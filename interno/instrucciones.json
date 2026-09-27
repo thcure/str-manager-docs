@@ -1,27 +1,41 @@
 {
-  "version": 1,
-  "actualizadoEn": "2026-09-27T05:00:00Z",
-  "items": [
-    {
-      "id": "ins-003",
-      "fecha": "2026-09-27",
-      "titulo": "Reanudar la cola de instrucciones",
-      "para": "carlos",
-      "texto": "1. Abre la carpeta C:\\Users\\ktcol\\Downloads\\str-instr-cola\\temp\n2. Mueve ejecutar-cola.ps1 de vuelta a C:\\Users\\ktcol\\Downloads\\str-instr-cola\\\n3. Si existe un archivo .corriendo viejo (sin ninguna CLI abierta), bórralo.\n4. La tarea de Windows \"STR cola CLI\" retoma sola en su próxima corrida; para no esperar, en el Programador de tareas clic derecho → Ejecutar."
-    },
-    {
-      "id": "ins-002",
-      "fecha": "2026-09-27",
-      "titulo": "Pausar la cola de instrucciones",
-      "para": "carlos",
-      "texto": "1. Abre C:\\Users\\ktcol\\Downloads\\str-instr-cola\\\n2. Mueve ejecutar-cola.ps1 a la subcarpeta temp\\ (la tarea de Windows no encuentra el script y no ejecuta nada).\n3. Los lotes .md que queden en la carpeta se quedan esperando; no hace falta borrarlos.\n4. Avísale a Claude en el chat que la cola está en pausa para que no reprograme revisiones."
-    },
-    {
-      "id": "ins-001",
-      "fecha": "2026-09-27",
-      "titulo": "Traspaso a un chat nuevo (texto para pegar)",
-      "para": "chat",
-      "texto": "Continúa el proyecto STR Manager. Antes de tocar nada lee, en este orden: claude/transiciones-chat.md (última entrada), claude/estado-proyecto.md, claude/proceso-cambios.md (Ciclo de una sesión), claude/requerimientos-consolidado.md y claude/patrones-codigo.md. Declárate escritor de los documentos. Carlos diseña y entrega requerimientos; el desarrollo completo es tuyo (categoría, lotes, cola, verificación, aceptación) sin pedir permiso por partes. Un lote a la vez; revisa la cola 15 min después de encolar y luego cada 5 min; una sola escritura por documento al cierre. Nunca redactes una instrucción sin leer el código real."
-    }
-  ]
+ "version": 1,
+ "actualizadoEn": "2026-09-27T14:30:00Z",
+ "items": [
+  {
+   "id": "ins-005",
+   "fecha": "2026-09-27",
+   "titulo": "Preparar el laptop de viaje para trabajar igual que en la oficina",
+   "para": "carlos",
+   "texto": "A. Antes del viaje, en el laptop de viaje\n1. Instalar Git para Windows y Node.js LTS. Configurar identidad: git config --global user.name \"Carlos Rodriguez\" y git config --global user.email <tu correo de GitHub>.\n2. Clonar el repo en la misma ruta relativa al usuario: cd $HOME ; git clone https://github.com/thcure/str-manager.git  (queda en %USERPROFILE%\\str-manager). En el primer push Git Credential Manager abre el navegador: inicia sesión en GitHub una vez y prueba con git push --dry-run.\n3. Instalar Claude Code (CLI): irm https://claude.ai/install.ps1 | iex  — debe quedar en %USERPROFILE%\\.local\\bin\\claude.exe (la ruta que usa el script de la cola). Abrir claude dentro de %USERPROFILE%\\str-manager, iniciar sesión y confiar en la carpeta. Probar: claude -p \"responde OK\" --permission-mode auto.\n4. Copiar del PC de la oficina a la misma ruta del laptop: %USERPROFILE%\\Downloads\\str-instr-cola\\ con ejecutar-cola.ps1 y las subcarpetas hechas\\, fallidas\\, log\\ y temp\\ (el historial es opcional; el script las crea vacías si faltan). Verificar que fallidas\\ quede vacía y sin ningún .md pendiente en la raíz.\n5. Crear la tarea de Windows (PowerShell como administrador, reemplazando <usuario> por el usuario del laptop): schtasks /Create /SC MINUTE /MO 1 /TN \"STR cola CLI\" /TR \"powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\<usuario>\\Downloads\\str-instr-cola\\ejecutar-cola.ps1\"  (usa /MO 15 si prefieres cada 15 min). Comprobar con schtasks /Query /TN \"STR cola CLI\".\n6. Energía: en Configuración → Sistema → Energía, que el laptop no se suspenda mientras está conectado; la tarea solo corre con el equipo despierto y la sesión iniciada.\n7. Instalar la app de escritorio de Claude, iniciar sesión y conectar las dos carpetas: %USERPROFILE%\\str-manager y %USERPROFILE%\\Downloads.\n8. Chrome: iniciar sesión con tu cuenta de Google (para traer contraseñas), instalar la extensión Claude in Chrome e iniciar sesión en ella; abrir app.apartamentosbucaramanga.com e iniciar sesión en el STR (deja las credenciales guardadas); abrir github.com e iniciar sesión.\n9. Prueba completa: node tests/run.js dentro del repo (debe salir todo OK) y lanzar la cola a mano (instrucción ins-004) sin pendientes: debe terminar sin error.\n\nB. El día 29, al empezar\n10. Abrir esta conversación en la app de escritorio del laptop y elegir \"Vincular a este computador\" (o iniciar una tarea nueva con ese equipo seleccionado). Si el nombre de usuario de Windows es distinto de ktcol, dímelo: las instrucciones se encolan por ruta absoluta y la tarea programada de revisión puede pedir aprobación una vez en el equipo nuevo.\n11. Confirmar que el PC de la oficina quede apagado o con el script en temp\\ (instrucción ins-002), para que no haya dos colas ejecutando los mismos lotes.\n12. Pedirme una comprobación de arranque: reviso la cola, la CLI y el navegador desde aquí antes del primer lote."
+  },
+  {
+   "id": "ins-004",
+   "fecha": "2026-09-27",
+   "titulo": "Lanzar la cola a mano desde PowerShell",
+   "para": "carlos",
+   "texto": "En una ventana de PowerShell normal (no dentro de la CLI de Claude Code):\n\npowershell -NoProfile -ExecutionPolicy Bypass -File \"$HOME\\Downloads\\str-instr-cola\\ejecutar-cola.ps1\"\n\nToma los .md pendientes en orden, hace git pull, ejecuta la CLI y mueve cada archivo a hechas\\ (con commit) o fallidas\\ (y ahí se detiene). No hace nada si ya hay una corrida activa (.corriendo de menos de 90 min), si hay algo en fallidas\\ o si no hay pendientes.\n\nPara ver el avance en vivo:\n\nGet-Content \"$HOME\\Downloads\\str-instr-cola\\log\\_resumen.txt\" -Wait -Tail 5"
+  },
+  {
+   "id": "ins-003",
+   "fecha": "2026-09-27",
+   "titulo": "Reanudar la cola de instrucciones",
+   "para": "carlos",
+   "texto": "1. Abre la carpeta C:\\Users\\ktcol\\Downloads\\str-instr-cola\\temp\n2. Mueve ejecutar-cola.ps1 de vuelta a C:\\Users\\ktcol\\Downloads\\str-instr-cola\\\n3. Si existe un archivo .corriendo viejo (sin ninguna CLI abierta), bórralo.\n4. La tarea de Windows \"STR cola CLI\" retoma sola en su próxima corrida; para no esperar, en el Programador de tareas clic derecho → Ejecutar."
+  },
+  {
+   "id": "ins-002",
+   "fecha": "2026-09-27",
+   "titulo": "Pausar la cola de instrucciones",
+   "para": "carlos",
+   "texto": "1. Abre C:\\Users\\ktcol\\Downloads\\str-instr-cola\\\n2. Mueve ejecutar-cola.ps1 a la subcarpeta temp\\ (la tarea de Windows no encuentra el script y no ejecuta nada).\n3. Los lotes .md que queden en la carpeta se quedan esperando; no hace falta borrarlos.\n4. Avísale a Claude en el chat que la cola está en pausa para que no reprograme revisiones."
+  },
+  {
+   "id": "ins-001",
+   "fecha": "2026-09-27",
+   "titulo": "Traspaso a un chat nuevo (texto para pegar)",
+   "para": "chat",
+   "texto": "Continúa el proyecto STR Manager. Antes de tocar nada lee, en este orden: claude/transiciones-chat.md (última entrada), claude/estado-proyecto.md, claude/proceso-cambios.md (Ciclo de una sesión), claude/requerimientos-consolidado.md y claude/patrones-codigo.md. Declárate escritor de los documentos. Carlos diseña y entrega requerimientos; el desarrollo completo es tuyo (categoría, lotes, cola, verificación, aceptación) sin pedir permiso por partes. Un lote a la vez; revisa la cola 15 min después de encolar y luego cada 5 min; una sola escritura por documento al cierre. Nunca redactes una instrucción sin leer el código real."
+  }
+ ]
 }

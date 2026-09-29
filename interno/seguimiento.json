@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-29T02:55:00Z",
+ "actualizadoEn": "2026-09-29T04:40:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -221,7 +221,8 @@
    "titulo": "Alertas con dato real del colaborador; tolerancia configurable por negocio y propiedad",
    "pendiente": "DA-16: confirmar dónde vive la tolerancia configurable",
    "fecha": "2026-09-25",
-   "necesitaDecision": true
+   "necesitaDecision": true,
+   "observacion": "Lote 31 (90f9c59, p5c31): DT-24 y DT-25 cerrados — el chip de salida en HK y el panel del Calendario muestran el nivel real; el Calendario usa la tolerancia por propiedad → negocio → 30."
   },
   {
    "id": "REQ-F1",
@@ -773,6 +774,26 @@
    "fecha": "2026-09-28",
    "severidad": "medio",
    "titulo": "Caché vieja del STR en otro navegador resubía datos de prueba al servidor (laptop de viaje, f-test-001); fix 29 (ac865c1): el servidor manda si conoce la colección y las migraciones al leer se suben tras el primer pull; verificado en producción"
+  },
+  {
+   "id": "INC-79",
+   "tipo": "INC",
+   "modulo": "Housekeeping",
+   "etapa": "📝",
+   "fecha": "2026-09-28",
+   "severidad": "medio",
+   "titulo": "HK calcula 'hoy' en UTC (toISOString) en _alertasTurno y _renderSalidaHuesped: entre las 19:00 y las 24:00 de Bogotá 'hoy' es el día siguiente, y las alertas de salida y 'no iniciado' del día no se disparan; el Calendario usa la fecha local (_hoyStr). Hallado al verificar el lote 31; anterior a él.",
+   "pendiente": "Fix propio (lote 32): fecha local en HK, revisar otros toISOString().slice(0,10) del archivo"
+  },
+  {
+   "id": "INC-80",
+   "tipo": "INC",
+   "modulo": "Operación (cola CLI)",
+   "etapa": "✔",
+   "fecha": "2026-09-28",
+   "severidad": "bajo",
+   "titulo": "Lote 31: primer intento 21:56 falló sin commit porque la CLI del laptop agotó su límite de sesión ('resets 10:50pm'). Causa: cupo compartido con los chats. Carlos reencoló el mismo archivo y salió OK a las 23:16.",
+   "observacion": "Lección: si un lote falla sin commit, leer el log antes de tocar la instrucción; un fallo por cupo se reencola sin cambios. Además, la tarea 'STR cola CLI' no arrancaba por la condición 'No iniciar en modo Batería' (Carlos la quitó y dejó el laptop sin suspensión); confirmar que el próximo lote arranca solo."
   }
  ],
  "cambios": [
@@ -995,12 +1016,54 @@
   {
    "lote": 31,
    "fecha": "2026-09-28",
-   "hash": null,
+   "hash": "90f9c59",
    "version": "p5c31",
    "req": "REQ-T9.2",
    "categoria": "normal",
    "resumen": "Salida del huésped: chip de HK con el nivel real (DT-24); Calendario con tolerancia por propiedad y nivel desde HK (DT-25); alertas[] del portal con codigo",
-   "estado": "encolado"
+   "estado": "aceptado",
+   "observacion": "Primer intento 21:56 falló sin commit (CLI del laptop sin cupo de sesión, INC-80); reencolado sin cambios, OK 23:16. Declarados = tocados (lógica en HK y Calendario; 14 HTML solo ?v=). tests 17/17. Verificado sin escribir datos: turnos sintéticos en memoria, reloj simulado en HK por INC-79.",
+   "aceptacion": {
+    "fecha": "2026-09-28",
+    "resultado": "aceptado",
+    "criterios": [
+     {
+      "c": "a. réplica _tolSalidaMin: 45 / 20 / 30 / 0",
+      "ok": true,
+      "observado": "CLI: 45, 20, 30, 0 y config inválida → 30; en producción con propiedades sintéticas en memoria: 45, 0, sin propiedad 30"
+     },
+     {
+      "c": "b. /api/health esquema 9; ?v=p5c31",
+      "ok": true,
+      "observado": "ok:true, schema_version 9; str-api.js?v=p5c31 en HK, Calendario y portal"
+     },
+     {
+      "c": "c. HK: chip amarillo ⚠ en atención, nunca rojo sin ticket",
+      "ok": true,
+      "observado": "turno sintético 60 min tarde sin ticket → chip-yellow '⚠ checkout tardío', sin chip-red; dentro de tolerancia → sin chip; hk:turnos manda codigo"
+     },
+     {
+      "c": "d. Calendario respeta la tolerancia por propiedad",
+      "ok": true,
+      "observado": "propiedad sintética con 45: 40 min → sin aviso, 50 min → 'adentro'; las 4 propiedades reales sin valor propio usan 30 del negocio; _TOL_SALIDA_MIN ya no existe"
+     },
+     {
+      "c": "e. panel 'adentro' con nivel desde HK",
+      "ok": true,
+      "observado": "atención → 'tp-alert atencion' ⚠; crítico → 'tp-alert critico' 🔴; crítico sin codigo (por texto) → 🔴; sin alerta → ⚠"
+     },
+     {
+      "c": "f. consola limpia y 0 undefined en HK, Calendario y portal",
+      "ok": true,
+      "observado": "0 errores tras recargar las tres páginas; 0 'undefined' en el panel y el portal"
+     }
+    ]
+   },
+   "costo": {
+    "tokens": "~230 000 del chat (redacción + verificación; estimado por el consumo de la sesión, sin la CLI)",
+    "minutosDueno": null,
+    "nota": "minutos de Carlos por confirmar: reencolar y ajustar la tarea de Windows"
+   }
   }
  ],
  "esquema": {
@@ -1099,7 +1162,7 @@
    "orden": 9,
    "categoriaPrevista": "normal",
    "riesgo": null,
-   "estado": "encolado",
+   "estado": "aceptado",
    "nota": "Primer lote bajo el modelo de operación: nivel del chip de salida en HK según _alertasTurno y tolerancia por propiedad en el Calendario. Encolado 28-sep 21:5x en el laptop."
   }
  ],

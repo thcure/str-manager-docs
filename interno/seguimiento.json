@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-29T00:05:00Z",
+ "actualizadoEn": "2026-09-29T01:30:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -770,10 +770,10 @@
    "id": "INC-78",
    "tipo": "INC",
    "modulo": "Fundación y datos",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-09-28",
    "severidad": "medio",
-   "titulo": "Caché vieja del STR en otro navegador resube datos de prueba al servidor al abrir la app (laptop de viaje, flujo f-test-001); limpiado a mano; causa candidata: _persistCol sube el diff local sin comparar con el servidor → fix propio pendiente"
+   "titulo": "Caché vieja del STR en otro navegador resubía datos de prueba al servidor (laptop de viaje, f-test-001); fix 29 (ac865c1): el servidor manda si conoce la colección y las migraciones al leer se suben tras el primer pull; verificado en producción"
   }
  ],
  "cambios": [
@@ -898,6 +898,53 @@
    "resumen": "Shell: Proyecto al nivel de los ítems de Punto de partida; Flujos de trabajo como nav-item junto a Limpieza & HK",
    "estado": "aceptado",
    "observacion": "14 archivos extra tocados solo por ?v= (explicado en el commit)"
+  },
+  {
+   "lote": 29,
+   "fecha": "2026-09-28",
+   "hash": "ac865c1",
+   "version": "p5c29",
+   "req": "INC-78",
+   "categoria": "normal",
+   "resumen": "Sync: decidirPull (el servidor manda si tiene cualquier ítem, incluso borrado) + migraciones al leer de Flujos se suben después del primer pull; tests/col-pull-decision.test.js",
+   "estado": "aceptado",
+   "aceptacion": {
+    "fecha": "2026-09-28",
+    "resultado": "aceptado",
+    "criterios": [
+     {
+      "c": "a) caché limpia: 0 flujos y sin PUT espontáneo",
+      "ok": true,
+      "observado": "servidor 30 tumbas / 0 vivos antes y después"
+     },
+     {
+      "c": "b) caché vieja simulada (f-inc78-prueba sin migracionGuias, sin lastpush ni migrated) no sube",
+      "ok": true,
+      "observado": "local → [], no en servidor, respaldo en str-col-backup-v1, migrated marcado"
+     },
+     {
+      "c": "c) flujo real creado desde la interfaz sube y aparece tras recargar",
+      "ok": true,
+      "observado": "f-mulzhlr31fykj deleted=0 y visible; borrado al final (deleted=1)"
+     },
+     {
+      "c": "d) Propiedades y HK sin PUT espontáneos ni errores",
+      "ok": true,
+      "observado": "conteos de propiedades/prop-tipos/ubicaciones/hk-config iguales antes y después"
+     },
+     {
+      "c": "tests Node",
+      "ok": true,
+      "observado": "17/17 archivos"
+     },
+     {
+      "c": "0 undefined en pantalla",
+      "ok": true,
+      "observado": "solo aparece dentro de comentarios de código, no en la interfaz"
+     }
+    ]
+   },
+   "observacion": "La clave real de la caché es str-flujos-v2 (la instrucción decía v1); la CLI lo señaló y se verificó con v2. 14 HTML extra tocados solo por ?v=."
   }
  ],
  "esquema": {
@@ -931,22 +978,22 @@
   },
   {
    "paso": "SP5 Modelo de operación",
-   "lote": "29",
+   "lote": "30",
    "req": "REQ-SP5",
    "orden": 3,
    "categoriaPrevista": "normal",
    "riesgo": null,
    "estado": "previsto",
-   "nota": "Paso 4: página Elementos en Proyecto (lee elementos.json; filtros capa/tipo/proceso/rol)"
+   "nota": "Paso 4: página Elementos en Proyecto (lee elementos.json; filtros capa/tipo/proceso/rol/estado)"
   },
   {
    "paso": "Fundación",
-   "lote": "30",
+   "lote": "29",
    "req": "INC-78",
    "orden": 4,
    "categoriaPrevista": "normal",
    "riesgo": "R-1",
-   "estado": "previsto",
+   "estado": "aceptado",
    "nota": "Fix: _persistCol no debe resubir una caché vieja sin comparar con el servidor"
   },
   {

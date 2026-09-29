@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-29T04:21:00Z",
+ "actualizadoEn": "2026-09-29T04:30:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -779,11 +779,11 @@
    "id": "INC-79",
    "tipo": "INC",
    "modulo": "Housekeeping",
-   "etapa": "📝",
+   "etapa": "🔨",
    "fecha": "2026-09-28",
    "severidad": "medio",
-   "titulo": "HK calcula 'hoy' en UTC (toISOString) en _alertasTurno y _renderSalidaHuesped: entre las 19:00 y las 24:00 de Bogotá 'hoy' es el día siguiente, y las alertas de salida y 'no iniciado' del día no se disparan; el Calendario usa la fecha local (_hoyStr). Hallado al verificar el lote 31; anterior a él.",
-   "pendiente": "Fix propio (lote 32): fecha local en HK, revisar otros toISOString().slice(0,10) del archivo"
+   "titulo": "HK calcula 'hoy' en UTC (toISOString) en _alertasTurno y _renderSalidaHuesped: entre las 19:00 y las 24:00 de Bogotá 'hoy' es el día siguiente, y las alertas de salida y 'no iniciado' del día no se disparan; el Calendario usa la fecha local (_hoyStr). Hallado al verificar el lote 31; anterior a él. Barrido del cliente: solo otro caso, el nombre del respaldo del shell (incluido en el lote 32).",
+   "pendiente": "Lote 32 encolado 23:29"
   },
   {
    "id": "INC-80",
@@ -794,6 +794,16 @@
    "severidad": "bajo",
    "titulo": "Lote 31: primer intento 21:56 falló sin commit porque la CLI del laptop agotó su límite de sesión ('resets 10:50pm'). Causa: cupo compartido con los chats. Carlos reencoló el mismo archivo y salió OK a las 23:16.",
    "observacion": "Lección: si un lote falla sin commit, leer el log antes de tocar la instrucción; un fallo por cupo se reencola sin cambios. Además, la tarea 'STR cola CLI' no arrancaba por la condición 'No iniciar en modo Batería' (Carlos la quitó y dejó el laptop sin suspensión); confirmar que el próximo lote arranca solo."
+  },
+  {
+   "id": "INC-81",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "etapa": "📝",
+   "fecha": "2026-09-28",
+   "severidad": "bajo",
+   "titulo": "Servidor: api/sync-ical usa gmdate('Y-m-d') como 'hoy' (UTC). Entre las 19:00 y las 24:00 de Bogotá: una reserva con salida hoy pasa a 'finalizada' desde las 19:00 y no a medianoche, y una reserva con llegada hoy ausente del feed ya no se cancela. api/export nombra el respaldo diario con la fecha UTC (cosmético).",
+   "pendiente": "Fix propio, categoría crítico (sync): fijar America/Bogota en el servidor o calcular 'hoy' local; hallado en el barrido de INC-79, no se toca en el lote 32"
   }
  ],
  "cambios": [
@@ -1061,9 +1071,20 @@
    },
    "costo": {
     "tokens": "~230 000 del chat (redacción + verificación; estimado por el consumo de la sesión, sin la CLI)",
+    "minutosCLI": 2,
     "minutosDueno": null,
-    "nota": "minutos de Carlos por confirmar: reencolar y ajustar la tarea de Windows"
+    "nota": "Medido en el log de la cola: 21:56 falla por límite de sesión de la CLI; 23:14 reencolado del mismo archivo; 23:16 OK (90f9c59), ejecución ~2 min. Entre el fallo y el reencolado pasaron 78 min, casi todos de espera (el límite se reinició a las 22:50) y el resto diagnóstico y decisiones: el tiempo de espera no es tiempo de trabajo. El ajuste de la tarea de Windows fue un solo comando; su duración no se midió (la deja Carlos si la recuerda)."
    }
+  },
+  {
+   "lote": 32,
+   "fecha": "2026-09-28",
+   "hash": null,
+   "version": "p5c32",
+   "req": "INC-79",
+   "categoria": "normal",
+   "resumen": "Fix: 'hoy' con fecha local (STRApi.fechas.ymdLocal) en HK y en el nombre del respaldo del shell; tests/fecha-local.test.js con horas nocturnas de Bogotá y guardia de patrón",
+   "estado": "encolado"
   }
  ],
  "esquema": {
@@ -1164,6 +1185,16 @@
    "riesgo": null,
    "estado": "aceptado",
    "nota": "Primer lote bajo el modelo de operación: nivel del chip de salida en HK según _alertasTurno y tolerancia por propiedad en el Calendario. Encolado 28-sep 21:5x en el laptop."
+  },
+  {
+   "paso": "Fix INC-79",
+   "lote": "32",
+   "req": "INC-79",
+   "orden": 10,
+   "categoriaPrevista": "normal",
+   "riesgo": null,
+   "estado": "encolado",
+   "nota": "Fecha local en HK (_alertasTurno, _renderSalidaHuesped) y en el respaldo del shell vía STRApi.fechas.ymdLocal; test con horas 19:00–24:00 de Bogotá + guardia contra toISOString().slice(0,10). Encolado 23:29 en el laptop; también prueba que la tarea arranca sola."
   }
  ],
  "riesgos": [

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-29T05:13:00Z",
+ "actualizadoEn": "2026-09-29T05:40:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1197,12 +1197,26 @@
     "notas": "Ejecución de prueba sobre un lote ya aceptado. La descarga del respaldo no se probó, como indica la instrucción. INC-81 (gmdate en el servidor) queda fuera del alcance. No leí patrones-codigo.md ni el REQ del proyecto."
    },
    "comparacionVerificador": "Mismo veredicto que el chat (aceptado, 0 INC, reloj real de noche). Diferencias de cobertura, no de resultado: el revisor probó en producción el criterio a (el chat lo tomó de la CLI) y separó 'tests 18/18' como solo réplica (ok:null); verificó además CLAUDE.md y el iframe del shell, que el chat no revisó; no leyó patrones-codigo.md ni el REQ (sin acceso al proyecto)."
+  },
+  {
+   "lote": null,
+   "tipo": "modelo",
+   "fecha": "2026-09-29",
+   "hash": null,
+   "version": null,
+   "req": "REQ-SP5",
+   "categoria": "modelo",
+   "resumen": "Sombrero Arquitecto: encargo rol-arquitecto (texto del borrador tal cual, con 'Datos del proyecto'); rol-desarrollo sin roles de arquitectura ni escritura de la capa Marco (10 roles); rol-verificador avisa cambios a la capa Marco sin 'modelo:'; casilla '¿Toca el modelo?' en la cabecera; tipo 'modelo' en cambios[]; Chat asesor pasa a ser el Arquitecto; riesgos R-6…R-8; pedido P-2.",
+   "motivo": "Separar quien diseña el modelo de quien lo opera (APO01.05, MEA02) y dejar el modelo reutilizable para otros proyectos.",
+   "aprobacion": "aprobado por Carlos el 29-sep-2026",
+   "estado": "registrado",
+   "observacion": "Registrado por el Chat de desarrollo por pedido de Carlos, con el borrador en str-instr-cola\\modelo\\ (no se movió ni editó). Desde aquí la capa Marco la escribe solo el Arquitecto."
   }
  ],
  "esquema": {
   "pedidos": "{id:'P-n', fecha, texto (literal de Carlos), estado:'nuevo'|'en REQ'|'descartado', req}",
   "plan": "{paso, lote:'NN'|null, req, orden, categoriaPrevista, riesgo:'R-n'|null, estado:'previsto'|'encolado'|'desplegado'|'aceptado'|'cerrado'|'espera DA', nota}",
-  "cambios": "{lote, fecha, hash, version, req, categoria, resumen, estado, observacion?, aceptacion?:{fecha, resultado, criterios:[{c, ok, observado}]}, costo?:{tokens, minutosDueno}, cruceDueno?:{fecha, resultado}}",
+  "cambios": "{lote|null, tipo?:'lote'|'modelo', fecha, hash, version, req, categoria, resumen, estado, observacion?, aceptacion?:{fecha, resultado, criterios:[{c, ok, observado}]}, costo?:{tokens, minutosDueno}, cruceDueno?:{fecha, resultado}, motivo? y aprobacion? (tipo 'modelo': commit con prefijo 'modelo:')}",
   "riesgos": "{id:'R-n', nombre, escenario, tolerancia, respuesta, probadaEl, responsable, estado:'propuesto'|'aceptado'|'cerrado'}",
   "posimplementacion": "{paso, fecha, prometido, quedo, seUsa, costoDeMas, reglaCambia}"
  },
@@ -1214,6 +1228,13 @@
    "estado": "nuevo",
    "req": null,
    "detalle": "Agente verificador (tarea programada): pedido de dejarle solo archivos del laptop y Chrome. Quedaron conectados Gmail, Google Drive, Google Calendar y el de tareas programadas (Claude_Code_Remote): las herramientas de Claude no permiten quitar conectores de una tarea. Mitigación aplicada: sus instrucciones prohíben usarlos (cambio aprobado por el laptop 28-sep 23:58). Pendiente: revisar si la app permite quitarlos en la configuración de la tarea, o recrearla sin ellos, y confirmar qué conectores quedan. La prueba sobre el lote 32 corrió con las instrucciones anteriores, sin esa prohibición."
+  },
+  {
+   "id": "P-2",
+   "fecha": "2026-09-29",
+   "texto": "El modelo debe poder recibir otros proyectos similares cuando el STR se cierre; el servicio del STR se mantiene mientras no se defina otra cosa. Sin análisis por ahora.",
+   "estado": "nuevo",
+   "req": null
   }
  ],
  "plan": [
@@ -1388,6 +1409,39 @@
    "probadaEl": null,
    "responsable": "GCo",
    "estado": "aceptado"
+  },
+  {
+   "id": "R-6",
+   "nombre": "Cambio al modelo sin aprobación",
+   "escenario": "Una instrucción de Carlos o de otro chat cambia la capa Marco (procesos, encargos, elementos) sin pasar por el Arquitecto ni por la aprobación de Carlos.",
+   "tolerancia": null,
+   "respuesta": "Casilla '¿Toca el modelo?' en la cabecera (si es sí, no entra a la cola); prefijo 'modelo:' y tipo 'modelo' en cambios[]; el Agente verificador avisa si ve cambios a la capa Marco sin el prefijo; revisión periódica del Arquitecto.",
+   "probadaEl": null,
+   "responsable": "AP",
+   "estado": "propuesto",
+   "fuente": "borrador rol-arquitecto (aprobado por Carlos el 29-sep-2026); tolerancia por definir"
+  },
+  {
+   "id": "R-7",
+   "nombre": "Dependencia de un solo chat",
+   "escenario": "El modelo depende de un único chat (Arquitecto o Chat de desarrollo) que se agota o pierde contexto, y nadie más puede mantenerlo.",
+   "tolerancia": null,
+   "respuesta": "Encargos rol-* escritos y reutilizables; traspaso en transiciones-chat.md; un token por chat que escribe.",
+   "probadaEl": null,
+   "responsable": "AP",
+   "estado": "propuesto",
+   "fuente": "borrador rol-arquitecto (aprobado por Carlos el 29-sep-2026); tolerancia por definir"
+  },
+  {
+   "id": "R-8",
+   "nombre": "Nombres desalineados",
+   "escenario": "Los nombres en la app (chats, tareas) no coinciden con elementos.json ni con los documentos, y un chat o agente actúa sobre el elemento equivocado.",
+   "tolerancia": null,
+   "respuesta": "El Arquitecto reconcilia elementos.json con la realidad en cada revisión (BAI10.05) y anota toda diferencia.",
+   "probadaEl": null,
+   "responsable": "AP",
+   "estado": "propuesto",
+   "fuente": "borrador rol-arquitecto (aprobado por Carlos el 29-sep-2026); tolerancia por definir"
   }
  ],
  "posimplementacion": []

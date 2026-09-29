@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-29T04:59:00Z",
+ "actualizadoEn": "2026-09-29T05:08:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1137,7 +1137,66 @@
     "minutosCLI": 2,
     "minutosDueno": 0,
     "nota": "CLI medida en el log: 23:30:05 → 23:31:55. Carlos no intervino (la cola arrancó sola). Tokens del chat sin medición confiable: no se estiman."
-   }
+   },
+   "verificacionPrueba": {
+    "lote": 32,
+    "hash": "1dcb0e5a74b26d44cff6f343ef2640ba55fce726",
+    "fecha": "2026-09-28",
+    "horaBogota": "23:56",
+    "resultado": "aceptado",
+    "modoVerificacion": "reloj real, sin simular: 2026-09-28 23:55 Bogotá (UTC−5) = 2026-09-29 04:55 UTC; la fecha UTC ya era el día siguiente, así que la prueba de noche es válida. El navegador está en la zona America/Bogota",
+    "criterios": [
+     {
+      "c": "a. ymdLocal: 00:00Z→28, 02:30Z→28, 04:59:59Z→28, 05:00Z→29, 17:00Z→29, inválido→null (réplica CLI con TZ Bogotá)",
+      "ok": true,
+      "observado": "En producción, con el str-api.js?v=p5c32 real y el navegador en America/Bogota (getHours de 00:00Z = 19): '2026-09-29T00:00:00Z → 2026-09-28', 'T02:30:00Z → 2026-09-28', 'T04:59:59Z → 2026-09-28', 'T05:00:00Z → 2026-09-29', 'T17:00:00Z → 2026-09-29', new Date('x') → null. El test CLI solo lo reporta el log (18/18); no lo ejecuté."
+     },
+     {
+      "c": "b. Guardia: ningún *.html ni str-api.js recorta toISOString() como fecha",
+      "ok": true,
+      "observado": "Busqué en lo que se sirve en producción (shell, HK, calendario, portal, flujos, propiedades, login, usuarios, invitacion, str-api.js): todos 'limpio'. Que el test CLI pase solo lo dice el log."
+     },
+     {
+      "c": "node tests/run.js → 18/18",
+      "ok": null,
+      "observado": "Solo réplica CLI: el log dice 'node tests/run.js 18/18'. No cuenta como verificado en producción."
+     },
+     {
+      "c": "c. /api/health esquema 9; ?v=p5c32",
+      "ok": true,
+      "observado": "{\"ok\":true,\"db\":true,\"schema_version\":9,\"secrets\":true,\"gd\":true}. Las 7 páginas revisadas cargan '?v=p5c32'. STR_API_VERSION = 'p5c32'. El iframe del shell es 'str-flujos.html?v=p5c32'."
+     },
+     {
+      "c": "d. HK: ymdLocal() = fecha local; turno sintético de hoy con windowStart hace 60 min sin checkoutReal → checkout-tardio atencion y '⚠ checkout tardío'; con windowStart hace 20 min sin inicioReal → no-iniciado",
+      "ok": true,
+      "observado": "ymdLocal() = '2026-09-28' (toISOString().slice(0,10) = '2026-09-29'). Turno de hoy con ws 22:55 (tolerancia 30) → [{codigo:'checkout-tardio', nivel:'atencion', texto:'⚠ checkout tardío'}]; _renderSalidaHuesped pinta '⚠ checkout tardío'. Turno con ws 23:35 sin inicioReal → [{codigo:'no-iniciado', nivel:'atencion', texto:'⏰ no iniciado'}]."
+     },
+     {
+      "c": "e. Un turno sintético de mañana no dispara alertas de hoy",
+      "ok": true,
+      "observado": "Con fecha '2026-09-29' y ws 22:55 → []. Con ws 00:01 → []."
+     },
+     {
+      "c": "f. Consola limpia en HK, Calendario, portal y shell",
+      "ok": true,
+      "observado": "Recargué cada página y la consola no mostró errores ni excepciones. En ninguna aparece 'undefined' en pantalla."
+     },
+     {
+      "c": "Respaldo del shell con fecha local (se verifica por código, no se descarga)",
+      "ok": true,
+      "observado": "El _descargarRespaldo que se sirve contiene ymdLocal y ya no recorta toISOString()."
+     },
+     {
+      "c": "CLAUDE.md menciona el cambio",
+      "ok": true,
+      "observado": "La línea 46 tiene la regla 'INC-79 — fecha sin hora = STRApi.fechas.ymdLocal(d)'. La fila de str-api.js menciona ymdLocal, y en tests/ aparece fecha-local.test.js. INC-37 dice 'hoy p5c32'."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "ninguno: solo turnos sintéticos en memoria (id zz-verif-t1/t2/t3/t3b, propId zz-verif-prop), pasados a _alertasTurno y _renderSalidaHuesped. No escribí nada en localStorage ni en el servidor",
+    "notas": "Ejecución de prueba sobre un lote ya aceptado. La descarga del respaldo no se probó, como indica la instrucción. INC-81 (gmdate en el servidor) queda fuera del alcance. No leí patrones-codigo.md ni el REQ del proyecto."
+   },
+   "comparacionVerificador": "Mismo veredicto que el chat (aceptado, 0 INC, reloj real de noche). Diferencias de cobertura, no de resultado: el revisor probó en producción el criterio a (el chat lo tomó de la CLI) y separó 'tests 18/18' como solo réplica (ok:null); verificó además CLAUDE.md y el iframe del shell, que el chat no revisó; no leyó patrones-codigo.md ni el REQ (sin acceso al proyecto)."
   }
  ],
  "esquema": {
@@ -1275,8 +1334,8 @@
    "orden": 12,
    "categoriaPrevista": "—",
    "riesgo": null,
-   "estado": "en curso",
-   "nota": "Agente verificador: tarea nueva de Claude con el encargo rol-verificador; 'Revisar cola STR' queda apagada. Visto bueno de Carlos el 28-sep con tres ajustes: tarea nueva, veredicto copiado al seguimiento sin cambios, prueba previa sobre el lote 32 comparada con el veredicto del chat."
+   "estado": "aceptado",
+   "nota": "Agente verificador: tarea nueva de Claude con el encargo rol-verificador; 'Revisar cola STR' queda apagada. Visto bueno de Carlos el 28-sep con tres ajustes: tarea nueva, veredicto copiado al seguimiento sin cambios, prueba previa sobre el lote 32 comparada con el veredicto del chat. Prueba sobre el lote 32 (28-sep 23:56): mismo veredicto que el chat, con más cobertura. Queda P-1 (conectores de la tarea)."
   }
  ],
  "riesgos": [

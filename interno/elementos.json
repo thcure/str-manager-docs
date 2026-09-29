@@ -1,6 +1,6 @@
 {
  "version": "1.0",
- "actualizadoEn": "2026-09-29T03:20:00Z",
+ "actualizadoEn": "2026-09-29T05:13:00Z",
  "fuente": "REQ-SP5 · Arquitecto de procesos (28-sep), consolidado por Carlos",
  "capas": {
   "gobierno": "¿Cómo decidimos?",
@@ -70,7 +70,8 @@
     "AP",
     "AA"
    ],
-   "encargo": "rol-desarrollo"
+   "encargo": "rol-desarrollo",
+   "nota": "El chat de Cowork se llama 'Chat de desarrollo'."
   },
   "agente-verificador": {
    "nombre": "Agente verificador",
@@ -79,13 +80,15 @@
     "ASo",
     "ACf"
    ],
-   "encargo": "rol-verificador"
+   "encargo": "rol-verificador",
+   "nota": "Tarea programada 'Agente verificador' (elemento tarea-agente-verificador)."
   },
   "agente-cli": {
    "nombre": "Agente CLI",
    "roles": [
     "DV"
-   ]
+   ],
+   "nota": "La tarea de Windows que lo ejecuta se sigue llamando 'STR cola CLI'."
   },
   "agente-salud": {
    "nombre": "Agente de salud (diferido)",
@@ -94,7 +97,7 @@
    ]
   }
  },
- "nota": "Rutas claude/<capa>/ vigentes desde la reorganización del 2026-09-28 (paso 3 de REQ-SP5). Los dos bocetos existentes siguen en claude/bocetos/.",
+ "nota": "Rutas claude/<capa>/ vigentes desde la reorganización del 2026-09-28 (paso 3 de REQ-SP5). Los dos bocetos existentes siguen en claude/bocetos/. Chat asesor: apoyo de Carlos fuera del modelo de operación (no es un sombrero ni tiene encargo); no escribe en documentos, JSON, cola ni tareas; lo que propone entra al modelo solo cuando Carlos lo trae al Chat de desarrollo (desde el 2026-09-29).",
  "elementos": [
   {
    "id": "doc-proceso-cambios",
@@ -343,7 +346,7 @@
    ],
    "relacion": [
     "cola-str-instr",
-    "tarea-revisar-cola-str"
+    "tarea-agente-verificador"
    ],
    "vigenciaDesde": "2026-09-11",
    "notas": "Despliegue (Redistribuir, /api/health, ?v=), reversión y tareas manuales."
@@ -898,16 +901,16 @@
     "BAI03"
    ],
    "relacion": [
-    "tarea-revisar-cola-str",
+    "tarea-agente-verificador",
     "doc-instruccion-lote",
     "doc-log-lote"
    ],
    "vigenciaDesde": "2026-09-11",
-   "notas": "Un lote a la vez; lo crítico nunca entra sin cruce previo con Carlos."
+   "notas": "Un lote a la vez; lo crítico nunca entra sin cruce previo con Carlos. La ejecuta el agente CLI mediante la tarea de Windows que se sigue llamando 'STR cola CLI' (cada minuto, sin condiciones de energía)."
   },
   {
    "id": "tarea-revisar-cola-str",
-   "nombre": "Tarea programada Revisar cola STR (agente verificador)",
+   "nombre": "Tarea programada Revisar cola STR (superada)",
    "tipo": "tarea",
    "capa": "operacion",
    "cobit": [
@@ -927,8 +930,8 @@
     "GCa",
     "ASo"
    ],
-   "vive": "Programador de tareas de Windows (PC de Carlos), cada minuto",
-   "estado": "vigente",
+   "vive": "Tarea de Cowork (recordatorio de una sola vez), desactivada; último disparo 2026-09-29 01:45 UTC",
+   "estado": "superado",
    "entrada_de": [
     "BAI06"
    ],
@@ -940,7 +943,52 @@
     "repo-str-manager"
    ],
    "vigenciaDesde": "2026-09-11",
-   "notas": "Tarea de Cowork con texto fijo (solo se mueve la hora): revisa la cola, lee log, verifica en producción y escribe aceptación e INC. Es el sombrero 'agente verificador'; encargo rol-verificador."
+   "notas": "Superada el 2026-09-28/29 por el elemento tarea-agente-verificador (tarea programada 'Agente verificador'). El dato 'Programador de tareas de Windows, cada minuto' que tenía era de la tarea de Windows 'STR cola CLI' (agente CLI), no de esta."
+  },
+  {
+   "id": "tarea-agente-verificador",
+   "nombre": "Agente verificador",
+   "tipo": "tarea",
+   "capa": "operacion",
+   "cobit": [
+    "BAI07.05",
+    "BAI07.06",
+    "DSS02.02",
+    "BAI10.04"
+   ],
+   "sdlc": [
+    "pruebas"
+   ],
+   "pmi": [
+    "monitoreo"
+   ],
+   "rol": "IP",
+   "usa": [
+    "ASo",
+    "ACf",
+    "GCa"
+   ],
+   "vive": "Tarea programada de Claude 'Agente verificador' (id trig_0134CBMyfUWkAJkv8ku9WMnD), sin horario propio; requiere el laptop; carpetas str-instr-cola y str-manager; aprobación automática; aviso al celular",
+   "estado": "vigente",
+   "entrada_de": [
+    "BAI06"
+   ],
+   "salida_a": [
+    "BAI07",
+    "DSS02"
+   ],
+   "relacion": [
+    "cola-str-instr",
+    "doc-log-lote",
+    "doc-instruccion-lote",
+    "herramienta-chrome",
+    "json-seguimiento",
+    "json-encargos-rol"
+   ],
+   "vigenciaDesde": "2026-09-28",
+   "sombrero": "agente-verificador",
+   "encargo": "rol-verificador",
+   "notas": "El Chat de desarrollo la activa por lote (~15 min tras encolar, luego cada 5). Lee instrucción, log y CLAUDE.md; verifica en Chrome sin tocar datos reales; escribe solo log\\NN-veredicto.json, que el Chat de desarrollo copia sin cambios a cambios[].aceptacion. Probada sobre el lote 32 (mismo veredicto que el chat). Pendiente P-1: conserva conectores Gmail/Drive/Calendar/tareas, prohibidos en sus instrucciones."
   },
   {
    "id": "tarea-salud-str",

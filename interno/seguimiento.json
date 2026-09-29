@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-28T23:40:00Z",
+ "actualizadoEn": "2026-09-29T00:05:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -714,11 +714,11 @@
    "id": "REQ-SP5",
    "tipo": "REQ",
    "modulo": "Seg. Proyecto (interno)",
-   "etapa": "📝",
+   "etapa": "🔨",
    "fecha": "2026-09-28",
-   "titulo": "Modelo de operación del proyecto: capas, roles por proceso (APO01), entradas/salidas y maestro de elementos (elementos.json + página Elementos) — en definición, plan de 5 pasos",
+   "titulo": "Modelo de operación del proyecto (APO01): capas, 19 roles en 4 sombreros, bus seguimiento.json, elementos.json v1.0 publicado; falta migrar carpetas y la página Elementos",
    "necesitaDecision": true,
-   "pendiente": "Carlos: confirmar el reparto de capas (paso 1) y los roles por proceso"
+   "pendiente": "Carlos: confirmar tolerancias R-1…R-5 y si quiere pedidos[] visibles"
   },
   {
    "id": "INC-77",
@@ -899,5 +899,138 @@
    "estado": "aceptado",
    "observacion": "14 archivos extra tocados solo por ?v= (explicado en el commit)"
   }
- ]
+ ],
+ "esquema": {
+  "pedidos": "{id:'P-n', fecha, texto (literal de Carlos), estado:'nuevo'|'en REQ'|'descartado', req}",
+  "plan": "{paso, lote:'NN'|null, req, orden, categoriaPrevista, riesgo:'R-n'|null, estado:'previsto'|'encolado'|'desplegado'|'aceptado'|'cerrado'|'espera DA', nota}",
+  "cambios": "{lote, fecha, hash, version, req, categoria, resumen, estado, observacion?, aceptacion?:{fecha, resultado, criterios:[{c, ok, observado}]}, costo?:{tokens, minutosDueno}, cruceDueno?:{fecha, resultado}}",
+  "riesgos": "{id:'R-n', nombre, escenario, tolerancia, respuesta, probadaEl, responsable, estado:'propuesto'|'aceptado'|'cerrado'}",
+  "posimplementacion": "{paso, fecha, prometido, quedo, seUsa, costoDeMas, reglaCambia}"
+ },
+ "pedidos": [],
+ "plan": [
+  {
+   "paso": "SP5 Modelo de operación",
+   "lote": null,
+   "req": "REQ-SP5",
+   "orden": 1,
+   "categoriaPrevista": "—",
+   "riesgo": null,
+   "estado": "desplegado",
+   "nota": "Paso 2: elementos.json v1.0 + claves nuevas del bus + encargos rol-desarrollo / rol-verificador (28-sep)"
+  },
+  {
+   "paso": "SP5 Modelo de operación",
+   "lote": null,
+   "req": "REQ-SP5",
+   "orden": 2,
+   "categoriaPrevista": "—",
+   "riesgo": null,
+   "estado": "previsto",
+   "nota": "Paso 3: migrar claude/*.md a claude/<capa>/ y actualizar referencias (cierre de sesión)"
+  },
+  {
+   "paso": "SP5 Modelo de operación",
+   "lote": "29",
+   "req": "REQ-SP5",
+   "orden": 3,
+   "categoriaPrevista": "normal",
+   "riesgo": null,
+   "estado": "previsto",
+   "nota": "Paso 4: página Elementos en Proyecto (lee elementos.json; filtros capa/tipo/proceso/rol)"
+  },
+  {
+   "paso": "Fundación",
+   "lote": "30",
+   "req": "INC-78",
+   "orden": 4,
+   "categoriaPrevista": "normal",
+   "riesgo": "R-1",
+   "estado": "previsto",
+   "nota": "Fix: _persistCol no debe resubir una caché vieja sin comparar con el servidor"
+  },
+  {
+   "paso": "F11 Flujos compuestos",
+   "lote": null,
+   "req": "REQ-F11 5b",
+   "orden": 5,
+   "categoriaPrevista": "crítico",
+   "riesgo": "R-2",
+   "estado": "espera DA",
+   "nota": "Pago por sub-flujo: espera DA-20"
+  },
+  {
+   "paso": "F11 Flujos compuestos",
+   "lote": null,
+   "req": "REQ-F11 6",
+   "orden": 6,
+   "categoriaPrevista": "normal",
+   "riesgo": null,
+   "estado": "espera DA",
+   "nota": "Portal 'mi sub-flujo': espera DA-20"
+  },
+  {
+   "paso": "F11 Flujos compuestos",
+   "lote": null,
+   "req": "REQ-F11 7",
+   "orden": 7,
+   "categoriaPrevista": "normal",
+   "riesgo": null,
+   "estado": "espera DA",
+   "nota": "Módulo de Mantenimiento: espera diseño funcional DA-21"
+  }
+ ],
+ "riesgos": [
+  {
+   "id": "R-1",
+   "nombre": "Pérdida de datos",
+   "escenario": "Un lote, una migración o una caché vieja borra o pisa datos reales del negocio (INC-45, INC-78).",
+   "tolerancia": "Ningún dato real perdido; recuperación en menos de 1 día desde el respaldo diario.",
+   "respuesta": "Respaldo diario en Hostinger; migraciones aditivas; git revert + Redistribuir; una clave de colección solo la escribe /api/col.",
+   "probadaEl": null,
+   "responsable": "GR",
+   "estado": "propuesto"
+  },
+  {
+   "id": "R-2",
+   "nombre": "Acceso indebido",
+   "escenario": "Un colaborador o un tercero lee o escribe datos que no le corresponden (huéspedes, pagos).",
+   "tolerancia": "Cero incidentes; todo lote crítico con login real y prueba de 403.",
+   "respuesta": "Validación en el servidor (_puede, JWT); verificación por zona en BAI07.05-b; hotfix el mismo día.",
+   "probadaEl": null,
+   "responsable": "GR",
+   "estado": "propuesto"
+  },
+  {
+   "id": "R-3",
+   "nombre": "Hosting vencido",
+   "escenario": "El contrato de Hostinger vence el 2026-11-03 y la app deja de responder.",
+   "tolerancia": "Renovar al menos 15 días antes; hasta 1 día sin producción.",
+   "respuesta": "Aviso en la tarea de salud (cuando exista) y en Próximos pasos; renovación por Carlos.",
+   "probadaEl": null,
+   "responsable": "OP",
+   "estado": "propuesto"
+  },
+  {
+   "id": "R-4",
+   "nombre": "Dueño indisponible",
+   "escenario": "Carlos no puede decidir ni operar el PC durante días (viaje, salud); la cola y las DA se detienen.",
+   "tolerancia": "El trabajo de categoría estándar y normal sigue solo; lo crítico espera.",
+   "respuesta": "Delegación vigente (Claude decide categoría y ejecuta); segundo equipo habilitado (ins-005); DA con opciones listas para decidir en un mensaje.",
+   "probadaEl": "2026-09-28",
+   "responsable": "JP",
+   "estado": "propuesto"
+  },
+  {
+   "id": "R-5",
+   "nombre": "Contexto perdido",
+   "escenario": "Un chat se agota o se cambia de modelo y el siguiente no sabe qué sigue ni qué quedó a medias.",
+   "tolerancia": "El chat siguiente arranca en menos de 10 minutos leyendo solo traspaso + encargo.",
+   "respuesta": "Traspaso en transiciones-chat.md; plan[] y cambios[] en el bus; encargo rol-desarrollo; corte solo en puntos limpios.",
+   "probadaEl": null,
+   "responsable": "GCo",
+   "estado": "propuesto"
+  }
+ ],
+ "posimplementacion": []
 }

@@ -1,25 +1,158 @@
 {
-  "version": 1,
-  "actualizadoEn": "2026-09-27T05:00:00Z",
-  "titulo": "Ciclo de un lote — quién hace qué (COBIT 2019)",
-  "escala": "Esfuerzo y complejidad de 1 (mínimo) a 5 (máximo).",
-  "pasos": [
-    { "cobit": "BAI02.01", "cobitNombre": "Definir y mantener requerimientos", "codigo": "0a", "paso": "Entregar el requerimiento", "proceso": "Carlos describe qué quiere (en el chat, con boceto si hace falta). Claude lo redacta como REQ-Xn en requerimientos-consolidado.md.", "quien": "Carlos", "herramienta": "Chat", "esfuerzo": 2, "complejidad": 2, "motivo": "Es la única entrada funcional del ciclo: sin REQ claro todo lo demás se rehace." },
-    { "cobit": "BAI02.04", "cobitNombre": "Obtener aprobación de requerimientos", "codigo": "0b", "paso": "Confirmar el entendido (una sola vez)", "proceso": "Claude devuelve el REQ en una tabla breve; Carlos dice \"ok\" o corrige. Desde ahí todo el desarrollo queda delegado (categoría, lotes, ejecución, verificación y aceptación).", "quien": "Carlos", "herramienta": "Chat", "esfuerzo": 1, "complejidad": 1, "motivo": "Un \"ok\" al comienzo evita permisos por partes durante el ciclo." },
-    { "cobit": "BAI08.02", "cobitNombre": "Identificar y clasificar fuentes de información", "codigo": "1", "paso": "Leer el código real", "proceso": "Claude trae del PC los archivos que el lote va a tocar y lee las funciones, líneas y datos actuales (nunca por memoria ni por resumen).", "quien": "Claude", "herramienta": "Lectura de archivos del repo (staging desde el PC)", "esfuerzo": 2, "complejidad": 2, "motivo": "Una instrucción escrita sobre código imaginado falla en la CLI o rompe producción." },
-    { "cobit": "BAI06.01", "cobitNombre": "Evaluar, priorizar y autorizar solicitudes de cambio", "codigo": "2", "paso": "Redactar la instrucción del lote", "proceso": "Archivo instr-<lote>.md con cabecera (categoría, alcance, impacto, riesgo, datos personales/dinero, normativa, pruebas derivadas, reversión), contexto con hash, puntos numerados, tests, CLAUDE.md, verificación y commit.", "quien": "Claude", "herramienta": "Redacción (Write)", "esfuerzo": 3, "complejidad": 3, "motivo": "La cabecera es la evaluación de riesgo; el cuerpo corto y preciso es lo que la CLI ejecuta bien en ≤ 8 min." },
-    { "cobit": "BAI06.02", "cobitNombre": "Gestionar cambios de emergencia / autorizar", "codigo": "3", "paso": "Encolar en el PC de Carlos", "proceso": "Claude copia la instrucción a Downloads/str-instr-cola/ con numeración consecutiva. Un lote a la vez.", "quien": "Claude", "herramienta": "Escritura en la carpeta conectada", "esfuerzo": 1, "complejidad": 1, "motivo": "La cola es el único canal hacia el código; encolar dos a la vez mezcla verificaciones." },
-    { "cobit": "BAI03.03 / BAI03.08", "cobitNombre": "Desarrollar la solución · Ejecutar pruebas", "codigo": "4", "paso": "Ejecutar el lote", "proceso": "La tarea de Windows \"STR cola CLI\" corre ejecutar-cola.ps1: Claude Code lee la instrucción, cambia el código, corre node tests/run.js, hace commit a main, push y despliegue; deja el log en log/ y mueve la instrucción a hechas/ o fallidas/.", "quien": "CLI", "herramienta": "Claude Code en el PC (tarea programada de Windows)", "esfuerzo": 3, "complejidad": 4, "motivo": "Es donde ocurre el cambio real; por eso el lote debe caber en una sesión corta." },
-    { "cobit": "BAI06.03", "cobitNombre": "Hacer seguimiento y reportar el estado de los cambios", "codigo": "5", "paso": "Revisar la cola y leer el log", "proceso": "Claude revisa 15 min después de encolar y luego cada 5 min hasta que el lote cierre; lee el log (hash, tests, Hecho/No hecho, archivos declarados vs tocados).", "quien": "Claude", "herramienta": "Tarea programada del chat + lectura de log/", "esfuerzo": 1, "complejidad": 1, "motivo": "Sin revisión la cola se queda muda; con revisión cada minuto se gasta contexto sin ganar nada." },
-    { "cobit": "BAI07.03", "cobitNombre": "Planificar pruebas de aceptación", "codigo": "6", "paso": "Verificar por código", "proceso": "Sobre los archivos ya desplegados: diff de bloques que deben ser idénticos, grep de funciones retiradas, versión ?v=, ausencia de alert/confirm/prompt, tests en verde.", "quien": "Claude", "herramienta": "Comandos sobre los archivos traídos del PC", "esfuerzo": 2, "complejidad": 3, "motivo": "Atrapa lo que el log de la CLI puede haber omitido antes de gastar tiempo en pantalla." },
-    { "cobit": "BAI07.05", "cobitNombre": "Realizar pruebas de aceptación", "codigo": "7", "paso": "Verificar en producción punto por punto", "proceso": "Con Chrome y la sesión admin de Carlos, Claude recorre las \"Pruebas derivadas\" de la instrucción; crea sus propios datos de prueba y los borra al final. Desplegado no significa aceptado.", "quien": "Claude", "herramienta": "Chrome (extensión) sobre app.apartamentosbucaramanga.com", "esfuerzo": 3, "complejidad": 3, "motivo": "Lo que no coincide con lo documentado se detiene y se pregunta; nunca se asume que \"así funciona\"." },
-    { "cobit": "BAI07.06 / DSS02.02", "cobitNombre": "Promover a producción · Registrar incidentes", "codigo": "8", "paso": "Aceptar o abrir un fix", "proceso": "Si todo coincide, el lote queda aceptado. Si algo falla: incidente con nivel y un fix en su propio lote (nunca mezclado con el siguiente).", "quien": "Claude", "herramienta": "Chat + nueva instrucción fix-<n>.md", "esfuerzo": 1, "complejidad": 2, "motivo": "Separar el fix mantiene trazable qué cambió por qué." },
-    { "cobit": "BAI08.03 / BAI06.03", "cobitNombre": "Organizar y contextualizar el conocimiento · Reportar cambios", "codigo": "9", "paso": "Cierre documental", "proceso": "Una sola escritura por documento al cerrar la sesión (o antes de compactar): estado-proyecto.md (semáforo, tablero, registro de cambios, incidentes, decisiones abiertas, próximos pasos), requerimientos-consolidado.md (\"Cómo quedó\") y transiciones-chat.md (traspaso).", "quien": "Claude", "herramienta": "Documentos del proyecto (project_write)", "esfuerzo": 2, "complejidad": 2, "motivo": "El siguiente chat arranca de estos documentos; escribirlos a mitad de camino duplica trabajo." },
-    { "cobit": "BAI07.07 / MEA01.04", "cobitNombre": "Soporte inicial en producción · Analizar y reportar desempeño", "codigo": "10", "paso": "Revisión de Carlos (opcional)", "proceso": "Carlos abre la pantalla cuando quiera y devuelve observaciones en el chat; cada observación entra como INC o como REQ-Xn.1.", "quien": "Carlos", "herramienta": "Navegador", "esfuerzo": 1, "complejidad": 1, "motivo": "El dueño valida el uso real; no es requisito para cerrar el lote." }
-  ],
-  "notas": [
-    "Dónde participa Carlos: 0a (entrega el requerimiento), 0b (confirma el entendido una vez) y 10 (revisión opcional). El resto es de Claude y de la CLI.",
-    "Qué devuelve a Carlos al ciclo: una pregunta funcional nueva (decisión abierta DA-n) o una escritura sobre sus datos reales que la regla R11 no permite hacer a Claude (por ejemplo borrar registros suyos).",
-    "Ajuste vigente del marco (2026-09-27): una escritura de documentos al cierre, un lote a la vez, revisión de la cola 15 min tras encolar y luego cada 5 min, instrucciones cortas, verificación por código cuando no hay navegador, y sin narrar el marco en cada respuesta."
-  ]
+ "version": 1,
+ "actualizadoEn": "2026-09-29T04:37:00Z",
+ "titulo": "Ciclo de un lote — quién hace qué (COBIT 2019)",
+ "escala": "Esfuerzo y complejidad de 1 (mínimo) a 5 (máximo).",
+ "pasos": [
+  {
+   "cobit": "BAI02.01",
+   "cobitNombre": "Definir y mantener requerimientos",
+   "codigo": "0a",
+   "paso": "Entregar el requerimiento",
+   "proceso": "Carlos describe qué quiere (en el chat, con boceto si hace falta). Claude lo redacta como REQ-Xn en requerimientos-consolidado.md.",
+   "quien": "Carlos",
+   "herramienta": "Chat",
+   "esfuerzo": 2,
+   "complejidad": 2,
+   "motivo": "Es la única entrada funcional del ciclo: sin REQ claro todo lo demás se rehace."
+  },
+  {
+   "cobit": "BAI02.04",
+   "cobitNombre": "Obtener aprobación de requerimientos",
+   "codigo": "0b",
+   "paso": "Confirmar el entendido (una sola vez)",
+   "proceso": "Claude devuelve el REQ en una tabla breve; Carlos dice \"ok\" o corrige. Desde ahí todo el desarrollo queda delegado (categoría, lotes, ejecución, verificación y aceptación).",
+   "quien": "Carlos",
+   "herramienta": "Chat",
+   "esfuerzo": 1,
+   "complejidad": 1,
+   "motivo": "Un \"ok\" al comienzo evita permisos por partes durante el ciclo."
+  },
+  {
+   "cobit": "BAI08.02",
+   "cobitNombre": "Identificar y clasificar fuentes de información",
+   "codigo": "1",
+   "paso": "Leer el código real",
+   "proceso": "Claude trae del PC los archivos que el lote va a tocar y lee las funciones, líneas y datos actuales (nunca por memoria ni por resumen).",
+   "quien": "Claude",
+   "herramienta": "Lectura de archivos del repo (staging desde el PC)",
+   "esfuerzo": 2,
+   "complejidad": 2,
+   "motivo": "Una instrucción escrita sobre código imaginado falla en la CLI o rompe producción."
+  },
+  {
+   "cobit": "BAI06.01",
+   "cobitNombre": "Evaluar, priorizar y autorizar solicitudes de cambio",
+   "codigo": "2",
+   "paso": "Redactar la instrucción del lote",
+   "proceso": "Archivo instr-<lote>.md con cabecera (categoría, alcance, impacto, riesgo, datos personales/dinero, normativa, pruebas derivadas, reversión), contexto con hash, puntos numerados, tests, CLAUDE.md, verificación y commit.",
+   "quien": "Claude",
+   "herramienta": "Redacción (Write)",
+   "esfuerzo": 3,
+   "complejidad": 3,
+   "motivo": "La cabecera es la evaluación de riesgo; el cuerpo corto y preciso es lo que la CLI ejecuta bien en ≤ 8 min."
+  },
+  {
+   "cobit": "BAI06.02",
+   "cobitNombre": "Gestionar cambios de emergencia / autorizar",
+   "codigo": "3",
+   "paso": "Encolar en el PC de Carlos",
+   "proceso": "Claude copia la instrucción a Downloads/str-instr-cola/ con numeración consecutiva. Un lote a la vez.",
+   "quien": "Claude",
+   "herramienta": "Escritura en la carpeta conectada",
+   "esfuerzo": 1,
+   "complejidad": 1,
+   "motivo": "La cola es el único canal hacia el código; encolar dos a la vez mezcla verificaciones."
+  },
+  {
+   "cobit": "BAI03.03 / BAI03.08",
+   "cobitNombre": "Desarrollar la solución · Ejecutar pruebas",
+   "codigo": "4",
+   "paso": "Ejecutar el lote",
+   "proceso": "La tarea de Windows \"STR cola CLI\" corre ejecutar-cola.ps1: Claude Code lee la instrucción, cambia el código, corre node tests/run.js, hace commit a main, push y despliegue; deja el log en log/ y mueve la instrucción a hechas/ o fallidas/.",
+   "quien": "CLI",
+   "herramienta": "Claude Code en el PC (tarea programada de Windows)",
+   "esfuerzo": 3,
+   "complejidad": 4,
+   "motivo": "Es donde ocurre el cambio real; por eso el lote debe caber en una sesión corta."
+  },
+  {
+   "cobit": "BAI06.03",
+   "cobitNombre": "Hacer seguimiento y reportar el estado de los cambios",
+   "codigo": "5",
+   "paso": "Revisar la cola y leer el log",
+   "proceso": "Claude revisa 15 min después de encolar y luego cada 5 min hasta que el lote cierre; lee el log (hash, tests, Hecho/No hecho, archivos declarados vs tocados).",
+   "quien": "Claude",
+   "herramienta": "Tarea programada del chat + lectura de log/",
+   "esfuerzo": 1,
+   "complejidad": 1,
+   "motivo": "Sin revisión la cola se queda muda; con revisión cada minuto se gasta contexto sin ganar nada."
+  },
+  {
+   "cobit": "BAI07.03",
+   "cobitNombre": "Planificar pruebas de aceptación",
+   "codigo": "6",
+   "paso": "Verificar por código",
+   "proceso": "Sobre los archivos ya desplegados: diff de bloques que deben ser idénticos, grep de funciones retiradas, versión ?v=, ausencia de alert/confirm/prompt, tests en verde.",
+   "quien": "Claude",
+   "herramienta": "Comandos sobre los archivos traídos del PC",
+   "esfuerzo": 2,
+   "complejidad": 3,
+   "motivo": "Atrapa lo que el log de la CLI puede haber omitido antes de gastar tiempo en pantalla."
+  },
+  {
+   "cobit": "BAI07.05",
+   "cobitNombre": "Realizar pruebas de aceptación",
+   "codigo": "7",
+   "paso": "Verificar en producción punto por punto",
+   "proceso": "Con Chrome y la sesión admin de Carlos, Claude recorre las \"Pruebas derivadas\" de la instrucción; crea sus propios datos de prueba y los borra al final. Desplegado no significa aceptado.",
+   "quien": "Claude",
+   "herramienta": "Chrome (extensión) sobre app.apartamentosbucaramanga.com",
+   "esfuerzo": 3,
+   "complejidad": 3,
+   "motivo": "Lo que no coincide con lo documentado se detiene y se pregunta; nunca se asume que \"así funciona\"."
+  },
+  {
+   "cobit": "BAI07.06 / DSS02.02",
+   "cobitNombre": "Promover a producción · Registrar incidentes",
+   "codigo": "8",
+   "paso": "Aceptar o abrir un fix",
+   "proceso": "Si todo coincide, el lote queda aceptado. Si algo falla: incidente con nivel y un fix en su propio lote (nunca mezclado con el siguiente).",
+   "quien": "Claude",
+   "herramienta": "Chat + nueva instrucción fix-<n>.md",
+   "esfuerzo": 1,
+   "complejidad": 2,
+   "motivo": "Separar el fix mantiene trazable qué cambió por qué."
+  },
+  {
+   "cobit": "BAI08.03 / BAI06.03",
+   "cobitNombre": "Organizar y contextualizar el conocimiento · Reportar cambios",
+   "codigo": "9",
+   "paso": "Cierre documental",
+   "proceso": "Una sola escritura por documento al cerrar la sesión (o antes de compactar): estado-proyecto.md (semáforo, tablero, registro de cambios, incidentes, decisiones abiertas, próximos pasos), requerimientos-consolidado.md (\"Cómo quedó\") y transiciones-chat.md (traspaso).",
+   "quien": "Claude",
+   "herramienta": "Documentos del proyecto (project_write)",
+   "esfuerzo": 2,
+   "complejidad": 2,
+   "motivo": "El siguiente chat arranca de estos documentos; escribirlos a mitad de camino duplica trabajo."
+  },
+  {
+   "cobit": "BAI07.07 / MEA01.04",
+   "cobitNombre": "Soporte inicial en producción · Analizar y reportar desempeño",
+   "codigo": "10",
+   "paso": "Revisión de Carlos (opcional)",
+   "proceso": "Carlos abre la pantalla cuando quiera y devuelve observaciones en el chat; cada observación entra como INC o como REQ-Xn.1.",
+   "quien": "Carlos",
+   "herramienta": "Navegador",
+   "esfuerzo": 1,
+   "complejidad": 1,
+   "motivo": "El dueño valida el uso real; no es requisito para cerrar el lote."
+  }
+ ],
+ "notas": [
+  "Dónde participa Carlos: 0a (entrega el requerimiento), 0b (confirma el entendido una vez) y 10 (revisión opcional). El resto es de Claude y de la CLI.",
+  "Qué devuelve a Carlos al ciclo: una pregunta funcional nueva (decisión abierta DA-n) o una escritura sobre sus datos reales que la regla R11 no permite hacer a Claude (por ejemplo borrar registros suyos).",
+  "Ajuste vigente del marco (2026-09-27): una escritura de documentos al cierre, un lote a la vez, revisión de la cola 15 min tras encolar y luego cada 5 min, instrucciones cortas, verificación por código cuando no hay navegador, y sin narrar el marco en cada respuesta.",
+  "Ajuste vigente (2026-09-28, lotes 31–32, primer ciclo completo bajo el modelo de operación): los tiempos y costos se registran medidos (log de la cola, reloj), nunca estimados; si falta una hora se pide a Carlos, y la espera no cuenta como trabajo · una verificación que depende de la hora dice si se hizo con el reloj real o simulado · un fallo de la CLI sin commit se diagnostica en el log antes de tocar la instrucción; si es por cupo de sesión, se reencola igual · la tarea de Windows de la cola no lleva la condición 'No iniciar en modo Batería' · un barrido de un defecto (p. ej. fecha UTC) cubre todos los módulos: lo que no entra al lote se registra como INC aparte."
+ ]
 }

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-29T04:30:00Z",
+ "actualizadoEn": "2026-09-29T04:37:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -779,11 +779,12 @@
    "id": "INC-79",
    "tipo": "INC",
    "modulo": "Housekeeping",
-   "etapa": "🔨",
+   "etapa": "✔",
    "fecha": "2026-09-28",
    "severidad": "medio",
    "titulo": "HK calcula 'hoy' en UTC (toISOString) en _alertasTurno y _renderSalidaHuesped: entre las 19:00 y las 24:00 de Bogotá 'hoy' es el día siguiente, y las alertas de salida y 'no iniciado' del día no se disparan; el Calendario usa la fecha local (_hoyStr). Hallado al verificar el lote 31; anterior a él. Barrido del cliente: solo otro caso, el nombre del respaldo del shell (incluido en el lote 32).",
-   "pendiente": "Lote 32 encolado 23:29"
+   "pendiente": "",
+   "observacion": "Fix lote 32 (1dcb0e5, p5c32): STRApi.fechas.ymdLocal en HK y en el respaldo del shell; guardia en tests/fecha-local.test.js. Verificado de noche real."
   },
   {
    "id": "INC-80",
@@ -793,7 +794,7 @@
    "fecha": "2026-09-28",
    "severidad": "bajo",
    "titulo": "Lote 31: primer intento 21:56 falló sin commit porque la CLI del laptop agotó su límite de sesión ('resets 10:50pm'). Causa: cupo compartido con los chats. Carlos reencoló el mismo archivo y salió OK a las 23:16.",
-   "observacion": "Lección: si un lote falla sin commit, leer el log antes de tocar la instrucción; un fallo por cupo se reencola sin cambios. Además, la tarea 'STR cola CLI' no arrancaba por la condición 'No iniciar en modo Batería' (Carlos la quitó y dejó el laptop sin suspensión); confirmar que el próximo lote arranca solo."
+   "observacion": "Lección: si un lote falla sin commit, leer el log antes de tocar la instrucción; un fallo por cupo se reencola sin cambios. Además, la tarea 'STR cola CLI' no arrancaba por la condición 'No iniciar en modo Batería' (Carlos la quitó y dejó el laptop sin suspensión); confirmar que el próximo lote arranca solo. Confirmado el 28-sep 23:30: el lote 32 arrancó solo 19 s después de encolado."
   },
   {
    "id": "INC-81",
@@ -1079,12 +1080,56 @@
   {
    "lote": 32,
    "fecha": "2026-09-28",
-   "hash": null,
+   "hash": "1dcb0e5",
    "version": "p5c32",
    "req": "INC-79",
    "categoria": "normal",
    "resumen": "Fix: 'hoy' con fecha local (STRApi.fechas.ymdLocal) en HK y en el nombre del respaldo del shell; tests/fecha-local.test.js con horas nocturnas de Bogotá y guardia de patrón",
-   "estado": "encolado"
+   "estado": "aceptado",
+   "observacion": "La cola arrancó sola: encolado 23:29:46, la CLI empezó 23:30:05 y terminó 23:31:55 (confirma el ajuste de la tarea de Windows, INC-80). tests 18/18. Verificación con el reloj real de noche (23:35 Bogotá = 04:35 UTC del 29), sin simulación y sin escribir datos.",
+   "aceptacion": {
+    "fecha": "2026-09-28",
+    "resultado": "aceptado",
+    "modoVerificacion": "noche real, 23:35 Bogotá (UTC ya en el 29); sin reloj simulado",
+    "criterios": [
+     {
+      "c": "a. ymdLocal con TZ Bogotá: 19:00, 21:30, 23:59:59 → 28; 00:00 y 12:00 → 29; inválida → null",
+      "ok": true,
+      "observado": "CLI: tests/fecha-local.test.js pasa (18/18)"
+     },
+     {
+      "c": "b. guardia contra toISOString().slice(0,10) en *.html y str-api.js",
+      "ok": true,
+      "observado": "CLI: incluida en el mismo test; 0 coincidencias"
+     },
+     {
+      "c": "c. /api/health esquema 9; ?v=p5c32",
+      "ok": true,
+      "observado": "ok:true, schema_version 9; STRApi.version p5c32 en HK y shell"
+     },
+     {
+      "c": "d. de noche, turno sintético de hoy: checkout-tardio y no-iniciado",
+      "ok": true,
+      "observado": "ymdLocal()=2026-09-28 con UTC 2026-09-29; 60 min tarde → checkout-tardio atención y chip '⚠ checkout tardío'; 20 min sin inicio → no-iniciado"
+     },
+     {
+      "c": "e. turno sintético de mañana no dispara alertas de hoy",
+      "ok": true,
+      "observado": "fecha 2026-09-29 → []"
+     },
+     {
+      "c": "f. consola limpia en HK, Calendario, portal y shell",
+      "ok": true,
+      "observado": "0 errores tras recargar las cuatro; respaldo del shell usa ymdLocal y ya no toISOString"
+     }
+    ]
+   },
+   "costo": {
+    "tokens": null,
+    "minutosCLI": 2,
+    "minutosDueno": 0,
+    "nota": "CLI medida en el log: 23:30:05 → 23:31:55. Carlos no intervino (la cola arrancó sola). Tokens del chat sin medición confiable: no se estiman."
+   }
   }
  ],
  "esquema": {
@@ -1193,7 +1238,7 @@
    "orden": 10,
    "categoriaPrevista": "normal",
    "riesgo": null,
-   "estado": "encolado",
+   "estado": "aceptado",
    "nota": "Fecha local en HK (_alertasTurno, _renderSalidaHuesped) y en el respaldo del shell vía STRApi.fechas.ymdLocal; test con horas 19:00–24:00 de Bogotá + guardia contra toISOString().slice(0,10). Encolado 23:29 en el laptop; también prueba que la tarea arranca sola."
   }
  ],

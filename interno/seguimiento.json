@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-09-30T02:13:00Z",
+ "actualizadoEn": "2026-09-30T02:36:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1244,12 +1244,56 @@
    "lote": 33,
    "tipo": "lote",
    "fecha": "2026-09-29",
-   "hash": null,
+   "hash": "3b3b456",
    "version": "p5c33",
    "req": "REQ-SP5",
    "categoria": "normal",
    "resumen": "CLAUDE.md: bloque del encargo rol-agente-cli con las guardas (crítico sin cruce o '¿Toca el modelo?' = sí → sin commit; 'No hecho' con causa)",
-   "estado": "encolado"
+   "estado": "aceptado",
+   "aceptacion": {
+    "lote": 33,
+    "hash": "3b3b456e351f4b7bf637f640d8e6f5071c92641e",
+    "fecha": "2026-09-29",
+    "horaBogota": "21:28",
+    "resultado": "aceptado",
+    "modoVerificacion": "no depende de la hora (referencia: reloj real, 2026-09-29 21:26 Bogotá = 2026-09-30 02:26 UTC)",
+    "criterios": [
+     {
+      "c": "a. CLAUDE.md tiene '## Tu encargo' con el texto exacto del punto 1, entre la introducción y '## Reglas fijas'; resto igual salvo la versión",
+      "ok": true,
+      "observado": "Leí los blobs de CLAUDE.md de los commits 1dcb0e5 y 3b3b456 en .git e hice diff. Solo hay 2 cambios: se añaden las líneas 5-8 ('## Tu encargo' + el párrafo, idéntico al bloque de la instrucción, comparado como cadena) entre la línea 3 (introducción) y '## Reglas fijas' (ahora línea 9), y en INC-37 cambia 'hoy `p5c32`' por 'hoy `p5c33`'. La copia de trabajo es idéntica byte a byte al blob del commit."
+     },
+     {
+      "c": "b. node tests/run.js → 18/18",
+      "ok": null,
+      "observado": "Esto solo lo prueba la réplica en la CLI: el log y el commit dicen 'node tests/run.js 18/18 OK'. No lo ejecuté y no cuenta como verificado en producción."
+     },
+     {
+      "c": "c. /api/health esquema 9; las páginas cargan str-api.js?v=p5c33; consola limpia en shell, HK, Calendario y portal",
+      "ok": true,
+      "observado": "/api/health: ok=true, db=true, schema_version=9. Las 15 páginas (shell, HK, calendario, portal, flujos, propiedades, usuarios, login, invitacion, conocimiento, seg-proyecto, marco-trabajo, instrucciones, cobit, elementos) responden 200, cargan str-api.js?v=p5c33 y todos sus ?v= son p5c33; en ninguna queda p5c32. STR_API_VERSION vale p5c33 en str-api.js y en el shell. El iframe #iframe-workflows es str-flujos.html?v=p5c33, y las navegaciones _irAFlujos de HK, calendario, flujos, propiedades y conocimiento usan p5c33. Recargué shell, HK, calendario y portal con la consola vigilada: 0 errores y 0 excepciones. No aparece 'undefined' en pantalla; en el iframe oculto de Flujos solo aparece dentro del texto de un <script>, así que es un falso positivo de innerText. En HK y calendario, STRApi.col existe."
+     },
+     {
+      "c": "d. El commit trae categoría, Hecho / No hecho por punto y archivos declarados vs tocados (HTML con solo ?v= listados como tales)",
+      "ok": true,
+      "observado": "El mensaje del commit 3b3b456 dice 'Categoría: normal (instr-33)' e incluye Hecho / No hecho para los puntos 1, 2 y 3a-d (3c 'No hecho aquí', queda para el verificador). También lista 'Archivos declarados' y 'Archivos tocados': CLAUDE.md y, 'solo ?v=/STR_API_VERSION', str-api.js y 15 HTML, con 'Sin diferencias con lo declarado'."
+     },
+     {
+      "c": "CLAUDE.md menciona lo que cambió el lote",
+      "ok": true,
+      "observado": "La sección '## Tu encargo' está en las líneas 5-7 y INC-37 dice 'hoy `p5c33`'."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "ninguno: solo lecturas (fetch GET y carga de páginas). No escribí nada en el servidor ni en localStorage",
+    "notas": "Lote real. Al empezar, la sesión no tenía las carpetas conectadas: pedí acceso y se concedió. No leí patrones-codigo.md ni el REQ del proyecto (lote solo de documentación). El comportamiento del agente ante una cabecera crítica o de modelo queda fuera, como indica la instrucción. El criterio b depende solo de la CLI."
+   },
+   "costo": {
+    "tokens": null,
+    "minutosCLI": 1,
+    "minutosDueno": 0,
+    "nota": "CLI medida en el log: 21:14:06 → 21:15:21. Primer lote aceptado por el Agente verificador; veredicto copiado sin cambios. Tokens sin medición confiable."
+   }
   },
   {
    "lote": null,
@@ -1418,7 +1462,7 @@
    "orden": 13,
    "categoriaPrevista": "normal",
    "riesgo": "R-6",
-   "estado": "encolado",
+   "estado": "aceptado",
    "nota": "Propuesta del Arquitecto: bloque '## Tu encargo' (rol-agente-cli) al inicio de CLAUDE.md con las guardas de cabecera. Encolado 2026-09-29 21:13:43; lo revisa el Agente verificador."
   }
  ],

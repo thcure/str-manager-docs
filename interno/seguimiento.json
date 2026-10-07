@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-07T16:55:00Z",
+ "actualizadoEn": "2026-10-07T17:35:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -711,11 +711,12 @@
    "id": "REQ-F9.o",
    "tipo": "REQ",
    "modulo": "Flujos de trabajo",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "titulo": "Foto de tarea exigida en HK/portal (hasta 10 por tarea, mínimo 1), heredada de la actividad sin excepción por tarea; subida por /api/upload a turno.fotos[clave]; en cola (U6.3).",
-   "pendiente": "Lote 36 (normal). Hoy la casilla 📷 es solo una marca: HK no pide foto.",
-   "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
+   "pendiente": "Lote 36 aceptado (bea9941, p5c36). Observación: c–h (HK con turno real) pendientes de recorrido por Carlos; INC-83 (bajo). Límite: tarea en modo proceso no se frena por foto.",
+   "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md",
+   "conObservacion": true
   },
   {
    "id": "REQ-U6.3",
@@ -724,7 +725,7 @@
    "etapa": "📝",
    "fecha": "2026-10-07",
    "titulo": "Cola local de subida (IndexedDB) de fotos y videos con estados, reintentos, wifi/datos y chip de pendientes; base del portal sin conexión; sistema operativo detectado.",
-   "pendiente": "Lote 37 (normal).",
+   "pendiente": "Lote 37 desplegado (0756073, p5c37). Verificador: 8/11 ok, 3 no verificables; aceptación pendiente de Carlos (a: miniaturas ⏳→✓ con foto real; d: cierre de limpieza con pendientes).",
    "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
   },
   {
@@ -918,6 +919,18 @@
    "necesitaDecision": true,
    "titulo": "INV1 fase 2: depósito común por ubicación o uno solo; ropa por juego o por pieza; quién resuelve una diferencia de conteo; consumo por tarea o deducido del conteo de cierre; qué activos listar por apto; muestreo de auditoría.",
    "pendiente": "La fase 1 arranca con supuestos (un depósito principal 74, ropa por pieza, diferencias las resuelve el operador). Decidir antes del lote 41."
+  },
+  {
+   "id": "INC-83",
+   "tipo": "INC",
+   "modulo": "Flujos de trabajo",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "Editor de flujos: si una tarea tenía su propio 'mín.' de fotos y luego la actividad marca 📷, el mínimo de la tarea sigue vigente (_fbFotoEfectiva usa t.fotoMin || a.fotoMin) pero el editor oculta el input, así que queda activo e invisible.",
+   "pendiente": "Lote estándar: al marcar 📷 en la actividad, limpiar t.fotoMin de sus tareas (o mostrar el valor efectivo). Sin fecha.",
+   "estado": "abierto",
+   "origen": "Veredicto del lote 36 (12:10) y límite declarado por la CLI."
   }
  ],
  "cambios": [
@@ -1643,18 +1656,176 @@
    "cruceDueno": null
   },
   {
-   "lote": null,
-   "tipo": "modelo",
+   "lote": 36,
    "fecha": "2026-10-07",
-   "hash": null,
-   "version": null,
-   "req": "REQ-SP5",
-   "categoria": "modelo",
-   "resumen": "Agente verificador con texto fijo: el lote de cada ejecución llega en log\\verificar.json (lo escribe el Chat de desarrollo; las notas solo restringen) y la tarea se lanza sin mensaje. Encargo rol-verificador, elementos (tarea-agente-verificador, nuevo json-verificar) y comandos-usuario actualizados; M-2 al Chat de desarrollo.",
-   "motivo": "Cambiar el texto de una tarea que corre en el equipo siempre pide la aprobación de Carlos, aun en modo Auto; con el lote dentro del texto, cada lote pedía un clic. Con el texto fijo, cero clics por lote (APO01.09, R-4).",
-   "aprobacion": "aprobado por Carlos el 7-oct-2026",
-   "estado": "registrado",
-   "observacion": "Se cierra cuando el Chat de desarrollo confirme en M-2 un lote verificado sin tarjeta de aprobación."
+   "hash": "bea9941",
+   "version": "p5c36",
+   "req": "REQ-F9.o",
+   "categoria": "normal",
+   "resumen": "Foto de tarea exigida (hasta 10, mínimo 1), heredada de la actividad sin excepción; _fbFotoEfectiva en HK/Propiedades/Flujos; captura con reducción a 1600 px, miniaturas, bloqueo del 'hecho' y pendientes 'sin foto' al cerrar; turno.fotos con unión por url en el merge; columna 'Fotos mín.' en Excel.",
+   "estado": "aceptado",
+   "observacion": "Verificador 11:53–12:10: aceptado; 4/10 criterios en producción (c, d, f, g, h, i no verificables: exigen turno real); datos zz-verif- creados y borrados. INC bajo → INC-83. Diferencias declaradas por la CLI: str-guia-visor.js (lightbox suelto), str-propiedades.html (copia de _fbFotoEfectiva), tests/lib/port-col.js; ref del turno saneado para /api/upload; una tarea en modo proceso no se frena por foto (límite). Sin PHP en LENOVO: api/col solo por réplica JS. CLI 11:36–11:47 (11 min). Carlos debe recorrer c–h con un turno real.",
+   "costo": {
+    "minutosCLI": 11,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 36,
+    "hash": "bea9941af6b83d8fe41ff99c0982877d91acbe9f",
+    "fecha": "2026-10-07",
+    "horaBogota": "12:10",
+    "resultado": "aceptado",
+    "modoVerificacion": "no depende de la hora (reloj real; Bogotá 11:53 / UTC 16:53 al iniciar)",
+    "criterios": [
+     {
+      "c": "Despliegue: /api/health ok, schema 9; páginas con str-api.js?v=p5c36; CLAUDE.md menciona el lote",
+      "ok": true,
+      "observado": "{\"ok\":true,\"db\":true,\"schema_version\":9,...}. str-flujos, str-m1-housekeeping, str-propiedades y portal cargan str-api.js?v=p5c36. CLAUDE.md contiene _fbFotoEfectiva, _hkReducirImagen, fotoMin, 'sin foto', p5c36 y REQ-F9.o."
+     },
+     {
+      "c": "a. Editor: 📷 en cabecera marca/deshabilita/atenúa las tareas; desmarcar vuelve al valor propio; tarea con 📷 propio se conserva",
+      "ok": true,
+      "observado": "Flujo en edición (3 tareas): con 📷 de actividad las 3 casillas checked, disabled, opacidad 0.5, title 'Foto obligatoria por la actividad', y aparece 'mín.'. Al desmarcar vuelven a su valor propio; la tarea con t.foto propio (puesta antes) quedó marcada y habilitada. Sin alert/confirm."
+     },
+     {
+      "c": "b. Guardar/reabrir conserva a.foto, a.fotoMin, t.foto; exportar Foto 'sí' + 'Fotos mín.'; importar como copia → a.foto=true",
+      "ok": true,
+      "observado": "Guardado flujo zz-verif-f9o; reabierto: cabecera marcada, mín. 2, 3 casillas marcadas/deshabilitadas. _ioFlujoAFilas: Foto 'sí' y Fotos mín. 2 en las tres filas (también con tareas de foto propia y mín. propio 3). Importación real (_ioEjecutarImportacion) de esas filas como 'zz-verif-imp': a.foto=true, fotoMin=2. 'abc' y 11 en Fotos mín. → error de fila 'Fotos mín. debe ser un número de 1 a 10'. No se descargó xlsx."
+     },
+     {
+      "c": "c. HK: tarea con foto exigida muestra '📷 Tomar foto' y '0/1'; marcarla sin foto → toast 'Falta la foto' y no marca",
+      "ok": null,
+      "observado": "PARCIAL, con objetos sintéticos (sin turno real): _hkFotosRowHTML sin fotos → botón '📷 Tomar foto' + '0/1' (clase falta). Con _readFlujos reemplazada solo en memoria (restaurada) y shift inexistente, _toggleTask('…','zzF','zzA','zzT1') mostró toast 'Falta la foto (mín. 2)|err' y retornó sin marcar; _hkFaltanFotos → 2, 1, 0 según 0/1/2 fotos; tarea con foto propia → 1; tarea no exigida → 0. No se renderizó el checklist real de un turno."
+     },
+     {
+      "c": "d. Subir imagen: miniatura 'subiendo…' → real; turno.fotos[clave]={url,at,por}; at resuelto por el servidor; ✕ y remove llegan al servidor",
+      "ok": null,
+      "observado": "No verificable: exige subir a /api/upload y escribir turno.fotos de un turno real. Solo verificado: _hkReducirImagen redujo un canvas 3200x2400 a 1600x1200 image/jpeg (45 KB→12 KB); HTML de miniaturas con ✕ cuando la tarea no está hecha y sin ✕ cuando sí."
+     },
+     {
+      "c": "e. Con 10 fotos el botón se deshabilita y dice '10/10 · tope'",
+      "ok": true,
+      "observado": "_hkFotosRowHTML con 10 fotos sintéticas: botón con 'disabled' y contador '10/10 · tope' (en su clase ok). Sin 'undefined'."
+     },
+     {
+      "c": "f. Dos pestañas: unión por url tras refresco de 60 s",
+      "ok": null,
+      "observado": "No verificable: exige escribir en un turno real. Solo hay la réplica de la CLI (tests/merge-turnos.test.js) y no cuenta como verificación en producción."
+     },
+     {
+      "c": "g. Panel del operador: miniaturas, clic abre pantalla completa; portal con '📷 N'",
+      "ok": null,
+      "observado": "PARCIAL: portal.html carga sin errores de consola ni 'undefined' y contiene lógica de fotos; HK incluye _hkVerFoto/STRGuiaVisor y _hkTotalFotos. No se abrió un turno real para ver miniaturas y lightbox ni la tarjeta '📷 N'."
+     },
+     {
+      "c": "h. Cierre de limpieza: tarea con foto exigida sin foto aparece como pendiente 'sin foto'",
+      "ok": null,
+      "observado": "No verificable sin un turno real; solo se confirmó por lectura de código en producción (HK líneas ~3763-3767: pendingMandatory.push(nombre + ' · sin foto'))."
+     },
+     {
+      "c": "i. node tests/run.js verde; health esquema 9; ?v=p5c36; consola limpia en Flujos, HK y portal; 0 undefined; sin alert/confirm/prompt",
+      "ok": null,
+      "observado": "Health y ?v= correctos. Consola sin errores en Flujos, HK y portal; 0 'undefined' en pantalla en las tres. No hay alert(/confirm(/prompt( en HK, portal ni Propiedades; str-flujos.html tiene 1 coincidencia (en los verificados anteriores era un comentario; no se reconfirmó). No ejecuté node tests/run.js (sin Node del proyecto): solo log de la CLI (18 archivos verdes) = réplica. Bloques _fbFotoEfectiva presentes en HK, Flujos y Propiedades; regla probada: actividad→exige/deActividad; tarea propia→mín. 3; actividad con fotoMin 2→2; hoja/__self__ ok."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Mínimo propio de tarea sigue vigente aunque la actividad pase a exigir foto y el editor no lo muestre",
+      "nivel": "bajo",
+      "causa": "_fbFotoEfectiva usa t.fotoMin || a.fotoMin; el editor oculta el input 'mín.' de la tarea cuando a.foto está marcada, de modo que un t.fotoMin previo queda activo e invisible. Límite ya declarado por la CLI.",
+      "observado": "Por lectura de la regla: tarea con fotoMin 3 y actividad con fotoMin 2 → mínimo efectivo 3 sin forma de verlo en la UI."
+     }
+    ],
+    "datosDePrueba": "creados y borrados: flujos 'zz-verif-f9o' (1 actividad 'zz-verif-act', 3 tareas 'zz-verif-t1'..'t3') y 'zz-verif-imp' (importado como copia). Borrados con el diálogo de eliminar de la página; tras recargar no queda ningún 'zz-verif-' en la lista (quedan Iniciar, Alistamiento, Revisión). Objetos sintéticos y reemplazos en memoria de _readFlujos/showToast restaurados. No se tocaron turnos, propiedades ni flujos reales.",
+    "notas": "Ningún criterio falló, pero c (parcial), d, f, g (parcial), h e i (parcial) no se pudieron probar en producción por exigir un turno real o subida/escritura de turnos (fuera de la lista autorizada). Carlos debe recorrer c–h con un turno real: subir foto, ✕, 10/10, dos pestañas, marcar sin foto, lightbox, cierre con 'sin foto'; son criterios 'Detener' y quedan pendientes de su visto bueno."
+   }
+  },
+  {
+   "lote": 37,
+   "fecha": "2026-10-07",
+   "hash": "0756073",
+   "version": "p5c37",
+   "req": "REQ-U6.3",
+   "categoria": "normal",
+   "resumen": "str-cola-subida.js (IndexedDB, estados en-telefono/subiendo/subida/fallida, reintentos 5 s·15 s·45 s… ≤10 min, 8 intentos, soloWifi, memoria si IndexedDB falla); HK: miniatura inmediata ⏳/✓/!, cuentan subidas + en cola para marcar, cierre con pendientes avisado, chip; portal: chip, fallidas en barra, menú de perfil con 'Mi teléfono' (str-os-v1); hk:turnos con fotosPendientes/fotosFallidas.",
+   "estado": "desplegado",
+   "observacion": "Verificador 12:22–12:24: 'no aceptado' sin INC ni criterio incumplido: 8/11 ok, 3 no verificables (a miniaturas, d cierre con pendientes, tests Node) por exigir turno real o el repositorio; la cola se ejerció completa en memoria (agregar, offline, 500 simulado, reintentos, persistencia IndexedDB, modo memoria). Queda 'desplegado' hasta que Carlos recorra a y d con un turno de prueba. Observación del verificador: una subida cuyo turno no existe queda sin 'aplicada' y cuenta como pendiente (esperado). CLI 11:53–12:02 (9 min), 19/19 tests. Diferencias: menú de perfil nuevo en el portal, fotosFallidas en hk:turnos. Límites: sin Background Sync; dos pestañas sin navigator.locks pueden duplicar una foto.",
+   "costo": {
+    "minutosCLI": 9,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 37,
+    "hash": "0756073ab8fd06aac719cb1c8fbab2a1292ecf15",
+    "fecha": "2026-10-07",
+    "horaBogota": "12:24",
+    "resultado": "no aceptado",
+    "modoVerificacion": "reloj real (Bogotá 12:22–12:24, UTC 17:22–17:24 del 7-oct-2026); navigator.onLine simulado solo en memoria y restaurado",
+    "criterios": [
+     {
+      "c": "g. /api/health esquema 9; páginas con ?v=p5c37 y str-cola-subida.js?v=p5c37",
+      "ok": true,
+      "observado": "health {\"ok\":true,\"db\":true,\"schema_version\":9,\"secrets\":true,\"gd\":true}; HK carga str-api.js, str-guia-visor.js y str-cola-subida.js con ?v=p5c37 (0 restos de p5c36); portal carga str-api.js?v=p5c37; str-cola-subida.js responde 200"
+     },
+     {
+      "c": "g. 0 undefined en pantalla, sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "0 'undefined' en texto de HK y portal; 0 llamadas alert/confirm/prompt en el HTML de ambos"
+     },
+     {
+      "c": "g. consola limpia en HK y portal",
+      "ok": true,
+      "observado": "0 errores en consola de portal y HK (el rastreo de consola empezó tras la primera carga de cada página; se recargó HK y quedó sin errores)"
+     },
+     {
+      "c": "g. node tests/run.js en verde",
+      "ok": null,
+      "observado": "No verificable desde producción; solo el log del agente CLI (19/19 OK), réplica en CLI, no cuenta como verificado en producción"
+     },
+     {
+      "c": "a. Foto: miniatura inmediata ⏳ → ✓; turno.fotos[clave] con url; tarea marcable antes de terminar la subida",
+      "ok": null,
+      "observado": "Parte cola ejercida en memoria con STRApi.upload simulado (sin escribir al servidor): al agregar quedó 'en-telefono', pendientes=1 y urlLocal blob: inmediata; en ~1,5 s pasó a 'subida' con url y se emitió 'subida'. La UI de HK (esquina ⏳/✓, escritura en turno.fotos, marcar tarea con fotos en cola) no se ejerció: exige un turno real y no se crean turnos"
+     },
+     {
+      "c": "b. Offline: 2 fotos quedan en cola, persisten tras recarga, al reconectar suben solas",
+      "ok": true,
+      "observado": "Con onLine simulado false: 2 ítems 'en-telefono', 0 llamadas a upload, pendientes=3 (incluye una subida anterior no aplicada). Persistencia comprobada leyendo IndexedDB 'str-cola-subida' desde otra conexión: 2 registros 'en-telefono' con blob de 3 bytes cada uno (no se recargó para no disparar subidas reales). Al restaurar onLine y emitir 'online': 2 llamadas a upload y ambos 'subida'. Chip/miniaturas de HK tras recargar no ejercidos (UI sin turno real)"
+     },
+     {
+      "c": "c. Fallo 500: estado fallida, reintento con espera, Reintentar sube",
+      "ok": true,
+      "observado": "upload simulado lanzando 'HTTP 500 simulado': estado 'fallida', intentos=1, ultimoError correcto, próximo intento en ~3 s restantes de 5 s; esperas _espera(1..6)=5000,15000,45000,135000,405000,600000 ms (5 s·15 s·45 s … tope 10 min). reintentar(id) → 'subida'. quitar() sobre fallida → true y desaparece. Esquina '!' y chip rojo en HK no ejercidos (UI sin turno real)"
+     },
+     {
+      "c": "d. Cerrar limpieza con pendientes: modal lista pendientes y deja cerrar igual",
+      "ok": null,
+      "observado": "No verificable: cerrar limpieza/turno modifica un turno real. En el código desplegado de HK existen los textos 'pendientes de subir' y 'Cerrar igual' (solo presencia, no comportamiento)"
+     },
+     {
+      "c": "e. Portal: chip '📷 N pendientes' y hk:turnos con fotosPendientes",
+      "ok": true,
+      "observado": "hk:turnos real (iframe ?modo=datos, solo lectura): 42 turnos, 42 con fotosPendientes y 42 con fotosFallidas, todos 0 (cola vacía). Código del portal contiene chip '📷 N pendiente(s)' (rojo si fotosFallidas>0, amarillo si no) y la línea 'no se pudieron subir'; chip con cola no vacía no se vio en pantalla"
+     },
+     {
+      "c": "e. Select 'Mi teléfono' guarda en str-os-v1; detección automática 'otro' en Chrome de escritorio",
+      "ok": true,
+      "observado": "Portal: select #perfilOS (Android / iPhone / Otro-computador) se abre con el valor guardado 'otro'; al cambiar a ios, localStorage['str-os-v1']='ios' (restaurado a 'otro' después). _hkOS() en HK devuelve 'otro' y str-os-v1='otro' (Windows/Chrome)"
+     },
+     {
+      "c": "f. IndexedDB no disponible: cola en memoria y aviso",
+      "ok": true,
+      "observado": "Re-evaluando el script con window.indexedDB=undefined: modoMemoria()=true, onError emitido {mensaje:'IndexedDB no disponible', memoria:true}, y aun así el ítem subió (estado 'subida', 1 llamada). El chip ámbar 'no cierres la pestaña' de HK no se vio en pantalla"
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "creados y borrados: solo registros locales en IndexedDB del navegador (turnoId zz-verif-turno, zz-verif-turno2, zz-mem; archivos zz-verif-*.jpg) con STRApi.upload simulado en memoria, nada enviado al servidor; los 6 registros quedaron borrados de IndexedDB (cola vacía al final). localStorage str-os-v1 restaurado a 'otro'. Ningún flujo, actividad, turno ni dato real creado ni modificado",
+    "notas": "Sin incumplimientos detectados, pero no se acepta: los criterios a, d y la parte visual de b, c, e, f (miniaturas ⏳/✓/!, chip, modal de cierre) y la corrida de tests exigen un turno real o el repositorio y no se pudieron verificar sin tocar datos reales; quedan para una prueba manual con turno de prueba. Observación (no es INC): un ítem 'subida' cuyo turno no existe queda sin 'aplicada' porque el handler de HK devuelve false, y cuenta como pendiente hasta que se aplique; esperado para turnos reales ausentes. CLAUDE.md menciona el lote (7 coincidencias de STRColaSubida/p5c37/U6.3). Límite declarado: dos pestañas sin navigator.locks podrían duplicar una subida."
+   }
   }
  ],
  "esquema": {
@@ -1841,7 +2012,7 @@
    "req": "REQ-F9.o",
    "categoria": "normal",
    "resumen": "Foto de tarea exigida y heredada; captura y /api/upload en HK/portal",
-   "estado": "previsto",
+   "estado": "aceptado",
    "orden": 36
   },
   {
@@ -1849,7 +2020,7 @@
    "req": "REQ-U6.3",
    "categoria": "normal",
    "resumen": "Cola local de subida de fotos y videos",
-   "estado": "previsto",
+   "estado": "desplegado",
    "orden": 37
   },
   {

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-07T15:40:00Z",
+ "actualizadoEn": "2026-10-07T16:55:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -689,21 +689,23 @@
    "id": "REQ-F9.n",
    "tipo": "REQ",
    "modulo": "Flujos de trabajo",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "titulo": "Selector de zonas: alto máximo con ascensor y apertura hacia arriba, campo 'Buscar o crear zona…' arriba, orden marcadas · usadas en este flujo · resto; zonas de la propiedad activa primero.",
-   "pendiente": "Lote 35 (estándar) con F9.p.",
-   "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
+   "pendiente": "Lote 35 aceptado (5d45ded, p5c35). Observación: HK con turno real y Node solo por la CLI.",
+   "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md",
+   "conObservacion": true
   },
   {
    "id": "REQ-F9.p",
    "tipo": "REQ",
    "modulo": "Flujos de trabajo",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "titulo": "Tiempo de la actividad como presupuesto: las tareas con minutos consumen de él, las vacías se reparten el resto al leer; la suma no puede superar el total (control en el editor e importador).",
-   "pendiente": "Lote 35 (estándar) con F9.n.",
-   "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
+   "pendiente": "Lote 35 aceptado (5d45ded, p5c35). Observación: HK con turno real y Node solo por la CLI.",
+   "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md",
+   "conObservacion": true
   },
   {
    "id": "REQ-F9.o",
@@ -1495,6 +1497,150 @@
    "aprobacion": "pedido por Carlos el 6-oct-2026",
    "estado": "registrado",
    "observacion": "Pendiente: añadir el buzón a 'Recibes de' / 'Entregas a' de los encargos rol-desarrollo y rol-arquitecto y a la tabla 01.03 de proceso-cambios cuando se pruebe con M-1."
+  },
+  {
+   "lote": 34,
+   "fecha": "2026-10-06",
+   "hash": "7d757cf",
+   "version": "p5c34",
+   "req": "REQ-F9.m",
+   "categoria": "normal",
+   "resumen": "Zona en la actividad (📍 en la cabecera), heredada por las tareas sin zona propia; '↩ Usar la de la actividad'; zonasEfectivas en editor, copia por propiedad, Excel y HK.",
+   "estado": "desplegado",
+   "observacion": "Verificador: h ✓; a–g no verificables (la plataforma negó escribir en el editor en dos ejecuciones, 21:12 y 21:40, antes de la autorización zz-verif-). Aceptación pendiente de Carlos: recorrer a–d con 'Alistamiento'. CLI 20:58–21:04 (6 min).",
+   "aceptacion": {
+    "resultado": "no aceptado",
+    "modoVerificacion": "no depende de la hora (reloj real; 2026-10-07T02:30Z = 21:30 Bogotá al iniciar)",
+    "criterios": [
+     {
+      "c": "a. Cabecera con 4 tareas: 📍 Zona → Zonas (1) y tareas heredan atenuadas sin recargar",
+      "ok": null,
+      "observado": "Parcial en producción: en un flujo nuevo sin guardar (zz-verif-f9m) la actividad muestra 📍 Zona en la cabecera, también con 1 tarea, y la actividad-hoja ya no repite el botón. No se pudo completar (4 tareas, elegir zona, ver chips atenuados): la plataforma denegó el siguiente clic en el editor (Modify Shared Resources). No se eludió."
+     },
+     {
+      "c": "b. Zona propia en tarea 2; cambiar zona de actividad no la afecta",
+      "ok": null,
+      "observado": "No verificable en UI (misma denegación). Lógica pura con objetos sintéticos: zonasEfectivas({zonas:['Zona de ropas']},{zonas:['Cocina']}) = ['Zona de ropas']."
+     },
+     {
+      "c": "c. ↩ Usar la de la actividad vuelve a heredar",
+      "ok": null,
+      "observado": "No verificable en UI (misma denegación)."
+     },
+     {
+      "c": "d. Guardar y reabrir: a.zonas=['Cocina'], tareas heredan con zonas [], flujo previo igual",
+      "ok": null,
+      "observado": "No verificable: exige guardar el flujo de prueba. Lectura sintética: {zonas:[]} con actividad Cocina = ['Cocina']; {zonas:[],ubicacion:'Baño'} = ['Baño']; {} = ['Cocina']."
+     },
+     {
+      "c": "e. HK muestra zona heredada en checklist y prellena ⚠",
+      "ok": null,
+      "observado": "No verificable de extremo a extremo (necesita turno con flujo con zona de actividad, que implica escribir datos reales)."
+     },
+     {
+      "c": "f. Copia por propiedad: por definir en la actividad, resolver aplica a las que heredan",
+      "ok": null,
+      "observado": "No verificable (crear copia escribe datos)."
+     },
+     {
+      "c": "g. Exportar/Importar con agrupación de zonas iguales",
+      "ok": null,
+      "observado": "No verificable sin guardar datos. La función _ioFlujoAFilas está presente en la página."
+     },
+     {
+      "c": "h. health esquema 9; páginas con ?v=p5c34; consola limpia; 0 undefined",
+      "ok": true,
+      "observado": "/api/health {ok:true,db:true,schema_version:9,secrets:true,gd:true}. str-flujos.html carga str-api.js?v=p5c34; zonasEfectivas existe. Consola de Flujos: 0 errores; 'undefined' no aparece en pantalla. HK y portal no re-revisados en esta ejecución (HK sí en la verificación previa de las 21:12). node tests/run.js 18/18 solo por declaración de la CLI, no verificado en producción."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "ninguno: se abrió el editor de un flujo nuevo 'zz-verif-f9m' con una actividad 'zz-verif-act' pero nunca se pulsó Guardar; se cerró la pestaña y no se escribió nada. El flujo 'Alistamiento' de Carlos no se tocó.",
+    "notas": "Desplegado, no aceptado: solo h y el inicio de a se comprobaron en producción; b–g quedan sin probar. Segunda ejecución con el mismo bloqueo que la de las 21:12: la plataforma deniega las interacciones que modifican el editor, aun con la autorización de Carlos para datos zz-verif-. CLAUDE.md ya menciona REQ-F9.m, zonasEfectivas y 'tarea.zonas = [] = hereda' (verificado en la ejecución previa). Observación menor: con los filtros por defecto (Flujo base / Mantenimiento) la lista dice 'No hay flujos' aunque 'Alistamiento' existe en memoria (flujos.length=1); probablemente es su categoría o el filtro, no un fallo del lote. Para cerrar: que Carlos recorra a–g con sus puntos de parada, o habilite escritura de zz-verif- al verificador.",
+    "horaBogota": "21:40"
+   },
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": null,
+    "nota": "espera no cuenta; Carlos: configuró la tarea de Windows (batería y repetición cada minuto), minutos no medidos"
+   },
+   "cruceDueno": null
+  },
+  {
+   "lote": 35,
+   "fecha": "2026-10-07",
+   "hash": "5d45ded",
+   "version": "p5c35",
+   "req": "REQ-F9.n + REQ-F9.p",
+   "categoria": "normal",
+   "resumen": "Selector de zonas (60vh, buscar/crear arriba, bloques Marcadas · En este flujo · Todas) y tiempo de la actividad como presupuesto (tiempoTotal, reparto al leer, control al guardar e importar, columna 'Minutos actividad'); HK y Propiedades leen el tiempo efectivo.",
+   "estado": "aceptado",
+   "observacion": "Verificador 11:23–11:50: aceptado; g (HK con turno real) e i (Node) parciales; primera ejecución con datos zz-verif- creados y borrados (la autorización de Carlos funcionó). Diferencias declaradas por la CLI: _fbDuracionMin de Propiedades también cambiado; casos nuevos dentro de flujo-base.test.js (18 archivos). CLI 11:11–11:18 (7 min).",
+   "aceptacion": {
+    "resultado": "aceptado",
+    "modoVerificacion": "no depende de la hora (reloj real; Bogotá 11:23 / UTC 16:23 al iniciar)",
+    "criterios": [
+     {
+      "c": "Despliegue: /api/health ok, schema 9; páginas cargan str-api.js?v=p5c35",
+      "ok": true,
+      "observado": "{\"ok\":true,\"db\":true,\"schema_version\":9,...}; str-flujos, str-m1-housekeeping y str-propiedades cargan str-api.js?v=p5c35 y contienen _fbTiempoTarea/tiempoTotal. CLAUDE.md menciona F9.n, F9.p, tiempoTotal, _fbTiempoTarea, F9p-puras, Minutos actividad y p5c35."
+     },
+     {
+      "c": "a. Popover de zonas: cabe en pantalla con scroll interno, se abre hacia arriba cerca del borde inferior, buscador fijo arriba",
+      "ok": true,
+      "observado": "max-height 525px (60vh de 875), overflow-y auto, max-width 260px. Desde la última tarea (botón en y=463–484) el popover se abrió en 1–459, o sea hacia arriba. Campo 'Buscar o crear zona…' en .zona-pop-head, con foco al abrir. Con solo 16 zonas no hizo falta scroll (scrollHeight<=clientHeight); el tope de altura y overflow quedaron comprobados por CSS, no con 15+ zonas que lo desborden. 'Otra zona…' ya no aparece."
+     },
+     {
+      "c": "b. 'ba' filtra; Enter con una sola coincidencia marca; texto inexistente + Enter crea y marca",
+      "ok": true,
+      "observado": "'ba' → Balcon, Baño, Baño Aux, Baño Ppal (Balcon también contiene 'ba'). Enter con 4 coincidencias no hizo nada. 'baño ppal' + Enter → tarea con zona ['Baño Ppal']. 'zz-verif-Terraza' + Enter → creada y marcada. El popover siguió abierto tras marcar."
+     },
+     {
+      "c": "c. Bloques Marcadas · En este flujo · Todas; filtros.prop pone primero las zonas de la propiedad en Todas",
+      "ok": true,
+      "observado": "Al reabrir: '## Marcadas | Baño Ppal | zz-verif-Terraza | ## En este flujo | Cocina | ## Todas | …' en ese orden. Con filtros.prop = id de 1901 (la propiedad no devolvió zonas por zonasEfectivas/_zonasPropias; probé con esas funciones reemplazadas solo en memoria y restauradas) apareció un separador y 'Habitación' quedó después de él; la comprobación de que usa las zonas reales de 1901 no es concluyente. Solo se puede confirmar que existe el separador y la reordenación."
+     },
+     {
+      "c": "d. Actividad 5 tareas, total 30: cabecera y repartos; 10 → 5 cada una; 20 → 0 y 'completo'; 25 → exceso en rojo, Guardar rechaza",
+      "ok": true,
+      "observado": "Cabecera '5 tareas · 30 min · 0 asignados · 30 por repartir entre 5' y placeholders 6,6,6,6,6. Con 10 → '10 asignados · 20 por repartir entre 4', placeholders 5, foco conservado en el input. 10+20 → '5 tareas · 30 min · completo', vacías 0. Con 25 → '35 asignados · ⚠ supera el total en 5 min', bordes var(--red-fg), title 'Supera los 30 min de la actividad (sobran 5)'. guardarFlujo() mostró toast '«zz-verif-act»: las tareas suman 35 min y el total es 30' y no guardó. Sin alert/confirm."
+     },
+     {
+      "c": "e. Quitar el total vuelve a la suma; flujo existente sin tiempoTotal igual que antes",
+      "ok": true,
+      "observado": "Con total vacío: '5 tareas · 35 min' (10+25, vacías cuentan 0); con 7,25,7,7,7 → '5 tareas · 53 min'. Flujos existentes (Alistamiento, etc.) siguen mostrando su tiempo sin cambios en la lista (p. ej. tarjeta 'Iniciar' 2 min); no se abrió ninguno para editar."
+     },
+     {
+      "c": "f. Guardar y reabrir conserva tiempoTotal y estimado:null; resumen usa el reparto; copia por propiedad hereda el total",
+      "ok": true,
+      "observado": "Guardado ('Flujo creado ✓'), tarjeta '5 tareas ⏱ 30 min'. Reabierto: tiempoTotal 30, estimados 10,null,null,null,null, cabecera '10 asignados · 20 por repartir entre 4', placeholders 5. crearClon(plantilla, 1901) devolvió el flujo con tiempoTotal 30 y estimados 10,null,null,null,null (función en memoria, sin guardar el clon)."
+     },
+     {
+      "c": "g. HK: checklist 'Xmin' por tarea repartida; progreso esperado y duración de limpieza suman 30",
+      "ok": null,
+      "observado": "No verificable en pantalla: requiere un turno real que use el flujo de prueba (tocar datos reales). Verificado solo en la página de HK en producción con objetos sintéticos: _fbTiempoTarea → 10,5,5,5,5; _fbTiempoActividad → 30; _fbStatsSimple → {minutos:30,duracion:30}; 31 entre 4 → 8,8,8,7; hoja → estimado. No se comprobó el render del checklist ni _progresoEsperado/_lD con un turno."
+     },
+     {
+      "c": "h. Exportar con 'Minutos actividad'; importar copia igual estructura; 20+20 con total 30 → error y botón Importar deshabilitado",
+      "ok": true,
+      "observado": "_ioFlujoAFilas: cabeceras '…Minutos|Minutos actividad|Zona 1…'; fila 1 Minutos 10, las demás '' y Minutos actividad 30 en las 5. _ioProcesarFilas con esas filas (sin zonas): 0 errores, botón habilitado, tiempoTotal 30 y estimados 10,null,null,null,null. Con 20+20/30: 'Fila 2: las tareas suman 40 min y el total es 30', botón deshabilitado. 'abc' → 'Minutos actividad no numéricos', deshabilitado. Total distinto entre filas → 'Minutos actividad debe ser igual en todas las filas de «zz-verif-act»'. No se descargó ningún archivo xlsx ni se ejecutó una importación real."
+     },
+     {
+      "c": "i. node tests/run.js ≥19 verdes; /api/health esquema 9; ?v=p5c35; consola limpia en Flujos, HK, Propiedades y portal; 0 undefined; sin alert/confirm/prompt",
+      "ok": null,
+      "observado": "Health y ?v= correctos. Consola sin errores en Flujos, HK y Propiedades (0 'undefined' en pantalla en las tres; leídas tras recargar). Portal no se abrió. No ejecuté node tests/run.js: el log de la CLI dice 18/18 archivos (instrucción pedía ≥19; la CLI lo explicó: los casos nuevos van dentro de flujo-base.test.js), así que solo hay réplica de la CLI. Iguales entre sí los tres bloques de ayudantes (HK = Propiedades = Flujos [F9p-puras]), comparados desde producción. El único match de confirm( en str-flujos.html es un comentario."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "creados y borrados: flujo 'zz-verif-f9p' (1 actividad 'zz-verif-act', 5 tareas 'zz-verif-t1'..'t5', zona 'zz-verif-Terraza' solo dentro de ese flujo). Borrado con el diálogo 'Eliminar' de la página; tras recargar no queda ningún 'zz-verif-' en la lista. No se guardó ninguna importación ni clon. Reemplazos en memoria de zonasEfectivas/_zonasPropias/filtros.prop restaurados.",
+    "notas": "Criterios g e i parcialmente no verificables en producción (g por no tocar turnos reales; i por no poder correr Node ni abrir el portal). Ningún criterio falló. Observación menor: en el popover, tras marcar una zona nueva creada con el buscador, esta pasa a Marcadas al refiltrar mientras las ya existentes marcadas permanecen en su bloque hasta reabrir; es coherente con 'no reordenar' salvo la zona recién creada. Recomendación a Carlos: revisar el checklist de HK con un turno real que use un flujo con total.",
+    "horaBogota": "11:50"
+   },
+   "costo": {
+    "minutosCLI": 7,
+    "minutosDueno": 0,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null
   }
  ],
  "esquema": {
@@ -1673,7 +1819,7 @@
    "req": "REQ-F9.n + REQ-F9.p",
    "categoria": "estándar",
    "resumen": "Selector de zonas y tiempo de la actividad como presupuesto (solo str-flujos.html)",
-   "estado": "previsto",
+   "estado": "aceptado",
    "orden": 35
   },
   {

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-07T18:40:00Z",
+ "actualizadoEn": "2026-10-07T23:58:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -755,7 +755,7 @@
    "etapa": "📝",
    "fecha": "2026-10-07",
    "titulo": "Módulo de Inventario ligado al flujo: catálogo libre con 4 clases (unidad, nivel, circulante, activo fijo), depósitos (74 principal, colgados, por apto), tarea 'inventario' desde cualquier flujo, movimientos con hora del servidor, lista de compra habitual, controles y auditoría teórica·declarada·verificada.",
-   "pendiente": "Lotes 40–42 (fases 1 y 2 normal, 3 crítico). Referencia visual: página 'Inventario en el flujo' v2.",
+   "pendiente": "Fase 1 desplegada (lote 40, a7f71c2, p5c40); verificación pendiente. Fase 2 espera DA-22; fase 3 crítica con cruce previo.",
    "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
   },
   {
@@ -931,6 +931,53 @@
    "pendiente": "Lote estándar: al marcar 📷 en la actividad, limpiar t.fotoMin de sus tareas (o mostrar el valor efectivo). Sin fecha.",
    "estado": "abierto",
    "origen": "Veredicto del lote 36 (12:10) y límite declarado por la CLI."
+  },
+  {
+   "id": "INC-84",
+   "tipo": "INC",
+   "modulo": "api/",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "medio",
+   "titulo": "api/export (respaldo JSON de la cuenta y respaldo diario) no incluía la colección 'guias': los respaldos anteriores al 7-oct no traen las guías. Causa: la colección se agregó a /api/col (REQ-K2) sin agregarla a $COLECCIONES de api/export (INC-73 no cubría export).",
+   "pendiente": "Lote estándar: agregar 'guias' a api/export y una guardia en tests que compare $COLECCIONES_VALIDAS con $COLECCIONES de export. Anterior al lote 40; hallado por la CLI al agregar las colecciones de inventario.",
+   "estado": "abierto",
+   "origen": "Log de la CLI del lote 40 (14:34)."
+  },
+  {
+   "id": "DA-23",
+   "tipo": "DA",
+   "modulo": "Gobierno (verificación)",
+   "etapa": "✔",
+   "fecha": "2026-10-07",
+   "titulo": "Decisión de Carlos (7-oct): el Agente verificador puede crear datos de prueba propios en producción con prefijo zz-verif-: flujos/actividades/tareas, una propiedad 'zz-verif-Propiedad' sin iCal (reutilizable), turnos y tickets solo en ella, fotos y evidencias con ref zz-verif- (no borrables del servidor, se anotan). Prohibido: huéspedes, reservas, pagos, liquidaciones, usuarios y todo lo sin prefijo. Alcance final según el encargo rol-verificador (commit 5296a35).",
+   "pendiente": "Aplicada en la tarea 'Agente verificador' el 7-oct 18:40 (texto = encargo vigente). Primera prueba: relanzar 38 (d–h), luego 39 y 40.",
+   "estado": "aplicada",
+   "origen": "Chat de desarrollo, 7-oct 15:45."
+  },
+  {
+   "id": "INC-85",
+   "tipo": "INC",
+   "modulo": "Gobierno (verificación)",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "medio",
+   "titulo": "Lote 39 desplegado sin ninguna prueba de aceptación con el servidor real (a–e, g, f parcial): el PHP nuevo de /api/expediente nunca se ejecutó con datos. Causa: no existe un incidente con evidencias en producción y la lista de datos de prueba del verificador (6-oct) no le permitía crear tickets ni turnos.",
+   "pendiente": "Se resuelve con DA-23 (datos zz-verif- ampliados): relanzar la verificación del 39 con un ticket zz-verif- con ≥2 evidencias (una anulada). Mientras, el lote queda 'desplegado'.",
+   "estado": "abierto",
+   "origen": "Veredicto del lote 39 (16:36)."
+  },
+  {
+   "id": "INC-86",
+   "tipo": "INC",
+   "modulo": "api/",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "GET /api/expediente/<id> responde 404 'Incidente no encontrado' para el único ticket existente (tk_mtwg32j0_4ncia, sin evidencias) con JWT admin y ?solo=html. Sin determinar si es esperado (ticket sin evidencias) o un fallo de la consulta a col_item.",
+   "pendiente": "Reevaluar con un ticket zz-verif- con evidencias (DA-23). Si el 404 se repite, sube a medio/crítico. Si es por falta de evidencias, el endpoint debe responder 400 con un mensaje claro, no 404.",
+   "estado": "abierto",
+   "origen": "Veredicto del lote 39 (16:36)."
   }
  ],
  "cambios": [
@@ -1325,7 +1372,7 @@
    "categoria": "normal",
    "resumen": "Evidencia de incidente: /api/upload tipo evidencia (original tal cual + copia 1600 px, SHA-256, EXIF) y video (≤ min(100 MB, ini), solo wifi por defecto); /api/archivo sirve video con rangos; health exif/zip/uploadMaxMB; ticket.resId + evidencias[] (solo crece, anular con motivo admin/operador); modal con galería sin capture, textos por OS, hasta 20 fotos y 2 videos ≤60 s; cierre bloqueado con pendientes; panel Tomada/Recibida/SHA-256 y 'Reserva: #código'.",
    "estado": "desplegado",
-   "observacion": "CLI 12:22–12:36 (14 min), 19/19. Diferencias declaradas: api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php (nuevos), str-api.js; corrección de paso: el ticket se firmaba con el primer usuario de la lista, ahora con la sesión real. Límites: el bloqueo de cierre solo ve la cola de ese teléfono; en iPhone no se detecta red móvil. Verificador: 1ª ejecución 13:05 sin Chrome (Carlos cerró el navegador; log\\38-veredicto-sin-chrome.json, nada verificado); 2ª 13:16 con el procedimiento nuevo (verificar.json, sin tarjeta, corrió en LENOVO) pero Chrome sin sesión iniciada: a e i-parcial ok, b–h no verificables. Pendiente: Carlos deja sesión abierta y se relanza.",
+   "observacion": "CLI 12:22–12:36 (14 min), 19/19. Diferencias declaradas: api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php (nuevos), str-api.js; corrección de paso: el ticket se firmaba con el primer usuario de la lista, ahora con la sesión real. Límites: el bloqueo de cierre solo ve la cola de ese teléfono; en iPhone no se detecta red móvil. Verificador: 1ª 13:05 sin Chrome (Carlos cerró el navegador), 2ª 13:16 sin sesión (procedimiento nuevo verificar.json probado: sin tarjeta, corrió en LENOVO), 3ª 13:40 con sesión: a, b, c verificados en producción (SHA-256 igual en respuesta, local y GET; EXIF; 413 a 26 MB y 101 MB), ningún fallo ni INC; d–h e i-interfaz no verificables sin ticket de prueba. Pendiente: Carlos recorre d–h con un incidente real o se acepta bajo su riesgo. Archivos de prueba en api/uploads ref zz-verif-38 (no se borran del servidor).",
    "costo": {
     "minutosCLI": 14,
     "minutosDueno": null,
@@ -1336,9 +1383,9 @@
     "lote": 38,
     "hash": "b78799c",
     "fecha": "2026-10-07",
-    "horaBogota": "13:16",
-    "resultado": "no aceptado (desplegado; verificación parcial, sin criterio incumplido)",
-    "modoVerificacion": "Chrome conectado en producción (app.apartamentosbucaramanga.com), sin sesión iniciada: no se puede escribir contraseñas (prohibido) y no hay sesión previa en ese Chrome. No depende de la hora (reloj real). Sin datos de prueba creados.",
+    "horaBogota": "13:40",
+    "resultado": "no aceptado (desplegado; a, b, c y parte de i verificados en producción sin fallos; d–h no verificados en la interfaz; sin criterio incumplido)",
+    "modoVerificacion": "Chrome en producción con la sesión ya abierta en ese navegador (no se ingresaron credenciales), llamando a STRApi.upload y /api/archivo con archivos sintéticos 'zz-verif-'. No se tocaron tickets, turnos, flujos ni reservas reales. Reloj real; ningún criterio depende de la hora. Producción ya sirve ?v=p5c39 (lote 39 desplegado encima), así que lo observado es el código de 38 más 39.",
     "criterios": [
      {
       "c": "a. /api/health reporta exif, zip, uploadMaxMB",
@@ -1346,49 +1393,49 @@
       "observado": "{\"ok\":true,\"db\":true,\"schema_version\":9,\"secrets\":true,\"gd\":true,\"exif\":true,\"zip\":true,\"uploadMaxMB\":100}"
      },
      {
-      "c": "b. Subida evidencia (sha256, EXIF, urlMin, byte a byte, png sin EXIF, 413 a 26 MB)",
-      "ok": null,
-      "observado": "No verificable: /api/upload exige JWT (POST sin token -> 401 {\"error\":\"Token requerido\"}); Chrome sin sesión y no se ingresan credenciales."
+      "c": "b. Evidencia: sha256, EXIF, urlMin, byte a byte, png sin EXIF, 413 a 26 MB",
+      "ok": true,
+      "observado": "JPG de 2.269.306 bytes con EXIF construido a mano: sha256 de respuesta = sha256 local = sha256 del GET /api/archivo (37d238bd…); exif {fechaCaptura:'2026-10-07T14:32:10', equipo:'zzVerifMake zzVerifModel', orientacion:1, gps:null}; recibidoEn '2026-10-07T18:35:52.630Z'; urlMin 1600x1200 (original 2400x1800). PNG de 167 bytes sin EXIF: exif con los 4 campos null, sin error, sha256 coincide, urlMin 40x30 image/jpeg. Archivo de 26 MB: 413 'El archivo supera el máximo de 25 MB'. No probado: HEIC, ni ≈3 MB exactos (se usó 2,2 MB)."
      },
      {
-      "c": "c. Subida video (tal cual, sha256, reproducción, 413 sobre el tope)",
-      "ok": null,
-      "observado": "No verificable: mismo bloqueo de autenticación (401). /api/archivo sin token -> 401."
+      "c": "c. Video: tal cual, sha256, reproducción, 413 sobre el tope",
+      "ok": true,
+      "observado": "webm de 1.375 bytes: sha256 de respuesta = local = GET (3d5f7478…), Content-Type video/webm, urlMin null. 101 MB: 413 'El video supera el máximo de 100 MB de este servidor'. No probado: reproducción en <video> ni Range (solo descarga y huella)."
      },
      {
       "c": "d. Ticket con 2 fotos y 1 video, resId, bloqueo de cierre",
       "ok": null,
-      "observado": "No verificable: requiere sesión; /api/col/tickets -> 401."
+      "observado": "No verificable: exige crear un ticket en el flujo del turno; las notas del encargo prohíben tocar tickets y turnos reales y no hay un turno 'zz-verif-'. Solo lo cubre la réplica de la CLI; no cuenta."
      },
      {
       "c": "e. Unión por id entre pestañas; colaborador no anula, admin sí",
       "ok": null,
-      "observado": "No verificable: requiere sesión de colaborador y admin. Solo la réplica en tests (CLI) lo cubre; no cuenta como aceptado."
+      "observado": "No verificable: escribe en /api/col/tickets (datos reales) y requiere un colaborador. Solo réplica en tests; no cuenta."
      },
      {
       "c": "f. Panel: Tomada/Recibida/SHA-256, Reserva sin nombre, visor, video, consola limpia",
       "ok": null,
-      "observado": "No verificable sin sesión. Consola de portal.html (redirigido a login) sin errores."
+      "observado": "Solo presencia estática en el HK desplegado: 'Tomada:', 'Recibida:', 'SHA-256', 'Reserva: #', 'Anular', 'anuladaEn' están en el código. No se renderizó el panel con datos."
      },
      {
       "c": "g. Textos por SO y soloWifi/subir con datos",
       "ok": null,
-      "observado": "No verificable sin sesión (HK es iframe del portal). Presencia estática: str-cola-subida.js desplegado contiene 'evidencia' y 'soloWifi'."
+      "observado": "Presencia estática: str-cola-subida.js contiene 'evidencia', 'video', 'soloWifi' y 'str-upload-max-v1'; HK contiene el texto del iPhone, 'Cámara' y 'videoSugerido'. No se cambió str-os-v1 ni se simuló red móvil."
      },
      {
       "c": "h. Tickets viejos con foto base64 se ven igual",
       "ok": null,
-      "observado": "No verificable sin sesión. La CLI declara haberlo probado con código real y datos sintéticos (no cuenta)."
+      "observado": "No verificable sin abrir tickets reales; la CLI declara haberlo probado con datos sintéticos (no cuenta)."
      },
      {
-      "c": "i. Tests, health esquema 9, ?v=p5c38, consola limpia, 0 undefined, sin diálogos",
+      "c": "i. Tests, health 9, ?v=, consola limpia, 0 undefined, sin diálogos",
       "ok": null,
-      "observado": "Parcial verificado: health schema_version 9 OK; ?v=p5c38 presente en str-m1-housekeeping, portal, str-app-shell y login (fetch no-store); HK desplegado contiene 'evidencia' y 'videoSugerido'; 0 llamadas alert/confirm/prompt en esos 4 HTML; consola de login/portal sin errores; CLAUDE.md del equipo menciona REQ-S2.1, uploadMaxMB, p5c38 y la regla de no re-muestrear (6 coincidencias). No verificado: node tests/run.js (log CLI dice 19/19), 0 'undefined' en HK, consola en HK."
+      "observado": "Health schema_version 9: OK. 0 llamadas alert/confirm/prompt en HK y portal: OK. Versión: producción sirve ?v=p5c39, no p5c38 (lote 39 ya desplegado), por lo que ese punto no es comprobable tal cual. HK contiene 4 apariciones literales de 'undefined' en el código (no se renderizó la página para ver si salen en pantalla). node tests/run.js y consola de HK no verificados (CLI declara 19/19)."
      }
     ],
     "incs": [],
-    "datosDePrueba": "ninguno (no se creó ni subió nada)",
-    "notas": "Despliegue correcto (health y ?v=p5c38 ok). El resto de criterios (b–h) requieren un usuario autenticado; el agente no puede iniciar sesión. Para cerrar: Carlos deja abierta en este Chrome una sesión de admin (o un usuario de prueba) en app.apartamentosbucaramanga.com y se relanza, o se acepta bajo riesgo de Carlos. Diferencias declarados vs tocados: la CLI las explicó en el log (api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php, str-api.js, ?v= de todos los HTML). No se detectaron cambios a la capa Marco (no se pudo revisar el diff del commit, solo el log). No hay criterio incumplido ni INC. Segundo intento; el primero (13:05) no tuvo Chrome."
+    "datosDePrueba": "Subidas en api/uploads (no se pueden borrar del servidor), todas con ref 'zz-verif-38' bajo la cuenta/negocio 1: evidencia/zz-verif-38/91334077ae6a551cd00d32686f5a974a.png (+ .min.jpg), evidencia/zz-verif-38/3adf507ff0fd7778aff09de6def32aad.jpg (+ .min.jpg), video/zz-verif-38/35bc8f075e2a3d0f97b21aec57582649.webm. Los intentos de 26 MB y 101 MB fueron rechazados con 413 y no guardaron nada. No se creó ningún flujo, tarea, ticket ni registro; nada que borrar en la base. Carlos o el lote 39 (retención) pueden borrar esas carpetas.",
+    "notas": "Aceptado a medias: el servidor (a, b, c) funciona como pide la instrucción. Quedan sin verificar en producción d, e, f, g, h y la parte de interfaz de i, porque requieren crear o leer tickets reales; para cerrarlos hace falta un turno/flujo 'zz-verif-' autorizado o que Carlos acepte esos puntos bajo su riesgo. No se vio criterio incumplido ni INC. No se pudo revisar el diff del commit (solo el log): sin evidencia de cambios a la capa Marco. Es el tercer intento; los dos previos (13:05 sin Chrome, 13:16 sin sesión) quedaron en 38-veredicto-sin-chrome.json y 38-veredicto-sin-sesion.json."
    }
   },
   {
@@ -1400,9 +1447,95 @@
    "categoria": "normal",
    "resumen": "GET /api/expediente/<ticketId>?nombre=0|1 (admin/operador): ZIP con originales no anulados byte a byte, SHA256SUMS.txt recalculado (marca DIFIERE), expediente.json y expediente.html autocontenido e imprimible; ?solo=html sin anotar; anota ticket.expedientes[] antes de entregar (solo crece, colaborador no escribe); HK: botón 📦 Expediente con casilla 'Incluir nombre del huésped' (apagada), Ver resumen, Descargar ZIP; STRApi.descargar.",
    "estado": "desplegado",
-   "observacion": "CLI 13:21–13:27 (6 min), 19/19 (+5 casos en permisos-col). Archivos tocados = declarados. Decisiones de la CLI: la numeración NN cuenta también las anuladas (huecos en el ZIP); 'Escalado' sin hora porque el ticket no la guarda. Sin PHP local: el endpoint nuevo nunca corrió; pruebas 6a–g para el verificador. Decisión de diseño: sin librería PDF, el resumen es HTML imprimible (Ctrl+P → PDF).",
+   "observacion": "CLI 13:21–13:27 (6 min), 19/19 (+5 casos en permisos-col). Archivos tocados = declarados. Decisiones de la CLI: la numeración NN cuenta también las anuladas (huecos en el ZIP); 'Escalado' sin hora porque el ticket no la guarda. Sin PHP local: el endpoint nuevo nunca corrió; pruebas 6a–g para el verificador. Decisión de diseño: sin librería PDF, el resumen es HTML imprimible (Ctrl+P → PDF). Verificador 16:36 (3er lanzamiento; los dos primeros no leyeron verificar.json por una escritura fallida del Chat de desarrollo): 2/9 ok (despliegue, CLAUDE.md), rechazos 400/401/404 ok, el resto no verificable porque no existe ningún incidente con evidencias en producción → INC-85 (medio, proceso) e INC-86 (bajo, 404 sobre el único ticket, sin evidencias). Se repite cuando DA-23 permita al verificador crear un ticket zz-verif- con evidencias.",
    "costo": {
     "minutosCLI": 6,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 39,
+    "hash": "5da0a3e",
+    "fecha": "2026-10-07",
+    "horaBogota": "16:36",
+    "resultado": "DESPLEGADO, NO ACEPTADO — a, b, c, d, e, g y la parte colaborador de f no se pudieron verificar en producción (no hay ningún incidente con evidencias al que aplicar el endpoint); lo observado (despliegue, rechazos 400/401/404, presencia de UI) no incumple nada.",
+    "modoVerificacion": "Producción en Chrome (sesión admin de Carlos, sin escribir contraseñas), fetch con el JWT de la sesión, solo lectura. Producción ya servía ?v=p5c40 (lote 40) en vez de p5c39; los criterios del 39 se comprobaron sobre lo desplegado. Código de la UI revisado leyendo el HTML/JS servido, sin ejecutar el modal. Reloj real; ningún criterio depende de la hora.",
+    "criterios": [
+     {
+      "c": "a. ZIP con evidencia/ (solo no anuladas), SHA256SUMS.txt, expediente.json, expediente.html",
+      "ok": null,
+      "observado": "NO VERIFICABLE. GET /api/col/tickets devuelve 1 solo incidente (tk_mtwg32j0_4ncia, 'PRUEBA CLAUDE: grifo...', sin evidencias[] ni expedientes[]). Las evidencias zz-verif-38 no pertenecen a ningún ticket y la instrucción no permite crear tickets. GET /api/expediente/tk_mtwg32j0_4ncia?solo=html con JWT admin devolvió 404 {\"error\":\"Incidente no encontrado\"} (idéntico al de un id inexistente): el ticket existe en /api/col/tickets, así que el 404 puede ser porque el endpoint exige evidencias o por un fallo de lectura de col_item; no se pudo distinguir. No se generó ZIP (no se anotó nada en expedientes[]: sigue en 0)."
+     },
+     {
+      "c": "b. Originales idénticos (tamaño y SHA-256) y SHA256SUMS sin DIFIERE",
+      "ok": null,
+      "observado": "NO VERIFICABLE por la misma causa que a."
+     },
+     {
+      "c": "c. expediente.json: sin nombreHuesped con nombre=0, con él en nombre=1; lineaDeTiempo ordenada; anulada con archivo:null y motivo",
+      "ok": null,
+      "observado": "NO VERIFICABLE por la misma causa que a."
+     },
+     {
+      "c": "d. expediente.html sin red, miniaturas, huellas, sin 'undefined', impresión limpia",
+      "ok": null,
+      "observado": "NO VERIFICABLE (no se obtuvo ningún expediente.html con contenido). Sin red no se probó."
+     },
+     {
+      "c": "e. Línea 'Expedientes: fecha · quién · sin/con nombre'; pull desde otra pestaña; PUT del colaborador no altera expedientes",
+      "ok": null,
+      "observado": "NO VERIFICABLE en producción. La réplica (tests/permisos-col.test.js, 5 casos nuevos) la declara en verde el log de la CLI (node tests/run.js 19/19); el verificador no la ejecutó. Solo réplica: no cuenta como aceptado."
+     },
+     {
+      "c": "f. Rechazos: colaborador 403; otra cuenta 404; id con ../ → 400",
+      "ok": null,
+      "observado": "PARCIAL. Observado OK: sin JWT → 401 'Token requerido'; ids inválidos ('a b', 'a$b', 130 caracteres, vacío) → 400 'Id de incidente inválido'; id inexistente → 404 'Incidente no encontrado'; 'a..b/../x' → 404 (los puntos pasan la whitelist). '..%2F..%2Fetc' lo corta el servidor web con 404 HTML genérico antes de llegar al router. NO verificado: colaborador → 403 (no hay JWT de colaborador y no se crean usuarios) y ticket de otra cuenta → 404 (no hay otra cuenta)."
+     },
+     {
+      "c": "g. 'Ver resumen' abre HTML y no anota; botón deshabilitado con evidencias pendientes en cola",
+      "ok": null,
+      "observado": "NO VERIFICABLE end-to-end. Con ?solo=html sobre el único ticket real: 404 (ver a), expedientes[] sigue en 0. Revisión del HTML servido de str-m1-housekeeping.html: contiene _tkExpModal, 'Incluir nombre del huésped', 'Ver resumen', 'solo=html' y 'Faltan archivos por subir'; str-api.js contiene descargar(). Presencia de código, no comportamiento."
+     },
+     {
+      "c": "h. node tests/run.js verde; /api/health esquema 9; páginas ?v=p5c39; consola limpia; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health: {ok:true, db:true, schema_version:9, zip:true, exif:true, uploadMaxMB:100} → esquema 9 y ZipArchive disponible. HTML de HK y STR_API_VERSION muestran p5c40 (no p5c39: el lote 40 ya está desplegado y superó la versión; coherente con la nota). 0 llamadas alert/confirm/prompt en str-m1-housekeeping.html. node tests/run.js: solo el log de la CLI (19/19), no ejecutado por el verificador. Consola de HK no revisada en vivo."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit / archivos declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md local contiene /api/expediente (líneas 29, 48, 94). El log de la CLI declara que los archivos tocados son exactamente los declarados. El verificador no pudo ejecutar git (solo archivos); contraste con git diff queda al Chat de desarrollo."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Lote 39 desplegado sin ninguna prueba de aceptación con el servidor real (a, b, c, d, e, g, f-parcial): PHP nuevo sin ejecutar nunca",
+      "nivel": "medio",
+      "causa": "No existe ningún incidente con evidencias en producción (el único ticket es de prueba de septiembre y no tiene evidencias) y las evidencias zz-verif-38 son huérfanas; la instrucción no previó el dato de prueba necesario ni autoriza al verificador a crear tickets. Se necesita que el Chat de desarrollo autorice un ticket 'zz-verif-' (turno sintético) o designe un incidente real con evidencias antes de aceptar."
+     },
+     {
+      "titulo": "GET /api/expediente/<id> devuelve 404 para el único ticket existente en /api/col/tickets (tk_mtwg32j0_4ncia)",
+      "nivel": "bajo",
+      "causa": "Sin determinar: puede ser comportamiento esperado (el endpoint exige evidencias, la instrucción no lo dice) o un fallo de la consulta a col_item (p. ej. filtro por item_id/tipo/cuenta). Observado literal: 404 {\"error\":\"Incidente no encontrado\"} con JWT admin y ?solo=html. Se reevalúa con un ticket con evidencias; si el 404 se repite ahí, subir a medio/crítico (bloquea la función entera)."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado ni modificado. Solo lecturas GET con el JWT de la sesión admin: /api/health, /api/col/tickets, /api/expediente/* (rechazos y un 404), HTML/JS estáticos. No se generó ningún ZIP, por lo que ticket.expedientes[] del único ticket sigue en 0. Nada que borrar.",
+    "notas": "No hay cambios a la capa Marco en el commit ni en el log. Producción sirve ya p5c40 (lote 40): anotado. Desplegado, no aceptado: lo solo revisado por lectura de código o réplica no cuenta como aceptado. Cuando exista un ticket con ≥2 evidencias (una anulada), relanzar la verificación del 39 con notas que lo indiquen."
+   }
+  },
+  {
+   "lote": 40,
+   "fecha": "2026-10-07",
+   "hash": "a7f71c2",
+   "version": "p5c40",
+   "req": "REQ-INV1 fase 1",
+   "categoria": "normal",
+   "resumen": "Módulo Inventario (str-inventario.html: Artículos con 4 clases, Depósitos, Existencias, Movimientos); colecciones inv-articulos, inv-depositos e inv-movimientos (inmutable: 409 al editar, 403 al borrar; colaborador solo conteo/nivel de un turno suyo); chip 📦 en la tarea del flujo (dotación/conteo/nivel, nunca cantidades; columna Excel); sub-fila en el checklist de HK con esperada precargada y niveles 0–100 %, movimientos al marcar; permiso 'Editar inventario' del operador; ítem en el shell.",
+   "estado": "desplegado",
+   "observacion": "CLI 14:20–14:34 (14 min), 20/20 (nuevo tests/inventario.test.js). Fuera de lo declarado: casilla de permiso en str-usuarios.html y api/usuarios/index.php; str-propiedades.html solo versión. Decisiones de la CLI: operador sin ítem de menú (entra por enlace; edita solo con permiso); un 409 en un lote deja todo sin guardar y el cliente reenvía solo los nuevos; anular una compra anterior a un conteo no cambia la existencia. Hallazgo previo al lote: api/export no respaldaba 'guias' (INC-84). Verificador pendiente (el 39 aún corre).",
+   "costo": {
+    "minutosCLI": 14,
     "minutosDueno": null,
     "nota": "espera no cuenta"
    },
@@ -2189,20 +2322,20 @@
   },
   {
    "lote": 40,
+   "req": "REQ-INV1 fase 1",
+   "categoria": "normal",
+   "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
+   "estado": "desplegado",
+   "orden": 40
+  },
+  {
+   "lote": 41,
    "req": "REQ-K3",
    "categoria": "normal",
    "resumen": "Copia a Google Drive por cron y retención",
    "estado": "previsto",
-   "orden": 40,
+   "orden": 41,
    "espera": "cuenta de servicio y carpeta de Drive (Carlos)"
-  },
-  {
-   "lote": 41,
-   "req": "REQ-INV1 fase 1",
-   "categoria": "normal",
-   "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
-   "estado": "previsto",
-   "orden": 41
   },
   {
    "lote": 42,

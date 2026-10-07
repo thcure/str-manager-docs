@@ -996,7 +996,7 @@
    "vigenciaDesde": "2026-10-06",
    "sombrero": "agente-verificador",
    "encargo": "rol-verificador",
-   "notas": "Recreada el 2026-10-06 en LENOVO (sucede a tarea-agente-verificador-asus). Cómo se lanza: el Chat de desarrollo, desde una sesión enlazada al mismo equipo, escribe el número de lote en la línea 'LOTE A VERIFICAR EN ESTA EJECUCIÓN: NN = …' del texto de la tarea (queda firmado para el equipo) y la lanza sin mensaje adicional; un mensaje adicional no va firmado y la ejecución cae a la nube sin acceso al equipo. Escribe solo log\\NN-veredicto.json, que el Chat de desarrollo copia sin cambios a cambios[].aceptacion. Probada con el lote 27 en modo prueba (log\\27-veredicto-prueba.json, 2026-10-06 17:12). Pendiente P-1: conserva conectores Gmail/Drive/Calendar/Claude Docs, prohibidos en sus instrucciones; la creación no permite quitarlos."
+   "notas": "Recreada el 2026-10-06 en LENOVO (sucede a tarea-agente-verificador-asus). Cómo se lanza (desde el 2026-10-07): texto fijo, firmado para el equipo; el Chat de desarrollo escribe log\\verificar.json con el lote y la lanza sin mensaje adicional (un mensaje adicional no va firmado y la ejecución cae a la nube). Así no pide la aprobación de Carlos por lote. Escribe solo log\\NN-veredicto.json, que el Chat de desarrollo copia sin cambios a cambios[].aceptacion. Probada con el lote 27 en modo prueba (log\\27-veredicto-prueba.json, 2026-10-06 17:12). Pendiente P-1: conserva conectores Gmail/Drive/Calendar/Claude Docs, prohibidos en sus instrucciones; la creación no permite quitarlos."
   },
   {
    "id": "tarea-agente-verificador-asus",
@@ -1687,6 +1687,41 @@
    ],
    "vigenciaDesde": "2026-10-06",
    "notas": "Pedido por Carlos el 6-oct-2026: los mensajes entre chats y agentes se escriben aquí y Carlos solo dice 'revisa el buzón'. Quien envía crea el mensaje; quien recibe solo cambia estado y respuesta. Lo que pide decisión de Carlos sigue yendo a seguimiento.json (DA-n, pedidos). Los agentes verificador y CLI no lo leen."
+  },
+  {
+   "id": "json-verificar",
+   "nombre": "Lote a verificar (log\\verificar.json)",
+   "tipo": "json",
+   "capa": "operacion",
+   "cobit": [
+    "BAI07.05",
+    "BAI06.03"
+   ],
+   "sdlc": [
+    "pruebas"
+   ],
+   "pmi": [
+    "monitoreo"
+   ],
+   "rol": "GCa",
+   "usa": [
+    "IP"
+   ],
+   "vive": "C:\\Users\\ktcol\\Downloads\\str-instr-cola\\log\\verificar.json (equipo activo)",
+   "estado": "vigente",
+   "entrada_de": [
+    "BAI06"
+   ],
+   "salida_a": [
+    "BAI07"
+   ],
+   "relacion": [
+    "tarea-agente-verificador",
+    "cola-str-instr",
+    "doc-log-lote"
+   ],
+   "vigenciaDesde": "2026-10-07",
+   "notas": "Lo escribe solo el Chat de desarrollo, uno por lote, antes de lanzar el Agente verificador: {lote, prueba, instruccion, commit, version, archivoVeredicto, notas, escritoPor, fecha}. El verificador solo lo lee. Las notas solo restringen; nunca amplían el encargo rol-verificador."
   }
  ]
 }

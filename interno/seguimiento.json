@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-07T17:35:00Z",
+ "actualizadoEn": "2026-10-07T18:40:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -735,7 +735,7 @@
    "etapa": "📝",
    "fecha": "2026-10-07",
    "titulo": "Evidencia de incidente: fotos originales desde la galería (EXIF, SHA-256, hora del servidor, dos fechas), videos ≤60 s ≤2 solo wifi, ligadas a la reserva; expediente exportable; ticket.foto deja el base64.",
-   "pendiente": "Lote 38 (normal; expediente con datos del huésped: revisar categoría).",
+   "pendiente": "Lote 38 desplegado (b78799c, p5c38) y lote 39 expediente desplegado (5da0a3e, p5c39); verificación en producción pendiente (Chrome con sesión).",
    "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
   },
   {
@@ -1315,6 +1315,98 @@
     "notas": "Ejecución de prueba sobre un lote ya aceptado. La descarga del respaldo no se probó, como indica la instrucción. INC-81 (gmdate en el servidor) queda fuera del alcance. No leí patrones-codigo.md ni el REQ del proyecto."
    },
    "comparacionVerificador": "Mismo veredicto que el chat (aceptado, 0 INC, reloj real de noche). Diferencias de cobertura, no de resultado: el revisor probó en producción el criterio a (el chat lo tomó de la CLI) y separó 'tests 18/18' como solo réplica (ok:null); verificó además CLAUDE.md y el iframe del shell, que el chat no revisó; no leyó patrones-codigo.md ni el REQ (sin acceso al proyecto)."
+  },
+  {
+   "lote": 38,
+   "fecha": "2026-10-07",
+   "hash": "b78799c",
+   "version": "p5c38",
+   "req": "REQ-S2.1",
+   "categoria": "normal",
+   "resumen": "Evidencia de incidente: /api/upload tipo evidencia (original tal cual + copia 1600 px, SHA-256, EXIF) y video (≤ min(100 MB, ini), solo wifi por defecto); /api/archivo sirve video con rangos; health exif/zip/uploadMaxMB; ticket.resId + evidencias[] (solo crece, anular con motivo admin/operador); modal con galería sin capture, textos por OS, hasta 20 fotos y 2 videos ≤60 s; cierre bloqueado con pendientes; panel Tomada/Recibida/SHA-256 y 'Reserva: #código'.",
+   "estado": "desplegado",
+   "observacion": "CLI 12:22–12:36 (14 min), 19/19. Diferencias declaradas: api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php (nuevos), str-api.js; corrección de paso: el ticket se firmaba con el primer usuario de la lista, ahora con la sesión real. Límites: el bloqueo de cierre solo ve la cola de ese teléfono; en iPhone no se detecta red móvil. Verificador: 1ª ejecución 13:05 sin Chrome (Carlos cerró el navegador; log\\38-veredicto-sin-chrome.json, nada verificado); 2ª 13:16 con el procedimiento nuevo (verificar.json, sin tarjeta, corrió en LENOVO) pero Chrome sin sesión iniciada: a e i-parcial ok, b–h no verificables. Pendiente: Carlos deja sesión abierta y se relanza.",
+   "costo": {
+    "minutosCLI": 14,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 38,
+    "hash": "b78799c",
+    "fecha": "2026-10-07",
+    "horaBogota": "13:16",
+    "resultado": "no aceptado (desplegado; verificación parcial, sin criterio incumplido)",
+    "modoVerificacion": "Chrome conectado en producción (app.apartamentosbucaramanga.com), sin sesión iniciada: no se puede escribir contraseñas (prohibido) y no hay sesión previa en ese Chrome. No depende de la hora (reloj real). Sin datos de prueba creados.",
+    "criterios": [
+     {
+      "c": "a. /api/health reporta exif, zip, uploadMaxMB",
+      "ok": true,
+      "observado": "{\"ok\":true,\"db\":true,\"schema_version\":9,\"secrets\":true,\"gd\":true,\"exif\":true,\"zip\":true,\"uploadMaxMB\":100}"
+     },
+     {
+      "c": "b. Subida evidencia (sha256, EXIF, urlMin, byte a byte, png sin EXIF, 413 a 26 MB)",
+      "ok": null,
+      "observado": "No verificable: /api/upload exige JWT (POST sin token -> 401 {\"error\":\"Token requerido\"}); Chrome sin sesión y no se ingresan credenciales."
+     },
+     {
+      "c": "c. Subida video (tal cual, sha256, reproducción, 413 sobre el tope)",
+      "ok": null,
+      "observado": "No verificable: mismo bloqueo de autenticación (401). /api/archivo sin token -> 401."
+     },
+     {
+      "c": "d. Ticket con 2 fotos y 1 video, resId, bloqueo de cierre",
+      "ok": null,
+      "observado": "No verificable: requiere sesión; /api/col/tickets -> 401."
+     },
+     {
+      "c": "e. Unión por id entre pestañas; colaborador no anula, admin sí",
+      "ok": null,
+      "observado": "No verificable: requiere sesión de colaborador y admin. Solo la réplica en tests (CLI) lo cubre; no cuenta como aceptado."
+     },
+     {
+      "c": "f. Panel: Tomada/Recibida/SHA-256, Reserva sin nombre, visor, video, consola limpia",
+      "ok": null,
+      "observado": "No verificable sin sesión. Consola de portal.html (redirigido a login) sin errores."
+     },
+     {
+      "c": "g. Textos por SO y soloWifi/subir con datos",
+      "ok": null,
+      "observado": "No verificable sin sesión (HK es iframe del portal). Presencia estática: str-cola-subida.js desplegado contiene 'evidencia' y 'soloWifi'."
+     },
+     {
+      "c": "h. Tickets viejos con foto base64 se ven igual",
+      "ok": null,
+      "observado": "No verificable sin sesión. La CLI declara haberlo probado con código real y datos sintéticos (no cuenta)."
+     },
+     {
+      "c": "i. Tests, health esquema 9, ?v=p5c38, consola limpia, 0 undefined, sin diálogos",
+      "ok": null,
+      "observado": "Parcial verificado: health schema_version 9 OK; ?v=p5c38 presente en str-m1-housekeeping, portal, str-app-shell y login (fetch no-store); HK desplegado contiene 'evidencia' y 'videoSugerido'; 0 llamadas alert/confirm/prompt en esos 4 HTML; consola de login/portal sin errores; CLAUDE.md del equipo menciona REQ-S2.1, uploadMaxMB, p5c38 y la regla de no re-muestrear (6 coincidencias). No verificado: node tests/run.js (log CLI dice 19/19), 0 'undefined' en HK, consola en HK."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "ninguno (no se creó ni subió nada)",
+    "notas": "Despliegue correcto (health y ?v=p5c38 ok). El resto de criterios (b–h) requieren un usuario autenticado; el agente no puede iniciar sesión. Para cerrar: Carlos deja abierta en este Chrome una sesión de admin (o un usuario de prueba) en app.apartamentosbucaramanga.com y se relanza, o se acepta bajo riesgo de Carlos. Diferencias declarados vs tocados: la CLI las explicó en el log (api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php, str-api.js, ?v= de todos los HTML). No se detectaron cambios a la capa Marco (no se pudo revisar el diff del commit, solo el log). No hay criterio incumplido ni INC. Segundo intento; el primero (13:05) no tuvo Chrome."
+   }
+  },
+  {
+   "lote": 39,
+   "fecha": "2026-10-07",
+   "hash": "5da0a3e",
+   "version": "p5c39",
+   "req": "REQ-S2.1 (b) expediente",
+   "categoria": "normal",
+   "resumen": "GET /api/expediente/<ticketId>?nombre=0|1 (admin/operador): ZIP con originales no anulados byte a byte, SHA256SUMS.txt recalculado (marca DIFIERE), expediente.json y expediente.html autocontenido e imprimible; ?solo=html sin anotar; anota ticket.expedientes[] antes de entregar (solo crece, colaborador no escribe); HK: botón 📦 Expediente con casilla 'Incluir nombre del huésped' (apagada), Ver resumen, Descargar ZIP; STRApi.descargar.",
+   "estado": "desplegado",
+   "observacion": "CLI 13:21–13:27 (6 min), 19/19 (+5 casos en permisos-col). Archivos tocados = declarados. Decisiones de la CLI: la numeración NN cuenta también las anuladas (huecos en el ZIP); 'Escalado' sin hora porque el ticket no la guarda. Sin PHP local: el endpoint nuevo nunca corrió; pruebas 6a–g para el verificador. Decisión de diseño: sin librería PDF, el resumen es HTML imprimible (Ctrl+P → PDF).",
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null
   },
   {
    "lote": null,
@@ -2041,43 +2133,51 @@
    "lote": 38,
    "req": "REQ-S2.1",
    "categoria": "normal",
-   "resumen": "Evidencia de incidente: originales, EXIF, huella, videos, expediente",
-   "estado": "previsto",
+   "resumen": "Evidencia de incidente: originales, EXIF, huella, videos",
+   "estado": "desplegado",
    "orden": 38
   },
   {
    "lote": 39,
+   "req": "REQ-S2.1 (b)",
+   "categoria": "normal",
+   "resumen": "Expediente del incidente: ZIP con originales, SHA256SUMS, JSON y resumen HTML imprimible; nombre del huésped solo con casilla",
+   "estado": "desplegado",
+   "orden": 39
+  },
+  {
+   "lote": 40,
    "req": "REQ-K3",
    "categoria": "normal",
    "resumen": "Copia a Google Drive por cron y retención",
    "estado": "previsto",
-   "orden": 39,
+   "orden": 40,
    "espera": "cuenta de servicio y carpeta de Drive (Carlos)"
   },
   {
-   "lote": 40,
+   "lote": 41,
    "req": "REQ-INV1 fase 1",
    "categoria": "normal",
    "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
    "estado": "previsto",
-   "orden": 40
+   "orden": 41
   },
   {
-   "lote": 41,
+   "lote": 42,
    "req": "REQ-INV1 fase 2",
    "categoria": "normal",
    "resumen": "Dotación, umbrales con tope, qué llevar, circuito de la ropa, activos + ticket por reserva, lista de compra",
    "estado": "previsto",
-   "orden": 41,
+   "orden": 42,
    "espera": "DA-22"
   },
   {
-   "lote": 42,
+   "lote": 43,
    "req": "REQ-INV1 fase 3",
    "categoria": "crítico",
    "resumen": "Compra ligada a adelanto/factura (B2), cargo por daño, auditoría, permisos inventario.*",
    "estado": "previsto",
-   "orden": 42,
+   "orden": 43,
    "espera": "cruce previo con Carlos; DA-12"
   }
  ],

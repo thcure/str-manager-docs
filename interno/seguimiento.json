@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T16:30:00Z",
+ "actualizadoEn": "2026-10-08T17:10:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1023,7 +1023,7 @@
    "etapa": "✔",
    "fecha": "2026-10-07",
    "titulo": "Decisión de Carlos (20:02): se autoriza un usuario colaborador de prueba 'zz-verif-colab' para que el Agente verificador cubra los criterios 'como colaborador' (403, botón ausente, PUT que no altera campos protegidos, cola en su teléfono). Carlos no hace pruebas: acepta el verificador.",
-   "pendiente": "8-oct: Carlos creó el usuario colaborador 'zz-verif-colab' y lo asignó (a zz-verif-Propiedad). M-12 al Arquitecto: publicar en el encargo rol-verificador cómo lo usa (sesión abierta por Carlos en Chrome, sin que el verificador escriba contraseñas); después copio el texto a la tarea (un clic de Carlos) y relanzo 38-3/39-3/40-2. Sesión del colaborador abierta por Carlos en el perfil de Chrome 'valeriaramos.xyz' (comprobado 23:10; admin sigue en su perfil). Mientras, esos criterios siguen 'no verificables'. 22:58: el verificador abrió el portal de zz-verif-colab en el segundo perfil (lectura) — el mecanismo funciona. 23:20: 38-3 falló: con dos Chrome conectados, la extensión pide elegir navegador y en ejecución programada nadie responde (M-15). Lección 8-oct: con dos perfiles conectados la tarea programada no puede elegir navegador (38-3 y 42 fallaron; 42-2 con uno solo pasó). Regla: el perfil del colaborador tiene la extensión desactivada salvo en sus pruebas, que se lanzan con Carlos presente.",
+   "pendiente": "8-oct: Carlos creó el usuario colaborador 'zz-verif-colab' y lo asignó (a zz-verif-Propiedad). M-12 al Arquitecto: publicar en el encargo rol-verificador cómo lo usa (sesión abierta por Carlos en Chrome, sin que el verificador escriba contraseñas); después copio el texto a la tarea (un clic de Carlos) y relanzo 38-3/39-3/40-2. Sesión del colaborador abierta por Carlos en el perfil de Chrome 'valeriaramos.xyz' (comprobado 23:10; admin sigue en su perfil). Mientras, esos criterios siguen 'no verificables'. 22:58: el verificador abrió el portal de zz-verif-colab en el segundo perfil (lectura) — el mecanismo funciona. 23:20: 38-3 falló: con dos Chrome conectados, la extensión pide elegir navegador y en ejecución programada nadie responde (M-15). Lección 8-oct: con dos perfiles conectados la tarea programada no puede elegir navegador (38-3 y 42 fallaron; 42-2 con uno solo pasó). Regla: el perfil del colaborador tiene la extensión desactivada salvo en sus pruebas, que se lanzan con Carlos presente. 8-oct: Carlos creó el usuario operador de prueba zz-verif-oper (para el criterio f del lote 40); se usará en un tercer perfil de Chrome.",
    "estado": "decidido",
    "origen": "Chat de desarrollo, 7-oct 20:02."
   },
@@ -1120,6 +1120,18 @@
    "pendiente": "Carlos crea la cuenta dedicada (correo en Hostinger o Gmail) y luego configuramos juntos el proyecto de Google Cloud (~15 min). Después: instrucción crítica con cruce previo con Carlos.",
    "estado": "propuesto",
    "origen": "Chat de desarrollo con Carlos, 8-oct."
+  },
+  {
+   "id": "INC-92",
+   "tipo": "INC",
+   "modulo": "HK / portal colaborador",
+   "etapa": "📝",
+   "fecha": "2026-10-08",
+   "severidad": "bajo",
+   "titulo": "Al marcar una tarea en un turno manual creado por admin y asignado a zz-verif-colab (titular), el portal muestra el toast rojo 'No puedes modificar un turno que no es tuyo', aunque la tarea queda marcada, el turno pasa a 'En curso' y los movimientos de inventario suben. Causa sin confirmar: el servidor rechaza alguna escritura del turno (probable hk:turnos) porque el turno manual no trae la asignación en el formato que valida INC-63.",
+   "pendiente": "Investigar con el log del servidor; fix estándar después del 44.",
+   "estado": "abierto",
+   "origen": "Veredicto 40-5 (12:50)."
   }
  ],
  "cambios": [
@@ -1891,7 +1903,7 @@
    "categoria": "normal",
    "resumen": "Módulo Inventario (str-inventario.html: Artículos con 4 clases, Depósitos, Existencias, Movimientos); colecciones inv-articulos, inv-depositos e inv-movimientos (inmutable: 409 al editar, 403 al borrar; colaborador solo conteo/nivel de un turno suyo); chip 📦 en la tarea del flujo (dotación/conteo/nivel, nunca cantidades; columna Excel); sub-fila en el checklist de HK con esperada precargada y niveles 0–100 %, movimientos al marcar; permiso 'Editar inventario' del operador; ítem en el shell.",
    "estado": "verificado",
-   "observacion": "CLI 14:20–14:34 (14 min), 20/20 (nuevo tests/inventario.test.js). Fuera de lo declarado: casilla de permiso en str-usuarios.html y api/usuarios/index.php; str-propiedades.html solo versión. Decisiones de la CLI: operador sin ítem de menú (entra por enlace; edita solo con permiso); un 409 en un lote deja todo sin guardar y el cliente reenvía solo los nuevos; anular una compra anterior a un conteo no cambia la existencia. Hallazgo previo al lote: api/export no respaldaba 'guias' (INC-84). Verificador pendiente (el 39 aún corre). Verificador 19:38 (con artículos, depósitos, flujo y turno zz-verif- creados por la interfaz): a, b, c, g, h ok; d cumple salvo un punto → INC-88 (bajo: el campo de unidad no muestra el 0 precargado); e, f y Node no verificables (sin usuario colaborador/operador de prueba → DA-24). Resultado 'no aceptado' por el INC-88 (criterio 'Detener'); fix estándar y repetir d. Deudas DT-30: '⏳ sin subir' persiste hasta recargar; el depósito principal no se puede desactivar ni reemplazar (queda 'zz-verif-Principal' como principal activo: Carlos lo renombra al empezar con datos reales o se permite reemplazarlo); sub-fila probada por funciones, no por fila renderizada; chip 📦 probado en hoja. 20:50: INC-88 cerrado con el 41-veredicto-2 (criterio d resuelto). Quedan e y f ('como colaborador/operador') a la espera de DA-24; el resto verificado.",
+   "observacion": "CLI 14:20–14:34 (14 min), 20/20 (nuevo tests/inventario.test.js). Fuera de lo declarado: casilla de permiso en str-usuarios.html y api/usuarios/index.php; str-propiedades.html solo versión. Decisiones de la CLI: operador sin ítem de menú (entra por enlace; edita solo con permiso); un 409 en un lote deja todo sin guardar y el cliente reenvía solo los nuevos; anular una compra anterior a un conteo no cambia la existencia. Hallazgo previo al lote: api/export no respaldaba 'guias' (INC-84). Verificador pendiente (el 39 aún corre). Verificador 19:38 (con artículos, depósitos, flujo y turno zz-verif- creados por la interfaz): a, b, c, g, h ok; d cumple salvo un punto → INC-88 (bajo: el campo de unidad no muestra el 0 precargado); e, f y Node no verificables (sin usuario colaborador/operador de prueba → DA-24). Resultado 'no aceptado' por el INC-88 (criterio 'Detener'); fix estándar y repetir d. Deudas DT-30: '⏳ sin subir' persiste hasta recargar; el depósito principal no se puede desactivar ni reemplazar (queda 'zz-verif-Principal' como principal activo: Carlos lo renombra al empezar con datos reales o se permite reemplazarlo); sub-fila probada por funciones, no por fila renderizada; chip 📦 probado en hoja. 20:50: INC-88 cerrado con el 41-veredicto-2 (criterio d resuelto). Quedan e y f ('como colaborador/operador') a la espera de DA-24; el resto verificado. 8-oct: 40-veredicto-2/3/4 no verificables (cortes de luz: sin Chrome o sin sesión admin). 40-veredicto-5 (12:50, Carlos presente): e como colaborador ok (conteo y nivel con turnoId y por = zz-verif-colab; el portal no ofrece Inventario ni compra); d ya cerrado por el lote 41 (INC-88). Falta f (operador sin inventario.editar): usuario zz-verif-oper creado por Carlos el 8-oct; se prueba con un tercer perfil de Chrome. 403 por API no verificables por el entorno (réplica). INC-92 bajo: toast 'No puedes modificar un turno que no es tuyo' al titular en turno manual.",
    "costo": {
     "minutosCLI": 14,
     "minutosDueno": null,
@@ -1961,6 +1973,55 @@
     ],
     "datosDePrueba": "Creados con prefijo zz-verif-: artículos zz-verif-Toalla (ar_muyst2dh92ma0), zz-verif-Jabon (ar_muysthzhjrfut), zz-verif-Papel (ar_muystt0152eps) — DESACTIVADOS (quedan en la colección con activo=false). Depósitos zz-verif-Principal (dp_muysu2m8poljy, tipo principal) — QUEDA ACTIVO (el módulo exige un principal activo) — y zz-verif-Propiedad (dp_muysuhr6pck88, apartamento de prop-1791416715199) — DESACTIVADO. Movimientos (inmutables, quedan): mv_muysvsjxs2btm compra 10; mv_muysw3gx457q6 ajuste −3 (anulado); mv_muyswht2axeqe ajuste +3 (anula al anterior); un conteo 8 (Toalla) y un nivel 50 (Jabon) del turno de prueba. Flujos zz-verif-Flujo inventario (f-muysxnmmhkbsl) y zz-verif-Flujo importado (f-muyszxgsu9dbv) — BORRADOS. Turno manual sh-m-1791419718487 en zz-verif-Propiedad (prop-1791416715199, sin iCal; la propiedad queda para próximas ejecuciones) — BORRADO (comprobado: 0 turnos vivos en esa propiedad tras visitar HK e Inventario). Sin fotos ni evidencias subidas. Archivos locales: el .xlsx exportado/importado solo existió en memoria del navegador. No se tocó ningún dato real (propiedades, huéspedes, reservas, tickets, usuarios; los 3 flujos reales y los 37 turnos reales no se modificaron). Se hizo un PUT de prueba para editar y otro para borrar un movimiento propio: ambos rechazados por el servidor, sin efecto.",
     "notas": "Desplegado, no aceptado: d incumple un punto (INC bajo) y e/f/node tests/run.js y la lectura del diff del commit no se pudieron verificar (hace falta un usuario colaborador y uno operador de prueba autorizados, o que Carlos acepte esos puntos por la réplica de la CLI, que no cuenta como aceptación). Lo verificado en producción: servidor (409/403, sello at), módulo Inventario completo (artículos, depósitos, compra, ajuste, anulación, existencias, buscador, desactivar), Flujos (chip, guardar, exportar/importar) y la sub-fila/marcado de HK vía funciones reales con turno real de prueba. Observaciones para el Chat de desarrollo (deuda baja, sin INC): (i) el indicador '⏳ sin subir' de Movimientos queda visible tras registrar aunque el servidor ya tiene el movimiento con at; desaparece al recargar; (ii) el depósito principal no se puede desactivar ni reemplazar creando otro: solo editarlo; los datos de prueba dejan 'zz-verif-Principal' como principal activo y Carlos deberá renombrarlo/editarlo al empezar con datos reales (o decidir si se quiere permitir desactivar el principal si se crea otro en el mismo guardado); (iii) en HK el turno manual no usa el flujo de prueba, así que la sub-fila solo se vio llamando _hkInvRowHTML/_toggleTask; no se comprobó con una fila de _renderChecklistSection ni la vista de solo lectura del operador; (iv) el chip 📦 se probó en una actividad hoja, no en una actividad con varias tareas. El nombre de la unidad de Toalla quedó vacío por un clic mío errado en la prueba, no es defecto del módulo. Producción sirve p5c40 = el lote 40; sin cambios a la capa Marco observados (diff no leído)."
+   },
+   "aceptacion5": {
+    "lote": 40,
+    "hash": "a7f71c2",
+    "fecha": "2026-10-08",
+    "horaBogota": "12:50",
+    "resultado": "Criterio e (colaborador) verificado en producción por la interfaz del colaborador: conteo y nivel registrados al marcar la tarea 📦, con turnoId, por = zz-verif-colab (id 5) y at del servidor; el portal no ofrece Inventario ni compra. Quedan sin verificar: el rechazo 403 de compra/sin turnoId (la interfaz no lo permite; escribir por API está bloqueado), f (operador) y node tests/run.js. Con lo anterior (a, b, c, g, h ok; d con INC bajo) el lote sigue NO ACEPTADO por d (INC bajo abierto) y por f/403/node no verificables; ya no queda e abierto.",
+    "modoVerificacion": "Chrome en producción, dos perfiles: ADMIN (Browser 2, sesión de Carlos ya abierta) para crear/limpiar datos zz-verif- por la interfaz; COLABORADOR (Browser 1, portal.html con zz-verif-colab) para la prueba. Reloj real. Sin inicios/cierres de sesión ni credenciales. Se leyó /api/col/inv-movimientos con GET desde la sesión del colaborador (solo lectura).",
+    "criterios": [
+     {
+      "c": "e1. Colaborador marca tarea 📦 → conteo/nivel con turnoId y por = él",
+      "ok": true,
+      "observado": "ADMIN creó por la interfaz 'zz-verif-Flujo 40' (1 actividad hoja 'zz-verif-Act', chip 📦 lista 'Dotación', sin artículos), lo puso como flujo base de zz-verif-Propiedad (Propiedades → Flujos del turno → Guardar cambios), y reactivó zz-verif-Jabon, zz-verif-Toalla y el depósito zz-verif-Propiedad. En el portal del colaborador, turno sh-m-1791472972351: el checklist mostró el flujo y la sub-fila '📦 Dotación del apartamento · zz-verif-Propiedad' con Jabon (5 botones 0·25·50·75·100, 50 marcado por el último nivel) y Toalla con 8 precargado (existencia previa del apartamento). Con clics reales: Jabon 75, Toalla 6, check de la tarea → la tarea queda hecha y la sub-fila muestra '75 %' y '6'. En el servidor (GET /api/col/inv-movimientos desde su sesión): mv_muzr68wh8blrw conteo 6 Toalla y mv_muzr68whu38n6 nivel 75 Jabon, depósito zz-verif-Propiedad, por='5' (zz-verif-colab), turnoId='sh-m-1791472972351', clave='f-muzr18z41njq8::a-muzr1l5qovxrz::__self__', at='2026-10-08T16:30:37.000Z' (resuelto por el servidor), zona=''. Admin los ve en Movimientos con 'Quién = zz-verif-colab'. Cola local vacía (str-col-pending-v1 = 0)."
+     },
+     {
+      "c": "e2. Colaborador no ve el módulo Inventario ni puede registrar compra",
+      "ok": true,
+      "observado": "El portal del colaborador solo tiene pestañas Mis turnos / Mi dinero / Mi desempeño; sin enlace ni texto 'Inventario'/'compra' (0 coincidencias en botones y enlaces). Como la interfaz no lo ofrece, es lo esperado."
+     },
+     {
+      "c": "e3. Rechazos 403 (compra por colaborador, conteo sin turnoId) y 'por' ajeno forzado; node tests/run.js",
+      "ok": null,
+      "observado": "NO VERIFICABLE por la interfaz: no hay forma de provocarlos desde el portal y escribir por API con la sesión del colaborador está bloqueado por instrucción. 'por' propio sí quedó = id del colaborador (e1). node tests/run.js sin Node con el repo."
+     },
+     {
+      "c": "f. Operador sin inventario.editar",
+      "ok": null,
+      "observado": "NO VERIFICABLE: no hay usuario operador de prueba."
+     },
+     {
+      "c": "Observación al marcar (no del lote 40)",
+      "ok": null,
+      "observado": "Al marcar la tarea, el colaborador (titular, portal lo muestra 'TITULAR') vio el toast rojo 'No puedes modificar un turno que no es tuyo'. Aun así la tarea quedó marcada en pantalla, el turno pasó a 'En curso' en HK y los dos movimientos subieron. Probable guardado de hk:turnos rechazado para el turno manual creado por admin (INC-89 / lote 39); no se investigó."
+     },
+     {
+      "c": "a, b, c, d, g, h y CLAUDE.md",
+      "ok": null,
+      "observado": "No re-verificados; por referencia a log\\40-veredicto.json (d: INC bajo de '0 precargado' sigue abierto; en esta ejecución Toalla mostró 8, no se probó el caso de existencia 0)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Toast 'No puedes modificar un turno que no es tuyo' al marcar tarea como titular en turno manual creado por admin",
+      "nivel": "bajo",
+      "causa": "Sin confirmar: el servidor rechaza alguna escritura del turno (probable hk:turnos) para zz-verif-colab aunque es titular; el turno manual por HK no trae la asignación en el formato que el servidor valida (relacionado con INC-89/lote 39). No afecta al lote 40 (los movimientos subieron). Observado literal: toast rojo en el portal tras marcar la tarea."
+     }
+    ],
+    "datosDePrueba": "Creados con admin por la interfaz: flujo zz-verif-Flujo 40 (f-muzr18z41njq8) — BORRADO (servidor: flujos = Iniciar, Alistamiento, Revisión). flujoBaseId de zz-verif-Propiedad vuelto a vacío. Reactivados y vueltos a DESACTIVAR: artículos zz-verif-Jabon y zz-verif-Toalla, depósito zz-verif-Propiedad (comprobado en servidor: todos activo=false). zz-verif-Principal sigue ACTIVO (único principal; no se puede desactivar). Turno sh-m-1791472972351 (lote 39) — BORRADO con '🗑 Eliminar turno' desde ADMIN. Movimientos nuevos que quedan (inmutables): mv_muzr68wh8blrw (conteo 6 Toalla) y mv_muzr68whu38n6 (nivel 75 Jabon), por zz-verif-colab. Sin fotos ni archivos subidos. No se tocó ningún dato real; no se hicieron escrituras por API con ninguna sesión (solo GET).",
+    "notas": "Veredicto previo log\\40-veredicto-2/3/4.json: no verificable por falta de Chrome/sesión; este (5) los reemplaza. Para aceptar el lote faltan: corregir o aceptar el INC bajo de d (0 precargado), y decidir f/403/node por réplica de la CLI o con usuario operador de prueba. Sin cambios a la capa Marco observados (diff no leído)."
    }
   },
   {
@@ -3265,7 +3326,7 @@
    "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
    "estado": "verificado",
    "orden": 40,
-   "espera": "e y f como colaborador/operador → DA-24"
+   "espera": "criterio f con zz-verif-oper (tercer perfil de Chrome, Carlos presente)"
   },
   {
    "lote": 41,

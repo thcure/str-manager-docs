@@ -1722,6 +1722,75 @@
    ],
    "vigenciaDesde": "2026-10-07",
    "notas": "Lo escribe solo el Chat de desarrollo, uno por lote, antes de lanzar el Agente verificador: {lote, prueba, instruccion, commit, version, archivoVeredicto, notas, escritoPor, fecha}. El verificador solo lo lee. Las notas solo restringen; nunca amplían el encargo rol-verificador."
+  },
+  {
+   "id": "herramienta-vigilar-buzon",
+   "nombre": "Despertador del buzón (vigilar-buzon.ps1 + tarea 'STR buzon')",
+   "tipo": "herramienta",
+   "capa": "operacion",
+   "cobit": [
+    "APO01.10",
+    "APO01.03"
+   ],
+   "sdlc": [
+    "construccion",
+    "pruebas"
+   ],
+   "pmi": [
+    "ejecucion"
+   ],
+   "rol": "AA",
+   "usa": [
+    "GCa"
+   ],
+   "vive": "str-manager-docs/herramientas/vigilar-buzon.ps1 → C:\\Users\\ktcol\\Downloads\\str-instr-cola\\buzon\\ en el equipo activo; tarea de Windows 'STR buzon' cada 3 min con lanzar-buzon.vbs",
+   "estado": "vigente",
+   "entrada_de": [
+    "APO01"
+   ],
+   "salida_a": [
+    "BAI02",
+    "BAI06"
+   ],
+   "relacion": [
+    "json-mensajes",
+    "json-destinatarios"
+   ],
+   "vigenciaDesde": "2026-10-08",
+   "notas": "Revisa el buzón sin usar Claude y, por cada mensaje pendiente nuevo, deja en el chat destinatario solo la frase fija 'Revisa el buzon … M-n' con claude -p --cloud (probado el 8-oct con el Chat de desarrollo: ok). Nunca copia el contenido del mensaje (repositorio público). Créditos: solo el turno del chat que despierta."
+  },
+  {
+   "id": "json-destinatarios",
+   "nombre": "Destinatarios del buzón (destinatarios.json)",
+   "tipo": "json",
+   "capa": "marco",
+   "cobit": [
+    "APO01.03"
+   ],
+   "sdlc": [
+    "construccion"
+   ],
+   "pmi": [
+    "ejecucion"
+   ],
+   "rol": "AP",
+   "usa": [
+    "AA"
+   ],
+   "vive": "str-manager-docs/interno/destinatarios.json",
+   "estado": "vigente",
+   "entrada_de": [
+    "APO01"
+   ],
+   "salida_a": [
+    "APO01"
+   ],
+   "relacion": [
+    "json-mensajes",
+    "herramienta-vigilar-buzon"
+   ],
+   "vigenciaDesde": "2026-10-08",
+   "notas": "Nombre del actor → sesión de su chat. Lo escribe el Arquitecto; se actualiza cada vez que un chat nuevo reemplaza a otro."
   }
  ]
 }

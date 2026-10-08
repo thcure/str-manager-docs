@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T02:05:00Z",
+ "actualizadoEn": "2026-10-08T03:40:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1023,7 +1023,7 @@
    "etapa": "✔",
    "fecha": "2026-10-07",
    "titulo": "Decisión de Carlos (20:02): se autoriza un usuario colaborador de prueba 'zz-verif-colab' para que el Agente verificador cubra los criterios 'como colaborador' (403, botón ausente, PUT que no altera campos protegidos, cola en su teléfono). Carlos no hace pruebas: acepta el verificador.",
-   "pendiente": "M-11 al Arquitecto: amplía el encargo rol-verificador (usuarios: solo 'zz-verif-colab', sin contraseña real: invitación o credencial de prueba que defina él); después el Chat de desarrollo copia el texto a la tarea (un clic de Carlos). Mientras, esos criterios quedan 'no verificables'.",
+   "pendiente": "8-oct: Carlos creó el usuario colaborador 'zz-verif-colab' y lo asignó (a zz-verif-Propiedad). M-12 al Arquitecto: publicar en el encargo rol-verificador cómo lo usa (sesión abierta por Carlos en Chrome, sin que el verificador escriba contraseñas); después copio el texto a la tarea (un clic de Carlos) y relanzo 38-3/39-3/40-2. Mientras, esos criterios siguen 'no verificables'.",
    "estado": "decidido",
    "origen": "Chat de desarrollo, 7-oct 20:02."
   },
@@ -2113,8 +2113,8 @@
    "req": "REQ-F9.m",
    "categoria": "normal",
    "resumen": "Zona en la actividad (📍 en la cabecera), heredada por las tareas sin zona propia; '↩ Usar la de la actividad'; zonasEfectivas en editor, copia por propiedad, Excel y HK.",
-   "estado": "desplegado",
-   "observacion": "Verificador: h ✓; a–g no verificables (la plataforma negó escribir en el editor en dos ejecuciones, 21:12 y 21:40, antes de la autorización zz-verif-). Aceptación pendiente de Carlos: recorrer a–d con 'Alistamiento'. CLI 20:58–21:04 (6 min).",
+   "estado": "aceptado",
+   "observacion": "Verificador: h ✓; a–g no verificables (la plataforma negó escribir en el editor en dos ejecuciones, 21:12 y 21:40, antes de la autorización zz-verif-). Aceptación pendiente de Carlos: recorrer a–d con 'Alistamiento'. CLI 20:58–21:04 (6 min). Verificador 21:09 (34-veredicto-2, flujo zz-verif- por la interfaz): a–d ok; h ok en la primera. Aceptado. e–g quedan como observación (no punto de parada).",
    "aceptacion": {
     "resultado": "no aceptado",
     "modoVerificacion": "no depende de la hora (reloj real; 2026-10-07T02:30Z = 21:30 Bogotá al iniciar)",
@@ -2170,7 +2170,45 @@
     "minutosDueno": null,
     "nota": "espera no cuenta; Carlos: configuró la tarea de Windows (batería y repetición cada minuto), minutos no medidos"
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion2": {
+    "lote": 34,
+    "hash": "7d757cf",
+    "fecha": "2026-10-08",
+    "horaBogota": "(ejecución programada)",
+    "resultado": "aceptado (criterios a–d); e, f, g fuera de esta ejecución; h ya ok en log\\34-veredicto.json",
+    "modoVerificacion": "producción en Chrome, por la interfaz (Flujos → Nuevo flujo); no depende de la hora (reloj real). Producción servía str-api.js?v=p5c41 (lotes posteriores ya desplegados), con zonasEfectivas presente; /api/health schema_version 9.",
+    "criterios": [
+     {
+      "c": "a. Actividad con 4 tareas: cabecera 📍 Zona → 📍 Zonas (1); las 4 tareas muestran '📍 <zona> · de la actividad' atenuado, sin recargar",
+      "ok": true,
+      "observado": "Cabecera con 4 tareas mostraba '📍 Zona'. Al elegir 'Deposito 72' (la zona 'Depósito' literal no existe; la más cercana del catálogo) la cabecera pasó a '📍 Zonas (1)' y las 4 tareas a '📍 Deposito 72 · de la actividad', sin recargar la página."
+     },
+     {
+      "c": "b. Zona propia en tarea 2; cambiar la de la actividad no la afecta",
+      "ok": true,
+      "observado": "Tarea 2 con 'Lavanderia' (zona 'Zona de ropas' no existe en el catálogo) → chip '📍 Zonas (1)' normal. Actividad cambiada a 'Cocina' → tareas 1, 3 y 4 'Cocina · de la actividad'; tarea 2 siguió '📍 Zonas (1)'."
+     },
+     {
+      "c": "c. ↩ Usar la de la actividad vuelve a heredar",
+      "ok": true,
+      "observado": "Popover de la tarea 2 traía '↩ Usar la de la actividad (Cocina)'; al pulsarlo la tarea 2 pasó a '📍 Cocina · de la actividad' (atenuada) como las otras tres. Luego se le volvió a poner 'Lavanderia' para probar d."
+     },
+     {
+      "c": "d. Guardar y reabrir: a.zonas=['Cocina'], tareas heredan con zonas [], tarea 2 con zona propia",
+      "ok": true,
+      "observado": "Tras guardar ('Flujo creado ✓') y recargar la página, dato leído en memoria desde el servidor: actividad zonas ['Cocina']; tareas [{zonas:[]},{zonas:['Lavanderia'],ubicacion:'Lavanderia'},{zonas:[]},{zonas:[]}]. Reabierto con Editar, se ve igual (3 heredadas atenuadas, tarea 2 propia). Flujos reales (Iniciar, Alistamiento, Revisión): JSON idéntico antes y después (4897 caracteres ambos). 'Un flujo guardado antes del lote se ve igual' no se pudo contrastar con una versión previa; los 3 flujos reales no mostraron cambio."
+     },
+     {
+      "c": "h. (referencia) health esquema 9; ?v= nuevo; consola limpia",
+      "ok": true,
+      "observado": "Copiado de log\\34-veredicto.json (primera ejecución, ok). En esta ejecución: /api/health {ok:true,db:true,schema_version:9}; no se leyó consola de nuevo."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creado por la interfaz y BORRADO por la interfaz (diálogo 'Eliminar flujo' → Eliminar): flujo 'zz-verif-Flujo 34' (id f-muyw52ywrccf7) con actividad 'zz-verif-Act 34' y 4 tareas. Tras borrar, flujos = Iniciar, Alistamiento, Revisión, idénticos a antes. No se subieron archivos. No se tocó la propiedad zz-verif-Propiedad ni datos reales.",
+    "notas": "Lote 34 aceptado en a–d. Observaciones menores no bloqueantes: (1) el catálogo de zonas no trae 'Depósito' ni 'Zona de ropas'; se usaron 'Deposito 72' y 'Lavanderia'; (2) el clic por ref en 'Editar' no abrió el editor, sí por coordenadas (artefacto de la herramienta); (3) la lista del editor reordena 'MARCADAS / EN ESTE FLUJO' tras marcar, lo cual desplaza los ítems. Sin cambios a la capa Marco detectados (no se revisó el commit en esta ejecución)."
+   }
   },
   {
    "lote": 35,
@@ -2688,7 +2726,7 @@
    "req": "REQ-F9.m",
    "categoria": "normal",
    "resumen": "Zona en la actividad heredada por las tareas",
-   "estado": "desplegado",
+   "estado": "aceptado",
    "orden": 34
   },
   {

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T01:05:00Z",
+ "actualizadoEn": "2026-10-08T02:05:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1026,6 +1026,42 @@
    "pendiente": "M-11 al Arquitecto: amplía el encargo rol-verificador (usuarios: solo 'zz-verif-colab', sin contraseña real: invitación o credencial de prueba que defina él); después el Chat de desarrollo copia el texto a la tarea (un clic de Carlos). Mientras, esos criterios quedan 'no verificables'.",
    "estado": "decidido",
    "origen": "Chat de desarrollo, 7-oct 20:02."
+  },
+  {
+   "id": "INC-88",
+   "tipo": "INC",
+   "modulo": "HK (inventario)",
+   "etapa": "✔",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "HK, sub-fila de inventario: cuando la existencia esperada del apartamento es 0, el campo de unidad se pinta con value=\"\" en vez de 0; el valor interno sí es 0 y al marcar se registra un conteo 0 que el colaborador no vio. Causa: _hkInvRowHTML trata 0 como vacío al pintar.",
+   "pendiente": "Cerrado 20:50: fix del lote 41 (8a25b24) verificado en producción por la interfaz (41-veredicto-2.json): fila renderizada con 0, conteo 0 y 8.",
+   "estado": "cerrado",
+   "origen": "Veredicto del lote 40 (19:38)."
+  },
+  {
+   "id": "DT-30",
+   "tipo": "DT",
+   "modulo": "Inventario / HK",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "Inventario: (i) el indicador '⏳ sin subir' de Movimientos queda visible tras registrar aunque el servidor ya devolvió at (desaparece al recargar); (ii) el depósito principal no se puede desactivar ni reemplazar creando otro; el de prueba 'zz-verif-Principal' quedó como principal activo (Carlos lo renombra al empezar con datos reales, o se permite reemplazar el principal en el mismo guardado); (iii) la sub-fila de HK se probó por funciones y no por fila renderizada ni en la vista del operador; (iv) chip 📦 probado solo en actividad hoja.",
+   "pendiente": "(i) y (ii) en el fix de INC-88 si cabe; (iii) y (iv) se cubren al repetir d.",
+   "estado": "abierto",
+   "origen": "Veredicto del lote 40 (19:38), observaciones."
+  },
+  {
+   "id": "INC-89",
+   "tipo": "INC",
+   "modulo": "HK (turnos)",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "HK no ofrece forma de borrar un turno manual desde la interfaz (ni el panel del turno ni la lista tienen acción de eliminar). La limpieza de turnos de prueba zz-verif- que exige el encargo del verificador no es posible por la interfaz; queda el turno sh-m-1791423653924 en zz-verif-Propiedad (7-oct 11:00–15:00, flujo extra ya borrado → referencia huérfana posible).",
+   "pendiente": "Decidir: borrar ese turno a mano o añadir 'Eliminar turno manual' en HK (solo admin, turnos sin iCal). Deuda de producto, no fallo del lote 41.",
+   "estado": "abierto",
+   "origen": "Veredicto 41-2 (20:50)."
   }
  ],
  "cambios": [
@@ -1696,14 +1732,183 @@
    "req": "REQ-INV1 fase 1",
    "categoria": "normal",
    "resumen": "Módulo Inventario (str-inventario.html: Artículos con 4 clases, Depósitos, Existencias, Movimientos); colecciones inv-articulos, inv-depositos e inv-movimientos (inmutable: 409 al editar, 403 al borrar; colaborador solo conteo/nivel de un turno suyo); chip 📦 en la tarea del flujo (dotación/conteo/nivel, nunca cantidades; columna Excel); sub-fila en el checklist de HK con esperada precargada y niveles 0–100 %, movimientos al marcar; permiso 'Editar inventario' del operador; ítem en el shell.",
-   "estado": "desplegado",
-   "observacion": "CLI 14:20–14:34 (14 min), 20/20 (nuevo tests/inventario.test.js). Fuera de lo declarado: casilla de permiso en str-usuarios.html y api/usuarios/index.php; str-propiedades.html solo versión. Decisiones de la CLI: operador sin ítem de menú (entra por enlace; edita solo con permiso); un 409 en un lote deja todo sin guardar y el cliente reenvía solo los nuevos; anular una compra anterior a un conteo no cambia la existencia. Hallazgo previo al lote: api/export no respaldaba 'guias' (INC-84). Verificador pendiente (el 39 aún corre).",
+   "estado": "verificado",
+   "observacion": "CLI 14:20–14:34 (14 min), 20/20 (nuevo tests/inventario.test.js). Fuera de lo declarado: casilla de permiso en str-usuarios.html y api/usuarios/index.php; str-propiedades.html solo versión. Decisiones de la CLI: operador sin ítem de menú (entra por enlace; edita solo con permiso); un 409 en un lote deja todo sin guardar y el cliente reenvía solo los nuevos; anular una compra anterior a un conteo no cambia la existencia. Hallazgo previo al lote: api/export no respaldaba 'guias' (INC-84). Verificador pendiente (el 39 aún corre). Verificador 19:38 (con artículos, depósitos, flujo y turno zz-verif- creados por la interfaz): a, b, c, g, h ok; d cumple salvo un punto → INC-88 (bajo: el campo de unidad no muestra el 0 precargado); e, f y Node no verificables (sin usuario colaborador/operador de prueba → DA-24). Resultado 'no aceptado' por el INC-88 (criterio 'Detener'); fix estándar y repetir d. Deudas DT-30: '⏳ sin subir' persiste hasta recargar; el depósito principal no se puede desactivar ni reemplazar (queda 'zz-verif-Principal' como principal activo: Carlos lo renombra al empezar con datos reales o se permite reemplazarlo); sub-fila probada por funciones, no por fila renderizada; chip 📦 probado en hoja. 20:50: INC-88 cerrado con el 41-veredicto-2 (criterio d resuelto). Quedan e y f ('como colaborador/operador') a la espera de DA-24; el resto verificado.",
    "costo": {
     "minutosCLI": 14,
     "minutosDueno": null,
     "nota": "espera no cuenta"
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 40,
+    "hash": "a7f71c2",
+    "fecha": "2026-10-07",
+    "horaBogota": "19:38",
+    "resultado": "no aceptado (desplegado). a, b, c, g, h verificados en producción sin fallo; d cumple salvo un punto (esperada 0 del apartamento no precargada en el campo, INC bajo); e, f y node tests/run.js no verificables (sin usuario colaborador/operador ni Node con el repo).",
+    "modoVerificacion": "Chrome en producción (app.apartamentosbucaramanga.com) con la sesión admin ya abierta; no se escribieron credenciales. Producción sirve ?v=p5c40 en shell, Inventario, Flujos, HK, Propiedades, Usuarios y Conocimiento. Reloj real; ningún criterio depende de la hora. Creación/guardado/anulación/desactivación de artículos, depósitos, compra, ajuste y anulación se hicieron con clics reales en la interfaz de Inventario (algunos campos de modal con JS auxiliar). Flujo con 📦 creado y guardado por la interfaz de Flujos; exportar/importar por la interfaz (el blob del .xlsx se capturó en memoria y se leyó con SheetJS; el archivo importado se armó en memoria y se entregó al input de archivo). HK: se creó un turno manual real en 'zz-verif-Propiedad' con el formulario 'Crear turno'; como el turno de HK usa plantilla y no el flujo de prueba, la sub-fila y el marcado se ejercitaron llamando las funciones reales de la página (_hkInvRowHTML, _hkInvSet, _toggleTask con la clave del flujo zz-verif-, _hkInvPersistir) sobre ese turno real y con push real al servidor; no se hizo clic sobre una fila renderizada por _renderChecklistSection.",
+    "criterios": [
+     {
+      "c": "a. Inventario: 3 artículos zz-verif- (unidad, nivel, circulante), depósitos, persistencia, buscador, Desactivar",
+      "ok": true,
+      "observado": "No existía depósito principal ni artículos/depósitos reales (las tres colecciones vacías al empezar). Creados por la interfaz: zz-verif-Toalla (unidad), zz-verif-Jabon (nivel), zz-verif-Papel (circulante); depósitos 'zz-verif-Principal' (principal) y 'zz-verif-Propiedad' (apartamento ligado a prop-1791416715199). Tras recargar la página y leer del servidor (/api/col/inv-*) se conserva todo. Buscador 'jabon' deja solo zz-verif-Jabon y al vaciarlo vuelven las tres. 'Desactivar' en Papel: desaparece de la lista, aparece con 'Mostrar inactivos' como 'inactivo · Activar', en el servidor activo=false y deleted=0 (no se borró). Un segundo depósito principal fue rechazado con 'Ya hay un depósito principal activo (zz-verif-Principal)'. Con la lista de flujos, Papel inactivo no aparece como opción."
+     },
+     {
+      "c": "b. Compra 10 → 10; ajuste −3 con nota → 7; anular → 10 y ambos en gris; movimiento no editable (409)",
+      "ok": true,
+      "observado": "Compra de 10 (costo 1000) a zz-verif-Principal → Existencias 10. Ajuste −3 con nota → 7. 'Anular' del ajuste con nota → movimiento inverso +3 con anulaA = id del ajuste; Existencias vuelve a 10 y las filas del ajuste y del inverso quedan con clase 'anulado' (gris); la compra sigue con botón Anular. En la red: PUT /api/col/inv-movimientos sobre el id existente mv_muysvsjxs2btm → 409 {\"error\":\"Un movimiento no se edita; registra uno inverso\"} (el ítem local no cambió). PUT con deleted:[id] → 403 {\"error\":\"Un movimiento no se borra; registra uno inverso\"}. En el servidor los movimientos traen at resuelto (2026-10-08T00:30:42Z, sello del servidor), por='1'. Observación menor: justo después de registrar, la fila mostraba '⏳ sin subir' aunque el servidor ya tenía el movimiento con at; desaparece al recargar (indicador desactualizado hasta el próximo pull)."
+     },
+     {
+      "c": "c. Flujos: 📦 en tarea, lista Dotación, sin artículos; guardar/reabrir; exportar columna Inventario; importar como copia",
+      "ok": true,
+      "observado": "Flujo 'zz-verif-Flujo inventario' con una actividad hoja 'zz-verif-Act' (tarea inline); chip 📦 → sub-fila con lista 'Dotación del apartamento (unidad + nivel)' y los artículos activos (Toalla, Jabon; Papel inactivo no sale), ninguno marcado. Guardado: en el servidor inventario = {lista:'dotacion', articulos:[]}. Tras recargar y pulsar Editar, el 📦 y la sub-fila siguen. Exportar seleccionadas: libro con hojas Flujo/Catálogo/Instrucciones; hoja Flujo con cabecera 'Inventario' (columna 16) y valor 'dotacion:*' para la fila del flujo. Importar el mismo libro con el nombre cambiado a 'zz-verif-Flujo importado': vista previa '1 flujo · 1 actividad · 0 tareas · 0 errores · 0 avisos'; tras Importar, el flujo nuevo conserva inventario {lista:'dotacion', articulos:[]}. Nota: el chip se probó en la fila de actividad hoja (la UI no ofrece otra tarea sin agregar una); no se probó el chip dentro de una actividad con varias tareas ni 'conteo'/'nivel' con ids concretos en Excel."
+     },
+     {
+      "c": "d. HK: sub-fila con esperada precargada (10 en principal/conteo; 0 en apartamento), 5 botones de nivel, marcar con 8 y 50 % → conteo/nivel con turnoId, zona, por y at del servidor; Existencias lo refleja",
+      "ok": false,
+      "observado": "Cumple: lista 'conteo' sobre el depósito principal → campo de Toalla precargado con 10; lista 'dotación' → Toalla y Jabon con 5 botones 0·25·50·75·100 % (ninguno marcado al no haber nivel previo). Al marcar la tarea (_toggleTask real, turno real sh-m-1791419718487 de prueba) con Toalla=8 y Jabon=50: dos movimientos nuevos conteo=8 y nivel=50 en el depósito zz-verif-Propiedad, con turnoId del turno, por='1', clave del flujo, at resuelto por el servidor (2026-10-08T00:35:48Z), push real (_persistCol('inv-movimientos', 5 ítems, 2 con stamp)); en el servidor aparecen igual. Desmarcar y volver a marcar sin cambios: 0 movimientos nuevos (siguen 5). Existencias: Toalla 10 (principal) / 8 (apartamento), Jabon 50 % (apartamento). zona='' porque la hoja de prueba no tiene zonas. INCUMPLE: con 0 existencias en el apartamento, el campo de Toalla se dibuja vacío (value=\"\"), no con 0 precargado, aunque el valor interno es 0 (_hkInvContexto lo calcula como 0); el colaborador no ve el 0 que la instrucción pide y, si no toca el campo, al marcar se registraría un conteo 0 que no ve. Ver INC. No se probó la sub-fila de solo lectura del panel del operador."
+     },
+     {
+      "c": "e. Colaborador: compra → 403; conteo sin turnoId → 403; por ajeno forzado; node tests/run.js verde",
+      "ok": null,
+      "observado": "NO VERIFICABLE: no hay usuario colaborador ni JWT de colaborador y no se crean usuarios; node tests/run.js no se pudo ejecutar (sin Node con el repo en este entorno; el log de la CLI declara 20/20). Lo único probado como admin: la inmutabilidad (409/403) de b. Lo del colaborador solo queda cubierto por la réplica de la CLI, que no cuenta."
+     },
+     {
+      "c": "f. Operador sin inventario.editar ve el módulo en solo lectura",
+      "ok": null,
+      "observado": "NO VERIFICABLE: no hay usuario operador de prueba. Solo se comprobó que str-usuarios.html y el módulo mencionan 'inventario.editar' / 'Editar inventario' (la lista de permisos del operador está en el código, por eso la CLI agregó la casilla). Resultado de la prueba de solo lectura: no observado."
+     },
+     {
+      "c": "g. /api/health esquema 9; páginas ?v=p5c40; /api/export con las tres colecciones; consola limpia; 0 undefined; sin alert/confirm/prompt; shell muestra 📦 Inventario al admin",
+      "ok": true,
+      "observado": "/api/health {ok:true, db:true, schema_version:9, zip:true, exif:true, uploadMaxMB:100}. ?v=p5c40 en shell, Inventario, Flujos, HK, Propiedades, Usuarios y Conocimiento. /api/export (200, ~49 KB) contiene inv-articulos, inv-depositos e inv-movimientos. Sin llamadas alert/confirm/prompt en las páginas tocadas (la única coincidencia en Flujos es un comentario 'sin confirm()'). Texto de Inventario sin undefined/NaN/[object. Shell: nav-item '📦 Inventario' con data-roles=\"superadmin,admin\" (visible para admin). Consola: sin mensajes de error en Inventario, Flujos y HK tras recargar cada una (el rastreo empezó al llamar la herramienta; no cubre la carga previa de la primera página)."
+     },
+     {
+      "c": "h. Limpieza: zz-verif- desactivados/borrados; movimientos quedan con nota 'prueba del verificador'",
+      "ok": true,
+      "observado": "Turno sh-m-1791419718487 y flujos zz-verif-Flujo inventario / zz-verif-Flujo importado borrados por /api/col (turnos y flujos zz-verif- vivos: 0). Artículos Toalla, Jabon y Papel desactivados; depósito zz-verif-Propiedad desactivado. El depósito 'zz-verif-Principal' NO se puede desactivar: el módulo responde 'Debe quedar un depósito principal activo.' y queda activo (es el único principal; para usar uno real hay que editarlo/renombrarlo, no crear otro). Los 5 movimientos quedan (inmutables); los dos con nota llevan 'prueba del verificador', los otros (ajuste, anulación, conteo y nivel de HK) llevan nota 'zz-verif…' o vacía por origen."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit / archivos declarados vs tocados / capa Marco",
+      "ok": null,
+      "observado": "No se pudo ejecutar git ni leer el diff de a7f71c2. El CLAUDE.md local (modificado antes del cierre del log de la CLI, 14:33) menciona str-inventario, inv-movimientos y p5c40 (9 coincidencias, incl. la línea INC-37 con p5c40). El log de la CLI explica las diferencias declarados vs tocados: str-usuarios.html y api/usuarios/index.php (casilla 'Editar inventario'), tests/inventario.test.js en vez de flujo-base.test.js, str-propiedades.html solo con la versión. Sin evidencia de cambios a la capa Marco sin prefijo 'modelo:' en el log; el diff no se leyó."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "HK: el campo de unidad no muestra el 0 precargado cuando la existencia del apartamento es 0",
+      "nivel": "bajo",
+      "causa": "El valor interno de la fila sí es 0 (_hkInvContexto → base 0), pero _hkInvRowHTML dibuja value=\"\" para ese valor (probable que 0 se trate como vacío al pintar); el colaborador no ve el 0 esperado por el criterio d y, si no toca el campo, el marcado registra igualmente un conteo 0 que no se ve. Observado: HTML del input de zz-verif-Toalla en lista 'dotación' con existencia 0 → value=\"\"."
+     }
+    ],
+    "datosDePrueba": "Creados con prefijo zz-verif-: artículos zz-verif-Toalla (ar_muyst2dh92ma0), zz-verif-Jabon (ar_muysthzhjrfut), zz-verif-Papel (ar_muystt0152eps) — DESACTIVADOS (quedan en la colección con activo=false). Depósitos zz-verif-Principal (dp_muysu2m8poljy, tipo principal) — QUEDA ACTIVO (el módulo exige un principal activo) — y zz-verif-Propiedad (dp_muysuhr6pck88, apartamento de prop-1791416715199) — DESACTIVADO. Movimientos (inmutables, quedan): mv_muysvsjxs2btm compra 10; mv_muysw3gx457q6 ajuste −3 (anulado); mv_muyswht2axeqe ajuste +3 (anula al anterior); un conteo 8 (Toalla) y un nivel 50 (Jabon) del turno de prueba. Flujos zz-verif-Flujo inventario (f-muysxnmmhkbsl) y zz-verif-Flujo importado (f-muyszxgsu9dbv) — BORRADOS. Turno manual sh-m-1791419718487 en zz-verif-Propiedad (prop-1791416715199, sin iCal; la propiedad queda para próximas ejecuciones) — BORRADO (comprobado: 0 turnos vivos en esa propiedad tras visitar HK e Inventario). Sin fotos ni evidencias subidas. Archivos locales: el .xlsx exportado/importado solo existió en memoria del navegador. No se tocó ningún dato real (propiedades, huéspedes, reservas, tickets, usuarios; los 3 flujos reales y los 37 turnos reales no se modificaron). Se hizo un PUT de prueba para editar y otro para borrar un movimiento propio: ambos rechazados por el servidor, sin efecto.",
+    "notas": "Desplegado, no aceptado: d incumple un punto (INC bajo) y e/f/node tests/run.js y la lectura del diff del commit no se pudieron verificar (hace falta un usuario colaborador y uno operador de prueba autorizados, o que Carlos acepte esos puntos por la réplica de la CLI, que no cuenta como aceptación). Lo verificado en producción: servidor (409/403, sello at), módulo Inventario completo (artículos, depósitos, compra, ajuste, anulación, existencias, buscador, desactivar), Flujos (chip, guardar, exportar/importar) y la sub-fila/marcado de HK vía funciones reales con turno real de prueba. Observaciones para el Chat de desarrollo (deuda baja, sin INC): (i) el indicador '⏳ sin subir' de Movimientos queda visible tras registrar aunque el servidor ya tiene el movimiento con at; desaparece al recargar; (ii) el depósito principal no se puede desactivar ni reemplazar creando otro: solo editarlo; los datos de prueba dejan 'zz-verif-Principal' como principal activo y Carlos deberá renombrarlo/editarlo al empezar con datos reales (o decidir si se quiere permitir desactivar el principal si se crea otro en el mismo guardado); (iii) en HK el turno manual no usa el flujo de prueba, así que la sub-fila solo se vio llamando _hkInvRowHTML/_toggleTask; no se comprobó con una fila de _renderChecklistSection ni la vista de solo lectura del operador; (iv) el chip 📦 se probó en una actividad hoja, no en una actividad con varias tareas. El nombre de la unidad de Toalla quedó vacío por un clic mío errado en la prueba, no es defecto del módulo. Producción sirve p5c40 = el lote 40; sin cambios a la capa Marco observados (diff no leído)."
+   }
+  },
+  {
+   "lote": 41,
+   "fecha": "2026-10-07",
+   "hash": "8a25b24",
+   "version": "p5c41",
+   "req": "fix INC-88 + DT-30 (i)(ii)",
+   "categoria": "estándar",
+   "resumen": "HK: la sub-fila de inventario pinta el 0 (la causa real: _esc(0) de HK devuelve vacío; se pinta con _esc(String(x)), sin tocar _esc ni [INV-puras]); Inventario: repintado tras el push (sin '⏳ sin subir' colgado) y casilla 'Reemplazar a «X» como principal' al crear un segundo principal (dos depósitos en un solo persistDepositos).",
+   "estado": "aceptado",
+   "observacion": "CLI 19:56–19:58 (2 min), 20/20 (caso nuevo: value=\"0\"). Causa distinta a la supuesta en la instrucción: _esc(0) → '' (patrón para patrones-codigo: _esc con 0/falsy). Verificador pendiente. Verificador 20:45: b, c, d ok (casilla de reemplazo y regla de un principal; repintado sin '⏳'; p5c41/health/consola); a no verificable porque intentó crear flujo/turno/artículo por STRApi.col.push y la plataforma bloqueó esa escritura por API (los lotes 38–40 crearon por la interfaz sin problema). Se repite (41-veredicto-2) con la nota: crear por la interfaz de Flujos y HK, nunca por API. Verificador 20:50 (41-veredicto-2, datos por la interfaz): a ok (fila renderizada value=\"0\", conteo 0 y conteo 8 registrados, vista del operador muestra 8); b, c, d por referencia. Aceptado. INC-89 (bajo, deuda): HK no permite borrar un turno manual por la interfaz; queda el turno de prueba sh-m-1791423653924 en zz-verif-Propiedad.",
+   "costo": {
+    "minutosCLI": 2,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 41,
+    "hash": "8a25b24",
+    "fecha": "2026-10-08",
+    "horaBogota": "20:45",
+    "resultado": "no aceptado (desplegado). b, c y d verificados en producción sin fallo (salvo node tests/run.js, no verificable aquí); a no verificable: la escritura de datos de prueba (flujo, artículo y turno zz-verif- por API) fue bloqueada y no se buscó otra vía; la fila renderizada de HK no se pudo ejercitar.",
+    "modoVerificacion": "Chrome en producción (app.apartamentosbucaramanga.com) con la sesión admin ya abierta; no se escribieron credenciales. Reloj real; ningún criterio depende de la hora. c y b con clics reales sobre la interfaz de Inventario (tipo del modal con evento change por JS auxiliar; activar/desactivar artículo con click() en el botón real). Lecturas de /api/col/* con el token de la sesión. a: solo una prueba sintética en memoria (se sustituyó temporalmente _hkInvContexto en la página abierta, sin persistir nada, y se llamó a la función real _hkInvRowHTML) — es réplica de la función, NO la fila de _renderChecklistSection, y no cuenta como aceptación.",
+    "criterios": [
+     {
+      "c": "a. HK: fila renderizada por _renderChecklistSection muestra 0; marcar sin tocar registra conteo 0; con 8 registra 8; vista del operador",
+      "ok": null,
+      "observado": "NO VERIFICABLE. Para armar el escenario (flujo zz-verif- con tarea 📦 dotación, artículo de unidad sin movimientos y reactivar el depósito zz-verif-Propiedad) intenté escribir por STRApi.col.push y el entorno bloqueó la acción (modificación de recursos compartidos); según el encargo no busqué otra vía. Sin turno ni flujo de prueba no se pudo renderizar la fila real ni marcar la tarea ni ver la vista del operador. Solo prueba sintética en memoria: con valor 0 y declarado 0, _hkInvRowHTML devuelve <input class=\"inv-num\" type=\"number\" ... value=\"0\"> (antes el INC-88 daba value=\"\"); no cuenta como aceptación. Producción sirve HK con ?v=p5c41. Falta: fila renderizada, conteo 0 al marcar sin tocar, conteo 8, vista operador."
+     },
+     {
+      "c": "b. Inventario → Movimientos: compra con red → fila sin '⏳ sin subir' sin recargar",
+      "ok": true,
+      "observado": "Con zz-verif-Toalla reactivada y depósito principal zz-verif-Principal, registré desde Existencias una compra de 5 con nota 'zz-verif lote 41 prueba del verificador'. Sin recargar la página abrí Movimientos: la fila '7 oct 20:20 Compra zz-verif-Toalla zz-verif-Principal 5 … Anular' aparece sin la etiqueta; el texto de la página no contiene 'sin subir' y /api/col/inv-movimientos devuelve 6 movimientos (el nuevo incluido). Limitación: comprobé unos segundos después de registrar (no medí el instante exacto de la respuesta), pero sin recarga y sin etiqueta, a diferencia del lote 40 donde persistía hasta recargar."
+     },
+     {
+      "c": "c. Depósitos: segundo principal → casilla de reemplazo; con casilla nuevo activo y anterior inactivo; sin casilla error; dejar el principal previo activo",
+      "ok": true,
+      "observado": "Con zz-verif-Principal activo, '＋ Depósito' tipo Principal nombre zz-verif-Principal2 → Guardar sin casilla: el modal muestra la casilla 'Reemplazar a «zz-verif-Principal» como principal (el anterior queda inactivo)' y el error 'Ya hay un depósito principal activo («zz-verif-Principal»).'; nada se guardó. Con la casilla marcada: aviso 'Depósito principal reemplazado · «zz-verif-Principal» quedó inactivo'; servidor: Principal2 activo=true y Principal activo=false (un solo principal activo). Luego creé otro «zz-verif-Principal» con la casilla: servidor: Principal2 inactivo y el nuevo zz-verif-Principal (dp_muyum184g3ozd) activo; queda exactamente un principal activo. No se probó editar el nombre del principal actual (sigue permitido según la instrucción)."
+     },
+     {
+      "c": "d. node tests/run.js; /api/health esquema 9; páginas ?v=p5c41; consola limpia en HK e Inventario; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health {ok:true, db:true, schema_version:9, zip:true, exif:true, secrets:true, gd:true, uploadMaxMB:100}. ?v=p5c41 en shell, Inventario, HK, Flujos, Propiedades y Usuarios; STRApi.version = p5c41; str-cola-subida.js responde 200. Sin llamadas alert/confirm/prompt en esos HTML (la única coincidencia en Flujos es el comentario 'sin confirm()' ya conocido). Consola: sin errores en HK ni Inventario durante la sesión (el rastreo empezó al llamar la herramienta; no cubre la carga previa de cada página). node tests/run.js NO verificable: este entorno no tiene Node con el repo; el log de la CLI declara 20/20, lo cual es réplica y no cuenta."
+     },
+     {
+      "c": "CLAUDE.md en el mismo commit / declarados vs tocados / capa Marco",
+      "ok": null,
+      "observado": "No se pudo ejecutar git ni leer el diff de 8a25b24. El CLAUDE.md local menciona p5c41 (línea INC-37), INC-88 en la fila de HK y 'Reemplazar a' en la fila de Inventario, coherente con lo pedido en la instrucción §5; no se pudo comprobar que esté en el mismo commit. El log de la CLI declara además tests/inventario.test.js y los HTML que solo cambian por ?v= (explicación suficiente). Sin indicio de cambios a la capa Marco sin prefijo 'modelo:'. Además el log declara que la causa del INC-88 no era _invExistencia sino _esc(0) de HK devolviendo vacío (se corrigió en _hkInvRowHTML, no se tocó [INV-puras])."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Todo con prefijo zz-verif-. Creados por la interfaz de Inventario: depósitos zz-verif-Principal2 (dp_muyulde8jjyn4, principal, queda INACTIVO) y un nuevo zz-verif-Principal (dp_muyum184g3ozd, principal, QUEDA ACTIVO: el módulo exige un principal activo; el anterior dp_muysu2m8poljy quedó inactivo). Artículo zz-verif-Toalla reactivado para la prueba y desactivado de nuevo (Toalla, Jabon y Papel inactivos). Movimiento nuevo e inmutable: compra de 5 de zz-verif-Toalla en zz-verif-Principal con nota 'zz-verif lote 41 prueba del verificador' (queda; no se puede anular sin crear otro inverso y no se hizo). El depósito zz-verif-Propiedad sigue inactivo. No se creó ningún flujo, turno, ticket, foto ni evidencia (la escritura por API fue bloqueada y no se intentó otra). La prueba sintética de HK fue solo en memoria del navegador. No se tocó ningún dato real (propiedades, huéspedes, reservas, tickets, usuarios, flujos, artículos ni depósitos reales).",
+    "notas": "Desplegado, no aceptado: el criterio a (punto de parada del lote) no se pudo verificar en producción. Para cerrarlo hace falta una nueva verificación (archivoVeredicto nuevo, p. ej. log\\41-veredicto-2.json) con permiso para crear el flujo/turno/artículo zz-verif- (o que el Chat de desarrollo habilite esa escritura); alcance mínimo pendiente: fila renderizada con 0 en zz-verif-Propiedad, marcar sin tocar → conteo 0, con 8 → conteo 8, vista del operador. Observación para el Chat de desarrollo: el escenario de a exige un artículo de unidad sin movimientos en zz-verif-Propiedad (zz-verif-Toalla ya tiene conteo 8) y reactivar el depósito zz-verif-Propiedad. Verificado sin fallo: casilla de reemplazo y regla de un solo principal (c), repintado sin '⏳ sin subir' (b), despliegue p5c41/health esquema 9/consola/diálogos (d). Sin cambios a la capa Marco observados (diff no leído)."
+   },
+   "aceptacion2": {
+    "lote": 41,
+    "hash": "8a25b24",
+    "fecha": "2026-10-08",
+    "horaBogota": "20:50",
+    "resultado": "aceptado en producción (criterio a verificado; b, c, d ya ok en log\\41-veredicto.json). Pendientes menores: node tests/run.js y CLAUDE.md/diff en el mismo commit no verificables desde Chrome (réplica de la CLI: 20/20); vista del colaborador real (portal) no ejercitada.",
+    "modoVerificacion": "Chrome en producción (app.apartamentosbucaramanga.com), sesión admin ya abierta, sin credenciales. Datos creados solo por la interfaz (Inventario, Flujos, HK → Crear turno), sin STRApi.col.push ni llamadas directas a /api/col. Lecturas de conteos con la función de la propia página (_hkInvMovs). Reloj real; ningún criterio depende de la hora.",
+    "criterios": [
+     {
+      "c": "a1. HK: fila renderizada por _renderChecklistSection muestra 0 (artículo de unidad sin movimientos)",
+      "ok": true,
+      "observado": "Turno zz-verif-Propiedad con flujo extra zz-verif-Flujo 41 (tarea 📦 'Dotación del apartamento', solo zz-verif-Vaso). La fila renderizada en el checklist es <div class=\"inv-fila\"><span class=\"inv-nom\">zz-verif-Vaso</span><input class=\"inv-num\" type=\"number\" ... value=\"0\">; input.value = '0' y se ve '0' en pantalla (antes del fix: value vacío)."
+     },
+     {
+      "c": "a2. Marcar la tarea sin tocar el campo registra conteo 0",
+      "ok": true,
+      "observado": "Tras marcar sin tocar: movimiento tipo 'conteo', cantidad 0, artículo zz-verif-Vaso (ar_muyvahfra8dm7), depósito zz-verif-Propiedad (dp_muysuhr6pck88), clave f-…::a-…::ta-…, turno sh-m-1791423653924, 01:43:49Z. La fila pasa a mostrar lo declarado '0'."
+     },
+     {
+      "c": "a3. Desmarcar, poner 8 y marcar registra conteo 8",
+      "ok": true,
+      "observado": "Desmarcada la tarea (progreso 0/1), el campo vuelve a ser editable; escrito 8 (tecla Tab) → input.value '8'; al marcar: nuevo movimiento 'conteo' cantidad 8 mismo artículo/depósito, 01:44:42Z. Quedan dos conteos (0 y 8) para ese artículo; Inventario → Movimientos los lista (20:43 conteo 0, 20:44 conteo 8, Carlos Rodriguez, origen turno)."
+     },
+     {
+      "c": "a4. La vista del operador muestra lo declarado",
+      "ok": true,
+      "observado": "Con la tarea marcada la fila deja de ser editable y muestra 'zz-verif-Vaso 8' (clase inv-dec); tras recargar HK (?como=1) y reabrir el turno sigue mostrando 8. Limitación: la vista fue la del panel de HK con sesión admin (rol operador a efectos de la acción, _modoColab=false); no se abrió el portal de un colaborador real, ?como=1 devolvió la misma vista admin."
+     },
+     {
+      "c": "b, c, d (de 41-veredicto.json)",
+      "ok": true,
+      "observado": "Copiados por referencia a log\\41-veredicto.json: b ok (compra sin '⏳ sin subir' sin recargar), c ok (casilla de reemplazo y un solo principal activo), d ok salvo node tests/run.js no verificable aquí. Hoy /api/health: ok, db, schema_version 9, secrets/gd/exif/zip true, uploadMaxMB 100; STRApi.version p5c41 en shell y páginas."
+     },
+     {
+      "c": "CLAUDE.md / declarados vs tocados / capa Marco",
+      "ok": null,
+      "observado": "No verificable desde Chrome (sin git/diff). Sin cambios respecto a lo dicho en 41-veredicto.json: el log de la CLI explica los archivos extra (tests/inventario.test.js y HTML que solo cambian por ?v=); sin indicio de cambios a la capa Marco sin prefijo 'modelo:'."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "HK no ofrece forma de borrar un turno manual (zz-verif-) desde la interfaz",
+      "nivel": "bajo",
+      "causa": "El panel de turno y la lista no tienen acción de eliminar y la página no define función de borrado de turnos; la limpieza de turnos de prueba exigida por el encargo no es posible por la interfaz. Deuda de producto/proceso, no fallo del lote 41.",
+      "observado": "Turno zz-verif-Propiedad (sh-m-1791423653924, hoy 7 oct 11:00–15:00, Carlos Rodriguez) queda 'En curso' al 100% en la lista de turnos activos de HK; no se borró por no existir vía en la interfaz y no se usó otra."
+     }
+    ],
+    "datosDePrueba": "Todo con prefijo zz-verif-. Creados por la interfaz: artículo zz-verif-Vaso (ar_muyvahfra8dm7, unidad) → DESACTIVADO; flujo zz-verif-Flujo 41 → BORRADO; depósito de apartamento zz-verif-Propiedad (dp_muysuhr6pck88) reactivado → DESACTIVADO de nuevo; turno manual sh-m-1791423653924 en zz-verif-Propiedad (flujo extra ya borrado) → NO borrado (sin vía en la interfaz; queda en HK, ver INC). Movimientos que quedan (inmutables): conteo 0 y conteo 8 de zz-verif-Vaso en zz-verif-Propiedad (turno sh-m-1791423653924). El depósito principal zz-verif-Principal (dp_muyum184g3ozd) sigue activo (el módulo exige uno; de la ejecución anterior). No se subieron fotos ni evidencias. No se tocó ningún dato real.",
+    "notas": "Criterio a (punto de parada del lote) verificado en producción por la interfaz; con b, c y d de la primera ejecución el lote queda aceptado en cuanto a comportamiento. Para el Chat de desarrollo: (1) decidir si el turno de prueba sh-m-1791423653924 se borra a mano o se agrega borrado de turnos manuales; (2) el flujo extra del turno ya no existe: el turno puede mostrar una referencia huérfana. Sin cambios observados a la capa Marco."
+   }
   },
   {
    "lote": null,
@@ -2531,34 +2736,43 @@
    "req": "REQ-INV1 fase 1",
    "categoria": "normal",
    "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
-   "estado": "desplegado",
-   "orden": 40
+   "estado": "verificado",
+   "orden": 40,
+   "espera": "e y f como colaborador/operador → DA-24"
   },
   {
    "lote": 41,
+   "req": "fix INC-88 + DT-30 (i)(ii)",
+   "categoria": "estándar",
+   "resumen": "HK: 0 precargado en la sub-fila de inventario; Inventario: repintar tras push, reemplazar depósito principal",
+   "estado": "aceptado",
+   "orden": 41
+  },
+  {
+   "lote": 42,
    "req": "REQ-K3",
    "categoria": "normal",
    "resumen": "Copia a Google Drive por cron y retención",
    "estado": "previsto",
-   "orden": 41,
+   "orden": 42,
    "espera": "cuenta de servicio y carpeta de Drive (Carlos)"
   },
   {
-   "lote": 42,
+   "lote": 43,
    "req": "REQ-INV1 fase 2",
    "categoria": "normal",
    "resumen": "Dotación, umbrales con tope, qué llevar, circuito de la ropa, activos + ticket por reserva, lista de compra",
    "estado": "previsto",
-   "orden": 42,
+   "orden": 43,
    "espera": "DA-22"
   },
   {
-   "lote": 43,
+   "lote": 44,
    "req": "REQ-INV1 fase 3",
    "categoria": "crítico",
    "resumen": "Compra ligada a adelanto/factura (B2), cargo por daño, auditoría, permisos inventario.*",
    "estado": "previsto",
-   "orden": 43,
+   "orden": 44,
    "espera": "cruce previo con Carlos; DA-12"
   }
  ],

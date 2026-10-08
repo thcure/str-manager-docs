@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T20:35:00Z",
+ "actualizadoEn": "2026-10-08T21:35:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1182,12 +1182,12 @@
    "id": "INC-95",
    "tipo": "INC",
    "modulo": "Calendario",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-08",
    "severidad": "bajo",
    "titulo": "El Calendario dice 'una reserva no se elimina, se cancela' pero no ofrece cancelar una reserva directa; la reserva de prueba res-1791487807449 (zz-verif-Propiedad) y su turno quedaron activos.",
-   "pendiente": "Lote 48 (instrucción escrita, en revisión de Carlos).",
-   "estado": "abierto",
+   "pendiente": "Cerrado 8-oct: lote 48 (36bfb37) aceptado; la reserva de prueba quedó cancelada.",
+   "estado": "cerrado",
    "origen": "46-veredicto-2."
   }
  ],
@@ -3553,6 +3553,73 @@
    }
   },
   {
+   "lote": 48,
+   "fecha": "2026-10-08",
+   "hash": "36bfb37",
+   "version": "p5c48",
+   "req": "INC-95",
+   "categoria": "normal",
+   "resumen": "Calendario: cancelar (motivo obligatorio, canceladaEn del servidor, canceladaPor, motivoCancelacion) y reactivar una reserva directa; reservas de canal muestran 'Se cancela en el canal'; sin 'Eliminar' para reservas; HK ya trataba la cancelada como iCal (sin cambios); tests/cancelar-reserva.test.js.",
+   "estado": "aceptado",
+   "observacion": "Aprobado por Carlos 15:55. CLI 15:57–16:01, 27/27 (el commit dice 28/28 por error, declarado). Declarados vs tocados contrastado por el Chat de desarrollo en el commit 36bfb37 (lista explícita en el mensaje): sin diferencias; el INC bajo del veredicto sobre esa lista queda sin efecto. 48-veredicto (16:20, Sonnet 5.5): b, c (reserva de prueba res-1791487807449 queda CANCELADA), d (reserva de Airbnb sin botón) y f ok; e por réplica en el navegador (0 VEVENT); a por la CLI. El verificador escribió 'aceptado con reservas' (formato no válido): se registra aceptado con el mismo criterio que 41/44/45. Queda el turno de prueba sh-res-1791487807449 'En curso' con chip 'reserva cancelada' (tiene inicio real; no se borra).",
+   "costo": {
+    "minutosCLI": 4,
+    "minutosDueno": 2,
+    "nota": "revisión del Calendario por Carlos"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 48,
+    "hash": "36bfb37",
+    "fecha": "2026-10-08",
+    "horaBogota": "16:20",
+    "resultado": "aceptado con reservas: criterios 5a (test) y 5f (parcial) no verificados en vivo; b, c, d verificados en producción; e verificado solo por réplica en cliente",
+    "modoVerificacion": "Chrome, perfil admin (deviceId 3198e288…, usuario Carlos Rodriguez, rol admin confirmado). Reloj real. Producción https://app.apartamentosbucaramanga.com, versión p5c48.",
+    "criterios": [
+     {
+      "c": "5a Test regla '¿se puede cancelar?' + node tests/run.js verde",
+      "ok": null,
+      "observado": "No verificable por el verificador (no ejecuta código). Según log de la CLI: 27/27 archivos OK, tests/cancelar-reserva.test.js con 10 casos. Declarado, no comprobado."
+     },
+     {
+      "c": "5b Admin cancela res-1791487807449 con motivo 'zz-verif- prueba 48'",
+      "ok": true,
+      "observado": "Panel muestra 'Cancelar reserva' (y ya no 'Eliminar'). Con motivo vacío el modal no avanza. Con motivo: GET /api/col/reservas → status:'cancelada', canceladaEn:'2026-10-08T21:14:36.000Z' (hora del servidor, coincide con updated_at), canceladaPor:{usuarioId:'1',nombre:'Carlos Rodriguez'}, motivoCancelacion:'zz-verif- prueba 48'. La barra deja de verse en la línea de tiempo (oculta sin 'Canceladas'); el panel conserva la reserva con chip 'Cancelada', 'Reactivar' y motivo. Turno sh-res-1791487807449: sigue en HK con chip rojo 'reserva cancelada' y estado 'En curso' (11:00–17:00, zz-verif-colab); es aceptable según el log y tiene trabajo iniciado."
+     },
+     {
+      "c": "5c Reactivar y volver a cancelar",
+      "ok": true,
+      "observado": "Modal 'Reactivar reserva' con aviso del motivo. Tras reactivar: status:'activa' y desaparecen canceladaEn/canceladaPor/motivoCancelacion. Segunda cancelación con el mismo motivo: status:'cancelada', canceladaEn:'2026-10-08T21:15:12.000Z'. Estado final: CANCELADA (limpieza hecha)."
+     },
+     {
+      "c": "5d Reserva real de Airbnb (solo abrir panel)",
+      "ok": true,
+      "observado": "Panel de una reserva con origen iCal: NO aparece botón 'Cancelar reserva' y SÍ el texto 'Se cancela en el canal (Airbnb/iCal); el próximo sync la marcará.' No se tocó nada ni se anotan datos del huésped."
+     },
+     {
+      "c": "5e Exportación iCal de zz-verif-Propiedad sin la cancelada",
+      "ok": true,
+      "observado": "SOLO RÉPLICA: en el navegador, STRApi.reservas.exportables() sobre las reservas de zz-verif-Propiedad devuelve 0 elementos e icsDe() genera 0 VEVENT. No se descargó el feed publicado real (no cuenta como aceptado en vivo por esta vía)."
+     },
+     {
+      "c": "5f /api/health esquema 9; ?v=p5c48; consola; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 9. str-api.js?v=p5c48 en Calendario y HK. Sin errores de consola en Calendario y HK (seguimiento iniciado tras la carga inicial de la primera visita; se recargaron ambas páginas). Los modales de cancelar/reactivar son propios; no apareció ningún diálogo nativo."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Log de la CLI no trae lista explícita de 'archivos declarados vs tocados'",
+      "nivel": "bajo",
+      "causa": "La instrucción §6 exige la lista explícita y el log 48 no la incluye (solo describe qué cambió); además el mensaje del commit dice 28/28 y el real es 27/27 (declarado por la CLI). El verificador no pudo cruzar declarados vs tocados sin acceso al commit. Deuda de proceso, no afecta al producto.",
+      "observado": "log\\48-*.txt: secciones Hecho / No hecho sin la lista de archivos."
+     }
+    ],
+    "datosDePrueba": "Solo la reserva de prueba existente res-1791487807449 (zz-verif-Propiedad, directa), que quedó CANCELADA con motivo 'zz-verif- prueba 48'. No se crearon datos nuevos. Su turno sh-res-1791487807449 sigue 'En curso' con chip 'reserva cancelada' (no se tocó; tiene inicio real, no se puede borrar).",
+    "notas": "CLAUDE.md: contiene referencias a p5c48 y a cancelar/reactivar reserva (líneas 36 y 111), consistente con actualización en el commit; no se pudo comprobar el diff del commit (sin acceso a git). Capa Marco: no se vio ningún cambio sin prefijo 'modelo:' (el log no menciona ninguno). Los puntos 5a y la lista declarados/tocados quedan por confirmar por el Chat de desarrollo. Chrome limpio: pestaña cerrada."
+   }
+  },
+  {
    "lote": null,
    "tipo": "modelo",
    "fecha": "2026-10-08",
@@ -3894,9 +3961,9 @@
    "req": "REQ-K3",
    "categoria": "crítico",
    "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25",
-   "estado": "previsto",
+   "estado": "en cola",
    "orden": 47,
-   "espera": "instrucción 49 (K3a) aprobada por Carlos; se encola después del 48"
+   "espera": "encolado tras aceptar el 48; verificador en Opus 5.5; Carlos pone los 3 secretos tras el despliegue"
   },
   {
    "lote": 46,
@@ -3919,9 +3986,8 @@
    "req": "INC-95",
    "categoria": "normal",
    "resumen": "Calendario: cancelar y reactivar una reserva directa (retira la reserva de prueba del 46)",
-   "estado": "previsto",
-   "orden": 47,
-   "espera": "revisión de Carlos"
+   "estado": "aceptado",
+   "orden": 47
   }
  ],
  "riesgos": [

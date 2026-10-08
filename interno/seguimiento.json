@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T04:00:00Z",
+ "actualizadoEn": "2026-10-08T04:20:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1023,7 +1023,7 @@
    "etapa": "✔",
    "fecha": "2026-10-07",
    "titulo": "Decisión de Carlos (20:02): se autoriza un usuario colaborador de prueba 'zz-verif-colab' para que el Agente verificador cubra los criterios 'como colaborador' (403, botón ausente, PUT que no altera campos protegidos, cola en su teléfono). Carlos no hace pruebas: acepta el verificador.",
-   "pendiente": "8-oct: Carlos creó el usuario colaborador 'zz-verif-colab' y lo asignó (a zz-verif-Propiedad). M-12 al Arquitecto: publicar en el encargo rol-verificador cómo lo usa (sesión abierta por Carlos en Chrome, sin que el verificador escriba contraseñas); después copio el texto a la tarea (un clic de Carlos) y relanzo 38-3/39-3/40-2. Sesión del colaborador abierta por Carlos en el perfil de Chrome 'valeriaramos.xyz' (comprobado 23:10; admin sigue en su perfil). Mientras, esos criterios siguen 'no verificables'.",
+   "pendiente": "8-oct: Carlos creó el usuario colaborador 'zz-verif-colab' y lo asignó (a zz-verif-Propiedad). M-12 al Arquitecto: publicar en el encargo rol-verificador cómo lo usa (sesión abierta por Carlos en Chrome, sin que el verificador escriba contraseñas); después copio el texto a la tarea (un clic de Carlos) y relanzo 38-3/39-3/40-2. Sesión del colaborador abierta por Carlos en el perfil de Chrome 'valeriaramos.xyz' (comprobado 23:10; admin sigue en su perfil). Mientras, esos criterios siguen 'no verificables'. 22:58: el verificador abrió el portal de zz-verif-colab en el segundo perfil (lectura) — el mecanismo funciona.",
    "estado": "decidido",
    "origen": "Chat de desarrollo, 7-oct 20:02."
   },
@@ -1055,11 +1055,11 @@
    "id": "INC-89",
    "tipo": "INC",
    "modulo": "HK (turnos)",
-   "etapa": "📝",
+   "etapa": "🔧",
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "HK no ofrece forma de borrar un turno manual desde la interfaz (ni el panel del turno ni la lista tienen acción de eliminar). La limpieza de turnos de prueba zz-verif- que exige el encargo del verificador no es posible por la interfaz; queda el turno sh-m-1791423653924 en zz-verif-Propiedad (7-oct 11:00–15:00, flujo extra ya borrado → referencia huérfana posible).",
-   "pendiente": "Decidir: borrar ese turno a mano o añadir 'Eliminar turno manual' en HK (solo admin, turnos sin iCal). Deuda de producto, no fallo del lote 41. 37-2 reutilizó ese turno (queda 'Lista' con flujo extra huérfano y una foto zz-verif-).",
+   "pendiente": "Instrucción 43 escrita (43-instr-inc89-eliminar-turno-manual.md, normal, R-1): botón op-only solo para sh-m- sin resId, sin tickets abiertos ni pagos; borrado lógico por _saveS/_persistCol; el servidor ya limita al colaborador (INC-63). Al aceptarse, el verificador borra sh-m-1791423653924.",
    "estado": "abierto",
    "origen": "Veredicto 41-2 (20:50)."
   },
@@ -1067,13 +1067,25 @@
    "id": "INC-90",
    "tipo": "INC",
    "modulo": "HK (turnos)",
-   "etapa": "📝",
+   "etapa": "🔧",
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "HK: tras 'Cerrar igual' con una foto pendiente, la línea de Limpieza del panel del turno muestra '🧹 aNaN' unos segundos y luego '🧹 22:35'. Causa probable: se formatea limpiezaCerradaEn.at antes de que el servidor estampe la hora (patrón conocido: formatear un at aún no resuelto).",
-   "pendiente": "Fix estándar: en el render, si at no es fecha válida usar atDispositivo o '…'. Comprobar si ocurre también sin pendientes.",
+   "pendiente": "Instrucción 42 escrita (42-instr-fix-inc90-hora-sentinel.md): causa leída en el código — _nowStamp deja at='__server__' hasta la respuesta y _timeStr hace new Date('__server__') → NaN. Fix: _timeStr(iso, respaldo=atDispositivo).",
    "estado": "abierto",
    "origen": "Veredicto 37-2 (22:37)."
+  },
+  {
+   "id": "DT-31",
+   "tipo": "DT",
+   "modulo": "HK (turnos)",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "HK: '✅ Cerrar turno' (_cerrarTurno) cierra de inmediato aunque haya una tarea con foto exigida sin foto; solo 'Cerrar limpieza' avisa. El lote 36 no lo exigía.",
+   "pendiente": "Decidir si _cerrarTurno debe mostrar los mismos pendientes que _cerrarLimpieza (probable fix estándar).",
+   "estado": "abierto",
+   "origen": "Veredicto 36-2 (22:58)."
   }
  ],
  "cambios": [
@@ -2308,7 +2320,7 @@
    "categoria": "normal",
    "resumen": "Foto de tarea exigida (hasta 10, mínimo 1), heredada de la actividad sin excepción; _fbFotoEfectiva en HK/Propiedades/Flujos; captura con reducción a 1600 px, miniaturas, bloqueo del 'hecho' y pendientes 'sin foto' al cerrar; turno.fotos con unión por url en el merge; columna 'Fotos mín.' en Excel.",
    "estado": "aceptado",
-   "observacion": "Verificador 11:53–12:10: aceptado; 4/10 criterios en producción (c, d, f, g, h, i no verificables: exigen turno real); datos zz-verif- creados y borrados. INC bajo → INC-83. Diferencias declaradas por la CLI: str-guia-visor.js (lightbox suelto), str-propiedades.html (copia de _fbFotoEfectiva), tests/lib/port-col.js; ref del turno saneado para /api/upload; una tarea en modo proceso no se frena por foto (límite). Sin PHP en LENOVO: api/col solo por réplica JS. CLI 11:36–11:47 (11 min). Carlos debe recorrer c–h con un turno real.",
+   "observacion": "Verificador 11:53–12:10: aceptado; 4/10 criterios en producción (c, d, f, g, h, i no verificables: exigen turno real); datos zz-verif- creados y borrados. INC bajo → INC-83. Diferencias declaradas por la CLI: str-guia-visor.js (lightbox suelto), str-propiedades.html (copia de _fbFotoEfectiva), tests/lib/port-col.js; ref del turno saneado para /api/upload; una tarea en modo proceso no se frena por foto (límite). Sin PHP en LENOVO: api/col solo por réplica JS. CLI 11:36–11:47 (11 min). Carlos debe recorrer c–h con un turno real. Verificador 22:58 (36-veredicto-2, turno zz-verif- por la interfaz): c, d, f, h ok; g ok en el panel del operador, portal '📷 N' no verificable (turno no asignado a zz-verif-colab; el verificador sí abrió el portal en el perfil del colaborador); i sin Node. Sigue aceptado. DT-31: '✅ Cerrar turno' cierra sin aviso aunque falte una foto exigida.",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": null,
@@ -2384,6 +2396,54 @@
     ],
     "datosDePrueba": "creados y borrados: flujos 'zz-verif-f9o' (1 actividad 'zz-verif-act', 3 tareas 'zz-verif-t1'..'t3') y 'zz-verif-imp' (importado como copia). Borrados con el diálogo de eliminar de la página; tras recargar no queda ningún 'zz-verif-' en la lista (quedan Iniciar, Alistamiento, Revisión). Objetos sintéticos y reemplazos en memoria de _readFlujos/showToast restaurados. No se tocaron turnos, propiedades ni flujos reales.",
     "notas": "Ningún criterio falló, pero c (parcial), d, f, g (parcial), h e i (parcial) no se pudieron probar en producción por exigir un turno real o subida/escritura de turnos (fuera de la lista autorizada). Carlos debe recorrer c–h con un turno real: subir foto, ✕, 10/10, dos pestañas, marcar sin foto, lightbox, cierre con 'sin foto'; son criterios 'Detener' y quedan pendientes de su visto bueno."
+   },
+   "aceptacion2": {
+    "lote": 36,
+    "hash": "bea9941",
+    "fecha": "2026-10-08",
+    "horaBogota": "22:58 (7-oct, reloj real del navegador; UTC 03:58 del 8-oct)",
+    "resultado": "aceptado (repetición: c, d, f, h verificados en producción; g parcial; i parcial)",
+    "modoVerificacion": "Producción sirviendo p5c41 (lotes posteriores): se verificó el comportamiento, no la versión. Chrome (Browser 2, administrador) y datos por la interfaz. No depende de la hora; reloj real. a, b y e quedan ok según log\\36-veredicto.json (no se repitieron).",
+    "criterios": [
+     {
+      "c": "a, b, e (referencia a log\\36-veredicto.json)",
+      "ok": true,
+      "observado": "Ok en la verificación anterior; no repetidos."
+     },
+     {
+      "c": "c. HK: tarea con foto exigida muestra '📷 Tomar foto' y '0/1'; marcarla sin foto → toast 'Falta la foto' y no marca",
+      "ok": true,
+      "observado": "Flujo zz-verif-Flujo 36 creado por la interfaz (actividad zz-verif-Act 36 con 📷 en la cabecera y 2 tareas; las 2 tareas quedaron marcadas, deshabilitadas) y agregado con '+ Agregar flujo a este turno' al turno sh-m-1791423653924 (aún admitía flujos aunque estaba 'Lista'). El checklist mostró en cada tarea botón '📷 Tomar foto' y '0/1'. Clic en el check de zz-verif-T1 sin foto → toast 'Falta la foto (mín. 1)' (capturado con MutationObserver); el progreso siguió en 0/2 tareas."
+     },
+     {
+      "c": "d. Subir imagen: miniatura → real; turno.fotos[clave]={url,at,por}; at resuelto por servidor; marcar hecha funciona; ✕ y remove llegan al servidor",
+      "ok": true,
+      "observado": "Imagen sintética 800x600 (canvas, nombre zz-verif-foto-N.jpg) entregada al input de _hkTomarFoto por la interfaz. En producción p5c41 la subida pasa por la cola del lote 37: mostró '📷 1 pendiente' y a los pocos segundos '1/1' con miniatura. turno.fotos[clave] = [{url:'/api/archivo/1/foto/sh-m-1791423653924/a878….jpg', at:'2026-10-08T03:57:12.000Z' (ISO real, no '__server__'), atDispositivo, por:'1', nombre}]. Marcar zz-verif-T1 ahora sí funcionó (1/2 tareas); en la tarea hecha las miniaturas no llevan ✕. ✕ sobre la miniatura (tarea no hecha): el arreglo quedó [] en local y, tras recargar y consultar STRApi.get('/col/turnos') directo al servidor, sigue [] (el remove llegó y no vuelve)."
+     },
+     {
+      "c": "f. Dos pestañas: una foto en cada una sobre la misma tarea → ambas tienen las dos (unión por url)",
+      "ok": true,
+      "observado": "Dos pestañas HK del mismo navegador con el turno abierto; foto en la pestaña A y segundos después en la B sobre la tarea zz-verif-T1. Tras ~55 s: servidor = 2 urls (…41078384.jpg, …5bbd32e1.jpg), y las dos pestañas mostraban las dos y '2/1'. Límite: ambas pestañas comparten localStorage; la unión se confirmó en el servidor."
+     },
+     {
+      "c": "g. Panel del operador: miniaturas por tarea; clic abre a pantalla completa; consola limpia. Portal: tarjeta '📷 N'",
+      "ok": null,
+      "observado": "PARCIAL. Operador: 2 miniaturas bajo la tarea; clic → _hkVerFoto abre .sgv-lightbox a pantalla completa (1999x875) con la imagen y flechas ‹ ›; cerró con el ✕ (la tecla Escape enviada por Chrome no la cerró; puede ser del envío de teclas, no se probó con teclado real). Consola de HK sin errores (el seguimiento arrancó al empezar a leerla, no desde la carga); 0 'undefined'. Portal con '📷 N': NO verificable: el turno sh-m-1791423653924 está asignado a 'Carlos Rodriguez', no a zz-verif-colab; el portal de zz-verif-colab (Browser 1) dice 'Hoy no tienes turnos'. No se reasignó."
+     },
+     {
+      "c": "h. Cierre de limpieza: tarea con foto exigida sin foto aparece como pendiente 'sin foto'",
+      "ok": true,
+      "observado": "Con T1 hecha y T2 sin foto, _cerrarLimpieza('sh-m-1791423653924') abrió el modal '🧹 Cerrar limpieza · Pendientes obligatorias: zz-verif-T2 · sin foto · … agrega una nota · Cancelar / Confirmar igualmente'. Se canceló."
+     },
+     {
+      "c": "i. node tests/run.js verde; health esquema 9; ?v=; consola limpia; 0 undefined; sin alert/confirm/prompt",
+      "ok": null,
+      "observado": "node tests/run.js: no verificable desde Chrome (sin Node del proyecto). /api/health: ok, db, schema_version 9. Páginas con str-api.js?v=p5c41 (producción sirve lotes posteriores; no p5c36). Consola de HK sin errores; 0 'undefined' en HK y Flujos. No se vieron diálogos nativos; sin embargo el renderer tardó/expiró en capturas de pantalla dos veces (tras agregar el flujo al turno y tras 🗑 en Flujos); en el segundo caso había un modal propio con Cancelar/Eliminar, y no se confirmó que fuera un diálogo nativo."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creado y BORRADO: flujo 'zz-verif-Flujo 36' (actividad zz-verif-Act 36, tareas zz-verif-T1, zz-verif-T2): quitado del turno (_quitarFlujoExtra) y eliminado en Flujos; tras recargar no queda ningún zz-verif- en la lista (Simples · 3). Turno de prueba sh-m-1791423653924 (zz-verif-Propiedad): se reutilizó; T1 se marcó hecha y el turno se cerró por error con '✅ Cerrar turno' (no abre modal; se reabrió con '↩ Reabrir'); el turno de prueba queda en la propiedad zz-verif-Propiedad (HK no borra turnos manuales, INC-89). turno.fotos conserva las claves de la prueba (arreglo [] de la tarea T1 borrada del flujo, más 2 fotos de T1 y 1 de una verificación anterior). ARCHIVOS SUBIDOS que no se pueden borrar del servidor: /api/archivo/1/foto/sh-m-1791423653924/a87800906ec5687254ee71133c2ac097.jpg (quitada con ✕), …/843ca185d5637a310e68ea7b41078384.jpg y …/db1a2d86d272f1b10214d88a5bbd32e1.jpg (pestañas A y B, aún en turno.fotos). No se tocó nada sin el prefijo zz-verif-.",
+    "notas": "Cierra la observación de c, d, f y h con resultado ok. Pendientes sin poder probar: (1) g, tarjeta '📷 N' en el portal: requiere un turno asignado a zz-verif-colab; (2) i, node tests/run.js. Observación (no es criterio de este lote, nivel bajo, para revisar): '✅ Cerrar turno' (_cerrarTurno) cerró de inmediato el turno de prueba con una tarea de foto exigida sin foto y sin modal; el cierre de limpieza sí advierte. La instrucción 36 solo exige el aviso en _cerrarLimpieza. Subida: en p5c41 pasa por la cola del lote 37 ('pendiente' → '1/1'); el indicador 'subiendo…' del lote 36 ya no se ve y no cuenta como incumplido. Sin cambios a la capa Marco observados. Se usó Browser 1 solo para leer el portal de zz-verif-colab (sin tocar datos); el administrador fue Browser 2."
    }
   },
   {
@@ -2870,29 +2930,48 @@
   },
   {
    "lote": 42,
+   "req": "INC-90",
+   "categoria": "estándar",
+   "resumen": "HK: _timeStr con sentinel __server__ → hora del dispositivo, nunca 'aNaN'",
+   "estado": "previsto",
+   "orden": 42,
+   "espera": "se encola tras las verificaciones 38-3/39-3/40-2 (un lote a la vez)"
+  },
+  {
+   "lote": 43,
+   "req": "INC-89",
+   "categoria": "normal",
+   "resumen": "HK: eliminar turno manual (solo sh-m- sin resId, sin tickets abiertos ni pagos; solo admin/operador; modal propio)",
+   "estado": "previsto",
+   "orden": 43,
+   "riesgo": "R-1",
+   "espera": "tras el 42"
+  },
+  {
+   "lote": 44,
    "req": "REQ-K3",
    "categoria": "normal",
    "resumen": "Copia a Google Drive por cron y retención",
    "estado": "previsto",
-   "orden": 42,
+   "orden": 44,
    "espera": "cuenta de servicio y carpeta de Drive (Carlos)"
   },
   {
-   "lote": 43,
+   "lote": 45,
    "req": "REQ-INV1 fase 2",
    "categoria": "normal",
    "resumen": "Dotación, umbrales con tope, qué llevar, circuito de la ropa, activos + ticket por reserva, lista de compra",
    "estado": "previsto",
-   "orden": 43,
+   "orden": 45,
    "espera": "DA-22"
   },
   {
-   "lote": 44,
+   "lote": 46,
    "req": "REQ-INV1 fase 3",
    "categoria": "crítico",
    "resumen": "Compra ligada a adelanto/factura (B2), cargo por daño, auditoría, permisos inventario.*",
    "estado": "previsto",
-   "orden": 44,
+   "orden": 46,
    "espera": "cruce previo con Carlos; DA-12"
   }
  ],

@@ -914,7 +914,8 @@
     "doc-log-lote"
    ],
    "vigenciaDesde": "2026-09-11",
-   "notas": "Un lote a la vez; lo crítico nunca entra sin cruce previo con Carlos. La ejecuta el agente CLI mediante la tarea de Windows que se sigue llamando 'STR cola CLI' (cada minuto, sin condiciones de energía)."
+   "notas": "Un lote a la vez; lo crítico nunca entra sin cruce previo con Carlos. La ejecuta el agente CLI mediante la tarea de Windows que se sigue llamando 'STR cola CLI' (cada minuto, sin condiciones de energía).",
+   "ficha": "APO01.10-a"
   },
   {
    "id": "tarea-revisar-cola-str",
@@ -996,7 +997,8 @@
    "vigenciaDesde": "2026-10-06",
    "sombrero": "agente-verificador",
    "encargo": "rol-verificador",
-   "notas": "Recreada el 2026-10-06 en LENOVO (sucede a tarea-agente-verificador-asus). Cómo se lanza (desde el 2026-10-07): texto fijo, firmado para el equipo; el Chat de desarrollo escribe log\\verificar.json con el lote y la lanza sin mensaje adicional (un mensaje adicional no va firmado y la ejecución cae a la nube). Así no pide la aprobación de Carlos por lote. Escribe solo log\\NN-veredicto.json, que el Chat de desarrollo copia sin cambios a cambios[].aceptacion. Probada con el lote 27 en modo prueba (log\\27-veredicto-prueba.json, 2026-10-06 17:12). Pendiente P-1: conserva conectores Gmail/Drive/Calendar/Claude Docs, prohibidos en sus instrucciones; la creación no permite quitarlos."
+   "notas": "Recreada el 2026-10-06 en LENOVO (sucede a tarea-agente-verificador-asus). Cómo se lanza (desde el 2026-10-07): texto fijo, firmado para el equipo; el Chat de desarrollo escribe log\\verificar.json con el lote y la lanza sin mensaje adicional (un mensaje adicional no va firmado y la ejecución cae a la nube). Así no pide la aprobación de Carlos por lote. Escribe solo log\\NN-veredicto.json, que el Chat de desarrollo copia sin cambios a cambios[].aceptacion. Probada con el lote 27 en modo prueba (log\\27-veredicto-prueba.json, 2026-10-06 17:12). Pendiente P-1: conserva conectores Gmail/Drive/Calendar/Claude Docs, prohibidos en sus instrucciones; la creación no permite quitarlos.",
+   "ficha": "BAI07.05-v"
   },
   {
    "id": "tarea-agente-verificador-asus",
@@ -1686,7 +1688,8 @@
     "doc-transiciones-chat"
    ],
    "vigenciaDesde": "2026-10-06",
-   "notas": "Pedido por Carlos el 6-oct-2026: los mensajes entre chats y agentes se escriben aquí y Carlos solo dice 'revisa el buzón'. Quien envía crea el mensaje; quien recibe solo cambia estado y respuesta. Lo que pide decisión de Carlos sigue yendo a seguimiento.json (DA-n, pedidos). Los agentes verificador y CLI no lo leen."
+   "notas": "Pedido por Carlos el 6-oct-2026: los mensajes entre chats y agentes se escriben aquí y Carlos solo dice 'revisa el buzón'. Quien envía crea el mensaje; quien recibe solo cambia estado y respuesta. Lo que pide decisión de Carlos sigue yendo a seguimiento.json (DA-n, pedidos). Los agentes verificador y CLI no lo leen.",
+   "ficha": "APO01.03-b"
   },
   {
    "id": "json-verificar",
@@ -1721,7 +1724,8 @@
     "doc-log-lote"
    ],
    "vigenciaDesde": "2026-10-07",
-   "notas": "Lo escribe solo el Chat de desarrollo, uno por lote, antes de lanzar el Agente verificador: {lote, prueba, instruccion, commit, version, archivoVeredicto, notas, escritoPor, fecha}. El verificador solo lo lee. Las notas solo restringen; nunca amplían el encargo rol-verificador."
+   "notas": "Lo escribe solo el Chat de desarrollo, uno por lote, antes de lanzar el Agente verificador: {lote, prueba, instruccion, commit, version, archivoVeredicto, notas, escritoPor, fecha}. El verificador solo lo lee. Las notas solo restringen; nunca amplían el encargo rol-verificador.",
+   "ficha": "BAI07.05-v"
   },
   {
    "id": "herramienta-vigilar-buzon",
@@ -1757,7 +1761,8 @@
     "json-destinatarios"
    ],
    "vigenciaDesde": "2026-10-08",
-   "notas": "Revisa el buzón sin usar Claude y, por cada mensaje pendiente nuevo, deja en el chat destinatario solo la frase fija 'Revisa el buzon … M-n' con claude -p --cloud (probado el 8-oct con el Chat de desarrollo: ok). Nunca copia el contenido del mensaje (repositorio público). Créditos: solo el turno del chat que despierta."
+   "notas": "Revisa el buzón sin usar Claude y, por cada mensaje pendiente nuevo, deja en el chat destinatario solo la frase fija 'Revisa el buzon … M-n' con claude -p --cloud (probado el 8-oct con el Chat de desarrollo: ok). Nunca copia el contenido del mensaje (repositorio público). Créditos: solo el turno del chat que despierta.",
+   "ficha": "APO01.03-b"
   },
   {
    "id": "json-destinatarios",
@@ -1790,7 +1795,51 @@
     "herramienta-vigilar-buzon"
    ],
    "vigenciaDesde": "2026-10-08",
-   "notas": "Nombre del actor → sesión de su chat. Lo escribe el Arquitecto; se actualiza cada vez que un chat nuevo reemplaza a otro."
+   "notas": "Nombre del actor → sesión de su chat. Lo escribe el Arquitecto; se actualiza cada vez que un chat nuevo reemplaza a otro.",
+   "ficha": "APO01.03-b"
+  },
+  {
+   "id": "json-conocimiento",
+   "nombre": "Base de conocimiento del modelo (conocimiento.json)",
+   "tipo": "json",
+   "capa": "marco",
+   "cobit": [
+    "BAI08.01",
+    "BAI08.02",
+    "BAI08.03",
+    "APO03.02",
+    "BAI10.01",
+    "BAI10.02",
+    "BAI10.05"
+   ],
+   "sdlc": [
+    "operacion"
+   ],
+   "pmi": [
+    "monitoreo"
+   ],
+   "rol": "AP",
+   "usa": [
+    "AA",
+    "ACf"
+   ],
+   "vive": "str-manager-docs/interno/conocimiento.json → página Conocimiento del STR (por construir)",
+   "estado": "vigente",
+   "entrada_de": [
+    "APO01"
+   ],
+   "salida_a": [
+    "APO01",
+    "BAI10"
+   ],
+   "relacion": [
+    "json-elementos",
+    "json-encargos-rol",
+    "json-mensajes",
+    "json-destinatarios"
+   ],
+   "vigenciaDesde": "2026-10-08",
+   "notas": "Fichas de proceso (APO01.03-b buzón, APO01.10-a cola, BAI07.05-v verificación), mapa de funcionamiento y líneas base (LENOVO, ASUS, sesiones, Hostinger). La escribe el Arquitecto."
   }
  ]
 }

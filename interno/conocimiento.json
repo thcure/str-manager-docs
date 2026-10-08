@@ -1,0 +1,393 @@
+{
+ "version": 1,
+ "actualizadoEn": "2026-10-08",
+ "titulo": "Base de conocimiento del modelo de operación",
+ "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
+ "cobit": {
+  "BAI08.01": "fuentes identificadas y clasificadas (este archivo, elementos.json, encargos, seguimiento)",
+  "BAI08.02": "fichas de proceso con código, dueño y relaciones",
+  "BAI08.03": "cada encargo y la página Conocimiento apuntan a las fichas",
+  "APO03.02": "mapa de funcionamiento = vista de la arquitectura actual (sin arquitectura objetivo)",
+  "BAI10.01": "el mapa usa los mismos ids que elementos.json",
+  "BAI10.02": "líneas base de configuración por equipo y por tarea",
+  "BAI10.05": "revisión periódica de la realidad contra las líneas base"
+ },
+ "reglas": [
+  "Todo mecanismo nuevo nace con su ficha (código, nombre, dueño) y se da por cerrado solo cuando el índice (elementos.json), el procedimiento (ins-*), los encargos, comandos-usuario y el mapa apuntan a ella.",
+  "Toda configuración aprobada de un equipo o de una tarea se escribe en su línea base el mismo día; cambiarla es un cambio de tipo 'modelo'.",
+  "En cada revisión periódica (y en todo cambio de equipo, ins-006) se compara la realidad con la línea base; toda diferencia se corrige o se anota."
+ ],
+ "mapa": {
+  "nodos": [
+   {
+    "id": "carlos",
+    "nombre": "Carlos",
+    "tipo": "actor",
+    "nota": "Pide, decide (DA-n), aprueba lo crítico, claves y perfiles de prueba"
+   },
+   {
+    "id": "arquitecto",
+    "nombre": "Arquitecto",
+    "tipo": "actor",
+    "nota": "Capa Marco: modelo, encargos, fichas, líneas base"
+   },
+   {
+    "id": "chat-desarrollo",
+    "nombre": "Chat de desarrollo",
+    "tipo": "actor",
+    "nota": "REQ, plan, instrucciones, cola, seguimiento"
+   },
+   {
+    "id": "agente-cli",
+    "nombre": "Agente CLI",
+    "tipo": "actor",
+    "nota": "Construye el lote y lo sube a producción"
+   },
+   {
+    "id": "agente-verificador",
+    "nombre": "Agente verificador",
+    "tipo": "actor",
+    "nota": "Verifica en producción y deja el veredicto"
+   },
+   {
+    "id": "buzon",
+    "nombre": "Buzón + despertador",
+    "tipo": "mecanismo",
+    "ficha": "APO01.03-b"
+   },
+   {
+    "id": "cola",
+    "nombre": "Cola de lotes",
+    "tipo": "mecanismo",
+    "ficha": "APO01.10-a"
+   },
+   {
+    "id": "verificar-json",
+    "nombre": "verificar.json",
+    "tipo": "mecanismo",
+    "ficha": "BAI07.05-v"
+   },
+   {
+    "id": "seguimiento",
+    "nombre": "Seguimiento (seguimiento.json)",
+    "tipo": "mecanismo"
+   },
+   {
+    "id": "lenovo",
+    "nombre": "LENOVO (equipo activo)",
+    "tipo": "lugar",
+    "lineaBase": "lb-lenovo"
+   },
+   {
+    "id": "github-docs",
+    "nombre": "GitHub str-manager-docs (público)",
+    "tipo": "lugar"
+   },
+   {
+    "id": "github-codigo",
+    "nombre": "GitHub str-manager (código)",
+    "tipo": "lugar"
+   },
+   {
+    "id": "hostinger",
+    "nombre": "Hostinger (producción)",
+    "tipo": "lugar",
+    "lineaBase": "lb-hostinger"
+   },
+   {
+    "id": "nube-claude",
+    "nombre": "Nube de Claude (chats y tareas)",
+    "tipo": "lugar"
+   }
+  ],
+  "flujos": [
+   {
+    "de": "carlos",
+    "a": "chat-desarrollo",
+    "que": "pedido, decisión DA-n, aprobación de críticos"
+   },
+   {
+    "de": "chat-desarrollo",
+    "a": "cola",
+    "que": "instrucción NN-instr-*.md",
+    "ficha": "APO01.10-a"
+   },
+   {
+    "de": "cola",
+    "a": "agente-cli",
+    "que": "lote (tarea 'STR cola CLI' cada minuto)",
+    "ficha": "APO01.10-a"
+   },
+   {
+    "de": "agente-cli",
+    "a": "github-codigo",
+    "que": "commit en main"
+   },
+   {
+    "de": "github-codigo",
+    "a": "hostinger",
+    "que": "despliegue automático"
+   },
+   {
+    "de": "chat-desarrollo",
+    "a": "verificar-json",
+    "que": "lote a verificar + perfil de Chrome (deviceId)",
+    "ficha": "BAI07.05-v"
+   },
+   {
+    "de": "verificar-json",
+    "a": "agente-verificador",
+    "que": "ejecución sin mensaje, firmada para LENOVO",
+    "ficha": "BAI07.05-v"
+   },
+   {
+    "de": "agente-verificador",
+    "a": "hostinger",
+    "que": "pruebas en Chrome con datos zz-verif-"
+   },
+   {
+    "de": "agente-verificador",
+    "a": "chat-desarrollo",
+    "que": "log\\NN-veredicto.json"
+   },
+   {
+    "de": "chat-desarrollo",
+    "a": "seguimiento",
+    "que": "aceptación, INC, plan (subida web: puente, INC-87)"
+   },
+   {
+    "de": "chat-desarrollo",
+    "a": "buzon",
+    "que": "mensaje M-n",
+    "ficha": "APO01.03-b"
+   },
+   {
+    "de": "arquitecto",
+    "a": "buzon",
+    "que": "mensaje M-n",
+    "ficha": "APO01.03-b"
+   },
+   {
+    "de": "buzon",
+    "a": "chat-desarrollo",
+    "que": "frase fija 'Revisa el buzon … M-n'",
+    "ficha": "APO01.03-b"
+   },
+   {
+    "de": "buzon",
+    "a": "arquitecto",
+    "que": "frase fija 'Revisa el buzon … M-n'",
+    "ficha": "APO01.03-b"
+   },
+   {
+    "de": "arquitecto",
+    "a": "github-docs",
+    "que": "modelo: encargos, elementos, fichas, líneas base"
+   }
+  ],
+  "abiertos": [
+   {
+    "donde": "chat-desarrollo",
+    "que": "Sube a str-manager-docs por la web (403 en git push); se resuelve con el próximo chat (INC-87)"
+   }
+  ]
+ },
+ "fichas": [
+  {
+   "codigo": "APO01.03-b",
+   "nombre": "Buzón entre actores",
+   "dueno": "Arquitecto",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-06",
+   "para": "Que los chats se pasen trabajo sin que Carlos haga de mensajero, y que cada uno se entere solo de lo que le llega.",
+   "quien": {
+    "escriben": "Chat de desarrollo y Arquitecto",
+    "mantiene": "Arquitecto (script, destinatarios.json)",
+    "carlos": "LENOVO encendido; instalar la tarea al cambiar de equipo"
+   },
+   "piezas": [
+    "json-mensajes",
+    "json-destinatarios",
+    "herramienta-vigilar-buzon"
+   ],
+   "flujo": [
+    "Un chat agrega un mensaje M-n en interno/mensajes.json con estado 'pendiente' y lo sube.",
+    "La tarea de Windows 'STR buzon' (cada 3 min, en LENOVO) lee el buzón sin usar Claude.",
+    "Si hay un pendiente nuevo, busca el chat destinatario en destinatarios.json.",
+    "Deja en ese chat solo la frase fija 'Revisa el buzon … M-n' con la CLI de Claude.",
+    "El chat lee el mensaje, hace lo pedido y cambia solo estado y respuesta.",
+    "El script anota lo avisado para no repetir; si falla, reintenta y deja el error en buzon.log."
+   ],
+   "reglas": [
+    "Quien envía crea el mensaje y no lo cambia; quien recibe solo cambia estado y respuesta.",
+    "Nunca se copia el contenido del mensaje al chat: el repositorio es público.",
+    "Lo que necesita decisión de Carlos va al seguimiento (DA-n), no al buzón.",
+    "El verificador y la CLI no leen el buzón."
+   ],
+   "instalacion": "ins-006, paso 7b",
+   "comprobacion": "$t=Get-ScheduledTask -TaskName \"STR buzon\"; $t.State; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; Get-Content \"$HOME\\Downloads\\str-instr-cola\\buzon\\buzon.log\" -Tail 3",
+   "creditos": "Revisar no gasta créditos de Claude; solo el turno del chat que despierta.",
+   "riesgos": [
+    "Mientras dure INC-87, el Chat de desarrollo sube sus respuestas por la web y con retraso.",
+    "Al abrir un chat nuevo hay que cambiar su sesión en destinatarios.json."
+   ]
+  },
+  {
+   "codigo": "APO01.10-a",
+   "nombre": "Cola de lotes (Agente CLI)",
+   "dueno": "Arquitecto (mecanismo) · Chat de desarrollo (uso)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-09-24",
+   "para": "Construir y desplegar cada lote sin intervención de Carlos, uno a la vez.",
+   "piezas": [
+    "cola-str-instr"
+   ],
+   "flujo": [
+    "El Chat de desarrollo deja NN-instr-*.md en la carpeta de la cola del equipo activo.",
+    "La tarea 'STR cola CLI' (cada minuto, con lanzar-oculto.vbs) corre ejecutar-cola.ps1.",
+    "La CLI ejecuta la instrucción, hace commit y push a main y deja su log.",
+    "Sin commit, el lote pasa a fallidas\\ y la cola se detiene."
+   ],
+   "reglas": [
+    "Un lote a la vez; los críticos nunca sin cruce previo con Carlos.",
+    "Encargo rol-agente-cli; reglas de código en CLAUDE.md."
+   ],
+   "instalacion": "ins-005 y ins-006",
+   "comprobacion": "$t=Get-ScheduledTask -TaskName \"STR cola CLI\"; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; $t.Actions|Select Execute,Arguments; $t.Settings|Select DisallowStartIfOnBatteries"
+  },
+  {
+   "codigo": "BAI07.05-v",
+   "nombre": "Verificación por el Agente verificador",
+   "dueno": "Arquitecto (encargo) · Chat de desarrollo (lanzamiento)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-07",
+   "para": "Que quien construye no acepte su propio lote: la verificación la hace un agente aparte, en producción, con datos de prueba propios.",
+   "piezas": [
+    "tarea-agente-verificador",
+    "json-verificar"
+   ],
+   "flujo": [
+    "El Chat de desarrollo escribe log\\verificar.json (lote, prueba, notas, deviceId del perfil) y lo relee.",
+    "Lanza la tarea 'Agente verificador' sin mensaje (texto fijo y firmado para el equipo).",
+    "El verificador prueba en Chrome con datos zz-verif- y usuarios de prueba, borra lo que creó y cierra sus pestañas.",
+    "Deja log\\NN-veredicto.json; el Chat de desarrollo lo copia sin cambios al seguimiento."
+   ],
+   "reglas": [
+    "Encargo rol-verificador (lista cerrada de datos de prueba, usuarios de prueba por perfil de Chrome, Chrome limpio).",
+    "Sonnet 5.5; Opus 5.5 en lotes críticos (lo cambia Carlos).",
+    "Cambiar el texto de la tarea pide el clic de Carlos."
+   ],
+   "instalacion": "ins-006, paso 11 (recrear al cambiar de equipo)"
+  }
+ ],
+ "lineasBase": [
+  {
+   "id": "lb-lenovo",
+   "nombre": "LENOVO (LAPTOP-U4AHAHON) — equipo activo",
+   "fecha": "2026-10-08",
+   "aprobadaPor": "Carlos (6 al 8-oct-2026)",
+   "items": [
+    {
+     "que": "Usuario de Windows y carpetas",
+     "valor": "ktcol · repo C:\\Users\\ktcol\\str-manager · cola C:\\Users\\ktcol\\Downloads\\str-instr-cola\\"
+    },
+    {
+     "que": "Tarea 'STR cola CLI'",
+     "valor": "cada minuto (PT1M); lanza wscript.exe lanzar-oculto.vbs → ejecutar-cola.ps1",
+     "comprobar": "$t=Get-ScheduledTask -TaskName \"STR cola CLI\"; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; $t.Actions|Select Execute,Arguments; $t.Settings|Select DisallowStartIfOnBatteries"
+    },
+    {
+     "que": "Condición de batería de la cola",
+     "valor": "sin condición si se usa desenchufado (la quita Carlos; LENOVO suele estar enchufado)"
+    },
+    {
+     "que": "Tarea 'STR buzon'",
+     "valor": "cada 3 minutos; lanza wscript.exe buzon\\lanzar-buzon.vbs → vigilar-buzon.ps1",
+     "comprobar": "$t=Get-ScheduledTask -TaskName \"STR buzon\"; $t.State; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; Get-Content \"$HOME\\Downloads\\str-instr-cola\\buzon\\buzon.log\" -Tail 3"
+    },
+    {
+     "que": "Energía",
+     "valor": "no se apaga ni se suspende sola (confirmado por Carlos el 6-oct)"
+    },
+    {
+     "que": "Chrome · perfil habitual (administrador)",
+     "valor": "sesión de admin del STR abierta; deviceId 3198e288-fa87-4596-9fcb-a868b3031818"
+    },
+    {
+     "que": "Chrome · perfil 'valeriaramos.xyz' (colaborador)",
+     "valor": "sesión zz-verif-colab abierta; deviceId 5d576fcc-dbcc-4096-8414-09a431588fef"
+    },
+    {
+     "que": "Chrome · perfil 'STR operador'",
+     "valor": "sesión zz-verif-oper abierta; deviceId 63059a77-8ad9-4072-99a4-7d5235c61902"
+    },
+    {
+     "que": "Tarea de Claude 'Agente verificador'",
+     "valor": "trig_014LMaT36niz8ni2AiGX1dT7 · manual · aprobación automática · requiere este equipo · carpetas str-instr-cola y str-manager · Sonnet 5.5 · texto = encargo rol-verificador vigente"
+    },
+    {
+     "que": "Claude CLI",
+     "valor": "claude.exe en %USERPROFILE%\\.local\\bin con sesión iniciada (la usan la cola y el despertador)"
+    }
+   ],
+   "nota": "Si se reinstala la extensión de Chrome, cambian los deviceId: el Chat de desarrollo actualiza DA-24 y el Arquitecto esta línea base."
+  },
+  {
+   "id": "lb-asus",
+   "nombre": "ASUS (VIVOBOOKM3607HA) — en pausa",
+   "fecha": "2026-10-08",
+   "aprobadaPor": "Carlos",
+   "items": [
+    {
+     "que": "Cola",
+     "valor": "en pausa (ejecutar-cola.ps1 en temp\\ al encenderlo, ins-002); tarea 'STR cola CLI' cada minuto, sin condición de batería, lanzar-oculto.vbs"
+    },
+    {
+     "que": "Agente verificador",
+     "valor": "trig_0134CBMyfUWkAJkv8ku9WMnD apagado, sin borrar; al volver a ASUS se crea uno nuevo (ins-006)"
+    },
+    {
+     "que": "Despertador del buzón",
+     "valor": "no instalado; se instala al activarlo (ins-006 paso 7b)"
+    }
+   ]
+  },
+  {
+   "id": "lb-sesiones",
+   "nombre": "Chats destinatarios del buzón",
+   "fecha": "2026-10-08",
+   "aprobadaPor": "Arquitecto",
+   "items": [
+    {
+     "que": "Fuente",
+     "valor": "interno/destinatarios.json (Chat de desarrollo y Arquitecto, con su sesión)"
+    }
+   ],
+   "nota": "Al abrir un chat que reemplaza a otro se cambia su sesión allí el mismo día."
+  },
+  {
+   "id": "lb-hostinger",
+   "nombre": "Hostinger (producción)",
+   "fecha": "2026-10-08",
+   "aprobadaPor": "Carlos",
+   "items": [
+    {
+     "que": "Plan",
+     "valor": "Premium, vence 2026-11-03 (migración a un plan nuevo en estudio)"
+    },
+    {
+     "que": "Despliegue",
+     "valor": "automático desde main de str-manager; versión desplegada en seguimiento.json → cambios[] (último lote)"
+    },
+    {
+     "que": "Cron",
+     "valor": "POST /api/sync-ical cada 15 min con X-Cron-Key; POST /api/export/cron diario 03:00 (30 respaldos en api/backups/)"
+    },
+    {
+     "que": "Claves",
+     "valor": "api/config/secrets.php solo en el servidor (las maneja Carlos)"
+    }
+   ]
+  }
+ ]
+}

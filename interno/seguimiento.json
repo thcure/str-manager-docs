@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T18:15:00Z",
+ "actualizadoEn": "2026-10-08T19:20:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1117,7 +1117,7 @@
    "etapa": "📝",
    "fecha": "2026-10-08",
    "titulo": "Diseño propuesto para K3 (lote por asignar): cada negocio conecta su propio Google Drive desde la app (OAuth, permiso drive.file: el STR solo ve los archivos que crea), refresh token cifrado en el servidor, copia diaria y retención por negocio, desconexión y aviso de 'copia detenida'. Un solo proyecto de Google Cloud del STR, con una cuenta de Google dedicada (no la personal de Carlos), pantalla de consentimiento publicada (en modo prueba los tokens vencen a los 7 días). Lote crítico (credenciales y datos personales de huéspedes; Ley 1581: el negocio acepta al conectar).",
-   "pendiente": "8-oct: Carlos decide usar por ahora su cuenta thcure@gmail.com para el proyecto de Google Cloud (se puede migrar a una cuenta dedicada después). Siguiente: configurar juntos el proyecto (~15 min) y luego la instrucción crítica con cruce previo.",
+   "pendiente": "8-oct: proyecto de Google Cloud 'STR Manager' (str-manager-511018) creado con thcure@gmail.com: API de Drive activa, consentimiento externo, drive.file, cliente web (origen app.apartamentosbucaramanga.com, retorno /api/drive/callback). App en modo prueba hasta publicar privacidad/términos (lote 47). K3 partido en 47 K3a conectar (aprobado), 48 K3b copia, 49 K3c retención.",
    "estado": "decidido",
    "origen": "Chat de desarrollo con Carlos, 8-oct."
   },
@@ -1153,9 +1153,30 @@
    "fecha": "2026-10-08",
    "severidad": "crítico",
    "titulo": "GET /api/col/<colección> no filtra por rol: cualquier usuario del negocio, incluido el colaborador, recibe la colección completa (reservas con datos de huéspedes, turnos e incidentes de todas las propiedades). Leído en api/col/index.php (case 'GET': solo cuenta_id + colección) y observado en 45-veredicto: la copia local de turnos de zz-verif-colab trae turnos de otras propiedades (sh-ical, sh-r). La escritura sí está acotada (INC-63).",
-   "pendiente": "R-2 (tolerancia cero). Fix crítico: filtrar en el servidor la lectura del colaborador (turnos donde es titular/apoyo o de propiedades que tiene asignadas; reservas solo de esas propiedades y sin datos personales que no necesita; tickets propios/de sus turnos; sin inventario ajeno). Requiere cruce previo con Carlos. No se probó leyendo datos reales (bloqueado por privacidad, correcto).",
+   "pendiente": "Lote 46 (4be0555) desplegado; 46-veredicto: aislamiento verificado; falta ejercer la lista blanca de campos con una reserva de prueba (DA-28).",
    "estado": "abierto",
    "origen": "Chat de desarrollo, 8-oct, a partir de 45-veredicto y lectura del código."
+  },
+  {
+   "id": "DA-27",
+   "tipo": "DA",
+   "modulo": "Datos personales (colaborador)",
+   "etapa": "✔",
+   "fecha": "2026-10-08",
+   "titulo": "Del huésped, el colaborador ve nombre, fechas (check-in/check-out) y número de huéspedes; nunca teléfono, correo, montos ni notas privadas. Base del lote 46 (INC-94).",
+   "estado": "decidido",
+   "origen": "Carlos, 8-oct 13:30."
+  },
+  {
+   "id": "DA-28",
+   "tipo": "DA",
+   "modulo": "Gobierno (verificación)",
+   "etapa": "📝",
+   "fecha": "2026-10-08",
+   "titulo": "Carlos autoriza que el verificador cree y elimine reservas de prueba zz-verif- en zz-verif-Propiedad (por la interfaz, datos inventados) para verificar la lista blanca de campos del lote 46.",
+   "pendiente": "M-18 al Arquitecto: ampliar el encargo rol-verificador; luego copiar el texto a la tarea (clic de Carlos) y lanzar 46-veredicto-2 en Opus.",
+   "estado": "decidido",
+   "origen": "Carlos, 8-oct 14:15."
   }
  ],
  "cambios": [
@@ -3308,6 +3329,76 @@
    }
   },
   {
+   "lote": 46,
+   "fecha": "2026-10-08",
+   "hash": "4be0555",
+   "version": "p5c46",
+   "req": "INC-94",
+   "categoria": "crítico",
+   "resumen": "Lectura por rol en GET /api/col: el colaborador solo recibe sus turnos (titular/base/apoyo), reservas y propiedades de lo suyo con lista blanca de campos (DA-27: nombre, fechas, número de huéspedes, código, canal, estado; sin teléfono, correo ni montos), sus tickets y movimientos; filas borradas ajenas tampoco; purga local única en el celular (str-col-filtro-v1='inc94') conservando lo propio sin subir; tests/lectura-colaborador.test.js (55 casos).",
+   "estado": "verificado",
+   "observacion": "Cruce con Carlos 13:35 (aprobado; DA-27 campos de huésped). CLI 13:37–13:44, 25/25; sin PHP local (el Chat de desarrollo comprobó /api/col como admin tras el despliegue: ok). Declarados vs tocados contrastado en el commit 4be0555: sin diferencias. 46-veredicto (14:05, corrida en Sonnet porque el cambio a Opus se guardó 1 min después del lanzamiento): aislamiento ok (colaborador 0 reservas de 53, 1 propiedad, solo turnos/tickets/movimientos suyos), admin = operador, sin 500, purga local ok, INC-92 no apareció. Falta: lista blanca de campos de reservas y recorte de propiedades no ejercidos (sin reservas en zz-verif-Propiedad); checklist/marcar tarea (sin flujo base). Carlos autorizó reservas de prueba (DA-28, M-18); verificación oficial 46-veredicto-2 en Opus después de que el Arquitecto amplíe el encargo.",
+   "costo": {
+    "minutosCLI": 7,
+    "minutosDueno": 5,
+    "nota": "cruce y cambio de modelo del verificador"
+   },
+   "cruceDueno": "2026-10-08 13:35",
+   "aceptacion": {
+    "lote": 46,
+    "hash": "4be0555",
+    "fecha": "2026-10-08",
+    "horaBogota": "14:05",
+    "resultado": "aceptado con reservas",
+    "modoVerificacion": "Producción en Chrome, reloj real. Perfiles por deviceId de las notas, usuario confirmado con STRApi.me antes de actuar: admin Carlos Rodriguez/admin (3198e288…), zz-verif-colab/colaborador id 5 (5d576fcc…), zz-verif-oper/operador (63059a77…). Lecturas por GET /api/col/<coleccion> con la sesión de cada perfil; en el veredicto solo conteos, ids y nombres de campo (privacidad). Turno zz-verif- creado por la interfaz con admin. Criterio a: solo por log del CLI (node tests/run.js no corre en Chrome).",
+    "criterios": [
+     {
+      "c": "despliegue",
+      "ok": true,
+      "observado": "/api/health → ok:true, db:true, schema_version:9. Servidos con ?v=p5c46 (únicos valores): str-app-shell.html, str-m1-housekeeping.html, portal.html, str-calendario.html."
+     },
+     {
+      "c": "a",
+      "ok": null,
+      "observado": "No verificable desde Chrome. El log del CLI declara 25/25 archivos en verde y tests/lectura-colaborador.test.js con 55 casos (incluye coincidencia PHP/JS de las listas de campos). Solo por reporte del CLI, no cuenta como verificado por mí."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "Sesión zz-verif-colab. Conteos (n totales incluidas filas deleted / vivos): reservas 0/0; turnos 8/0 (ids sh-m-1791416768145, sh-m-1791423653924, sh-m-1791466367776, sh-m-1791470788534, sh-m-1791472972351, sh-m-1791479687594, sh-m-1791479485691, sh-m-1791482080261, todos con propId prop-1791416715199 = zz-verif-Propiedad, todos borrados); tickets 4/3 (tk_muyrbie0_lekr9, tk_muz18ygg_7jlal, tk_muzoto4q_wdck8, tk_muzu722h_lymo4, todos de zz-verif-Propiedad); propiedades 1/1 (solo prop-1791416715199); inv-movimientos 4/4 (mv_muyvhtbfa0fbu, mv_muyvixwwie8d5, mv_muzr68wh8blrw, mv_muzr68whu38n6; con admin: 2 con por=1 y turnoId, 2 con por=5 y turnoId, los demás 6 movimientos del negocio no llegan). Admin ve en el mismo momento reservas 157/53 vivas, turnos 16-17, tickets 7/3, propiedades 6/5, inv-movimientos 10: el colaborador recibe 0 reservas, 0 turnos ajenos, 1 propiedad, 4 de 10 movimientos. Nada ajeno apareció. LIMITE: las reservas del colaborador son 0 (zz-verif-Propiedad no tiene reservas), así que la unión de nombres de campo de reservas quedó vacía y la LISTA BLANCA DE CAMPOS NO FUE EJERCIDA en producción (ni con reservas ni con datos de huésped); solo la réplica del CLI la cubre. Tampoco se pudo comprobar el recorte de campos de propiedades (la única visible es la de prueba, sin iCal)."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "No hubo línea base previa; se comparó con admin. Admin: reservas 157/53 vivas, turnos 16 (17 con el turno de prueba, 6 vivos), tickets 7/3, propiedades 6/5, inv-movimientos 10 (mismos números que el operador). Calendario (reservas en las 5 propiedades), Propiedades (5 propiedades listadas) y HK (turnos de la semana) cargan y pintan con datos reales; read_console_messages (error/Uncaught/warn/403/500/fail) sin resultados al recargar Calendario, Propiedades y HK. Ningún 500 en /api/col en ninguna colección leída (reservas, turnos, tickets, propiedades, inv-movimientos, prop-workflows, flujos, flujo-categorias, guias, ubicaciones, inv-articulos, inv-depositos)."
+     },
+     {
+      "c": "d",
+      "ok": null,
+      "observado": "PARCIAL. Con recarga completa del portal (sesión zz-verif-colab), el turno zz-verif- 'sh-m-1791485605996' (creado por la interfaz de HK, usuarioId 5, zz-verif-Propiedad) se pinta en 'Mis turnos' y al abrirlo muestra detalles, colaborador, mis horas y bloque de huésped (sin reserva: 'Huésped por confirmar', por eso no se pudo ver un nombre de huésped real). Iniciar turno y 'Unidad desocupada' escribieron en el servidor (estado en_curso y checkoutReal presentes tras GET) sin ningún toast 'No puedes modificar un turno que no es tuyo' ni errores de JS (observador de toasts y window.onerror vacíos): INC-92 no se reprodujo. NO verificado: checklist y marcar tarea, porque zz-verif-Propiedad no tiene flujo base (prop-workflows está vacío también para admin: es configuración, no el filtro) y el portal mostró 'Sin flujo base'. Tampoco se probó el pintado de incidentes en el turno. Purga local: ocurrió; str-col-filtro-v1='inc94'. Copia local tras recargar: str-turnos-v1 = 1 turno (el suyo), str-reservas-v1 0, str-propiedades-v1 1 (zz-verif-Propiedad), str-tickets-v1 3 (de zz), str-inv-movimientos-v1 4; ningún id ajeno."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "Operador zz-verif-oper: reservas 157/53, turnos 17/6, tickets 7/3, propiedades 6/5, inv-movimientos 10, prop-workflows 6/0; idénticos a admin en el mismo momento."
+     },
+     {
+      "c": "f",
+      "ok": true,
+      "observado": "/api/health esquema 9; páginas ?v=p5c46; consola sin errores en Calendario, Propiedades y HK (con rastreo desde la carga); en el portal solo medido desde después de la carga con window.onerror (0 errores). Sin alert/confirm/prompt: el borrado usó el modal propio. Datos zz-verif- borrados: turno sh-m-1791485605996 eliminado con '🗑 Eliminar turno' (deleted=1 en el servidor, 0 turnos zz vivos)."
+     },
+     {
+      "c": "declarados-vs-tocados",
+      "ok": null,
+      "observado": "El log del CLI no trae la lista explícita 'archivos declarados vs tocados' (la remite al mensaje del commit, sin acceso a git). Lo observable es coherente con lo declarado: HTML con mtime del commit (cambio de ?v=), str-api.js, api/col/index.php, tests/lectura-colaborador.test.js (nuevo), CLAUDE.md (5 apariciones de INC-94/p5c46). Desviación declarada por el CLI en el punto 4 (la purga conserva lo propio aún sin subir) explicada en el log y observada: no se perdió nada propio. No contrastado con el commit."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creado con admin por la interfaz: turno 'zz-verif- turno lote 46' (sh-m-1791485605996) en zz-verif-Propiedad con zz-verif-colab; iniciado y 'Unidad desocupada' marcado por el colaborador; eliminado con '🗑 Eliminar turno' (deleted=1 en el servidor, ausente en HK). Sin flujos, tickets, fotos ni archivos nuevos. zz-verif-Propiedad (prop-1791416715199) queda para próximas ejecuciones. Los tickets zz-verif- de lotes 38, 39 y 45 siguen cerrados, sin tocar. Lecturas de b, c y e solo por GET. Sin escrituras en datos reales.",
+    "notas": "Sin cambios a la capa Marco detectados en el log del CLI. Sin INC nuevos: no apareció ningún dato ajeno ni 500. RESERVAS para el Chat de desarrollo: (1) la parte más sensible del lote (lista blanca de campos de reservas con datos de huésped y recorte de propiedades) NO se ejercitó en producción porque el colaborador de prueba no tiene reservas; para cerrarla hace falta una reserva de prueba o una propiedad de prueba con reserva sintética asignada a zz-verif-colab (zz-verif- permitido solo si se crea sin calendario iCal; el verificador no puede crear reservas con su lista actual) o que Carlos autorice otra vía; hasta entonces INC-94 está verificado en aislamiento por propiedad/turno/ticket/movimiento pero no en campos de huésped. (2) d: falta probar checklist y marcar tarea; requiere asignar un flujo base zz-verif- a zz-verif-Propiedad (flujo + prop-workflow por la interfaz; el verificador puede crear flujos zz-verif- pero la asignación a la propiedad no estaba en su lista explícita de escrituras). (3) a solo por log del CLI. (4) declarados vs tocados no contrastable. Observación: el colaborador recibe 'flujos' completos del negocio con sus propId reales (4 propiedades ajenas, solo ids de configuración, como indica el punto 3 'igual que hoy'). Perfiles: se usaron select_browser con los deviceId de las notas; no se inició ni cerró sesión."
+   }
+  },
+  {
    "lote": null,
    "tipo": "modelo",
    "fecha": "2026-10-08",
@@ -3603,22 +3694,22 @@
    "nota": "número al encolar"
   },
   {
-   "lote": null,
+   "lote": 47,
    "req": "REQ-K3",
    "categoria": "crítico",
    "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25",
    "estado": "previsto",
    "orden": 47,
-   "espera": "proyecto de Google Cloud con thcure@gmail.com (DA-26); cruce previo con Carlos; número al encolar"
+   "espera": "instrucción 47 (K3a conectar Drive) aprobada por Carlos 8-oct; se encola al aceptar el 46; K3b copia y K3c retención después"
   },
   {
-   "lote": null,
+   "lote": 46,
    "req": "INC-94",
    "categoria": "crítico",
    "resumen": "Lectura por rol en GET /api/col: el colaborador solo recibe lo suyo (sin reservas ajenas ni datos de huéspedes)",
-   "estado": "previsto",
+   "estado": "verificado",
    "orden": 46,
-   "espera": "cruce previo con Carlos (crítico)"
+   "espera": "46-veredicto-2 en Opus con reserva de prueba (DA-28, M-18)"
   }
  ],
  "riesgos": [

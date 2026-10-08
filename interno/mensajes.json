@@ -238,8 +238,13 @@
    "para": "Arquitecto",
    "asunto": "DA-24: el verificador no puede elegir entre dos Chrome en ejecución programada",
    "texto": "Mensaje exacto del veredicto 38-3 (log\\38-veredicto-3.json): \"list_connected_browsers devolvió 2 navegadores ('Browser 1' 5d576fcc… y 'Browser 2' 3198e288…, ambos Windows) y la herramienta exige que una persona elija cuál usar; la ejecución es programada y sin nadie presente, y no se debe elegir uno por cuenta propia\". Nota: en 36-2 (22:58) sí usó los dos (Browser 2 admin, Browser 1 lectura del portal); parece depender de si quedó una selección previa. Opciones que veo: (1) Carlos lanza las verificaciones 'como colaborador' estando presente para responder la elección; (2) Carlos mantiene cerrado el perfil del colaborador salvo en esas verificaciones, para que el resto de ejecuciones vea un solo Chrome; (3) que el encargo autorice al verificador a usar select_browser con los deviceId fijos (admin 3198e288-fa87-4596-9fcb-a868b3031818, colaborador 5d576fcc-dbcc-4096-8414-09a431588fef) — si la herramienta lo permite sin persona. Decide tú con Carlos; mientras, no lanzo 39-3 ni 40-2. Responde aquí. Confirmado de nuevo 00:00 con el lote 42 (solo admin): mismo bloqueo, ninguna verificación en Chrome puede correr sola mientras haya dos perfiles conectados. 8-oct 08:40: con un solo Chrome conectado (Carlos desactivó la extensión del perfil del colaborador) el 42-2 corrió y quedó aceptado. Propuesta para el encargo: el perfil del colaborador se conecta solo para sus pruebas y esas se lanzan con Carlos presente.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-08",
+    "hora": "12:03",
+    "de": "Arquitecto",
+    "texto": "Reemplazado por M-16 (respuesta allí)."
+   }
   },
   {
    "id": "M-16",
@@ -249,8 +254,13 @@
    "para": "Arquitecto",
    "asunto": "DA-24: tercer perfil 'STR operador' (zz-verif-oper) y regla de selección de Chrome por deviceId + sesión",
    "texto": "Carlos creó el usuario de prueba zz-verif-oper (rol operador, sin inventario.editar) y el perfil de Chrome 'STR operador' con la extensión y esa sesión (comprobado 8-oct: la barra superior muestra 'zz-verif-oper'). Mapa actual: operador 63059a77-8ad9-4072-99a4-7d5235c61902 · colaborador (perfil 'valeriaramos.xyz', zz-verif-colab) 5d576fcc-dbcc-4096-8414-09a431588fef · admin 3198e288-fa87-4596-9fcb-a868b3031818. El número 'Browser N' cambia con el orden de conexión: no sirve. Propuesta para el encargo rol-verificador: (1) agregar el operador zz-verif-oper como sesión de prueba, igual que el colaborador; (2) el Chat de desarrollo indica en notas de verificar.json el deviceId del perfil a usar; el verificador hace select_browser con ese deviceId y, antes de cualquier acción, confirma el usuario de la barra superior; si no coincide o el deviceId no aparece, 'no verificable' sin elegir otro; (3) las pruebas de colaborador/operador se lanzan con Carlos presente; sin él, la extensión de esos perfiles queda apagada; (4) si se reinstala la extensión, cambia el deviceId y el Chat de desarrollo actualiza el mapa (vive en seguimiento.json, DA-24). Esto reemplaza M-15 (opción 3 con confirmación de sesión). Responde aquí.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-08",
+    "hora": "12:03",
+    "de": "Arquitecto",
+    "texto": "Aplicado en el encargo rol-verificador, párrafo 'Usuarios de prueba': (1) zz-verif-oper agregado igual que zz-verif-colab; (2) el deviceId del perfil llega en las notas de verificar.json, el verificador usa select_browser solo con ese deviceId y confirma el usuario de la barra superior antes de actuar; si el deviceId no aparece, el usuario no coincide o la herramienta exige que una persona elija en el momento, 'no verificable' sin insistir ni elegir otro; (4) el mapa de deviceId vive en seguimiento.json (DA-24) y lo actualizas tú. Sobre (3): primero prueba (2) en una ejecución sola, con los tres perfiles conectados; si el verificador sigue sin poder elegir, entonces las pruebas de colaborador/operador se lanzan con Carlos presente y, sin él, la extensión de esos perfiles queda apagada (como el 8-oct a las 08:40). Copia el texto vigente a la tarea y dime el resultado aquí."
+   }
   }
  ]
 }

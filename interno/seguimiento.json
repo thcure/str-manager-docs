@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T04:46:00Z",
+ "actualizadoEn": "2026-10-08T05:00:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1071,7 +1071,7 @@
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "HK: tras 'Cerrar igual' con una foto pendiente, la línea de Limpieza del panel del turno muestra '🧹 aNaN' unos segundos y luego '🧹 22:35'. Causa probable: se formatea limpiezaCerradaEn.at antes de que el servidor estampe la hora (patrón conocido: formatear un at aún no resuelto).",
-   "pendiente": "Instrucción 42 escrita (42-instr-fix-inc90-hora-sentinel.md): causa leída en el código — _nowStamp deja at='__server__' hasta la respuesta y _timeStr hace new Date('__server__') → NaN. Fix: _timeStr(iso, respaldo=atDispositivo).",
+   "pendiente": "Fix desplegado (lote 42, 917221c, p5c42). Cierre al verificar 3a en producción.",
    "estado": "abierto",
    "origen": "Veredicto 37-2 (22:37)."
   },
@@ -2726,6 +2726,23 @@
    "aprobacion": "DA-24, decidida por Carlos el 7-oct-2026",
    "estado": "registrado",
    "observacion": "Se cierra cuando un veredicto use la sesión del perfil 'STR colaborador' (38-3, 39-3 o 40-2)."
+  },
+  {
+   "lote": 42,
+   "fecha": "2026-10-07",
+   "hash": "917221c",
+   "version": "p5c42",
+   "req": "INC-90",
+   "categoria": "estándar",
+   "resumen": "HK: _timeStr(iso, respaldo) — con el sentinel '__server__' o fecha inválida usa atDispositivo; nunca 'aNaN'. Aplicado a 🧹 de la lista y a Iniciado/🧹/Cerrado del panel; hallazgo extra: 'Salió hh:mm' (Unidad desocupada) tenía el mismo problema ('NaN:NaN') y también se corrigió.",
+   "estado": "desplegado",
+   "observacion": "CLI 23:39–23:41 (2 min), node tests/run.js 21/21 (nuevo tests/hora-sentinel.test.js, 9 casos). No hecho por la CLI: 3a, 3b, 3d (navegador) → verificador. Archivo extra declarado: el test.",
+   "costo": {
+    "minutosCLI": 2,
+    "minutosDueno": null,
+    "nota": "espera no cuenta"
+   },
+   "cruceDueno": null
   }
  ],
  "esquema": {
@@ -2961,9 +2978,9 @@
    "req": "INC-90",
    "categoria": "estándar",
    "resumen": "HK: _timeStr con sentinel __server__ → hora del dispositivo, nunca 'aNaN'",
-   "estado": "encolado",
+   "estado": "desplegado",
    "orden": 42,
-   "espera": "encolado 23:45; verificación necesita resolver la elección de Chrome (M-15)"
+   "espera": "verificación (admin)"
   },
   {
    "lote": 43,

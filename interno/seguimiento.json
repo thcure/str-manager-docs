@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T05:00:00Z",
+ "actualizadoEn": "2026-10-08T05:20:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -2736,13 +2736,63 @@
    "categoria": "estándar",
    "resumen": "HK: _timeStr(iso, respaldo) — con el sentinel '__server__' o fecha inválida usa atDispositivo; nunca 'aNaN'. Aplicado a 🧹 de la lista y a Iniciado/🧹/Cerrado del panel; hallazgo extra: 'Salió hh:mm' (Unidad desocupada) tenía el mismo problema ('NaN:NaN') y también se corrigió.",
    "estado": "desplegado",
-   "observacion": "CLI 23:39–23:41 (2 min), node tests/run.js 21/21 (nuevo tests/hora-sentinel.test.js, 9 casos). No hecho por la CLI: 3a, 3b, 3d (navegador) → verificador. Archivo extra declarado: el test.",
+   "observacion": "CLI 23:39–23:41 (2 min), node tests/run.js 21/21 (nuevo tests/hora-sentinel.test.js, 9 casos). No hecho por la CLI: 3a, 3b, 3d (navegador) → verificador. Archivo extra declarado: el test. Verificador 00:00: no verificable en producción — dos Chrome conectados sin selección (mismo bloqueo que 38-3, M-15). Lectura de código y réplica del test favorables (no cuentan). Repetir como 42-veredicto-2 con un solo Chrome o con Carlos presente.",
    "costo": {
     "minutosCLI": 2,
     "minutosDueno": null,
     "nota": "espera no cuenta"
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 42,
+    "hash": "917221c",
+    "fecha": "2026-10-08",
+    "horaBogota": "00:00",
+    "resultado": "no aceptado (pendiente de verificación en producción: Chrome no utilizable en esta ejecución)",
+    "modoVerificacion": "Solo lectura de código y réplica del test desde los archivos del equipo (str-manager, hechas, log). No se abrió Chrome: hay dos navegadores Chrome conectados a la extensión ('Browser 1' 5d576fcc-dbcc-4096-8414-09a431588fef y 'Browser 2' 3198e288-fa87-4596-9fcb-a868b3031818) y ninguno seleccionado; la herramienta exige que lo elija una persona y la ejecución es automática, sin nadie que responda. No se inició sesión ni se tocó ningún dato. Sin shell en el equipo: no se pudo ver git ni /api/health.",
+    "criterios": [
+     {
+      "c": "a. HK, turno zz-verif- con respuesta retenida: 'Iniciado'/'🧹'/'Cerrado' y línea 🧹 muestran HH:MM del dispositivo, nunca aNaN; al liberar, hora del servidor",
+      "ok": null,
+      "observado": "No verificable en producción (causa: Chrome sin navegador seleccionado). Lectura de código: _timeStr(iso, respaldo) (~3858) descarta '__server__'/vacío/fecha inválida y cae al respaldo, y devuelve '' si ninguno sirve; llamadas con atDispositivo en ~1882 (limpiezaCerradaEn) y ~4322-4324 (inicioReal, limpiezaCerradaEn, finReal) con respaldos legacy iniciadoEn/cerradoEn como primer argumento. Coherente con la instrucción, pero no cuenta como aceptación."
+     },
+     {
+      "c": "Extra declarado: 'Salió hh:mm' tras 'Unidad desocupada'",
+      "ok": null,
+      "observado": "No verificable en producción. Código ~5367: new Date(checkoutR.at) con respaldo a atDispositivo si es inválida; correcto por lectura."
+     },
+     {
+      "c": "b. Sin sesión/sin red: la hora sigue saliendo como antes",
+      "ok": null,
+      "observado": "Lectura de código: con un ISO válido en 'at', _timeStr lo usa primero (igual que antes). No probado en pantalla; nunca se cierra sesión."
+     },
+     {
+      "c": "c. Test nuevo en tests/ y node tests/run.js verde",
+      "ok": null,
+      "observado": "tests/hora-sentinel.test.js existe (9 casos). Réplica ejecutada aquí con node sobre el archivo staged: 9 OK, 0 FAIL (incluye _timeStr('__server__', '2026-10-08T03:35:39.379Z')='22:35', _timeStr('__server__')='', _timeStr('basura')=''). node tests/run.js completo (21 archivos) no ejecutable desde esta sesión: sin shell en el equipo; el log de la CLI declara 21/21. Réplica, no cuenta como aceptado."
+     },
+     {
+      "c": "d. /api/health esquema 9; páginas ?v=p5c42; consola limpia en HK y portal; 0 'NaN'/'undefined'; sin alert/confirm/prompt",
+      "ok": null,
+      "observado": "No verificable en producción. En el HTML local de HK aparece 'p5c42' (4 coincidencias). Sin comprobar /api/health ni consola."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit y declarados vs tocados",
+      "ok": null,
+      "observado": "CLAUDE.md modificado en el mismo intervalo que los HTML (mtime 1791434457425 vs 1791434410xxx), pero sin git no se pudo ver el diff del commit. Log de la CLI: único archivo no declarado = tests/hora-sentinel.test.js (explicado: lo pide el punto 3c). Sin indicio de cambios a la capa Marco sin 'modelo:'."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Verificación del lote 42 no ejecutada: dos navegadores Chrome conectados y ninguno seleccionado",
+      "nivel": "bajo",
+      "causa": "La extensión exige que una persona elija el navegador cuando hay varios conectados; la tarea programada no puede elegir (y no debe adivinar entre el perfil de administrador y el del colaborador). No es un fallo del lote.",
+      "observado": "list_connected_browsers: 'Browser 1' (5d576fcc-dbcc-4096-8414-09a431588fef) y 'Browser 2' (3198e288-fa87-4596-9fcb-a868b3031818), sin selección. Acción: Carlos selecciona el navegador del administrador (select_browser) o deja uno solo conectado, y el Chat de desarrollo relanza con archivoVeredicto nuevo (p. ej. log\\42-veredicto-2.json)."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado ni borrado en esta ejecución. Sigue pendiente de ejecuciones anteriores el turno manual sh-m-1791423653924 en zz-verif-Propiedad (INC-89).",
+    "notas": "Lote 42 desplegado según el log de la CLI (commit 917221c, push a main), pero NO aceptado: criterios a, b, d y el extra 'Salió' sin verificar en producción. Lo verificado por lectura de código y réplica del test es favorable. Sin cambios a la capa Marco observados."
+   }
   }
  ],
  "esquema": {

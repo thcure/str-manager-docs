@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T17:25:00Z",
+ "actualizadoEn": "2026-10-08T18:15:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1091,12 +1091,12 @@
    "id": "INC-91",
    "tipo": "INC",
    "modulo": "Incidentes (portal colaborador)",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "Portal del colaborador: forzando _tkAnularModal/_tkConfirmarAnular, la interfaz muestra 'Anulada · motivo' y 'Evidencia anulada' aunque el servidor rechaza la anulación (anuladaEn sigue null). Causa: actualización optimista sin comprobar la respuesta y funciones invocables en modo colaborador aunque el botón no se pinte; el dato está protegido por el servidor.",
-   "pendiente": "Fix estándar: en modo colaborador las funciones de anular salen sin hacer nada; y en cualquier rol, si el servidor rechaza, revertir y mostrar error.",
-   "estado": "abierto",
+   "pendiente": "Cerrado 8-oct: lote 45 (a17fa0d) aceptado en producción (45-veredicto.json).",
+   "estado": "cerrado",
    "origen": "Veredicto 38-4."
   },
   {
@@ -1116,7 +1116,7 @@
    "modulo": "Copia a Google Drive (K3)",
    "etapa": "📝",
    "fecha": "2026-10-08",
-   "titulo": "Diseño propuesto para K3 (lote 45): cada negocio conecta su propio Google Drive desde la app (OAuth, permiso drive.file: el STR solo ve los archivos que crea), refresh token cifrado en el servidor, copia diaria y retención por negocio, desconexión y aviso de 'copia detenida'. Un solo proyecto de Google Cloud del STR, con una cuenta de Google dedicada (no la personal de Carlos), pantalla de consentimiento publicada (en modo prueba los tokens vencen a los 7 días). Lote crítico (credenciales y datos personales de huéspedes; Ley 1581: el negocio acepta al conectar).",
+   "titulo": "Diseño propuesto para K3 (lote por asignar): cada negocio conecta su propio Google Drive desde la app (OAuth, permiso drive.file: el STR solo ve los archivos que crea), refresh token cifrado en el servidor, copia diaria y retención por negocio, desconexión y aviso de 'copia detenida'. Un solo proyecto de Google Cloud del STR, con una cuenta de Google dedicada (no la personal de Carlos), pantalla de consentimiento publicada (en modo prueba los tokens vencen a los 7 días). Lote crítico (credenciales y datos personales de huéspedes; Ley 1581: el negocio acepta al conectar).",
    "pendiente": "8-oct: Carlos decide usar por ahora su cuenta thcure@gmail.com para el proyecto de Google Cloud (se puede migrar a una cuenta dedicada después). Siguiente: configurar juntos el proyecto (~15 min) y luego la instrucción crítica con cruce previo.",
    "estado": "decidido",
    "origen": "Chat de desarrollo con Carlos, 8-oct."
@@ -1129,7 +1129,7 @@
    "fecha": "2026-10-08",
    "severidad": "bajo",
    "titulo": "Al marcar una tarea en un turno manual creado por admin y asignado a zz-verif-colab (titular), el portal muestra el toast rojo 'No puedes modificar un turno que no es tuyo', aunque la tarea queda marcada, el turno pasa a 'En curso' y los movimientos de inventario suben. Causa sin confirmar: el servidor rechaza alguna escritura del turno (probable hk:turnos) porque el turno manual no trae la asignación en el formato que valida INC-63.",
-   "pendiente": "Investigar con el log del servidor; fix estándar después del 44.",
+   "pendiente": "45-veredicto: no se reprodujo. Hipótesis: el portal empuja turnos que no son del colaborador (su copia local trae turnos de otras propiedades, INC-94) y el servidor los rechaza con ese mensaje. Se resuelve probablemente junto con INC-94; volver a observar después.",
    "estado": "abierto",
    "origen": "Veredicto 40-5 (12:50)."
   },
@@ -1144,6 +1144,18 @@
    "pendiente": "Deuda: que _puede devuelva false para el operador hasta que /me responda (o que los módulos esperen a STRApi.me()). Fix estándar cuando toque str-api.js.",
    "estado": "abierto",
    "origen": "Veredicto 40-7 y lectura del código (str-api.js ~823)."
+  },
+  {
+   "id": "INC-94",
+   "tipo": "INC",
+   "modulo": "API /api/col (lectura)",
+   "etapa": "📝",
+   "fecha": "2026-10-08",
+   "severidad": "crítico",
+   "titulo": "GET /api/col/<colección> no filtra por rol: cualquier usuario del negocio, incluido el colaborador, recibe la colección completa (reservas con datos de huéspedes, turnos e incidentes de todas las propiedades). Leído en api/col/index.php (case 'GET': solo cuenta_id + colección) y observado en 45-veredicto: la copia local de turnos de zz-verif-colab trae turnos de otras propiedades (sh-ical, sh-r). La escritura sí está acotada (INC-63).",
+   "pendiente": "R-2 (tolerancia cero). Fix crítico: filtrar en el servidor la lectura del colaborador (turnos donde es titular/apoyo o de propiedades que tiene asignadas; reservas solo de esas propiedades y sin datos personales que no necesita; tickets propios/de sus turnos; sin inventario ajeno). Requiere cruce previo con Carlos. No se probó leyendo datos reales (bloqueado por privacidad, correcto).",
+   "estado": "abierto",
+   "origen": "Chat de desarrollo, 8-oct, a partir de 45-veredicto y lectura del código."
   }
  ],
  "cambios": [
@@ -3226,6 +3238,76 @@
    }
   },
   {
+   "lote": 45,
+   "fecha": "2026-10-08",
+   "hash": "a17fa0d",
+   "version": "p5c45",
+   "req": "INC-91",
+   "categoria": "normal",
+   "resumen": "Anular evidencia solo con confirmación del servidor: el servidor devuelve el ticket en items cuando une evidencias; HK no anula sin conexión ni con rol colaborador; 'Anulando…'; si no se confirma, restaura local + copia del último envío y fuerza pull; _persistCol con opts.relanzar opcional; tests/anular-evidencia.test.js.",
+   "estado": "aceptado",
+   "observacion": "CLI 12:33–12:36 (3 min), node tests/run.js 24/24. Verificador 45-veredicto (13:05; admin y colaborador por deviceId): despliegue, a, b, c, d, f ok; e por réplica de la CLI. El verificador escribió 'aceptado con reservas' (formato no válido: solo aceptado/no aceptado); las reservas eran e (node, mismo criterio que 41/44) y declarados vs tocados, que el Chat de desarrollo contrastó leyendo el commit a17fa0d en el equipo: sin diferencia (HTML extra solo por ?v=). Resultado registrado: aceptado. INC-92 no se reprodujo. Hallazgo nuevo: la copia local de turnos del colaborador trae turnos de otras propiedades → INC-94.",
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0,
+    "nota": "sin intervención de Carlos"
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 45,
+    "hash": "a17fa0d",
+    "fecha": "2026-10-08",
+    "horaBogota": "13:05",
+    "resultado": "aceptado con reservas",
+    "modoVerificacion": "Producción en Chrome. Admin: perfil deviceId 3198e288… (STRApi.me: Carlos Rodriguez, rol admin). Colaborador: perfil deviceId 5d576fcc… (STRApi.me: zz-verif-colab, rol colaborador); no se usó el perfil del operador. Datos creados por la interfaz (turno, incidente, fotos por el input del propio modal con 2 imágenes sintéticas generadas en canvas). b y c solo en memoria de la pestaña (STRApi.online y STRApi.col.push envueltos y restaurados; verificado que se restauraron), sin escrituras. Reloj real del navegador. Criterio e: no ejecutado por mí (node tests/run.js no corre en Chrome); solo lectura del log del CLI.",
+    "criterios": [
+     {
+      "c": "despliegue",
+      "ok": true,
+      "observado": "/api/health → ok:true, db:true, schema_version:9. str-app-shell.html y str-m1-housekeeping.html sirven solo ?v=p5c45. HK servido contiene 'relanzar'; 0 llamadas alert/confirm/prompt en el HTML de HK. api/col/index.php (local del repo, mtime del commit) trae $evidenciasUnidas en el bloque de tickets (líneas 821-866)."
+     },
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "Admin, HK, ticket 'zz-verif- incidente lote 45' (tk_muzu722h_lymo4) en zz-verif-Propiedad con 2 evidencias zz-verif-. Anular con motivo 'zz-verif- prueba a admin': el botón pasó a 'Anulando…' (disabled=true) y luego toast 'Evidencia anulada' y UI 'Anulada 8 oct 12:56 · zz-verif- prueba a admin'. anuladaEn local = 2026-10-08T17:56:11.000Z (segundos enteros = hora del servidor) y GET/pull de tickets tras recargar la página devuelve el mismo valor, anuladaPor '1' (admin) y mismo motivo; la segunda evidencia sigue en null. Modal cerrado."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "Con STRApi.online() falso en memoria: Anular → toast 'Anular necesita conexión' (tipo err), botón vuelve a 'Anular', modal queda abierto, anuladaEn null en las 2 evidencias en local; no hubo push."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "(1) STRApi.col.push rechazando con error 403 simulado: toast 'No se pudo anular: 403 simulado', modal cerrado, evidencia sin 'Anulada' en la UI, anuladaEn null en str-tickets-v1 y en la copia str-col-lastpush-v1, y str-col-sync-v1.tickets borrado (pull completo forzado). (2) push que resuelve {items:[]} sin el ticket: toast 'No se pudo anular: el servidor no lo aceptó', mismo estado restaurado. Tras STRApi.col.pull('tickets') el servidor devuelve anuladaEn null en ambas evidencias y local = servidor (sync.tickets se rehízo). Push original restaurado."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "Portal (sesión zz-verif-colab confirmada), turno de prueba asignado a zz-verif-colab abierto en el portal: _fuenteActual()='colaborador'; el incidente muestra evidencia 1 'Anulada' y evidencia 2 sin anular, con 0 botones '.tk-ev-anular'. Llamando _tkAnularModal(tkId,ev2) no se abre modal; llamando _tkConfirmarAnular(tkId,ev2) (con un textarea de motivo puesto en el DOM) no hay toast, anuladaEn local y del servidor (pull) idénticos antes y después ([…17:56:11.000Z, null]) y la UI sigue con 1 evidencia anulada."
+     },
+     {
+      "c": "e",
+      "ok": null,
+      "observado": "No verificable desde Chrome: node tests/run.js no corre aquí. Existe tests/anular-evidencia.test.js (5877 bytes, mtime del commit). El log del CLI dice 24/24 en verde; solo por reporte del CLI, no cuenta como verificado por mí."
+     },
+     {
+      "c": "f",
+      "ok": true,
+      "observado": "/api/health esquema 9; HK y shell con ?v=p5c45; el portal cargó y operó sin fallos visibles; recarga completa de HK sin errores de consola (read_console_messages con patrón error/Uncaught/warn, sin resultados; la consola del portal no se pudo medir desde la carga porque el rastreo empezó después); sin diálogos nativos en el flujo (solo modales propios). CLAUDE.md actualizado en el mismo commit (INC-91 en las filas de incidentes/HK, INC-37 p5c45). Ticket zz-verif- cerrado por la interfaz ('✅ Resuelto en sitio', nota 'zz-verif- cierre lote 45') y turno zz-verif- eliminado con '🗑 Eliminar turno' (ausente en local y en el servidor tras pull)."
+     },
+     {
+      "c": "declarados-vs-tocados",
+      "ok": null,
+      "observado": "El log del CLI (resumen) no trae la lista explícita 'archivos declarados vs tocados'; dice que está en el mensaje del commit y no tuve acceso al git. Lo que veo es coherente con lo declarado: todos los HTML con mtime del commit (cambio de ?v=), str-api.js (STR_API_VERSION), api/col/index.php, tests/anular-evidencia.test.js nuevo, CLAUDE.md. Sin diferencias visibles, pero no lo pude contrastar con la lista del commit."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creados por interfaz con admin: turno 'zz-verif- turno lote 45' (sh-m-1791482080261) en zz-verif-Propiedad con zz-verif-colab → eliminado con '🗑 Eliminar turno' (confirmado ausente en local y servidor). Ticket tk_muzu722h_lymo4 'zz-verif- incidente lote 45' (tipo Avería) con 2 evidencias: /api/archivo/1/evidencia/tk_muzu722h_lymo4/3b877dc03c2441d7524d83850c9233d3.jpg (ANULADA en el servidor con motivo 'zz-verif- prueba a admin') y /api/archivo/1/evidencia/tk_muzu722h_lymo4/b79a2481d063c95490ceb09c4ee32b9d.jpg (sin anular); ticket cerrado como 'resuelto-sitio' (queda en el servidor, igual que en el lote 38). Los archivos subidos no se pueden borrar del servidor. zz-verif-Propiedad queda para próximas ejecuciones. Quedan además dos tickets zz-verif- de lotes 38 y 39 (tk_muz18ygg_7jlal, tk_muzoto4q_wdck8) ya en 'resuelto-sitio', sin tocar. Sin otros datos escritos.",
+    "notas": "Sin cambios a la capa Marco detectados (el log no menciona proceso-cambios, marco-trabajo.json, instrucciones.json, cobit.json, elementos.json ni comandos-usuario.md). Reservas: (1) criterio e solo por reporte del CLI; (2) lista declarados vs tocados no contrastable con el commit. INC-91 queda verificado en producción en a, b, c y d. INC-92 (solo observar): en esta ejecución NO apareció el toast 'No puedes modificar un turno que no es tuyo' en el portal del colaborador y no se observó ninguna respuesta de error de /api/col/turnos; copia local del colaborador al abrir el portal: 6 ids de turno (3 'sh-ical-…@airbnb.com', 2 'sh-r-…', 1 el turno zz-verif- 'sh-m-1791482080261'); no se pudo reproducir. Observación: la copia local de turnos del colaborador incluye ids de turnos distintos al suyo (reales), solo se anotaron ids, sin datos de huéspedes. Perfiles: se usó select_browser con los deviceId de las notas y se volvió al admin al terminar."
+   }
+  },
+  {
    "lote": null,
    "tipo": "modelo",
    "fecha": "2026-10-08",
@@ -3494,30 +3576,49 @@
   },
   {
    "lote": 45,
-   "req": "REQ-K3",
-   "categoria": "crítico",
-   "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25 (30 días / 90 días tras cierre → Drive o ZIP)",
-   "estado": "previsto",
-   "orden": 45,
-   "espera": "proyecto de Google Cloud con la cuenta thcure@gmail.com (DA-26); cruce previo con Carlos"
+   "req": "INC-91",
+   "categoria": "normal",
+   "resumen": "Anular evidencia solo con confirmación del servidor",
+   "estado": "aceptado",
+   "orden": 45
   },
   {
-   "lote": 46,
+   "lote": null,
    "req": "REQ-INV1 fase 2",
    "categoria": "normal",
    "resumen": "Dotación, umbrales con tope, qué llevar, circuito de la ropa, activos + ticket por reserva, lista de compra",
    "estado": "previsto",
-   "orden": 46,
-   "espera": "DA-22"
+   "orden": 48,
+   "espera": "DA-22",
+   "nota": "número al encolar"
   },
   {
-   "lote": 47,
+   "lote": null,
    "req": "REQ-INV1 fase 3",
    "categoria": "crítico",
    "resumen": "Compra ligada a adelanto/factura (B2), cargo por daño, auditoría, permisos inventario.*",
    "estado": "previsto",
+   "orden": 49,
+   "espera": "cruce previo con Carlos; DA-12",
+   "nota": "número al encolar"
+  },
+  {
+   "lote": null,
+   "req": "REQ-K3",
+   "categoria": "crítico",
+   "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25",
+   "estado": "previsto",
    "orden": 47,
-   "espera": "cruce previo con Carlos; DA-12"
+   "espera": "proyecto de Google Cloud con thcure@gmail.com (DA-26); cruce previo con Carlos; número al encolar"
+  },
+  {
+   "lote": null,
+   "req": "INC-94",
+   "categoria": "crítico",
+   "resumen": "Lectura por rol en GET /api/col: el colaborador solo recibe lo suyo (sin reservas ajenas ni datos de huéspedes)",
+   "estado": "previsto",
+   "orden": 46,
+   "espera": "cruce previo con Carlos (crítico)"
   }
  ],
  "riesgos": [

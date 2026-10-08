@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T19:20:00Z",
+ "actualizadoEn": "2026-10-08T20:35:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1125,12 +1125,12 @@
    "id": "INC-92",
    "tipo": "INC",
    "modulo": "HK / portal colaborador",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-08",
    "severidad": "bajo",
    "titulo": "Al marcar una tarea en un turno manual creado por admin y asignado a zz-verif-colab (titular), el portal muestra el toast rojo 'No puedes modificar un turno que no es tuyo', aunque la tarea queda marcada, el turno pasa a 'En curso' y los movimientos de inventario suben. Causa sin confirmar: el servidor rechaza alguna escritura del turno (probable hk:turnos) porque el turno manual no trae la asignación en el formato que valida INC-63.",
-   "pendiente": "45-veredicto: no se reprodujo. Hipótesis: el portal empuja turnos que no son del colaborador (su copia local trae turnos de otras propiedades, INC-94) y el servidor los rechaza con ese mensaje. Se resuelve probablemente junto con INC-94; volver a observar después.",
-   "estado": "abierto",
+   "pendiente": "Cerrado 8-oct: no reaparece tras INC-94 (46-veredicto, 46-veredicto-2, 47-veredicto: sin el aviso al marcar tareas). Causa: el portal empujaba turnos ajenos/borrados.",
+   "estado": "cerrado",
    "origen": "Veredicto 40-5 (12:50)."
   },
   {
@@ -1149,12 +1149,12 @@
    "id": "INC-94",
    "tipo": "INC",
    "modulo": "API /api/col (lectura)",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-08",
    "severidad": "crítico",
    "titulo": "GET /api/col/<colección> no filtra por rol: cualquier usuario del negocio, incluido el colaborador, recibe la colección completa (reservas con datos de huéspedes, turnos e incidentes de todas las propiedades). Leído en api/col/index.php (case 'GET': solo cuenta_id + colección) y observado en 45-veredicto: la copia local de turnos de zz-verif-colab trae turnos de otras propiedades (sh-ical, sh-r). La escritura sí está acotada (INC-63).",
-   "pendiente": "Lote 46 (4be0555) desplegado; 46-veredicto: aislamiento verificado; falta ejercer la lista blanca de campos con una reserva de prueba (DA-28).",
-   "estado": "abierto",
+   "pendiente": "Cerrado 8-oct: lotes 46 (4be0555) y 47 (4c621a0) aceptados en producción (46-veredicto-2, 47-veredicto).",
+   "estado": "cerrado",
    "origen": "Chat de desarrollo, 8-oct, a partir de 45-veredicto y lectura del código."
   },
   {
@@ -1171,12 +1171,24 @@
    "id": "DA-28",
    "tipo": "DA",
    "modulo": "Gobierno (verificación)",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-08",
    "titulo": "Carlos autoriza que el verificador cree y elimine reservas de prueba zz-verif- en zz-verif-Propiedad (por la interfaz, datos inventados) para verificar la lista blanca de campos del lote 46.",
-   "pendiente": "M-18 al Arquitecto: ampliar el encargo rol-verificador; luego copiar el texto a la tarea (clic de Carlos) y lanzar 46-veredicto-2 en Opus.",
+   "pendiente": "Aplicado: Arquitecto 4d87ed4 (M-18), texto copiado a la tarea 14:27; usado en 46-veredicto-2.",
    "estado": "decidido",
    "origen": "Carlos, 8-oct 14:15."
+  },
+  {
+   "id": "INC-95",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "etapa": "📝",
+   "fecha": "2026-10-08",
+   "severidad": "bajo",
+   "titulo": "El Calendario dice 'una reserva no se elimina, se cancela' pero no ofrece cancelar una reserva directa; la reserva de prueba res-1791487807449 (zz-verif-Propiedad) y su turno quedaron activos.",
+   "pendiente": "Lote 48 (instrucción escrita, en revisión de Carlos).",
+   "estado": "abierto",
+   "origen": "46-veredicto-2."
   }
  ],
  "cambios": [
@@ -3336,8 +3348,8 @@
    "req": "INC-94",
    "categoria": "crítico",
    "resumen": "Lectura por rol en GET /api/col: el colaborador solo recibe sus turnos (titular/base/apoyo), reservas y propiedades de lo suyo con lista blanca de campos (DA-27: nombre, fechas, número de huéspedes, código, canal, estado; sin teléfono, correo ni montos), sus tickets y movimientos; filas borradas ajenas tampoco; purga local única en el celular (str-col-filtro-v1='inc94') conservando lo propio sin subir; tests/lectura-colaborador.test.js (55 casos).",
-   "estado": "verificado",
-   "observacion": "Cruce con Carlos 13:35 (aprobado; DA-27 campos de huésped). CLI 13:37–13:44, 25/25; sin PHP local (el Chat de desarrollo comprobó /api/col como admin tras el despliegue: ok). Declarados vs tocados contrastado en el commit 4be0555: sin diferencias. 46-veredicto (14:05, corrida en Sonnet porque el cambio a Opus se guardó 1 min después del lanzamiento): aislamiento ok (colaborador 0 reservas de 53, 1 propiedad, solo turnos/tickets/movimientos suyos), admin = operador, sin 500, purga local ok, INC-92 no apareció. Falta: lista blanca de campos de reservas y recorte de propiedades no ejercidos (sin reservas en zz-verif-Propiedad); checklist/marcar tarea (sin flujo base). Carlos autorizó reservas de prueba (DA-28, M-18); verificación oficial 46-veredicto-2 en Opus después de que el Arquitecto amplíe el encargo.",
+   "estado": "aceptado",
+   "observacion": "Cruce con Carlos 13:35 (aprobado; DA-27 campos de huésped). CLI 13:37–13:44, 25/25; sin PHP local (el Chat de desarrollo comprobó /api/col como admin tras el despliegue: ok). Declarados vs tocados contrastado en el commit 4be0555: sin diferencias. 46-veredicto (14:05, corrida en Sonnet porque el cambio a Opus se guardó 1 min después del lanzamiento): aislamiento ok (colaborador 0 reservas de 53, 1 propiedad, solo turnos/tickets/movimientos suyos), admin = operador, sin 500, purga local ok, INC-92 no apareció. Falta: lista blanca de campos de reservas y recorte de propiedades no ejercidos (sin reservas en zz-verif-Propiedad); checklist/marcar tarea (sin flujo base). Carlos autorizó reservas de prueba (DA-28, M-18); verificación oficial 46-veredicto-2 en Opus después de que el Arquitecto amplíe el encargo. 46-veredicto-2 (14:41, Opus, con reserva de prueba DA-28): lista blanca de huésped y recorte de propiedades VERIFICADOS en producción (sin teléfono, correo, notas ni monto); checklist y marcar tarea ok; INC-92 no aparece. No aceptado por dos INC medios (push con borrado 403 tras purga; horas checkinTime/checkoutTime fuera de la lista blanca) → corregidos en el lote 47 y verificados en 47-veredicto (15:19): 46 aceptado junto con el 47. Pendiente: retirar la reserva de prueba res-1791487807449 y su turno (lote 48, cancelar reserva directa).",
    "costo": {
     "minutosCLI": 7,
     "minutosDueno": 5,
@@ -3396,6 +3408,148 @@
     "incs": [],
     "datosDePrueba": "Creado con admin por la interfaz: turno 'zz-verif- turno lote 46' (sh-m-1791485605996) en zz-verif-Propiedad con zz-verif-colab; iniciado y 'Unidad desocupada' marcado por el colaborador; eliminado con '🗑 Eliminar turno' (deleted=1 en el servidor, ausente en HK). Sin flujos, tickets, fotos ni archivos nuevos. zz-verif-Propiedad (prop-1791416715199) queda para próximas ejecuciones. Los tickets zz-verif- de lotes 38, 39 y 45 siguen cerrados, sin tocar. Lecturas de b, c y e solo por GET. Sin escrituras en datos reales.",
     "notas": "Sin cambios a la capa Marco detectados en el log del CLI. Sin INC nuevos: no apareció ningún dato ajeno ni 500. RESERVAS para el Chat de desarrollo: (1) la parte más sensible del lote (lista blanca de campos de reservas con datos de huésped y recorte de propiedades) NO se ejercitó en producción porque el colaborador de prueba no tiene reservas; para cerrarla hace falta una reserva de prueba o una propiedad de prueba con reserva sintética asignada a zz-verif-colab (zz-verif- permitido solo si se crea sin calendario iCal; el verificador no puede crear reservas con su lista actual) o que Carlos autorice otra vía; hasta entonces INC-94 está verificado en aislamiento por propiedad/turno/ticket/movimiento pero no en campos de huésped. (2) d: falta probar checklist y marcar tarea; requiere asignar un flujo base zz-verif- a zz-verif-Propiedad (flujo + prop-workflow por la interfaz; el verificador puede crear flujos zz-verif- pero la asignación a la propiedad no estaba en su lista explícita de escrituras). (3) a solo por log del CLI. (4) declarados vs tocados no contrastable. Observación: el colaborador recibe 'flujos' completos del negocio con sus propId reales (4 propiedades ajenas, solo ids de configuración, como indica el punto 3 'igual que hoy'). Perfiles: se usaron select_browser con los deviceId de las notas; no se inició ni cerró sesión."
+   },
+   "aceptacion2": {
+    "lote": 46,
+    "hash": "4be0555",
+    "fecha": "2026-10-08",
+    "horaBogota": "14:41",
+    "resultado": "desplegado, no aceptado",
+    "modoVerificacion": "Verificación oficial (Opus 5.5) en producción, Chrome, reloj real. Perfiles por deviceId de verificar.json, usuario confirmado con STRApi.me antes de actuar: admin Carlos Rodriguez/admin (3198e288…), zz-verif-colab id 5/colaborador (5d576fcc…), zz-verif-oper id 6/operador (63059a77…). Reserva, flujo y flujo base creados por la interfaz con admin (DA-28, puntos e y f). Lecturas por GET /api/col/<colección> con la sesión de cada perfil. Valores anotados solo de la reserva de prueba (inventados). Se copia por referencia de 46-veredicto.json lo ya aceptado: aislamiento por propiedad/turno/ticket/movimiento, admin = operador, sin 500, purga local.",
+    "criterios": [
+     {
+      "c": "despliegue",
+      "ok": true,
+      "observado": "/api/health → ok:true, db:true, schema_version:9. Calendario servido solo con ?v=p5c46. STRApi.version presente."
+     },
+     {
+      "c": "a",
+      "ok": null,
+      "observado": "No verificable en Chrome. Solo por log del CLI: 25/25 archivos verdes, tests/lectura-colaborador.test.js 55 casos. No cuenta como verificado."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "Reserva de prueba res-1791487807449 en zz-verif-Propiedad (huésped 'zz-verif- Huésped 46', 2 huéspedes, 8→9 oct, precio 123456, notas 'zz-verif- nota privada 46 tel +57 300 000 0046 correo zz-verif-46@example.com'). El formulario de Calendario no tiene campos de teléfono ni correo: se metieron en Notas. Admin ve 18 campos: channel, checkIn, checkOut, checkinTime, checkoutTime, guestName, huespedCantidad, huespedNombre, id, llegadaConfirmada, nights, notas, pax, propId, salidaConfirmada, status, tipo, total. Colaborador (GET /api/col/reservas): 1 reserva (solo res-1791487807449) con 14 campos: channel, checkIn, checkOut, guestName, huespedCantidad, huespedNombre, id, llegadaConfirmada, nights, pax, propId, salidaConfirmada, status, tipo. Búsqueda en la respuesta cruda: 'nota privada', '300 000', 'example.com' y '123456' ausentes. Propiedades: solo prop-1791416715199, campos apto, ciudad, colaboradorBaseId, color, departamento, direccion, flujoBaseId, horasTurno, id, indicaciones, interior, name, planoUrl, rooms, tipo, toleranciaSalidaMin, torre, ubicacionId, zonas, zonasPlano (sin icals). Turnos 10 filas, 1 viva (sh-res-1791487807449, el suyo); tickets 3 vivos de zz; inv-movimientos los 4 de antes. Nada ajeno. Ver INC sobre horas omitidas."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "Admin antes de crear datos: reservas 157/53, turnos 17/5, tickets 7/3, propiedades 6/5, inv-movimientos 10/10. Después: 158/54 y 18/6 (solo la reserva y el turno de prueba), resto igual. Calendario, Propiedades, Flujos y HK cargan y pintan datos reales; consola de HK sin errores al recargar."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "Portal recargado (zz-verif-colab): en Próximos 'zz-verif-Propiedad · vie 9 oct · 11:00–17:00', '📋 zz-verif-Flujo 46 0%', '👤 zz-verif- Huésped 46 · 2 huéspedes · 1 noche'. Al abrirlo: detalle de reserva, colaborador, mis horas, huésped y checklist 'zz-verif-Actividad 46' con 2 tareas. Marcadas las 2 tareas: progreso 50% y luego 100%, servidor con tareasDone 1 y luego 2 (PUT /api/col/turnos 200). Sin toast 'No puedes modificar un turno que no es tuyo' (observador de toasts y window.onerror vacíos): INC-92 no se reprodujo. Incidentes del turno: no probado (sin ticket en este turno)."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "Operador zz-verif-oper: reservas 158/54, turnos 18/6, tickets 7/3, propiedades 6/5, inv-movimientos 10/10, igual que admin. Ve la reserva de prueba completa: 18 campos, con total 123456, notas y checkinTime 15:00."
+     },
+     {
+      "c": "f",
+      "ok": false,
+      "observado": "Esquema 9 y ?v=p5c46 ok. Sin alert/confirm/prompt (borrado de flujo con modal propio). Consola del portal NO limpia: al marcar la primera tarea, tras la recarga, apareció '[WARNING] (str-m1-housekeeping.html?modo=colaborador&v=p5c46:1521) [STR] push turnos: Error: No puedes borrar en esta colección' (403 del servidor). Al marcar la segunda tarea no se repitió (2 PUT 200). Limpieza incompleta: ver datosDePrueba."
+     },
+     {
+      "c": "declarados-vs-tocados",
+      "ok": true,
+      "observado": "Contrastado por el Chat de desarrollo en el commit 4be0555, sin diferencias (según verificar.json). Desviación del punto 4 declarada en el log (la purga conserva lo propio sin subir). CLAUDE.md actualizado en el commit: fila /api/col con INC-94/DA-27, lista blanca de reservas, purga del colaborador y fila de tests."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Tras la purga, el push de turnos del colaborador sigue mandando un borrado (403)",
+      "nivel": "medio",
+      "causa": "No confirmada. Lo más probable es que la caché de diff/último push del colaborador (str-col-lastpush-v1) aún tenga un id de turno que ya no está en local, por ejemplo el turno zz-verif- del veredicto anterior (sh-m-1791485605996) que admin borró, y que el push lo trate como borrado. El punto 4 pide que el push no vuelva a mandar turnos ajenos o borrados. El servidor lo rechaza (INC-63), así que no se pierde nada.",
+      "observado": "Portal zz-verif-colab, primera escritura tras recargar: '[STR] push turnos: Error: No puedes borrar en esta colección' (warning en consola, línea 1521 de HK modo colaborador). Sin toast. La tarea sí quedó guardada. No se repitió en la siguiente escritura."
+     },
+     {
+      "titulo": "La lista blanca de reservas del colaborador deja fuera las horas (checkinTime/checkoutTime)",
+      "nivel": "medio",
+      "causa": "_colCamposReservaColaborador no incluye checkinTime ni checkoutTime, aunque la instrucción (punto 3) dice 'fechas (checkIn/checkOut y horas si existen)' y las reservas directas sí las guardan.",
+      "observado": "Admin: checkinTime '15:00' y checkoutTime '11:00'. Colaborador: la reserva llega sin esos dos campos. El portal mostró 11:00–17:00 y 'Checkout planificado: 11:00', que coincide con el valor por defecto; con una hora de salida distinta, el colaborador podría ver una ventana equivocada (no probado)."
+     },
+     {
+      "titulo": "Calendario: no se puede cancelar una reserva directa por la interfaz",
+      "nivel": "bajo",
+      "causa": "deleteRes solo borra bloqueos y muestra 'Una reserva no se elimina, se cancela…', pero ni el panel ni el modal 'Editar reserva' ofrecen cancelar: solo hay Eliminar, Cancelar (cerrar) y Guardar.",
+      "observado": "Botón 🗑 Eliminar del panel → toast 'Una reserva no se elimina, se cancela. Solo los bloqueos manuales se pueden borrar.' El Eliminar del modal cierra el modal sin cambios (status sigue 'activa')."
+     }
+    ],
+    "datosDePrueba": "Creados con admin por la interfaz: (1) reserva res-1791487807449 en zz-verif-Propiedad (huésped 'zz-verif- Huésped 46', directo, 8→9 oct 2026, 2 huéspedes, 123456/noche, notas zz-verif-). SIGUE ACTIVA: la interfaz no permite borrarla ni cancelarla (INC bajo); no se usó otra vía. (2) Turno automático sh-res-1791487807449 (titular zz-verif-colab, 2 tareas marcadas por el colaborador). SIGUE VIVO: HK no ofrece '🗑 Eliminar turno' para turnos automáticos; desaparecerá o quedará huérfano al cancelar la reserva. (3) Flujo 'zz-verif-Flujo 46' (f-muzxn5hj3446e; actividad zz-verif-Actividad 46; tareas zz-verif-Tarea 46a/46b): borrado (deleted=1). (4) Flujo base de zz-verif-Propiedad: asignado y luego quitado (flujoBaseId null); icals [] y colaboradorBaseId '5' sin cambio. Sin fotos, tickets ni pagos. zz-verif-Propiedad queda para próximas ejecuciones. Nada real tocado.",
+    "notas": "PENDIENTE PARA EL CHAT DE DESARROLLO: decidir cómo retirar la reserva res-1791487807449 y su turno sh-res-1791487807449 (p. ej. que Carlos la cancele, o autorizar al verificador a cambiarla a Bloqueo por la interfaz y borrarla). Mientras siga activa, la exportación iCal de zz-verif-Propiedad la publica como 'No disponible', pero no hay calendario de Airbnb conectado. Lo más sensible de INC-94 (lista blanca de datos del huésped y recorte de propiedades) queda VERIFICADO en producción. No se acepta por: f (warning de push en la consola del portal) y la omisión de horas en la lista blanca. Observaciones sin INC: (a) en Propiedades, elegir el flujo base no guarda hasta pulsar 'Guardar cambios' de Información básica (antes no se veía ningún aviso); (b) el primer GET del operador al cargar Calendario respondió 'Base de datos no disponible' una vez, y el reintento y /api/health salieron bien. No se detectaron cambios a la capa Marco. No se inició ni cerró sesión en ningún perfil."
+   }
+  },
+  {
+   "lote": 47,
+   "fecha": "2026-10-08",
+   "hash": "4c621a0",
+   "version": "p5c47",
+   "req": "INC-94 (fix del 46)",
+   "categoria": "normal",
+   "resumen": "_m1AplicarBorrados: los borrados que vienen del servidor salen también de la caché de diff (str-col-lastpush-v1); el colaborador nunca manda deleted; checkinTime/checkoutTime en la lista blanca de reservas del colaborador; tests/push-borrados.test.js.",
+   "estado": "aceptado",
+   "observacion": "CLI 14:51–14:53 (3 min), 26/26. Declarados vs tocados contrastado en el commit 4c621a0: str-api.js solo versión, limpieza en HK; sin otras diferencias. 47-veredicto (15:19, Opus): b (turno borrado por admin con el portal abierto; PUT 200 con deleted:[]; consola limpia), c (16 campos con horas; sin notas/total), d, e y el f pendiente del 46 ok; a por réplica.",
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0,
+    "nota": ""
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 47,
+    "hash": "4c621a0",
+    "fecha": "2026-10-08",
+    "horaBogota": "15:19",
+    "resultado": "aceptado",
+    "modoVerificacion": "Verificación oficial (Opus 5.5) en producción, Chrome, reloj real. Perfiles por deviceId de verificar.json; usuario confirmado con STRApi.me/str-user antes de actuar: admin Carlos Rodriguez/admin (3198e288…), zz-verif-colab id 5/colaborador (5d576fcc…), zz-verif-oper/operador (63059a77…). Datos zz-verif- creados por la interfaz con admin (encargo puntos a, c, f). Lecturas por GET /api/col/<colección> con la sesión de cada perfil; en el portal se instrumentó en memoria el fetch y console.warn/error del iframe HK (sin escribir nada). La reserva de prueba res-1791487807449 y su turno sh-res-1791487807449 solo se leyeron.",
+    "criterios": [
+     {
+      "c": "despliegue",
+      "ok": true,
+      "observado": "/api/health → ok:true, db:true, schema_version:9. portal, HK, Propiedades, Calendario, Flujos y shell servidos solo con ?v=p5c47; STRApi.version 'p5c47'."
+     },
+     {
+      "c": "a",
+      "ok": null,
+      "observado": "No verificable en Chrome. Solo por log del CLI: node tests/run.js 26/26, tests/push-borrados.test.js nuevo y lectura-colaborador.test.js ampliado. No cuenta como verificado."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "Admin creó por HK los turnos manuales sh-m-1791490262269 (A, 8 oct) y sh-m-1791490298987 (B, 10 oct) en zz-verif-Propiedad, titular zz-verif-colab, con flujo base zz-verif-Flujo 47 asignado a la propiedad. Caso más exigente que el pedido: el colaborador marcó primero una tarea de A (PUT 200), así A quedó en str-col-lastpush-v1 [sh-res…, A, B]. Con el portal abierto, admin borró A con '🗑 Eliminar turno' (confirmación con franja propia; servidor deleted=1). Al recargar el portal: local [sh-res…, B] y caché de diff [sh-res…, B] (A ya no está). Marcadas las 2 tareas de B: 3 PUT /api/col/turnos con status 200, todos con deleted:[] e items solo [B]; servidor tareasDone 1 y luego 2. Consola del portal sin mensajes (seguimiento desde antes de la recarga) y log instrumentado del iframe HK vacío: no aparece 'No puedes borrar en esta colección'."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "GET /api/col/reservas como zz-verif-colab: 200, 1 ítem (res-1791487807449) con 16 campos: channel, checkIn, checkOut, checkinTime, checkoutTime, guestName, huespedCantidad, huespedNombre, id, llegadaConfirmada, nights, pax, propId, salidaConfirmada, status, tipo. checkinTime '15:00', checkoutTime '11:00'. Sin notas ni total; en la respuesta cruda no aparecen 'nota privada', '123456' ni 'example.com'. Portal: el turno del 8 oct muestra ventana 11:00–15:00 con 'Próx. check-in: zz-verif- Huésped 46 · 3:00 PM' (fin = checkinTime de la reserva); el del 9 oct 11:00–17:00 (sin llegada, +6 h) y 'Checkout planificado: 11:00'. Salvedad: 11:00 coincide con la hora por defecto y la reserva no se podía modificar, así que una hora de salida distinta no se probó."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "Conteos total/vivos iguales entre admin y operador: reservas 158/54, turnos 20/7, tickets 7/3, propiedades 6/5, inv-movimientos 10/10 (antes del borrado de B). Calendario (admin) pinta 1708, 1808, 1801, 1901 y zz-verif-Propiedad; Propiedades y HK cargan con sus datos. Calendario como operador cargó sin error."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "Esquema 9 y ?v=p5c47 ok. Consola: HK (admin) sin mensajes al recargar, abrir detalle y borrar B; Propiedades sin mensajes; Calendario solo 5 LOG '[iCal] ✓ … status=ok' del sync normal; portal sin mensajes. Sin alert/confirm/prompt (interceptados en HK: 0 llamadas; borrados con franja/modal propios). Turnos zz-verif- manuales A y B borrados (deleted=1); la reserva de prueba y sh-res-1791487807449 no se tocaron."
+     },
+     {
+      "c": "f-46 (pendiente)",
+      "ok": true,
+      "observado": "Re-verificación del criterio f del lote 46: consola del portal del colaborador limpia al guardar tras recargar (ver b). INC medio del 46 'push de turnos manda borrado (403)' queda resuelto en producción."
+     },
+     {
+      "c": "declarados-vs-tocados",
+      "ok": true,
+      "observado": "Log 47: diferencia declarada y explicada (str-api.js solo cambió por versión; la limpieza quedó en HK; demás páginas solo por ?v=). CLAUDE.md al día en el commit (mtime anterior al commit 4c621a0 en .git/logs/HEAD): _m1AplicarBorrados y caché de diff en la fila HK, colaborador sin deleted, checkinTime/checkoutTime en _colCamposReservaColaborador, push-borrados.test.js en tests, INC-37 'hoy p5c47'. Sin cambios a la capa Marco."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creados con admin por la interfaz y borrados: (1) flujo 'zz-verif-Flujo 47' (f-muzyx17t9kq7i; actividad zz-verif-Actividad 47 a-muzyxbtal681x; tareas zz-verif-Tarea 47a/47b) → deleted=1. (2) flujo base de zz-verif-Propiedad asignado a ese flujo y luego quitado (flujoBaseId null; icals [] y colaboradorBaseId '5' sin cambio). (3) turnos manuales sh-m-1791490262269 (8 oct, nota 'zz-verif-turno 47 A (se borra)', 1 tarea marcada) y sh-m-1791490298987 (10 oct, 'zz-verif-turno 47 B', 2 tareas marcadas) → deleted=1. Sin fotos, tickets, reservas ni pagos nuevos. Reserva res-1791487807449 y turno sh-res-1791487807449: solo lectura, siguen activos (se retiran con el lote 48). zz-verif-Propiedad queda para próximas ejecuciones. Nada real tocado.",
+    "notas": "Aceptado: b, c, d, e y el f pendiente del 46 verificados en producción; a solo por log (no cuenta). Con este lote se pueden cerrar los dos INC medios del 46-veredicto-2 (push con borrado 403 y horas fuera de la lista blanca). Observación sin INC: en Flujos, el primer clic en 'Eliminar' del modal de confirmación (por referencia de accesibilidad) no tuvo efecto y el segundo (por coordenada) sí; probablemente artefacto de la herramienta, no reproducido. Al cargar Calendario como admin corre el sync iCal del navegador (5 feeds ok, 'actualizadas' sin nuevas ni canceladas), comportamiento existente. No se detectaron cambios a la capa Marco. No se inició ni cerró sesión en ningún perfil."
    }
   },
   {
@@ -3708,22 +3862,38 @@
    "nota": "número al encolar"
   },
   {
-   "lote": 47,
+   "lote": 49,
    "req": "REQ-K3",
    "categoria": "crítico",
    "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25",
    "estado": "previsto",
    "orden": 47,
-   "espera": "instrucción 47 (K3a conectar Drive) aprobada por Carlos 8-oct; se encola al aceptar el 46; K3b copia y K3c retención después"
+   "espera": "instrucción 49 (K3a) aprobada por Carlos; se encola después del 48"
   },
   {
    "lote": 46,
    "req": "INC-94",
    "categoria": "crítico",
    "resumen": "Lectura por rol en GET /api/col: el colaborador solo recibe lo suyo (sin reservas ajenas ni datos de huéspedes)",
-   "estado": "verificado",
-   "orden": 46,
-   "espera": "46-veredicto-2 en Opus con reserva de prueba (DA-28, M-18)"
+   "estado": "aceptado",
+   "orden": 46
+  },
+  {
+   "lote": 47,
+   "req": "INC-94 (fix del 46)",
+   "categoria": "normal",
+   "resumen": "Sin borrados reenviados por el colaborador; horas en su lista blanca",
+   "estado": "aceptado",
+   "orden": 46.5
+  },
+  {
+   "lote": 48,
+   "req": "INC-95",
+   "categoria": "normal",
+   "resumen": "Calendario: cancelar y reactivar una reserva directa (retira la reserva de prueba del 46)",
+   "estado": "previsto",
+   "orden": 47,
+   "espera": "revisión de Carlos"
   }
  ],
  "riesgos": [

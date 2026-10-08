@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T14:30:00Z",
+ "actualizadoEn": "2026-10-08T15:05:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1079,11 +1079,11 @@
    "id": "DT-31",
    "tipo": "DT",
    "modulo": "HK (turnos)",
-   "etapa": "📝",
+   "etapa": "🔧",
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "HK: '✅ Cerrar turno' (_cerrarTurno) cierra de inmediato aunque haya una tarea con foto exigida sin foto; solo 'Cerrar limpieza' avisa. El lote 36 no lo exigía.",
-   "pendiente": "Decidir si _cerrarTurno debe mostrar los mismos pendientes que _cerrarLimpieza (probable fix estándar).",
+   "pendiente": "Aprobado por Carlos 8-oct: lote 44 (44-instr-dt31-cerrar-turno-pendientes.md, estándar). K3 e INV1 pasan a 45–47.",
    "estado": "abierto",
    "origen": "Veredicto 36-2 (22:58)."
   }
@@ -2845,8 +2845,8 @@
    "req": "INC-89",
    "categoria": "normal",
    "resumen": "HK: botón '🗑 Eliminar turno' (op-only) solo para turnos creados con 'Crear turno' (sh-m- sin resId), sin tickets abiertos/escalados ni pago/liquidación (campos aún inexistentes, se miran por si se agregan); modal propio; borrado lógico (deleted=1) enviado explícito en _persistCol (antes dependía de la última copia local; ahora también borra un turno recién bajado del servidor, sin ids duplicados); el botón aparece al cerrar el ticket sin reabrir el panel.",
-   "estado": "verificado",
-   "observacion": "CLI 08:45–08:48 (3 min), node tests/run.js 22/22 (nuevo tests/eliminar-turno.test.js). No hecho por la CLI: 4a–d y 4f (navegador). La cola tomó la versión anterior del .md (device_commit_files reutilizó el contenido viejo del mismo stagedPath; las notas nuevas van en verificar.json). Recuperación documentada en CLAUDE.md: deleted=0 y subir updated_at. Verificador 09:09: a, b, c, e, f y CLAUDE.md ok (los dos turnos de prueba borrados con deleted=1; botón ausente en 5 turnos de reserva/promovidos; aparece al resolver el ticket sin reabrir). d (portal del colaborador) no verificable por diseño → el lote queda 'verificado', no aceptado, hasta repetir d con Carlos presente (el resultado 'con reservas' no existe).",
+   "estado": "aceptado",
+   "observacion": "CLI 08:45–08:48 (3 min), node tests/run.js 22/22 (nuevo tests/eliminar-turno.test.js). No hecho por la CLI: 4a–d y 4f (navegador). La cola tomó la versión anterior del .md (device_commit_files reutilizó el contenido viejo del mismo stagedPath; las notas nuevas van en verificar.json). Recuperación documentada en CLAUDE.md: deleted=0 y subir updated_at. Verificador 09:09: a, b, c, e, f y CLAUDE.md ok (los dos turnos de prueba borrados con deleted=1; botón ausente en 5 turnos de reserva/promovidos; aparece al resolver el ticket sin reabrir). d (portal del colaborador) no verificable por diseño → el lote queda 'verificado', no aceptado, hasta repetir d con Carlos presente (el resultado 'con reservas' no existe). 43-veredicto-2 (09:55, Carlos presente, dos perfiles): d ok (colaborador no ve el botón; turno borrado desaparece de su portal al recargar). Aceptado. Observación: el portal puede mostrar un turno ya borrado hasta que se recarga o llega el siguiente pull.",
    "costo": {
     "minutosCLI": 3,
     "minutosDueno": null,
@@ -2905,6 +2905,39 @@
     "incs": [],
     "datosDePrueba": "Turnos zz-verif-Propiedad: sh-m-1791423653924 y sh-m-1791466367776, ambos borrados con el botón (deleted=1). Ticket tk_muz18ygg_7jlal (zz-verif-colab) quedó en estado resuelto-sitio, con su evidencia zz-verif-colab-1.jpg y fotos del turno en el servidor (no se pueden borrar). Propiedad 'zz-verif-Propiedad' se conserva. No se creó ningún dato nuevo.",
     "notas": "Sin cambios a la capa Marco en el commit ni en el log. Pendiente: d con Carlos presente (colaborador no ve el botón). Observación menor para el Chat de desarrollo: el log del CLI no lista 'archivos tocados' de forma explícita. Chrome: una sola ventana conectada, perfil de administrador; no se inició ni cerró sesión. Observación de maquetación: el botón queda en el pie del panel."
+   },
+   "aceptacion2": {
+    "lote": 43,
+    "hash": "607ff39",
+    "fecha": "2026-10-08",
+    "horaBogota": "09:55",
+    "resultado": "aceptado: a, b, c, e, f verificados en 43-veredicto.json (por referencia) y d verificado ahora en producción; sin INC",
+    "modoVerificacion": "Repetición solo del criterio d. Producción en Chrome, dos perfiles: administrador (HK, crear y borrar por la interfaz) y colaborador zz-verif-colab (portal.html, sesión ya abierta; no se inició ni cerró sesión). v=p5c43. Reloj real. Las lecturas directas de /api/col/turnos con fetch devolvieron {error} (falta la cabecera de sesión), por lo que el borrado se comprobó por la interfaz (HK tras recargar y portal del colaborador), no por GET.",
+    "criterios": [
+     {
+      "c": "a, b, c, e, f, despliegue, CLAUDE.md",
+      "ok": true,
+      "observado": "Sin cambios: ver log\\43-veredicto.json (ok)."
+     },
+     {
+      "c": "d.1 turno borrado por el lote ya no aparece en el portal del colaborador",
+      "ok": true,
+      "observado": "Tras abrir portal.html (carga nueva) el portal del colaborador muestra solo 'HOY · Hoy no tienes turnos.'; no hay sección ATRASADOS ni el turno 'zz-verif-Propiedad · mié 7 oct · 📷 3'. Se pudo estar viendo un estado en caché a las 09:35; con carga nueva ya no está."
+     },
+     {
+      "c": "d.2 colaborador no ve '🗑 Eliminar turno'",
+      "ok": true,
+      "observado": "Admin creó por la interfaz un turno en zz-verif-Propiedad (jue 8 oct, 11:00–15:00, nota 'zz-verif- lote 43 d') asignado a zz-verif-colab. En el portal del colaborador (tras recargar) apareció como 'Pendiente'; al abrirlo el detalle (iframe de HK en modo colaborador) tiene solo los botones: Unidad desocupada, Huésped aún en la unidad, ⚠ Reportar incidente, ▶ Iniciar turno. hkEliminarSlot vacío; el texto 'Eliminar turno' no existe en la página ni en el iframe. En el mismo turno el administrador sí vio '🗑 Eliminar turno'."
+     },
+     {
+      "c": "d.3 borrar con admin y desaparece del portal del colaborador",
+      "ok": true,
+      "observado": "Admin abrió el turno, pulsó 🗑 Eliminar turno, modal propio 'Eliminar el turno de «zz-verif-Propiedad» del Jue 8 oct 2026…', Eliminar. Tras recargar el portal del colaborador: 'Hoy no tienes turnos.' Tras recargar HK (admin): 0 turnos con 'zz-verif' en _readS() y en la lista."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creado y borrado en esta ejecución: 1 turno zz-verif- en zz-verif-Propiedad (nota 'zz-verif- lote 43 d', asignado a zz-verif-colab), borrado con el botón (deleted=1 por el flujo del lote 43). Sin tickets, fotos ni movimientos nuevos. Quedan de ejecuciones anteriores: ticket tk_muz18ygg_7jlal (resuelto-sitio) y archivos zz-verif-colab-1.jpg / fotos del turno en el servidor (no borrables). Propiedad zz-verif-Propiedad se conserva.",
+    "notas": "Lote 43 queda aceptado sin reservas (el criterio d, antes no verificable, ahora ok). Sin cambios a la capa Marco. Observaciones: (1) el hallazgo de las 09:35 (turno borrado visible en ATRASADOS del portal) no se reprodujo; probablemente caché de la sesión abierta, que se renueva al recargar: si el colaborador no recarga, puede ver un turno ya borrado hasta el siguiente pull. (2) Al crear el turno por la interfaz, el formulario preselecciona al primer colaborador (Andrés Bayona) y hubo que elegir a zz-verif-colab a mano; no se tocó a ningún colaborador real. (3) 'Crear turno y enviar link' no abrió WhatsApp ni envió nada."
    }
   }
  ],
@@ -3149,36 +3182,44 @@
    "req": "INC-89",
    "categoria": "normal",
    "resumen": "HK: eliminar turno manual (solo sh-m- sin resId, sin tickets abiertos ni pagos; solo admin/operador; modal propio)",
-   "estado": "verificado",
+   "estado": "aceptado",
    "orden": 43,
-   "riesgo": "R-1",
-   "espera": "criterio d (colaborador no ve el botón) con Carlos presente"
+   "riesgo": "R-1"
   },
   {
    "lote": 44,
+   "req": "DT-31",
+   "categoria": "estándar",
+   "resumen": "HK: '✅ Cerrar turno' avisa pendientes obligatorias y fotos exigidas (modal con nota como 'Cerrar limpieza'); _pendientesDeEtapas compartida",
+   "estado": "previsto",
+   "orden": 44,
+   "espera": "se encola al terminar la ronda de verificaciones como colaborador (aprobado por Carlos 8-oct)"
+  },
+  {
+   "lote": 45,
    "req": "REQ-K3",
    "categoria": "normal",
    "resumen": "Copia a Google Drive por cron y retención",
    "estado": "previsto",
-   "orden": 44,
+   "orden": 45,
    "espera": "cuenta de servicio y carpeta de Drive (Carlos)"
   },
   {
-   "lote": 45,
+   "lote": 46,
    "req": "REQ-INV1 fase 2",
    "categoria": "normal",
    "resumen": "Dotación, umbrales con tope, qué llevar, circuito de la ropa, activos + ticket por reserva, lista de compra",
    "estado": "previsto",
-   "orden": 45,
+   "orden": 46,
    "espera": "DA-22"
   },
   {
-   "lote": 46,
+   "lote": 47,
    "req": "REQ-INV1 fase 3",
    "categoria": "crítico",
    "resumen": "Compra ligada a adelanto/factura (B2), cargo por daño, auditoría, permisos inventario.*",
    "estado": "previsto",
-   "orden": 46,
+   "orden": 47,
    "espera": "cruce previo con Carlos; DA-12"
   }
  ],

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T14:05:00Z",
+ "actualizadoEn": "2026-10-08T14:30:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1055,12 +1055,12 @@
    "id": "INC-89",
    "tipo": "INC",
    "modulo": "HK (turnos)",
-   "etapa": "🔧",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "HK no ofrece forma de borrar un turno manual desde la interfaz (ni el panel del turno ni la lista tienen acción de eliminar). La limpieza de turnos de prueba zz-verif- que exige el encargo del verificador no es posible por la interfaz; queda el turno sh-m-1791423653924 en zz-verif-Propiedad (7-oct 11:00–15:00, flujo extra ya borrado → referencia huérfana posible).",
-   "pendiente": "Instrucción 43 escrita (43-instr-inc89-eliminar-turno-manual.md, normal, R-1): botón op-only solo para sh-m- sin resId, sin tickets abiertos ni pagos; borrado lógico por _saveS/_persistCol; el servidor ya limita al colaborador (INC-63). Al aceptarse, el verificador borra sh-m-1791423653924. 42-2 creó otro turno de prueba sh-m-1791466367776; ambos se borran en la verificación del 43.",
-   "estado": "abierto",
+   "pendiente": "Cerrado 8-oct 09:09: botón 'Eliminar turno' (lote 43, 607ff39) verificado en producción; los dos turnos de prueba sh-m-1791423653924 y sh-m-1791466367776 borrados (deleted=1). Queda el ticket de prueba tk_muz18ygg_7jlal resuelto-sitio.",
+   "estado": "cerrado",
    "origen": "Veredicto 41-2 (20:50)."
   },
   {
@@ -2845,14 +2845,67 @@
    "req": "INC-89",
    "categoria": "normal",
    "resumen": "HK: botón '🗑 Eliminar turno' (op-only) solo para turnos creados con 'Crear turno' (sh-m- sin resId), sin tickets abiertos/escalados ni pago/liquidación (campos aún inexistentes, se miran por si se agregan); modal propio; borrado lógico (deleted=1) enviado explícito en _persistCol (antes dependía de la última copia local; ahora también borra un turno recién bajado del servidor, sin ids duplicados); el botón aparece al cerrar el ticket sin reabrir el panel.",
-   "estado": "desplegado",
-   "observacion": "CLI 08:45–08:48 (3 min), node tests/run.js 22/22 (nuevo tests/eliminar-turno.test.js). No hecho por la CLI: 4a–d y 4f (navegador). La cola tomó la versión anterior del .md (device_commit_files reutilizó el contenido viejo del mismo stagedPath; las notas nuevas van en verificar.json). Recuperación documentada en CLAUDE.md: deleted=0 y subir updated_at.",
+   "estado": "verificado",
+   "observacion": "CLI 08:45–08:48 (3 min), node tests/run.js 22/22 (nuevo tests/eliminar-turno.test.js). No hecho por la CLI: 4a–d y 4f (navegador). La cola tomó la versión anterior del .md (device_commit_files reutilizó el contenido viejo del mismo stagedPath; las notas nuevas van en verificar.json). Recuperación documentada en CLAUDE.md: deleted=0 y subir updated_at. Verificador 09:09: a, b, c, e, f y CLAUDE.md ok (los dos turnos de prueba borrados con deleted=1; botón ausente en 5 turnos de reserva/promovidos; aparece al resolver el ticket sin reabrir). d (portal del colaborador) no verificable por diseño → el lote queda 'verificado', no aceptado, hasta repetir d con Carlos presente (el resultado 'con reservas' no existe).",
    "costo": {
     "minutosCLI": 3,
     "minutosDueno": null,
     "nota": "espera no cuenta"
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 43,
+    "hash": "607ff39",
+    "fecha": "2026-10-08",
+    "horaBogota": "09:09",
+    "resultado": "aceptado con reservas: a, b, c, e, f verificados; d (portal del colaborador) no verificable por diseño; sin INC",
+    "modoVerificacion": "Producción en Chrome (perfil administrador, app.apartamentosbucaramanga.com, v=p5c43) + test unitario ejecutado en la nube sobre el HTML real del commit. Datos solo por la interfaz; lecturas del servidor con GET /api/col/turnos. Reloj real.",
+    "criterios": [
+     {
+      "c": "despliegue",
+      "ok": true,
+      "observado": "/api/health → {ok:true,db:true,schema_version:9,...}. Shell con str-api.js?v=p5c43 e iframe str-flujos.html?v=p5c43; HK cargado con ?v=p5c43 y _puedeEliminarTurno presente."
+     },
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "Turno sh-m-1791423653924 (zz-verif-Propiedad). Con un ticket zz-verif- abierto el botón no aparecía (correcto, ver c). Tras cerrarlo apareció '🗑 Eliminar turno'. Modal propio (sin confirm): 'Eliminar el turno de «zz-verif-Propiedad» del Mié 7 oct 2026. Se quita de HK y del portal del colaborador. Las fotos ya subidas quedan en el servidor.' Cancelar: modal cerrado, turno sigue (n=7, existe). Eliminar: panel cerrado, lista 7→6. Tras recargar sigue fuera y GET /api/col/turnos lo trae con deleted:1 (updated_at 2026-10-08 14:07:35). Segundo turno sh-m-1791466367776 borrado igual: deleted:1 en servidor, 0 turnos manuales vivos."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "Abiertos sin tocar con _openDetail los 5 turnos no manuales: 3 automáticos de iCal (sh-ical-..., con resId) y 2 'sh-r-...' (manual:true, con resId, promovidos). En los 5 el slot hkEliminarSlot quedó vacío y no aparece el texto 'Eliminar turno'. No se pulsó nada."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "Se usó el turno y el ticket zz-verif- que ya existían de lotes anteriores (no se crearon nuevos por la interfaz: desviación respecto a la nota). Ticket abierto (tk_muz18ygg_7jlal) → botón ausente (_puedeEliminarTurno=false). Tras 'Resuelto en sitio' por la interfaz, el botón apareció sin reabrir el panel. Luego se borró el turno con el botón; el ticket queda (resuelto-sitio), anotado."
+     },
+     {
+      "c": "d",
+      "ok": null,
+      "observado": "No verificable: perfil del colaborador desconectado a propósito (nota del encargo). Pendiente repetir con Carlos presente. Evidencia indirecta (réplica, no cuenta como aceptado): el código oculta el botón si _modoColab o _fuenteActual()==='colaborador' y _eliminarTurnoManual/_doEliminarTurnoManual se salen en modo colaborador."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "tests/eliminar-turno.test.js ejecutado en la nube contra el HTML del commit: 13 OK, 0 FAIL (sh-m- sin resId→true; con resId→false; id de reserva→false; ticket abierto/escalado→false; resuelto/cerrado→true; pagoCalculado/liquidadoEn→false). No se corrió 'node tests/run.js' completo (el repo no estaba en la nube); el log del CLI declara 22/22. Es verificación por réplica."
+     },
+     {
+      "c": "f",
+      "ok": true,
+      "observado": "Health esquema 9; páginas con ?v=p5c43. Consola sin errores en HK (el seguimiento de consola empezó al llamar la herramienta, después de la carga inicial: la carga no está cubierta). Sin diálogos nativos: el código nuevo usa solo modal propio; ningún diálogo bloqueó el navegador. Portal del colaborador no revisado (ver d)."
+     },
+     {
+      "c": "CLAUDE.md",
+      "ok": true,
+      "observado": "CLAUDE.md modificado en el mismo trabajo (mtime 08:47, líneas 29 y 47 mencionan _puedeEliminarTurno/_eliminarTurnoManual y p5c43). Archivos declarados vs tocados: el log del CLI no lista archivos tocados; los declarados (HK, tests, CLAUDE.md, versión en HTML/str-api.js) coinciden con los mtimes 08:47. str-cola-subida.js tiene mtime anterior (no se actualizó el ?v= dentro del archivo, solo se declara su referencia). El log declara además un cambio en el guardado (_saveS con 4.º parámetro 'deleted' explícito) no mencionado en el alcance de la instrucción: tiene explicación en el log (punto 3)."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Turnos zz-verif-Propiedad: sh-m-1791423653924 y sh-m-1791466367776, ambos borrados con el botón (deleted=1). Ticket tk_muz18ygg_7jlal (zz-verif-colab) quedó en estado resuelto-sitio, con su evidencia zz-verif-colab-1.jpg y fotos del turno en el servidor (no se pueden borrar). Propiedad 'zz-verif-Propiedad' se conserva. No se creó ningún dato nuevo.",
+    "notas": "Sin cambios a la capa Marco en el commit ni en el log. Pendiente: d con Carlos presente (colaborador no ve el botón). Observación menor para el Chat de desarrollo: el log del CLI no lista 'archivos tocados' de forma explícita. Chrome: una sola ventana conectada, perfil de administrador; no se inició ni cerró sesión. Observación de maquetación: el botón queda en el pie del panel."
+   }
   }
  ],
  "esquema": {
@@ -3096,10 +3149,10 @@
    "req": "INC-89",
    "categoria": "normal",
    "resumen": "HK: eliminar turno manual (solo sh-m- sin resId, sin tickets abiertos ni pagos; solo admin/operador; modal propio)",
-   "estado": "desplegado",
+   "estado": "verificado",
    "orden": 43,
    "riesgo": "R-1",
-   "espera": "verificación (admin); d con Carlos presente"
+   "espera": "criterio d (colaborador no ve el botón) con Carlos presente"
   },
   {
    "lote": 44,

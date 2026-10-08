@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T15:05:00Z",
+ "actualizadoEn": "2026-10-08T16:30:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1086,6 +1086,40 @@
    "pendiente": "Aprobado por Carlos 8-oct: lote 44 (44-instr-dt31-cerrar-turno-pendientes.md, estándar). K3 e INV1 pasan a 45–47.",
    "estado": "abierto",
    "origen": "Veredicto 36-2 (22:58)."
+  },
+  {
+   "id": "INC-91",
+   "tipo": "INC",
+   "modulo": "Incidentes (portal colaborador)",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "Portal del colaborador: forzando _tkAnularModal/_tkConfirmarAnular, la interfaz muestra 'Anulada · motivo' y 'Evidencia anulada' aunque el servidor rechaza la anulación (anuladaEn sigue null). Causa: actualización optimista sin comprobar la respuesta y funciones invocables en modo colaborador aunque el botón no se pinte; el dato está protegido por el servidor.",
+   "pendiente": "Fix estándar: en modo colaborador las funciones de anular salen sin hacer nada; y en cualquier rol, si el servidor rechaza, revertir y mostrar error.",
+   "estado": "abierto",
+   "origen": "Veredicto 38-4."
+  },
+  {
+   "id": "DA-25",
+   "tipo": "DA",
+   "modulo": "Fotos y evidencias (retención)",
+   "etapa": "✔",
+   "fecha": "2026-10-08",
+   "titulo": "Política de fotos aprobada por Carlos (8-oct): el servidor no guarda fotos para siempre. Normales (tareas/turnos): comprimidas en el teléfono (~1600 px, ~300 KB), 30 días en la app (configurable 15–60) y luego al Drive del negocio en STR/Propiedad/Año-Mes/Fecha-turno; en la app queda miniatura + 'Ver en tu Drive'. Incidentes (originales, EXIF, SHA-256, videos): mientras el incidente esté abierto + 90 días tras el cierre (configurable 30–180), luego al Drive con su expediente ZIP y SHA256SUMS; en la app queda la ficha, las huellas y el enlace. Reglas: solo se borra del servidor lo confirmado en Drive (tamaño y huella; si falla, reintenta y no borra); aviso 7 días antes; sin Drive conectado, ZIP mensual descargable 30 días con avisos y borrado al vencer.",
+   "pendiente": "Construir junto con la copia a Drive (lote 45, ver DA-26). Capacidad estimada con la política: ~80–100 negocios en el plan Premium (límite pasa a CPU).",
+   "estado": "decidido",
+   "origen": "Chat de desarrollo con Carlos, 8-oct."
+  },
+  {
+   "id": "DA-26",
+   "tipo": "DA",
+   "modulo": "Copia a Google Drive (K3)",
+   "etapa": "📝",
+   "fecha": "2026-10-08",
+   "titulo": "Diseño propuesto para K3 (lote 45): cada negocio conecta su propio Google Drive desde la app (OAuth, permiso drive.file: el STR solo ve los archivos que crea), refresh token cifrado en el servidor, copia diaria y retención por negocio, desconexión y aviso de 'copia detenida'. Un solo proyecto de Google Cloud del STR, con una cuenta de Google dedicada (no la personal de Carlos), pantalla de consentimiento publicada (en modo prueba los tokens vencen a los 7 días). Lote crítico (credenciales y datos personales de huéspedes; Ley 1581: el negocio acepta al conectar).",
+   "pendiente": "Carlos crea la cuenta dedicada (correo en Hostinger o Gmail) y luego configuramos juntos el proyecto de Google Cloud (~15 min). Después: instrucción crítica con cruce previo con Carlos.",
+   "estado": "propuesto",
+   "origen": "Chat de desarrollo con Carlos, 8-oct."
   }
  ],
  "cambios": [
@@ -1479,8 +1513,8 @@
    "req": "REQ-S2.1",
    "categoria": "normal",
    "resumen": "Evidencia de incidente: /api/upload tipo evidencia (original tal cual + copia 1600 px, SHA-256, EXIF) y video (≤ min(100 MB, ini), solo wifi por defecto); /api/archivo sirve video con rangos; health exif/zip/uploadMaxMB; ticket.resId + evidencias[] (solo crece, anular con motivo admin/operador); modal con galería sin capture, textos por OS, hasta 20 fotos y 2 videos ≤60 s; cierre bloqueado con pendientes; panel Tomada/Recibida/SHA-256 y 'Reserva: #código'.",
-   "estado": "desplegado",
-   "observacion": "CLI 12:22–12:36 (14 min), 19/19. Diferencias declaradas: api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php (nuevos), str-api.js; corrección de paso: el ticket se firmaba con el primer usuario de la lista, ahora con la sesión real. Límites: el bloqueo de cierre solo ve la cola de ese teléfono; en iPhone no se detecta red móvil. Verificador: 1ª 13:05 sin Chrome (Carlos cerró el navegador), 2ª 13:16 sin sesión (procedimiento nuevo verificar.json probado: sin tarjeta, corrió en LENOVO), 3ª 13:40 con sesión: a, b, c verificados en producción (SHA-256 igual en respuesta, local y GET; EXIF; 413 a 26 MB y 101 MB), ningún fallo ni INC; d–h e i-interfaz no verificables sin ticket de prueba. Pendiente: Carlos recorre d–h con un incidente real o se acepta bajo su riesgo. Archivos de prueba en api/uploads ref zz-verif-38 (no se borran del servidor). 4ª ejecución 18:55 (DA-23 aplicada, log\\38-veredicto-2.json): d, f, g, h verificados en producción por la interfaz real con propiedad 'zz-verif-Propiedad', turno y ticket de prueba (la plataforma SÍ dejó crearlos y borrarlos); 7/9 ok, sin fallo ni INC; e (colaborador no anula) e i-Node no verificables (sin usuario colaborador de prueba; sin Node). Deuda baja: un webm sin duración legible queda con duracionSeg 0 y muestra '0 s' en vez de null. Decisión de aceptación: Carlos (todo lo verificable está ok). 38-veredicto-3 (23:17): no verificable — con dos Chrome conectados la extensión exige que una persona elija el navegador y la ejecución programada no puede responder (en 36-2 sí funcionó). M-15 al Arquitecto.",
+   "estado": "aceptado",
+   "observacion": "CLI 12:22–12:36 (14 min), 19/19. Diferencias declaradas: api/archivo/index.php, api/upload/evidencia.php, api/lib/upload-limites.php (nuevos), str-api.js; corrección de paso: el ticket se firmaba con el primer usuario de la lista, ahora con la sesión real. Límites: el bloqueo de cierre solo ve la cola de ese teléfono; en iPhone no se detecta red móvil. Verificador: 1ª 13:05 sin Chrome (Carlos cerró el navegador), 2ª 13:16 sin sesión (procedimiento nuevo verificar.json probado: sin tarjeta, corrió en LENOVO), 3ª 13:40 con sesión: a, b, c verificados en producción (SHA-256 igual en respuesta, local y GET; EXIF; 413 a 26 MB y 101 MB), ningún fallo ni INC; d–h e i-interfaz no verificables sin ticket de prueba. Pendiente: Carlos recorre d–h con un incidente real o se acepta bajo su riesgo. Archivos de prueba en api/uploads ref zz-verif-38 (no se borran del servidor). 4ª ejecución 18:55 (DA-23 aplicada, log\\38-veredicto-2.json): d, f, g, h verificados en producción por la interfaz real con propiedad 'zz-verif-Propiedad', turno y ticket de prueba (la plataforma SÍ dejó crearlos y borrarlos); 7/9 ok, sin fallo ni INC; e (colaborador no anula) e i-Node no verificables (sin usuario colaborador de prueba; sin Node). Deuda baja: un webm sin duración legible queda con duracionSeg 0 y muestra '0 s' en vez de null. Decisión de aceptación: Carlos (todo lo verificable está ok). 38-veredicto-3 (23:17): no verificable — con dos Chrome conectados la extensión exige que una persona elija el navegador y la ejecución programada no puede responder (en 36-2 sí funcionó). M-15 al Arquitecto. 38-veredicto-4 (7-oct ~23:30, Carlos presente): e como colaborador ok (no puede anular: el servidor lo rechaza); extra 36 g ok ('📷 3' en el portal). INC-91 bajo: la interfaz del colaborador muestra 'Anulada' de forma optimista aunque el servidor rechaza. Turno de prueba borrado después por el lote 43. Aceptado (lo no verificable de i —node, ?v= viejo— queda como réplica).",
    "costo": {
     "minutosCLI": 14,
     "minutosDueno": null,
@@ -1630,6 +1664,40 @@
     "incs": [],
     "datosDePrueba": "Ninguno creado ni modificado en esta ejecución. Siguen vigentes los de veredictos anteriores (propiedad zz-verif-Propiedad; turno sh-m-1791423653924 en esa propiedad, indicado por el Chat de desarrollo, no tocado; archivos subidos no borrables ya anotados en 38-veredicto-2.json).",
     "notas": "Para repetir: dejar seleccionado un solo navegador por sesión es imposible con dos perfiles; el Chat de desarrollo/Carlos debe elegir en la extensión (o lanzar la tarea con Carlos presente para responder la elección) y poner un archivoVeredicto nuevo (p. ej. log\\38-veredicto-4.json) en verificar.json. Mientras el selector exija elección humana, los criterios 'como colaborador' no pueden correr de forma programada. Sin criterio incumplido y sin INC. No se revisó el diff del commit en esta ejecución (sin evidencia de cambios a la capa Marco sin 'modelo:')."
+   },
+   "aceptacion4": {
+    "lote": 38,
+    "hash": "b78799c",
+    "fecha": "2026-10-08",
+    "horaBogota": "~23:30 del 7-oct según el reloj de la app (ejecución con Carlos presente, tras su indicación de navegadores)",
+    "resultado": "criterio e (colaborador) y extra 36 g verificados en producción: cumplidos; 1 INC bajo (la interfaz del colaborador muestra 'Anulada' aunque el servidor la rechaza); lote 38 sin criterio incumplido de fondo. Pendiente de limpieza: ticket y turno de prueba sin borrar (el clasificador bloqueó el borrado). Sustituye a 38-veredicto-3.json (no verificable por falta de elección de navegador)",
+    "modoVerificacion": "Chrome en producción (app.apartamentosbucaramanga.com, ?v=p5c41). Carlos indicó 'Browser 1' para todo y 'Browser 2' para el colaborador valeriaramos.xyz, pero las sesiones estaban al revés: Browser 1 = sesión zz-verif-colab (portal.html); Browser 2 = sesión admin Carlos. Se usó cada sesión según su rol (admin para preparar, colaborador para las pruebas 'como colaborador'); no se inició ni cerró sesión. Reloj real. Evidencia subida por la interfaz del portal (modal Reportar incidente, JPEG sintético 1342 bytes adjuntado al input de archivo), nunca con STRApi.col.push ni /api/col con admin. Admin asignó el turno sh-m-1791423653924 (zz-verif-Propiedad) a zz-verif-colab desde HK por la interfaz.",
+    "criterios": [
+     {
+      "c": "e (parte colaborador). El colaborador NO puede anular una evidencia",
+      "ok": true,
+      "observado": "Ticket tk_muz18ygg_7jlal creado por zz-verif-colab (evidencia cs-muz18ygh-lcspg7, por:'5', recibidoEn 2026-10-08T04:24:54Z). En su portal: 0 botones 'Anular' en el panel del turno (solo 'Original', 'Resuelto en sitio', 'Escalar'). Forzando la acción (_tkAnularModal + motivo 'zz-verif-motivo colaborador' + botón Anular del modal) la interfaz mostró 'Anulada 7 oct 23:26 · zz-verif-motivo colaborador' y el aviso 'Evidencia anulada'; pero el servidor (/col/tickets leído con admin) sigue con anuladaEn/anuladaPor/motivoAnulacion = null, y tras recargar el portal la evidencia ya no figura anulada ni en localStorage. El servidor rechazó la anulación del colaborador. No se vio el código HTTP (403) directamente: es lectura del resultado."
+     },
+     {
+      "c": "extra 36 g. Portal del colaborador: tarjeta del turno muestra '📷 N'",
+      "ok": true,
+      "observado": "En el portal de zz-verif-colab, con el turno asignado a él (usuarioId '5' en servidor y local, 3 fotos en turno.fotos), la tarjeta muestra 'mié 7 oct · 11:00–15:00 · 📷 3' (N=3 coincide con las fotos del turno en el servidor). Justo tras asignar, antes de sincronizar, no aparecía; apareció tras la sincronización."
+     },
+     {
+      "c": "a, b, c, d, f, g, h, i (restantes)",
+      "ok": true,
+      "observado": "Sin repetir: ver 38-veredicto.json y 38-veredicto-2.json. /api/health hoy: {ok:true, db:true, schema_version:9, gd:true, exif:true, zip:true, uploadMaxMB:100}. i: node tests/run.js y ?v=p5c38 siguen sin verificar (producción sirve p5c41)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "El portal del colaborador muestra una evidencia como 'Anulada' y 'Evidencia anulada' aunque el servidor rechaza la acción",
+      "nivel": "bajo",
+      "causa": "La anulación se refleja en la interfaz de forma optimista (cliente) sin comprobar la respuesta del servidor; además _tkAnularModal/_tkConfirmarAnular se pueden invocar como colaborador aunque el botón no se pinte (la defensa real está solo en el servidor, que sí protege el dato). Efecto: mensaje engañoso hasta recargar; sin pérdida ni acceso indebido. Observado: panel 'Anulada 7 oct 23:26 · zz-verif-motivo colaborador' con servidor anuladaEn=null."
+     }
+    ],
+    "datosDePrueba": "Creados con prefijo zz-verif- en esta ejecución: ticket tk_muz18ygg_7jlal (descripción 'zz-verif-colab incidente de prueba (lote 38 e)', 1 evidencia JPEG) y archivo subido en api/uploads evidencia/tk_muz18ygg_7jlal/… (no se puede borrar del servidor). Turno sh-m-1791423653924 (zz-verif-Propiedad) reasignado de Carlos a zz-verif-colab (dato de prueba propio). NO BORRADOS: el intento de borrar ticket y turno con STRApi.col.push(...,[],[ids]) fue denegado por el clasificador de la plataforma y no se buscó otra vía; STRApi.del devuelve 'Método no permitido'. Quedan para que el Chat de desarrollo o Carlos los borre (o para la próxima ejecución). Propiedad zz-verif-Propiedad queda para próximas ejecuciones. Archivo local de apoyo zz-verif-colab-1.jpg solo en el entorno del verificador.",
+    "notas": "Carlos indicó 'Browser 1' para todo y 'Browser 2' para colaborador, pero Browser 1 = colaborador y Browser 2 = admin (por la sesión abierta en cada uno); anotar para futuras ejecuciones: el criterio es la sesión, no el número. Sin criterio incumplido de fondo. Lote 38 queda aceptable cuando se borren ticket/turno de prueba; falta solo lo no verificable de d–i ya indicado en 38-veredicto-2 (node tests, reproducción real del video, 'Reserva: #código' con reserva real). No se revisó el diff del commit: sin evidencia de cambios a la capa Marco sin 'modelo:'. INC-89 (HK no borra turnos manuales) sigue afectando la limpieza."
    }
   },
   {
@@ -1640,8 +1708,8 @@
    "req": "REQ-S2.1 (b) expediente",
    "categoria": "normal",
    "resumen": "GET /api/expediente/<ticketId>?nombre=0|1 (admin/operador): ZIP con originales no anulados byte a byte, SHA256SUMS.txt recalculado (marca DIFIERE), expediente.json y expediente.html autocontenido e imprimible; ?solo=html sin anotar; anota ticket.expedientes[] antes de entregar (solo crece, colaborador no escribe); HK: botón 📦 Expediente con casilla 'Incluir nombre del huésped' (apagada), Ver resumen, Descargar ZIP; STRApi.descargar.",
-   "estado": "desplegado",
-   "observacion": "CLI 13:21–13:27 (6 min), 19/19 (+5 casos en permisos-col). Archivos tocados = declarados. Decisiones de la CLI: la numeración NN cuenta también las anuladas (huecos en el ZIP); 'Escalado' sin hora porque el ticket no la guarda. Sin PHP local: el endpoint nuevo nunca corrió; pruebas 6a–g para el verificador. Decisión de diseño: sin librería PDF, el resumen es HTML imprimible (Ctrl+P → PDF). Verificador 16:36 (3er lanzamiento; los dos primeros no leyeron verificar.json por una escritura fallida del Chat de desarrollo): 2/9 ok (despliegue, CLAUDE.md), rechazos 400/401/404 ok, el resto no verificable porque no existe ningún incidente con evidencias en producción → INC-85 (medio, proceso) e INC-86 (bajo, 404 sobre el único ticket, sin evidencias). Se repite cuando DA-23 permita al verificador crear un ticket zz-verif- con evidencias. 2ª verificación 19:15 (log\\39-veredicto-2.json, con ticket zz-verif- con 3 evidencias y 1 anulada): a, b, c, d, g verificados en producción (ZIP real descargado y leído en memoria, SHA-256 recalculados iguales a SHA256SUMS y al ticket, JSON con/sin nombre, HTML autocontenido e imprimible, 'Ver resumen' no anota, botón deshabilitado con pendientes, rechazos 400/401/404); sin fallo ni INC. No verificables: e/f colaborador y otra cuenta (sin usuario de prueba), h Node. INC-85 queda resuelto por la verificación; INC-86 reevaluado: el 404 era por ticket sin evidencias/inexistente. Deudas bajas (DT-29): línea de tiempo sin generaciones anteriores; género en 'Video 3 tomada'; nombreHuesped null sin reserva (clave presente). Decisión de aceptación: Carlos.",
+   "estado": "aceptado",
+   "observacion": "CLI 13:21–13:27 (6 min), 19/19 (+5 casos en permisos-col). Archivos tocados = declarados. Decisiones de la CLI: la numeración NN cuenta también las anuladas (huecos en el ZIP); 'Escalado' sin hora porque el ticket no la guarda. Sin PHP local: el endpoint nuevo nunca corrió; pruebas 6a–g para el verificador. Decisión de diseño: sin librería PDF, el resumen es HTML imprimible (Ctrl+P → PDF). Verificador 16:36 (3er lanzamiento; los dos primeros no leyeron verificar.json por una escritura fallida del Chat de desarrollo): 2/9 ok (despliegue, CLAUDE.md), rechazos 400/401/404 ok, el resto no verificable porque no existe ningún incidente con evidencias en producción → INC-85 (medio, proceso) e INC-86 (bajo, 404 sobre el único ticket, sin evidencias). Se repite cuando DA-23 permita al verificador crear un ticket zz-verif- con evidencias. 2ª verificación 19:15 (log\\39-veredicto-2.json, con ticket zz-verif- con 3 evidencias y 1 anulada): a, b, c, d, g verificados en producción (ZIP real descargado y leído en memoria, SHA-256 recalculados iguales a SHA256SUMS y al ticket, JSON con/sin nombre, HTML autocontenido e imprimible, 'Ver resumen' no anota, botón deshabilitado con pendientes, rechazos 400/401/404); sin fallo ni INC. No verificables: e/f colaborador y otra cuenta (sin usuario de prueba), h Node. INC-85 queda resuelto por la verificación; INC-86 reevaluado: el 404 era por ticket sin evidencias/inexistente. Deudas bajas (DT-29): línea de tiempo sin generaciones anteriores; género en 'Video 3 tomada'; nombreHuesped null sin reserva (clave presente). Decisión de aceptación: Carlos. 39-veredicto-3 (10:30, Carlos presente): e y f como colaborador ok (sin botón Expediente; GET con su JWT → 403; su guardado no altera expedientes[]). Sin INC. Quedan no verificables por el entorno (no por fallo): ticket de otro negocio → 404 (no hay otro negocio de prueba), PUT forjado (la plataforma bloquea escrituras directas), node tests y vista de impresión — mismo criterio que 38 i: réplica, no cuenta. Aceptado. Turno de prueba sh-m-1791472972351 sin borrar (el verificador no pudo volver al perfil admin); se borra en 40-2.",
    "costo": {
     "minutosCLI": 6,
     "minutosDueno": null,
@@ -1774,6 +1842,44 @@
     "incs": [],
     "datosDePrueba": "Creados con prefijo zz-verif-: turno manual sh-m-1791418025831 en zz-verif-Propiedad (id prop-1791416715199, sin iCal; la propiedad QUEDA para próximas ejecuciones) — BORRADO (en deletedIds de /col/turnos). Tickets: tk_muys1q5p_p5u4w (primer intento mal armado, con 2 fotos subidas por la ruta antigua 'foto/' y un video rechazado) y tk_muys36ch_0pxjz (3 evidencias, 1 anulada, 2 expedientes generados) — AMBOS BORRADOS (en deletedIds de /col/tickets; el anulado conserva su registro con deleted=1; las anulaciones no se deshacen). Archivos subidos que NO se pueden borrar del servidor (cuenta 1): foto/tk_muys1q5p_p5u4w/9186a39645ee254040da9d8b7c9d848b.jpg y 2265ed04767a352e0294d591ec9ef031.jpg (+ .min.jpg si existen); evidencia/tk_muys36ch_0pxjz/a3ef62d7cab3cd420ac8937fbd27edd0.jpg y c6356425fd332025353f0c07b416aaf0.jpg (+ .min.jpg); video/tk_muys36ch_0pxjz/b18dcdf815669edad99b6231e3b73d58.webm. Además el ticket de prueba tuvo 2 generaciones de expediente (ZIPs temporales borrados por el servidor; nada guardado en disco local: los blobs se leyeron en memoria). Cola local de subida del navegador: quedan 5 ítems 'subida' de esos tickets (la API quitar() solo borra los pendientes/fallidos; el de video fallido se quitó); son locales al navegador y no afectan al servidor. Un intento de video con bytes aleatorios fue rechazado por el servidor ('El video debe ser mp4, mov, webm o 3gp'): comportamiento esperado.",
     "notas": "Sin criterio incumplido y sin INC. Desplegado, no aceptado todavía solo por lo no verificable: (1) e y f: colaborador (403, botón ausente, PUT que no altera expedientes) y ticket de otra cuenta → 404: hace falta un usuario colaborador de prueba autorizado, o que Carlos acepte esos puntos por la réplica de la CLI; (2) h: node tests/run.js (log de la CLI 19/19); (3) d/g: la apertura de 'Ver resumen' en pestaña nueva y la vista de impresión (Ctrl+P) no se observaron visualmente. Producción sirve p5c40 (lote 40): verificado sobre lo desplegado. Observaciones menores para el Chat de desarrollo (deuda baja, sin INC): (i) la línea de tiempo del expediente no lista las generaciones anteriores, solo la actual; (ii) textos tipo 'Video 3 tomada (teléfono)' / 'Video 3 recibida' concuerdan mal en género; (iii) con nombre=1 y turno sin reserva, nombreHuesped sale null (la clave existe), conviene confirmar que es lo esperado; (iv) con evidencias anuladas, sha256Calculado queda null y la numeración de archivos conserva el hueco (01, 03), coherente con n. Sin cambios a la capa Marco observados (el diff del commit no se pudo leer)."
+   },
+   "aceptacion3": {
+    "lote": 39,
+    "hash": "5da0a3e",
+    "fecha": "2026-10-08",
+    "horaBogota": "10:30",
+    "resultado": "no aceptado todavía: sin criterio incumplido; en esta repetición quedaron verificados en producción los puntos de colaborador de e y f (botón ausente, GET 403, guardado del colaborador no altera expedientes[]). Siguen sin poder probarse: ticket de otra cuenta → 404, PUT con expedientes forjado (bloqueado por la plataforma), node tests/run.js y la vista de impresión. Limpieza incompleta: el turno de prueba NO se borró (ver datosDePrueba).",
+    "modoVerificacion": "Chrome en producción (app.apartamentosbucaramanga.com, ?v=p5c43, esquema 9, zip:true). Admin = Chrome 'Browser 1' (sesión de Carlos); colaborador = Chrome 'Browser 2' (portal.html con zz-verif-colab, id 5, rol colaborador, comprobado en su str-user). Sin iniciar/cerrar sesión ni escribir contraseñas. Datos zz-verif- creados: turno manual por la interfaz de HK (admin, en zz-verif-Propiedad, asignado a mano a zz-verif-colab); incidente reportado desde el portal del colaborador con una foto jpg sintética 320x240 (canvas, inyectada al input de fotos). Reloj real. Partes del veredicto 39-veredicto-2.json (a, b, c, d, g, h-salud) se citan por referencia, no se repitieron.",
+    "criterios": [
+     {
+      "c": "e (parte colaborador). Un guardado del ticket desde su sesión no altera ticket.expedientes[]",
+      "ok": true,
+      "observado": "Con admin se generó el expediente del ticket tk_muzoto4q_wdck8 (GET /api/expediente/<id>, nombre=0): expedientes[] del servidor = 1 entrada {id:'exp_6ac7b65781368', en:'2026-10-08T15:27:19.520Z', por:'1', conNombre:false, archivos:1}. Luego el colaborador pulsó 'Resuelto en sitio' (nota 'zz-verif-resuelto lote 39') por la interfaz del portal: estado pasó a 'resuelto-sitio', resueltoEn 15:28:30Z, y expedientes[] siguió idéntico (1 entrada, mismo id, mismo en). Límite: la copia local del colaborador no traía expedientes, así que el guardado no lo enviaba; el caso fuerte (PUT del colaborador con expedientes forjado/vaciado) no se pudo probar: la plataforma bloqueó esa escritura directa (STRApi.col.push desde la sesión del colaborador) y no se buscó otra vía."
+     },
+     {
+      "c": "e (parte admin). Línea 'Expedientes:' / registro en ticket",
+      "ok": true,
+      "observado": "Ya cubierto en 39-veredicto-2.json. Hoy se confirmó que el servidor anota la generación en expedientes[] (1 entrada con por='1', conNombre=false, archivos=1)."
+     },
+     {
+      "c": "f (parte colaborador). Sin botón; GET /api/expediente/<id> con su JWT → 403",
+      "ok": true,
+      "observado": "En su vista del turno (portal) el panel 'Incidentes del turno (1)' muestra el ticket con 'Resuelto en sitio', 'Escalar' y 'Reportar incidente', sin ningún botón 'Expediente' (0 botones con texto Expediente/📦 en el iframe de HK; el texto de la página no contiene 'Expediente'). Con el JWT del colaborador: GET /api/expediente/tk_muzoto4q_wdck8?nombre=0 → 403 {\"error\":\"Sin permiso\"}; el mismo con solo=html → 403; id con ../ (a%2E%2E%2Fb) → 403 (el permiso se evalúa antes que la validación del id, coherente). El admin sí ve el botón '📦 Expediente' y su modal con '1 foto, 0 videos, 0 anuladas'."
+     },
+     {
+      "c": "f. Ticket de otra cuenta → 404",
+      "ok": null,
+      "observado": "NO VERIFICABLE: no hay otro negocio de prueba."
+     },
+     {
+      "c": "e/f. PUT del colaborador con expedientes cambiado (forjado) no lo altera",
+      "ok": null,
+      "observado": "NO VERIFICABLE por acción directa: STRApi.col.push con expedientes falso desde la sesión del colaborador fue bloqueado por la plataforma; no se intentó otra vía. Solo cubierto por el guardado normal de la interfaz (ver e) y por la réplica de la CLI, que no cuenta."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Creados con prefijo zz-verif- en esta ejecución: (1) turno manual sh-m-1791472972351 en zz-verif-Propiedad (id prop-1791416715199), asignado a zz-verif-colab, nota 'zz-verif-turno lote 39 colab' — SIN BORRAR: tras la prueba la plataforma bloqueó el cambio de navegador hacia la sesión de admin, y borrar con '🗑 Eliminar turno' exige esa sesión. Pendiente de borrar en la próxima ejecución o por el Chat de desarrollo/Carlos. (2) Ticket tk_muzoto4q_wdck8 (incidente 'zz-verif-incidente lote 39 colaborador', 1 evidencia foto, resuelto en sitio, 1 expediente generado): queda (borrar por API está bloqueado), anotado. Archivo subido que no se puede borrar del servidor: evidencia/tk_muzoto4q_wdck8/<uuid>.jpg (+ .min.jpg), cuenta 1. El ZIP del expediente no se guardó en disco (solo se leyó el estado; temporal del servidor borrado por el servidor). La propiedad zz-verif-Propiedad queda para próximas ejecuciones.",
+    "notas": "Sin criterio incumplido y sin INC. Desplegado, no aceptado todavía solo por lo no verificable: ticket de otra cuenta → 404, PUT del colaborador con expedientes forjado, node tests/run.js (CLI declara 19/19), apertura de 'Ver resumen' en pestaña y vista de impresión (Ctrl+P). Pendiente de limpieza: turno sh-m-1791472972351 (el verificador no pudo volver a la sesión de admin: bloqueo de la plataforma al cambiar de navegador). Observación menor: id con ../ para el colaborador devuelve 403 y no 400 (el 400 solo lo ve admin, ya verificado en 39-veredicto-2); es coherente, no es incumplimiento. Producción sirve p5c43 (lotes 40-43 encima del 39). CLAUDE.md/archivos declarados vs tocados y capa Marco: no re-verificados (sin git en esta ejecución); sin indicio de cambios a Marco sin prefijo 'modelo:'."
    }
   },
   {
@@ -2348,7 +2454,7 @@
    "categoria": "normal",
    "resumen": "Foto de tarea exigida (hasta 10, mínimo 1), heredada de la actividad sin excepción; _fbFotoEfectiva en HK/Propiedades/Flujos; captura con reducción a 1600 px, miniaturas, bloqueo del 'hecho' y pendientes 'sin foto' al cerrar; turno.fotos con unión por url en el merge; columna 'Fotos mín.' en Excel.",
    "estado": "aceptado",
-   "observacion": "Verificador 11:53–12:10: aceptado; 4/10 criterios en producción (c, d, f, g, h, i no verificables: exigen turno real); datos zz-verif- creados y borrados. INC bajo → INC-83. Diferencias declaradas por la CLI: str-guia-visor.js (lightbox suelto), str-propiedades.html (copia de _fbFotoEfectiva), tests/lib/port-col.js; ref del turno saneado para /api/upload; una tarea en modo proceso no se frena por foto (límite). Sin PHP en LENOVO: api/col solo por réplica JS. CLI 11:36–11:47 (11 min). Carlos debe recorrer c–h con un turno real. Verificador 22:58 (36-veredicto-2, turno zz-verif- por la interfaz): c, d, f, h ok; g ok en el panel del operador, portal '📷 N' no verificable (turno no asignado a zz-verif-colab; el verificador sí abrió el portal en el perfil del colaborador); i sin Node. Sigue aceptado. DT-31: '✅ Cerrar turno' cierra sin aviso aunque falte una foto exigida.",
+   "observacion": "Verificador 11:53–12:10: aceptado; 4/10 criterios en producción (c, d, f, g, h, i no verificables: exigen turno real); datos zz-verif- creados y borrados. INC bajo → INC-83. Diferencias declaradas por la CLI: str-guia-visor.js (lightbox suelto), str-propiedades.html (copia de _fbFotoEfectiva), tests/lib/port-col.js; ref del turno saneado para /api/upload; una tarea en modo proceso no se frena por foto (límite). Sin PHP en LENOVO: api/col solo por réplica JS. CLI 11:36–11:47 (11 min). Carlos debe recorrer c–h con un turno real. Verificador 22:58 (36-veredicto-2, turno zz-verif- por la interfaz): c, d, f, h ok; g ok en el panel del operador, portal '📷 N' no verificable (turno no asignado a zz-verif-colab; el verificador sí abrió el portal en el perfil del colaborador); i sin Node. Sigue aceptado. DT-31: '✅ Cerrar turno' cierra sin aviso aunque falte una foto exigida. g (portal '📷 N') verificado en 38-veredicto-4: ok.",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": null,
@@ -3141,7 +3247,7 @@
    "req": "REQ-S2.1",
    "categoria": "normal",
    "resumen": "Evidencia de incidente: originales, EXIF, huella, videos",
-   "estado": "desplegado",
+   "estado": "aceptado",
    "orden": 38
   },
   {
@@ -3149,7 +3255,7 @@
    "req": "REQ-S2.1 (b)",
    "categoria": "normal",
    "resumen": "Expediente del incidente: ZIP con originales, SHA256SUMS, JSON y resumen HTML imprimible; nombre del huésped solo con casilla",
-   "estado": "desplegado",
+   "estado": "aceptado",
    "orden": 39
   },
   {
@@ -3198,11 +3304,11 @@
   {
    "lote": 45,
    "req": "REQ-K3",
-   "categoria": "normal",
-   "resumen": "Copia a Google Drive por cron y retención",
+   "categoria": "crítico",
+   "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25 (30 días / 90 días tras cierre → Drive o ZIP)",
    "estado": "previsto",
    "orden": 45,
-   "espera": "cuenta de servicio y carpeta de Drive (Carlos)"
+   "espera": "cuenta dedicada y proyecto Google Cloud (DA-26); cruce previo con Carlos"
   },
   {
    "lote": 46,

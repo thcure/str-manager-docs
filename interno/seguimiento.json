@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T04:10:00Z",
+ "actualizadoEn": "2026-10-08T04:00:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1059,9 +1059,21 @@
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "HK no ofrece forma de borrar un turno manual desde la interfaz (ni el panel del turno ni la lista tienen acción de eliminar). La limpieza de turnos de prueba zz-verif- que exige el encargo del verificador no es posible por la interfaz; queda el turno sh-m-1791423653924 en zz-verif-Propiedad (7-oct 11:00–15:00, flujo extra ya borrado → referencia huérfana posible).",
-   "pendiente": "Decidir: borrar ese turno a mano o añadir 'Eliminar turno manual' en HK (solo admin, turnos sin iCal). Deuda de producto, no fallo del lote 41.",
+   "pendiente": "Decidir: borrar ese turno a mano o añadir 'Eliminar turno manual' en HK (solo admin, turnos sin iCal). Deuda de producto, no fallo del lote 41. 37-2 reutilizó ese turno (queda 'Lista' con flujo extra huérfano y una foto zz-verif-).",
    "estado": "abierto",
    "origen": "Veredicto 41-2 (20:50)."
+  },
+  {
+   "id": "INC-90",
+   "tipo": "INC",
+   "modulo": "HK (turnos)",
+   "etapa": "📝",
+   "fecha": "2026-10-07",
+   "severidad": "bajo",
+   "titulo": "HK: tras 'Cerrar igual' con una foto pendiente, la línea de Limpieza del panel del turno muestra '🧹 aNaN' unos segundos y luego '🧹 22:35'. Causa probable: se formatea limpiezaCerradaEn.at antes de que el servidor estampe la hora (patrón conocido: formatear un at aún no resuelto).",
+   "pendiente": "Fix estándar: en el render, si at no es fecha válida usar atDispositivo o '…'. Comprobar si ocurre también sin pendientes.",
+   "estado": "abierto",
+   "origen": "Veredicto 37-2 (22:37)."
   }
  ],
  "cambios": [
@@ -2382,8 +2394,8 @@
    "req": "REQ-U6.3",
    "categoria": "normal",
    "resumen": "str-cola-subida.js (IndexedDB, estados en-telefono/subiendo/subida/fallida, reintentos 5 s·15 s·45 s… ≤10 min, 8 intentos, soloWifi, memoria si IndexedDB falla); HK: miniatura inmediata ⏳/✓/!, cuentan subidas + en cola para marcar, cierre con pendientes avisado, chip; portal: chip, fallidas en barra, menú de perfil con 'Mi teléfono' (str-os-v1); hk:turnos con fotosPendientes/fotosFallidas.",
-   "estado": "desplegado",
-   "observacion": "Verificador 12:22–12:24: 'no aceptado' sin INC ni criterio incumplido: 8/11 ok, 3 no verificables (a miniaturas, d cierre con pendientes, tests Node) por exigir turno real o el repositorio; la cola se ejerció completa en memoria (agregar, offline, 500 simulado, reintentos, persistencia IndexedDB, modo memoria). Queda 'desplegado' hasta que Carlos recorra a y d con un turno de prueba. Observación del verificador: una subida cuyo turno no existe queda sin 'aplicada' y cuenta como pendiente (esperado). CLI 11:53–12:02 (9 min), 19/19 tests. Diferencias: menú de perfil nuevo en el portal, fotosFallidas en hk:turnos. Límites: sin Background Sync; dos pestañas sin navigator.locks pueden duplicar una foto.",
+   "estado": "aceptado",
+   "observacion": "Verificador 12:22–12:24: 'no aceptado' sin INC ni criterio incumplido: 8/11 ok, 3 no verificables (a miniaturas, d cierre con pendientes, tests Node) por exigir turno real o el repositorio; la cola se ejerció completa en memoria (agregar, offline, 500 simulado, reintentos, persistencia IndexedDB, modo memoria). Queda 'desplegado' hasta que Carlos recorra a y d con un turno de prueba. Observación del verificador: una subida cuyo turno no existe queda sin 'aplicada' y cuenta como pendiente (esperado). CLI 11:53–12:02 (9 min), 19/19 tests. Diferencias: menú de perfil nuevo en el portal, fotosFallidas en hk:turnos. Límites: sin Background Sync; dos pestañas sin navigator.locks pueden duplicar una foto. Verificador 22:37 (37-veredicto-2, turno zz-verif- por la interfaz): a y d ok (miniatura ⏳→✓, tarea marcable antes de terminar la subida; modal de pendientes y 'Cerrar igual' con hora del clic). Aceptado. INC-90 bajo ('aNaN' transitorio tras cerrar limpieza).",
    "costo": {
     "minutosCLI": 9,
     "minutosDueno": null,
@@ -2457,6 +2469,62 @@
     "incs": [],
     "datosDePrueba": "creados y borrados: solo registros locales en IndexedDB del navegador (turnoId zz-verif-turno, zz-verif-turno2, zz-mem; archivos zz-verif-*.jpg) con STRApi.upload simulado en memoria, nada enviado al servidor; los 6 registros quedaron borrados de IndexedDB (cola vacía al final). localStorage str-os-v1 restaurado a 'otro'. Ningún flujo, actividad, turno ni dato real creado ni modificado",
     "notas": "Sin incumplimientos detectados, pero no se acepta: los criterios a, d y la parte visual de b, c, e, f (miniaturas ⏳/✓/!, chip, modal de cierre) y la corrida de tests exigen un turno real o el repositorio y no se pudieron verificar sin tocar datos reales; quedan para una prueba manual con turno de prueba. Observación (no es INC): un ítem 'subida' cuyo turno no existe queda sin 'aplicada' porque el handler de HK devuelve false, y cuenta como pendiente hasta que se aplique; esperado para turnos reales ausentes. CLAUDE.md menciona el lote (7 coincidencias de STRColaSubida/p5c37/U6.3). Límite declarado: dos pestañas sin navigator.locks podrían duplicar una subida."
+   },
+   "aceptacion2": {
+    "lote": 37,
+    "hash": "0756073",
+    "fecha": "2026-10-08",
+    "horaBogota": "22:37",
+    "resultado": "aceptado en producción (criterios a y d verificados por la interfaz; b, c, e, f, g(salvo tests/CLAUDE.md) ya ok en log\\37-veredicto.json). Pendientes menores: node tests/run.js y CLAUDE.md/diff en el mismo commit no verificables desde Chrome (réplica CLI 19/19); partes visuales '!' de c y chip ámbar de f no vistas en pantalla.",
+    "modoVerificacion": "Chrome en producción (app.apartamentosbucaramanga.com), sesión admin ya abierta, sin credenciales. Producción sirve p5c41 (lotes posteriores): se verificó el comportamiento, no la versión. Datos creados por la interfaz (Flujos → Nuevo flujo; HK → '+ Agregar flujo a este turno'); imagen sintética zz-verif-foto37.jpg adjuntada al input de la tarea (el input de archivo se capturó con un parche en memoria de HTMLInputElement.click para evitar el selector nativo; la lógica de HK no se modificó). Para a/d se hizo lenta la subida con un envoltorio en memoria de STRApi.upload (compuerta liberada a mano); no se usó STRApi.col.push ni /api/col. Reloj real (UTC 03:34–03:36 del 8-oct = 22:34–22:36 Bogotá del 7-oct según el servidor).",
+    "criterios": [
+     {
+      "c": "a. Foto: miniatura inmediata ⏳ → ✓; turno.fotos[clave] con url y at del servidor; tarea marcable antes de terminar la subida",
+      "ok": true,
+      "observado": "Turno zz-verif-Propiedad (sh-m-1791423653924) con zz-verif-Flujo 37 (actividad con foto exigida, tarea zz-verif-Tarea foto 37 '0/1 Tomar foto'). Subida normal: al adjuntar quedó en cola y a los pocos segundos la miniatura mostró ✓; _getShiftFotos devolvió {url:'/api/archivo/1/foto/sh-m-1791423653924/ab9def31….jpg', at:'2026-10-08T03:34:42.000Z' (servidor), atDispositivo:'03:34:41.764Z', por:'1', nombre:'Carlos Rodriguez'}. Con la subida retenida (envoltorio lento): miniatura con esquina ⏳ de inmediato, contador '1/1' y chip '1 pendiente' en la barra; la tarea se pudo marcar hecha con la cola en estado 'subiendo' y fotos[clave]=[] (progreso 100%). Al liberar la subida pasó a 'subida' con url y fotos[clave] quedó con url y at de servidor (03:35:49Z; dispositivo 03:35:18.562Z)."
+     },
+     {
+      "c": "d. Cerrar limpieza con pendientes: modal lista pendientes y deja cerrar igual; hora de cierre = la del momento",
+      "ok": true,
+      "observado": "Con 1 foto 'subiendo', 'Cerrar limpieza' abrió el modal '1 foto pendiente de subir (zz-verif-Act 37) — Puedes cerrar igual: se subirán al recuperar señal. No borres los datos del navegador hasta entonces.' con Cancelar / Cerrar igual. 'Cerrar igual' cerró: estado 'Lista', limpiezaCerradaEn.at='2026-10-08T03:35:39.000Z' (atDispositivo 03:35:39.379Z = el instante del clic, 10 s antes de que terminara la subida, que acabó a 03:35:49Z). Tras el cierre la foto siguió en cola, subió sola y fotos[clave] quedó con url."
+     },
+     {
+      "c": "b (parte visual) miniatura ⏳ + chip '📷 N pendientes'",
+      "ok": true,
+      "observado": "Visto en pantalla durante la retención de subida: miniatura con ⏳ y chip '📷 1 pendiente' (ámbar) en la barra del turno; desaparece al subir. La parte offline/recarga/reconexión se verificó antes en log\\37-veredicto.json (b ok, por réplica en IndexedDB real). No se ejercitó recarga con miniaturas en pantalla."
+     },
+     {
+      "c": "c (parte visual) '!' y chip rojo con fallo 500",
+      "ok": null,
+      "observado": "No verificable: intenté una segunda foto con upload que lanza 'HTTP 500 simulado', pero el input de la tarea ya marcada no encoló el ítem (cola sin cambios) y no se pudo repetir sin tocar más datos. El comportamiento de fallida/reintentar sigue ok por log\\37-veredicto.json (c)."
+     },
+     {
+      "c": "b, c, e, f, g (de 37-veredicto.json)",
+      "ok": true,
+      "observado": "Copiados por referencia a log\\37-veredicto.json: b ok, c ok (lógica), e ok, f ok, g ok salvo node tests/run.js. Hoy /api/health: ok, db, schema_version 9, exif/zip/gd true, uploadMaxMB 100; HK carga str-api.js, str-guia-visor.js y str-cola-subida.js con ?v=p5c41 (versión de producción posterior a p5c37)."
+     },
+     {
+      "c": "g. node tests/run.js; CLAUDE.md y declarados vs tocados en el mismo commit; capa Marco sin 'modelo:'",
+      "ok": null,
+      "observado": "No verificable desde Chrome (sin git ni diff). Log de la CLI: 19/19 OK (réplica, no cuenta); declara como extras tests/cola-subida.test.js, línea en tests/README.md y fotosFallidas en hk:turnos (explicadas). Sin indicio de cambios a la capa Marco."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "HK: texto 'aNaN' transitorio en el panel de turno justo tras cerrar limpieza",
+      "nivel": "bajo",
+      "causa": "Probable formateo de la hora de cierre (limpiezaCerradaEn.at) antes de que se resuelva/estampe el valor del servidor; en el render inmediato posterior a 'Cerrar igual' el texto bajo 'Limpieza' mostró '🧹 aNaN' y segundos después '🧹 22:35'. No se reprodujo en lecturas posteriores (0 'NaN' en innerText). Afecta a cierres con subida pendiente; verificar si ocurre también sin pendientes.",
+      "observado": "Captura tras 'Cerrar igual' (panel con 'Lista'): línea 'aNaN' bajo la barra Limpieza; captura posterior: '22:35'. La tarjeta de la lista mostró '🧹 22:35'."
+     },
+     {
+      "titulo": "HK no permite borrar turnos manuales de prueba (ya registrado como INC-89)",
+      "nivel": "bajo",
+      "causa": "Sin acción de eliminar turnos manuales en la interfaz; no es fallo del lote 37.",
+      "observado": "Turno sh-m-1791423653924 (zz-verif-Propiedad) queda 'Lista' con limpieza cerrada 22:35."
+     }
+    ],
+    "datosDePrueba": "Todo con prefijo zz-verif-. Creado por la interfaz: flujo zz-verif-Flujo 37 (actividad zz-verif-Act 37, tarea zz-verif-Tarea foto 37) → BORRADO desde Flujos. Reutilizado turno manual sh-m-1791423653924 en zz-verif-Propiedad (prop-1791416715199): NO borrado (INC-89); queda con limpieza cerrada y con un flujo extra ya inexistente (referencia huérfana). Archivos subidos al servidor (no borrables): /api/archivo/1/foto/sh-m-1791423653924/ab9def31a91f00b0b7d7e02e27a4dded.jpg (foto quitada del turno con ✕) y /api/archivo/1/foto/sh-m-1791423653924/b5147ed43138cc3024bee77651505483.jpg (queda en turno.fotos). Imagen sintética zz-verif-foto37.jpg. Registros de cola en IndexedDB del navegador del verificador (turnoId sh-m-1791423653924) con estado 'subida'. Ningún dato real tocado.",
+    "notas": "Criterios a y d (puntos de parada pendientes) verificados en producción por la interfaz; con b, c, e, f, g de 37-veredicto.json el lote queda aceptado en cuanto a comportamiento. Pendiente para el Chat de desarrollo: decidir sobre el turno de prueba sh-m-1791423653924 (INC-89) y revisar el INC bajo del 'aNaN'. Sin cambios observados a la capa Marco. Limitación: a/d se ejercieron con admin y parches en memoria (input de archivo y retraso de upload), no con un colaborador en teléfono real."
    }
   },
   {
@@ -2764,7 +2832,7 @@
    "req": "REQ-U6.3",
    "categoria": "normal",
    "resumen": "Cola local de subida de fotos y videos",
-   "estado": "desplegado",
+   "estado": "aceptado",
    "orden": 37
   },
   {

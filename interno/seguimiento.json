@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T16:33:00Z",
+ "actualizadoEn": "2026-10-09T13:00:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1263,6 +1263,42 @@
    "estado": "decidido",
    "titulo": "Decisiones de Carlos (9-oct) para inventario y operación: nombre fijo de zona, principal por propiedad, acceso automático con ajustes, juegos con detalle por pieza, lavado en el apto con decisión del operador, condición a discreción, incidentes internos vs reclamos, compra como actividad de flujo, códigos opcionales, lector QR, identificación en el portal antes de escanear.",
    "pendiente": "Detalle en claude/producto/requerimientos-inventario-operacion-2026-10.md. De DA-22 siguen abiertas: diferencia de conteo, consumo por tarea o deducido, muestreo de auditoría."
+  },
+  {
+   "id": "INC-98",
+   "tipo": "INC",
+   "modulo": "Inventario",
+   "etapa": "🔧",
+   "fecha": "2026-10-09",
+   "severidad": "medio",
+   "titulo": "El colaborador no recibe invPrincipalId de la propiedad: si el admin elige a mano la zona principal, el colaborador cuenta en la automática y las existencias se parten.",
+   "pendiente": "Fix lote 54 (lista blanca de propiedades del colaborador).",
+   "estado": "en fix",
+   "origen": "53-veredicto-2."
+  },
+  {
+   "id": "INC-99",
+   "tipo": "INC",
+   "modulo": "Inventario",
+   "etapa": "📝",
+   "fecha": "2026-10-09",
+   "severidad": "bajo",
+   "titulo": "El servidor envía al colaborador todas las zonas tipo principal, sin filtrar por propIds (latente: hoy ninguna ajena).",
+   "pendiente": "Se resuelve en INV2·4 (accesos por zona, crítico).",
+   "estado": "abierto",
+   "origen": "53-veredicto-2."
+  },
+  {
+   "id": "INC-100",
+   "tipo": "INC",
+   "modulo": "Proceso",
+   "etapa": "📝",
+   "fecha": "2026-10-09",
+   "severidad": "bajo",
+   "titulo": "El log de la CLI del lote 53 no trae la lista explícita de archivos declarados vs tocados (sí el commit).",
+   "pendiente": "Recordado en la sección de cierre de cada instrucción desde el lote 54.",
+   "estado": "abierto",
+   "origen": "53-veredicto-2."
   }
  ],
  "cambios": [
@@ -4215,6 +4251,171 @@
     "datosDePrueba": "Ninguno creado ni modificado. Solo lectura con zz-verif-oper y admin.",
     "notas": "Sin cambios a la capa Marco detectados en el log (sin prefijo 'modelo:' no aplica). Reloj real no usado en criterios. Chrome: pestañas cerradas en ambos perfiles."
    }
+  },
+  {
+   "lote": 53,
+   "fecha": "2026-10-09",
+   "hash": "dee153d",
+   "version": "p5c53",
+   "req": "REQ-INV2 · 1",
+   "categoria": "normal",
+   "resumen": "Zonas de inventario (rol, tipoNombre, propIds, ubicacion; migración al leer; compatibilidad tipo/propId), varias principales, invPrincipalId por propiedad, nombre fijo; ficha de la propiedad con depósito y sección Inventario.",
+   "estado": "aceptado",
+   "observacion": "CLI 11:34–11:43, 30/30. Declarados vs tocados contrastado por el Chat de desarrollo en el commit dee153d (el commit trae la lista; el log no: INC-100). 53-veredicto (Sonnet): no verificable, sesión admin vencida y perfil colaborador sin conectar. 53-veredicto-2 (~12:57): b, c, e, f en producción; d con el código real de HK y tarea sintética; a por el log. Límites medidos: INC-98 (medio) e INC-99 (bajo). Pestaña vieja de la shell en caché p5c52 hasta recargar (comportamiento del navegador, sin INC).",
+   "costo": {
+    "minutosCLI": 9,
+    "minutosDueno": 3
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 53,
+    "hash": "dee153d22ba006b964ad3d19263b51ad47ebb46c",
+    "fecha": "2026-10-09",
+    "horaBogota": "no registrada (reloj real; sin criterios dependientes de la hora)",
+    "resultado": "aceptado con salvedades: 7b, 7c, 7e y 7f cumplen en produccion; 7d medido con el codigo real de HK sobre tarea sintetica (no con un turno ni una tarea de Flujos creados); 7a solo por declaracion de la CLI. Dos limites declarados por la CLI quedaron medidos (ver incs).",
+    "modoVerificacion": "Chrome en produccion (p5c53 confirmado con fetch no-store en shell, inventario, propiedades y HK; /api/health esquema 10). Perfil admin 3198e288 (usuario Carlos Rodriguez, rol admin) para 7b, 7c, 7d, 7f y limpieza; perfil colaborador 5d576fcc (usuario zz-verif-colab, rol colaborador) para 7e. No se inicio sesion ni se escribieron contrasenas. La pestana de la shell abierta estaba en cache p5c52; se recargo con parametro nc y los HTML del servidor llevan p5c53.",
+    "criterios": [
+     {
+      "c": "7a tests (node tests/run.js 30/30)",
+      "ok": null,
+      "observado": "Declarado por la CLI en el log (30/30). El verificador no re-ejecuto node (no tiene acceso a ejecutar el repo). Cuenta como no verificado de forma independiente, sin fallo conocido."
+     },
+     {
+      "c": "7b Inventario: zonas existentes y existencias sin cambios",
+      "ok": true,
+      "observado": "Pestana 'Zonas de inventario' con columnas Nombre/Tipo/Uso/Sirve a/Ubicacion/Estado; zz-verif-Principal -> Tipo Principal, Uso Principal, Sirve a Todo el negocio (convertido al leer; el registro viejo sigue con tipo/propId). Linea base antes de crear nada: 10 movimientos, 5 combinaciones articulo|deposito, hash movimientos 6370647fdb54, hash totales 990abc74464b, 4 articulos (todos zz-verif-, ninguno activo; Existencias muestra 'Sin articulos activos'); zonas reales: ninguna (el negocio solo tiene zonas zz-verif-). Al final: 10 movimientos y los mismos dos hashes. Ninguna existencia cambio."
+     },
+     {
+      "c": "7c Crear zz-verif-Zona comun; nombre no editable; ficha con deposito, zona principal y zonas que sirven",
+      "ok": true,
+      "observado": "Creada por la UI (Uso Principal, tipo libre 'Comun edificio', sirve a zz-verif-Propiedad, ubicacion Mueble en Cocina, detalle 'mueble con candado'): aparece en la tabla con 'Mueble en Cocina del zz-verif-Propiedad · mueble con candado'. Registro guardado: rol principal, tipoNombre 'Comun edificio', propIds [zz-verif-Propiedad], ubicacion {clase mueble, zona Cocina, detalle}, y compatibilidad tipo 'principal', propId null. Al editar: el nombre aparece como texto fijo con la nota 'El nombre no se cambia. Si quedo mal, desactivala y crea otra.' y no hay campo de nombre. Ficha de zz-verif-Propiedad: seccion 'Deposito de la propiedad' (Tiene deposito, numero, ubicacion) guardo {tiene true, numero 'zz-14', ubicacion 'zz-verif sotano 2'}; seccion Inventario: selector con 'Automatica — zz-verif-Zona comun', zz-verif-Principal y zz-verif-Zona comun; elegir zz-verif-Principal guardo invPrincipalId dp_muyum184g3ozd; 'Zonas que sirven a esta propiedad' lista zz-verif-Principal (todo el negocio) y zz-verif-Zona comun."
+     },
+     {
+      "c": "7d HK conteo usa la zona principal elegida",
+      "ok": true,
+      "observado": "PARCIAL EN EL METODO: no se creo turno ni tarea de Flujos; en la pagina real de HK (p5c53) se llamo _hkInvContexto con una tarea sintetica {lista conteo} para zz-verif-Propiedad con datos reales de la cuenta: con invPrincipalId elegido a mano (zz-verif-Principal) el conteo usa zz-verif-Principal; sin invPrincipalId (automatica) usa zz-verif-Zona comun; dotacion devuelve null porque la zona apto zz-verif-Propiedad esta inactiva. LIMITE 1 medido: en la zona de la propiedad la principal elegida a mano (zz-verif-Principal) difiere de la automatica (zz-verif-Zona comun); el admin cuenta en zz-verif-Principal y el colaborador, que no recibe invPrincipalId (la propiedad que le llega por /col/propiedades no trae esa clave), contaria en zz-verif-Zona comun. No se abrio el checklist del colaborador (portal.html no expone las funciones de inventario; str-m1-housekeeping.html redirige a portal para el colaborador), asi que lo del colaborador es calculo con la funcion real, no observado en su pantalla."
+     },
+     {
+      "c": "7e Colaborador: GET /api/col/inv-depositos igual que antes y portal funciona",
+      "ok": true,
+      "observado": "zz-verif-colab (id 5, rol colaborador) recibe 5 zonas: dp_muysu2m8poljy zz-verif-Principal inactiva principal; dp_muyulde8jjyn4 zz-verif-Principal2 inactiva principal; dp_muyum184g3ozd zz-verif-Principal activa principal; dp_muysuhr6pck88 zz-verif-Propiedad inactiva apartamento (propId zz-verif-Propiedad); dp_mv17uh9d6tjc1 zz-verif-Zona comun activa principal propIds [zz-verif-Propiedad] (la nueva, que se suma por ser principal). Es decir: antes del lote recibia las 4 primeras; ahora ademas la nueva principal, que sirve solo a zz-verif-Propiedad, que es su unica propiedad. Ninguna zona ajena a sus propiedades. /col/propiedades le trae 1 propiedad (zz-verif-Propiedad) sin invPrincipalId ni deposito. Tiene 1 turno visible, en zz-verif-Propiedad (hoy 11:00-17:00). Limite 2 medido: el servidor sigue enviando TODAS las zonas tipo principal al colaborador, sin filtrar por propIds; con datos reales de otros negocios o edificios una principal que sirve solo a otras propiedades le llegaria igual. Hoy no hay ninguna asi, asi que no se observo la fuga. Portal carga y muestra su turno; consola sin errores."
+     },
+     {
+      "c": "7f /api/health esquema 10; paginas ?v=p5c53; consola limpia; sin alert/confirm/prompt; desactivar zona y quitar deposito",
+      "ok": true,
+      "observado": "/api/health {ok true, db true, schema_version 10, secrets, gd, exif, zip, drive true}. Shell, inventario, propiedades y HK sirven ?v=p5c53 (fetch no-store). Consola sin errores en Inventario, Propiedades y HK (lectura de consola y listeners de error durante las acciones; HK tracking arranco tras la carga inicial, se recargo y tampoco hubo errores). Guardas sobre alert/confirm/prompt instaladas en Propiedades e Inventario: 0 llamadas. Limpieza hecha: zz-verif-Zona comun desactivada (toast 'Zona desactivada'), invPrincipalId de zz-verif-Propiedad vuelto a automatica (null), 'Tiene deposito' desmarcado (queda tiene false; numero y ubicacion de prueba siguen como texto en el registro)."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit",
+      "ok": true,
+      "observado": "CLAUDE.md local (mtime mas reciente que los HTML) contiene INV2 y p5c53 (revisado en la ejecucion anterior, lineas 29-114); no se comparo con el diff del commit por falta de acceso a git."
+     },
+     {
+      "c": "Declarados vs tocados",
+      "ok": null,
+      "observado": "El log de la CLI declara tres diferencias con la instruccion (tercera copia del bloque de inventario en Propiedades, texto del aviso en HK, 'Usar zona de inventario' sube directo al servidor) pero NO trae la lista explicita de archivos declarados vs tocados que exigia la seccion 8. Sin acceso a git para confrontar. No cuenta como fallo de comportamiento; queda como incumplimiento de proceso (INC bajo)."
+     },
+     {
+      "c": "Cambios a la capa Marco sin prefijo 'modelo:'",
+      "ok": true,
+      "observado": "No se vieron en el log ni en el CLAUDE.md revisado."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Colaborador cuenta en la zona principal automatica, no en la elegida a mano por el admin",
+      "nivel": "medio",
+      "causa": "El servidor (api/, no tocado por el lote) no incluye invPrincipalId de la propiedad en lo que lee el colaborador, y HK aplica la regla invPrincipalId -> principal que sirve a la propiedad -> principal de todo el negocio. Si el admin elige una principal distinta de la automatica, admin y colaborador cuentan en zonas diferentes y las existencias se parten. Es la limitacion que la CLI ya declaro; aqui se midio con una principal elegida distinta de la automatica.",
+      "observado": "zz-verif-Propiedad: elegida zz-verif-Principal (dp_muyum184g3ozd), automatica zz-verif-Zona comun (dp_mv17uh9d6tjc1); _invDepositoDe da zz-verif-Principal con invPrincipalId y zz-verif-Zona comun sin el; /col/propiedades del colaborador no trae invPrincipalId. Corregir antes de usar zonas principales multiples con zonas elegidas a mano (p. ej. lote INV2·4 de accesos)."
+     },
+     {
+      "titulo": "El servidor envia al colaborador todas las zonas tipo principal, sin filtrar por propIds",
+      "nivel": "bajo",
+      "causa": "El filtro de lectura del servidor sigue siendo el anterior (tipo principal + apartamento de sus propiedades) y las zonas nuevas dejan de ser unicas principales: con varias principales por edificio o por dueno, el colaborador recibira las de propiedades que no son suyas. No se observo en produccion: la unica zona nueva sirve a su propiedad.",
+      "observado": "GET /col/inv-depositos como zz-verif-colab: 5 zonas, 3 principales (1 activa antigua, 1 activa nueva que sirve a su propiedad); ninguna ajena. Riesgo latente; el ajuste esta previsto en INV2·4 (critico)."
+     },
+     {
+      "titulo": "Log de la CLI sin lista explicita de archivos declarados vs tocados",
+      "nivel": "bajo",
+      "causa": "La instruccion (seccion 8) pedia la lista en el commit y en el log; el log solo narra tres diferencias.",
+      "observado": "log/53-instr-inv2-1-zonas-de-inventario.txt: texto de resumen y 'Diferencias con lo declarado' sin archivos."
+     },
+     {
+      "titulo": "Pestana de la shell con version vieja en cache tras el despliegue",
+      "nivel": "bajo",
+      "causa": "La shell abierta antes del despliegue seguia en p5c52 (str-api.js y el iframe de Flujos); el servidor ya sirve p5c53. Es comportamiento de cache del navegador, no del lote; se resuelve recargando.",
+      "observado": "STRApi.version 'p5c52' en la pestana vieja; tras recargar con nc, 'p5c53'."
+     }
+    ],
+    "datosDePrueba": "Creado y dejado: zona de inventario 'zz-verif-Zona comun' (id dp_mv17uh9d6tjc1), INACTIVA (no se borra). Modificado en 'zz-verif-Propiedad': invPrincipalId vuelto a automatica (vacio); deposito = {tiene false, numero 'zz-14', ubicacion 'zz-verif sotano 2'} (queda el texto de prueba con tiene false). Sin turnos, tickets, flujos, reservas, fotos ni archivos subidos. Zonas zz-verif- anteriores sin cambios (zz-verif-Principal activa). Nada real escrito ni borrado; de lo real solo se leyeron conteos y nombres de campos. Chrome: pestanas de ambos perfiles cerradas.",
+    "notas": "Aceptacion: 7b, 7c, 7e, 7f cumplen; 7d cumple con el calculo hecho por el codigo real de HK (no se recorrio un turno completo en pantalla); 7a por declaracion de la CLI. Dos limites de la CLI quedan registrados como INC (medio y bajo) para el Chat de desarrollo; no bloquean este lote pero el primero debe resolverse antes de usar principales elegidas a mano en produccion. Reloj real, sin pruebas dependientes de la hora. No se vieron cambios a la capa Marco."
+   },
+   "veredictoPrevio": {
+    "lote": 53,
+    "hash": "dee153d22ba006b964ad3d19263b51ad47ebb46c",
+    "fecha": "2026-10-09",
+    "horaBogota": "no registrada (reloj real; sin pruebas dependientes de la hora)",
+    "resultado": "no verificable: sesion de administrador vencida en Chrome; desplegado, NO aceptado",
+    "modoVerificacion": "Despliegue y archivos; produccion sin sesion. No se inicio sesion ni se escribieron contrasenas. Solo estaba conectado el perfil admin (3198e288...); el perfil colaborador zz-verif-colab (5d576fcc...) no aparecio en list_connected_browsers.",
+    "criterios": [
+     {
+      "c": "7a tests (node tests/run.js 30/30)",
+      "ok": null,
+      "observado": "Declarado por la CLI en el log (30/30); no re-ejecutado por el verificador (sin acceso al repo para correr node). Cuenta como no verificado independientemente."
+     },
+     {
+      "c": "7b Inventario: zonas existentes y totales de existencias sin cambios",
+      "ok": null,
+      "observado": "No verificable: str-inventario.html muestra 'Sesion vencida · Entrar' y /api/me responde 401. En la vista sin sesion solo se ve la zona zz-verif-Principal (Principal, Todo el negocio) con pestana 'Zonas de inventario' y boton 'Crear zonas de los apartamentos que faltan'; no es dato real autenticado."
+     },
+     {
+      "c": "7c Crear zz-verif-Zona comun; nombre no editable; ficha: deposito, zona principal, zonas que sirven",
+      "ok": null,
+      "observado": "No verificable: sin sesion de administrador."
+     },
+     {
+      "c": "7d HK conteo usa la zona principal elegida",
+      "ok": null,
+      "observado": "No verificable: sin sesion de administrador; perfil colaborador no conectado."
+     },
+     {
+      "c": "7e Colaborador: GET /api/col/inv-depositos igual que antes",
+      "ok": null,
+      "observado": "No verificable: perfil zz-verif-colab (deviceId 5d576fcc...) no conectado a la extension. Sigue pendiente medir los dos limites declarados por la CLI (no envia invPrincipalId al colaborador; el servidor envia TODAS las principales)."
+     },
+     {
+      "c": "7f /api/health esquema 10; paginas ?v=p5c53; consola limpia; sin alert/confirm/prompt",
+      "ok": null,
+      "observado": "Parcial: /api/health -> {ok:true,db:true,schema_version:10,...} OK; str-inventario.html carga str-api.js?v=p5c53 OK. Consola en Inventario/Propiedades/HK y ausencia de dialogos no verificadas (sin sesion)."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit",
+      "ok": true,
+      "observado": "CLAUDE.md local contiene INV2 y p5c53 (lineas 29-114). No se comparo con el diff del commit; sin acceso a git."
+     },
+     {
+      "c": "Declarados vs tocados",
+      "ok": true,
+      "observado": "El log declara las diferencias (tercera copia del bloque de inventario en Propiedades, texto del aviso en HK, 'Usar zona de inventario' sube directo al servidor). Sin lista explicita de archivos tocados en el log: no confirmado."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Sesion de administrador vencida en el perfil de Chrome de verificacion",
+      "nivel": "bajo",
+      "causa": "El perfil admin (3198e288...) ya no tiene sesion activa en el STR; el verificador no puede iniciar sesion. Es de proceso, no del lote.",
+      "observado": "/api/me 401; str-inventario.html muestra 'Sesion vencida · Entrar'."
+     },
+     {
+      "titulo": "Perfil colaborador zz-verif-colab no conectado",
+      "nivel": "bajo",
+      "causa": "Solo un Chrome aparece en list_connected_browsers; falta el perfil 5d576fcc...",
+      "observado": "list_connected_browsers devolvio unicamente 3198e288...."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado ni modificado. Existente de ejecuciones anteriores: zona zz-verif-Principal (vista sin sesion).",
+    "notas": "Lote desplegado (health OK, p5c53) pero NO aceptado: 7b-7e sin verificar. Pedir a Carlos reabrir sesion admin (y colaborador) en sus perfiles y relanzar con archivoVeredicto 53-veredicto-2.json. Chrome limpio: pestana cerrada. No se detectaron cambios a la capa Marco en el log."
+   }
   }
  ],
  "esquema": {
@@ -4492,8 +4693,8 @@
    "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
    "estado": "aceptado",
    "orden": 40,
-   "vista": "esperando a Carlos",
-   "esperaA": "Carlos",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV1"
   },
   {
@@ -4728,14 +4929,14 @@
    "req": "REQ-INV2 · 1",
    "categoria": "normal",
    "resumen": "Zonas de inventario: los depósitos pasan a zonas (migración sin perder movimientos), tipos libres, ámbito, ubicación física, principal por propiedad; etiqueta 'depósito' en la ficha de la propiedad y 'Usar zona de inventario'",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV2",
    "riesgo": "R-1 (migración)",
    "espera": null,
    "orden": 58,
-   "nota": "encolado 11:33 (normal)"
+   "nota": "aceptado 9-oct (53-veredicto-2)"
   },
   {
    "lote": null,
@@ -4743,13 +4944,13 @@
    "categoria": "normal",
    "resumen": "Artículos con atributos libres y condición; juegos y kits; contenedores móviles (carreta)",
    "estado": "previsto",
-   "vista": "siguiente",
+   "vista": "previsto",
    "esperaA": null,
    "grupo": "INV2",
    "riesgo": null,
    "espera": null,
    "orden": 59,
-   "nota": "número al encolar"
+   "nota": "instrucción redactada; entra tras el lote 54"
   },
   {
    "lote": null,
@@ -4777,7 +4978,7 @@
    "riesgo": "R-2",
    "espera": "cruce previo con Carlos",
    "orden": 61,
-   "nota": "número al encolar"
+   "nota": "cruce con Carlos en curso (9-oct): zona vinculada al menos a una propiedad; el colaborador base hereda acceso; el operador mantiene o revoca. Incluye INC-99."
   },
   {
    "lote": null,
@@ -4890,6 +5091,20 @@
    "espera": null,
    "orden": 69,
    "nota": "número al encolar"
+  },
+  {
+   "lote": 54,
+   "req": "INC-98",
+   "categoria": "normal",
+   "resumen": "Fix: invPrincipalId en la lectura del colaborador (misma zona principal para admin y colaborador)",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
+   "grupo": "INV2",
+   "riesgo": "R-2 (lectura, un campo)",
+   "espera": null,
+   "orden": 58.5,
+   "nota": "encolado 13:00 (normal)"
   }
  ],
  "riesgos": [

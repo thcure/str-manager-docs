@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T01:20:00Z",
+ "actualizadoEn": "2026-10-09T01:40:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -3963,7 +3963,7 @@
  ],
  "esquema": {
   "pedidos": "{id:'P-n', fecha, texto (literal de Carlos), estado:'nuevo'|'en REQ'|'descartado', req}",
-  "plan": "{paso, lote:'NN'|null, req, orden, categoriaPrevista, riesgo:'R-n'|null, estado:'previsto'|'encolado'|'desplegado'|'aceptado'|'cerrado'|'espera DA', nota}",
+  "plan": "{paso?, tipo?:'lote'|'dueno', lote:'NN'|null, req, orden, categoria|categoriaPrevista, riesgo:'R-n'|null, resumen, estado:'previsto'|'encolado'|'desplegado'|'aceptado'|'cerrado'|'espera DA'|'pospuesto', vista:'en curso'|'siguiente'|'esperando a Carlos'|'hecho'|'previsto'|'pospuesto', esperaA:'Carlos'|'CLI'|'verificador'|null, grupo, espera?, vence?, nota}. Hash, versión y aceptación de cada lote se leen de cambios[] por número de lote (no se copian).",
   "cambios": "{lote|null, tipo?:'lote'|'modelo', fecha, hash, version, req, categoria, resumen, estado, observacion?, aceptacion?:{fecha, resultado, criterios:[{c, ok, observado}]}, costo?:{tokens, minutosDueno}, cruceDueno?:{fecha, resultado}, motivo? y aprobacion? (tipo 'modelo': commit con prefijo 'modelo:')}",
   "riesgos": "{id:'R-n', nombre, escenario, tolerancia, respuesta, probadaEl, responsable, estado:'propuesto'|'aceptado'|'cerrado'}",
   "posimplementacion": "{paso, fecha, prometido, quedo, seUsa, costoDeMas, reglaCambia}"
@@ -4002,7 +4002,10 @@
    "categoriaPrevista": "—",
    "riesgo": null,
    "estado": "desplegado",
-   "nota": "Paso 2: elementos.json v1.0 + claves nuevas del bus + encargos rol-desarrollo / rol-verificador (28-sep)"
+   "nota": "Paso 2: elementos.json v1.0 + claves nuevas del bus + encargos rol-desarrollo / rol-verificador (28-sep)",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "SP5"
   },
   {
    "paso": "SP5 Modelo de operación",
@@ -4012,7 +4015,10 @@
    "categoriaPrevista": "—",
    "riesgo": null,
    "estado": "aceptado",
-   "nota": "Paso 3 hecho en el cierre del 28-sep: claude/gobierno|marco|producto|archivo/, estado-proyecto adelgazado, sección APO01 en proceso-cambios, T-4 en transiciones"
+   "nota": "Paso 3 hecho en el cierre del 28-sep: claude/gobierno|marco|producto|archivo/, estado-proyecto adelgazado, sección APO01 en proceso-cambios, T-4 en transiciones",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "SP5"
   },
   {
    "paso": "SP5 Modelo de operación",
@@ -4022,7 +4028,10 @@
    "categoriaPrevista": "normal",
    "riesgo": null,
    "estado": "aceptado",
-   "nota": "Paso 4: página Elementos en Proyecto (lee elementos.json; filtros capa/tipo/proceso/rol/estado)"
+   "nota": "Paso 4: página Elementos en Proyecto (lee elementos.json; filtros capa/tipo/proceso/rol/estado)",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "SP5"
   },
   {
    "paso": "Fundación",
@@ -4032,7 +4041,10 @@
    "categoriaPrevista": "normal",
    "riesgo": "R-1",
    "estado": "aceptado",
-   "nota": "Fix: _persistCol no debe resubir una caché vieja sin comparar con el servidor"
+   "nota": "Fix: _persistCol no debe resubir una caché vieja sin comparar con el servidor",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-78"
   },
   {
    "paso": "F11 Flujos compuestos",
@@ -4042,7 +4054,10 @@
    "categoriaPrevista": "crítico",
    "riesgo": "R-2",
    "estado": "espera DA",
-   "nota": "Pago por sub-flujo: espera DA-20"
+   "nota": "Pago por sub-flujo: espera DA-20",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "F11"
   },
   {
    "paso": "F11 Flujos compuestos",
@@ -4052,7 +4067,10 @@
    "categoriaPrevista": "normal",
    "riesgo": null,
    "estado": "espera DA",
-   "nota": "Portal 'mi sub-flujo': espera DA-20"
+   "nota": "Portal 'mi sub-flujo': espera DA-20",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "F11"
   },
   {
    "paso": "F11 Flujos compuestos",
@@ -4062,7 +4080,10 @@
    "categoriaPrevista": "normal",
    "riesgo": null,
    "estado": "espera DA",
-   "nota": "Módulo de Mantenimiento: espera diseño funcional DA-21"
+   "nota": "Módulo de Mantenimiento: espera diseño funcional DA-21",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "F11"
   },
   {
    "paso": "SP5 Modelo de operación",
@@ -4072,7 +4093,10 @@
    "categoriaPrevista": "—",
    "riesgo": "R-5",
    "estado": "aceptado",
-   "nota": "Prueba R-5 hecha el 28-sep en Cowork: arranque en 1 minuto (21:31 → 21:32, medido por Carlos) leyendo solo traspaso + encargo, sin preguntas sobre lo ya escrito. Paso 5 (cierre): Carlos confirmó tolerancias R-1…R-5 y adoptó pedidos[] el 28-sep."
+   "nota": "Prueba R-5 hecha el 28-sep en Cowork: arranque en 1 minuto (21:31 → 21:32, medido por Carlos) leyendo solo traspaso + encargo, sin preguntas sobre lo ya escrito. Paso 5 (cierre): Carlos confirmó tolerancias R-1…R-5 y adoptó pedidos[] el 28-sep.",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "SP5"
   },
   {
    "paso": "T9.2 observaciones",
@@ -4082,7 +4106,10 @@
    "categoriaPrevista": "normal",
    "riesgo": null,
    "estado": "aceptado",
-   "nota": "Primer lote bajo el modelo de operación: nivel del chip de salida en HK según _alertasTurno y tolerancia por propiedad en el Calendario. Encolado 28-sep 21:5x en el laptop."
+   "nota": "Primer lote bajo el modelo de operación: nivel del chip de salida en HK según _alertasTurno y tolerancia por propiedad en el Calendario. Encolado 28-sep 21:5x en el laptop.",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "T9.2"
   },
   {
    "paso": "Fix INC-79",
@@ -4092,7 +4119,10 @@
    "categoriaPrevista": "normal",
    "riesgo": null,
    "estado": "aceptado",
-   "nota": "Fecha local en HK (_alertasTurno, _renderSalidaHuesped) y en el respaldo del shell vía STRApi.fechas.ymdLocal; test con horas 19:00–24:00 de Bogotá + guardia contra toISOString().slice(0,10). Encolado 23:29 en el laptop; también prueba que la tarea arranca sola."
+   "nota": "Fecha local en HK (_alertasTurno, _renderSalidaHuesped) y en el respaldo del shell vía STRApi.fechas.ymdLocal; test con horas 19:00–24:00 de Bogotá + guardia contra toISOString().slice(0,10). Encolado 23:29 en el laptop; también prueba que la tarea arranca sola.",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-79"
   },
   {
    "paso": "Fix INC-81",
@@ -4102,7 +4132,10 @@
    "categoriaPrevista": "crítico",
    "riesgo": "R-1",
    "estado": "pospuesto",
-   "nota": "Pospuesto por decisión de Carlos (28-sep), sin fecha. No se encola. Condiciones de Carlos para retomarlo: 1) respaldo diario reciente confirmado antes de desplegar · 2) conteo de reservas por estado antes y tras la primera sincronización, y si algo cambia sin explicación se revierte y se avisa · 3) confirmar en el código que la zona fija no cambia otras fechas del servidor · 4) desplegar antes de las 19:00 y vigilar las dos primeras sincronizaciones de la noche · 5) si algo falla, revertir primero y explicar después."
+   "nota": "Pospuesto por decisión de Carlos (28-sep), sin fecha. No se encola. Condiciones de Carlos para retomarlo: 1) respaldo diario reciente confirmado antes de desplegar · 2) conteo de reservas por estado antes y tras la primera sincronización, y si algo cambia sin explicación se revierte y se avisa · 3) confirmar en el código que la zona fija no cambia otras fechas del servidor · 4) desplegar antes de las 19:00 y vigilar las dos primeras sincronizaciones de la noche · 5) si algo falla, revertir primero y explicar después.",
+   "vista": "pospuesto",
+   "esperaA": null,
+   "grupo": "INC-81"
   },
   {
    "paso": "SP5 Modelo de operación · paso 8",
@@ -4112,7 +4145,10 @@
    "categoriaPrevista": "—",
    "riesgo": null,
    "estado": "aceptado",
-   "nota": "Agente verificador: tarea nueva de Claude con el encargo rol-verificador; 'Revisar cola STR' queda apagada. Visto bueno de Carlos el 28-sep con tres ajustes: tarea nueva, veredicto copiado al seguimiento sin cambios, prueba previa sobre el lote 32 comparada con el veredicto del chat. Prueba sobre el lote 32 (28-sep 23:56): mismo veredicto que el chat, con más cobertura. Queda P-1 (conectores de la tarea)."
+   "nota": "Agente verificador: tarea nueva de Claude con el encargo rol-verificador; 'Revisar cola STR' queda apagada. Visto bueno de Carlos el 28-sep con tres ajustes: tarea nueva, veredicto copiado al seguimiento sin cambios, prueba previa sobre el lote 32 comparada con el veredicto del chat. Prueba sobre el lote 32 (28-sep 23:56): mismo veredicto que el chat, con más cobertura. Queda P-1 (conectores de la tarea).",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "SP5"
   },
   {
    "paso": "Encargo Agente CLI en CLAUDE.md",
@@ -4122,7 +4158,10 @@
    "categoriaPrevista": "normal",
    "riesgo": "R-6",
    "estado": "aceptado",
-   "nota": "Propuesta del Arquitecto: bloque '## Tu encargo' (rol-agente-cli) al inicio de CLAUDE.md con las guardas de cabecera. Encolado 2026-09-29 21:13:43; lo revisa el Agente verificador."
+   "nota": "Propuesta del Arquitecto: bloque '## Tu encargo' (rol-agente-cli) al inicio de CLAUDE.md con las guardas de cabecera. Encolado 2026-09-29 21:13:43; lo revisa el Agente verificador.",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "SP5"
   },
   {
    "lote": 34,
@@ -4130,7 +4169,10 @@
    "categoria": "normal",
    "resumen": "Zona en la actividad heredada por las tareas",
    "estado": "aceptado",
-   "orden": 34
+   "orden": 34,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "F9.m"
   },
   {
    "lote": 35,
@@ -4138,7 +4180,10 @@
    "categoria": "estándar",
    "resumen": "Selector de zonas y tiempo de la actividad como presupuesto (solo str-flujos.html)",
    "estado": "aceptado",
-   "orden": 35
+   "orden": 35,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "F9.n"
   },
   {
    "lote": 36,
@@ -4146,7 +4191,10 @@
    "categoria": "normal",
    "resumen": "Foto de tarea exigida y heredada; captura y /api/upload en HK/portal",
    "estado": "aceptado",
-   "orden": 36
+   "orden": 36,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "F9.o"
   },
   {
    "lote": 37,
@@ -4154,7 +4202,10 @@
    "categoria": "normal",
    "resumen": "Cola local de subida de fotos y videos",
    "estado": "aceptado",
-   "orden": 37
+   "orden": 37,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "U6.3"
   },
   {
    "lote": 38,
@@ -4162,7 +4213,10 @@
    "categoria": "normal",
    "resumen": "Evidencia de incidente: originales, EXIF, huella, videos",
    "estado": "aceptado",
-   "orden": 38
+   "orden": 38,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "S2.1"
   },
   {
    "lote": 39,
@@ -4170,7 +4224,10 @@
    "categoria": "normal",
    "resumen": "Expediente del incidente: ZIP con originales, SHA256SUMS, JSON y resumen HTML imprimible; nombre del huésped solo con casilla",
    "estado": "aceptado",
-   "orden": 39
+   "orden": 39,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "S2.1"
   },
   {
    "lote": 40,
@@ -4178,7 +4235,10 @@
    "categoria": "normal",
    "resumen": "Catálogo, depósitos, compra manual, tarea inventario (dotación y conteo)",
    "estado": "aceptado",
-   "orden": 40
+   "orden": 40,
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "INV1"
   },
   {
    "lote": 41,
@@ -4186,7 +4246,10 @@
    "categoria": "estándar",
    "resumen": "HK: 0 precargado en la sub-fila de inventario; Inventario: repintar tras push, reemplazar depósito principal",
    "estado": "aceptado",
-   "orden": 41
+   "orden": 41,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "fix"
   },
   {
    "lote": 42,
@@ -4194,7 +4257,10 @@
    "categoria": "estándar",
    "resumen": "HK: _timeStr con sentinel __server__ → hora del dispositivo, nunca 'aNaN'",
    "estado": "aceptado",
-   "orden": 42
+   "orden": 42,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-90"
   },
   {
    "lote": 43,
@@ -4203,7 +4269,10 @@
    "resumen": "HK: eliminar turno manual (solo sh-m- sin resId, sin tickets abiertos ni pagos; solo admin/operador; modal propio)",
    "estado": "aceptado",
    "orden": 43,
-   "riesgo": "R-1"
+   "riesgo": "R-1",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-89"
   },
   {
    "lote": 44,
@@ -4211,7 +4280,10 @@
    "categoria": "estándar",
    "resumen": "HK: '✅ Cerrar turno' avisa pendientes obligatorias y fotos exigidas (modal con nota como 'Cerrar limpieza'); _pendientesDeEtapas compartida",
    "estado": "aceptado",
-   "orden": 44
+   "orden": 44,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "DT-31"
   },
   {
    "lote": 45,
@@ -4219,7 +4291,10 @@
    "categoria": "normal",
    "resumen": "Anular evidencia solo con confirmación del servidor",
    "estado": "aceptado",
-   "orden": 45
+   "orden": 45,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-91"
   },
   {
    "lote": null,
@@ -4229,7 +4304,10 @@
    "estado": "previsto",
    "orden": 48,
    "espera": "DA-22",
-   "nota": "número al encolar"
+   "nota": "número al encolar",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "INV1"
   },
   {
    "lote": null,
@@ -4239,7 +4317,10 @@
    "estado": "previsto",
    "orden": 49,
    "espera": "cruce previo con Carlos; DA-12",
-   "nota": "número al encolar"
+   "nota": "número al encolar",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "INV1"
   },
   {
    "lote": 49,
@@ -4249,7 +4330,10 @@
    "estado": "aceptado",
    "orden": 47,
    "espera": null,
-   "nota": "49-veredicto-3 (19:48) aceptado; antes 49-veredicto no aceptado por bloqueo de Google (INC-96)."
+   "nota": "49-veredicto-3 (19:48) aceptado; antes 49-veredicto no aceptado por bloqueo de Google (INC-96).",
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "K3"
   },
   {
    "lote": 46,
@@ -4257,7 +4341,10 @@
    "categoria": "crítico",
    "resumen": "Lectura por rol en GET /api/col: el colaborador solo recibe lo suyo (sin reservas ajenas ni datos de huéspedes)",
    "estado": "aceptado",
-   "orden": 46
+   "orden": 46,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-94"
   },
   {
    "lote": 47,
@@ -4265,7 +4352,10 @@
    "categoria": "normal",
    "resumen": "Sin borrados reenviados por el colaborador; horas en su lista blanca",
    "estado": "aceptado",
-   "orden": 46.5
+   "orden": 46.5,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-94"
   },
   {
    "lote": 48,
@@ -4273,7 +4363,109 @@
    "categoria": "normal",
    "resumen": "Calendario: cancelar y reactivar una reserva directa (retira la reserva de prueba del 46)",
    "estado": "aceptado",
-   "orden": 47
+   "orden": 47,
+   "vista": "hecho",
+   "esperaA": null,
+   "grupo": "INC-95"
+  },
+  {
+   "lote": 50,
+   "req": "M-21",
+   "categoria": "estándar",
+   "resumen": "Página Conocimiento en Seg. Proyecto: pestañas Mapa, Fichas y Líneas base, solo lectura de interno/conocimiento.json",
+   "estado": "previsto",
+   "vista": "siguiente",
+   "esperaA": null,
+   "grupo": "SP",
+   "nota": "número reservado",
+   "orden": 50
+  },
+  {
+   "lote": 51,
+   "req": "M-24",
+   "categoria": "estándar",
+   "resumen": "Vista 'Plan de trabajo' en Seg. Proyecto desde plan[] (en curso, siguiente, esperando a Carlos, hecho); reemplaza el artefacto 'Plan de trabajo STR'",
+   "estado": "previsto",
+   "vista": "previsto",
+   "esperaA": null,
+   "grupo": "SP",
+   "nota": "número reservado; tras aceptarlo se retira el artefacto",
+   "orden": 51
+  },
+  {
+   "lote": null,
+   "req": "INC-93",
+   "categoria": "estándar",
+   "resumen": "STRApi.puede devuelve true antes de cargar /me",
+   "estado": "previsto",
+   "vista": "previsto",
+   "esperaA": null,
+   "grupo": "INC",
+   "nota": "número al encolar",
+   "orden": 52
+  },
+  {
+   "lote": null,
+   "req": "REQ-K3 K3b",
+   "categoria": "crítico",
+   "resumen": "Copia de fotos y videos del turno al Drive del negocio (+ arreglo INC-97)",
+   "estado": "previsto",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "K3",
+   "espera": "cruce previo con Carlos",
+   "nota": "número al encolar",
+   "orden": 53
+  },
+  {
+   "lote": null,
+   "req": "REQ-K3 K3c",
+   "categoria": "crítico",
+   "resumen": "Retención de fotos en el hosting según DA-25",
+   "estado": "previsto",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "K3",
+   "espera": "cruce previo con Carlos",
+   "nota": "número al encolar",
+   "orden": 54
+  },
+  {
+   "tipo": "dueno",
+   "lote": null,
+   "req": null,
+   "resumen": "Renovar Hostinger y dominios",
+   "estado": "previsto",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "Operación",
+   "vence": "2026-11-03",
+   "nota": null,
+   "orden": 55
+  },
+  {
+   "tipo": "dueno",
+   "lote": null,
+   "req": "REQ-K3",
+   "resumen": "Revisar el borrador de privacidad y términos (versión 1, 8-oct)",
+   "estado": "previsto",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "K3",
+   "nota": null,
+   "orden": 56
+  },
+  {
+   "tipo": "dueno",
+   "lote": null,
+   "req": null,
+   "resumen": "Borrar en GitHub el token pegado en el chat",
+   "estado": "previsto",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
+   "grupo": "Seguridad",
+   "nota": null,
+   "orden": 57
   }
  ],
  "riesgos": [

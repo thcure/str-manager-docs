@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T02:34:00Z",
+ "actualizadoEn": "2026-10-09T02:46:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1137,12 +1137,12 @@
    "id": "INC-93",
    "tipo": "INC",
    "modulo": "Permisos (str-api.js)",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-08",
    "severidad": "bajo",
    "titulo": "STRApi.puede(clave) devuelve true para un operador mientras /api/me no se ha cargado (_meCache null → 'si no hay permisos, todo'). En el shell, antes de abrir un módulo, puede('inventario.editar') = true para zz-verif-oper sin el permiso; dentro del módulo, que carga /me, da false. El servidor sigue rechazando: solo afecta lo que la interfaz muestra.",
-   "pendiente": "Deuda: que _puede devuelva false para el operador hasta que /me responda (o que los módulos esperen a STRApi.me()). Fix estándar cuando toque str-api.js.",
-   "estado": "abierto",
+   "pendiente": "Cerrado 8-oct: lote 52 (651e049) aceptado; operador sin permisos conocidos → puede() false, copia local str-me-permisos-v1.",
+   "estado": "cerrado",
    "origen": "Veredicto 40-7 y lectura del código (str-api.js ~823)."
   },
   {
@@ -4106,6 +4106,65 @@
     "datosDePrueba": "Ninguno creado ni borrado. Solo se borró la clave localStorage 'str-segproy-tab' en el navegador del admin, según la nota.",
     "notas": "Sin cambios a la capa Marco sin prefijo 'modelo:' según log (header: no toca el modelo). Limitaciones: no ejecuté node tests/run.js ni leí el diff de git (sin shell). Producción mostraba 3a6422d · p5c50 al verificar porque el 51 aún no figura aceptado en cambios[]; al registrarlo, debería mostrar 63ed38b · p5c51. El 51 sigue 'en curso' en plan[] hasta que el Chat de desarrollo lo actualice. Pestaña de Chrome cerrada."
    }
+  },
+  {
+   "lote": 52,
+   "fecha": "2026-10-08",
+   "hash": "651e049",
+   "version": "p5c52",
+   "req": "INC-93",
+   "categoria": "estándar",
+   "resumen": "STRApi.puede: el operador no recibe nada antes de conocer sus permisos; copia local str-me-permisos-v1 (mismo usuario y negocio), STRApi.permisosListos(); tests/permisos-ui.test.js (17 casos).",
+   "estado": "aceptado",
+   "observacion": "CLI 21:35–21:38, 30/30. Declarados vs tocados contrastado por el Chat de desarrollo en el commit 651e049: str-api.js, test nuevo, CLAUDE.md y solo ?v= en el resto; HK, Inventario y Equipo ya repintaban tras /me (sin cambios). 52-veredicto (~21:50, Sonnet 5.5): b–e en producción con operador y admin; a por lectura de código y log. INC-93 cerrado.",
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 52,
+    "hash": "651e049",
+    "fecha": "2026-10-09",
+    "horaBogota": "2026-10-08 21:50 aprox. (UTC 02:41-02:55 del 9-oct)",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome: perfil operador zz-verif-oper (Browser 1) y perfil admin (Browser 2); lectura del código (str-api.js, CLAUDE.md, test nuevo, log). Sin datos de prueba ni escrituras. No se corrió node tests/run.js aquí (el log del CLI declara 30/30): el criterio a se acepta por lectura del código y del log, no por ejecución propia.",
+    "criterios": [
+     {
+      "c": "a. Tests de puede() / node tests/run.js",
+      "ok": true,
+      "observado": "Lectura de _puede (str-api.js ~850): operador sin /me ni copia → false; copia solo si mismo usuarioId y negocio (String()); todo!==false → true, si no p[clave]===true; admin/superadmin true; otro rol false. tests/permisos-ui.test.js existe (17 casos según log). Ejecución 30/30 es declaración del CLI, no reproducida."
+     },
+     {
+      "c": "b. Operador: puede('inventario.editar') → false antes de /me; Inventario solo lectura",
+      "ok": true,
+      "observado": "Usuario de sesión zz-verif-oper (rol operador, id 6). Al abrir el shell: STRApi.puede('inventario.editar') = false con permisosListos() = false (antes de /me). Inventario muestra 'Solo lectura · para editar el inventario pide el permiso \"Editar inventario\"…' y solo los botones de pestañas (Artículos, Depósitos, Existencias, Movimientos, Mostrar inactivos); sin botones de editar. No se pulsó nada que guarde."
+     },
+     {
+      "c": "c. Operador: copia str-me-permisos-v1 y recarga sin botones de editar",
+      "ok": true,
+      "observado": "Tras STRApi.me(): localStorage['str-me-permisos-v1'] existe, usuarioId=6 (coincide con la sesión), trae permisos (no se copian al veredicto); puede=false, permisosListos=true. Al recargar Inventario (con copia ya presente) sigue en solo lectura, sin botones de editar. Limitación: no se simuló red lenta; la lectura del código cubre la rama de copia local."
+     },
+     {
+      "c": "d. Admin: HK, Inventario y Calendario con sus botones",
+      "ok": true,
+      "observado": "Admin (rol admin): puede('inventario.editar')=true. Inventario: '＋ Depósito', 'Editar', 'Desactivar', 'Crear depósitos de los apartamentos que faltan'. HK: '＋ Nuevo turno', 'Semana', 'Mes'. Calendario: 'Sincronizar ahora', '＋ Nueva reserva', '2 carriles', 'Canceladas', 'Hoy', 'Ir a hoy', navegación. Sin botones faltantes aparentes frente al comportamiento previo (no se comparó con captura anterior)."
+     },
+     {
+      "c": "e. Health esquema 10, ?v=p5c52, consola limpia, sin diálogos",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10. STRApi.version p5c52; HTML de shell, Inventario, HK y Calendario solo con ?v=p5c52. Consola sin errores en Inventario (operador y admin), HK y Calendario (el seguimiento de consola arrancó tras la carga; no se vio el arranque del shell). Ningún alert/confirm/prompt apareció."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit y declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md contiene la regla INC-93 (fila str-api.js, INC-37 con p5c52, fila tests con permisos-ui.test.js). Log del CLI declara únicos archivos: str-api.js, tests/permisos-ui.test.js, CLAUDE.md y ?v= en 17 HTML; Equipo revisado sin tocar. No pude ejecutar git para comparar el diff del commit 651e049; la comparación se basó en el log y los mtimes (HTML y str-api.js en el mismo minuto, 21:37)."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado ni modificado. Solo lectura con zz-verif-oper y admin.",
+    "notas": "Sin cambios a la capa Marco detectados en el log (sin prefijo 'modelo:' no aplica). Reloj real no usado en criterios. Chrome: pestañas cerradas en ambos perfiles."
+   }
   }
  ],
  "esquema": {
@@ -4544,11 +4603,11 @@
    "req": "INC-93",
    "categoria": "estándar",
    "resumen": "INC-93: STRApi.puede no concede nada al operador antes de conocer sus permisos (copia local str-me-permisos-v1)",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INC",
-   "nota": "encolado 21:34 (estándar)",
+   "nota": "aceptado ~21:50",
    "orden": 52
   },
   {

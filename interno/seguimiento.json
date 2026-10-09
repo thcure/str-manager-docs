@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T13:15:00-05:00",
+ "actualizadoEn": "2026-10-09T13:40:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -936,13 +936,14 @@
    "id": "INC-84",
    "tipo": "INC",
    "modulo": "api/",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "severidad": "medio",
    "titulo": "api/export (respaldo JSON de la cuenta y respaldo diario) no incluía la colección 'guias': los respaldos anteriores al 7-oct no traen las guías. Causa: la colección se agregó a /api/col (REQ-K2) sin agregarla a $COLECCIONES de api/export (INC-73 no cubría export).",
    "pendiente": "Lote estándar: agregar 'guias' a api/export y una guardia en tests que compare $COLECCIONES_VALIDAS con $COLECCIONES de export. Anterior al lote 40; hallado por la CLI al agregar las colecciones de inventario.",
-   "estado": "abierto",
-   "origen": "Log de la CLI del lote 40 (14:34)."
+   "estado": "cerrado",
+   "origen": "Log de la CLI del lote 40 (14:34).",
+   "cierre": "2026-10-09: cubierto por el lote 56 (fix INC-101, 7bbab23): api/export usa la misma lista que /api/col; 56-veredicto: GET /api/export 200 con 16 colecciones, guias 1. La guardia en tests (export-colecciones.test.js) compara las dos listas del PHP real."
   },
   {
    "id": "DA-23",
@@ -1007,14 +1008,15 @@
    "id": "INC-87",
    "tipo": "INC",
    "modulo": "modelo / infraestructura",
-   "etapa": "🔧",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "severidad": "medio",
    "titulo": "El cambio de equipo de ASUS a LENOVO (6–7 oct) se volvió un día de arreglos: (1) LENOVO tenía la configuración del 23-sep (cola cada 15 min, sin lanzador oculto) porque los ajustes hechos en ASUS no volvieron a ins-005; (2) el Agente verificador queda atado al equipo donde se creó y hubo que recrearlo, y las ejecuciones lanzadas con mensaje caían a la nube; (3) el Chat de desarrollo perdió la escritura en str-manager-docs (403: el repo no está en las fuentes de su sesión) e improvisó copia en LENOVO, push manual de Carlos y subidas por la web, una de las cuales borró una entrada de cambios[].",
    "causa": "Deriva de configuración: los arreglos se hicieron en un equipo y no se escribieron el mismo día en el procedimiento que lo reproduce (ins-005). Dependencias no previstas: tarea programada atada a un equipo; repositorios de una sesión fijados al crearla. Improvisación de mecanismos sin pasar por el Arquitecto.",
    "pendiente": "Resuelto: cola cada minuto y lanzador en LENOVO; verificador recreado en LENOVO con texto fijo y lote por verificar.json, y elección de perfil de Chrome por deviceId; procedimiento ins-006 (incluye el despertador del buzón, paso 7b); regla de automatización en rol-desarrollo; entrada borrada restaurada; despertador del buzón funcionando (8-oct, M-20), así que Carlos ya no hace de mensajero. SIN SOLUCIÓN AÚN (8-oct): el Chat de desarrollo sigue sin poder hacer git push a str-manager-docs (403: el repo no está en las fuentes de su sesión y no tiene herramienta para agregarlo, M-9). Sube por la web de GitHub con la sesión de Chrome de Carlos (puente, regla de M-8: partir del archivo vigente) y solo cuando el verificador no está usando Chrome, lo que retrasa sus subidas. Se resuelve al abrir el próximo Chat de desarrollo con str-manager-docs seleccionado como repositorio, al terminar el plan actual (acordado con Carlos). Volver a ASUS exige recrear otra vez el verificador. EN CURSO (9-oct): los chats del proyecto no tienen selector de repositorios (verificado por el Arquitecto en claude.ai); Carlos decidió que el nuevo Chat de desarrollo use un token propio con git -c http.extraheader, como el Arquitecto; el anterior entrega el traspaso al cerrar el lote en curso (M-26) y avisa al nuevo con M-27; el nuevo cierra este INC con su primer git push.",
-   "estado": "abierto",
-   "origen": "Cambio de equipo ASUS → LENOVO, 6–7 oct-2026; registrado por el Arquitecto a pedido de Carlos."
+   "estado": "cerrado",
+   "origen": "Cambio de equipo ASUS → LENOVO, 6–7 oct-2026; registrado por el Arquitecto a pedido de Carlos.",
+   "cierre": "2026-10-09 13:40: el Chat de desarrollo nuevo escribe en str-manager-docs con git push directo y su token propio (git -c http.extraheader; comprobado con git push --dry-run). Este commit es el primer push."
   },
   {
    "id": "DA-24",
@@ -4597,8 +4599,8 @@
    "resumen": "Relevo del Chat de desarrollo (M-26, M-27): el chat nuevo escribe en str-manager-docs con git push y un token propio que Carlos le pega al abrirlo (grano fino, solo ese repo), usado con git -c http.extraheader y comprobado al arrancar con git push --dry-run; prohíbe puentes. Los chats del proyecto no tienen selector de repositorios (verificado 9-oct).",
    "motivo": "INC-87: el Chat de desarrollo no puede hacer git push (403, repo fuera de las fuentes de su sesión) y sube por la web de GitHub, lento y con riesgo de pisar archivos.",
    "aprobacion": "pedido por Carlos el 9-oct-2026",
-   "estado": "registrado",
-   "observacion": "Se cierra cuando el nuevo chat haga su primer git push y cierre INC-87."
+   "estado": "cerrado",
+   "observacion": "Se cierra cuando el nuevo chat haga su primer git push y cierre INC-87. Cerrado el 9-oct 13:40: primer git push del chat nuevo; INC-87 cerrado."
   },
   {
    "lote": 56,

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T01:44:00Z",
+ "actualizadoEn": "2026-10-09T01:55:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -3959,6 +3959,75 @@
    "aprobacion": "pedido por Carlos el 8-oct-2026",
    "estado": "registrado",
    "observacion": "Se cierra cuando la vista esté aceptada y el artefacto marcado como superado."
+  },
+  {
+   "lote": 50,
+   "fecha": "2026-10-08",
+   "hash": "3a6422d",
+   "version": "p5c50",
+   "req": "M-21",
+   "categoria": "estándar",
+   "resumen": "Página 'Base de conocimiento' (str-base-conocimiento.html) en el grupo Proyecto: pestañas Mapa, Fichas y Líneas base, solo lectura de interno/conocimiento.json; acceso superadmin/admin como Elementos.",
+   "estado": "aceptado",
+   "observacion": "CLI 20:45–20:48, 28/28. Declarados vs tocados contrastado por el Chat de desarrollo en el commit 3a6422d (lista explícita en el mensaje): página nueva, shell, CLAUDE.md, str-api.js y solo ?v= en el resto; sin diferencias (el verificador no la vio porque leyó el log, no el commit). Ancla de línea base 'lb-lb-<id>' declarada, sin efecto. 50-veredicto 20:53 (Sonnet 5.5): b–f en producción; a declarado por la CLI.",
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 50,
+    "hash": "3a6422d",
+    "fecha": "2026-10-08",
+    "horaBogota": "20:53",
+    "resultado": "aceptado",
+    "modoVerificacion": "producción real en Chrome (perfil admin Carlos para a-d y f; perfil zz-verif-oper para e); reloj real; sin datos de prueba (lote de solo lectura)",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js verde",
+      "ok": true,
+      "observado": "No lo corrí (el verificador no tiene shell en el repo). Log de la CLI declara 28/28 y pintado con DOM simulado sin errores. Cuenta solo como declarado por la CLI, no verificado por mí."
+     },
+     {
+      "c": "b. Menú + 3 pestañas + conteos",
+      "ok": true,
+      "observado": "Admin: página carga con pestañas mapa/fichas/lineas. Cabecera: '14 nodos (5 actores, 4 mecanismos, 5 lugares) · 15 flujos · 1 abiertos · 3 fichas · 4 líneas base' = conteos esperados. Menú: entrada '🧭 Base de conocimiento' (data-roles=superadmin) en el DOM del shell justo después de Elementos, en el grupo Proyecto (no la abrí con clic en el shell: el grupo estaba plegado; verificado por DOM). No comparé contra un conocimiento.json más nuevo: coincide con los conteos de la nota."
+     },
+     {
+      "c": "c. Chips del Mapa y abiertos en rojo",
+      "ok": true,
+      "observado": "13 chips data-ir; ficha-APO01.03-b → pestaña Fichas, ancla existe y clase 'resaltado' aplicada; lb-lb-lenovo → pestaña Líneas base, ancla existe (ids lb-lb-lenovo/asus/sesiones/hostinger). Ninguno marcado 'falta'. Abierto: .abierto color rgb(248,113,113) sobre fondo rgba(239,68,68,.08). Ancla 'lb-lb-…' ya declarada por la CLI; no es INC."
+     },
+     {
+      "c": "d. Fichas/Líneas base: secciones vacías, Copiar, búsqueda",
+      "ok": true,
+      "observado": "Fichas: 3 tarjetas con id ficha-<código>; ninguna cabecera de sección sin contenido. 2 botones Copiar; al pulsar el primero aparece toast 'Copiado ✓'. Búsqueda 'zzzxxnoexiste' → 0 fichas; 'verificar' → 1; al limpiar → 3. Pestaña recordada en localStorage str-basecon-tab='fichas'. Cero alert/confirm/prompt (llamadas interceptadas = 0; sin ocurrencias en el HTML)."
+     },
+     {
+      "c": "e. Operador zz-verif-oper",
+      "ok": true,
+      "observado": "Sesión confirmada como zz-verif-oper. Entrada de menú 'Base de conocimiento' (y Elementos, Seg. Proyecto) con display:none. Abrir str-base-conocimiento.html directo → redirige al shell (str-app-shell.html); no vio el contenido. Cumple la alternativa 'o redirección'. No pulsé nada más."
+     },
+     {
+      "c": "f. Salud, versión, consola, guías",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10. str-base-conocimiento, str-app-shell, str-conocimiento y str-elementos llevan ?v=p5c50; STR_API_VERSION='p5c50' en str-api.js. Consola sin errores en la página nueva (recarga limpia), en el shell y en str-conocimiento.html. str-conocimiento.html (guías) abre igual (título 'Conocimiento · STR Manager', lista de guías)."
+     },
+     {
+      "c": "CLAUDE.md en el mismo commit",
+      "ok": true,
+      "observado": "CLAUDE.md local (mtime 20:48, posterior al resto) contiene la fila str-base-conocimiento y p5c50."
+     },
+     {
+      "c": "Archivos declarados vs tocados",
+      "ok": true,
+      "observado": "La CLI no entregó la lista explícita pedida en el punto 7 (el log solo narra). Sin acceso a git, comparé por fecha de modificación en la carpeta del repo: tocados = str-base-conocimiento.html (nuevo), str-app-shell.html, CLAUDE.md y el resto de HTML + str-api.js (solo bump de versión); str-cola-subida.js, privacidad.html, terminos.html y api/ sin cambios, coherente con lo declarado. No pude leer el diff del commit."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado ni borrado (lote de solo lectura). Sin subidas de archivos.",
+    "notas": "Aceptado con tres límites dichos: (1) tests 28/28 solo declarado por la CLI; (2) declarados vs tocados por fechas de archivo, no por diff, y falta la lista explícita en el log (omisión menor de forma, sin INC); (3) en el shell no abrí el grupo Proyecto con clic, verifiqué orden y rol por DOM. Sin cambios a la capa Marco detectados. Chrome: se cerraron las pestañas usadas; en el perfil admin (Browser 2) pudo quedar una pestaña en blanco 'Nueva pestaña' que la herramienta ya no alcanza (sin contenido). El permiso de la extensión para javascript_tool tardó en responder una vez al inicio y luego funcionó."
+   }
   }
  ],
  "esquema": {
@@ -4373,11 +4442,11 @@
    "req": "M-21",
    "categoria": "estándar",
    "resumen": "Página 'Base de conocimiento' (str-base-conocimiento.html) en el grupo Proyecto: pestañas Mapa, Fichas y Líneas base, solo lectura de interno/conocimiento.json (no confundir con str-conocimiento.html, guías)",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "SP",
-   "nota": "encolado 20:44 (estándar)",
+   "nota": "aceptado 20:53",
    "orden": 50
   },
   {
@@ -4386,7 +4455,7 @@
    "categoria": "estándar",
    "resumen": "Vista 'Plan de trabajo' en Seg. Proyecto desde plan[] (en curso, siguiente, esperando a Carlos, hecho); reemplaza el artefacto 'Plan de trabajo STR'",
    "estado": "previsto",
-   "vista": "previsto",
+   "vista": "siguiente",
    "esperaA": null,
    "grupo": "SP",
    "nota": "número reservado; tras aceptarlo se retira el artefacto",

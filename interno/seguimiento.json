@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T14:17:00-05:00",
+ "actualizadoEn": "2026-10-09T14:20:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -4807,13 +4807,46 @@
    "req": "DT-26",
    "categoria": "estándar",
    "resumen": "confirmarEliminar: con 1 copia, 'se eliminará su copia por propiedad'.",
-   "estado": "desplegado",
-   "observacion": "Encolado 14:14. CLI 14:14–14:15, 32/32; lista de archivos declarados vs tocados en el log (sin diferencias). Consola y aviso real para el navegador. Agente verificador (Sonnet) lanzado 14:17.",
+   "estado": "aceptado",
+   "observacion": "Encolado 14:14. CLI 14:14–14:15, 32/32; lista de archivos declarados vs tocados en el log (sin diferencias). Consola y aviso real para el navegador. Agente verificador (Sonnet) lanzado 14:17. 59-veredicto (14:17): aceptado 4/4; aviso probado con la función desplegada y objetos en memoria. Cómo quedó: con una copia, \"También se eliminará su copia por propiedad\"; con más, igual que antes. DT-26 resuelta.",
    "costo": {
     "minutosCLI": 1,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 59,
+    "hash": "b449ed124b084e2c9f9aad5a75070ef0c5efd9d3",
+    "fecha": "2026-10-09",
+    "horaBogota": "14:17",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome (perfil admin 3198e288…, Carlos Rodriguez / Carlos Hospedaje) para b y c; lectura del código desplegado y del árbol local (str-flujos.html, CLAUDE.md). a por log de la CLI, sin shell para ejecutar node tests/run.js. Sin reloj simulado (ningún criterio depende de la hora). Hora Bogotá tomada del reloj del sistema.",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js verde",
+      "ok": true,
+      "observado": "NO ejecutado por mí (sin shell): verificado por log, no por ejecución propia. Log CLI: 32/32 OK; sintaxis de scripts sin src correcta; sin alert/confirm/prompt."
+     },
+     {
+      "c": "b. Texto con 1 copia exactamente el del punto 1; con 2 o más igual que antes",
+      "ok": true,
+      "observado": "Código servido en producción (str-flujos.html?v=p5c59, igual al árbol local, línea 2806): copias.length===1 ? 'También se eliminará su copia por propiedad' : 'También se eliminarán sus N copias por propiedad'. Evaluando la expresión extraída de confirmarEliminar desplegada con objetos sintéticos en memoria: (1 copia, 1 prop) → 'También se eliminará su copia por propiedad (usada por 1 propiedad, que quedará sin este flujo).' = texto exacto del punto 1; (2,1) → 'También se eliminarán sus 2 copias por propiedad (usada por 1 propiedad, que quedará sin este flujo).' (igual que antes, M=1 se deja); (3,2) → '…sus 3 copias por propiedad (usadas por 2 propiedades, que quedarán sin este flujo).' No se abrió el modal real ni se crearon flujos: la prueba fue por la función desplegada con objetos sintéticos."
+     },
+     {
+      "c": "c. /api/health esquema 10; páginas ?v=p5c59; consola limpia en Flujos; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health {ok:true,db:true,schema_version:10,drive,exif,gd,zip:true}. str-app-shell.html y str-flujos.html con ?v=p5c59 (único valor). Consola de Flujos tras recarga con el rastreo ya activo: sin mensajes ni errores. Llamadas a alert/confirm/prompt en str-flujos.html: 0 (la única coincidencia textual es el comentario 'sin confirm()' en la línea 2541)."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit; declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md contiene 'DT-26 (resuelta, instr-59)' y p5c59 (mtime 14:14, igual que los HTML). Declarados vs tocados: la CLI listó CLAUDE.md + 17 archivos con ?v= (incluye str-api.js y str-flujos.html); la diferencia declarada (HTML que solo cambian p5c58→p5c59) está explicada. api/ y str-cola-subida.js sin cambios (mtime anterior). No pude leer el commit por git; me apoyo en mtimes del árbol y en el log. La lista está en el log de la cola."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado ni modificado en producción. Pestañas de Chrome abiertas por esta ejecución: 1, cerrada.",
+    "notas": "Aceptado. Reservas: (1) 4a/3a verificado por log, no por ejecución propia; (2) el aviso se probó con la función desplegada y objetos sintéticos, no abriendo el modal real; (3) commit no leído por git, solo mtimes y log. Sin cambios a la capa Marco detectados (no se tocaron proceso-cambios, marco-trabajo.json, instrucciones.json, cobit.json, elementos.json ni comandos-usuario.md)."
+   }
   }
  ],
  "esquema": {
@@ -5579,14 +5612,14 @@
    "req": "DT-26",
    "categoria": "estándar",
    "resumen": "DT-26: aviso de borrado de un flujo general con una sola copia en singular",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "Deuda",
    "riesgo": null,
    "espera": null,
    "orden": 60.7,
-   "nota": "Encolado 14:14; CLI 14:14–14:15 (b449ed1); Agente verificador lanzado 14:17."
+   "nota": "Aceptado 14:17 (59-veredicto, Sonnet)."
   }
  ],
  "riesgos": [

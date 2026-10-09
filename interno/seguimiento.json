@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T16:47:00-05:00",
+ "actualizadoEn": "2026-10-09T16:53:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1408,14 +1408,16 @@
    "id": "REQ-TB1",
    "tipo": "REQ",
    "modulo": "Seg. Proyecto (interno)",
-   "etapa": "🚀",
+   "etapa": "✔",
    "fecha": "2026-10-09",
    "severidad": null,
    "titulo": "Tablero de planes de trabajo en Seg. Proyecto (agentes, planes, bolsa); plan PT-0.",
-   "pendiente": "Lote 63 desplegado (318b8e3); espera veredicto.",
+   "pendiente": null,
    "documento": "claude/producto/requerimientos-tablero-seg-proyecto-2026-10.md › REQ-TB1",
    "entregadoEn": "M-52",
-   "necesitaDecision": false
+   "necesitaDecision": false,
+   "estado": "cerrado",
+   "cierre": "2026-10-09: lote 63 (318b8e3, p5c63), 63-veredicto 20/20."
   }
  ],
  "cambios": [
@@ -5306,13 +5308,151 @@
    "req": "REQ-TB1",
    "categoria": "estándar",
    "resumen": "str-seg-proyecto.html: pestaña Tablero desde diseno.json y seguimiento.json; bloque puro [TB1] y test.",
-   "estado": "desplegado",
-   "observacion": "Encolado 16:38. CLI 16:39–16:45, 34/34; probado sobre DOM simulado con los JSON publicados. Decisiones: lote con vista hecho no ocupa agentes; lote previsto no cuenta para la etapa. Agente verificador (Sonnet) lanzado 16:47.",
+   "estado": "aceptado",
+   "observacion": "Encolado 16:38. CLI 16:39–16:45, 34/34; probado sobre DOM simulado con los JSON publicados. Decisiones: lote con vista hecho no ocupa agentes; lote previsto no cuenta para la etapa. Agente verificador (Sonnet) lanzado 16:47. 63-veredicto (16:50): aceptado 20/20 + despliegue; decisiones de la CLI aceptables. Cómo quedó: Seg. Proyecto abre en Tablero con agentes (6 filas), planes con avance y etapas por REQ, y bolsa con filtros; todo leído de diseno.json y seguimiento.json.",
    "costo": {
     "minutosCLI": 6,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 63,
+    "hash": "318b8e3ab607925f6097b7330b45d54a2cdef3fd",
+    "fecha": "2026-10-09",
+    "horaBogota": "16:50",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome (perfil admin, deviceId 3198e288…, sesión ya abierta como Carlos/admin; sin iniciar sesión) sobre str-seg-proyecto.html?v=p5c63 con los JSON publicados de hoy; criterios 3, 4, 5, 9, 12 y 13 con objetos sintéticos en memoria corriendo el bloque [TB1] REAL de producción (mismo archivo; solo copia local para ejecutarlo en Node), sin escribir nada. Hora: reloj real del sistema (criterio 4 usa 'desde' fijo, formato HH:MM calculado por _tbHora). Los 20 criterios del REQ se evaluaron contra el texto de requerimientos-tablero-seg-proyecto-2026-10.md.",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js verde",
+      "ok": true,
+      "observado": "CLI: 34/34 en su log. Yo corrí tests/tablero.test.js sobre el HTML de producción: 56 OK, 0 FAIL (no corrí run.js completo: no hay repo completo en mi entorno)."
+     },
+     {
+      "c": "1. Tablero primera pestaña y por defecto, mismo acceso",
+      "ok": true,
+      "observado": "Orden de pestañas: tablero, plan, diseno, items, cambios. Sin str-segproy-tab guardada, al recargar abre solo #paneTablero visible. Sesión admin sin 401/403."
+     },
+     {
+      "c": "2. Agentes: 6 filas en orden y 6 columnas",
+      "ok": true,
+      "observado": "Diseño, CD, CLI, verificador, Arquitecto, Carlos; columnas AGENTE, ESTADO, PLAN, OBJETIVO CORTO, QUÉ HACE, DESDE, SU COLA. Cabecera 'Según lo último anotado a las 16:47'."
+     },
+     {
+      "c": "3. Agente sin ítem (sintético)",
+      "ok": true,
+      "observado": "Con plan activo y sin lotes: Diseño/CLI/verificador/Arquitecto/Carlos 'libre', plan y desde nulos; CD libre con cola [REQ-A · PT-1]. En producción hoy Diseño, CD, CLI y Arquitecto salen 'libre' con —."
+     },
+     {
+      "c": "4. Lote encolado esperaA CLI, PT-1, desde 2026-10-09 17:30 (sintético)",
+      "ok": true,
+      "observado": "Fila CLI: ocupado, plan PT-1, objetivoCorto del PT-1 de prueba, que = texto del lote, desde '2026-10-09 17:30' (_tbHora lo muestra HH:MM si es de hoy)."
+     },
+     {
+      "c": "5. Lote en redacción esperaA CD (sintético)",
+      "ok": true,
+      "observado": "Fila CD: ocupado, plan PT-1, desde 2026-10-09T17:40…-05:00 (se muestra 17:40)."
+     },
+     {
+      "c": "6. Carlos con ítems esperándolo",
+      "ok": true,
+      "observado": "Producción: 'lo esperan 14', plan PT-1, Qué hace 'T-4 Dar el visto bueno al lote INV2·4a (DA-30)' (desde: sin hora), Su cola: REQ-INV2-4a Accesos por zona (servidor) · PT-1, Renovar Hostinger y dominios, Revisar el borrador de privacidad y términos y '10 más'. Incluye las tareas 'dueno' de plan[], por eso son 14 y no los 3 del REQ."
+     },
+     {
+      "c": "7. Su cola = siguiente del plan activo por carril, con PT-n, máx. 3",
+      "ok": true,
+      "observado": "CD muestra REQ-TB1 · PT-0 (plan activo PT-0, carril Construcción); otros agentes sin ítems en su carril. Carlos 3 + 'y N más'."
+     },
+     {
+      "c": "8. Planes de trabajo (valores vigentes)",
+      "ok": true,
+      "observado": "3 filas: PT-0 'activo' 0/1 (Construcción); PT-1 'en definición (pausado)' 0/9 (Tareas de Carlos, Construcción); PT-2 'en definición (pausado)' 0/6 (Definición). Coincide con diseno.json publicado (el REQ decía 2 filas PT-1/PT-2: dato viejo, la instrucción pidió usar lo vigente)."
+     },
+     {
+      "c": "9. 4 de 9 aceptados (sintético)",
+      "ok": true,
+      "observado": "_tbAvance → '4/9'."
+     },
+     {
+      "c": "10. Clic en PT-1 → detalle",
+      "ok": true,
+      "observado": "Detalle con ítems por estado (ESPERA CARLOS 2, LISTO 2, DEFINIENDO 2, PENDIENTE 3…) y una línea por REQ con etapa y hora. REQ-INV2-3a sale 'no aceptado, vuelve a CD · lote 62 · 16:38' (el REQ decía 'listo': dato viejo; el lote 62 tiene veredicto no aceptado)."
+     },
+     {
+      "c": "11. REQ en espera DA",
+      "ok": true,
+      "observado": "REQ-INV2-4a: 'en definición · espera DA-30 y a Carlos · 16:02'."
+     },
+     {
+      "c": "12. Etapas con lotes de prueba",
+      "ok": true,
+      "observado": "en redacción → 'en redacción'; encolado → 'construyendo en la CLI'; desplegado → 'verificando'; aceptado → 'aceptado'; no aceptado → 'no aceptado, vuelve a CD'."
+     },
+     {
+      "c": "13. Ítem sin desde / sin planTrabajo",
+      "ok": true,
+      "observado": "_tbHora(undefined) = 'sin hora'; fila sin desde queda con desde nulo; _tbAgentes({},{}) y (null,null) devuelven 6 filas sin error. En producción Carlos muestra 'sin hora'."
+     },
+     {
+      "c": "14. Bolsa (valores vigentes)",
+      "ok": true,
+      "observado": "28 ítems (44 en bolsa − 16 en planes). Por tipo: funcionalidad 8, decisión 8, deuda técnica 4, corrección 3, modelo 3, tarea de Carlos 2. Por prioridad: alta 1, media 9, baja 18. Pantalla y cálculo con los JSON publicados coinciden."
+     },
+     {
+      "c": "15. Filtro prioridad alta",
+      "ok": true,
+      "observado": "Deja solo INC-99; al quitar el chip vuelven los 28."
+     },
+     {
+      "c": "16. Texto de la bolsa = fuente",
+      "ok": true,
+      "observado": "Los textos de INC/DT/DA/REQ salen de sus fuentes (ej. INC-99 de seguimiento.items; DA-20 de das.pregunta; REQ-K3b de reqs.titulo); _tbTexto con cadena reqs→das→pedidos→items→bolsa→ref comprobada con tests."
+     },
+     {
+      "c": "17. Se actualiza con el JSON",
+      "ok": true,
+      "observado": "Los datos se leen en cada carga de seguimiento.json y diseno.json (fetch, sin copias en el código); la hora 'Según lo último anotado' y el verificador ocupado con REQ-TB1 reflejan el JSON del momento. Pruebas de estados con objetos sintéticos por la misma función. No modifiqué los JSON."
+     },
+     {
+      "c": "18. Solo lectura (red solo GET)",
+      "ok": true,
+      "observado": "Al recargar, abrir plan, filtrar y cambiar de pestañas: solo GET (str-seg-proyecto.html, str-api.js?v=p5c63, seguimiento.json, diseno.json, 200). Parche de fetch/XHR sin escrituras."
+     },
+     {
+      "c": "19. 390 px y claro/oscuro",
+      "ok": true,
+      "observado": "Iframe de 390 px: scrollWidth del documento 371 ≤ ancho (sin desplazamiento horizontal); .tb-marco overflow-x auto con tabla de 760 px dentro de 321. Con detalle de plan abierto sigue 371. Oscuro: fondo rgb(8,12,20), texto rgb(248,250,252); claro (solo en memoria, devuelto al original): fondo rgb(240,244,248), texto rgb(15,23,42)."
+     },
+     {
+      "c": "20. Pestañas anteriores y tests",
+      "ok": true,
+      "observado": "Plan de trabajo, Diseño, Ítems y Cambios renderizan contenido (3115, 13520, 34823 y 57171 caracteres). tablero.test.js 56 OK / 0 FAIL."
+     },
+     {
+      "c": "e. Despliegue, health, versión, consola, diálogos",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10. HTML del shell con ?v=p5c63 únicamente. Consola sin mensajes ni errores. Sin alert/confirm/prompt en str-seg-proyecto.html (grep) ni durante la prueba."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit y declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md (mtime 16:44) trae la fila de Seg. Proyecto con REQ-TB1/[TB1], tablero.test.js e INC-37 'hoy p5c63'. Log: 'archivos declarados vs tocados: no hay diferencia' (3 de fondo + 17 solo ?v=p5c63). Ningún cambio a la capa Marco en lo declarado."
+     },
+     {
+      "c": "Decisión CLI: lote con vista 'hecho' no ocupa agentes",
+      "ok": true,
+      "observado": "Aceptable: el REQ-SP5 viejo 'desplegado' con vista hecho no ocupa al verificador; hoy el verificador sale ocupado con REQ-TB1 (lote 63), lo correcto."
+     },
+     {
+      "c": "Decisión CLI: lote 'previsto' no cuenta para la etapa",
+      "ok": true,
+      "observado": "Aceptable: manda el estado del REQ (ej. REQ-INV2-3b 'listo')."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado. Solo lectura y objetos sintéticos en memoria. Cambios temporales en el navegador del admin: se quitó y restauró localStorage 'str-segproy-tab' (valor original 'plan', restaurado); el tema claro se probó solo en un iframe en memoria y se volvió al oscuro. Pestañas de Chrome cerradas.",
+    "notas": "Aceptado. Observaciones menores, sin INC: (1) La cola de CD muestra REQ-TB1 · PT-0 aunque su lote 63 ya está desplegado/en verificación (solo se excluyen los 'aceptado'); se corrige solo al aceptar. (2) Los criterios 6, 8, 10 y 14 del REQ traen valores viejos (2 planes, INV2·3a 'listo'): se verificó con lo vigente, como pidió la instrucción. (3) La CLI no pudo leer el REQ; verifiqué yo contra su texto y todo coincide. (4) Fila Carlos cuenta tareas 'dueno' de plan[] además de T-4/INV2·4a/DA-30 (14 en total): coherente con la instrucción. (5) Sin cambios a la capa Marco: no hay aviso para el Arquitecto."
+   }
   },
   {
    "lote": null,
@@ -6155,16 +6295,16 @@
    "req": "REQ-TB1",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto: pestaña Tablero (agentes, planes de trabajo con avance y etapas, bolsa)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "planTrabajo": "PT-0",
    "grupo": "SP",
    "riesgo": null,
    "espera": null,
    "orden": 100,
-   "desde": "2026-10-09T16:47:00-05:00",
-   "nota": "Encolado 16:38; CLI 16:39–16:45 (318b8e3); Agente verificador lanzado 16:47."
+   "desde": "2026-10-09T16:53:00-05:00",
+   "nota": "Aceptado (63-veredicto 16:50, Sonnet, 20/20)."
   }
  ],
  "riesgos": [

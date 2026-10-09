@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T12:35:00-05:00",
+ "actualizadoEn": "2026-10-09T12:48:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1292,13 +1292,25 @@
    "id": "INC-100",
    "tipo": "INC",
    "modulo": "Proceso",
-   "etapa": "📝",
+   "etapa": "✅",
    "fecha": "2026-10-09",
    "severidad": "bajo",
    "titulo": "El log de la CLI del lote 53 no trae la lista explícita de archivos declarados vs tocados (sí el commit).",
-   "pendiente": "Reincide en el lote 54. Desde el 55 la instrucción pide la misma lista en el log de la cola.",
-   "estado": "abierto",
+   "pendiente": "Atendido desde el lote 55 (lista en commit y log).",
+   "estado": "cerrado",
    "origen": "53-veredicto-2."
+  },
+  {
+   "id": "INC-101",
+   "tipo": "INC",
+   "modulo": "Respaldo",
+   "etapa": "🔧",
+   "fecha": "2026-10-09",
+   "severidad": "medio",
+   "titulo": "El respaldo diario (api/export) no incluye inv-grupos (y guias): su lista de colecciones se separó de la de /api/col.",
+   "pendiente": "Fix lote 56 con test que compare las dos listas.",
+   "estado": "en fix",
+   "origen": "55-veredicto."
   }
  ],
  "cambios": [
@@ -4487,6 +4499,92 @@
     "datosDePrueba": "Sin datos nuevos creados. Cambios temporales y revertidos en datos zz-verif-: zz-verif-Zona comun (dp_mv17uh9d6tjc1) activada y vuelta a inactiva; invPrincipalId de zz-verif-Propiedad (prop-1791416715199) puesto en dp_muyum184g3ozd y vuelto a vacio (automatica). Sin turnos, tickets, flujos, reservas, fotos ni archivos subidos. De lo real solo se leyeron nombres de campos y conteos; durante la prueba se abrio por clic la ficha de una propiedad real (solo lectura, sin guardar). Chrome: pestanas de ambos perfiles cerradas.",
     "notas": "Aceptacion: 4b, 4c, 4d y CLAUDE.md cumplen en produccion; 4a por declaracion de la CLI. INC-98 puede cerrarse con esta verificacion (4c medido con codigo real de HK, no con un turno completo). Quedan abiertos los de 53-veredicto-2: INC bajo del servidor que envia al colaborador todas las zonas tipo principal sin filtrar por propIds (previsto en INV2-4). Reloj real. No se vieron cambios a la capa Marco."
    }
+  },
+  {
+   "lote": 55,
+   "fecha": "2026-10-09",
+   "hash": "3a37da2",
+   "version": "p5c55",
+   "req": "REQ-INV2 · 2",
+   "categoria": "normal",
+   "resumen": "Artículos con atributos y condición (circulante/activo, un toque, historial 20); catálogo inv-grupos (juegos y kits) con pestaña; zona móvil (carreta) con al menos una propiedad; api/col acepta inv-grupos con la regla de inventario.editar.",
+   "estado": "aceptado",
+   "observacion": "CLI 12:26–12:33, 30/30. Lista de archivos en el commit y en el log (INC-100 atendido). Diferencias explicadas: str-api.js (inv-grupos en COL_KEYS) y etiqueta Móvil en Propiedades. 55-veredicto (~12:44, Sonnet): b–g en producción con admin, operador (403 en push) y colaborador; a por el log. INC-101 (medio): inv-grupos fuera del respaldo api/export → lote 56.",
+   "costo": {
+    "minutosCLI": 7,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 55,
+    "hash": "3a37da21d02ac540a1cc517f2e0688f30cd553d6",
+    "fecha": "2026-10-09",
+    "horaBogota": "pruebas hacia las 12:35-12:50 (servidor ~17:38-17:45 UTC); reloj real; ningun criterio dependia de la hora",
+    "resultado": "aceptado con salvedades: 8b-8g cumplen en produccion; 8a (node tests/run.js 30/30) solo por declaracion de la CLI, no re-ejecutado; INC medio: inv-grupos no entra al respaldo api/export; la diferencia declarados vs tocados esta explicada",
+    "modoVerificacion": "Chrome en produccion. Perfil admin 3198e288 (Carlos Rodriguez, admin) para 8b-8e, 8g y limpieza; operador 63059a77 (zz-verif-oper, rol operador, permiso inventario.editar=false) y colaborador 5d576fcc (zz-verif-colab, rol colaborador) para 8f. Sin iniciar sesion ni escribir contrasenas. Pestana inicial en cache p5c52: recargada con ?nc y paso a p5c55. Creacion de articulos, juegos, kit y zona por la interfaz (modal y botones reales; condicion con clic real en el menu del chip); el rechazo de juego con unidad, kit con activo, nombre repetido, cantidad invalida, repetido e inactivo se midio llamando a la funcion real _invValidarGrupo con objetos sinteticos porque la interfaz ni siquiera ofrece esos articulos en el selector. En el iframe de Inventario sustitui alert/confirm/prompt por contadores para no bloquear Chrome: contador final 0 (ninguna llamada nativa).",
+    "criterios": [
+     {
+      "c": "8a Tests del punto 7 (node tests/run.js verde)",
+      "ok": null,
+      "observado": "Declarado por la CLI: 30/30. El verificador no ejecuta node en el repo; no verificado de forma independiente, sin fallo conocido. Lo comprobado en produccion con las funciones reales cubre (iii) y (iv) y la igualdad de copias (v)."
+     },
+     {
+      "c": "8b Articulos existentes iguales y existencias con los mismos totales",
+      "ok": true,
+      "observado": "Antes de crear nada: 4 articulos (zz-verif-Papel circulante, -Vaso unidad, -Jabon nivel, -Toalla unidad; todos inactivos, ninguno con atributos ni condicion) y 10 movimientos; huella articulos [id,nombre,clase,minimo,activo,unidad] 2524894c384f y de movimientos 9260e6473d85. Al final, tras la limpieza: las mismas 4 huellas identicas (2524894c384f / 9260e6473d85, 10 movimientos). Como las existencias se derivan solo de los movimientos y estos no cambiaron, los totales son iguales. El negocio hoy no tiene articulos reales de inventario (solo zz-verif-). 0 articulos viejos con campos nuevos escritos."
+     },
+     {
+      "c": "8c zz-verif-Sabana circulante con Color=azul; condicion Desgastado con un toque; chip, filtro y busqueda; sin control de condicion en unidad",
+      "ok": true,
+      "observado": "Creado por la UI (toast 'Articulo creado'); fila con chip 'Color: azul'. Clic real en el chip de condicion abrio menu Nuevo/Bueno/Desgastado/Para reponer; tras elegir Desgastado el chip pasa a 'Desgastado' (clase cond desgastado) y el servidor guarda condicion 'desgastado', condicionEn, condicionPor '1' y condicionHist con 1 entrada, sin abrir el modal. Filtro 'Desgastado' lo muestra; filtro 'Para reponer' da 'Ningun articulo coincide'; busqueda 'azul' lo encuentra. En el modal con clase Unidad no hay control de condicion; con Circulante aparece arCondicion; _invCondicionAplica: unidad false, nivel false, circulante true, activo true."
+     },
+     {
+      "c": "8d zz-verif-Juego 1 (2 x Sabana), duplicado Juego 2, zz-verif-Kit con consumible; juego con unidad / kit con activo rechazado con mensaje",
+      "ok": true,
+      "observado": "Juego 1 creado por la UI con componente Sabana x2, condicion null; 'Duplicar' creo 'zz-verif-Juego 2' con la misma composicion; Kit creado con zz-verif-Consumible (unidad) x1, sin control de condicion. Selector del juego solo ofrece circulantes activos; el del kit ofrece consumible y circulante y no el activo. _invValidarGrupo real: juego con unidad -> 'Un juego solo lleva articulos circulantes: zz-verif-Consumible no lo es.'; kit con activo -> 'Un kit no lleva activos: zz-verif-Equipo.'; nombre repetido sin distinguir mayusculas -> 'Ya existe un juego zz-verif-Juego 1.'; sin componentes, cantidad 0, cantidad 1.5, articulo repetido e inactivo (zz-verif-Vaso) rechazados con su mensaje; caso valido devuelve null. Limite: el rechazo se midio con la funcion, no con el clic en pantalla."
+     },
+     {
+      "c": "8e zz-verif-Carreta (uso Movil, sirve a zz-verif-Propiedad; sin propiedad se rechaza); aparece con uso Movil; conteo HK sigue en su zona principal",
+      "ok": true,
+      "observado": "Modal con uso Movil muestra lista de propiedades (casillas) y oculta ubicacion. Guardar sin propiedad: 'Elige al menos una propiedad donde se usa.' y el numero de zonas sigue en 5. Con zz-verif-Propiedad marcada se guarda {rol movil, tipo colgado, propId null, propIds [prop-1791416715199], ubicacion null}. Tabla de zonas: 'zz-verif-Carreta | Carreta | Movil | zz-verif-Propiedad'. _invDepositoDe (copia en Inventario) con lista conteo para zz-verif-Propiedad = zz-verif-Principal; sin lista conteo (dotacion) = null (nunca elige la carreta). Las tres copias de [INV-puras] servidas en produccion (Inventario, HK, Propiedades) son identicas (8069 caracteres, mismo hash 2eca9d68). Limite: conteo medido con la funcion real, no abriendo un checklist de turno."
+     },
+     {
+      "c": "8f Operador sin inventario.editar: Juegos y kits solo lectura y push a inv-grupos 403; colaborador: inv-depositos sin Carreta y GET inv-grupos responde",
+      "ok": true,
+      "observado": "Operador (zz-verif-oper, puede('inventario.editar') false): ve la pestana Juegos y kits con 3 registros y los botones Editar/Duplicar/Desactivar/Crear estan ocultos (solo quedan pestanas y 'Mostrar inactivos'). PUT /col/inv-grupos con un registro 'zz-verif-NoDebeGuardar' -> 403 'No tienes permiso para editar el inventario'; despues sigue habiendo 3 grupos y no existe el registro (no se escribio nada). Su GET inv-depositos si incluye Carreta (el operador ve todo el catalogo, como las demas zonas; el filtro solo aplica al colaborador). Colaborador (zz-verif-colab): GET /col/inv-depositos devuelve 5 zonas, sin zz-verif-Carreta; GET /col/inv-grupos responde 200 con 3 registros (solo conteo; no se comparo contenido)."
+     },
+     {
+      "c": "8g /api/health esquema 10; paginas ?v=p5c55; consola limpia; sin alert/confirm/prompt; limpieza",
+      "ok": true,
+      "observado": "/api/health: ok true, db true, schema_version 10. Shell, inventario, propiedades, HK y portal sirven ?v=p5c55 (fetch no-store); STRApi.version p5c55 en admin, operador y colaborador. Consola sin errores en la pestana del shell con Inventario, Propiedades y HK cargados despues de iniciar el seguimiento; la consola de los iframes puede no estar cubierta por la herramienta, asi que el resultado es 'sin errores observados'. Contador de dialogos nativos 0. Limpieza hecha por la UI: zz-verif-Sabana, Juego 1, Juego 2, Kit, Carreta, y mis articulos auxiliares zz-verif-Consumible y zz-verif-Equipo quedan inactivos (confirmado por GET)."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit",
+      "ok": true,
+      "observado": "CLAUDE.md local (mtime posterior a los HTML) contiene 6 menciones de inv-grupos/movil/p5c55. No se pudo confrontar con el diff del commit por falta de acceso a git."
+     },
+     {
+      "c": "Declarados vs tocados",
+      "ok": true,
+      "observado": "El log de la CLI trae la lista explicita (declarados 6 archivos; solo version 15). Diferencias juzgadas: str-api.js (inv-grupos en COL_KEYS) es necesaria: sin eso STRApi no lee ni guarda la coleccion, y se confirmo que funciona en produccion; etiqueta 'Movil' en Propiedades es menor y coherente (texto de zona). Sin acceso a git para confrontar contra el commit real."
+     },
+     {
+      "c": "Cambios a la capa Marco sin prefijo 'modelo:'",
+      "ok": true,
+      "observado": "No se ven en el log ni en CLAUDE.md."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "inv-grupos (juegos y kits) no entra al respaldo diario api/export",
+      "nivel": "medio",
+      "causa": "La instruccion 55 limito el servidor a api/col y no pidio agregar la coleccion nueva al export; la CLI lo declaro correctamente como no hecho. Hoy solo hay datos zz-verif-, pero cuando Carlos cargue juegos y kits reales quedarian fuera del respaldo.",
+      "observado": "log/55: 'inv-grupos no esta en api/export ... El respaldo diario todavia no incluye los juegos y kits.' Pendiente de corregir antes del siguiente lote de INV2 que cargue datos reales."
+     }
+    ],
+    "datosDePrueba": "Creados por la UI como admin y desactivados al final (nada se puede borrar: sin boton Borrar): articulos zz-verif-Sabana (ar_mv190ifhtxdwj), zz-verif-Consumible (ar_mv192hvwvt3i8) y zz-verif-Equipo; grupos zz-verif-Juego 1 (gr_mv1920hh285yj), zz-verif-Juego 2 y zz-verif-Kit; zona zz-verif-Carreta (dp_mv194d0iaf8o2, rol movil, sirve a zz-verif-Propiedad). Todos activo=false. Intento de push del operador rechazado con 403: no se creo gr_zzverif_oper. Sin turnos, tickets, reservas, fotos, archivos subidos ni cambios a zz-verif-Propiedad ni a sus zonas existentes. De lo real solo se leyeron conteos y nombres (el negocio no tiene articulos reales). Chrome: las pestanas abiertas en los tres perfiles estan cerradas.",
+    "notas": "Aceptacion: 8b-8g y CLAUDE.md cumplen en produccion; 8a por declaracion de la CLI. Salvedades: (1) INC medio del respaldo (arriba), sugerido para el siguiente lote o fix antes de cargar datos reales. (2) Rechazos de 8d medidos con la funcion real, no con clic en pantalla; conteo de HK de 8e medido con la funcion, no con un checklist. (3) Observacion menor, no INC: el operador ve la zona movil en inv-depositos (por diseno, el filtro del servidor solo se la oculta al colaborador; accesos por zona llegan en INV2-4). (4) En la ficha de Propiedades no se abrio la etiqueta 'Movil' (solo verificada por codigo/estructura de zona). Reloj real. No se vieron cambios a la capa Marco."
+   }
   }
  ],
  "esquema": {
@@ -5014,14 +5112,14 @@
    "req": "REQ-INV2 · 2",
    "categoria": "normal",
    "resumen": "Artículos con atributos libres y condición; juegos y kits; contenedores móviles (carreta)",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV2",
    "riesgo": null,
    "espera": null,
    "orden": 59,
-   "nota": "encolado 12:35 (normal); incluye catálogo inv-grupos en api/col"
+   "nota": "aceptado 9-oct (55-veredicto)"
   },
   {
    "lote": null,
@@ -5038,18 +5136,18 @@
    "nota": "número al encolar"
   },
   {
-   "lote": null,
-   "req": "REQ-INV2 · 4",
+   "lote": 57,
+   "req": "REQ-INV2 · 4a",
    "categoria": "crítico",
-   "resumen": "Accesos por zona: ver por zona, escribir solo desde tarea asignada (servidor)",
+   "resumen": "Accesos por zona en el servidor: zonas de mis propiedades (base o turno vigente), revocados, privada del propietario, escribir solo en la zona de la tarea + consumibles del apto, corrección hasta 2 h; ≥1 propiedad por zona; cierra INC-99",
    "estado": "previsto",
    "vista": "esperando a Carlos",
    "esperaA": "Carlos",
    "grupo": "INV2",
    "riesgo": "R-2",
-   "espera": "cruce previo con Carlos",
+   "espera": "visto bueno de Carlos a la instrucción",
    "orden": 61,
-   "nota": "cruce con Carlos en curso (9-oct). Decidido: toda zona vinculada a ≥1 propiedad; el colaborador base hereda acceso a las zonas de su propiedad; el operador mantiene o revoca (ej. zona privada del dueño); otro colaborador con turno en la propiedad accede solo durante el turno y no a zonas revocadas; entrega (al cerrar) y recepción (al llegar) con conteo y foto general solo cuando cambia la persona; diferencia → aviso al operador con ambos conteos y fotos, a nombre de quien entregó; con dos en el turno cuenta el titular; escribe solo en la zona que indica la tarea, más los consumibles del apto y los incidentes sobre activos del apto. Incluye INC-99."
+   "nota": "cruce de diseño hecho 9-oct; instrucción redactada; entra tras el lote 56"
   },
   {
    "lote": null,
@@ -5176,6 +5274,48 @@
    "espera": null,
    "orden": 58.5,
    "nota": "aceptado 9-oct (54-veredicto)"
+  },
+  {
+   "lote": 56,
+   "req": "INC-101",
+   "categoria": "estándar",
+   "resumen": "Fix: el respaldo incluye todas las colecciones de /api/col (inv-grupos, guias) con test",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
+   "grupo": "INV2",
+   "riesgo": "R-1",
+   "espera": null,
+   "orden": 59.5,
+   "nota": "encolado 12:47"
+  },
+  {
+   "lote": null,
+   "req": "REQ-INV2 · 4b",
+   "categoria": "normal",
+   "resumen": "Entrega y recepción de zona con conteo y foto cuando cambia la persona; diferencia → aviso al operador con ambos conteos y fotos",
+   "estado": "previsto",
+   "vista": "previsto",
+   "esperaA": null,
+   "grupo": "INV2",
+   "riesgo": null,
+   "espera": null,
+   "orden": 61.5,
+   "nota": "después del 4a"
+  },
+  {
+   "lote": null,
+   "req": "Portal de propietarios",
+   "categoria": null,
+   "resumen": "Acceso de solo lectura del propietario tercero a sus propiedades y zonas (requerimiento futuro, 9-oct)",
+   "estado": "previsto",
+   "vista": "pospuesto",
+   "esperaA": null,
+   "grupo": "INV2",
+   "riesgo": null,
+   "espera": null,
+   "orden": 90,
+   "nota": "anotado en el cruce INV2·4"
   }
  ],
  "riesgos": [

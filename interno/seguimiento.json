@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T15:36:00-05:00",
+ "actualizadoEn": "2026-10-09T15:41:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1329,14 +1329,28 @@
    "id": "REQ-BC1",
    "tipo": "REQ",
    "modulo": "Base de conocimiento (interno)",
-   "etapa": "🚀",
+   "etapa": "✔",
    "fecha": "2026-10-09",
    "severidad": null,
    "titulo": "Pestaña 'Diagrama' en Base de conocimiento: cajas y flechas desde conocimiento.json → mapa (P-4).",
-   "pendiente": "Lote 60 desplegado (967cbd4); espera veredicto.",
+   "pendiente": null,
    "documento": "claude/producto/requerimientos-base-conocimiento-diagrama-2026-10.md › REQ-BC1",
    "entregadoEn": "M-35",
-   "necesitaDecision": false
+   "necesitaDecision": false,
+   "estado": "cerrado",
+   "cierre": "2026-10-09: lote 60 (967cbd4, p5c60), 60-veredicto 15/15."
+  },
+  {
+   "id": "INC-102",
+   "tipo": "INC",
+   "modulo": "Base de conocimiento (interno)",
+   "etapa": "📝",
+   "fecha": "2026-10-09",
+   "severidad": "bajo",
+   "titulo": "Diagrama: cada flujo omitido deja 2 console.warn idénticos (la validación del mapa corre dos veces: contador y render). Además, la cabecera de la página cuenta '16 nodos (6 actores, 4 mecanismos, 5 lugares)' sin el tipo dato (anterior al lote 60).",
+   "pendiente": "Deuda estándar en str-base-conocimiento.html: avisar una sola vez y contar todos los tipos en la cabecera.",
+   "estado": "abierto",
+   "origen": "60-veredicto (15:38)."
   }
  ],
  "cambios": [
@@ -4920,13 +4934,108 @@
    "req": "REQ-BC1",
    "categoria": "estándar",
    "resumen": "str-base-conocimiento.html: pestaña Diagrama desde conocimiento.json → mapa (16 nodos, 20 flujos hoy), bloque puro [BC1] y test.",
-   "estado": "desplegado",
-   "observacion": "Encolado 15:26. CLI 15:26–15:33, 33/33 (test nuevo con geometría: ninguna flecha cruza un recuadro). Revisó en Chrome sin ventana con sesión simulada; 390 px no probado (mínimo 532). Archivos declarados vs tocados en el log, sin diferencias. Agente verificador (Sonnet) lanzado 15:35.",
+   "estado": "aceptado",
+   "observacion": "Encolado 15:26. CLI 15:26–15:33, 33/33 (test nuevo con geometría: ninguna flecha cruza un recuadro). Revisó en Chrome sin ventana con sesión simulada; 390 px no probado (mínimo 532). Archivos declarados vs tocados en el log, sin diferencias. Agente verificador (Sonnet) lanzado 15:35. 60-veredicto (15:38): aceptado 15/15; 390 px en iframe; claro solo en memoria. INC-102 (bajo) registrado. Cómo quedó: pestaña Diagrama con 16 recuadros en franjas 6/4/1/5 y 20 flechas por los pasillos; selección de nodo y flecha con panel y chips a fichas; zoom y arrastre en celular; se arma solo desde conocimiento.json.",
    "costo": {
     "minutosCLI": 7,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 60,
+    "hash": "967cbd48c364e53c87224da99ab4cb443da4b311",
+    "fecha": "2026-10-09",
+    "horaBogota": "15:38",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción real (https://app.apartamentosbucaramanga.com, versión p5c60) en Chrome, perfil admin deviceId 3198e288-… (usuario de la barra: Carlos Rodriguez). Reloj real del sistema; ningún criterio depende de la hora. Valores vigentes de conocimiento.json: 16 nodos (6/4/1/5), 20 flujos, 0 abiertos (iguales a los del REQ). Criterios 9-10 con un mapa en memoria (fetch interceptado en un iframe srcdoc; nada escrito). Criterios 13-14 con un iframe de 390 px y tema claro solo en memoria (restaurado a oscuro); la ventana no se redimensionó.",
+    "criterios": [
+     {
+      "c": 1,
+      "ok": true,
+      "observado": "Pestaña 'Diagrama16' junto a Mapa con sesión admin; sin 401/403. No se probó con un usuario sin acceso a la página (el gate de la página no cambió)."
+     },
+     {
+      "c": 2,
+      "ok": true,
+      "observado": "16 g.dia-nd; los 16 nombres coinciden exactamente con mapa.nodos[].nombre (sin diferencias)."
+     },
+     {
+      "c": 3,
+      "ok": true,
+      "observado": "4 franjas con título ACTORES/MECANISMOS/DATOS/LUGARES y '6/4/1/5 elementos'; cada rect con clase t-<tipo>."
+     },
+     {
+      "c": 4,
+      "ok": true,
+      "observado": "20 g.dia-fl, cada una con su texto 'que' (g.dia-lab) y title 'de → a: que'; 0 pares de flujos duplicados."
+     },
+     {
+      "c": 5,
+      "ok": true,
+      "observado": "'Chat de desarrollo → Cola de lotes: instrucción NN-instr-*.md'; en los 20 flujos el inicio del trazo cae en el recuadro 'de' y la punta (marker-end) en el 'a'."
+     },
+     {
+      "c": 6,
+      "ok": true,
+      "observado": "Clic en 'Chat de desarrollo': nodo y 7 flechas con opacidad 1 (4 salientes + 3 entrantes), resto 0.18 (incluye los nodos vecinos); panel: nombre, 'actor', id, nota 'REQ, plan, instrucciones, cola, seguimiento', SALEN·4, ENTRAN·3."
+     },
+     {
+      "c": 7,
+      "ok": true,
+      "observado": "'Buzón + despertador': chip '📘 APO01.03-b'; al pulsarlo cambia a la pestaña Fichas y resalta la ficha APO01.03-b (clase 'ficha resaltado')."
+     },
+     {
+      "c": 8,
+      "ok": true,
+      "observado": "Clic en la flecha 'instrucción NN-instr-*.md': panel 'FLUJO · De Chat de desarrollo · A Cola de lotes · texto · 📘 APO01.10-a'; 1 flecha y 2 nodos resaltados."
+     },
+     {
+      "c": 9,
+      "ok": true,
+      "observado": "Mapa en memoria con +1 nodo (dato) y +1 flujo: 17 recuadros y 21 flechas; contador de pestaña 'Diagrama17'; sin tocar código."
+     },
+     {
+      "c": 10,
+      "ok": true,
+      "observado": "Dos flujos con de/a inexistente: se omiten, 16 recuadros y 20 flechas; aviso en pantalla 'omitido(s) del diagrama: a \"no-existe\" no existe en nodos · de \"no-existe2\" no existe en nodos' y console.warn por cada flujo (cada warn salió 2 veces; ver INC bajo)."
+     },
+     {
+      "c": 11,
+      "ok": true,
+      "observado": "Mapa: cabecera '16 nodos … 20 flujos' y 'FLUJOS · 20'; Fichas 8; Líneas base 4; sin cambios visibles."
+     },
+     {
+      "c": 12,
+      "ok": true,
+      "observado": "read_network_requests tras abrir la pestaña y seleccionar nodos/flechas: solo GET (str-api.js, conocimiento.json); 0 POST/PUT/DELETE."
+     },
+     {
+      "c": 13,
+      "ok": true,
+      "observado": "Iframe de 390 px: scrollWidth del documento = clientWidth (370), sin desplazamiento horizontal; el marco .dia-marco (overflow auto, 1208 px de ancho de dibujo) se arrastra con puntero (scrollLeft +140) y los botones − / + cambian el ancho del SVG (1208→1510); el panel queda debajo del marco (top 954 > bottom 942); texto del recuadro 11 px a 100 %. No se probó con toque físico ni con la ventana real a 390 px."
+     },
+     {
+      "c": 14,
+      "ok": true,
+      "observado": "Contraste calculado (WCAG): oscuro — texto de nodo 17.4, etiquetas 18.7, título de franja 18.7, línea 7.4; claro — texto de nodo 17.9, etiquetas 16.2, título de franja 16.2, línea 6.4. Tema claro solo en memoria; restaurado a 'dark'."
+     },
+     {
+      "c": 15,
+      "ok": true,
+      "observado": "Producción: /api/health ok, schema_version 10; los 17 HTML y STR_API_VERSION en ?v=p5c60; sin alert/confirm/prompt en el código de los HTML; consola sin errores tras recarga limpia; pestañas Mapa/Fichas/Líneas base iguales. CLAUDE.md actualizado en el commit (fila de str-base-conocimiento con Diagrama) y tests/base-conocimiento-diagrama.test.js existe. 'node tests/run.js' (33/33) NO lo corrí yo (sin shell en el equipo): solo consta en el log de la CLI."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Aviso de flujo omitido duplicado en consola",
+      "nivel": "bajo",
+      "causa": "Probable: la validación del mapa se ejecuta dos veces (p. ej. contador de pestaña y render), por lo que cada flujo omitido genera 2 console.warn idénticos; no afecta el dibujo.",
+      "observado": "Con 2 flujos rotos: 4 warns ('flujo #20 omitido del diagrama…' ×2 y 'flujo #21 …' ×2). Además la cabecera de la página dice '16 nodos (6 actores, 4 mecanismos, 5 lugares)' y omite el dato (suma 15); anterior a este lote, solo informativo."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado en producción. Solo objetos sintéticos en memoria (iframes srcdoc con fetch interceptado, 'zz-verif-…'), eliminados al terminar; sin archivos subidos.",
+    "notas": "Acepto con una reserva: 'node tests/run.js' solo consta por el log de la CLI (33/33), no lo repetí. Cambios a la capa Marco sin prefijo 'modelo:': ninguno visto (el commit toca solo str-base-conocimiento.html, tests/, CLAUDE.md y la versión ?v=). Archivos tocados vs declarados: coinciden (los demás HTML, str-api.js y el shell solo cambian ?v=p5c59→p5c60; verificado en producción que todos llevan p5c60). Observación de diseño (no INC): al seleccionar un nodo también se atenúan sus nodos vecinos (solo queda en pleno el seleccionado y sus flechas), tal como pide el REQ. Pestaña de Chrome cerrada."
+   }
   },
   {
    "lote": null,
@@ -5722,14 +5831,28 @@
    "req": "REQ-BC1",
    "categoria": "estándar",
    "resumen": "Base de conocimiento: pestaña Diagrama (SVG propio, franjas por tipo, selección de nodo y flecha, solo lectura)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "SP",
    "riesgo": null,
    "espera": null,
    "orden": 102,
-   "nota": "Encolado 15:26; CLI 15:26–15:33 (967cbd4); Agente verificador lanzado 15:35."
+   "nota": "Aceptado 15:38 (60-veredicto, Sonnet, 15/15)."
+  },
+  {
+   "lote": null,
+   "req": "INC-102",
+   "categoria": "estándar",
+   "resumen": "Base de conocimiento: un solo aviso por flujo omitido y cabecera que cuenta los cuatro tipos",
+   "estado": "previsto",
+   "vista": "previsto",
+   "esperaA": null,
+   "grupo": "Deuda",
+   "riesgo": null,
+   "espera": null,
+   "orden": 103,
+   "nota": "número al encolar"
   }
  ],
  "riesgos": [

@@ -5,13 +5,12 @@
  "descripcion": "Lado funcional del proyecto: pedidos de Carlos, estado de cada REQ hasta entregarlo al Chat de desarrollo, decisiones pendientes (DA) y orden del trabajo. Lo escribe solo el Chat de diseño; los demás lo leen. El texto de cada REQ vive en claude/producto/requerimientos-*.md (un dato, una fuente).",
  "esquema": {
   "pedidos": "P-n · fecha · texto (palabras de Carlos) · estado (nuevo | en definición | convertido | descartado) · req (REQ-X si se convirtió)",
-  "reqs": "REQ-X · titulo · documento (ruta y sección) · estado (definiendo | espera DA | listo | entregado | construido) · prioridad (número de prioridades[]) · das (DA-n que lo frenan) · entregadoEn (M-n del buzón) · nota",
+  "reqs": "REQ-X · titulo · documento (ruta y sección) · estado (definiendo | espera DA | listo | entregado | construido) · prioridad (número de prioridades[]) · das (DA-n que lo frenan) · entregadoEn (M-n del buzón) · nota · planTrabajo (PT-n) · desde (AAAA-MM-DD HH:MM, Bogotá, del último cambio) · esperaA (Diseño | CD | CLI | verificador | Arquitecto | Carlos)",
   "das": "DA-n · fecha · pregunta · opciones [{opcion, consecuencias}] · recomendacion · estado (abierta | decidida) · decision · fechaDecision · reqs",
   "prioridades": "lista ordenada de REQ-X; el Chat de desarrollo arma plan[] con este orden",
   "traspaso": "objeto · fecha · estado (dónde va el trabajo) · conCarlos (en qué quedaste con él) · proximoPaso. Lo escribe el Chat de diseño al cerrar sesión; el siguiente Chat de diseño lo lee primero. transiciones-chat.md es del Chat de desarrollo (solo lectura aquí).",
-  "bolsa": "lista de ítems pendientes categorizados; nadie trabaja sobre ella. Cada ítem: ref (id del REQ en reqs[], de la DA en das[], del pedido, o de INC/DT en seguimiento.json; los que no tienen id propio llevan titulo) · tipo (funcionalidad | corrección | deuda técnica | tarea de Carlos | decisión | modelo) · modulo · prioridad (alta | media | baja) · tamano (lotes; null si por definir) · nota. El texto de cada ítem vive en su fuente (un dato, una fuente).",
-  "planes": "PT-n · nombre · objetivo (lenguaje de negocio) · estado (propuesto | activo | cerrado) · inicio · cierrePrevisto · cierre · items [{ref, carril (Construcción | Definición | Modelo | Tareas de Carlos), estado (pendiente | definiendo | listo | construyendo | verificando | aceptado | espera Carlos), orden}] · logrado · vuelveABolsa · leccion. Un plan de Construcción activo a la vez; el siguiente se define en paralelo. Carlos aprueba.",
-  "cambioEn": "reqs[].cambioEn: fecha y hora (Bogotá, ISO) del último cambio de estado del REQ; lo escribe el Chat de diseño. plan[].cambioEn lo escribe el Chat de desarrollo."
+  "bolsa": "lista de ítems pendientes categorizados; nadie trabaja sobre ella. Cada ítem: ref (id del REQ en reqs[], de la DA en das[], del pedido, o de INC/DT en seguimiento.json; los que no tienen id propio llevan titulo) · tipo (funcionalidad=REQ | corrección=INC | deuda técnica=DT | tarea de Carlos | decisión=DA | modelo) · modulo · prioridad (alta | media | baja) · tamano (lotes; null si por definir) · nota. El texto de cada ítem vive en su fuente (un dato, una fuente).",
+  "planes": "PT-n · nombre · objetivo (lenguaje de negocio) · objetivoCorto (2 a 4 palabras con el módulo) · estado (en definición | activo | cerrado) · inicio · cierrePrevisto · cierre · items [{ref, carril (Construcción | Definición | Modelo | Tareas de Carlos), estado (pendiente | definiendo | listo | construyendo | verificando | aceptado | espera Carlos), orden}] · logrado · vuelveABolsa · leccion. Un plan de Construcción activo a la vez; el siguiente se define en paralelo. Carlos aprueba."
  },
  "pedidos": [
   {
@@ -67,7 +66,9 @@
    ],
    "entregadoEn": null,
    "nota": "Crítico. Cruce hecho el 9-oct; espera visto bueno de Carlos. Cierra INC-99. Antes de encolar, el Chat de desarrollo lee claude/archivo/traspaso-chat-anterior.md (respuestas 1 y 4 a M-38): confirmar que cerradoEn viene de la hora del servidor (ventana de 2 h), y asignar la zona zz-verif-Principal a zz-verif-Propiedad antes de verificar. Decisión no tomada: ¿el operador puede dar acceso a mano a un colaborador que no es base ni tiene turno? Carlos solo habló de mantener o revocar.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-1",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Carlos"
   },
   {
    "id": "REQ-BC1",
@@ -78,7 +79,9 @@
    "das": [],
    "entregadoEn": "M-35",
    "nota": "Estándar. 15 criterios con valores de hoy (16 nodos, 20 flujos). Nota: los tipos reales son actor/mecanismo/lugar/dato, no 'infraestructura'. Construido y aceptado 15/15 (lote 60, M-41). Falta que Carlos lo vea y diga si le sirven las franjas.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": null
   },
   {
    "id": "REQ-INV2-3a",
@@ -89,7 +92,9 @@
    "das": [],
    "entregadoEn": "M-42",
    "nota": "Normal (toca servidor: si lo ven crítico por permisos, avisar por el buzón). 15 criterios. El colaborador lo usa después del 4a.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-1",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "CD"
   },
   {
    "id": "REQ-INV2-3b",
@@ -100,18 +105,22 @@
    "das": [],
    "entregadoEn": "M-43",
    "nota": "Normal. 15 criterios. Va después del 3a. Sin DA pendiente.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-1",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "CD"
   },
   {
    "id": "REQ-TB1",
    "titulo": "Tablero de planes de trabajo en Seg. Proyecto (plan activo, carriles, dónde está cada REQ, bolsa)",
    "documento": "claude/producto/requerimientos-tablero-seg-proyecto-2026-10.md › REQ-TB1",
-   "estado": "listo",
+   "estado": "definiendo",
    "prioridad": 5,
    "das": [],
    "entregadoEn": null,
-   "nota": "Estándar. 17 criterios. Listo; se entrega cuando Carlos apruebe en qué plan va (recomendado: PT-1). Necesita plan[].cambioEn del Chat de desarrollo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "nota": "Estándar. 20 criterios con el diseño de Carlos (agentes, planes, bolsa; M-47). EN DEFINICIÓN con Carlos: no entregar hasta que él diga que el tema quedó cerrado (M-49). Recomendado en PT-1.",
+   "planTrabajo": "PT-1",
+   "desde": "2026-10-09 16:14",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-INV2-5",
@@ -122,7 +131,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-1",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-INV2-6",
@@ -133,7 +144,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-2",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-PC1-1",
@@ -144,7 +157,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-2",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-INC1-1",
@@ -155,7 +170,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-2",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-INV2-PLANTILLAS",
@@ -166,7 +183,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-2",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-INV2-4b",
@@ -177,7 +196,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Normal. Después del 4a. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-1",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-PC1-2",
@@ -188,7 +209,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Crítico: requiere cruce con Carlos.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": "PT-2",
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-INC1-2",
@@ -201,7 +224,9 @@
    ],
    "entregadoEn": null,
    "nota": "Crítico: requiere cruce con Carlos; plazos de Airbnb por confirmar.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-CMP1",
@@ -214,7 +239,9 @@
    ],
    "entregadoEn": null,
    "nota": "Crítico (dinero): requiere cruce con Carlos.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-K3b",
@@ -225,7 +252,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Crítico: requiere cruce con Carlos.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-K3c",
@@ -236,7 +265,9 @@
    "das": [],
    "entregadoEn": null,
    "nota": "Crítico: requiere cruce con Carlos.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Diseño"
   },
   {
    "id": "REQ-F11-5b",
@@ -249,7 +280,9 @@
    ],
    "entregadoEn": null,
    "nota": "Crítico.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Carlos"
   },
   {
    "id": "REQ-F11-6",
@@ -262,7 +295,9 @@
    ],
    "entregadoEn": null,
    "nota": "Normal.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Carlos"
   },
   {
    "id": "REQ-F11-7",
@@ -275,7 +310,9 @@
    ],
    "entregadoEn": null,
    "nota": "Normal. Necesita diálogo funcional.",
-   "cambioEn": "2026-10-09T16:02:00-05:00"
+   "planTrabajo": null,
+   "desde": "2026-10-09 16:02",
+   "esperaA": "Carlos"
   }
  ],
  "das": [
@@ -519,9 +556,9 @@
  ],
  "traspaso": {
   "fecha": "2026-10-09",
-  "estado": "Sesión del 9-oct. diseno.json con bolsa (44 ítems), planes PT-1 y PT-2 propuestos (esperan aprobación de Carlos), 19 REQ y 10 DA. Entregados: INV2·3a y 3b. Listo: REQ-TB1 (tablero). Pendientes de criterios: INV2·5, ·6, PC1·1, INC1·1, Plantillas, 4b.",
+  "estado": "Sesión del 9-oct. diseno.json con bolsa (44 ítems), PT-1 y PT-2 'en definición' (esperan aprobación de Carlos), 19 REQ y 10 DA. Entregados: INV2·3a y 3b. REQ-TB1 (tablero) EN DEFINICIÓN con Carlos: no entregar hasta su cierre explícito (M-49). Pendientes de criterios: INV2·5, ·6, PC1·1, INC1·1, Plantillas, 4b.",
   "conCarlos": "Esperando su visto bueno a INV2·4a (DA-30), sus respuestas a las DA viejas y que vea el diagrama BC1. Le gusta: respuestas breves, tablas cortas, preguntas de una en una con opción recomendada, sin ejemplos largos; ver primero lo que espera de él.",
-  "proximoPaso": "Con la aprobación de Carlos: avisar al Chat de desarrollo el plan activo y su orden (buzón), entregar REQ-TB1 y actualizar el artefacto 'Plan de trabajo STR' por carril. Seguir con criterios de INV2·4b y INV2·5."
+  "proximoPaso": "Cerrar con Carlos el tablero y la aprobación de PT-1; entonces avisar al Chat de desarrollo el plan activo y entregar TB1, y actualizar el artefacto por carril. Seguir con criterios de INV2·4b y INV2·5."
  },
  "bolsa": [
   {
@@ -888,7 +925,7 @@
    "id": "PT-1",
    "nombre": "Inventario operativo: quién ve qué, mover cosas y dónde está la ropa",
    "objetivo": "Que el operador y los colaboradores trabajen el inventario de un apartamento completo: cada uno ve solo lo suyo, se mueven cosas entre zonas, se sabe dónde está cada juego de ropa, y Carlos ve en un tablero cómo va el trabajo.",
-   "estado": "propuesto",
+   "estado": "en definición",
    "inicio": null,
    "cierrePrevisto": "2026-10-12 (si das el visto bueno a INV2·4a hoy)",
    "cierre": null,
@@ -956,13 +993,14 @@
    ],
    "logrado": null,
    "vuelveABolsa": null,
-   "leccion": null
+   "leccion": null,
+   "objetivoCorto": "Inventario: accesos y ropa"
   },
   {
    "id": "PT-2",
    "nombre": "Puntos de control, activos y reclamos",
    "objetivo": "Que el turno empiece al escanear el punto de control, que los activos importantes se inspeccionen con la cámara y que los daños se registren como incidente.",
-   "estado": "propuesto",
+   "estado": "en definición",
    "inicio": null,
    "cierrePrevisto": "2026-10-16",
    "cierre": null,
@@ -1006,7 +1044,8 @@
    ],
    "logrado": null,
    "vuelveABolsa": null,
-   "leccion": null
+   "leccion": null,
+   "objetivoCorto": "Puntos de control e incidentes"
   }
  ]
 }

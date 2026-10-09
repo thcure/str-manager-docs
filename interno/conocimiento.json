@@ -443,6 +443,88 @@
    "riesgos": [
     "Si no se registra la sesión, los avisos quedan en espera (sin perderse) hasta registrarla."
    ]
+  },
+  {
+   "codigo": "DSS02-i",
+   "nombre": "Gestión de incidentes (INC)",
+   "dueno": "Chat de desarrollo (los del producto) · Arquitecto (los del modelo)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-09-23",
+   "para": "Que toda falla, del sistema o de la forma de trabajar, quede registrada con su nivel y su causa, se corrija en su propio lote y deje una lección que evite repetirla.",
+   "quien": {
+    "detecta": "Agente verificador (en el veredicto), Chat de desarrollo, Carlos o cualquier chat",
+    "registra": "Chat de desarrollo en seguimiento.json → items[] (INC-n); los del modelo, el Arquitecto a pedido de Carlos",
+    "corrige": "Chat de desarrollo con un lote fix propio; los del modelo, el Arquitecto",
+    "cierra": "quien registró, después de verificar en producción"
+   },
+   "piezas": [
+    "seguimiento.json → items[] (tipo INC)",
+    "cola NN-instr-fix-*.md",
+    "claude/marco/patrones-codigo.md (errores conocidos)",
+    "marco-trabajo.json (lecciones)",
+    "claude/gobierno/proceso-cambios.md › DSS02"
+   ],
+   "flujo": [
+    "Se detecta la falla: un criterio incumplido en el veredicto, un hallazgo al usar el STR o un mecanismo del modelo que no funciona.",
+    "Se registra el mismo día como INC-n: qué se observó (literal), módulo, nivel y causa (la causa, no el síntoma). Si es anterior al lote que se verificaba, se dice y no hace fallar ese lote.",
+    "Nivel: crítico (pérdida de datos, acceso indebido o bloqueo de uso) → hotfix el mismo día · medio (función incorrecta sin pérdida) → fix propio antes del siguiente lote · bajo (cosmético) → deuda técnica o siguiente lote del módulo.",
+    "Se diagnostica revisando primero los errores conocidos de patrones-codigo.md y el log del lote.",
+    "Se corrige en su propio lote (NN-instr-fix-*.md, un solo tema), nunca mezclado con otro.",
+    "Se cierra solo con verificación en producción (hash y qué se verificó).",
+    "La lección: el error conocido va a patrones-codigo.md (producto) o a marco-trabajo.json y al procedimiento afectado (modelo), con aprobación de Carlos."
+   ],
+   "reglas": [
+    "Una corrección es su propio lote.",
+    "Un INC abierto 'sin solución aún' lo dice en su campo pendiente con las salvedades (caso INC-87).",
+    "Los INC del modelo no entran a la cola: los resuelve el Arquitecto (ficha APO01.11-g)."
+   ],
+   "instalacion": "No aplica (es un proceso).",
+   "comprobacion": "Seg. Proyecto: INC abiertos con nivel y causa; ninguno medio o crítico abierto antes de encolar el siguiente lote.",
+   "creditos": "Un lote fix por INC medio o crítico.",
+   "riesgos": [
+    "Registrar el síntoma y no la causa hace que el error vuelva."
+   ]
+  },
+  {
+   "codigo": "BAI10.05-e",
+   "nombre": "Cambio del equipo activo (ASUS ↔ LENOVO)",
+   "dueno": "Arquitecto (procedimiento) · Carlos (lo ejecuta en el equipo)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-08",
+   "para": "Mover la cola, el despertador y los verificadores de un computador a otro sin perder lotes ni configuración, y que el equipo nuevo quede igual a su línea base.",
+   "quien": {
+    "ejecuta": "Carlos, con los comandos de ins-006",
+    "recrea_verificadores": "Chat de desarrollo (paso 11)",
+    "comprueba": "Arquitecto contra lb-lenovo / lb-asus"
+   },
+   "piezas": [
+    "ins-006",
+    "lb-lenovo",
+    "lb-asus",
+    "tarea 'STR cola CLI'",
+    "tarea 'STR buzon' (despertador)",
+    "Agente verificador y Agente verificador crítico",
+    "comandos-usuario.md › Infraestructura: equipos"
+   ],
+   "flujo": [
+    "Elegir un punto limpio: nada en la cola, sin .corriendo y el último lote con veredicto.",
+    "En el equipo que se deja: pausar la cola (ins-002) y apagar el despertador.",
+    "En el equipo que se activa: reanudar la cola (ins-003), repo al día, tarea cada minuto con lanzador oculto, sin condición de batería, despertador instalado (paso 7b).",
+    "Enlazar la sesión de Claude y Chrome con sesión del STR al equipo nuevo.",
+    "Recrear los dos verificadores desde un chat enlazado al equipo nuevo: quedan atados al equipo donde se crean.",
+    "Comparar el equipo con su línea base y anotar toda diferencia; actualizar la tabla de equipos en comandos-usuario.md."
+   ],
+   "reglas": [
+    "Solo un equipo con la cola activa.",
+    "Todo arreglo hecho en un equipo se escribe el mismo día en ins-006 o en la línea base (lección INC-87).",
+    "Las tareas programadas de Cowork no se reatan: se recrean."
+   ],
+   "instalacion": "ins-006",
+   "comprobacion": "Comandos de comprobación de ins-006 (PT1M, wscript + lanzar-oculto.vbs, buzon.log) y prueba del verificador con un lote en modo prueba.",
+   "creditos": "Una prueba del verificador por cambio.",
+   "riesgos": [
+    "Volver a ASUS exige recrear otra vez los verificadores y copiar el despertador v3."
+   ]
   }
  ],
  "lineasBase": [

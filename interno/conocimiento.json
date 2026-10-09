@@ -356,6 +356,93 @@
     "Dos chats más que coordinar: el buzón es la única vía entre ellos.",
     "Un ítem de plan[] mal marcado (sin espera cuando sí espera a Carlos) produce avisos inútiles; el Chat de diseño lo corrige pidiéndolo al Chat de desarrollo."
    ]
+  },
+  {
+   "codigo": "APO01.11-g",
+   "nombre": "Gobierno del modelo: cómo cambia la forma de trabajar",
+   "dueno": "Arquitecto",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-09-29",
+   "para": "Que todo cambio a la forma de trabajar (roles, chats, encargos, herramientas, reglas) se decida con Carlos, quede registrado y llegue a todos los actores y documentos, sin que ninguno quede con una versión vieja.",
+   "quien": {
+    "propone": "Carlos o cualquier chat (por el buzón al Arquitecto)",
+    "evalua_y_escribe": "Arquitecto",
+    "aprueba": "Carlos",
+    "aplica": "cada actor en su propio archivo, avisado por el buzón"
+   },
+   "piezas": [
+    "encargo rol-arquitecto",
+    "interno/instrucciones.json",
+    "interno/conocimiento.json",
+    "interno/elementos.json",
+    "interno/cobit.json",
+    "interno/marco-trabajo.json",
+    "claude/gobierno/proceso-cambios.md › APO01",
+    "claude/marco/comandos-usuario.md",
+    "instrucciones del proyecto (ins-proyecto)",
+    "interno/destinatarios.json",
+    "herramientas/"
+   ],
+   "flujo": [
+    "Llega la propuesta (pedido de Carlos, propuesta de un chat por el buzón o hallazgo de una revisión).",
+    "El Arquitecto la presenta a Carlos en lenguaje de negocio: qué cambia, por qué, riesgo, costo en uso y cómo se deshace.",
+    "Con la aprobación de Carlos, registra la entrada en seguimiento.json → cambios[] con tipo 'modelo' (motivo, aprobación, estado 'registrado').",
+    "Si es grande (rol o mecanismo nuevo) va por fases: A preparar en borrador sin afectar a nadie · B esperar un punto limpio · C activar todo de una vez · D medir una semana (costo y avance).",
+    "Escribe en la capa Marco y propaga con la lista de comprobación (reglas); commit con prefijo 'modelo:'.",
+    "Avisa por el buzón a cada actor afectado qué cambió en su encargo; cada uno responde en una línea y ajusta sus propios archivos.",
+    "Cierra la entrada de cambios[] cuando la realidad coincide (encargos, documentos, páginas, despertador) y lo informa a Carlos."
+   ],
+   "reglas": [
+    "Lista de comprobación de propagación: encargos afectados · ficha del mecanismo · mapa (nodos y flujos) · elementos.json · cobit.json · marco-trabajo.json (lección) · proceso-cambios.md › APO01 · comandos-usuario.md · instrucciones del proyecto (ins-proyecto) · destinatarios.json y despertador si cambia un chat · procedimiento ins-NNN si hay pasos manuales · aviso por el buzón.",
+    "Nada cambia el modelo sin aprobación de Carlos; una instrucción que toque la capa Marco nunca entra a la cola.",
+    "Un escritor por archivo: el Arquitecto no edita los archivos de otro rol; les pide el ajuste por el buzón.",
+    "Lo que se verifica en pantalla (claude.ai, GitHub, Windows) se comprueba antes de documentarlo (lección INC-87).",
+    "Cuidar el uso semanal: los cambios grandes se activan cuando hay margen."
+   ],
+   "instalacion": "No aplica (es un proceso).",
+   "comprobacion": "seguimiento.json → cambios[] tipo 'modelo' sin entradas 'registrado' viejas; revisión periódica del Arquitecto (rol-arquitecto, punto 4).",
+   "creditos": "El costo es del Arquitecto y de los avisos por el buzón.",
+   "riesgos": [
+    "Un documento que nadie actualiza queda contradiciendo al modelo (pasó con las instrucciones del proyecto hasta el 9-oct)."
+   ]
+  },
+  {
+   "codigo": "BAI08.03-t",
+   "nombre": "Abrir un chat nuevo y relevo entre chats",
+   "dueno": "Arquitecto",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-09",
+   "para": "Cambiar un chat por otro (relevo) o sumar un rol nuevo sin perder trabajo, sin dos escritores a la vez y con el despertador apuntando al chat correcto.",
+   "quien": {
+    "abre": "Arquitecto (en claude.ai, desde Chrome)",
+    "token": "Carlos lo crea y lo pega solo en ese chat",
+    "sale": "el chat anterior entrega el traspaso"
+   },
+   "piezas": [
+    "ins-007",
+    "interno/destinatarios.json",
+    "lb-sesiones",
+    "interno/mensajes.json",
+    "encargo del rol"
+   ],
+   "flujo": [
+    "Relevo: mensaje al chat que sale; termina lo que tiene en curso, escribe su traspaso, deja 'Traspaso listo: arranca' para el nuevo y deja de escribir.",
+    "El Arquitecto crea el chat en el proyecto: equipo LENOVO, modelo según el rol, permisos Auto; primer mensaje con el arranque del rol.",
+    "Carlos crea el token del chat y se lo pega; el chat comprueba git push --dry-run y da su identificador cse_….",
+    "El Arquitecto registra la sesión en destinatarios.json y lb-sesiones; el despertador empieza a avisarle.",
+    "El chat nuevo confirma en el buzón; el anterior queda solo de consulta."
+   ],
+   "reglas": [
+    "Nunca dos chats escribiendo el mismo archivo: el nuevo solo lee hasta recibir el traspaso.",
+    "Los chats del proyecto no tienen selector de repositorios: la escritura es con token propio.",
+    "Hacerlo en un punto limpio (nada en la cola ni en verificación)."
+   ],
+   "instalacion": "ins-007",
+   "comprobacion": "buzon.log muestra 'M-n avisado a <rol>' y el chat nuevo respondió en el buzón.",
+   "creditos": "Un arranque de chat (lectura inicial) por relevo.",
+   "riesgos": [
+    "Si no se registra la sesión, los avisos quedan en espera (sin perderse) hasta registrarla."
+   ]
   }
  ],
  "lineasBase": [

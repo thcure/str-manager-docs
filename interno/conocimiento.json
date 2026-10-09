@@ -249,7 +249,7 @@
    ],
    "flujo": [
     "Un chat agrega un mensaje M-n en interno/mensajes.json con estado 'pendiente' y lo sube.",
-    "La tarea de Windows 'STR buzon' (cada 3 min, en LENOVO) revisa, sin usar Claude, tres fuentes: el buzón, los veredictos nuevos en log\\ y las líneas nuevas de log\\_resumen.txt de la cola.",
+    "La tarea de Windows 'STR buzon' (cada minuto desde el 9-oct, v4, en LENOVO) pregunta a GitHub el último commit (git ls-remote) y, solo si cambió, descarga los JSON de ese commit sin caché; luego revisa, sin usar Claude, tres fuentes: el buzón, los veredictos nuevos en log\\ y las líneas nuevas de log\\_resumen.txt de la cola.",
     "Por cada evento nuevo busca el chat destinatario en destinatarios.json (veredictos y cola van al Chat de desarrollo).",
     "Deja en ese chat solo una frase fija: 'Revisa el buzon … M-n', 'Hay veredicto nuevo … log\\<archivo>' o 'La CLI termino el lote NN (OK|FALLO)'.",
     "El chat atiende: responde en el buzón (estado y respuesta), lee el veredicto o revisa la cola.",
@@ -264,7 +264,7 @@
    ],
    "instalacion": "ins-006, paso 7b",
    "comprobacion": "$t=Get-ScheduledTask -TaskName \"STR buzon\"; $t.State; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; Get-Content \"$HOME\\Downloads\\str-instr-cola\\buzon\\buzon.log\" -Tail 3",
-   "creditos": "Revisar no gasta créditos de Claude; solo el turno del chat que despierta.",
+   "creditos": "Revisar no gasta créditos de Claude; solo el turno del chat que despierta. Demora típica del aviso ~30 s (antes, con revisión cada 3 min y caché de GitHub, 3,7 min de promedio medidos el 9-oct).",
    "riesgos": [
     "Mientras dure INC-87, el Chat de desarrollo sube sus respuestas por la web y con retraso.",
     "Al abrir un chat nuevo hay que cambiar su sesión en destinatarios.json."
@@ -610,7 +610,7 @@
   {
    "id": "lb-lenovo",
    "nombre": "LENOVO (LAPTOP-U4AHAHON) — equipo activo",
-   "fecha": "2026-10-08",
+   "fecha": "2026-10-09",
    "aprobadaPor": "Carlos (6 al 8-oct-2026)",
    "items": [
     {
@@ -628,7 +628,7 @@
     },
     {
      "que": "Tarea 'STR buzon'",
-     "valor": "cada 3 minutos; lanza wscript.exe buzon\\lanzar-buzon.vbs → vigilar-buzon.ps1",
+     "valor": "Tarea de Windows 'STR buzon' cada 1 minuto (PT1M) con buzon\\lanzar-buzon.vbs; vigilar-buzon.ps1 v4 (git ls-remote + JSON del commit, sin caché; vigía); estado en buzon\\ (notificados, veredictos-avisados, cola-lineas, vigia, sha, sinsesion, cache\\)",
      "comprobar": "$t=Get-ScheduledTask -TaskName \"STR buzon\"; $t.State; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; Get-Content \"$HOME\\Downloads\\str-instr-cola\\buzon\\buzon.log\" -Tail 3"
     },
     {

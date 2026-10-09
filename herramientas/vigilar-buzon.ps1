@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-09; v3: veredictos, cola y vigia)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-09; v4: cada minuto y sin cache de GitHub)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -13,6 +13,9 @@
 #      -> Chat de diseno: "El plan tiene trabajo libre y no hay movimiento desde las HH:MM: retomalo."
 #      Un aviso por episodio y como mucho uno cada $VigiaEntre min (ficha BAI11-d).
 # El chat de cada destinatario sale de interno/destinatarios.json (lo mantiene el Arquitecto).
+# v4: cada corrida pregunta a GitHub el ultimo commit de main (git ls-remote, ~2 KB); solo si cambio,
+# descarga destinatarios, mensajes y seguimiento de ESE commit (raw/<sha>/..., sin cache vieja) a buzon\cache\.
+# Las fuentes locales (veredictos, cola) se revisan siempre. Tarea de Windows: cada 1 minuto.
 # Solo llama a la CLI (claude -p ... --cloud <sesion>) cuando hay un evento. La primera corrida de cada
 # fuente marca lo existente como avisado, sin avisar.
 #
@@ -23,6 +26,9 @@
 #   veredictos-avisados.txt  nombres de veredictos ya avisados
 #   cola-lineas.txt          lineas de _resumen.txt ya revisadas
 #   vigia.txt                ultimo episodio avisado por el vigia (movimiento|hora del aviso)
+#   sha.txt                  ultimo commit visto de str-manager-docs|hora en que se vio por primera vez
+#   sinsesion.txt            mensajes ya anotados como 'sin sesion registrada' (para no repetir el log)
+#   cache\                    copia de los JSON del ultimo commit visto
 #   buzon.log                una linea por aviso o error
 # Borrar uno de los .txt reinicia esa fuente sin avisar.
 #
@@ -39,7 +45,11 @@ $Lock     = Join-Path $Base '.corriendo'
 $Claude   = Join-Path $HOME '.local\bin\claude.exe'
 $Resumen  = Join-Path $Cola 'log\_resumen.txt'
 $LogDir   = Join-Path $Cola 'log'
-$Raw      = 'https://raw.githubusercontent.com/thcure/str-manager-docs/main/interno'
+$RawBase  = 'https://raw.githubusercontent.com/thcure/str-manager-docs'
+$RepoGit  = 'https://github.com/thcure/str-manager-docs.git'
+$EstSha   = Join-Path $Base 'sha.txt'
+$EstSinS  = Join-Path $Base 'sinsesion.txt'
+$CacheDir = Join-Path $Base 'cache'
 $EstVigia = Join-Path $Base 'vigia.txt'
 $VigiaMin   = 60    # minutos sin movimiento
 $VigiaEntre = 120   # minutos minimos entre avisos
@@ -64,14 +74,38 @@ function Avisar([string]$destNombre, [string]$texto, $dest) {
 }
 
 try {
-    $t = [DateTime]::UtcNow.Ticks
+    # --- 0. Ultimo commit de str-manager-docs (sin cache) y copia local de los JSON de ese commit ---
+    New-Item -ItemType Directory -Force $CacheDir | Out-Null
+    $previo = if (Test-Path $EstSha) { [string](Get-Content -Path $EstSha | Select-Object -First 1) } else { '' }
+    $shaPrev = ($previo -split '\|')[0]
+    $vistoEn = $null; if (($previo -split '\|').Count -gt 1) { try { $vistoEn = [DateTime]::Parse(($previo -split '\|')[1]) } catch { } }
+    $sha = ''
     try {
-        $dest = (Invoke-RestMethod -Uri "$Raw/destinatarios.json?t=$t" -UseBasicParsing).destinatarios
+        $lr = & git ls-remote $RepoGit refs/heads/main 2>$null | Select-Object -First 1
+        if ($lr -match '^([0-9a-f]{40})\s') { $sha = $Matches[1] }
+    } catch { }
+    if (-not $sha) { Log 'Aviso: git ls-remote no respondio; se usa la copia local.' ; $sha = $shaPrev }
+    $faltan = -not (Test-Path (Join-Path $CacheDir 'mensajes.json')) -or -not (Test-Path (Join-Path $CacheDir 'destinatarios.json')) -or -not (Test-Path (Join-Path $CacheDir 'seguimiento.json'))
+    if ($sha -and ($sha -ne $shaPrev -or $faltan)) {
+        try {
+            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json')) {
+                Invoke-WebRequest -Uri "$RawBase/$sha/interno/$f" -UseBasicParsing -OutFile (Join-Path $CacheDir ($f + '.tmp'))
+            }
+            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json')) {
+                Move-Item -Force (Join-Path $CacheDir ($f + '.tmp')) (Join-Path $CacheDir $f)
+            }
+            if ($sha -ne $shaPrev) { $vistoEn = Get-Date }
+            Set-Content -Path $EstSha -Value ($sha + '|' + ($(if ($vistoEn) { $vistoEn } else { Get-Date })).ToString('yyyy-MM-dd HH:mm:ss'))
+        } catch { Log ('ERROR al descargar el commit ' + $sha + ': ' + $_.Exception.Message) }
+    }
+    function LeerCache([string]$f) { Get-Content -Path (Join-Path $CacheDir $f) -Raw -Encoding UTF8 | ConvertFrom-Json }
+    try {
+        $dest = (LeerCache 'destinatarios.json').destinatarios
     } catch { Log ('ERROR al leer destinatarios: ' + $_.Exception.Message); return }
 
     # --- 1. Buzon ---
     try {
-        $msgs = (Invoke-RestMethod -Uri "$Raw/mensajes.json?t=$t" -UseBasicParsing).mensajes
+        $msgs = (LeerCache 'mensajes.json').mensajes
         if (-not (Test-Path $EstMsg)) {
             $msgs | ForEach-Object { $_.id } | Set-Content -Path $EstMsg
             Log ("Inicio buzon: " + @($msgs).Count + " mensajes marcados sin avisar.")
@@ -80,6 +114,12 @@ try {
             foreach ($m in $msgs) {
                 $id = [string]$m.id
                 if ($id -notmatch '^M-\d+$' -or $m.estado -ne 'pendiente' -or $avisados -contains $id) { continue }
+                $para = [string]$m.para
+                if (-not ($dest | Where-Object { $_.nombre -eq $para })) {
+                    $yaS = if (Test-Path $EstSinS) { @(Get-Content -Path $EstSinS) } else { @() }
+                    if ($yaS -notcontains $id) { Add-Content -Path $EstSinS -Value $id; Log "Sin sesion registrada para el destinatario de $id; espera a que se registre." }
+                    continue
+                }
                 $texto = "Revisa el buzon (interno/mensajes.json): tienes el mensaje pendiente $id."
                 if (Avisar ([string]$m.para) $texto $dest) { Add-Content -Path $EstMsg -Value $id; Log "$id avisado a $($m.para)." }
             }
@@ -133,7 +173,7 @@ try {
         $dv = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
         $ahora = Get-Date
         if ($dv -and $ahora.Hour -ge $VigiaDesde -and $ahora.Hour -lt $VigiaHasta) {
-            $seg = Invoke-RestMethod -Uri "$Raw/seguimiento.json?t=$t" -UseBasicParsing
+            $seg = LeerCache 'seguimiento.json'
             $libres = @($seg.plan | Where-Object {
                 ($_.estado -eq 'previsto' -or $_.estado -eq 'siguiente') -and -not $_.espera -and
                 ([string]$_.esperaA) -ne 'Carlos' -and
@@ -152,10 +192,7 @@ try {
                 if (Test-Path $Resumen) { $marcas += (Get-Item $Resumen).LastWriteTime }
                 $uv = Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
                 if ($uv) { $marcas += $uv.LastWriteTime }
-                try {
-                    $c = Invoke-RestMethod -Uri 'https://api.github.com/repos/thcure/str-manager-docs/commits?per_page=1' -UseBasicParsing
-                    $marcas += ([DateTime]::Parse([string]@($c)[0].commit.committer.date)).ToLocalTime()
-                } catch { Log ('Vigia: no se pudo leer el ultimo commit: ' + $_.Exception.Message) }
+                if ($vistoEn) { $marcas += $vistoEn }   # hora en que se vio el ultimo commit (sha.txt)
                 $mov = ($marcas | Sort-Object | Select-Object -Last 1)
                 if ($mov -and (($ahora - $mov).TotalMinutes -ge $VigiaMin)) {
                     $clave = $mov.ToString('yyyy-MM-dd HH:mm')

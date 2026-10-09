@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T14:09:00-05:00",
+ "actualizadoEn": "2026-10-09T14:14:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -925,13 +925,14 @@
    "id": "INC-83",
    "tipo": "INC",
    "modulo": "Flujos de trabajo",
-   "etapa": "🔨",
+   "etapa": "✔",
    "fecha": "2026-10-07",
    "severidad": "bajo",
    "titulo": "Editor de flujos: si una tarea tenía su propio 'mín.' de fotos y luego la actividad marca 📷, el mínimo de la tarea sigue vigente (_fbFotoEfectiva usa t.fotoMin || a.fotoMin) pero el editor oculta el input, así que queda activo e invisible.",
-   "pendiente": "Lote 58 (normal), encolado 9-oct 14:03.",
-   "estado": "abierto",
-   "origen": "Veredicto del lote 36 (12:10) y límite declarado por la CLI."
+   "pendiente": null,
+   "estado": "cerrado",
+   "origen": "Veredicto del lote 36 (12:10) y límite declarado por la CLI.",
+   "cierre": "2026-10-09: lote 58 (5afab98, p5c58), 58-veredicto criterio b en Flujos, HK y Propiedades."
   },
   {
    "id": "INC-84",
@@ -4752,13 +4753,51 @@
    "req": "INC-83",
    "categoria": "normal",
    "resumen": "_fbFotoEfectiva: con foto en la actividad el mínimo sale de a.fotoMin; t.fotoMin se conserva sin aplicar. Tres copias idénticas + casos en flujo-base.test.js.",
-   "estado": "desplegado",
-   "observacion": "Encolado 14:02. CLI 14:03–14:05, 32/32; 4a y 4b por réplica de las tres copias; 4c y consola de 4d para el navegador. Consecuencia declarada: actividad sin foto + tarea con foto sin mínimo propio → pide 1 (antes tomaba un a.fotoMin oculto); coherente con la regla. La lista de archivos quedó solo en el commit. Agente verificador (Sonnet) lanzado 14:08.",
+   "estado": "aceptado",
+   "observacion": "Encolado 14:02. CLI 14:03–14:05, 32/32; 4a y 4b por réplica de las tres copias; 4c y consola de 4d para el navegador. Consecuencia declarada: actividad sin foto + tarea con foto sin mínimo propio → pide 1 (antes tomaba un a.fotoMin oculto); coherente con la regla. La lista de archivos quedó solo en el commit. Agente verificador (Sonnet) lanzado 14:08. 58-veredicto: aceptado 5/5 (a por log/réplica; b en las tres páginas reales con objetos en memoria). Ojo: el veredicto dice horaBogota 14:20 pero el Chat de desarrollo lo leyó a las 14:13 por reloj: la hora del verificador no es fiable (R10). Cómo quedó: con foto en la actividad el mínimo de fotos sale solo de la actividad; el de la tarea queda guardado sin aplicar. INC-83 cerrado.",
    "costo": {
     "minutosCLI": 2,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 58,
+    "hash": "5afab9885320f82944deb830d0d08f8c646ec705",
+    "fecha": "2026-10-09",
+    "horaBogota": "14:20",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome (perfil admin 3198e288…, Carlos Rodriguez / Carlos Hospedaje) para b, c, d (salud, versión, funciones reales en las tres páginas con objetos sintéticos en memoria, nada escrito). a por réplica: sin shell en el equipo no pude ejecutar node tests/run.js; me apoyo en el log de la CLI (32/32) y en las funciones desplegadas, idénticas en las tres copias (310 caracteres cada una). Sin reloj simulado (ningún criterio depende de la hora).",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js verde, casos nuevos, tres copias iguales",
+      "ok": true,
+      "observado": "NO ejecutado por mí (sin shell): cuenta como verificado por réplica/log, no por ejecución propia. Log CLI: 32/32. flujo-base.test.js modificado (mtime 14:03, 16120 bytes). Las tres copias de _fbFotoEfectiva servidas en producción tienen la misma longitud (310) y el mismo comportamiento."
+     },
+     {
+      "c": "b. _fbFotoEfectiva con objetos sintéticos en la página real (Flujos, HK, Propiedades)",
+      "ok": true,
+      "observado": "En las tres: ({foto:false,fotoMin:5},{foto:true,fotoMin:3}) → {exige:true,minimo:3,deActividad:true}; ({foto:false,fotoMin:5},{foto:true}) → minimo 1; ({foto:true,fotoMin:5},{foto:false}) → minimo 5 deActividad:false; hoja '__self__' con fotoMin 4 → minimo 4. Flujos probado dentro del iframe del shell y también directo."
+     },
+     {
+      "c": "c. Editor de Flujos sin cambio visual",
+      "ok": true,
+      "observado": "Abrí el editor de 'Alistamiento' (sin editar ni guardar, cerrado con X): se ve igual que antes, casillas de foto desmarcadas, sin input de mínimo en las tareas. Ese flujo no tiene 📷 en ninguna actividad, así que el caso 'cabecera con 📷 y mínimo visible' no se vio renderizado (solo por código/pruebas)."
+     },
+     {
+      "c": "d. /api/health esquema 10; ?v=p5c58; consola limpia; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health {ok:true,db:true,schema_version:10,secrets,gd,exif,zip,drive:true}. str-app-shell, str-flujos, str-m1-housekeeping y str-propiedades con v=p5c58. Consola: sin errores en shell/Flujos; sin mensajes en Flujos, HK y Propiedades (limitación: el rastreo de consola empieza en la primera lectura, así que errores de la carga inicial de HK/Propiedades pudieron no capturarse; las funciones respondieron bien). alert/confirm/prompt: 0 en shell, HK y Propiedades; 1 coincidencia en str-flujos.html que es el comentario 'sin confirm()' ya visto en el lote 57."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit; declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md (mtime 14:04) describe INC-83 cerrado (instr-58), 'manda solo a.fotoMin', t.fotoMin sin aplicar, INC-37 en p5c58. Archivos modificados en el árbol: HTML (versión), str-api.js, tests/flujo-base.test.js, CLAUDE.md; api/ y str-cola-subida.js sin cambios, coherente con lo declarado. No pude leer el commit por git; me apoyo en mtimes y en el log. La CLI no escribió la lista de archivos en el log de la cola (la instrucción lo pedía): incumplimiento menor de cierre, anotado, sin efecto en el código."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado ni modificado en producción. Pestañas de Chrome abiertas por esta ejecución: 1, cerrada.",
+    "notas": "Aceptado. Reservas: (1) 4a verificado por log/réplica, no por ejecución propia; (2) la lista de archivos declarados vs tocados falta en el log de la cola (está en el commit, que no pude leer); (3) consecuencia ya aceptada por el Chat de desarrollo: actividad sin 📷 y tarea con 📷 sin mínimo propio pide 1 aunque la actividad tenga fotoMin guardado. Sin cambios a la capa Marco detectados (no se tocaron proceso-cambios, marco-trabajo.json, instrucciones.json, cobit.json, elementos.json ni comandos-usuario.md)."
+   }
   }
  ],
  "esquema": {
@@ -5510,14 +5549,14 @@
    "req": "INC-83",
    "categoria": "normal",
    "resumen": "Fix INC-83: con 📷 en la actividad manda su mínimo de fotos; el de la tarea queda guardado sin aplicar (tres copias de _fbFotoEfectiva + tests)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "Deuda",
    "riesgo": null,
    "espera": null,
    "orden": 60.6,
-   "nota": "Encolado 14:02; CLI 14:03–14:05 (5afab98); Agente verificador lanzado 14:08."
+   "nota": "Aceptado (58-veredicto, Sonnet; leído 14:13)."
   }
  ],
  "riesgos": [

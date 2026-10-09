@@ -8,7 +8,10 @@
   "reqs": "REQ-X · titulo · documento (ruta y sección) · estado (definiendo | espera DA | listo | entregado | construido) · prioridad (número de prioridades[]) · das (DA-n que lo frenan) · entregadoEn (M-n del buzón) · nota",
   "das": "DA-n · fecha · pregunta · opciones [{opcion, consecuencias}] · recomendacion · estado (abierta | decidida) · decision · fechaDecision · reqs",
   "prioridades": "lista ordenada de REQ-X; el Chat de desarrollo arma plan[] con este orden",
-  "traspaso": "objeto · fecha · estado (dónde va el trabajo) · conCarlos (en qué quedaste con él) · proximoPaso. Lo escribe el Chat de diseño al cerrar sesión; el siguiente Chat de diseño lo lee primero. transiciones-chat.md es del Chat de desarrollo (solo lectura aquí)."
+  "traspaso": "objeto · fecha · estado (dónde va el trabajo) · conCarlos (en qué quedaste con él) · proximoPaso. Lo escribe el Chat de diseño al cerrar sesión; el siguiente Chat de diseño lo lee primero. transiciones-chat.md es del Chat de desarrollo (solo lectura aquí).",
+  "bolsa": "lista de ítems pendientes categorizados; nadie trabaja sobre ella. Cada ítem: ref (id del REQ en reqs[], de la DA en das[], del pedido, o de INC/DT en seguimiento.json; los que no tienen id propio llevan titulo) · tipo (funcionalidad | corrección | deuda técnica | tarea de Carlos | decisión | modelo) · modulo · prioridad (alta | media | baja) · tamano (lotes; null si por definir) · nota. El texto de cada ítem vive en su fuente (un dato, una fuente).",
+  "planes": "PT-n · nombre · objetivo (lenguaje de negocio) · estado (propuesto | activo | cerrado) · inicio · cierrePrevisto · cierre · items [{ref, carril (Construcción | Definición | Modelo | Tareas de Carlos), estado (pendiente | definiendo | listo | construyendo | verificando | aceptado | espera Carlos), orden}] · logrado · vuelveABolsa · leccion. Un plan de Construcción activo a la vez; el siguiente se define en paralelo. Carlos aprueba.",
+  "cambioEn": "reqs[].cambioEn: fecha y hora (Bogotá, ISO) del último cambio de estado del REQ; lo escribe el Chat de diseño. plan[].cambioEn lo escribe el Chat de desarrollo."
  },
  "pedidos": [
   {
@@ -63,7 +66,8 @@
     "DA-30"
    ],
    "entregadoEn": null,
-   "nota": "Crítico. Cruce hecho el 9-oct; espera visto bueno de Carlos. Cierra INC-99. Antes de encolar, el Chat de desarrollo lee claude/archivo/traspaso-chat-anterior.md (respuestas 1 y 4 a M-38): confirmar que cerradoEn viene de la hora del servidor (ventana de 2 h), y asignar la zona zz-verif-Principal a zz-verif-Propiedad antes de verificar. Decisión no tomada: ¿el operador puede dar acceso a mano a un colaborador que no es base ni tiene turno? Carlos solo habló de mantener o revocar."
+   "nota": "Crítico. Cruce hecho el 9-oct; espera visto bueno de Carlos. Cierra INC-99. Antes de encolar, el Chat de desarrollo lee claude/archivo/traspaso-chat-anterior.md (respuestas 1 y 4 a M-38): confirmar que cerradoEn viene de la hora del servidor (ventana de 2 h), y asignar la zona zz-verif-Principal a zz-verif-Propiedad antes de verificar. Decisión no tomada: ¿el operador puede dar acceso a mano a un colaborador que no es base ni tiene turno? Carlos solo habló de mantener o revocar.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-BC1",
@@ -73,7 +77,8 @@
    "prioridad": 2,
    "das": [],
    "entregadoEn": "M-35",
-   "nota": "Estándar. 15 criterios con valores de hoy (16 nodos, 20 flujos). Nota: los tipos reales son actor/mecanismo/lugar/dato, no 'infraestructura'. Construido y aceptado 15/15 (lote 60, M-41). Falta que Carlos lo vea y diga si le sirven las franjas."
+   "nota": "Estándar. 15 criterios con valores de hoy (16 nodos, 20 flujos). Nota: los tipos reales son actor/mecanismo/lugar/dato, no 'infraestructura'. Construido y aceptado 15/15 (lote 60, M-41). Falta que Carlos lo vea y diga si le sirven las franjas.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INV2-3a",
@@ -83,7 +88,8 @@
    "prioridad": 3,
    "das": [],
    "entregadoEn": "M-42",
-   "nota": "Normal (toca servidor: si lo ven crítico por permisos, avisar por el buzón). 15 criterios. El colaborador lo usa después del 4a."
+   "nota": "Normal (toca servidor: si lo ven crítico por permisos, avisar por el buzón). 15 criterios. El colaborador lo usa después del 4a.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INV2-3b",
@@ -93,157 +99,183 @@
    "prioridad": 4,
    "das": [],
    "entregadoEn": "M-43",
-   "nota": "Normal. 15 criterios. Va después del 3a. Sin DA pendiente."
+   "nota": "Normal. 15 criterios. Va después del 3a. Sin DA pendiente.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
+  },
+  {
+   "id": "REQ-TB1",
+   "titulo": "Tablero de planes de trabajo en Seg. Proyecto (plan activo, carriles, dónde está cada REQ, bolsa)",
+   "documento": "claude/producto/requerimientos-tablero-seg-proyecto-2026-10.md › REQ-TB1",
+   "estado": "listo",
+   "prioridad": 5,
+   "das": [],
+   "entregadoEn": null,
+   "nota": "Estándar. 17 criterios. Listo; se entrega cuando Carlos apruebe en qué plan va (recomendado: PT-1). Necesita plan[].cambioEn del Chat de desarrollo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INV2-5",
    "titulo": "Actividades de inventario en Flujos",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-INV2 punto 7",
    "estado": "definiendo",
-   "prioridad": 5,
+   "prioridad": 6,
    "das": [],
    "entregadoEn": null,
-   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo."
+   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INV2-6",
    "titulo": "Activos: ficha, QR opcional y plantilla de dotación",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-INV2 punto 8",
    "estado": "definiendo",
-   "prioridad": 6,
+   "prioridad": 7,
    "das": [],
    "entregadoEn": null,
-   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo."
+   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-PC1-1",
    "titulo": "Dos ajustes por actividad (cuándo empieza, cómo se registra) y guiada por cámara",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-PC1 puntos 1–2",
    "estado": "definiendo",
-   "prioridad": 7,
+   "prioridad": 8,
    "das": [],
    "entregadoEn": null,
-   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo."
+   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INC1-1",
    "titulo": "Incidentes internos",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-INC1 puntos 1 y 3",
    "estado": "definiendo",
-   "prioridad": 8,
+   "prioridad": 9,
    "das": [],
    "entregadoEn": null,
-   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo."
+   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INV2-PLANTILLAS",
    "titulo": "Plantillas de arranque (la operación de Carlos como plantilla)",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › Principio rector",
    "estado": "definiendo",
-   "prioridad": 9,
+   "prioridad": 10,
    "das": [],
    "entregadoEn": null,
-   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo."
+   "nota": "Normal. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INV2-4b",
    "titulo": "Entrega y recepción con conteo y foto",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-INV2 punto 6",
    "estado": "definiendo",
-   "prioridad": 10,
+   "prioridad": 11,
    "das": [],
    "entregadoEn": null,
-   "nota": "Normal. Después del 4a. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo."
+   "nota": "Normal. Después del 4a. Falta escribir los criterios de aceptación con valores esperados antes de entregarlo.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-PC1-2",
    "titulo": "Puntos de control con lector QR y respaldo",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-PC1 puntos 3–5",
    "estado": "definiendo",
-   "prioridad": 11,
+   "prioridad": 12,
    "das": [],
    "entregadoEn": null,
-   "nota": "Crítico: requiere cruce con Carlos."
+   "nota": "Crítico: requiere cruce con Carlos.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-INC1-2",
    "titulo": "Reclamos al huésped y a la plataforma",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-INC1 punto 2",
    "estado": "definiendo",
-   "prioridad": 12,
+   "prioridad": 13,
    "das": [
     "DA-12"
    ],
    "entregadoEn": null,
-   "nota": "Crítico: requiere cruce con Carlos; plazos de Airbnb por confirmar."
+   "nota": "Crítico: requiere cruce con Carlos; plazos de Airbnb por confirmar.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-CMP1",
    "titulo": "Compras y alertas de reposición",
    "documento": "claude/producto/requerimientos-inventario-operacion-2026-10.md › REQ-CMP1",
    "estado": "definiendo",
-   "prioridad": 13,
+   "prioridad": 14,
    "das": [
     "DA-22"
    ],
    "entregadoEn": null,
-   "nota": "Crítico (dinero): requiere cruce con Carlos."
+   "nota": "Crítico (dinero): requiere cruce con Carlos.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-K3b",
    "titulo": "Copia de fotos a Drive (K3b)",
    "documento": "claude/producto/requerimientos-consolidado.md › REQ-K3",
    "estado": "definiendo",
-   "prioridad": 14,
+   "prioridad": 15,
    "das": [],
    "entregadoEn": null,
-   "nota": "Crítico: requiere cruce con Carlos."
+   "nota": "Crítico: requiere cruce con Carlos.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-K3c",
    "titulo": "Retención de la copia a Drive (K3c)",
    "documento": "claude/producto/requerimientos-consolidado.md › REQ-K3",
    "estado": "definiendo",
-   "prioridad": 15,
+   "prioridad": 16,
    "das": [],
    "entregadoEn": null,
-   "nota": "Crítico: requiere cruce con Carlos."
+   "nota": "Crítico: requiere cruce con Carlos.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-F11-5b",
    "titulo": "Pago por sub-flujo",
    "documento": "claude/producto/requerimientos-consolidado.md › REQ-F11 punto 7",
    "estado": "espera DA",
-   "prioridad": 16,
+   "prioridad": 17,
    "das": [
     "DA-20"
    ],
    "entregadoEn": null,
-   "nota": "Crítico."
+   "nota": "Crítico.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-F11-6",
    "titulo": "Portal: vista \"mi sub-flujo\"",
    "documento": "claude/producto/requerimientos-consolidado.md › REQ-F11",
    "estado": "espera DA",
-   "prioridad": 17,
+   "prioridad": 18,
    "das": [
     "DA-20"
    ],
    "entregadoEn": null,
-   "nota": "Normal."
+   "nota": "Normal.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   },
   {
    "id": "REQ-F11-7",
    "titulo": "Módulo de Mantenimiento",
    "documento": "claude/producto/requerimientos-consolidado.md › REQ-F11 punto 6",
    "estado": "espera DA",
-   "prioridad": 18,
+   "prioridad": 19,
    "das": [
     "DA-21"
    ],
    "entregadoEn": null,
-   "nota": "Normal. Necesita diálogo funcional."
+   "nota": "Normal. Necesita diálogo funcional.",
+   "cambioEn": "2026-10-09T16:02:00-05:00"
   }
  ],
  "das": [
@@ -469,6 +501,7 @@
   "REQ-BC1",
   "REQ-INV2-3a",
   "REQ-INV2-3b",
+  "REQ-TB1",
   "REQ-INV2-5",
   "REQ-INV2-6",
   "REQ-PC1-1",
@@ -486,8 +519,494 @@
  ],
  "traspaso": {
   "fecha": "2026-10-09",
-  "estado": "Sesión del 9-oct. diseno.json con 6 pedidos, 18 REQ y 10 DA. BC1 construido (lote 60). Entregados: INV2·3a (M-42) y 3b (M-43). Pendientes de criterios: INV2·5, ·6, PC1·1, INC1·1, Plantillas, 4b. Recibido el traspaso del Chat de desarrollo anterior (claude/archivo/traspaso-chat-anterior.md), falta pasar a M-36 'leído' tras revisar.",
+  "estado": "Sesión del 9-oct. diseno.json con bolsa (44 ítems), planes PT-1 y PT-2 propuestos (esperan aprobación de Carlos), 19 REQ y 10 DA. Entregados: INV2·3a y 3b. Listo: REQ-TB1 (tablero). Pendientes de criterios: INV2·5, ·6, PC1·1, INC1·1, Plantillas, 4b.",
   "conCarlos": "Esperando su visto bueno a INV2·4a (DA-30), sus respuestas a las DA viejas y que vea el diagrama BC1. Le gusta: respuestas breves, tablas cortas, preguntas de una en una con opción recomendada, sin ejemplos largos; ver primero lo que espera de él.",
-  "proximoPaso": "Criterios de INV2·5, ·6, PC1·1, INC1·1 y Plantillas, uno por mensaje. Con Carlos, DA-22 en conversación corta (preguntas de una en una)."
- }
+  "proximoPaso": "Con la aprobación de Carlos: avisar al Chat de desarrollo el plan activo y su orden (buzón), entregar REQ-TB1 y actualizar el artefacto 'Plan de trabajo STR' por carril. Seguir con criterios de INV2·4b y INV2·5."
+ },
+ "bolsa": [
+  {
+   "ref": "REQ-INV2-4a",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "alta",
+   "tamano": 1,
+   "nota": "Crítico. Espera DA-30."
+  },
+  {
+   "ref": "REQ-INV2-3a",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "alta",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "REQ-INV2-4b",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "alta",
+   "tamano": 1,
+   "nota": "Después del 4a."
+  },
+  {
+   "ref": "REQ-INV2-3b",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "alta",
+   "tamano": 2,
+   "nota": ""
+  },
+  {
+   "ref": "REQ-TB1",
+   "tipo": "funcionalidad",
+   "modulo": "Seg. Proyecto",
+   "prioridad": "alta",
+   "tamano": 2,
+   "nota": "Tablero del STR con planes, carriles y dónde está cada REQ."
+  },
+  {
+   "ref": "REQ-INV2-5",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "media",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "REQ-INV2-6",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "media",
+   "tamano": 2,
+   "nota": ""
+  },
+  {
+   "ref": "REQ-PC1-1",
+   "tipo": "funcionalidad",
+   "modulo": "Puntos de control",
+   "prioridad": "media",
+   "tamano": 2,
+   "nota": ""
+  },
+  {
+   "ref": "REQ-PC1-2",
+   "tipo": "funcionalidad",
+   "modulo": "Puntos de control",
+   "prioridad": "media",
+   "tamano": 3,
+   "nota": "Crítico: cruce con Carlos."
+  },
+  {
+   "ref": "REQ-INC1-1",
+   "tipo": "funcionalidad",
+   "modulo": "Incidentes",
+   "prioridad": "media",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "REQ-INC1-2",
+   "tipo": "funcionalidad",
+   "modulo": "Incidentes",
+   "prioridad": "media",
+   "tamano": 3,
+   "nota": "Crítico: cruce con Carlos; DA-12."
+  },
+  {
+   "ref": "REQ-CMP1",
+   "tipo": "funcionalidad",
+   "modulo": "Compras",
+   "prioridad": "media",
+   "tamano": 3,
+   "nota": "Crítico: cruce con Carlos."
+  },
+  {
+   "ref": "REQ-INV2-PLANTILLAS",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "media",
+   "tamano": 1,
+   "nota": "Después del 3b."
+  },
+  {
+   "ref": "REQ-K3b",
+   "tipo": "funcionalidad",
+   "modulo": "Copia a Drive",
+   "prioridad": "media",
+   "tamano": 1,
+   "nota": "Crítico: cruce con Carlos. Incluye INC-97."
+  },
+  {
+   "ref": "REQ-K3c",
+   "tipo": "funcionalidad",
+   "modulo": "Copia a Drive",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": "Crítico: cruce con Carlos."
+  },
+  {
+   "ref": "REQ-F11-5b",
+   "tipo": "funcionalidad",
+   "modulo": "Flujos",
+   "prioridad": "media",
+   "tamano": 1,
+   "nota": "Crítico. Espera DA-20."
+  },
+  {
+   "ref": "REQ-F11-6",
+   "tipo": "funcionalidad",
+   "modulo": "Flujos",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": "Espera DA-20."
+  },
+  {
+   "ref": "REQ-F11-7",
+   "tipo": "funcionalidad",
+   "modulo": "Flujos",
+   "prioridad": "baja",
+   "tamano": 3,
+   "nota": "Espera DA-21 y diálogo funcional."
+  },
+  {
+   "ref": "Portal de propietarios",
+   "tipo": "funcionalidad",
+   "modulo": "Inventario",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": "Solo lectura de sus propiedades y zonas. Por definir.",
+   "titulo": "Portal de propietarios"
+  },
+  {
+   "ref": "INC-99",
+   "tipo": "corrección",
+   "modulo": "Inventario",
+   "prioridad": "alta",
+   "tamano": 0,
+   "nota": "Lo cierra el lote INV2·4a."
+  },
+  {
+   "ref": "INC-103",
+   "tipo": "corrección",
+   "modulo": "Propiedades",
+   "prioridad": "media",
+   "tamano": 1,
+   "nota": "La zona principal no se guarda hasta pulsar Guardar cambios."
+  },
+  {
+   "ref": "INC-97",
+   "tipo": "corrección",
+   "modulo": "Copia a Drive",
+   "prioridad": "media",
+   "tamano": 0,
+   "nota": "Va con K3b."
+  },
+  {
+   "ref": "INC-81",
+   "tipo": "corrección",
+   "modulo": "Calendario",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": "Crítico; pospuesto por Carlos con 5 condiciones."
+  },
+  {
+   "ref": "DT-27",
+   "tipo": "deuda técnica",
+   "modulo": "Fundación",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "DT-28",
+   "tipo": "deuda técnica",
+   "modulo": "Evidencia",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "DT-29",
+   "tipo": "deuda técnica",
+   "modulo": "Evidencia",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "DT-30",
+   "tipo": "deuda técnica",
+   "modulo": "Inventario",
+   "prioridad": "baja",
+   "tamano": 1,
+   "nota": ""
+  },
+  {
+   "ref": "T-1",
+   "tipo": "tarea de Carlos",
+   "modulo": "Operación",
+   "prioridad": "alta",
+   "tamano": null,
+   "nota": "Vence 3-nov; hacerlo antes del 19-oct.",
+   "titulo": "Renovar Hostinger y dominios"
+  },
+  {
+   "ref": "T-2",
+   "tipo": "tarea de Carlos",
+   "modulo": "Operación",
+   "prioridad": "media",
+   "tamano": null,
+   "nota": "",
+   "titulo": "Revisar el borrador de privacidad y términos (versión 1)"
+  },
+  {
+   "ref": "T-3",
+   "tipo": "tarea de Carlos",
+   "modulo": "Seguridad",
+   "prioridad": "media",
+   "tamano": null,
+   "nota": "",
+   "titulo": "Borrar en GitHub los tokens pegados en el chat cuando ya no se usen"
+  },
+  {
+   "ref": "T-4",
+   "tipo": "tarea de Carlos",
+   "modulo": "Inventario",
+   "prioridad": "alta",
+   "tamano": null,
+   "nota": "DA-30.",
+   "titulo": "Dar el visto bueno al lote INV2·4a (DA-30)"
+  },
+  {
+   "ref": "T-5",
+   "tipo": "tarea de Carlos",
+   "modulo": "Base de conocimiento",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": "",
+   "titulo": "Ver el diagrama (BC1) y decir si le sirven las franjas"
+  },
+  {
+   "ref": "DA-20",
+   "tipo": "decisión",
+   "modulo": "Flujos",
+   "prioridad": "media",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-21",
+   "tipo": "decisión",
+   "modulo": "Flujos",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-22",
+   "tipo": "decisión",
+   "modulo": "Inventario",
+   "prioridad": "media",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-12",
+   "tipo": "decisión",
+   "modulo": "Pagos",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-6",
+   "tipo": "decisión",
+   "modulo": "Fundación",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-8",
+   "tipo": "decisión",
+   "modulo": "Fundación",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-11",
+   "tipo": "decisión",
+   "modulo": "Equipo",
+   "prioridad": "media",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-16",
+   "tipo": "decisión",
+   "modulo": "Housekeeping",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "DA-17",
+   "tipo": "decisión",
+   "modulo": "Propiedades",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "P-2",
+   "tipo": "modelo",
+   "modulo": "Modelo",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": ""
+  },
+  {
+   "ref": "P-3",
+   "tipo": "modelo",
+   "modulo": "Modelo",
+   "prioridad": "media",
+   "tamano": null,
+   "nota": "Crítico (despliegue y hosting); lo activa Carlos."
+  },
+  {
+   "ref": "P-6",
+   "tipo": "modelo",
+   "modulo": "Diseño",
+   "prioridad": "baja",
+   "tamano": null,
+   "nota": "Agregar el cruce de INV2·4 al mapa de inventario."
+  }
+ ],
+ "planes": [
+  {
+   "id": "PT-1",
+   "nombre": "Inventario operativo: quién ve qué, mover cosas y dónde está la ropa",
+   "objetivo": "Que el operador y los colaboradores trabajen el inventario de un apartamento completo: cada uno ve solo lo suyo, se mueven cosas entre zonas, se sabe dónde está cada juego de ropa, y Carlos ve en un tablero cómo va el trabajo.",
+   "estado": "propuesto",
+   "inicio": null,
+   "cierrePrevisto": "2026-10-12 (si das el visto bueno a INV2·4a hoy)",
+   "cierre": null,
+   "items": [
+    {
+     "ref": "T-4",
+     "carril": "Tareas de Carlos",
+     "estado": "espera Carlos",
+     "orden": 1
+    },
+    {
+     "ref": "REQ-INV2-4a",
+     "carril": "Construcción",
+     "estado": "espera Carlos",
+     "orden": 2
+    },
+    {
+     "ref": "REQ-INV2-3a",
+     "carril": "Construcción",
+     "estado": "listo",
+     "orden": 3
+    },
+    {
+     "ref": "REQ-INV2-4b",
+     "carril": "Construcción",
+     "estado": "definiendo",
+     "orden": 4
+    },
+    {
+     "ref": "REQ-INV2-3b",
+     "carril": "Construcción",
+     "estado": "listo",
+     "orden": 5
+    },
+    {
+     "ref": "INC-103",
+     "carril": "Construcción",
+     "estado": "pendiente",
+     "orden": 6
+    },
+    {
+     "ref": "REQ-TB1",
+     "carril": "Construcción",
+     "estado": "definiendo",
+     "orden": 7
+    },
+    {
+     "ref": "REQ-INV2-5",
+     "carril": "Construcción",
+     "estado": "definiendo",
+     "orden": 8
+    },
+    {
+     "ref": "T-1",
+     "carril": "Tareas de Carlos",
+     "estado": "pendiente",
+     "orden": 9
+    },
+    {
+     "ref": "T-2",
+     "carril": "Tareas de Carlos",
+     "estado": "pendiente",
+     "orden": 10
+    }
+   ],
+   "logrado": null,
+   "vuelveABolsa": null,
+   "leccion": null
+  },
+  {
+   "id": "PT-2",
+   "nombre": "Puntos de control, activos y reclamos",
+   "objetivo": "Que el turno empiece al escanear el punto de control, que los activos importantes se inspeccionen con la cámara y que los daños se registren como incidente.",
+   "estado": "propuesto",
+   "inicio": null,
+   "cierrePrevisto": "2026-10-16",
+   "cierre": null,
+   "items": [
+    {
+     "ref": "REQ-INV2-6",
+     "carril": "Definición",
+     "estado": "definiendo",
+     "orden": 1
+    },
+    {
+     "ref": "REQ-PC1-1",
+     "carril": "Definición",
+     "estado": "definiendo",
+     "orden": 2
+    },
+    {
+     "ref": "REQ-INC1-1",
+     "carril": "Definición",
+     "estado": "definiendo",
+     "orden": 3
+    },
+    {
+     "ref": "REQ-INV2-PLANTILLAS",
+     "carril": "Definición",
+     "estado": "definiendo",
+     "orden": 4
+    },
+    {
+     "ref": "REQ-PC1-2",
+     "carril": "Definición",
+     "estado": "definiendo",
+     "orden": 5
+    },
+    {
+     "ref": "DA-22",
+     "carril": "Definición",
+     "estado": "definiendo",
+     "orden": 6
+    }
+   ],
+   "logrado": null,
+   "vuelveABolsa": null,
+   "leccion": null
+  }
+ ]
 }

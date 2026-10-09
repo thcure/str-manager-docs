@@ -564,6 +564,46 @@
    "riesgos": [
     "Si los ítems de la bolsa no se categorizan al entrar, armar el siguiente plan vuelve a ser perderse entre pendientes."
    ]
+  },
+  {
+   "codigo": "APO06-u",
+   "nombre": "Uso de créditos de Claude",
+   "dueno": "Arquitecto (reglas) · cada chat (las aplica) · Carlos (informa el uso semanal)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-09",
+   "para": "Avanzar el proyecto sin agotar el uso semanal de la cuenta: gastar en construir y verificar, no en mirar ni en esperar.",
+   "quien": {
+    "informa": "Carlos dice el porcentaje de uso semanal cuando lo ve en la app (los chats no lo pueden leer)",
+    "aplica": "cada chat y agente según su encargo",
+    "mide": "Chat de desarrollo en cambios[].costo"
+   },
+   "piezas": [
+    "encargos rol-*",
+    "seguimiento.json → cambios[].costo",
+    "herramientas/vigilar-buzon.ps1 (revisar no gasta)",
+    "tablero del STR (ver no gasta)"
+   ],
+   "flujo": [
+    "Ver y revisar no cuesta: las páginas del STR leen los JSON de GitHub y el despertador revisa sin Claude.",
+    "Cuesta cada turno de un chat (cada despertar), cada lote de la CLI y, sobre todo, cada ejecución del verificador en Chrome.",
+    "Cada chat aplica las reglas de abajo; el Chat de desarrollo anota el costo medido de cada lote.",
+    "Cuando Carlos informa el uso semanal, todos ajustan el modo de trabajo según los umbrales."
+   ],
+   "reglas": [
+    "Modelos: Chat de diseño y Agente verificador en Sonnet 5.5; Chat de desarrollo y Agente verificador crítico en Opus 5.5 (solo lotes críticos); Arquitecto en Opus 5.5.",
+    "Relevo cuando un chat se vuelve muy largo (cada turno relee todo su historial): si un chat se compactó dos veces o sus turnos se vuelven lentos, propone el relevo al Arquitecto (ins-007).",
+    "Preferir el tablero del STR a los artefactos: un artefacto cuesta un turno por actualización; mientras exista, se actualiza solo cuando Carlos lo pide o al cambiar de plan.",
+    "Lotes de tamaño medio (regla de consolidación de APO06.05): muchos lotes chicos multiplican las verificaciones; los muy grandes fallan más.",
+    "Sin esperas activas: nada de revisiones cortas programadas; el despertador avisa (Esperas sin gastar).",
+    "Umbrales del uso semanal informado por Carlos: menos de 75 % → normal · 75 % o más → modo ahorro: solo el plan activo de construcción y lo urgente; nada de definiciones extensas, artefactos ni cambios de modelo no urgentes · 90 % o más → solo urgencias y lotes críticos ya cruzados; el resto espera al reinicio.",
+    "Medir: cambios[].costo de cada lote; una semana antes y después de cada cambio grande de modelo para comparar."
+   ],
+   "instalacion": "No aplica (es un proceso).",
+   "comprobacion": "cambios[].costo completo en los lotes; el modo vigente lo dice el último aviso del Arquitecto por el buzón.",
+   "creditos": "Esta ficha existe para eso.",
+   "riesgos": [
+    "Los chats no ven el uso semanal: si Carlos no lo informa, nadie entra en modo ahorro a tiempo."
+   ]
   }
  ],
  "lineasBase": [

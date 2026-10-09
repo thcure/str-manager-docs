@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-08T21:35:00Z",
+ "actualizadoEn": "2026-10-09T01:20:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -745,7 +745,7 @@
    "etapa": "📝",
    "fecha": "2026-10-07",
    "titulo": "Copia de fotos y videos del turno a Google Drive por cron (cuenta de servicio, carpetas propiedad/fecha/reserva) y retención en el hosting.",
-   "pendiente": "Lote 39; espera que Carlos cree la cuenta de servicio y la carpeta.",
+   "pendiente": "K3a aceptado 8-oct (lote 49, fd2f016): conexión OAuth drive.file por negocio, activa para Carlos. Faltan K3b (copia de fotos) y K3c (retención), críticos; Carlos publica la app en Google tras completar la marca.",
    "definicion": "claude/producto/requerimientos-flujos-inventario-2026-10.md"
   },
   {
@@ -1189,6 +1189,30 @@
    "pendiente": "Cerrado 8-oct: lote 48 (36bfb37) aceptado; la reserva de prueba quedó cancelada.",
    "estado": "cerrado",
    "origen": "46-veredicto-2."
+  },
+  {
+   "id": "INC-96",
+   "tipo": "INC",
+   "modulo": "Conocimiento",
+   "etapa": "✔",
+   "fecha": "2026-10-08",
+   "severidad": "medio",
+   "titulo": "Google bloqueaba el OAuth de STR Manager (403 access_denied): la app en modo prueba no tenía a la cuenta de Carlos como usuario de prueba.",
+   "pendiente": "Cerrado 8-oct: cuenta agregada en Google Auth Platform → Público → Usuarios de prueba (17:23); 49-veredicto-3 conectó con ?drive=ok.",
+   "estado": "cerrado",
+   "origen": "49-veredicto."
+  },
+  {
+   "id": "INC-97",
+   "tipo": "INC",
+   "modulo": "Conocimiento",
+   "etapa": "📝",
+   "fecha": "2026-10-08",
+   "severidad": "bajo",
+   "titulo": "Conectar Drive sin marcar la casilla de permiso de Google (desmarcada por defecto) vuelve con ?drive=error sin motivo; el callback no anota ultimo_error ni log en ninguna rama de error.",
+   "pendiente": "Deuda: comprobar el scope concedido, redirigir con motivo (p. ej. ?drive=sin-permiso con texto 'Marca la casilla de Google Drive') y registrar el paso que falló en api/logs/error.log. Candidato a incluir en K3b.",
+   "estado": "abierto",
+   "origen": "49-veredicto-3."
   }
  ],
  "cambios": [
@@ -3716,6 +3740,211 @@
    "aprobacion": "aprobado por Carlos el 8-oct-2026",
    "estado": "registrado",
    "observacion": "Se cierra con el primer aviso de veredicto y de cola recibidos por el Chat de desarrollo."
+  },
+  {
+   "lote": 49,
+   "fecha": "2026-10-08",
+   "hash": "fd2f016",
+   "version": "p5c49",
+   "req": "REQ-K3",
+   "categoria": "crítico",
+   "resumen": "K3a: cada negocio conecta su Google Drive (OAuth drive.file): /api/drive (conectar, callback, estado, desconectar, prueba), api/lib/drive.php (token cifrado s1/g1), migración 10 (drive_conexion + drive_oauth_state), health 'drive', sección 'Copia en Google Drive' en Configuración (solo admin), privacidad.html y terminos.html. No copia fotos (K3b) ni borra (K3c).",
+   "estado": "aceptado",
+   "observacion": "Cruce previo con Carlos: aprobado 8-oct. CLI 16:31: 28/28, sin php -l (sin PHP). Diferencias declarados vs tocados explicadas (login.html pie, 15 archivos por ?v=, tabla extra drive_oauth_state). Secretos GOOGLE_CLIENT_ID/SECRET y DRIVE_TOKEN_KEY puestos por Carlos en secrets.php (17:10, health drive:true). Veredictos (verificador crítico, Opus 5.5): 49-veredicto-prueba 16:51 (solo lectura, despliegue/b/g ok); 49-veredicto 17:18 NO ACEPTADO: c/d/f bloqueados por Google 403 access_denied (cuenta de Carlos no era tester, INC-96; el Chat de desarrollo la agregó en Público 17:23 con OK de Carlos); 49-veredicto-2 (lanzada 17:24) no dejó archivo: esa ejecución informó que arrancó sin las carpetas conectadas en LENOVO y no tocó nada. 49-veredicto-3 (lanzada 19:35) 19:48 ACEPTADO con Carlos presente (c, d, f en producción; a por réplica 37/37). Conexión de Drive queda ACTIVA con la cuenta de Carlos y carpeta 'STR Manager' en su Drive. INC-97 bajo (deuda). Pendiente de Carlos: completar la información de marca en Google Auth Platform y publicar la app (en modo prueba Google corta a los 7 días).",
+   "costo": {
+    "minutosCLI": null,
+    "minutosDueno": 40,
+    "nota": "Google Cloud, secretos, tester y dos inicios de sesión"
+   },
+   "cruceDueno": {
+    "fecha": "2026-10-08",
+    "resultado": "aprobado"
+   },
+   "aceptacion": {
+    "lote": 49,
+    "hash": "fd2f016",
+    "fecha": "2026-10-08",
+    "horaBogota": "19:48",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción real (https://app.apartamentosbucaramanga.com), tarea 'Agente verificador crítico', reloj real (ningún criterio depende de la hora). Chrome perfil admin deviceId 3198e288-… (usuario 'Carlos Rodriguez · Carlos Hospedaje', rol admin). Carlos presente: él eligió la cuenta, aceptó el aviso de app no verificada y pulsó Continuar en Google; el verificador no escribió contraseñas ni pulsó nada en las pantallas de Google. Código leído: api/drive/index.php, api/lib/drive.php. b, e, g, CLAUDE.md y declarados vs tocados ya se verificaron en 49-veredicto (sin cambios desde entonces: mismo commit fd2f016) y no se repitieron, salvo el despliegue.",
+    "criterios": [
+     {
+      "c": "Despliegue: /api/health responde y HTML con ?v= nuevo",
+      "ok": true,
+      "observado": "/api/health 200 {ok:true, db:true, schema_version:10, drive:true, gd:true, exif:true, zip:true, uploadMaxMB:100}. str-app-shell.html: STR_API_VERSION 'p5c49' y todos los scripts/iframes con ?v=p5c49."
+     },
+     {
+      "c": "a Tests (state, cifrado, 403) y node tests/run.js verde; php -l",
+      "ok": true,
+      "observado": "El verificador corrió tests/drive.test.js (réplica JS contra api/lib/drive.php y api/drive/index.php reales): 37 OK, 0 FAIL (state válido/vencido/alterado/reutilizado, cifrado g1, 403 por rol, orden de guardas, ningún log ni respuesta con el token). php -l no se pudo correr (sin PHP local, ya declarado por la CLI). En producción se confirmaron state alterado/reutilizado → error (49-veredicto) y el flujo completo (c, d, f). Cifrado en base: solo por código/tests."
+     },
+     {
+      "c": "b Estado 'sin conectar' en Configuración; /api/drive/estado sin error",
+      "ok": true,
+      "observado": "Verificado en 49-veredicto. Hoy, antes de c: GET /api/drive/estado 200 {configurado:true, conectado:false, estado:null}; Configuración mostraba 'Sin conectar.' y solo 'Conectar Google Drive'."
+     },
+     {
+      "c": "c Conectar con la cuenta de Carlos → ?drive=ok, 'conectado como…', carpeta 'STR Manager', token cifrado",
+      "ok": true,
+      "observado": "Primer intento: Google mostró el selector de cuenta y la pantalla de app no verificada (ya no el bloqueo 403 de 49-veredicto), pero el retorno fue str-app-shell.html?drive=error y el estado siguió 'Sin conectar' (ver INC bajo). Segundo intento: la pantalla de permisos de Google trae la casilla de Drive ('Ver, editar, crear y eliminar solo los archivos de Google Drive que utilices en esta aplicación') DESMARCADA por defecto; Carlos la marcó y pulsó Continuar → callback 200 con scope 'email …userinfo.email openid …/auth/drive.file' → str-app-shell.html?drive=ok (el parámetro se limpió de la barra). Configuración: '✓ Conectado como <cuenta de Carlos> desde 8 de oct de 2026, 07:44 p. m. · abrir carpeta \"STR Manager\"' + 'Probar conexión' + 'Desconectar'. GET /api/drive/estado: {configurado:true, conectado:true, estado:'activa', ultimo_error:null, carpeta:{id, enlace}}, 7 claves, ningún token. La carpeta 'STR Manager' existe en Mi unidad. Sin tokens en la URL de retorno, en /api/drive/estado ni en la consola (sin errores); la URL del callback lleva solo el código de autorización de un solo uso de Google (esperado en OAuth, consumido por el servidor). Token en base: cifrado solo por código/tests (drive.php: 's1:' sodium o 'g1:' AES-256-GCM)."
+     },
+     {
+      "c": "d Probar conexión → ok y zz-prueba-conexion.txt ya no está",
+      "ok": true,
+      "observado": "POST /api/drive/prueba 200; toast '✓ Conexión con Drive correcta (archivo de prueba creado y borrado)'. Carpeta 'STR Manager' abierta en Drive (solo mirar): vacía ('Arrastra archivos aquí'), sin zz-prueba-conexion.txt."
+     },
+     {
+      "c": "e Operador y colaborador: sin botones; POST prueba/desconectar → 403",
+      "ok": true,
+      "observado": "Verificado en 49-veredicto (operador: botones ocultos, conectar/prueba/desconectar 403; colaborador: estado/conectar/prueba/desconectar 403). No se repitió."
+     },
+     {
+      "c": "f Desconectar → revocado, STR Manager fuera de 'Apps con acceso', reconectar ok",
+      "ok": true,
+      "observado": "'Desconectar' abre el modal propio '¿Desconectar Google Drive?' (sin diálogo nativo); al confirmar, POST /api/drive/desconectar 200, estado {conectado:false, estado:'revocada', ultimo_error:null} (Google aceptó la revocación) y la sección dice 'Desconectado (permiso revocado).' + 'Volver a conectar'. myaccount.google.com/connections (solo lectura): ni 'STR Manager' ni 'apartamentosbucaramanga.com' figuran en la lista. 'Volver a conectar' → Carlos repitió el inicio de sesión con la casilla de Drive marcada → ?drive=ok, estado 'activa', conectado_en nuevo, misma carpeta reutilizada (mismo id)."
+     },
+     {
+      "c": "g privacidad.html y terminos.html sin sesión y desde el pie de login.html; ?v=p5c49; consola limpia; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "Verificado en 49-veredicto; no se repitió. Consola del shell sin errores durante esta ejecución."
+     },
+     {
+      "c": "CLAUDE.md en el mismo commit y declarados vs tocados explicados",
+      "ok": true,
+      "observado": "Verificado en 49-veredicto (commit fd2f016 con CLAUDE.md; login.html, 15 archivos por ?v=p5c49 y tabla drive_oauth_state explicados en commit y log). Capa Marco: sin cambios."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Conectar Drive sin marcar la casilla de permiso de Google vuelve con ?drive=error sin decir la causa",
+      "nivel": "bajo",
+      "causa": "Probable (no confirmada desde fuera): Google usa consentimiento granular y deja desmarcada la casilla de drive.file; sin ese permiso el callback no puede crear la carpeta y cae en _driveRedirigir('error'). Todas las ramas de error del callback (state, nonce, intercambio de código, falta de refresh_token, carpeta) redirigen al mismo 'error' sin anotar ultimo_error ni log, así que ni el usuario ni el soporte saben qué pasó. Deuda: comprobar el scope concedido y redirigir con un motivo (p. ej. ?drive=sin-permiso → 'Marca la casilla de Google Drive y vuelve a intentar') y registrar el paso que falló en api/logs/error.log.",
+      "observado": "Primer intento de c: retorno str-app-shell.html?drive=error; /api/drive/estado {conectado:false, estado:null, ultimo_error:null}. En el segundo intento la pantalla de Google mostraba la casilla de Drive desmarcada por defecto; con la casilla marcada el retorno fue ?drive=ok."
+     }
+    ],
+    "datosDePrueba": "No se crearon datos zz-verif-. En el Google Drive de Carlos quedó la carpeta 'STR Manager' (Mi unidad, vacía), creada por la app y reutilizada al reconectar. zz-prueba-conexion.txt se creó y se borró en la prueba (la carpeta quedó vacía; no se revisó la papelera de Drive). La conexión de Drive queda ACTIVA con la cuenta de Carlos (configuración real autorizada por él). Efectos colaterales: 3 nonces en drive_oauth_state (uno por cada 'Conectar'), los tres consumidos por sus callbacks.",
+    "notas": "Lote crítico aceptado: c, d y f verificados en producción con Carlos presente; a verificado por réplica corrida por el verificador (37/37) más el flujo real. Cifrado del token en base: solo por código/tests (no hay acceso a la base). INC bajo (deuda) por el ?drive=error mudo cuando falta la casilla de Drive; conviene avisar a cada negocio que marque esa casilla hasta que se corrija. Durante la espera la extensión de Chrome se reconectó y la sesión quedó apuntando al perfil del operador; se volvió a seleccionar el deviceId del admin antes de seguir y no se hizo nada en el perfil del operador. Chrome limpio: las 2 pestañas abiertas (shell y Drive/myaccount) quedaron cerradas y el grupo se eliminó."
+   },
+   "veredictosPrevios": [
+    {
+     "lote": 49,
+     "hash": "fd2f016",
+     "fecha": "2026-10-08",
+     "horaBogota": "16:51",
+     "resultado": "prueba",
+     "modoVerificacion": "PRUEBA DE SOLO LECTURA (M-22), tarea 'Agente verificador crítico'. Chrome perfil admin (deviceId 3198e288-fa87-4596-9fcb-a868b3031818); barra superior 'Carlos Rodriguez · Carlos Hospedaje', JWT rol admin. Solo GET; no se pulsó Conectar/Probar/Desconectar. Reloj real. Producción https://app.apartamentosbucaramanga.com.",
+     "criterios": [
+      {
+       "c": "Despliegue: /api/health schema_version 10 y drive:false; páginas ?v=p5c49",
+       "ok": true,
+       "observado": "/api/health 200: {ok:true, db:true, schema_version:10, secrets:true, gd:true, exif:true, zip:true, uploadMaxMB:100, drive:false}. str-app-shell.html y login.html solo referencian ?v=p5c49 (str-api.js?v=p5c49 cargado). privacidad.html y terminos.html no cargan scripts ni recursos versionados."
+      },
+      {
+       "c": "a Tests (state, cifrado, 403) + node tests/run.js verde",
+       "ok": null,
+       "observado": "No verificable en esta prueba. Log CLI declara 28/28 y que no hubo php -l (sin PHP)."
+      },
+      {
+       "c": "b Configuración muestra 'no configurado'; GET /api/drive/estado sin error",
+       "ok": true,
+       "observado": "Configuración → tarjeta '☁ Copia en Google Drive' con el texto de §4 y estado 'No configurado en el servidor (faltan las claves de Google). Pídeselo al soporte del STR.'; sin botones (coherente con no configurado); pie 'Al conectar aceptas la política de privacidad y los términos' con enlaces. GET /api/drive/estado (JWT admin) → 200 {configurado:false, conectado:false, google_email:null, carpeta:null, conectado_en:null, estado:null, ultimo_error:null}."
+      },
+      {
+       "c": "c Conectar con cuenta de Google",
+       "ok": null,
+       "observado": "No verificable en esta prueba."
+      },
+      {
+       "c": "d Probar conexión",
+       "ok": null,
+       "observado": "No verificable en esta prueba."
+      },
+      {
+       "c": "e Operador/colaborador → 403",
+       "ok": null,
+       "observado": "No verificable en esta prueba."
+      },
+      {
+       "c": "f Desconectar y reconectar",
+       "ok": null,
+       "observado": "No verificable en esta prueba."
+      },
+      {
+       "c": "g privacidad.html y terminos.html sin sesión, enlazadas desde login.html; ?v=p5c49; consola limpia; sin alert/confirm/prompt",
+       "ok": true,
+       "observado": "fetch sin credenciales: privacidad.html 200 ('STR Manager — Política de privacidad') y terminos.html 200 ('STR Manager — Términos del servicio'); abiertas en pestaña nueva del mismo perfil, ambas con 'Versión 1 — 8-oct-2026 · borrador sujeto a revisión del responsable'. Privacidad cubre responsable/contacto, datos, fines, Hostinger + Drive propio, drive.file, Limited Use, retención, derechos Ley 1581. login.html (leído por fetch, sin navegar) enlaza 'Privacidad' → privacidad.html y 'Términos' → terminos.html (no hay etiqueta <footer>; enlaces presentes en el HTML), ?v=p5c49. Sin alert/confirm/prompt en login, privacidad ni términos (estas dos sin scripts). Consola: sin errores en shell ni en terminos.html, pero el seguimiento empezó después de la carga (no se recargó el shell)."
+      }
+     ],
+     "incs": [],
+     "datosDePrueba": "Ninguno. No se creó, editó ni borró nada; solo lecturas GET.",
+     "notas": "Prueba de la tarea 'Agente verificador crítico'; modelo configurado claude-opus-5-5 (el modelo que sirve puede diferir). Al arrancar la sesión las carpetas conectadas venían vacías; se pidió acceso a la cola y a str-manager y se concedió en el acto. No se revisó CLAUDE.md ni el diff del commit (fuera del alcance de la prueba). Log CLI sí trae declarados vs tocados (login.html, 15 archivos por ?v=, tabla extra drive_oauth_state) con explicación. Capa Marco: el log y la cabecera no mencionan cambios. Chrome limpio: las 2 pestañas cerradas, grupo eliminado."
+    },
+    {
+     "lote": 49,
+     "hash": "fd2f016",
+     "fecha": "2026-10-08",
+     "horaBogota": "17:18",
+     "resultado": "no aceptado",
+     "modoVerificacion": "Producción real (https://app.apartamentosbucaramanga.com), tarea 'Agente verificador crítico', reloj real. Chrome: admin deviceId 3198e288-… (barra 'Carlos Rodriguez · Carlos Hospedaje', rol admin); operador 63059a77-… (barra 'zz-verif-oper · Carlos Hospedaje', rol operador); colaborador 5d576fcc-… (portal 'zz-verif-colab', rol colaborador). Código leído: commit fd2f016 (objeto git), api/lib/drive.php, api/drive/index.php, str-app-shell.html, CLAUDE.md. Sin escribir contraseñas ni elegir cuenta en Google.",
+     "criterios": [
+      {
+       "c": "Despliegue: /api/health responde y HTML con ?v= nuevo",
+       "ok": true,
+       "observado": "/api/health 200 {ok:true, db:true, schema_version:10, secrets:true, gd:true, exif:true, zip:true, uploadMaxMB:100, drive:true}. str-app-shell.html y login.html solo referencian ?v=p5c49."
+      },
+      {
+       "c": "a Tests (state, cifrado, 403) y node tests/run.js verde; php -l",
+       "ok": null,
+       "observado": "Solo por réplica: log CLI declara 28/28 con tests/drive.test.js (réplica JS); sin PHP local no se corrió php -l y el formato sodium 's1' no se prueba. No cuenta como aceptado. En producción se comprobó aparte el state: alterado → ?drive=error; válido con error de Google → ?drive=cancelado; el mismo state reutilizado → ?drive=error; sin state → ?drive=error."
+      },
+      {
+       "c": "b Estado 'sin conectar' en Configuración; /api/drive/estado sin error (con secretos puestos)",
+       "ok": true,
+       "observado": "Configuración → '☁ Copia en Google Drive', texto de §4, estado 'Sin conectar', solo botón 'Conectar Google Drive', pie con enlaces a política de privacidad y términos. GET /api/drive/estado (admin) 200 {configurado:true, conectado:false, google_email:null, carpeta:null, conectado_en:null, estado:null, ultimo_error:null}. POST /api/drive/prueba sin conexión → 409 'Google Drive no está conectado'."
+      },
+      {
+       "c": "c Conectar con la cuenta de Carlos → ?drive=ok, 'conectado como…', carpeta 'STR Manager', token cifrado",
+       "ok": null,
+       "observado": "No verificable. Se pulsó 'Conectar Google Drive'; GET conectar devuelve URL a accounts.google.com/o/oauth2/v2/auth con redirect_uri https://app.apartamentosbucaramanga.com/api/drive/callback, scope 'https://www.googleapis.com/auth/drive.file openid email', access_type=offline, prompt=consent, include_granted_scopes=true, response_type=code, state {c,u,e,n} que caduca a los 10 min; sin tokens en la URL. Google respondió de inmediato, sin pantalla de elección de cuenta: 'Acceso bloqueado: apartamentosbucaramanga.com no ha completado el proceso de verificación de Google … En estos momentos, la app se está probando y solo pueden acceder a ella los testers aprobados por el desarrollador … Error 403: access_denied' (cuenta de Carlos). No hubo retorno con ?drive=ok. Cifrado en base: solo por código/tests (drive.php: 's1:' sodium o 'g1:' AES-256-GCM, nonce por registro)."
+      },
+      {
+       "c": "d Probar conexión → ok y zz-prueba-conexion.txt ya no está",
+       "ok": null,
+       "observado": "No verificable: depende de c (no hay conexión)."
+      },
+      {
+       "c": "e Operador y colaborador: sin botones; POST prueba/desconectar → 403",
+       "ok": true,
+       "observado": "Operador zz-verif-oper (shell): #driveAcciones display:none (_driveEsAdmin()=false); estado 200 (solo lectura); conectar 403, prueba 403, desconectar 403 {error:'Sin permiso'}. Colaborador zz-verif-colab (portal.html, sin texto 'Google Drive'): estado 403, conectar 403, prueba 403, desconectar 403. No se pulsó nada en esos perfiles."
+      },
+      {
+       "c": "f Desconectar → revocado, STR Manager fuera de 'Apps con acceso', reconectar ok",
+       "ok": null,
+       "observado": "No verificable: depende de c. No se pulsó Desconectar ni se abrió myaccount.google.com."
+      },
+      {
+       "c": "g privacidad.html y terminos.html sin sesión y desde el pie de login.html; ?v=p5c49; consola limpia; sin alert/confirm/prompt",
+       "ok": true,
+       "observado": "fetch sin credenciales: privacidad.html 200 'STR Manager — Política de privacidad' y terminos.html 200 'STR Manager — Términos del servicio', ambas con 'Versión 1 — 8-oct-2026', sin scripts. login.html enlaza privacidad.html y terminos.html, ?v=p5c49, sin alert/confirm/prompt. Consola sin errores en privacidad.html y en str-app-shell.html (seguimiento activo antes de la recarga)."
+      },
+      {
+       "c": "CLAUDE.md en el mismo commit y declarados vs tocados explicados",
+       "ok": true,
+       "observado": "Commit fd2f016 incluye CLAUDE.md (fila api/drive/, páginas públicas, shell K3a, migración 10, INC-37 p5c49). Diferencias explicadas en commit y log: login.html (pie, punto 5), 15 archivos solo por ?v=p5c49, tabla extra drive_oauth_state. Capa Marco: sin cambios."
+      }
+     ],
+     "incs": [
+      {
+       "titulo": "Google bloquea el OAuth de STR Manager: la cuenta de Carlos no es tester de la app en modo prueba",
+       "nivel": "medio",
+       "causa": "Configuración del proyecto de Google Cloud str-manager-511018 (pantalla de consentimiento en modo prueba sin la cuenta de Carlos en 'Usuarios de prueba' o equivalente), no el código del lote: la URL de autorización que genera /api/drive/conectar es correcta. Bloquea c, d y f; fix: Carlos agrega su cuenta como usuario de prueba (o publica la app) y se repite la verificación con un archivoVeredicto nuevo.",
+       "observado": "accounts.google.com/signin/oauth/error: 'Acceso bloqueado: apartamentosbucaramanga.com no ha completado el proceso de verificación de Google … solo pueden acceder a ella los testers aprobados por el desarrollador … Error 403: access_denied'."
+      }
+     ],
+     "datosDePrueba": "No se crearon datos zz-verif-. Efectos colaterales mínimos: 2 nonces en drive_oauth_state por GET conectar (admin) — uno consumido por la prueba de reutilización, otro caduca a los 10 min y se purga solo. No se creó carpeta en Drive (no hubo conexión). Conexión de Drive: sin conectar (no quedó activa, como pedían las notas, porque Google bloqueó el acceso).",
+     "notas": "Lote crítico. Resultado 'no aceptado' porque c, d y f no se pudieron verificar (bloqueo de Google, ver INC); a solo por réplica. Lo verificado en producción (despliegue, b, e, g, state firmado/un solo uso, 403 por rol) está bien. Para repetir: Carlos añade su cuenta como tester en Google Cloud → 'Pantalla de consentimiento OAuth' / 'Público', y el Chat de desarrollo relanza con archivoVeredicto nuevo (p. ej. log\\49-veredicto-2.json) con Carlos presente. Al arrancar, las carpetas conectadas venían vacías; se pidió acceso a la cola y a str-manager y se concedió. Chrome limpio: las 3 pestañas (admin, operador, colaborador) cerradas, grupos eliminados."
+    }
+   ]
   }
  ],
  "esquema": {
@@ -4003,9 +4232,10 @@
    "req": "REQ-K3",
    "categoria": "crítico",
    "resumen": "Copia a Google Drive por negocio (OAuth drive.file) + política de fotos DA-25",
-   "estado": "en cola",
+   "estado": "aceptado",
    "orden": 47,
-   "espera": "encolado tras aceptar el 48; verificador en Opus 5.5; Carlos pone los 3 secretos tras el despliegue"
+   "espera": null,
+   "nota": "49-veredicto-3 (19:48) aceptado; antes 49-veredicto no aceptado por bloqueo de Google (INC-96)."
   },
   {
    "lote": 46,

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T13:57:00-05:00",
+ "actualizadoEn": "2026-10-09T14:02:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -902,13 +902,14 @@
    "id": "INC-82",
    "tipo": "INC",
    "modulo": "Seg. Proyecto (interno)",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-06",
    "severidad": "bajo",
    "titulo": "Pestaña Cambios: los chips de estado 'registrado' y 'cerrado' no tienen color propio (texto casi blanco). Causa: el CSS del lote 27 solo define aceptado/no-aceptado/revertido y los lotes posteriores agregaron estados nuevos al JSON sin clase de color.",
    "pendiente": "Lote estándar: agregar clase y color a los dos estados en str-seg-proyecto.html. Sin fecha.",
-   "estado": "abierto",
-   "origen": "Veredicto de PRUEBA del Agente verificador en LENOVO (lote 27, 2026-10-06 17:12 Bogotá, log\\27-veredicto-prueba.json). La prueba no es aceptación y no se copia a cambios[]."
+   "estado": "cerrado",
+   "origen": "Veredicto de PRUEBA del Agente verificador en LENOVO (lote 27, 2026-10-06 17:12 Bogotá, log\\27-veredicto-prueba.json). La prueba no es aceptación y no se copia a cambios[].",
+   "cierre": "2026-10-09: lote 57 (532fb36, p5c57), 57-veredicto criterio e: registrado y cerrado legibles en claro y oscuro."
   },
   {
    "id": "DA-22",
@@ -4682,13 +4683,66 @@
    "req": "M-28 · INC-82",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto: pestaña Diseño desde diseno.json (solo lectura, carga independiente) + colores de .estado-tag (INC-82).",
-   "estado": "desplegado",
-   "observacion": "CLI 13:51–13:54, 32/32 (el commit dice 33/33 por error). b, c y d por réplica en Node; e y f quedan para el navegador. Cambio no pedido: actualizadoEn solo fecha se muestra tal cual (evita el día anterior en Bogotá). Agente verificador (Sonnet) lanzado 13:57.",
+   "estado": "aceptado",
+   "observacion": "CLI 13:51–13:54, 32/32 (el commit dice 33/33 por error). b, c y d por réplica en Node; e y f quedan para el navegador. Cambio no pedido: actualizadoEn solo fecha se muestra tal cual (evita el día anterior en Bogotá). Agente verificador (Sonnet) lanzado 13:57. 57-veredicto (14:00, Sonnet): aceptado 7/7; c y d por réplica en memoria; cambio no pedido (fecha sin hora tal cual) aceptable. Cómo quedó: Seg. Proyecto tiene la pestaña Diseño (Prioridades, REQ en definición, Decisiones abiertas, Pedidos, Entregados y cerrados) leída de diseno.json con carga independiente; chips de estado con color por defecto y registrado/encolado azul, cerrado verde, desplegado ámbar. INC-82 cerrado.",
    "costo": {
     "minutosCLI": 3,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 57,
+    "hash": "532fb361309c426a4338dacaff6b2b61186686d1",
+    "fecha": "2026-10-09",
+    "horaBogota": "14:00",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome (perfil admin 3198e288…, usuario Carlos Rodriguez/admin) para a-health, b, e, f, g; c y d por objetos sintéticos en memoria (código real de str-seg-proyecto.html ejecutado en Node con stubs, nada escrito) porque el estado de la pestaña está dentro de un IIFE inaccesible; d NO se probó en el navegador (solo render con state.disError y lectura del código: cargarDiseno y cargar son fetch independientes). No se usó reloj simulado (ningún criterio depende de la hora).",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js verde",
+      "ok": true,
+      "observado": "No pude ejecutar run.js completo (sin shell en el equipo). Sí ejecuté tests/diseno.test.js sobre el HTML del commit: 14 OK, 0 FAIL. Conté 32 archivos *.test.js en tests/ (coincide con 32/32 del log; el mensaje del commit dice 33/33 = error del mensaje, anotado)."
+     },
+     {
+      "c": "b. Diseño con diseno.json publicado: encabezado, 5 bloques en 0, 'Nada por ahora.', consola limpia",
+      "ok": true,
+      "observado": "Encabezado 'Actualizado: 2026-10-09' y 'Escribe: Chat de diseño (encargo rol-diseno)'. diseno.json publicado: pedidos/reqs/das/prioridades = 0. Bloques: Prioridades·0, REQ en definición·0, Decisiones abiertas·0, Pedidos·0 (abiertos), Entregados y cerrados·0 (plegado); los 5 contienen 'Nada por ahora.'. Consola sin errores ni mensajes (recargado y abierto desde str-app-shell > Seg. Proyecto)."
+     },
+     {
+      "c": "c. diseno.json sintético en memoria",
+      "ok": true,
+      "observado": "Con datos sintéticos: prioridades en orden REQ-D, REQ-X (no está en reqs → solo id), REQ-A con título y chip de estado; REQ definiendo y listo en 'REQ en definición' (2, por prioridad); REQ entregado + DA decidida + pedido convertido en 'Entregados y cerrados' (3, con 'entregado M-1', 'Decisión: z · 2026-10-01', '→ REQ-A'); DA abierta muestra opciones opA/opB con consecuencias, 'Recomendación: recoX', chip 'necesita a Carlos' y 'afecta: REQ-A'; pedido nuevo en Pedidos (1); '<b>hola</b>' y escritor '<b>x</b>' salen escapados (&lt;b&gt;). Con {} → 5 'Nada por ahora.'"
+     },
+     {
+      "c": "d. diseno.json falla → otras pestañas cargan, Diseño con aviso",
+      "ok": true,
+      "observado": "Render con state.disError='HTTP 404' → 'No se pudo cargar el diseño (HTTP 404).'. Por código, cargar() (PLANO_URL) y cargarDiseno() (DISENO_URL) son independientes. No probado en navegador con URL alterada (solo réplica en Node): cuenta como verificado por réplica."
+     },
+     {
+      "c": "e. Chips registrado/cerrado legibles en claro y oscuro; aceptado/no aceptado/revertido como antes",
+      "ok": true,
+      "observado": "Oscuro (tema real): aceptado/cerrado rgb(16,185,129) contraste 7.16; registrado rgb(96,165,250) 7.14; desplegado rgb(251,191,36) 10.88. Claro (data-theme=light puesto en memoria en el iframe y devuelto a dark; no se tocó el toggle ni lo persistido): aceptado/cerrado rgb(5,150,105) 3.77; registrado rgb(29,78,216) 6.7; desplegado rgb(180,83,9) 5.02. Reglas CSS .no-aceptado y .revertido sin cambios (líneas 108-109); hoy no hay cambios con esos estados en los datos, así que no se vieron renderizados. INC-82 cerrable. Observación: verde en tema claro 3.77:1, igual que el aceptado preexistente (deuda baja de contraste, no de este lote)."
+     },
+     {
+      "c": "f. Conteos iguales y pestaña recordada",
+      "ok": true,
+      "observado": "Contra seguimiento.json publicado: Plan 56 filas = plan[] 56; Ítems 134 = items 134 (33 grupos de módulo); Cambios 71 = cambios[] 71. Tras recargar la página con 'diseno' elegida, volvió en Diseño (localStorage str-segproy-tab). Al terminar dejé la pestaña en Plan."
+     },
+     {
+      "c": "g. /api/health esquema 10; páginas ?v=p5c57; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health {ok:true, db:true, schema_version:10, secrets, gd, exif, zip, drive: true}. str-seg-proyecto.html, str-app-shell.html y str-flujos.html con ?v=p5c57; str-api.js STR_API_VERSION='p5c57'; iframes del shell con ?v=p5c57. Sin llamadas nativas alert/confirm/prompt (la única coincidencia es un comentario en str-flujos.html línea 2540 'sin confirm()')."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit; declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md (mtime 13:53, antes del push 13:54) trae la fila de seg-proyecto con pestaña Diseño, INC-82 y p5c57 en INC-37. Archivos modificados en el árbol coinciden con lo declarado (HTMLs de la versión, str-api.js, str-seg-proyecto.html, tests/diseno.test.js, CLAUDE.md); str-cola-subida.js y api/ sin cambios. No pude leer el commit por git; me apoyo en el log ('los archivos tocados coinciden con los declarados') y en las fechas de modificación."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado en producción: no se escribió ni borró nada. Único cambio de estado del navegador: localStorage 'str-segproy-tab' (preferencia de vista) quedó en 'plan'. Pestañas de Chrome abiertas por esta ejecución: 1, cerrada.",
+    "notas": "Cambio no pedido (actualizadoEn solo fecha se muestra tal cual, regex ^\\d{4}-\\d{2}-\\d{2}$): ACEPTABLE — acotado a la cabecera de Diseño, evita el desfase de un día en Bogotá, verificado ('Actualizado: 2026-10-09'); recomendación: declararlo en cambios[] y considerar lo mismo para el 'Actualizado' del plano principal (usa new Date, pre-existente, no tocado). Mensaje del commit dice 33/33 y el real es 32/32 (error del mensaje, sin efecto en el código). Los chips de estado propios de Diseño (listo, definiendo, abierta, nuevo, entregado…) no tienen color específico y usan --text-2 por defecto, como pide el fix. Sin cambios a la capa Marco detectados (no se tocaron proceso-cambios, marco-trabajo.json, instrucciones.json, cobit.json, elementos.json ni comandos-usuario.md). Limitaciones: run.js completo y la prueba d en navegador no se ejecutaron aquí; c y d son por réplica."
+   }
   }
  ],
  "esquema": {
@@ -5426,14 +5480,14 @@
    "req": "M-28 · INC-82",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto: pestaña Diseño desde interno/diseno.json (pedidos, REQ en definición, DA abiertas, prioridades) + fix INC-82 (chips de estado sin color)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "SP",
    "riesgo": null,
    "espera": null,
    "orden": 60.5,
-   "nota": "Encolado 13:51; CLI 13:51–13:54 (532fb36); Agente verificador lanzado 13:57."
+   "nota": "Aceptado 14:00 (57-veredicto, Sonnet)."
   }
  ],
  "riesgos": [

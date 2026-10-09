@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T16:00:00-05:00",
+ "actualizadoEn": "2026-10-09T15:53:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1344,23 +1344,24 @@
    "id": "INC-102",
    "tipo": "INC",
    "modulo": "Base de conocimiento (interno)",
-   "etapa": "🔨",
+   "etapa": "✔",
    "fecha": "2026-10-09",
    "severidad": "bajo",
    "titulo": "Diagrama: cada flujo omitido deja 2 console.warn idénticos (la validación del mapa corre dos veces: contador y render). Además, la cabecera de la página cuenta '16 nodos (6 actores, 4 mecanismos, 5 lugares)' sin el tipo dato (anterior al lote 60).",
-   "pendiente": "Lote 61 (estándar), encolado 9-oct 15:42.",
-   "estado": "abierto",
-   "origen": "60-veredicto (15:38)."
+   "pendiente": null,
+   "estado": "cerrado",
+   "origen": "60-veredicto (15:38).",
+   "cierre": "2026-10-09: lote 61 (bb019f6, p5c61), 61-veredicto b y c."
   },
   {
    "id": "REQ-INV2-3a",
    "tipo": "REQ",
    "modulo": "Inventario",
-   "etapa": "📐",
+   "etapa": "🔨",
    "fecha": "2026-10-09",
    "severidad": null,
    "titulo": "Traslados, préstamos y devoluciones (15 criterios).",
-   "pendiente": "Lote 62 (normal), redactado; se encola al aceptarse el 61.",
+   "pendiente": "Lote 62 (normal), encolado 9-oct 15:52.",
    "documento": "claude/producto/requerimientos-inv2-3-traslados-circuito-2026-10.md › REQ-INV2-3a",
    "entregadoEn": "M-42",
    "necesitaDecision": false
@@ -5097,10 +5098,69 @@
    "req": "INC-102",
    "categoria": "estándar",
    "resumen": "Base de conocimiento: console.warn una vez por flujo omitido; cabecera con los cuatro tipos (incluye dato).",
-   "estado": "desplegado",
-   "observacion": "Encolado 15:41. CLI 15:42–15:43, 33/33; cabecera calculada \"16 nodos (6 actores, 4 mecanismos, 1 dato, 5 lugares)\". Archivos sin diferencias. Agente verificador (Sonnet) lanzado 15:47.",
+   "estado": "aceptado",
+   "observacion": "Encolado 15:41. CLI 15:42–15:43, 33/33; cabecera calculada \"16 nodos (6 actores, 4 mecanismos, 1 dato, 5 lugares)\". Archivos sin diferencias. Agente verificador (Sonnet) lanzado 15:47. 61-veredicto: aceptado 6/6 (horaBogota 15:55 del verificador; leído 15:52 por reloj del Chat de desarrollo). Cómo quedó: un solo console.warn por flujo omitido; cabecera \"16 nodos (6 actores, 4 mecanismos, 1 dato, 5 lugares)\". INC-102 cerrado.",
    "costo": {
     "minutosCLI": 1,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 61,
+    "hash": "bb019f6ee6192a5971f60bedce2b3fd2a70c7ded",
+    "fecha": "2026-10-09",
+    "horaBogota": "15:55",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción real (https://app.apartamentosbucaramanga.com, versión p5c61) en Chrome, perfil admin deviceId 3198e288-… (sesión de administrador abierta; sin iniciar sesión). Reloj real del sistema; ningún criterio depende de la hora. Criterio c con dos iframes srcdoc de la página real y fetch interceptado (mapa con 2 flujos rotos solo en memoria; nada escrito). Se contó console.warn sustituyendo console.warn dentro del iframe.",
+    "criterios": [
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "'node tests/run.js' 33/33 solo consta en el log de la CLI; no lo corrí (sin shell). No cuenta como verificado por mí."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "#resumen con el JSON vigente: '16 nodos (6 actores, 4 mecanismos, 1 dato, 5 lugares) · 20 flujos · 0 abiertos · 8 fichas · 4 líneas base'."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "Mapa con 2 flujos rotos: 2 console.warn ('flujo #20 omitido…' y 'flujo #21 omitido…', uno cada uno) tras carga, cambios entre Diagrama/Mapa/Fichas/Líneas base, acercar ×2, alejar y vuelta a Diagrama (ancho SVG 1510→2416→1812); aviso ámbar #diaOmit sigue en pantalla ('⚠ 2 flujo(s) omitido(s)…'); 16 recuadros y 20 flechas. Mapa sano: 0 warns."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "Pestañas Mapa16, Diagrama16, Fichas8, Líneas base4 (iguales); 16 g.dia-nd / 20 g.dia-fl; /api/health ok, schema_version 10; los 17 HTML y str-api.js en ?v=p5c61 (str-cola-subida.js responde 200); consola sin errores; sin alert/confirm/prompt en str-base-conocimiento.html."
+     },
+     {
+      "c": "CLAUDE.md",
+      "ok": true,
+      "observado": "CLAUDE.md del equipo contiene 'INC-102 (cerrado, instr-61)' con el aviso único. No revisé el diff del commit en GitHub; verificado contra el archivo local."
+     },
+     {
+      "c": "declarados-vs-tocados",
+      "ok": true,
+      "observado": "Log: sin diferencias; los 17 archivos fuera de str-base-conocimiento.html y CLAUDE.md solo cambian ?v=p5c60→p5c61, confirmado en producción. Sin cambios a api/ ni a la capa Marco según el log."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado en producción. Solo iframes en memoria con fetch interceptado ('zz-verif-x/y'), eliminados; sin archivos subidos.",
+    "notas": "Acepto con una reserva: 'node tests/run.js' solo consta por el log de la CLI. Cambios a la capa Marco sin prefijo 'modelo:': ninguno visto. INC-102 queda verificado en producción. Pestaña de Chrome cerrada."
+   }
+  },
+  {
+   "lote": 62,
+   "fecha": "2026-10-09",
+   "hash": null,
+   "version": "p5c62",
+   "req": "REQ-INV2-3a",
+   "categoria": "normal",
+   "resumen": "Inventario: movimientos traslado/prestamo/devolucion (servidor: solo admin u operador con inventario.editar), existencias con traslados y préstamos en [INV-puras], Préstamos abiertos, aviso al cerrar el turno en HK.",
+   "estado": "encolado",
+   "observacion": "Encolado 15:52 en LENOVO (62-instr-inv2-3a-traslados-prestamos.md). R-1, R-2.",
+   "costo": {
+    "minutosCLI": null,
     "minutosDueno": 0
    },
    "cruceDueno": null
@@ -5647,14 +5707,14 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Traslados, préstamos y devoluciones (movimientos nuevos, [INV-puras], aviso al cerrar el turno)",
-   "estado": "previsto",
-   "vista": "siguiente",
-   "esperaA": null,
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
    "grupo": "INV2",
    "riesgo": "R-1, R-2",
-   "espera": "aceptación del lote 61 (un lote a la vez)",
+   "espera": null,
    "orden": 102,
-   "nota": "Instrucción redactada 15:58 tras leer api/col, [INV-puras] y _cerrarTurno."
+   "nota": "Encolado 15:52 (instrucción redactada 15:58 de la nota anterior: hora corregida, fue antes)."
   },
   {
    "lote": null,
@@ -5899,14 +5959,14 @@
    "req": "INC-102",
    "categoria": "estándar",
    "resumen": "Base de conocimiento: un solo aviso por flujo omitido y cabecera que cuenta los cuatro tipos",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "Deuda",
    "riesgo": null,
    "espera": null,
    "orden": 103,
-   "nota": "Encolado 15:41; CLI 15:42–15:43 (bb019f6); Agente verificador lanzado 15:47."
+   "nota": "Aceptado (61-veredicto, Sonnet; leído 15:52)."
   },
   {
    "lote": 63,

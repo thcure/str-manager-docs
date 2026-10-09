@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T02:23:00Z",
+ "actualizadoEn": "2026-10-09T02:34:00Z",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -4042,6 +4042,70 @@
    "aprobacion": "pedido por Carlos el 8-oct-2026",
    "estado": "registrado",
    "observacion": "Se cierra cuando el Chat de desarrollo encadene lotes sin que Carlos lo empuje."
+  },
+  {
+   "lote": 51,
+   "fecha": "2026-10-08",
+   "hash": "63ed38b",
+   "version": "p5c51",
+   "req": "M-24",
+   "categoria": "estándar",
+   "resumen": "Seg. Proyecto: pestaña 'Plan de trabajo' (primera) desde plan[]: en curso, siguiente, esperando a Carlos (tareas del dueño primero, vence en rojo a ≤7 días), previsto/pospuesto y hecho (hash · versión · hora del veredicto leídos de cambios[]); agrupar por fase; clic en lote abre Cambios filtrado; tests/plan-trabajo.test.js.",
+   "estado": "aceptado",
+   "observacion": "CLI 21:23–21:25, 29/29. Declarados vs tocados contrastado por el Chat de desarrollo en el commit 63ed38b: único extra tests/plan-trabajo.test.js (opcional, punto 5); el resto solo ?v=. 51-veredicto (~21:45, Sonnet 5.5): b–f en producción, sin INC. Con esto el artefacto 'Plan de trabajo STR' queda superado (se deja de actualizar; aviso al Arquitecto en M-24).",
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 51,
+    "hash": "63ed38b",
+    "fecha": "2026-10-09",
+    "horaBogota": "aprox. 21:45",
+    "resultado": "aceptado",
+    "modoVerificacion": "producción en Chrome (perfil admin, deviceId 3198e288…), solo lectura; reloj real del dispositivo; sin datos de prueba",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js verde",
+      "ok": true,
+      "observado": "No se pudo ejecutar (el verificador no tiene shell en el equipo). Consta en el log de la CLI: 29/29 con tests/plan-trabajo.test.js nuevo. Aceptado por declaración del log, no por réplica propia."
+     },
+     {
+      "c": "b. Abre en Plan de trabajo sin pestaña guardada; contadores = plan[]; Producción",
+      "ok": true,
+      "observado": "Con 'str-segproy-tab' borrada, abre en 'Plan de trabajo'. Contadores: en curso 1 · siguiente 1 · esperando a Carlos 11 · previsto 0 · hecho 25 (+ pospuesto 1 en su bloque). Coinciden con plan[] de seguimiento.json publicado (39 elementos, deducción de vista recalculada aparte). Producción: 3a6422d · p5c50 = último cambio aceptado (lote 50), como se esperaba por no haberse registrado aún el 51."
+     },
+     {
+      "c": "c. En curso / Siguiente / Esperando con chip esperaA; 3 tareas dueno",
+      "ok": true,
+      "observado": "En curso: lote 51 (M-24, estándar, 'espera a: CLI'). Siguiente: INC-93. Esperando a Carlos: 11, con las 3 tareas 'tarea de Carlos' primero; 'Renovar Hostinger y dominios' con 'vence 2026-11-03 · faltan 26 d' (sin rojo, >7 días). Todas con chip 'espera a: Carlos'."
+     },
+     {
+      "c": "d. Hecho con hash · versión · hora; clic en lote abre Cambios filtrado",
+      "ok": true,
+      "observado": "Hecho (25) muestra 50 → 3a6422d · p5c50 · veredicto 2026-10-08 20:53; 49 → fd2f016 · p5c49 · 19:48; 48 → 36bfb37 · p5c48 · 16:20 (y 47, 46…). Clic en '49' cambia a Cambios con la búsqueda '49' y muestra el lote 49."
+     },
+     {
+      "c": "e. Ítems y Cambios iguales; pestaña recordada al recargar",
+      "ok": true,
+      "observado": "Cambios: '61 lotes · último 2026-10-08 · p5c50' = cambios[] del JSON (61). Ítems renderiza con filtros y contenido (JSON 125 ítems; la página no muestra contador textual, no se pudo comparar un número visible). Tras elegir 'items' y recargar, reabre en Ítems (clave guardada 'items'). Clave borrada al final, como autorizaba la nota."
+     },
+     {
+      "c": "f. /api/health esquema 10; ?v=p5c51; consola limpia; sin diálogos",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10, drive true. str-seg-proyecto, str-app-shell y str-calendario con ?v=p5c51. Consola: sin errores (el rastreo empezó tras la carga inicial; se recargó la página después sin errores nuevos registrados). Sin alert/confirm/prompt en el HTML; contador de diálogos en 0 durante las pruebas."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit / declarados vs tocados",
+      "ok": true,
+      "observado": "CLAUDE.md contiene 'Plan de trabajo' y 'p5c51'. El log de la CLI declara como único archivo extra tests/plan-trabajo.test.js (punto 5, opcional) y dice que el commit lista declarados vs tocados. No pude abrir git para comprobar el diff del commit; consta por el log."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado ni borrado. Solo se borró la clave localStorage 'str-segproy-tab' en el navegador del admin, según la nota.",
+    "notas": "Sin cambios a la capa Marco sin prefijo 'modelo:' según log (header: no toca el modelo). Limitaciones: no ejecuté node tests/run.js ni leí el diff de git (sin shell). Producción mostraba 3a6422d · p5c50 al verificar porque el 51 aún no figura aceptado en cambios[]; al registrarlo, debería mostrar 63ed38b · p5c51. El 51 sigue 'en curso' en plan[] hasta que el Chat de desarrollo lo actualice. Pestaña de Chrome cerrada."
+   }
   }
  ],
  "esquema": {
@@ -4468,23 +4532,23 @@
    "req": "M-24",
    "categoria": "estándar",
    "resumen": "Vista 'Plan de trabajo' en Seg. Proyecto desde plan[] (en curso, siguiente, esperando a Carlos, hecho); reemplaza el artefacto 'Plan de trabajo STR'",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "SP",
-   "nota": "encolado 21:23 (estándar)",
+   "nota": "aceptado ~21:45",
    "orden": 51
   },
   {
-   "lote": null,
+   "lote": 52,
    "req": "INC-93",
    "categoria": "estándar",
-   "resumen": "STRApi.puede devuelve true antes de cargar /me",
-   "estado": "previsto",
-   "vista": "siguiente",
-   "esperaA": null,
+   "resumen": "INC-93: STRApi.puede no concede nada al operador antes de conocer sus permisos (copia local str-me-permisos-v1)",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
    "grupo": "INC",
-   "nota": "número al encolar",
+   "nota": "encolado 21:34 (estándar)",
    "orden": 52
   },
   {

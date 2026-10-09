@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T16:06:00-05:00",
+ "actualizadoEn": "2026-10-09T16:11:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1390,6 +1390,19 @@
    "pendiente": "Deuda estándar; sin fecha.",
    "estado": "abierto",
    "origen": "Observado por el verificador del lote 54; registrado desde el traspaso del chat anterior (traspaso-chat-anterior.md, respuesta 5)."
+  },
+  {
+   "id": "INC-104",
+   "tipo": "INC",
+   "modulo": "modelo / verificación",
+   "etapa": "📝",
+   "fecha": "2026-10-09",
+   "severidad": "medio",
+   "titulo": "Lote 62: el modo automático de la tarea 'Agente verificador' bloqueó la creación de datos zz-verif- en producción ([Modify Shared Resources]), aunque la lista cerrada de Carlos la autoriza; criterios 1–13 sin verificar.",
+   "pendiente": "Decisión de Carlos: relanzar la verificación (62-veredicto-2) o hacer él la preparación/pruebas guiadas. Mientras, el 62 queda desplegado y no aceptado y no se encola el 63.",
+   "estado": "abierto",
+   "origen": "62-veredicto (16:08).",
+   "necesitaDecision": true
   }
  ],
  "cambios": [
@@ -5157,13 +5170,78 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Inventario: movimientos traslado/prestamo/devolucion (servidor: solo admin u operador con inventario.editar), existencias con traslados y préstamos en [INV-puras], Préstamos abiertos, aviso al cerrar el turno en HK.",
-   "estado": "desplegado",
-   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05.",
+   "estado": "no aceptado",
+   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104.",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 62,
+    "hash": "9728725cb3c4cc6b6a6a2f1e08768a47be453318",
+    "fecha": "2026-10-09",
+    "horaBogota": "16:08",
+    "resultado": "no aceptado (desplegado; sin verificar en producción los criterios 1-13: la escritura de datos zz-verif- fue bloqueada)",
+    "modoVerificacion": "Chrome perfil admin (deviceId 3198e288…), solo lectura. Al intentar crear las zonas zz-verif- de preparación, el clasificador de permisos del modo automático denegó la escritura en producción ([Modify Shared Resources]); no busqué otra vía. Sin escrituras: no se tocó ningún dato. Los perfiles colaborador y operador no se usaron. Reloj real del sistema.",
+    "criterios": [
+     {
+      "c": "1-5 traslado de artículo y de juego (A=6/B=4, saldo 7 de 6, origen=destino, destino inactivo, juego 1 movimiento)",
+      "ok": null,
+      "observado": "No verificable: escritura de datos de prueba bloqueada. Solo réplica: _invValidarTraslado y _invExistencia leídas en producción (str-inventario.html) cubren saldo, origen=destino, destino inactivo y componentes×cantidad; el servidor valida origen≠destino y destino activo. No cuenta como aceptado."
+     },
+     {
+      "c": "6-8 préstamo del Equipo a zz-verif-colab, segundo préstamo rechazado, devolución con vínculo",
+      "ok": null,
+      "observado": "No verificable (misma causa). Código: _invValidarPrestamo, 409 'Ya está prestado' en servidor, 409 'Ese préstamo ya fue devuelto', devolución toma objeto y cantidad del préstamo. Solo lectura de código."
+     },
+     {
+      "c": "9 aviso al cerrar turno con préstamo abierto de la carreta",
+      "ok": null,
+      "observado": "No verificable (misma causa). Limitación declarada por la CLI: el colaborador no lee préstamos de otra persona, el aviso solo sale si cierra admin/operador."
+     },
+     {
+      "c": "10 lista Préstamos abiertos",
+      "ok": null,
+      "observado": "No verificable con datos. En producción hoy no hay préstamos; el bloque (_renderPrestamosAbiertos) existe y no pinta nada sin préstamos."
+     },
+     {
+      "c": "11 colaborador/operador sin inventario.editar reciben 403 al crear traslado",
+      "ok": null,
+      "observado": "No verificable: un PUT de prueba también es escritura y los perfiles colab/oper no se usaron. Solo código PHP: colaborador → 403 'Solo puedes registrar conteos y niveles'; sin inventario.editar → 403 (réplica, no producción)."
+     },
+     {
+      "c": "12 editar o borrar un movimiento rechazado",
+      "ok": null,
+      "observado": "No verificable (misma causa)."
+     },
+     {
+      "c": "13 respaldo con movimientos nuevos y test col vs export",
+      "ok": null,
+      "observado": "No verificable: no hay movimientos nuevos en producción."
+     },
+     {
+      "c": "14 existencias sin movimientos nuevos iguales a antes",
+      "ok": true,
+      "observado": "Con los 10 movimientos actuales (2 ajuste, 2 compra, 4 conteo, 2 nivel; todos zz-verif-, no hay zonas ni movimientos reales en inventario), _invExistencia (nueva, con grupos) = cálculo legado (conteo + compra/ajuste sin anulados) en los 5 pares artículo-zona: 10, 6, 0, 5, 8. Limitación: no existe zona real con conteos; la comparación es sobre datos zz-verif-. Solo lectura."
+     },
+     {
+      "c": "15 + health + versión + consola + diálogos",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10. STR_API_VERSION p5c62; shell e inventario con ?v=p5c62. Las tres copias de [INV-puras] son idénticas (16598 caracteres). Sin alert/confirm/prompt en Inventario, HK ni Propiedades. Consola sin errores en Inventario, HK y Propiedades (el rastreo empezó tras la carga, así que errores de arranque no quedan cubiertos)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Lote 62: criterios 1-13 sin verificar en producción",
+      "nivel": "medio",
+      "causa": "El modo automático de la tarea bloqueó la creación de datos zz-verif- (zonas A y B, reactivar artículos) en producción, aunque la lista cerrada de Carlos la autoriza. No es defecto del código. El lote sigue desplegado y no aceptado hasta repetir la verificación con la escritura permitida (nuevo archivoVeredicto, p. ej. log\\62-veredicto-2.json).",
+      "observado": "Permission for this action was denied by the Claude Code auto mode classifier. Reason: [Modify Shared Resources]"
+     }
+    ],
+    "datosDePrueba": "Nada creado ni borrado en esta ejecución. Existentes de ejecuciones previas, sin tocar: artículos, zonas y juegos zz-verif- (varios inactivos; zz-verif-Principal activa), propiedad zz-verif-Propiedad, 3 movimientos zz-verif-. Sin archivos subidos.",
+    "notas": "Revisión estática del commit: CLAUDE.md actualizado en el mismo commit (mtime 15:52-16:03 del 9-oct, con nota INV2·4a). Archivos declarados vs tocados: sin diferencias inexplicadas en el log de la CLI; no pude comparar con el diff de git. Sin cambios a capa Marco detectados en el log (no se tocaron instrucciones.json, marco-trabajo.json, cobit.json ni elementos.json). Servidor sin recalculo de saldo, declarado. Para repetir: el Chat de desarrollo debe lanzar la tarea con escritura zz-verif- permitida o dejar la preparación hecha por Carlos."
+   }
   },
   {
    "lote": null,
@@ -5735,14 +5813,14 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Traslados, préstamos y devoluciones (movimientos nuevos, [INV-puras], aviso al cerrar el turno)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "no aceptado",
+   "vista": "esperando a Carlos",
+   "esperaA": "Carlos",
    "grupo": "INV2",
    "riesgo": "R-1, R-2",
-   "espera": null,
+   "espera": "decidir cómo verificar (INC-104)",
    "orden": 102,
-   "nota": "Encolado 15:52; CLI 15:52–16:03 (9728725); Agente verificador lanzado 16:05."
+   "nota": "62-veredicto 16:08: no verificable (escritura de prueba bloqueada); 14 y 15 ok."
   },
   {
    "lote": null,

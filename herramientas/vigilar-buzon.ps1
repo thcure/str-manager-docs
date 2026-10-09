@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-08; v2 con veredictos y cola)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-09; v3: veredictos, cola y vigia)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -8,6 +8,10 @@
 #        "Hay veredicto nuevo del verificador: log\<archivo>. Revisalo."
 #   3. Linea nueva en log\_resumen.txt de la cola (la CLI termino un lote)    -> Chat de desarrollo
 #        "La CLI termino el lote NN (OK|FALLO): revisa la cola."
+#   4. Vigia de estancamiento (solo si 'Chat de diseno' esta en destinatarios.json): plan[] con trabajo
+#      libre, nada en curso y sin movimiento desde hace $VigiaMin min, entre $VigiaDesde y $VigiaHasta h
+#      -> Chat de diseno: "El plan tiene trabajo libre y no hay movimiento desde las HH:MM: retomalo."
+#      Un aviso por episodio y como mucho uno cada $VigiaEntre min (ficha BAI11-d).
 # El chat de cada destinatario sale de interno/destinatarios.json (lo mantiene el Arquitecto).
 # Solo llama a la CLI (claude -p ... --cloud <sesion>) cuando hay un evento. La primera corrida de cada
 # fuente marca lo existente como avisado, sin avisar.
@@ -18,6 +22,7 @@
 #   notificados.txt          ids de mensajes ya avisados
 #   veredictos-avisados.txt  nombres de veredictos ya avisados
 #   cola-lineas.txt          lineas de _resumen.txt ya revisadas
+#   vigia.txt                ultimo episodio avisado por el vigia (movimiento|hora del aviso)
 #   buzon.log                una linea por aviso o error
 # Borrar uno de los .txt reinicia esa fuente sin avisar.
 #
@@ -35,6 +40,11 @@ $Claude   = Join-Path $HOME '.local\bin\claude.exe'
 $Resumen  = Join-Path $Cola 'log\_resumen.txt'
 $LogDir   = Join-Path $Cola 'log'
 $Raw      = 'https://raw.githubusercontent.com/thcure/str-manager-docs/main/interno'
+$EstVigia = Join-Path $Base 'vigia.txt'
+$VigiaMin   = 60    # minutos sin movimiento
+$VigiaEntre = 120   # minutos minimos entre avisos
+$VigiaDesde = 7     # hora de inicio (incluida)
+$VigiaHasta = 22    # hora de fin (excluida)
 
 New-Item -ItemType Directory -Force $Base | Out-Null
 function Log([string]$t) { Add-Content -Path $LogFile -Value ((Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + ' ' + $t) }
@@ -117,6 +127,53 @@ try {
             }
         }
     } catch { Log ('ERROR en cola: ' + $_.Exception.Message) }
+
+    # --- 4. Vigia de estancamiento ---
+    try {
+        $dv = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+        $ahora = Get-Date
+        if ($dv -and $ahora.Hour -ge $VigiaDesde -and $ahora.Hour -lt $VigiaHasta) {
+            $seg = Invoke-RestMethod -Uri "$Raw/seguimiento.json?t=$t" -UseBasicParsing
+            $libres = @($seg.plan | Where-Object {
+                ($_.estado -eq 'previsto' -or $_.estado -eq 'siguiente') -and -not $_.espera -and
+                ([string]$_.esperaA) -ne 'Carlos' -and
+                ([string]$_.categoria) -notmatch '^cr.tico$' -and ([string]$_.categoriaPrevista) -notmatch '^cr.tico$' })
+            $enCurso = (Test-Path (Join-Path $Cola '.corriendo')) -or (@(Get-ChildItem -Path $Cola -Filter '*-instr-*.md' -File -ErrorAction SilentlyContinue).Count -gt 0)
+            $marcas = @()
+            $vj = Join-Path $LogDir 'verificar.json'
+            if (Test-Path $vj) {
+                $marcas += (Get-Item $vj).LastWriteTime
+                try {
+                    $vf = [string](Get-Content -Path $vj -Raw | ConvertFrom-Json).archivoVeredicto
+                    if ($vf -and $vf -match '^[A-Za-z0-9._-]+\.json$' -and -not (Test-Path (Join-Path $LogDir $vf))) { $enCurso = $true }
+                } catch { }
+            }
+            if ($libres.Count -gt 0 -and -not $enCurso) {
+                if (Test-Path $Resumen) { $marcas += (Get-Item $Resumen).LastWriteTime }
+                $uv = Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
+                if ($uv) { $marcas += $uv.LastWriteTime }
+                try {
+                    $c = Invoke-RestMethod -Uri 'https://api.github.com/repos/thcure/str-manager-docs/commits?per_page=1' -UseBasicParsing
+                    $marcas += ([DateTime]::Parse([string]@($c)[0].commit.committer.date)).ToLocalTime()
+                } catch { Log ('Vigia: no se pudo leer el ultimo commit: ' + $_.Exception.Message) }
+                $mov = ($marcas | Sort-Object | Select-Object -Last 1)
+                if ($mov -and (($ahora - $mov).TotalMinutes -ge $VigiaMin)) {
+                    $clave = $mov.ToString('yyyy-MM-dd HH:mm')
+                    $previo = if (Test-Path $EstVigia) { [string](Get-Content -Path $EstVigia | Select-Object -First 1) } else { '' }
+                    $pClave = ($previo -split '\|')[0]
+                    $pHora = $null; if (($previo -split '\|').Count -gt 1) { try { $pHora = [DateTime]::Parse(($previo -split '\|')[1]) } catch { } }
+                    $espaciado = (-not $pHora) -or (($ahora - $pHora).TotalMinutes -ge $VigiaEntre)
+                    if ($pClave -ne $clave -and $espaciado) {
+                        $texto = "El plan tiene trabajo libre y no hay movimiento desde las " + $mov.ToString('HH:mm') + ": retomalo."
+                        if (Avisar ([string]$dv.nombre) $texto $dest) {
+                            Set-Content -Path $EstVigia -Value ($clave + '|' + $ahora.ToString('yyyy-MM-dd HH:mm:ss'))
+                            Log ("Vigia: aviso a Chat de diseno (" + $libres.Count + " items libres; sin movimiento desde $clave).")
+                        }
+                    }
+                }
+            }
+        }
+    } catch { Log ('ERROR en vigia: ' + $_.Exception.Message) }
 } finally {
     Remove-Item -Path $Lock -Force -ErrorAction SilentlyContinue
 }

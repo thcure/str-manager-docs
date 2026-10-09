@@ -279,6 +279,46 @@
     "Dos tareas con el mismo texto: 'Agente verificador' (Sonnet 5.5, estándar y normal) y 'Agente verificador crítico' (Opus 5.5, críticos); nunca corren a la vez; al cambiar el encargo se copia a las dos."
    ],
    "instalacion": "ins-006, paso 11 (recrear al cambiar de equipo)"
+  },
+  {
+   "codigo": "BAI11-d",
+   "nombre": "Chat de diseño y vigía de estancamiento",
+   "dueno": "Arquitecto",
+   "estado": "propuesta",
+   "vigenciaDesde": null,
+   "para": "Separar el qué (Carlos con el Chat de diseño) del cómo (Chat de desarrollo), para que el Chat de desarrollo no se interrumpa con definiciones y que alguien funcional vele por que el plan avance.",
+   "quien": {
+    "escriben": "Chat de diseño (diseno.json, documentos de REQ)",
+    "leen": "Chat de desarrollo, Arquitecto",
+    "carlos": "pide, decide las DA, aprueba lo crítico"
+   },
+   "piezas": [
+    "encargo rol-diseno",
+    "interno/diseno.json",
+    "herramienta-vigilar-buzon (sección 4, vigía)"
+   ],
+   "flujo": [
+    "Carlos pide algo al Chat de diseño; queda como P-n en diseno.json.",
+    "El Chat de diseño lo define con Carlos: REQ con criterios; si falta una decisión, DA-n.",
+    "Cuando el REQ está listo, lo entrega al Chat de desarrollo por el buzón ('REQ-X listo para construir') y lo ubica en prioridades[].",
+    "El Chat de desarrollo lo registra en seguimiento.json, lo parte en lotes y lo construye; las dudas vuelven por el buzón.",
+    "El vigía (despertador, cada 3 min, sin Claude) revisa plan[]: si hay trabajo libre, nada en curso y 60 min sin movimiento, entre 7:00 y 22:00, despierta una vez al Chat de diseño.",
+    "El Chat de diseño pregunta al Chat de desarrollo qué lo frena y lo destraba desde su lado."
+   ],
+   "reglas": [
+    "Un escritor por archivo: diseno.json y los documentos de REQ son del Chat de diseño; seguimiento.json es del Chat de desarrollo.",
+    "Las DA las decide Carlos; el Chat de diseño las prepara con recomendación.",
+    "El vigía avisa una sola vez por episodio y como mucho cada 2 horas; 'trabajo libre' es un ítem de plan[] previsto o siguiente, sin espera, que no espera a Carlos y no es crítico.",
+    "'Movimiento' es lo más reciente entre: último commit en str-manager-docs, última línea de la cola, último veredicto y el último verificar.json.",
+    "'En curso' es: una instrucción en la cola, la cola corriendo o un verificar.json sin su veredicto."
+   ],
+   "instalacion": "Al abrir el Chat de diseño: destinatarios.json + vigilar-buzon.ps1 v3 en LENOVO (lo copia el Arquitecto).",
+   "comprobacion": "Get-Content \"$HOME\\Downloads\\str-instr-cola\\buzon\\buzon.log\" -Tail 5   → líneas 'Vigia: …'",
+   "creditos": "El vigía no gasta créditos al revisar; cada aviso es un turno del Chat de diseño. Medir una semana antes y después con cambios[].costo.",
+   "riesgos": [
+    "Dos chats más que coordinar: el buzón es la única vía entre ellos.",
+    "Un ítem de plan[] mal marcado (sin espera cuando sí espera a Carlos) produce avisos inútiles; el Chat de diseño lo corrige pidiéndolo al Chat de desarrollo."
+   ]
   }
  ],
  "lineasBase": [

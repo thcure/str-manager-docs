@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T12:48:00-05:00",
+ "actualizadoEn": "2026-10-09T13:15:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1284,7 +1284,7 @@
    "fecha": "2026-10-09",
    "severidad": "bajo",
    "titulo": "El servidor envía al colaborador todas las zonas tipo principal, sin filtrar por propIds (latente: hoy ninguna ajena).",
-   "pendiente": "Se resuelve en INV2·4 (accesos por zona, crítico).",
+   "pendiente": "Se resuelve en el lote 57 (INV2·4a, crítico).",
    "estado": "abierto",
    "origen": "53-veredicto-2."
   },
@@ -1304,12 +1304,12 @@
    "id": "INC-101",
    "tipo": "INC",
    "modulo": "Respaldo",
-   "etapa": "🔧",
+   "etapa": "✅",
    "fecha": "2026-10-09",
    "severidad": "medio",
    "titulo": "El respaldo diario (api/export) no incluye inv-grupos (y guias): su lista de colecciones se separó de la de /api/col.",
-   "pendiente": "Fix lote 56 con test que compare las dos listas.",
-   "estado": "en fix",
+   "pendiente": "Cerrado por el lote 56 (56-veredicto).",
+   "estado": "cerrado",
    "origen": "55-veredicto."
   }
  ],
@@ -4599,6 +4599,50 @@
    "aprobacion": "pedido por Carlos el 9-oct-2026",
    "estado": "registrado",
    "observacion": "Se cierra cuando el nuevo chat haga su primer git push y cierre INC-87."
+  },
+  {
+   "lote": 56,
+   "fecha": "2026-10-09",
+   "hash": "7bbab23",
+   "version": "p5c56",
+   "req": "INC-101",
+   "categoria": "estándar",
+   "resumen": "api/export: misma lista de colecciones que /api/col (16; se suman guias e inv-grupos); tests/export-colecciones.test.js compara las dos listas del PHP real.",
+   "estado": "aceptado",
+   "observacion": "CLI 12:47–12:48, 31/31. Lista de archivos en commit y log, sin diferencias. 56-veredicto (~12:58, Sonnet): b (GET /api/export 200 con 16 colecciones, inv-grupos 3, guias 1) y c en producción; a por lectura del PHP y el log. INC-101 cerrado.",
+   "costo": {
+    "minutosCLI": 1,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 56,
+    "hash": "7bbab232aba979d881cc600390b8ca3b65c695af",
+    "fecha": "2026-10-09",
+    "horaBogota": "~13:00",
+    "resultado": "aceptado",
+    "modoVerificacion": "producción en Chrome (perfil admin 3198e288…, usuario Carlos) + lectura del código real; sin crear ni modificar datos. Reloj real (no aplica hora).",
+    "criterios": [
+     {
+      "c": "4a. node tests/run.js verde con el test nuevo",
+      "ok": true,
+      "observado": "No ejecutable por el verificador (sin Node/repo en su entorno). Reportado por el CLI: 31/31. Verificado por lectura: $COLECCIONES de api/export/index.php:16 y $COLECCIONES_VALIDAS de api/col/index.php:12 son idénticas (16 colecciones, mismo orden, con guias e inv-grupos); tests/export-colecciones.test.js listado en CLAUDE.md. Resultado del run = declarado por el CLI, no re-ejecutado."
+     },
+     {
+      "c": "4b. GET /api/export como admin trae inv-grupos y guias con conteo",
+      "ok": true,
+      "observado": "HTTP 200. Claves: cuenta, exportado_en, colecciones, usuarios, capacidades. Colecciones (16) y conteos: flujo-categorias 0, flujos 3, guias 1, hk-config 1, inv-articulos 7, inv-depositos 6, inv-grupos 3, inv-movimientos 10, prop-tipos 5, prop-workflows 0, propiedades 5, reservas 54, tickets 3, turnos 6, ubic-tipos 6, ubicaciones 1. Archivo no guardado en disco; no se leyó contenido."
+     },
+     {
+      "c": "4c. /api/health esquema 10; páginas ?v=p5c56; consola limpia en el shell",
+      "ok": true,
+      "observado": "health ok:true, db:true, schema_version 10. Shell recargado: iframe str-flujos.html?v=p5c56 y str-api.js?v=p5c56; /str-app-shell.html y /str-api.js sin caché muestran p5c56 (STR_API_VERSION='p5c56'). Consola: 0 errores, pero el rastreo empezó tras la carga, así que no cubre errores del arranque. Nota: una pestaña previa mostraba p5c52 por caché del navegador (resuelto al recargar)."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado ni modificado. Solo lecturas (GET /api/health, GET /api/export, descargas de HTML/JS). Pestaña de Chrome cerrada.",
+    "notas": "CLAUDE.md actualizado en el mismo commit (filas api/export, tests, respaldo diario, INC-37 p5c56, INC-101 cerrado). Archivos declarados vs tocados: según el log del CLI sin diferencias; no se pudo contrastar con git (sin acceso al commit). Sin cambios a capa Marco detectados en los archivos revisados. Lo que no pude comprobar: ejecución real de tests/run.js (31/31 es declaración del CLI) y consola desde el arranque."
+   }
   }
  ],
  "esquema": {
@@ -5159,9 +5203,9 @@
    "esperaA": "Carlos",
    "grupo": "INV2",
    "riesgo": "R-2",
-   "espera": "visto bueno de Carlos a la instrucción",
+   "espera": "visto bueno de Carlos a la instrucción (crítico)",
    "orden": 61,
-   "nota": "cruce de diseño hecho 9-oct; instrucción redactada; entra tras el lote 56"
+   "nota": "cruce de diseño hecho 9-oct; borrador en el proyecto: claude/producto/borradores/57-instr-inv2-4a-accesos-por-zona.md (leer el código antes de encolar; ?v= p5c56 → p5c57); verificador crítico (Opus)"
   },
   {
    "lote": null,
@@ -5294,14 +5338,14 @@
    "req": "INC-101",
    "categoria": "estándar",
    "resumen": "Fix: el respaldo incluye todas las colecciones de /api/col (inv-grupos, guias) con test",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV2",
    "riesgo": "R-1",
    "espera": null,
    "orden": 59.5,
-   "nota": "encolado 12:47"
+   "nota": "aceptado 9-oct (56-veredicto)"
   },
   {
    "lote": null,

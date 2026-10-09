@@ -32,6 +32,12 @@
     "nota": "Capa Marco: modelo, encargos, fichas, líneas base"
    },
    {
+    "id": "chat-diseno",
+    "nombre": "Chat de diseño",
+    "tipo": "actor",
+    "nota": "Analista de negocio + Jefe de proyecto: pedidos, REQ, DA, prioridades (diseno.json)"
+   },
+   {
     "id": "chat-desarrollo",
     "nombre": "Chat de desarrollo",
     "tipo": "actor",
@@ -98,13 +104,19 @@
     "id": "nube-claude",
     "nombre": "Nube de Claude (chats y tareas)",
     "tipo": "lugar"
+   },
+   {
+    "id": "diseno",
+    "nombre": "diseno.json",
+    "tipo": "dato",
+    "nota": "Pedidos, REQ, DA y prioridades; escribe el Chat de diseño"
    }
   ],
   "flujos": [
    {
     "de": "carlos",
     "a": "chat-desarrollo",
-    "que": "pedido, decisión DA-n, aprobación de críticos"
+    "que": "aprobación de críticos"
    },
    {
     "de": "chat-desarrollo",
@@ -153,7 +165,7 @@
    {
     "de": "chat-desarrollo",
     "a": "seguimiento",
-    "que": "aceptación, INC, plan (subida web: puente, INC-87)"
+    "que": "REQ registrado, plan, aceptación, INC (git push con token propio)"
    },
    {
     "de": "chat-desarrollo",
@@ -183,14 +195,39 @@
     "de": "arquitecto",
     "a": "github-docs",
     "que": "modelo: encargos, elementos, fichas, líneas base"
+   },
+   {
+    "de": "carlos",
+    "a": "chat-diseno",
+    "que": "pedido, respuesta a DA-n, '¿cómo vamos?'",
+    "ficha": "BAI11-d"
+   },
+   {
+    "de": "chat-diseno",
+    "a": "diseno",
+    "que": "P-n, REQ, DA-n, prioridades",
+    "ficha": "BAI11-d"
+   },
+   {
+    "de": "chat-diseno",
+    "a": "buzon",
+    "que": "'REQ-X listo para construir'",
+    "ficha": "BAI11-d"
+   },
+   {
+    "de": "buzon",
+    "a": "chat-diseno",
+    "que": "frase fija 'Revisa el buzon … M-n' y vigía 'El plan tiene trabajo libre…'",
+    "ficha": "BAI11-d"
+   },
+   {
+    "de": "seguimiento",
+    "a": "chat-diseno",
+    "que": "lectura del plan (jefe de proyecto)",
+    "ficha": "BAI11-d"
    }
   ],
-  "abiertos": [
-   {
-    "donde": "chat-desarrollo",
-    "que": "Sube a str-manager-docs por la web (403 en git push); se resuelve con el próximo chat (INC-87)"
-   }
-  ]
+  "abiertos": []
  },
  "fichas": [
   {

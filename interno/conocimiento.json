@@ -525,6 +525,44 @@
    "riesgos": [
     "Volver a ASUS exige recrear otra vez los verificadores y copiar el despertador v3."
    ]
+  },
+  {
+   "codigo": "BAI11-p",
+   "nombre": "Planes de trabajo, carriles y bolsa de pendientes",
+   "dueno": "Chat de diseño (jefe de proyecto)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-09",
+   "para": "No perderse entre tantos pendientes: se trabaja sobre planes acotados con objetivo, se ve en todo momento el avance y qué hace cada agente, y lo demás espera en una bolsa sin gestionarse.",
+   "quien": {
+    "propone": "Chat de diseño",
+    "aprueba": "Carlos",
+    "ejecutan": "cada carril con sus agentes",
+    "muestra": "tablero del STR (y, mientras no exista, el artefacto 'Plan de trabajo STR' que mantiene el Chat de diseño)"
+   },
+   "piezas": [
+    "diseno.json → bolsa (pedidos y reqs categorizados) y planes[]",
+    "seguimiento.json → plan[] (lotes con su plan)",
+    "encargos rol-diseno y rol-desarrollo"
+   ],
+   "flujo": [
+    "Todo lo nuevo entra a la bolsa con tipo (funcionalidad, corrección, deuda técnica, tarea de Carlos, modelo), módulo, prioridad (alta, media, baja) y tamaño en lotes. Nadie trabaja sobre la bolsa.",
+    "El Chat de diseño arma un plan: PT-n con nombre, objetivo, 5 a 10 lotes (o ítems), carril de cada ítem y cierre previsto; Carlos lo aprueba.",
+    "Carriles: Construcción (CD → CLI → verificador; un solo plan a la vez porque la cola es una), Definición (Chat de diseño con Carlos; normalmente el plan siguiente), Modelo (Arquitecto) y Tareas de Carlos. Un segundo plan corre en paralelo si sus ítems caen en carriles libres; si chocan, manda la prioridad de Carlos.",
+    "El Chat de desarrollo construye en el orden del plan activo y marca cada lote de plan[] con su plan (campo planTrabajo).",
+    "A mitad de plan no entra nada nuevo: va a la bolsa o al plan siguiente; solo Carlos puede cambiar un ítem por urgencia.",
+    "Al cerrar el plan: qué se logró, qué vuelve a la bolsa y una lección (BAI11.09); se activa el siguiente, ya definido en el carril de Definición."
+   ],
+   "reglas": [
+    "Se gestiona solo el plan activo de cada carril; la bolsa es un depósito.",
+    "El tablero muestra arriba: plan activo y avance, ocupación por carril (agente, ítem, desde qué hora) y lo que espera a Carlos; la bolsa en una pestaña aparte.",
+    "Un dato, una fuente: el artefacto y el tablero solo muestran lo que dicen diseno.json y seguimiento.json."
+   ],
+   "instalacion": "No aplica (es un proceso).",
+   "comprobacion": "diseno.json → planes[] con un plan activo de construcción; cada lote de plan[] tiene planTrabajo.",
+   "creditos": "La organización inicial es un turno largo del Chat de diseño; después, solo al preparar o cerrar un plan.",
+   "riesgos": [
+    "Si los ítems de la bolsa no se categorizan al entrar, armar el siguiente plan vuelve a ser perderse entre pendientes."
+   ]
   }
  ],
  "lineasBase": [

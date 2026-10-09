@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-09T13:00:00-05:00",
+ "actualizadoEn": "2026-10-09T12:35:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1268,12 +1268,12 @@
    "id": "INC-98",
    "tipo": "INC",
    "modulo": "Inventario",
-   "etapa": "🔧",
+   "etapa": "✅",
    "fecha": "2026-10-09",
    "severidad": "medio",
    "titulo": "El colaborador no recibe invPrincipalId de la propiedad: si el admin elige a mano la zona principal, el colaborador cuenta en la automática y las existencias se parten.",
-   "pendiente": "Fix lote 54 (lista blanca de propiedades del colaborador).",
-   "estado": "en fix",
+   "pendiente": "Cerrado por el lote 54 (54-veredicto).",
+   "estado": "cerrado",
    "origen": "53-veredicto-2."
   },
   {
@@ -1296,7 +1296,7 @@
    "fecha": "2026-10-09",
    "severidad": "bajo",
    "titulo": "El log de la CLI del lote 53 no trae la lista explícita de archivos declarados vs tocados (sí el commit).",
-   "pendiente": "Recordado en la sección de cierre de cada instrucción desde el lote 54.",
+   "pendiente": "Reincide en el lote 54. Desde el 55 la instrucción pide la misma lista en el log de la cola.",
    "estado": "abierto",
    "origen": "53-veredicto-2."
   }
@@ -4416,6 +4416,77 @@
     "datosDePrueba": "Ninguno creado ni modificado. Existente de ejecuciones anteriores: zona zz-verif-Principal (vista sin sesion).",
     "notas": "Lote desplegado (health OK, p5c53) pero NO aceptado: 7b-7e sin verificar. Pedir a Carlos reabrir sesion admin (y colaborador) en sus perfiles y relanzar con archivoVeredicto 53-veredicto-2.json. Chrome limpio: pestana cerrada. No se detectaron cambios a la capa Marco en el log."
    }
+  },
+  {
+   "lote": 54,
+   "fecha": "2026-10-09",
+   "hash": "347827f",
+   "version": "p5c54",
+   "req": "INC-98",
+   "categoria": "normal",
+   "resumen": "api/col: invPrincipalId en la lista blanca de propiedades del colaborador (nada más); tests de lectura del colaborador con 2 casos nuevos.",
+   "estado": "aceptado",
+   "observacion": "CLI 12:14–12:15, 30/30. Declarados vs tocados contrastado por el Chat de desarrollo en el commit 347827f (lista explícita; str-cola-subida.js declarado y no tocado, explicado). 54-veredicto (~12:25, Sonnet): b, c, d en producción con admin y colaborador; a por el log. INC-98 cerrado. INC-100 reincide (log sin lista).",
+   "costo": {
+    "minutosCLI": 2,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 54,
+    "hash": "347827f8157b07a8728ec51adebcd55567df1c01",
+    "fecha": "2026-10-09",
+    "horaBogota": "no registrada (reloj real; sin criterios dependientes de la hora). Pruebas hacia las 12:20-12:25 (servidor 17:20-17:23 UTC)",
+    "resultado": "aceptado con salvedad: 4b, 4c y 4d cumplen en produccion; 4a (node tests/run.js 30/30) solo por declaracion de la CLI, no re-ejecutado por el verificador; la lista explicita de archivos declarados vs tocados no consta en el log (INC bajo).",
+    "modoVerificacion": "Chrome en produccion (p5c54 confirmado con fetch no-store en shell, inventario, propiedades, HK y portal; /api/health esquema 10). Perfil admin 3198e288 (usuario Carlos Rodriguez, rol admin) para 4b y limpieza; perfil colaborador 5d576fcc (usuario zz-verif-colab, rol colaborador) para 4c. No se inicio sesion ni se escribieron contrasenas. La pestana inicial de la shell estaba en cache p5c52; se recargo con parametro nc y pasa a p5c54. 4b por la interfaz (Inventario > Activar; ficha de Propiedades > selector de zona principal > Guardar cambios). 4c: GET /col/propiedades real como colaborador + codigo real de HK (_hkInvContexto y _invDepositoDe en el iframe del portal) con tarea conteo sintetica, sin crear turnos.",
+    "criterios": [
+     {
+      "c": "4a node tests/run.js verde (30/30)",
+      "ok": null,
+      "observado": "Declarado por la CLI en el log (30/30; 2 casos nuevos en tests/lectura-colaborador.test.js y replica actualizada en tests/lib/port-col.js). El verificador no puede ejecutar node en el repo; cuenta como no verificado de forma independiente, sin fallo conocido."
+     },
+     {
+      "c": "4b Admin: elegir a mano zz-verif-Principal como zona principal de zz-verif-Propiedad (con la automatica distinta)",
+      "ok": true,
+      "observado": "Se activo zz-verif-Zona comun (dp_mv17uh9d6tjc1) por la UI de Inventario; el selector de la ficha mostro 'Automatica — zz-verif-Zona comun'. Se eligio zz-verif-Principal (dp_muyum184g3ozd) y, tras 'Guardar cambios', GET /col/propiedades como admin trae invPrincipalId = dp_muyum184g3ozd en prop-1791416715199 (updated_at 2026-10-09 17:20:58 UTC). Nota: elegir en el selector no guarda solo; hay que pulsar 'Guardar cambios' (comportamiento de la ficha, no del lote)."
+     },
+     {
+      "c": "4c Colaborador: /col/propiedades trae zz-verif-Propiedad con invPrincipalId elegido y sin deposito ni otros campos nuevos; HK cuenta en la zona elegida",
+      "ok": true,
+      "observado": "zz-verif-colab (rol colaborador, p5c54) recibe 1 propiedad (zz-verif-Propiedad) con invPrincipalId = dp_muyum184g3ozd; sin 'deposito' ni 'icals'. 21 claves: apto, ciudad, colaboradorBaseId, color, departamento, direccion, flujoBaseId, horasTurno, id, indicaciones, interior, invPrincipalId, name, planoUrl, rooms, tipo, toleranciaSalidaMin, torre, ubicacionId, zonas, zonasPlano. Frente a la linea base de 53-veredicto-2 (propiedad sin invPrincipalId ni deposito) solo se suma invPrincipalId; no recibe otras propiedades. En el HK del portal (iframe str-m1-housekeeping, codigo real), _hkInvContexto('zz-verif-sint','zz-verif-k',{lista:'conteo'},propId) da dep = zz-verif-Principal (dp_muyum184g3ozd) con invPrincipalId; sin invPrincipalId, _invDepositoDe da zz-verif-Zona comun (dp_mv17uh9d6tjc1). INC-98 corregido: admin y colaborador cuentan en la misma zona. Limite del metodo: no se abrio un checklist ni se creo turno; es medicion con la funcion real, no observacion en pantalla del colaborador."
+     },
+     {
+      "c": "4d /api/health esquema 10; paginas ?v=p5c54; consola limpia en portal y HK; limpieza (zona principal en automatica, zz-verif-Zona comun inactiva)",
+      "ok": true,
+      "observado": "/api/health {ok true, db true, schema_version 10, drive, gd, exif, zip true}. portal, shell, inventario, propiedades y HK sirven ?v=p5c54 (fetch no-store); STRApi.version p5c54 en admin y colaborador. Consola sin errores en portal (colaborador, tras recarga), Inventario y HK (admin; tracking iniciado antes de recargar). Limpieza: invPrincipalId de zz-verif-Propiedad vuelto a vacio (null, updated_at 17:22:59 UTC) y zz-verif-Zona comun inactiva (activo false); zz-verif-Principal sigue activa como antes del lote."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit",
+      "ok": true,
+      "observado": "CLAUDE.md local (mtime 12:15, posterior a los HTML) contiene INC-98 (lineas 29 y 51) y p5c54 (linea 114). No se pudo confrontar con el diff del commit por falta de acceso a git."
+     },
+     {
+      "c": "Declarados vs tocados",
+      "ok": null,
+      "observado": "El log de la CLI explica la diferencia (str-cola-subida.js no se toco porque su version se pone donde HK lo carga; 17 HTML y str-api.js a p5c54) pero NO trae lista explicita de archivos declarados vs tocados como exigia la seccion 5 (INC-100). Sin acceso a git para confrontar. Incumplimiento de proceso, no de comportamiento."
+     },
+     {
+      "c": "Cambios a la capa Marco sin prefijo 'modelo:'",
+      "ok": true,
+      "observado": "No se ven en el log ni en CLAUDE.md."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Log de la CLI sin lista explicita de archivos declarados vs tocados (INC-100 reincidente)",
+      "nivel": "bajo",
+      "causa": "La instruccion 54 (seccion 5) pedia la lista explicita en el commit y en el log; el log solo narra la diferencia sobre str-cola-subida.js y los HTML.",
+      "observado": "log/54-instr-fix-inc98-principal-colaborador.txt: resumen en prosa, sin lista de archivos."
+     }
+    ],
+    "datosDePrueba": "Sin datos nuevos creados. Cambios temporales y revertidos en datos zz-verif-: zz-verif-Zona comun (dp_mv17uh9d6tjc1) activada y vuelta a inactiva; invPrincipalId de zz-verif-Propiedad (prop-1791416715199) puesto en dp_muyum184g3ozd y vuelto a vacio (automatica). Sin turnos, tickets, flujos, reservas, fotos ni archivos subidos. De lo real solo se leyeron nombres de campos y conteos; durante la prueba se abrio por clic la ficha de una propiedad real (solo lectura, sin guardar). Chrome: pestanas de ambos perfiles cerradas.",
+    "notas": "Aceptacion: 4b, 4c, 4d y CLAUDE.md cumplen en produccion; 4a por declaracion de la CLI. INC-98 puede cerrarse con esta verificacion (4c medido con codigo real de HK, no con un turno completo). Quedan abiertos los de 53-veredicto-2: INC bajo del servidor que envia al colaborador todas las zonas tipo principal sin filtrar por propIds (previsto en INV2-4). Reloj real. No se vieron cambios a la capa Marco."
+   }
   }
  ],
  "esquema": {
@@ -4939,18 +5010,18 @@
    "nota": "aceptado 9-oct (53-veredicto-2)"
   },
   {
-   "lote": null,
+   "lote": 55,
    "req": "REQ-INV2 · 2",
    "categoria": "normal",
    "resumen": "Artículos con atributos libres y condición; juegos y kits; contenedores móviles (carreta)",
-   "estado": "previsto",
-   "vista": "previsto",
-   "esperaA": null,
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
    "grupo": "INV2",
    "riesgo": null,
    "espera": null,
    "orden": 59,
-   "nota": "instrucción redactada; entra tras el lote 54"
+   "nota": "encolado 12:35 (normal); incluye catálogo inv-grupos en api/col"
   },
   {
    "lote": null,
@@ -4978,7 +5049,7 @@
    "riesgo": "R-2",
    "espera": "cruce previo con Carlos",
    "orden": 61,
-   "nota": "cruce con Carlos en curso (9-oct): zona vinculada al menos a una propiedad; el colaborador base hereda acceso; el operador mantiene o revoca. Incluye INC-99."
+   "nota": "cruce con Carlos en curso (9-oct). Decidido: toda zona vinculada a ≥1 propiedad; el colaborador base hereda acceso a las zonas de su propiedad; el operador mantiene o revoca (ej. zona privada del dueño); otro colaborador con turno en la propiedad accede solo durante el turno y no a zonas revocadas; entrega (al cerrar) y recepción (al llegar) con conteo y foto general solo cuando cambia la persona; diferencia → aviso al operador con ambos conteos y fotos, a nombre de quien entregó; con dos en el turno cuenta el titular; escribe solo en la zona que indica la tarea, más los consumibles del apto y los incidentes sobre activos del apto. Incluye INC-99."
   },
   {
    "lote": null,
@@ -5097,14 +5168,14 @@
    "req": "INC-98",
    "categoria": "normal",
    "resumen": "Fix: invPrincipalId en la lectura del colaborador (misma zona principal para admin y colaborador)",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV2",
    "riesgo": "R-2 (lectura, un campo)",
    "espera": null,
    "orden": 58.5,
-   "nota": "encolado 13:00 (normal)"
+   "nota": "aceptado 9-oct (54-veredicto)"
   }
  ],
  "riesgos": [

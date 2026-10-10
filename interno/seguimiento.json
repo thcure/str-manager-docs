@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-10T12:15:00-05:00",
+ "actualizadoEn": "2026-10-10T12:24:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1395,14 +1395,15 @@
    "id": "INC-104",
    "tipo": "INC",
    "modulo": "modelo / verificación",
-   "etapa": "📝",
+   "etapa": "✔",
    "fecha": "2026-10-09",
    "severidad": "medio",
    "titulo": "Lote 62: el modo automático de la tarea 'Agente verificador' bloqueó la creación de datos zz-verif- en producción ([Modify Shared Resources]), aunque la lista cerrada de Carlos la autoriza; criterios 1–13 sin verificar.",
    "pendiente": "Autorización puesta en las dos tareas (Carlos, 12:07); 62-veredicto-2 lanzado 12:11.",
-   "estado": "abierto",
+   "estado": "cerrado",
    "origen": "62-veredicto (16:08).",
-   "necesitaDecision": false
+   "necesitaDecision": false,
+   "cierre": "2026-10-10: con la autorización de Carlos en el texto de la tarea, 62-veredicto-2 pudo crear y usar datos zz-verif- (criterios 1–10 y 12–14 en producción)."
   },
   {
    "id": "REQ-TB1",
@@ -1457,6 +1458,18 @@
    "pendiente": "Deuda estándar del tablero; sin fecha.",
    "estado": "abierto",
    "origen": "64-veredicto (11:20)."
+  },
+  {
+   "id": "INC-107",
+   "tipo": "INC",
+   "modulo": "Inventario / api/col",
+   "etapa": "📝",
+   "fecha": "2026-10-10",
+   "severidad": "bajo",
+   "titulo": "El colaborador no recibe los préstamos que registró otra persona: el aviso de préstamos abiertos al cerrar su propio turno no le aparece (lectura de inv-movimientos del colaborador). El aviso sí funciona cuando cierra admin u operador.",
+   "pendiente": "Lote aparte; toca la lectura del colaborador en api/col (crítico, R-2). Candidato a ir con INV2·4a o después.",
+   "estado": "abierto",
+   "origen": "Log de la CLI del lote 62 y 62-veredicto-2."
   }
  ],
  "cambios": [
@@ -5225,7 +5238,7 @@
    "categoria": "normal",
    "resumen": "Inventario: movimientos traslado/prestamo/devolucion (servidor: solo admin u operador con inventario.editar), existencias con traslados y préstamos en [INV-puras], Préstamos abiertos, aviso al cerrar el turno en HK.",
    "estado": "no aceptado",
-   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104.",
+   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104. 62-veredicto-2 (12:25): no aceptado solo por el criterio 11 no verificable (perfiles de colaborador y operador no conectados); 1–10 y 12–15 cumplen en producción. INC-104 cerrado; INC-107 (bajo) registrado.",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": 0
@@ -5234,67 +5247,103 @@
    "aceptacion": {
     "lote": 62,
     "hash": "9728725cb3c4cc6b6a6a2f1e08768a47be453318",
-    "fecha": "2026-10-09",
-    "horaBogota": "16:08",
-    "resultado": "no aceptado (desplegado; sin verificar en producción los criterios 1-13: la escritura de datos zz-verif- fue bloqueada)",
-    "modoVerificacion": "Chrome perfil admin (deviceId 3198e288…), solo lectura. Al intentar crear las zonas zz-verif- de preparación, el clasificador de permisos del modo automático denegó la escritura en producción ([Modify Shared Resources]); no busqué otra vía. Sin escrituras: no se tocó ningún dato. Los perfiles colaborador y operador no se usaron. Reloj real del sistema.",
+    "fecha": "2026-10-10",
+    "horaBogota": "12:25",
+    "resultado": "no aceptado (criterio 11 no verificable en producción: perfiles colaborador y operador no conectados; criterios 1-10, 12-15 cumplen)",
+    "modoVerificacion": "Chrome perfil admin (deviceId 3198e288…, usuario Carlos Rodriguez). Preparación y criterios 1-10 y 12-14 en producción: acciones de Trasladar, Prestar y Devolver por la interfaz de Inventario (modal y botones); rechazos de servidor y devolución repetida por PUT /api/col con el token de la sesión admin; aviso de cierre de turno por _cerrarTurno en HK. Criterio 15 con tests ejecutados en la nube sobre copia de los archivos del HEAD local (inventario 135 OK, permisos-col 74 OK, export-colecciones 5 OK); no se pudo correr node tests/run.js completo. Producción estaba en p5c64 (página con ?v=p5c64; repo local ya en p5c65); el código de inventario no cambió desde el 62. Reloj real del sistema.",
     "criterios": [
      {
-      "c": "1-5 traslado de artículo y de juego (A=6/B=4, saldo 7 de 6, origen=destino, destino inactivo, juego 1 movimiento)",
-      "ok": null,
-      "observado": "No verificable: escritura de datos de prueba bloqueada. Solo réplica: _invValidarTraslado y _invExistencia leídas en producción (str-inventario.html) cubren saldo, origen=destino, destino inactivo y componentes×cantidad; el servidor valida origen≠destino y destino activo. No cuenta como aceptado."
+      "c": "1 traslado 4 de 10 de A a B",
+      "ok": true,
+      "observado": "Por la UI (Existencias, celda Papel en A, Trasladar a zz-verif-B, 4). A=6, B=4, Principal 0, Carreta 0 (total 10). 1 movimiento 'traslado' con at del servidor y por=1 (Carlos Rodriguez). Destinos ofrecidos: B, Principal, Carreta (A, el origen, no aparece)."
      },
      {
-      "c": "6-8 préstamo del Equipo a zz-verif-colab, segundo préstamo rechazado, devolución con vínculo",
-      "ok": null,
-      "observado": "No verificable (misma causa). Código: _invValidarPrestamo, 409 'Ya está prestado' en servidor, 409 'Ese préstamo ya fue devuelto', devolución toma objeto y cantidad del préstamo. Solo lectura de código."
+      "c": "2 trasladar 7 de 6",
+      "ok": true,
+      "observado": "Mensaje en línea: 'No alcanza: en la zona de origen hay 6 y quieres mover 7.' Sin movimiento nuevo; A sigue en 6."
+     },
+     {
+      "c": "3 origen = destino",
+      "ok": true,
+      "observado": "La UI no ofrece el origen como destino; _invValidarTraslado: 'El origen y el destino son la misma zona.'; servidor 400 'El origen y el destino son la misma zona'. Sin movimiento nuevo."
+     },
+     {
+      "c": "4 destino inactivo",
+      "ok": true,
+      "observado": "La UI solo ofrece zonas activas; _invValidarTraslado: 'La zona de destino no existe o está inactiva.'; servidor 400 igual. Sin movimiento (el total de movimientos no cambió). Además cantidad 0 y 1.5: 400 'La cantidad debe ser un entero mayor o igual a 1'."
+     },
+     {
+      "c": "5 trasladar un juego completo",
+      "ok": true,
+      "observado": "Juego zz-verif-Juego 1 (2 × Sábana) con 4 Sábanas en A: por la UI, Trasladar a B. 1 movimiento con grupoId. Sábana A 4→2, B 0→2; juego completo A 2→1, B 0→1. Nota: con 2 juegos completos en A quedó 1 en cada zona; el criterio dice 'el juego queda en B y no en A' y aquí había 2 juegos completos posibles por existencias, comportamiento coherente con componentes×cantidad."
+     },
+     {
+      "c": "6 prestar zz-verif-Equipo a zz-verif-colab",
+      "ok": true,
+      "observado": "Por la UI. A disponible 0 (celda 'prestado: 1'), prestado 1, total 1. 1 movimiento 'prestamo' con prestadoA=5 (zz-verif-colab)."
+     },
+     {
+      "c": "7 prestarlo otra vez",
+      "ok": true,
+      "observado": "_invValidarPrestamo: 'Ya está prestado.'; servidor 409 'Ya está prestado'. Sin movimiento nuevo."
+     },
+     {
+      "c": "8 devolverlo a A",
+      "ok": true,
+      "observado": "Por la UI (Préstamos abiertos › Devolver, destino zz-verif-A). A=1, préstamo cerrado, devolución con prestamoId = id del préstamo. En Movimientos: 'devuelto · préstamo del …' y 'devuelto … a zz-verif-A' vinculados. Segunda devolución: servidor 409 'Ese préstamo ya fue devuelto'."
      },
      {
       "c": "9 aviso al cerrar turno con préstamo abierto de la carreta",
-      "ok": null,
-      "observado": "No verificable (misma causa). Limitación declarada por la CLI: el colaborador no lee préstamos de otra persona, el aviso solo sale si cierra admin/operador."
+      "ok": true,
+      "observado": "Préstamo de zz-verif-Carreta a zz-verif-colab por la UI. Turno de zz-verif-Propiedad con titular zz-verif-colab (sh-res-1791487807449) cerrado desde HK con perfil admin: modal 'Préstamos de inventario sin devolver: zz-verif-Carreta · zz-verif-colab · desde 10 oct' con 1 elemento, botones Cancelar y 'Cerrar igual'; 'Cerrar igual' cerró el turno (estado completado, finReal.fuente operador). No bloquea. NO se comprobó lo que ve el colaborador en su portal (su perfil no estaba conectado): limitación declarada por la CLI sin verificar."
      },
      {
       "c": "10 lista Préstamos abiertos",
-      "ok": null,
-      "observado": "No verificable con datos. En producción hoy no hay préstamos; el bloque (_renderPrestamosAbiertos) existe y no pinta nada sin préstamos."
+      "ok": true,
+      "observado": "Bloque 'PRÉSTAMOS ABIERTOS · 1 — zz-verif-Equipo · a zz-verif-colab desde 10 oct 12:15 · de zz-verif-A · Devolver'; tras devolver, deja de listarlo."
      },
      {
-      "c": "11 colaborador/operador sin inventario.editar reciben 403 al crear traslado",
+      "c": "11 colaborador y operador sin inventario.editar reciben 403 al crear traslado",
       "ok": null,
-      "observado": "No verificable: un PUT de prueba también es escritura y los perfiles colab/oper no se usaron. Solo código PHP: colaborador → 403 'Solo puedes registrar conteos y niveles'; sin inventario.editar → 403 (réplica, no producción)."
+      "observado": "No verificable: los deviceId del colaborador (5d576fcc…) y del operador (63059a77…) no están conectados (list_connected_browsers solo muestra el perfil admin). No se usó otra vía. Réplica: tests permisos-col (74 OK) cubren colaborador 403 y operador sin permiso 403; no cuenta como aceptado. Este criterio es crítico si da 200 y sigue sin comprobar en producción."
      },
      {
-      "c": "12 editar o borrar un movimiento rechazado",
-      "ok": null,
-      "observado": "No verificable (misma causa)."
+      "c": "12 editar o borrar un movimiento",
+      "ok": true,
+      "observado": "PUT con cantidad 9 sobre el traslado existente: 409 'Un movimiento no se edita; registra uno inverso'. PUT con deleted=1: 409 con el mismo mensaje. La cantidad sigue en 4."
      },
      {
       "c": "13 respaldo con movimientos nuevos y test col vs export",
-      "ok": null,
-      "observado": "No verificable: no hay movimientos nuevos en producción."
+      "ok": true,
+      "observado": "GET /api/export (200): colecciones['inv-movimientos'] = 18 ids = los 18 de /api/col; los 5 movimientos nuevos (2 traslados, 2 préstamos... y 1 devolución) están. tests/export-colecciones.test.js: 5 OK, 0 FAIL (en la nube)."
      },
      {
-      "c": "14 existencias sin movimientos nuevos iguales a antes",
+      "c": "14 existencias sin regresión",
       "ok": true,
-      "observado": "Con los 10 movimientos actuales (2 ajuste, 2 compra, 4 conteo, 2 nivel; todos zz-verif-, no hay zonas ni movimientos reales en inventario), _invExistencia (nueva, con grupos) = cálculo legado (conteo + compra/ajuste sin anulados) en los 5 pares artículo-zona: 10, 6, 0, 5, 8. Limitación: no existe zona real con conteos; la comparación es sobre datos zz-verif-. Solo lectura."
+      "observado": "Con los 10 movimientos previos al lote (compra, ajuste, conteo, nivel; no existen zonas ni movimientos reales en inventario, solo zz-verif-): _invExistencia nueva (con grupos) = cálculo legado en los 4 pares no cero: Vaso/Propiedad 8, Toalla/Principal 10 y 5, Toalla/Propiedad 6. Solo lectura de conteos; no se escribió en zonas reales."
      },
      {
-      "c": "15 + health + versión + consola + diálogos",
+      "c": "15 tests, health, versión, consola, diálogos",
       "ok": true,
-      "observado": "/api/health: ok, db, schema_version 10. STR_API_VERSION p5c62; shell e inventario con ?v=p5c62. Las tres copias de [INV-puras] son idénticas (16598 caracteres). Sin alert/confirm/prompt en Inventario, HK ni Propiedades. Consola sin errores en Inventario, HK y Propiedades (el rastreo empezó tras la carga, así que errores de arranque no quedan cubiertos)."
+      "observado": "/api/health: ok, db, schema_version 10. Tests (nube): inventario 135 OK/0 FAIL, permisos-col 74 OK/0 FAIL, export-colecciones 5 OK/0 FAIL; las tres copias de [INV-puras] idénticas (16598 caracteres, mismo MD5). Páginas de producción con ?v=p5c64 (el lote pedía p5c62; ya hubo dos lotes después). Sin errores de consola en Inventario tras recarga con rastreo activo; no se revisó consola de HK ni Propiedades en esta ejecución. Sin alert/confirm/prompt en las tres páginas (búsqueda en el código). Limitación: node tests/run.js completo no se corrió."
      }
     ],
     "incs": [
      {
-      "titulo": "Lote 62: criterios 1-13 sin verificar en producción",
+      "titulo": "Lote 62: criterio 11 (403 al colaborador y operador sin permiso) sin verificar en producción",
       "nivel": "medio",
-      "causa": "El modo automático de la tarea bloqueó la creación de datos zz-verif- (zonas A y B, reactivar artículos) en producción, aunque la lista cerrada de Carlos la autoriza. No es defecto del código. El lote sigue desplegado y no aceptado hasta repetir la verificación con la escritura permitida (nuevo archivoVeredicto, p. ej. log\\62-veredicto-2.json).",
-      "observado": "Permission for this action was denied by the Claude Code auto mode classifier. Reason: [Modify Shared Resources]"
+      "causa": "Los perfiles de Chrome del colaborador y del operador (deviceId 5d576fcc… y 63059a77…) no estaban conectados a la extensión; solo el perfil admin. No es defecto del código: la réplica en tests da 403. Hasta comprobarlo en producción el lote no puede aceptarse; si el servidor diera 200 sería crítico (acceso indebido).",
+      "observado": "list_connected_browsers devolvió solo 3198e288-fa87-4596-9fcb-a868b3031818; select_browser con 5d576fcc… respondió 'No connected browser has deviceId'."
+     },
+     {
+      "titulo": "Lote 62: el colaborador no recibe los préstamos que registró otra persona (limitación declarada, criterio 9)",
+      "nivel": "bajo",
+      "causa": "La lectura de movimientos del colaborador en api/col solo trae los suyos o los de sus turnos, así que el aviso al cerrar su propio turno no sale; el aviso sí funciona cuando cierra admin/operador. Sin comprobar en producción por falta del perfil colaborador. Va a un lote aparte (CLI lo propuso).",
+      "observado": "Texto del log de la CLI; en admin el aviso mostró 1 elemento y permitió cerrar."
      }
     ],
-    "datosDePrueba": "Nada creado ni borrado en esta ejecución. Existentes de ejecuciones previas, sin tocar: artículos, zonas y juegos zz-verif- (varios inactivos; zz-verif-Principal activa), propiedad zz-verif-Propiedad, 3 movimientos zz-verif-. Sin archivos subidos.",
-    "notas": "Revisión estática del commit: CLAUDE.md actualizado en el mismo commit (mtime 15:52-16:03 del 9-oct, con nota INV2·4a). Archivos declarados vs tocados: sin diferencias inexplicadas en el log de la CLI; no pude comparar con el diff de git. Sin cambios a capa Marco detectados en el log (no se tocaron instrucciones.json, marco-trabajo.json, cobit.json ni elementos.json). Servidor sin recalculo de saldo, declarado. Para repetir: el Chat de desarrollo debe lanzar la tarea con escritura zz-verif- permitida o dejar la preparación hecha por Carlos."
+    "datosDePrueba": "Creados: zonas zz-verif-A (dp_zzv62a) y zz-verif-B (dp_zzv62b); movimientos zz-verif- (compras 10 Papel, 1 Equipo, 4 Sábana; traslado de 4 Papel; traslado del juego; préstamo y devolución del Equipo; préstamo y devolución de la Carreta; los movimientos no se borran) = 9 movimientos nuevos, total 19 en la base. Reactivados y vueltos a dejar inactivos: zonas zz-verif-A, zz-verif-B y zz-verif-Carreta; artículos zz-verif-Papel, -Equipo y -Sábana; grupo zz-verif-Juego 1. Préstamos abiertos al terminar: 0. Turno sh-res-1791487807449 de zz-verif-Propiedad quedó 'completado' (cerrado por la prueba del criterio 9; antes figuraba en curso en pantalla). Sin archivos subidos. zz-verif-Principal sigue activa como antes.",
+    "notas": "Sin cambios a la capa Marco detectados (no se tocaron instrucciones.json, marco-trabajo.json, cobit.json, elementos.json ni comandos-usuario.md en los archivos revisados). CLAUDE.md actualizado en el commit 9728725 según el log (mtime 9-oct 15:52-16:03); no se pudo comparar con el diff de git. Archivos declarados vs tocados: sin diferencias inexplicadas en el log. Para aceptar: repetir solo el criterio 11 con los perfiles colaborador y operador conectados (archivoVeredicto nuevo, p. ej. log\\62-veredicto-3.json). El servidor no recalcula saldo (declarado); sugerencia: validarlo en PHP en un lote futuro. En el criterio 13 el texto 'los 5 movimientos nuevos' se refiere a 2 traslados, 2 préstamos y 1 devolución existentes al momento del export (la devolución de la Carreta se hizo después)."
    }
   },
   {
@@ -5700,7 +5749,7 @@
    "categoria": "estándar",
    "resumen": "str-propiedades.html: chip 'Sin guardar' y confirmación en línea al cerrar con la zona principal cambiada.",
    "estado": "desplegado",
-   "observacion": "Encolado 12:12. CLI 12:12–12:14. Fuera de alcance declarado: salir por el menú del shell no avisa (no cierra la ficha). Verificación después de 62-veredicto-2.",
+   "observacion": "Encolado 12:12. CLI 12:12–12:14. Fuera de alcance declarado: salir por el menú del shell no avisa (no cierra la ficha). Verificación después de 62-veredicto-2. Agente verificador (Sonnet) lanzado 12:24.",
    "costo": {
     "minutosCLI": 2,
     "minutosDueno": 0
@@ -6249,15 +6298,15 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Traslados, préstamos y devoluciones (movimientos nuevos, [INV-puras], aviso al cerrar el turno)",
-   "estado": "desplegado",
+   "estado": "no aceptado",
    "vista": "esperando a Carlos",
-   "esperaA": "verificador",
+   "esperaA": "Carlos",
    "grupo": "INV2",
    "riesgo": "R-1, R-2",
-   "espera": null,
+   "espera": "abrir los perfiles de Chrome del colaborador y del operador para repetir solo el criterio 11 (62-veredicto-3)",
    "orden": 102,
-   "nota": "62-veredicto-2 lanzado 12:11 con la autorización de Carlos en el texto de la tarea (INC-104).",
-   "desde": "2026-10-10T12:12:00-05:00",
+   "nota": "62-veredicto-2 (12:25): 14/15; falta el criterio 11 (403 a colaborador y operador) por perfiles no conectados.",
+   "desde": "2026-10-10T12:24:00-05:00",
    "planTrabajo": "PT-1"
   },
   {
@@ -6574,8 +6623,8 @@
    "riesgo": null,
    "espera": null,
    "orden": 101,
-   "desde": "2026-10-10T12:15:00-05:00",
-   "nota": "Encolado 12:12; CLI 12:12–12:14 (7d69e59). Verificación en espera: el verificador está con 62-veredicto-2 (comparten Chrome)."
+   "desde": "2026-10-10T12:24:00-05:00",
+   "nota": "Encolado 12:12; CLI 12:12–12:14 (7d69e59). Agente verificador lanzado 12:24."
   }
  ],
  "riesgos": [

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-10T12:24:00-05:00",
+ "actualizadoEn": "2026-10-10T12:29:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1383,13 +1383,14 @@
    "id": "INC-103",
    "tipo": "INC",
    "modulo": "Propiedades",
-   "etapa": "🔨",
+   "etapa": "✔",
    "fecha": "2026-10-09",
    "severidad": "bajo",
    "titulo": "Ficha de Propiedades: elegir la zona principal de inventario no se guarda hasta pulsar 'Guardar cambios' (sin aviso de cambios sin guardar).",
-   "pendiente": "Lote 65 (estándar), encolado 10-oct 12:12.",
-   "estado": "abierto",
-   "origen": "Observado por el verificador del lote 54; registrado desde el traspaso del chat anterior (traspaso-chat-anterior.md, respuesta 5)."
+   "pendiente": null,
+   "estado": "cerrado",
+   "origen": "Observado por el verificador del lote 54; registrado desde el traspaso del chat anterior (traspaso-chat-anterior.md, respuesta 5).",
+   "cierre": "2026-10-10: lote 65 (7d69e59, p5c65), 65-veredicto 7/7."
   },
   {
    "id": "INC-104",
@@ -5748,13 +5749,61 @@
    "req": "INC-103",
    "categoria": "estándar",
    "resumen": "str-propiedades.html: chip 'Sin guardar' y confirmación en línea al cerrar con la zona principal cambiada.",
-   "estado": "desplegado",
-   "observacion": "Encolado 12:12. CLI 12:12–12:14. Fuera de alcance declarado: salir por el menú del shell no avisa (no cierra la ficha). Verificación después de 62-veredicto-2. Agente verificador (Sonnet) lanzado 12:24.",
+   "estado": "aceptado",
+   "observacion": "Encolado 12:12. CLI 12:12–12:14. Fuera de alcance declarado: salir por el menú del shell no avisa (no cierra la ficha). Verificación después de 62-veredicto-2. Agente verificador (Sonnet) lanzado 12:24. 65-veredicto: aceptado 7/7 (el verificador no anotó hora; leído 12:27). Cómo quedó: chip \"Sin guardar\", botón resaltado y confirmación en línea al salir con la zona principal cambiada. INC-103 cerrado.",
    "costo": {
     "minutosCLI": 2,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 65,
+    "hash": "7d69e591813f076d668bc717c73cfb5f70fd7706",
+    "fecha": "2026-10-10",
+    "horaBogota": "(reloj del sistema; sin hora exacta registrada)",
+    "resultado": "aceptado",
+    "modoVerificacion": "Chrome en produccion, perfil admin (deviceId 3198e288...), solo ficha de zz-verif-Propiedad. Los criterios no dependen de la hora. 3a (node tests/run.js) no se re-ejecuto: se toma del log de la CLI (34/34), dicho aqui y no verificado por mi.",
+    "criterios": [
+     {
+      "c": "3a node tests/run.js verde",
+      "ok": true,
+      "observado": "Solo por el log de la CLI: 34/34. No re-ejecutado por el verificador."
+     },
+     {
+      "c": "3b chip 'Sin guardar' y boton resaltado; al volver a la original desaparecen",
+      "ok": true,
+      "observado": "Al elegir 'zz-verif-Principal · todo el negocio' (guardado: automatica): chip #inv-principal-pend visible, boton 'btn-save pend' con borde/sombra ambar. Al volver a 'Automatica': chip display:none y boton 'btn-save' sin resalte."
+     },
+     {
+      "c": "3c cambio pendiente + intentar salir: aviso en linea, 1er toque no sale; 2do descarta, no se guardo",
+      "ok": true,
+      "observado": "Con cambio pendiente, 1er toque en otra tarjeta (1705, solo lectura): la ficha siguio en zz-verif-Propiedad y aparecio 'Cambiaste la zona principal y no la guardaste · toca de nuevo para descartar (5)' bajo el selector y en la tarjeta. 2do toque: abrio 1705. Al reabrir zz-verif-Propiedad: zona = automatica (valor '') y sin chip. Sin alert/confirm/prompt."
+     },
+     {
+      "c": "3d Guardar cambios sigue guardando",
+      "ok": true,
+      "observado": "En zz-verif-Propiedad: elegir zona dp_muyum184g3ozd + Guardar cambios -> chip y resalte se limpian, valor se mantiene. Restaurado despues a automatica y guardado (valor ''). No recargue para releer del servidor tras el 2o guardado: el estado final se vio en pantalla."
+     },
+     {
+      "c": "3e health esquema 10; paginas ?v=p5c65; consola limpia; sin alert/confirm/prompt",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10. str-propiedades.html: 2 x p5c65, 0 x p5c64; str-app-shell.html: 3 x p5c65, 0 x p5c64. Consola de Propiedades sin errores. Sin alert/confirm/prompt en el HTML de propiedades (0 coincidencias) ni durante la prueba."
+     },
+     {
+      "c": "CLAUDE.md actualizado en el mismo commit",
+      "ok": true,
+      "observado": "CLAUDE.md contiene 'INC-103 (cerrado, instr-65)' y 'p5c65'."
+     },
+     {
+      "c": "declarados vs tocados",
+      "ok": true,
+      "observado": "El log lista 19 archivos tocados (str-propiedades, CLAUDE.md, str-api.js, shell y 15 HTML por el ?v=), explicados por el bump de version; coincide con lo declarado. tests/tablero.test.js conserva p5c64 a proposito (dato del lote 64)."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Sin datos nuevos. Solo se edito zona principal de zz-verif-Propiedad (cambiada y devuelta a automatica). Cero archivos subidos. Un clic de lectura en la tarjeta 1705 (propiedad real) solo para el 2do toque de descartar; sin cambios en ella.",
+    "notas": "Fuera de alcance declarado por la CLI: salir por el menu del shell no avisa (no verificado, no es criterio). Sin cambios a la capa Marco en el commit ni en el log. Chrome: pestana cerrada. No pude escribir en el buzon interno/mensajes.json (sin herramienta de shell en el equipo): el Chat de desarrollo debe leer este veredicto."
+   }
   }
  ],
  "esquema": {
@@ -6298,15 +6347,15 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Traslados, préstamos y devoluciones (movimientos nuevos, [INV-puras], aviso al cerrar el turno)",
-   "estado": "no aceptado",
+   "estado": "desplegado",
    "vista": "esperando a Carlos",
-   "esperaA": "Carlos",
+   "esperaA": "verificador",
    "grupo": "INV2",
    "riesgo": "R-1, R-2",
-   "espera": "abrir los perfiles de Chrome del colaborador y del operador para repetir solo el criterio 11 (62-veredicto-3)",
+   "espera": "62-veredicto-3, solo criterio 11",
    "orden": 102,
    "nota": "62-veredicto-2 (12:25): 14/15; falta el criterio 11 (403 a colaborador y operador) por perfiles no conectados.",
-   "desde": "2026-10-10T12:24:00-05:00",
+   "desde": "2026-10-10T12:29:00-05:00",
    "planTrabajo": "PT-1"
   },
   {
@@ -6615,16 +6664,16 @@
    "req": "INC-103",
    "categoria": "estándar",
    "resumen": "Propiedades: aviso de zona principal sin guardar (chip y confirmación al cerrar)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "planTrabajo": "PT-1",
    "grupo": "Deuda",
    "riesgo": null,
    "espera": null,
    "orden": 101,
-   "desde": "2026-10-10T12:24:00-05:00",
-   "nota": "Encolado 12:12; CLI 12:12–12:14 (7d69e59). Agente verificador lanzado 12:24."
+   "desde": "2026-10-10T12:29:00-05:00",
+   "nota": "Aceptado (65-veredicto, Sonnet, 7/7; leído 12:27)."
   }
  ],
  "riesgos": [

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-09",
+ "actualizadoEn": "2026-10-10",
  "titulo": "Base de conocimiento del modelo de operación",
  "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
  "cobit": {
@@ -610,6 +610,48 @@
    "creditos": "Esta ficha existe para eso.",
    "riesgos": [
     "Los chats no ven el uso semanal: si Carlos no lo informa, nadie entra en modo ahorro a tiempo."
+   ]
+  },
+  {
+   "codigo": "BAI08-l",
+   "nombre": "Lecciones aprendidas y base de conocimiento: dónde, cuándo y cómo se guardan",
+   "dueno": "Arquitecto (el proceso) · cada agente (lo suyo)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-10",
+   "para": "Que lo que aprende cada agente no se pierda al cerrar un chat o una ejecución, quede en un solo lugar según su tipo y lo encuentre el siguiente que lo necesite.",
+   "quien": {
+    "detectan": "todos los agentes y Carlos",
+    "escriben": "cada uno en sus propios archivos; lo del modelo solo el Arquitecto",
+    "aprueba": "Carlos (lo que cambia la forma de trabajar)"
+   },
+   "piezas": [
+    "claude/marco/patrones-codigo.md (Chat de desarrollo)",
+    "CLAUDE.md del código (Agente CLI)",
+    "log\\NN-veredicto.json → lecciones (Agente verificador)",
+    "diseno.json y claude/producto/requerimientos-*.md (Chat de diseño)",
+    "marco-trabajo.json, conocimiento.json e instrucciones.json (Arquitecto)",
+    "interno/mensajes.json (propuestas con asunto 'Lección:')"
+   ],
+   "flujo": [
+    "Error o patrón del código (algo que vuelve a fallar o una trampa del sistema): el Chat de desarrollo lo anota en patrones-codigo.md › errores conocidos al cerrar el INC o el lote; la CLI lo deja en CLAUDE.md en el mismo commit del lote que lo corrige.",
+    "Hallazgo de una verificación: el verificador lo escribe en el campo 'lecciones' de su veredicto; el Chat de desarrollo lo pasa a patrones-codigo.md (código) o lo propone al Arquitecto (modelo).",
+    "Lo aprendido del negocio (preferencias de Carlos, por qué se decidió algo): el Chat de diseño lo deja el mismo día en diseno.json (DA con decisión y motivo) o en el documento del REQ.",
+    "Lección de la forma de trabajar (proceso, agentes, herramientas, permisos): quien la vive la propone por el buzón al Arquitecto con asunto 'Lección: <tema>'; el Arquitecto la presenta a Carlos y, con su sí, la guarda en marco-trabajo.json y la aplica en la ficha, el encargo o el procedimiento afectado.",
+    "Pasos manuales que se repiten: se proponen al Arquitecto como procedimiento ins-NNN.",
+    "Cierre de un plan: el Chat de diseño anota la lección del plan en diseno.json → planes[].cierre; si toca la forma de trabajar, la propone al Arquitecto."
+   ],
+   "reglas": [
+    "Formato de toda lección: fecha · origen (INC, lote, M-n o plan) · qué pasó · causa · regla nueva · dónde quedó aplicada.",
+    "Cuándo: el mismo día en que se cierra el INC, el lote, la verificación o el plan; y siempre que un problema aparezca por segunda vez.",
+    "Un dato, una fuente: cada lección vive en un solo lugar según su tipo; los demás la enlazan, no la copian.",
+    "Nadie edita los archivos de otro rol: se propone por el buzón al dueño.",
+    "Si Carlos dice 'guarda esto como lección', quien lo oye la registra o la propone ese mismo día."
+   ],
+   "instalacion": "No aplica (es un proceso).",
+   "comprobacion": "Revisión periódica del Arquitecto: INC y planes cerrados con su lección en el lugar que corresponde; mensajes 'Lección:' atendidos.",
+   "creditos": "Una lección bien guardada ahorra repetir el error; escribirla es parte del cierre, no un turno aparte.",
+   "riesgos": [
+    "Lecciones solo en la conversación de un chat se pierden en el relevo."
    ]
   }
  ],

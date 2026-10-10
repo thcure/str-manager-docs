@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-10T17:46:00-05:00",
+ "actualizadoEn": "2026-10-10T17:50:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1531,7 +1531,7 @@
    "etapa": "📝",
    "fecha": "2026-10-10",
    "severidad": "bajo",
-   "titulo": "La barra superior del operador muestra además el nombre de la cuenta de Google del perfil (#userName), no el del usuario del STR.",
+   "titulo": "La barra superior muestra además el nombre de la cuenta de Google del perfil (#userName), no el del usuario del STR (visto con operador y con admin de prueba).",
    "causa": "El shell pinta #userName con el displayName de Firebase; tras el lote 67 debería usar el nombre de /api/me.",
    "pendiente": "Ajuste menor en un lote próximo.",
    "estado": "abierto",
@@ -6082,7 +6082,7 @@
    "categoria": "crítico",
    "resumen": "Un usuario, un rol: menús y Equipo desde el rol del servidor (fuera Firestore), Proyecto para admin, invitar admin desde Equipo, guardas 'Sin permiso' en módulos de admin.",
    "estado": "no aceptado",
-   "observacion": "Encolado 15:43 en LENOVO (cmp ok). 15:42 la CLI se detuvo sin tocar nada: faltaba el cruce con Carlos en la cabecera (lección: en un lote crítico, la línea Categoría lleva 'cruce previo con Carlos: fecha, qué'). Cabecera corregida y reencolada 15:44. CLI 16:26–16:35: main adbf94d (p5c66), tests 35/35 (roles.test.js, 49 casos). Fuera de lo declarado, explicado: api/lib/session.php (las reglas nuevas del servidor) y str-propiedades.html (carga str-api.js antes). Decisión de la CLI: un 'superadmin' en MySQL se trata como admin. Verificador crítico lanzado 16:36, primera pasada: a, b, d, e, i; c, f, g, h esperan la invitación de zz-verif-admin (Carlos) y el criterio h, de Carlos. Las ejecuciones del verificador de 16:36 y 17:05 no entregaron nada: llegaron sin las carpetas conectadas y quedaron esperando el permiso de acceso (lo concedió Carlos en la de las 17:39). 67-veredicto (17:44): no aceptado. a, b y e cumplen. d falla: el ítem '⊞ Dashboard' de la barra lateral quedó sin data-roles y el operador abre el Dashboard (INC-109, crítico). i no es verificable: zz-verif-oper no tiene equipo.invitar. Segunda pasada (c, f, g, h) pendiente.",
+   "observacion": "Encolado 15:43 en LENOVO (cmp ok). 15:42 la CLI se detuvo sin tocar nada: faltaba el cruce con Carlos en la cabecera (lección: en un lote crítico, la línea Categoría lleva 'cruce previo con Carlos: fecha, qué'). Cabecera corregida y reencolada 15:44. CLI 16:26–16:35: main adbf94d (p5c66), tests 35/35 (roles.test.js, 49 casos). Fuera de lo declarado, explicado: api/lib/session.php (las reglas nuevas del servidor) y str-propiedades.html (carga str-api.js antes). Decisión de la CLI: un 'superadmin' en MySQL se trata como admin. Verificador crítico lanzado 16:36, primera pasada: a, b, d, e, i; c, f, g, h esperan la invitación de zz-verif-admin (Carlos) y el criterio h, de Carlos. Las ejecuciones del verificador de 16:36 y 17:05 no entregaron nada: llegaron sin las carpetas conectadas y quedaron esperando el permiso de acceso (lo concedió Carlos en la de las 17:39). 67-veredicto (17:44): no aceptado. a, b y e cumplen. d falla: el ítem '⊞ Dashboard' de la barra lateral quedó sin data-roles y el operador abre el Dashboard (INC-109, crítico). i no es verificable: zz-verif-oper no tiene equipo.invitar. Segunda pasada (c, f, g, h) pendiente. 67-veredicto-2 (17:49): c y f cumplen (zz-verif-admin entra como admin y ve todo; Equipo sin editor de roles de Firestore; un rol por usuario); h confirmado por Carlos; g no verificable (réplica). Queda solo d (INC-109).",
    "costo": {
     "minutosCLI": 9,
     "minutosDueno": 0
@@ -6136,6 +6136,44 @@
      "El ítem Dashboard pasó sin rol · data-roles se puso a mano por ítem y el test cubre solo la función pura · regla propuesta: un test que lea str-app-shell.html y compruebe que todo .nav-item con data-panel/openModule tiene data-roles (lista blanca explícita de los que no).",
      "Criterio i sin precondición · zz-verif-oper no tiene equipo.invitar · regla propuesta: antes de lanzar, el Chat de desarrollo confirma los permisos del usuario de prueba que pide el criterio o deja en notas que Carlos los ajustó.",
      "Carpetas no conectadas al arrancar la tarea · la ejecución llegó sin connectedFolders y sin device_bash · regla propuesta: el verificador pide acceso una vez; si se niega, escribe veredicto-bloqueado."
+    ]
+   },
+   "aceptacion2": {
+    "lote": 67,
+    "hash": "adbf94d74e144e2ff0e391e2e4dc295eb9cdc4cc",
+    "fecha": "2026-10-10",
+    "horaBogota": "17:49",
+    "resultado": "no aceptado",
+    "modoVerificacion": "Segunda pasada (c, f, g, h) en producción con Chrome, perfil 'STR admin' (deviceId 63059a77…): barra superior 'zz-verif-admin · Carlos Hospedaje', /api/me rol admin. Solo lectura y navegación; sin datos creados. Reloj real. El resultado combina con la primera pasada (log\\67-veredicto.json): d quedó incumplido (operador ve el Dashboard) e i no verificable; por la regla de las notas el lote no se acepta.",
+    "criterios": [
+     {
+      "c": "c. zz-verif-admin entra como admin y ve todos los módulos (Proyecto, Seg. Proyecto, Portafolio, Usuarios & Roles); /api/me → admin",
+      "ok": true,
+      "observado": "Shell en str-app-shell.html con ?v=p5c66 (único). STRApi.rol()='admin', str-user rol admin, STRApi.get('/me') → nombre zz-verif-admin, rol admin, estado activo. Todos los ítems con data-roles tienen display visible (ninguno oculto por rol). Con los grupos expandidos se ven: Dashboard, Onboarding, Propiedades, Calendario único, grupo Proyecto (Seg. Proyecto, Marco de Trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento), Portafolio, Limpieza & HK, Flujos, Conocimiento, Inventario, Check-in/Out, Mantenimiento, Usuarios & Roles, Configuración. Clic en Seg. Proyecto → carga 'Seguimiento del proyecto STR Manager' (Tablero, Plan de trabajo, Diseño, Ítems, Cambios). /api/health ok, schema_version 10."
+     },
+     {
+      "c": "f. Un solo rol por usuario; sin editor de roles de Firestore ni 'Vincular cuenta' en Equipo",
+      "ok": true,
+      "observado": "Solo lectura (no cambié roles). str-usuarios.html (?v=p5c66) como zz-verif-admin: no existe #fbList, no hay FB_ROLES, renderFbList ni updateDoc en el código; 'profiles' solo aparece en un comentario de retiro (INC-108). Ningún botón ni texto 'Vincular cuenta'. El único selector de rol es #cm-rol del modal de edición (simple, no múltiple: colaborador/operador/admin). STRApi.get('/usuarios') → 6 usuarios, cada uno con un solo campo rol (Andres colaborador, Betty colaborador, Carlos admin, zz-verif-admin admin, zz-verif-colab colaborador, zz-verif-oper operador). El cambio de rol (PUT deja un solo rol) queda cubierto solo por la réplica de tests/roles.test.js: no cuenta como aceptado en producción."
+     },
+     {
+      "c": "g. Invitación de admin aceptada con otra cuenta de Google → 409 sin vincular",
+      "ok": null,
+      "observado": "No verificable: no hay segunda cuenta de Google de prueba. Cubierto solo por la réplica de tests/roles.test.js (409 con otro correo, sesión con el mismo)."
+     },
+     {
+      "c": "h. Carlos entra con su perfil y ve lo mismo; rol admin en shell y /api/me",
+      "ok": true,
+      "observado": "Confirmado por Carlos (16:46, en su perfil; lectura del Chat de desarrollo a su pedido: rol admin, p5c66, menú completo sin nada oculto). El verificador no usó su perfil ni lo repitió."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "Ninguno creado. Solo lectura y navegación. Pestaña cerrada al terminar.",
+    "notas": "Resultado de la segunda pasada: c y f cumplen, h confirmado por Carlos, g no verificable (réplica). El lote sigue 'no aceptado' por la primera pasada: d incumplido (INC crítico ya registrado en log\\67-veredicto.json: el ítem '⊞ Dashboard' del shell no tiene data-roles y el operador lo ve y lo abre; en esta pasada confirmé que ese ítem sigue sin data-roles en p5c66) e i no verificable. No registro INC nuevo: el de d ya existe. Observación fuera de criterio (igual que en la pasada del operador): la barra superior muestra además 'CA Carlos Rodriguez' (#userName) junto al chip 'zz-verif-admin', aunque /api/me da otro correo; parece el nombre de la identidad de Firebase del perfil, revisar. Sin cambios a la capa Marco vistos. Las carpetas de la tarea llegaron sin conectar otra vez: pedí acceso a la cola y a str-manager y se concedió. list_connected_browsers pidió que una persona eligiera; usé select_browser con el deviceId de las notas (elegido por Carlos de antemano).",
+    "lecciones": [
+     "Las carpetas de la tarea vuelven a llegar sin conectar · la ejecución arranca con connectedFolders vacío (segunda vez hoy) · regla propuesta: dejarlo como paso fijo del encargo (pedir acceso una vez a las dos carpetas; si se niega, veredicto-bloqueado).",
+     "Los ítems del menú del shell parecen ocultos aunque el rol los permita · están dentro de grupos colapsados (display:none del padre) · regla propuesta: para comprobar visibilidad por rol, leer el display propio del ítem con data-roles o expandir los grupos antes; no usar offsetHeight.",
+     "fetch('/api/me') directo da 401 · la API usa el token de STRApi, no la cookie · regla propuesta: en verificaciones de solo lectura usar STRApi.get('/me') y STRApi.get('/usuarios')."
     ]
    }
   },
@@ -7052,8 +7090,8 @@
    "riesgo": "R-2",
    "espera": "confirmar si el operador ve el Dashboard; visto bueno al lote de corrección de INC-109",
    "orden": 101,
-   "nota": "a, b, e cumplen; d falla (Dashboard); i no verificable; c, f, g, h pendientes.",
-   "desde": "2026-10-10T17:46:00-05:00",
+   "nota": "a, b, c, e, f cumplen; h confirmado por Carlos; g e i no verificables; falta d (Dashboard visible al operador, INC-109).",
+   "desde": "2026-10-10T17:50:00-05:00",
    "planTrabajo": "PT-7"
   }
  ],

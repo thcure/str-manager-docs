@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v7: escalamiento agrupado por chat)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v8: aviso de cola detenida por fallidas)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -12,6 +12,8 @@
 #      libre, nada en curso y sin movimiento desde hace $VigiaMin min, entre $VigiaDesde y $VigiaHasta h
 #      -> Chat de diseno: "El plan tiene trabajo libre y no hay movimiento desde las HH:MM: retomalo."
 #      Un aviso por episodio y como mucho uno cada $VigiaEntre min (ficha BAI11-d).
+#   5. Cola detenida: un .md sigue en fallidas\ $FallaMin min o mas           -> Chat de desarrollo
+#      (se repite cada $FallaCada min, tambien al Chat de diseno). Estado: fallidas-avisadas.txt
 # El chat de cada destinatario sale de interno/destinatarios.json (lo mantiene el Arquitecto).
 # v4: cada corrida pregunta a GitHub el ultimo commit de main (git ls-remote, ~2 KB); solo si cambio,
 # descarga destinatarios, mensajes y seguimiento de ESE commit (raw/<sha>/..., sin cache vieja) a buzon\cache\.
@@ -60,6 +62,9 @@ $EscMin   = 60    # minutos 'pendiente' tras el aviso -> aviso al Chat de diseno
 $RecCada  = 60    # minutos minimos entre recordatorios al mismo chat
 $EscCada  = 120   # minutos minimos entre escalamientos del mismo chat
 $EstRecD  = Join-Path $Base 'recordados-dest.txt'
+$EstFalla = Join-Path $Base 'fallidas-avisadas.txt'
+$FallaMin  = 15    # minutos que un .md sigue en fallidas\ antes del primer aviso
+$FallaCada = 60    # minutos entre avisos repetidos (con escalamiento al Chat de diseno)
 $EstEscD  = Join-Path $Base 'escalados-dest.txt'
 $EstVigia = Join-Path $Base 'vigia.txt'
 $VigiaMin   = 60    # minutos sin movimiento
@@ -264,6 +269,47 @@ try {
             }
         }
     } catch { Log ('ERROR en vigia: ' + $_.Exception.Message) }
+
+    # --- 5. Cola detenida por un lote en fallidas\ (v8, 10-oct-2026) ---
+    # Mientras haya un .md en fallidas\, ejecutar-cola.ps1 no corre ningun lote. Cuando el despertador lo ve
+    # ahi $FallaMin min seguidos, avisa al Chat de desarrollo; si sigue, repite cada $FallaCada min al
+    # Chat de desarrollo y al Chat de diseno. Estado: fallidas-avisadas.txt (clave|visto desde|ultimo aviso).
+    try {
+        $ahoraF = Get-Date
+        $fall = @(Get-ChildItem -Path (Join-Path $Cola 'fallidas') -Filter '*.md' -File -ErrorAction SilentlyContinue)
+        $prev = @{}
+        if (Test-Path $EstFalla) { foreach ($l in @(Get-Content -Path $EstFalla)) { $q = ([string]$l) -split '\|'; if ($q.Count -ge 3) { $prev[$q[0]] = @($q[1], $q[2]) } } }
+        $lineasF = @()
+        foreach ($f in $fall) {
+            $clave = $f.Name + '@' + $f.LastWriteTime.ToString('yyyyMMddHHmmss')
+            $desde = $ahoraF; $ult = $null
+            if ($prev.ContainsKey($clave)) {
+                try { $desde = [DateTime]::Parse($prev[$clave][0]) } catch { }
+                if ($prev[$clave][1]) { try { $ult = [DateTime]::Parse($prev[$clave][1]) } catch { } }
+            }
+            $toca = (($ahoraF - $desde).TotalMinutes -ge $FallaMin) -and ((-not $ult) -or (($ahoraF - $ult).TotalMinutes -ge $FallaCada))
+            if ($toca) {
+                $num = if ($f.Name -match '^(\d{1,3})-') { $Matches[1] } else { $f.BaseName }
+                $copia = Join-Path $Cola $f.Name
+                $texto = if ((Test-Path $copia) -and ((Get-Item $copia).LastWriteTime -gt $f.LastWriteTime)) {
+                    "La cola esta detenida: hay una copia nueva del lote $num en la cola, pero no corre mientras siga fallidas\$($f.Name). Pidele a Carlos que borre ese archivo."
+                } else {
+                    "La cola esta detenida: el lote $num esta en fallidas\ y no corre ningun lote mientras siga ahi. Revisa log\$($f.BaseName).txt y resuelvelo."
+                }
+                if (Avisar 'Chat de desarrollo' $texto $dest) {
+                    Log "Cola detenida: lote $num en fallidas avisado a Chat de desarrollo."
+                    if ($ult) {
+                        $dv5 = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+                        if ($dv5 -and (Avisar ([string]$dv5.nombre) ('Escalamiento: ' + $texto) $dest)) { Log "Cola detenida: lote $num escalado al Chat de diseno." }
+                    }
+                    $ult = $ahoraF
+                }
+            }
+            $lineasF += ($clave + '|' + $desde.ToString('yyyy-MM-dd HH:mm:ss') + '|' + $(if ($ult) { $ult.ToString('yyyy-MM-dd HH:mm:ss') } else { '' }))
+        }
+        if ($lineasF.Count -gt 0) { Set-Content -Path $EstFalla -Value $lineasF }
+        elseif (Test-Path $EstFalla) { Remove-Item -Path $EstFalla -Force -ErrorAction SilentlyContinue }
+    } catch { Log ('ERROR en fallidas: ' + $_.Exception.Message) }
 } finally {
     Remove-Item -Path $Lock -Force -ErrorAction SilentlyContinue
 }

@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v6: respeta la pausa de jornada del panel)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v7: escalamiento agrupado por chat)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -56,7 +56,11 @@ $EstHora  = Join-Path $Base 'avisados-hora.txt'
 $EstRec   = Join-Path $Base 'recordados.txt'
 $EstEsc   = Join-Path $Base 'escalados.txt'
 $RecMin   = 30    # minutos 'pendiente' tras el aviso -> recordatorio al destinatario (una vez)
-$EscMin   = 60    # minutos 'pendiente' tras el aviso -> aviso al Chat de diseno (una vez)
+$EscMin   = 60    # minutos 'pendiente' tras el aviso -> aviso al Chat de diseno
+$RecCada  = 60    # minutos minimos entre recordatorios al mismo chat
+$EscCada  = 120   # minutos minimos entre escalamientos del mismo chat
+$EstRecD  = Join-Path $Base 'recordados-dest.txt'
+$EstEscD  = Join-Path $Base 'escalados-dest.txt'
 $EstVigia = Join-Path $Base 'vigia.txt'
 $VigiaMin   = 60    # minutos sin movimiento
 $VigiaEntre = 120   # minutos minimos entre avisos
@@ -135,29 +139,43 @@ try {
         }
     } catch { Log ('ERROR en buzon: ' + $_.Exception.Message) }
 
-    # --- 1b. Escalamiento: mensajes avisados que siguen 'pendiente' (regla 3 de INC-104, 10-oct-2026) ---
+    # --- 1b. Escalamiento agrupado por destinatario (v7, 10-oct-2026) ---
+    # Por chat destinatario: si tiene mensajes avisados que siguen 'pendiente' mas de $RecMin min, UN recordatorio
+    # con la lista (como mucho cada $RecCada min); si siguen mas de $EscMin min, UN aviso al Chat de diseno con la
+    # lista (como mucho cada $EscCada min). Asi una sola causa no genera un aviso por mensaje.
     try {
         $ahoraE = Get-Date
         if ((Test-Path $EstHora) -and $ahoraE.Hour -ge $VigiaDesde -and $ahoraE.Hour -lt $VigiaHasta) {
             $horas = @{}
             foreach ($l in @(Get-Content -Path $EstHora)) { $p2 = ([string]$l) -split '\|'; if ($p2.Count -gt 1) { try { $horas[$p2[0]] = [DateTime]::Parse($p2[1]) } catch { } } }
-            $rec = if (Test-Path $EstRec) { @(Get-Content -Path $EstRec) } else { @() }
-            $esc = if (Test-Path $EstEsc) { @(Get-Content -Path $EstEsc) } else { @() }
+            function Leer-Marcas($ruta) { $h = @{}; if (Test-Path $ruta) { foreach ($l in @(Get-Content -Path $ruta)) { $q = ([string]$l) -split '\|'; if ($q.Count -gt 1) { try { $h[$q[0]] = [DateTime]::Parse($q[1]) } catch { } } } }; return $h }
+            $recD = Leer-Marcas $EstRecD
+            $escD = Leer-Marcas $EstEscD
             $dis = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+            $porDest = @{}
             foreach ($m in $msgs) {
                 $id = [string]$m.id
                 if ($m.estado -ne 'pendiente' -or -not $horas.ContainsKey($id)) { continue }
                 $min = ($ahoraE - $horas[$id]).TotalMinutes
-                $hh = $horas[$id].ToString('HH:mm')
-                if ($min -ge $RecMin -and $rec -notcontains $id) {
-                    $t1 = "Recordatorio: el mensaje $id del buzon sigue pendiente desde las $hh. Atiendelo o responde por que espera."
-                    if (Avisar ([string]$m.para) $t1 $dest) { Add-Content -Path $EstRec -Value $id; Log "Recordatorio de $id a $($m.para)." }
+                if ($min -lt $RecMin) { continue }
+                $para = [string]$m.para
+                if (-not $porDest.ContainsKey($para)) { $porDest[$para] = @{ rec = @(); esc = @() } }
+                $porDest[$para].rec += $id
+                if ($min -ge $EscMin) { $porDest[$para].esc += $id }
+            }
+            foreach ($para in $porDest.Keys) {
+                $g = $porDest[$para]
+                if ($g.rec.Count -gt 0 -and (-not $recD.ContainsKey($para) -or ($ahoraE - $recD[$para]).TotalMinutes -ge $RecCada)) {
+                    $t1 = "Recordatorio: tienes " + $g.rec.Count + " mensaje(s) pendiente(s) en el buzon (" + ($g.rec -join ', ') + "). Atiendelos o responde por que esperan."
+                    if (Avisar $para $t1 $dest) { $recD[$para] = $ahoraE; Log ("Recordatorio a $para de " + ($g.rec -join ',') + ".") }
                 }
-                if ($min -ge $EscMin -and $esc -notcontains $id -and $dis -and ([string]$m.para) -notmatch '^Chat de dise.o$') {
-                    $t2 = "Escalamiento: el mensaje $id para " + [string]$m.para + " lleva mas de $EscMin minutos sin atender (avisado a las $hh). Revisalo como jefe de proyecto."
-                    if (Avisar ([string]$dis.nombre) $t2 $dest) { Add-Content -Path $EstEsc -Value $id; Log "Escalamiento de $id al Chat de diseno." }
+                if ($g.esc.Count -gt 0 -and $dis -and $para -notmatch '^Chat de dise.o$' -and (-not $escD.ContainsKey($para) -or ($ahoraE - $escD[$para]).TotalMinutes -ge $EscCada)) {
+                    $t2 = "Escalamiento: " + $para + " tiene " + $g.esc.Count + " mensaje(s) sin atender hace mas de $EscMin minutos (" + ($g.esc -join ', ') + "). Revisalo como jefe de proyecto; si la causa es una sola, tratala una vez."
+                    if (Avisar ([string]$dis.nombre) $t2 $dest) { $escD[$para] = $ahoraE; Log ("Escalamiento de $para al Chat de diseno: " + ($g.esc -join ',') + ".") }
                 }
             }
+            Set-Content -Path $EstRecD -Value @($recD.Keys | ForEach-Object { $_ + '|' + $recD[$_].ToString('yyyy-MM-dd HH:mm:ss') })
+            Set-Content -Path $EstEscD -Value @($escD.Keys | ForEach-Object { $_ + '|' + $escD[$_].ToString('yyyy-MM-dd HH:mm:ss') })
         }
     } catch { Log ('ERROR en escalamiento: ' + $_.Exception.Message) }
 

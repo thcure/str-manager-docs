@@ -432,14 +432,15 @@
    "flujo": [
     "Relevo: mensaje al chat que sale; termina lo que tiene en curso, escribe su traspaso, deja 'Traspaso listo: arranca' para el nuevo y deja de escribir.",
     "El Arquitecto crea el chat en el proyecto: equipo LENOVO, modelo según el rol, permisos Auto; primer mensaje con el arranque del rol.",
-    "Carlos crea el token del chat y se lo pega; el chat comprueba git push --dry-run y da su identificador cse_….",
+    "Carlos crea el token del chat y lo guarda en str-instr-cola\\claves\\<rol>.txt (un archivo por chat, fuera de todo repositorio); el chat comprueba git push --dry-run y da su identificador cse_….",
     "El Arquitecto registra la sesión en destinatarios.json y lb-sesiones; el despertador empieza a avisarle.",
     "El chat nuevo confirma en el buzón; el anterior queda solo de consulta."
    ],
    "reglas": [
     "Nunca dos chats escribiendo el mismo archivo: el nuevo solo lee hasta recibir el traspaso.",
     "Los chats del proyecto no tienen selector de repositorios: la escritura es con token propio.",
-    "Hacerlo en un punto limpio (nada en la cola ni en verificación)."
+    "Hacerlo en un punto limpio (nada en la cola ni en verificación).",
+    "Los tokens viven en claves\\ (desarrollo.txt, diseno.txt, arquitecto.txt), no en las conversaciones: al compactarse, un chat pierde lo que se le pegó (lección del 10-oct-2026). El Panel STR muestra el vencimiento de cada uno y avisa 7 días antes."
    ],
    "instalacion": "ins-007",
    "comprobacion": "buzon.log muestra 'M-n avisado a <rol>' y el chat nuevo respondió en el buzón.",
@@ -680,7 +681,8 @@
    "reglas": [
     "El panel no inicia sesión ni guarda contraseñas.",
     "No usa Claude: no gasta créditos.",
-    "Los nombres de los perfiles se ajustan en panel-config.json (nombre visible en Chrome o carpeta, por ejemplo Default)."
+    "Los nombres de los perfiles se ajustan en panel-config.json (nombre visible en Chrome o carpeta, por ejemplo Default).",
+    "Estado muestra el vencimiento de los tres tokens (GitHub lo informa en cada consulta); Empezar jornada avisa si alguno vence en 7 días o menos o no funciona."
    ],
    "instalacion": "Archivos en C:\\Users\\ktcol\\Downloads\\str-instr-cola\\panel\\; acceso directo 'Panel STR' en el escritorio (comando en comandos-usuario.md).",
    "comprobacion": "Abrir el panel → Estado; con la jornada en pausa, buzon.log no registra avisos nuevos.",
@@ -746,6 +748,10 @@
     {
      "que": "Panel de jornada",
      "valor": "str-instr-cola\\panel\\ (panel-str.ps1, panel-config.json, lanzar-panel.vbs) + acceso directo 'Panel STR' en el escritorio; ejecutar-cola.ps1 y vigilar-buzon.ps1 v6 respetan el archivo PAUSA"
+    },
+    {
+     "que": "Tokens",
+     "valor": "str-instr-cola\\claves\\ (desarrollo.txt, diseno.txt, arquitecto.txt; solo los escribe Carlos; LEEME.txt explica). Fuera de todo repositorio."
     }
    ],
    "nota": "Si se reinstala la extensión de Chrome, cambian los deviceId: el Chat de desarrollo actualiza DA-24 y el Arquitecto esta línea base."

@@ -94,6 +94,39 @@ function Perfiles-Abiertos {
     return $abiertos
 }
 
+# Tokens de GitHub en claves\ : GitHub informa su vencimiento en la cabecera github-authentication-token-expiration.
+$Claves = Join-Path $Cola 'claves'
+function Estado-Tokens {
+    $r = @()
+    foreach ($par in @(@('Desarrollo','desarrollo.txt'), @('Diseno','diseno.txt'), @('Arquitecto','arquitecto.txt'))) {
+        $ruta = Join-Path $Claves $par[1]
+        $o = [pscustomobject]@{ chat = $par[0]; dias = $null; texto = '' }
+        if (-not (Test-Path $ruta)) { $o.texto = 'sin archivo'; $r += $o; continue }
+        $raw = Get-Content -Path $ruta -Raw -ErrorAction SilentlyContinue
+        $tok = if ($raw) { ([string]$raw).Trim() } else { '' }
+        if (-not $tok) { $o.texto = 'archivo vacio'; $r += $o; continue }
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $resp = Invoke-WebRequest -Uri 'https://api.github.com/rate_limit' -UseBasicParsing -Headers @{ Authorization = "Bearer $tok"; 'User-Agent' = 'panel-str' } -ErrorAction Stop
+            $exp = [string]$resp.Headers['github-authentication-token-expiration']
+            if (-not $exp) { $o.texto = 'valido, sin fecha de vencimiento'; $r += $o; continue }
+            $d = [DateTime]::Parse(($exp -replace ' UTC$', 'Z')).ToLocalTime()
+            $o.dias = [math]::Floor(($d - (Get-Date)).TotalDays)
+            $o.texto = 'vence el ' + $d.ToString('dd-MM-yyyy HH:mm') + ' (' + $o.dias + ' dias)'
+        } catch {
+            $o.dias = -1; $o.texto = 'NO FUNCIONA (vencido o revocado): regeneralo en GitHub y reemplaza ' + $par[1]
+        }
+        $r += $o
+    }
+    return $r
+}
+
+function Avisos-Tokens {
+    $a = @()
+    foreach ($t in (Estado-Tokens)) { if ($t.dias -ne $null -and $t.dias -le 7) { $a += ('ATENCION token de ' + $t.chat + ': ' + $t.texto) } elseif ($t.texto -like 'sin archivo*' -or $t.texto -like 'archivo vacio*') { $a += ('ATENCION token de ' + $t.chat + ': ' + $t.texto) } }
+    return $a
+}
+
 function Ultima-Linea($ruta) {
     if (Test-Path $ruta) { $l = Get-Content -Path $ruta -Tail 1 -ErrorAction SilentlyContinue; if ($l) { return [string]$l } }
     return '-'
@@ -127,6 +160,9 @@ function Texto-Estado {
         } catch { }
     }
     [void]$s.AppendLine('Despertador, ultimo aviso: ' + (Ultima-Linea (Join-Path $Buzon 'buzon.log')))
+    [void]$s.AppendLine('')
+    [void]$s.AppendLine('Tokens de GitHub:')
+    foreach ($t in (Estado-Tokens)) { [void]$s.AppendLine('  ' + $t.chat + ': ' + $t.texto + $(if ($t.dias -ne $null -and $t.dias -le 7) { '  <-- RENOVAR' } else { '' })) }
     [void]$s.AppendLine('')
     [void]$s.AppendLine('Perfiles de Chrome:')
     $faltan = $false
@@ -163,6 +199,7 @@ function Empezar {
         }
     }
     $msg = "Jornada ACTIVA. Se abrieron los perfiles que estaban cerrados (puede tardar unos segundos en verse en Estado).`r`nSi alguno pide iniciar sesion, entra con el usuario de ese perfil:`r`n  Administrador: tu usuario`r`n  Colaborador: zz-verif-colab`r`n  Operador: zz-verif-oper"
+    $avisos += (Avisos-Tokens)
     if ($avisos.Count) { $msg += "`r`n`r`n" + ($avisos -join "`r`n") }
     return $msg
 }

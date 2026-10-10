@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-09; v4: cada minuto y sin cache de GitHub)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v5: escalamiento de mensajes sin atender)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -26,6 +26,8 @@
 #   veredictos-avisados.txt  nombres de veredictos ya avisados
 #   cola-lineas.txt          lineas de _resumen.txt ya revisadas
 #   vigia.txt                ultimo episodio avisado por el vigia (movimiento|hora del aviso)
+#   avisados-hora.txt       id|hora en que se aviso cada mensaje (para el escalamiento)
+#   recordados.txt / escalados.txt  mensajes ya recordados (30 min) o escalados al Chat de diseno (60 min)
 #   sha.txt                  ultimo commit visto de str-manager-docs|hora en que se vio por primera vez
 #   sinsesion.txt            mensajes ya anotados como 'sin sesion registrada' (para no repetir el log)
 #   cache\                    copia de los JSON del ultimo commit visto
@@ -50,6 +52,11 @@ $RepoGit  = 'https://github.com/thcure/str-manager-docs.git'
 $EstSha   = Join-Path $Base 'sha.txt'
 $EstSinS  = Join-Path $Base 'sinsesion.txt'
 $CacheDir = Join-Path $Base 'cache'
+$EstHora  = Join-Path $Base 'avisados-hora.txt'
+$EstRec   = Join-Path $Base 'recordados.txt'
+$EstEsc   = Join-Path $Base 'escalados.txt'
+$RecMin   = 30    # minutos 'pendiente' tras el aviso -> recordatorio al destinatario (una vez)
+$EscMin   = 60    # minutos 'pendiente' tras el aviso -> aviso al Chat de diseno (una vez)
 $EstVigia = Join-Path $Base 'vigia.txt'
 $VigiaMin   = 60    # minutos sin movimiento
 $VigiaEntre = 120   # minutos minimos entre avisos
@@ -121,10 +128,36 @@ try {
                     continue
                 }
                 $texto = "Revisa el buzon (interno/mensajes.json): tienes el mensaje pendiente $id."
-                if (Avisar ([string]$m.para) $texto $dest) { Add-Content -Path $EstMsg -Value $id; Log "$id avisado a $($m.para)." }
+                if (Avisar ([string]$m.para) $texto $dest) { Add-Content -Path $EstMsg -Value $id; Add-Content -Path $EstHora -Value ($id + '|' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')); Log "$id avisado a $($m.para)." }
             }
         }
     } catch { Log ('ERROR en buzon: ' + $_.Exception.Message) }
+
+    # --- 1b. Escalamiento: mensajes avisados que siguen 'pendiente' (regla 3 de INC-104, 10-oct-2026) ---
+    try {
+        $ahoraE = Get-Date
+        if ((Test-Path $EstHora) -and $ahoraE.Hour -ge $VigiaDesde -and $ahoraE.Hour -lt $VigiaHasta) {
+            $horas = @{}
+            foreach ($l in @(Get-Content -Path $EstHora)) { $p2 = ([string]$l) -split '\|'; if ($p2.Count -gt 1) { try { $horas[$p2[0]] = [DateTime]::Parse($p2[1]) } catch { } } }
+            $rec = if (Test-Path $EstRec) { @(Get-Content -Path $EstRec) } else { @() }
+            $esc = if (Test-Path $EstEsc) { @(Get-Content -Path $EstEsc) } else { @() }
+            $dis = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+            foreach ($m in $msgs) {
+                $id = [string]$m.id
+                if ($m.estado -ne 'pendiente' -or -not $horas.ContainsKey($id)) { continue }
+                $min = ($ahoraE - $horas[$id]).TotalMinutes
+                $hh = $horas[$id].ToString('HH:mm')
+                if ($min -ge $RecMin -and $rec -notcontains $id) {
+                    $t1 = "Recordatorio: el mensaje $id del buzon sigue pendiente desde las $hh. Atiendelo o responde por que espera."
+                    if (Avisar ([string]$m.para) $t1 $dest) { Add-Content -Path $EstRec -Value $id; Log "Recordatorio de $id a $($m.para)." }
+                }
+                if ($min -ge $EscMin -and $esc -notcontains $id -and $dis -and ([string]$m.para) -notmatch '^Chat de dise.o$') {
+                    $t2 = "Escalamiento: el mensaje $id para " + [string]$m.para + " lleva mas de $EscMin minutos sin atender (avisado a las $hh). Revisalo como jefe de proyecto."
+                    if (Avisar ([string]$dis.nombre) $t2 $dest) { Add-Content -Path $EstEsc -Value $id; Log "Escalamiento de $id al Chat de diseno." }
+                }
+            }
+        }
+    } catch { Log ('ERROR en escalamiento: ' + $_.Exception.Message) }
 
     # --- 2. Veredictos del verificador ---
     try {

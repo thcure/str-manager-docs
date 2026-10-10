@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-10T12:29:00-05:00",
+ "actualizadoEn": "2026-10-10T12:32:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -5239,7 +5239,7 @@
    "categoria": "normal",
    "resumen": "Inventario: movimientos traslado/prestamo/devolucion (servidor: solo admin u operador con inventario.editar), existencias con traslados y préstamos en [INV-puras], Préstamos abiertos, aviso al cerrar el turno en HK.",
    "estado": "no aceptado",
-   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104. 62-veredicto-2 (12:25): no aceptado solo por el criterio 11 no verificable (perfiles de colaborador y operador no conectados); 1–10 y 12–15 cumplen en producción. INC-104 cerrado; INC-107 (bajo) registrado.",
+   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104. 62-veredicto-2 (12:25): no aceptado solo por el criterio 11 no verificable (perfiles de colaborador y operador no conectados); 1–10 y 12–15 cumplen en producción. INC-104 cerrado; INC-107 (bajo) registrado. 62-veredicto-3 (~12:35): criterio 11 sigue no verificable — sesión del colaborador vencida; perfil operador muestra \"portal como administrador\" y el modo automático bloqueó JavaScript en esa pestaña.",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": 0
@@ -5345,6 +5345,31 @@
     ],
     "datosDePrueba": "Creados: zonas zz-verif-A (dp_zzv62a) y zz-verif-B (dp_zzv62b); movimientos zz-verif- (compras 10 Papel, 1 Equipo, 4 Sábana; traslado de 4 Papel; traslado del juego; préstamo y devolución del Equipo; préstamo y devolución de la Carreta; los movimientos no se borran) = 9 movimientos nuevos, total 19 en la base. Reactivados y vueltos a dejar inactivos: zonas zz-verif-A, zz-verif-B y zz-verif-Carreta; artículos zz-verif-Papel, -Equipo y -Sábana; grupo zz-verif-Juego 1. Préstamos abiertos al terminar: 0. Turno sh-res-1791487807449 de zz-verif-Propiedad quedó 'completado' (cerrado por la prueba del criterio 9; antes figuraba en curso en pantalla). Sin archivos subidos. zz-verif-Principal sigue activa como antes.",
     "notas": "Sin cambios a la capa Marco detectados (no se tocaron instrucciones.json, marco-trabajo.json, cobit.json, elementos.json ni comandos-usuario.md en los archivos revisados). CLAUDE.md actualizado en el commit 9728725 según el log (mtime 9-oct 15:52-16:03); no se pudo comparar con el diff de git. Archivos declarados vs tocados: sin diferencias inexplicadas en el log. Para aceptar: repetir solo el criterio 11 con los perfiles colaborador y operador conectados (archivoVeredicto nuevo, p. ej. log\\62-veredicto-3.json). El servidor no recalcula saldo (declarado); sugerencia: validarlo en PHP en un lote futuro. En el criterio 13 el texto 'los 5 movimientos nuevos' se refiere a 2 traslados, 2 préstamos y 1 devolución existentes al momento del export (la devolución de la Carreta se hizo después)."
+   },
+   "aceptacion3": {
+    "lote": 62,
+    "hash": "9728725cb3c4cc6b6a6a2f1e08768a47be453318",
+    "fecha": "2026-10-10",
+    "horaBogota": "~12:35",
+    "resultado": "no aceptado (criterio 11 sigue no verificable en producción; los demás criterios cumplieron en 62-veredicto-2)",
+    "modoVerificacion": "Chrome, perfiles colaborador (deviceId 5d576fcc…) y operador (63059a77…), seleccionados con select_browser. Reloj real. No se escribió ningún dato.",
+    "criterios": [
+     {
+      "c": "11 colaborador y operador sin inventario.editar reciben 403 al crear traslado",
+      "ok": null,
+      "observado": "Colaborador: portal.html muestra usuario zz-verif-colab, pero STRApi.token() = false; STRApi.get('/api/me') y GET /api/col/inv-movimientos responden 'Sesión vencida'; un PUT sin token no prueba el 403 de permisos (daría 401). No se inició sesión ni se escribieron contraseñas. El PUT del traslado de prueba se envió con esa sesión sin token y no se creó movimiento (respuesta 'Sesión vencida'). Operador: portal.html muestra usuario zz-verif-oper, pero con el texto 'Estás viendo el portal como administrador; elige un colaborador…' (sin confirmar); la ejecución de JavaScript en esa pestaña fue denegada por el clasificador de permisos del modo automático (Modify Shared Resources), así que no se hizo el PUT ni se pudo leer su token. No se buscó otra vía."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Lote 62: criterio 11 sigue sin verificar en producción (sesión del colaborador vencida; JS bloqueado en perfil operador)",
+      "nivel": "medio",
+      "causa": "Perfil colaborador sin token (sesión vencida; reabrir sesión es cosa de Carlos). Perfil operador: el modo automático de la herramienta bloqueó javascript_tool; además la página lo muestra con aviso de 'portal como administrador', hay que aclarar con qué rol real corre esa sesión. No es defecto del código; réplica en tests (permisos-col 74 OK) da 403.",
+      "observado": "Colaborador: {tok:false}, 'Sesión vencida' en /api/me. Operador: 'Permission for this action was denied by the Claude Code auto mode classifier. Reason: [Modify Shared Resources]'."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado ni modificado. Pestañas de Chrome cerradas.",
+    "notas": "Para repetir: Carlos renueva la sesión de zz-verif-colab y confirma que zz-verif-oper entra como operador (no admin) y permite JS en ese perfil; nuevo archivoVeredicto (p. ej. log\\62-veredicto-4.json). Sin cambios a la capa Marco detectados (no se revisaron archivos esta vez)."
    }
   },
   {
@@ -6347,15 +6372,15 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Traslados, préstamos y devoluciones (movimientos nuevos, [INV-puras], aviso al cerrar el turno)",
-   "estado": "desplegado",
+   "estado": "no aceptado",
    "vista": "esperando a Carlos",
-   "esperaA": "verificador",
+   "esperaA": "Carlos",
    "grupo": "INV2",
    "riesgo": "R-1, R-2",
-   "espera": "62-veredicto-3, solo criterio 11",
+   "espera": "renovar la sesión de zz-verif-colab y confirmar que zz-verif-oper entra como operador (no admin); luego 62-veredicto-4 solo criterio 11",
    "orden": 102,
    "nota": "62-veredicto-2 (12:25): 14/15; falta el criterio 11 (403 a colaborador y operador) por perfiles no conectados.",
-   "desde": "2026-10-10T12:29:00-05:00",
+   "desde": "2026-10-10T12:32:00-05:00",
    "planTrabajo": "PT-1"
   },
   {

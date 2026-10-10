@@ -77,6 +77,12 @@ function Lista-Perfiles {
 
 function Perfiles-Abiertos {
     $abiertos = @{}
+    # Chrome anota en Local State los perfiles con ventana abierta (last_active_profiles).
+    try {
+        $ls = Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data\Local State'
+        $j = Get-Content -Path $ls -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($x in @($j.profile.last_active_profiles)) { if ($x) { $abiertos[[string]$x] = $true } }
+    } catch { }
     try {
         $procs = Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" -ErrorAction Stop
         foreach ($pr in $procs) {
@@ -111,7 +117,12 @@ function Texto-Estado {
         try {
             $v = Get-Content -Path $vj -Raw -Encoding UTF8 | ConvertFrom-Json
             $ver = Join-Path $LogDir ([string]$v.archivoVeredicto)
-            $est = if (Test-Path $ver) { 'con veredicto' } else { 'VERIFICANDO o por verificar' }
+            if (Test-Path $ver) { $est = 'con veredicto (' + [string]$v.archivoVeredicto + ')' }
+            else {
+                $ult = Get-ChildItem -Path $LogDir -Filter ([string]$v.lote + '-veredicto*.json') -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
+                $est = 'preparada o en curso (espera ' + [string]$v.archivoVeredicto + ')'
+                if ($ult) { $est += '; ultimo veredicto: ' + $ult.Name + ' ' + $ult.LastWriteTime.ToString('HH:mm') }
+            }
             [void]$s.AppendLine('Verificacion: lote ' + $v.lote + ' - ' + $est)
         } catch { }
     }
@@ -151,7 +162,7 @@ function Empezar {
             }
         }
     }
-    $msg = "Jornada ACTIVA. Se abrieron los perfiles que estaban cerrados.`r`nSi alguno pide iniciar sesion, entra con el usuario de ese perfil:`r`n  Administrador: tu usuario`r`n  Colaborador: zz-verif-colab`r`n  Operador: zz-verif-oper"
+    $msg = "Jornada ACTIVA. Se abrieron los perfiles que estaban cerrados (puede tardar unos segundos en verse en Estado).`r`nSi alguno pide iniciar sesion, entra con el usuario de ese perfil:`r`n  Administrador: tu usuario`r`n  Colaborador: zz-verif-colab`r`n  Operador: zz-verif-oper"
     if ($avisos.Count) { $msg += "`r`n`r`n" + ($avisos -join "`r`n") }
     return $msg
 }

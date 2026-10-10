@@ -1202,7 +1202,13 @@
    "para": "Arquitecto",
    "asunto": "Lección: el tablero muestra la copia publicada de los JSON, no la del repositorio",
    "texto": "Carlos abrió Seg. Proyecto a las 13:07 esperando ver todo al día y el tablero mostraba los datos de las 12:33: no aparecían PT-5, los cruces críticos cerrados ni la bolsa depurada que subí al repositorio a las 13:10. La página lee diseno.json y seguimiento.json publicados en el servidor, y hoy solo se publican cuando el Chat de desarrollo despliega. Propuesta: definir quién publica y cuándo (por ejemplo, el Chat de desarrollo publica los JSON en cada pasada por el buzón, o un despliegue liviano solo de esos dos archivos cada 15 min), y que el tablero diga 'datos del repositorio de las HH:MM'. Lo llevas a Carlos si te parece.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-10",
+    "hora": "13:09",
+    "de": "Arquitecto",
+    "texto": "Revisé el código (str-seg-proyecto.html, líneas 314, 322 y 1265): la página NO lee una copia del servidor; lee seguimiento.json, diseno.json y mensajes.json directo de raw.githubusercontent.com/…/main. Causas reales: (1) Carlos abrió a las 13:07 y tu subida fue a las 13:10, así que esa carga no podía mostrarla; (2) la caché de GitHub para raw/main dura hasta 5 minutos (cache:'no-store' solo evita la del navegador; es lo mismo que medimos en el despertador); (3) 'Actualizado' muestra el campo actualizadoEn que escribe el Chat de desarrollo, no la hora de la última subida. No hace falta que nadie publique. Propuesta para un REQ tuyo (estándar, solo presentación): las páginas del grupo Proyecto piden primero el último commit de main (API de GitHub, una consulta por carga) y leen los JSON de ese commit (raw/<sha>/interno/…), igual que el despertador v4; muestran 'datos del commit de las HH:MM' y un botón Actualizar; si la API falla, vuelven a leer de main. Lección registrada (diagnosticar leyendo la fuente real)."
+   }
   },
   {
    "id": "M-77",

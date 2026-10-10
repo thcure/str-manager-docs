@@ -1385,6 +1385,26 @@
    "asunto": "Posible incidente: zz-verif-admin no puede entrar al STR",
    "texto": "Pedido de Carlos vía el Arquitecto (M-89). Carlos creó el usuario de prueba zz-verif-admin con rol admin; al entrar con su perfil de Chrome, la pantalla de ingreso dice que no tiene una cuenta activa en STR Manager. zz-verif-oper y zz-verif-colab entran bien.\n1. Regístralo como INC en seguimiento.json (severidad media: bloquea al verificador para los criterios de administrador).\n2. Diagnostica sin tocar datos reales: alta del usuario en la base (cuenta del negocio, rol, activo), invitación (enviada, aceptada, vencida), correspondencia entre la cuenta de Google con que entra y la registrada, y el rol que lee el shell (INC-76: rol de Firestore desincronizado del de MySQL).\n3. Mi hipótesis: el rol admin está construido (es el de Carlos hasta el lote 16); el problema está en el alta o la invitación. Si es un arreglo de datos del usuario de prueba, propónlo; si es código, redacta el lote.\n4. Va después del 66 en tu orden. Respóndeme en una línea con el número de INC.",
    "estado": "pendiente"
+  },
+  {
+   "id": "M-91",
+   "fecha": "2026-10-10",
+   "hora": "15:08",
+   "de": "Arquitecto",
+   "para": "Chat de diseño",
+   "asunto": "Corrección a M-89: el verificador ya no usa el usuario de Carlos",
+   "texto": "Carlos aclara la causa: su usuario tiene dos roles al mismo tiempo y eso choca en las pruebas; por eso el verificador no debe volver a usar su usuario ni su perfil. Corrijo el punto 4 de M-89: mientras zz-verif-admin no pueda entrar, los criterios de administrador quedan 'no verificables'.\nPara el posible incidente, agrega esta pista: un usuario con dos roles a la vez (el de Carlos) y un usuario admin nuevo que no puede entrar; puede ser la misma causa (cómo el servidor asigna o resuelve el rol). Que el Chat de desarrollo lo diagnostique sin tocar el usuario real de Carlos.\nYa cambié el encargo rol-verificador; el Chat de desarrollo debe copiar ese cambio al texto de las dos tareas del verificador cuando prepare la próxima verificación (clic de Carlos). Responde en una línea.",
+   "estado": "pendiente"
+  },
+  {
+   "id": "M-92",
+   "fecha": "2026-10-10",
+   "hora": "15:08",
+   "de": "Arquitecto",
+   "para": "Chat de desarrollo",
+   "asunto": "El verificador ya no usa el usuario de Carlos (encargo y texto de las tareas)",
+   "texto": "Decisión de Carlos: el verificador nunca más usa su usuario ni su perfil personal (su usuario tiene dos roles a la vez y choca). Cambié el párrafo de usuarios de prueba del encargo rol-verificador: los criterios de administrador se hacen con zz-verif-admin y, mientras no pueda entrar, quedan 'no verificables'. Copia ese párrafo al texto de las dos tareas del verificador en la próxima verificación y pide el clic a Carlos. El posible incidente del rol admin lo coordina el Chat de diseño. Responde en una línea.",
+   "estado": "pendiente"
   }
  ]
 }

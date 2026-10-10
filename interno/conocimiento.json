@@ -653,6 +653,41 @@
    "riesgos": [
     "Lecciones solo en la conversación de un chat se pierden en el relevo."
    ]
+  },
+  {
+   "codigo": "APO01.10-j",
+   "nombre": "Panel de jornada (Panel STR)",
+   "dueno": "Arquitecto (herramienta) · Carlos (lo usa)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-10",
+   "para": "Que Carlos empiece y termine la jornada con un clic: con la jornada activa trabajan la cola, el despertador y los perfiles de prueba; en pausa nadie despierta a los chats y no hay consumo.",
+   "quien": {
+    "usa": "Carlos",
+    "mantiene": "Arquitecto"
+   },
+   "piezas": [
+    "herramientas/panel/panel-str.ps1",
+    "herramientas/panel/panel-config.json",
+    "herramientas/panel/lanzar-panel.vbs",
+    "archivo PAUSA en la carpeta de la cola",
+    "ejecutar-cola.ps1 y vigilar-buzon.ps1 (respetan PAUSA)"
+   ],
+   "flujo": [
+    "Empezar jornada: borra PAUSA y abre los perfiles de Chrome de administrador, colaborador y operador con el STR; si alguno pide sesión, Carlos entra con ese usuario.",
+    "Terminar jornada: crea PAUSA; el lote que esté corriendo termina, no empieza otro y el despertador deja de avisar (incluidos vigía y escalamiento).",
+    "Estado: jornada, cola, lotes esperando o fallidos, último lote, verificación en curso, último aviso del despertador y perfiles abiertos."
+   ],
+   "reglas": [
+    "El panel no inicia sesión ni guarda contraseñas.",
+    "No usa Claude: no gasta créditos.",
+    "Los nombres de los perfiles se ajustan en panel-config.json (nombre visible en Chrome o carpeta, por ejemplo Default)."
+   ],
+   "instalacion": "Archivos en C:\\Users\\ktcol\\Downloads\\str-instr-cola\\panel\\; acceso directo 'Panel STR' en el escritorio (comando en comandos-usuario.md).",
+   "comprobacion": "Abrir el panel → Estado; con la jornada en pausa, buzon.log no registra avisos nuevos.",
+   "creditos": "Cero; en pausa evita todo despertar de chats.",
+   "riesgos": [
+    "Si la jornada queda en pausa por olvido, nada avanza: el Estado lo muestra arriba."
+   ]
   }
  ],
  "lineasBase": [
@@ -707,6 +742,10 @@
     {
      "que": "Tarea de Claude 'Agente verificador crítico'",
      "valor": "por crear (M-22): mismo texto, carpetas y aprobación que 'Agente verificador', con Opus 5.5; solo lotes críticos"
+    },
+    {
+     "que": "Panel de jornada",
+     "valor": "str-instr-cola\\panel\\ (panel-str.ps1, panel-config.json, lanzar-panel.vbs) + acceso directo 'Panel STR' en el escritorio; ejecutar-cola.ps1 y vigilar-buzon.ps1 v6 respetan el archivo PAUSA"
     }
    ],
    "nota": "Si se reinstala la extensión de Chrome, cambian los deviceId: el Chat de desarrollo actualiza DA-24 y el Arquitecto esta línea base."

@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v5: escalamiento de mensajes sin atender)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v6: respeta la pausa de jornada del panel)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -63,6 +63,8 @@ $VigiaEntre = 120   # minutos minimos entre avisos
 $VigiaDesde = 7     # hora de inicio (incluida)
 $VigiaHasta = 22    # hora de fin (excluida)
 
+# Jornada en pausa (panel STR): con el archivo PAUSA en la cola no se avisa a nadie.
+if (Test-Path (Join-Path $Cola 'PAUSA')) { exit 0 }
 New-Item -ItemType Directory -Force $Base | Out-Null
 function Log([string]$t) { Add-Content -Path $LogFile -Value ((Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + ' ' + $t) }
 

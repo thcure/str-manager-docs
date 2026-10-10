@@ -50,10 +50,14 @@ try {
     exit 0
   }
 
+  # Jornada en pausa (panel STR, 10-oct-2026): con el archivo PAUSA en la cola no se empieza ningun lote.
+  if (Test-Path (Join-Path $Cola 'PAUSA')) { exit 0 }
+
   $pendientes = Get-ChildItem -Path $Cola -Filter '*.md' -File | Sort-Object Name
   if (-not $pendientes) { exit 0 }
 
   foreach ($f in $pendientes) {
+    if (Test-Path (Join-Path $Cola 'PAUSA')) { break }   # se pidio terminar la jornada: no empezar otro lote
     # Repositorio al día antes de cada lote
     Write-Host "Lote: $($f.Name)"
     (git pull --ff-only 2>&1 | ForEach-Object { "$_" }) | Out-Null

@@ -49,12 +49,30 @@ function Carpeta-Perfil($p) {
     if (-not (Test-Path $ls)) { return $null }
     try {
         $j = Get-Content -Path $ls -Raw -Encoding UTF8 | ConvertFrom-Json
+        $q = ([string]$p.nombre).Trim().ToLower()
+        if (-not $q) { return $null }
         foreach ($prop in $j.profile.info_cache.PSObject.Properties) {
             $v = $prop.Value
-            if ($v.name -eq $p.nombre -or $v.user_name -eq $p.nombre -or $v.gaia_name -eq $p.nombre) { return $prop.Name }
+            $campos = @([string]$v.name, [string]$v.user_name, [string]$v.gaia_name, [string]$v.gaia_given_name, [string]$v.shortcut_name) | ForEach-Object { $_.ToLower() }
+            if ($campos -contains $q) { return $prop.Name }
+        }
+        foreach ($prop in $j.profile.info_cache.PSObject.Properties) {
+            $v = $prop.Value
+            $todo = (([string]$v.name) + ' ' + ([string]$v.user_name) + ' ' + ([string]$v.gaia_name)).ToLower()
+            if ($todo.Contains($q)) { return $prop.Name }
         }
     } catch { }
     return $null
+}
+
+function Lista-Perfiles {
+    $ls = Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data\Local State'
+    $r = @()
+    try {
+        $j = Get-Content -Path $ls -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($prop in $j.profile.info_cache.PSObject.Properties) { $r += ('    carpeta "' + $prop.Name + '" = nombre "' + [string]$prop.Value.name + '"' + $(if ($prop.Value.user_name) { ' (' + [string]$prop.Value.user_name + ')' } else { '' })) }
+    } catch { }
+    return $r
 }
 
 function Perfiles-Abiertos {
@@ -100,11 +118,18 @@ function Texto-Estado {
     [void]$s.AppendLine('Despertador, ultimo aviso: ' + (Ultima-Linea (Join-Path $Buzon 'buzon.log')))
     [void]$s.AppendLine('')
     [void]$s.AppendLine('Perfiles de Chrome:')
+    $faltan = $false
     $ab = Perfiles-Abiertos
     foreach ($p in $cfg.perfiles) {
         $dir = Carpeta-Perfil $p
         $txt = if (-not $dir) { 'no encontrado (revisa panel-config.json)' } elseif ($ab.ContainsKey($dir)) { 'abierto' } else { 'cerrado' }
         [void]$s.AppendLine('  ' + $p.rol + ': ' + $txt)
+        if (-not $dir) { $faltan = $true }
+    }
+    if ($faltan) {
+        [void]$s.AppendLine('')
+        [void]$s.AppendLine('Perfiles que tiene tu Chrome (para ajustar panel-config.json):')
+        foreach ($l in (Lista-Perfiles)) { [void]$s.AppendLine($l) }
     }
     return $s.ToString()
 }

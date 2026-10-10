@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-10T11:12:00-05:00",
+ "actualizadoEn": "2026-10-10T11:21:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1423,14 +1423,40 @@
    "id": "REQ-TB2",
    "tipo": "REQ",
    "modulo": "Seg. Proyecto (interno)",
-   "etapa": "🚀",
+   "etapa": "✔",
    "fecha": "2026-10-10",
    "severidad": null,
    "titulo": "Tablero v2: objetivos, 'Trabajando en' y clic en agente, objetivo e ítem (P-7).",
-   "pendiente": "Lote 64 desplegado (bc3e4d8); espera veredicto.",
+   "pendiente": null,
    "documento": "claude/producto/requerimientos-tablero-v2-2026-10.md › REQ-TB2",
    "entregadoEn": "M-57",
-   "necesitaDecision": false
+   "necesitaDecision": false,
+   "estado": "cerrado",
+   "cierre": "2026-10-10: lote 64 (bc3e4d8, p5c64), 64-veredicto aceptado con reserva."
+  },
+  {
+   "id": "INC-105",
+   "tipo": "INC",
+   "modulo": "Seg. Proyecto (interno)",
+   "etapa": "📝",
+   "fecha": "2026-10-10",
+   "severidad": "bajo",
+   "titulo": "Etapa actual y historial del ítem aceptado muestran horas distintas (16:53 y 16:50). La ficha toma la hora de «Etapa actual» de seguimiento.plan[].desde y la del evento «aceptado» de cambios[].aceptacion.horaBogota; son dos fuentes distintas que no se concilian. No es un error de código sino una diferencia de datos entre las dos fuentes.",
+   "pendiente": "Deuda estándar del tablero; sin fecha.",
+   "estado": "abierto",
+   "origen": "64-veredicto (11:20)."
+  },
+  {
+   "id": "INC-106",
+   "tipo": "INC",
+   "modulo": "Seg. Proyecto (interno)",
+   "etapa": "📝",
+   "fecha": "2026-10-10",
+   "severidad": "bajo",
+   "titulo": "A 390 px las tablas del tablero siguen con varias columnas (scroll interno). El bloque TB1/TB2 reutiliza tablas de 760 px dentro de un contenedor overflow auto en vez de apilar filas; la página no se desplaza pero la instrucción §2.6 pide «una columna».",
+   "pendiente": "Deuda estándar del tablero; sin fecha.",
+   "estado": "abierto",
+   "origen": "64-veredicto (11:20)."
   }
  ],
  "cambios": [
@@ -5503,13 +5529,139 @@
    "req": "REQ-TB2",
    "categoria": "estándar",
    "resumen": "str-seg-proyecto.html: tablero v2 — objetivos con planes anidados, columna 'Trabajando en', detalle por agente y ficha por ítem (mensajes.json al abrir ficha).",
-   "estado": "desplegado",
-   "observacion": "Encolado 10:59. CLI 11:00–11:11, 34/34 (63 casos nuevos). Decisiones: ficha en el lugar del detalle de origen; historial en orden lógico; sin hora de encolado usa la fecha de cambios. Agente verificador (Sonnet) lanzado 11:12.",
+   "estado": "aceptado",
+   "observacion": "Encolado 10:59. CLI 11:00–11:11, 34/34 (63 casos nuevos). Decisiones: ficha en el lugar del detalle de origen; historial en orden lógico; sin hora de encolado usa la fecha de cambios. Agente verificador (Sonnet) lanzado 11:12. 64-veredicto (11:20): aceptado con reserva (criterio 20 parcial: tests/ solo por el log de la CLI); INC-105 y INC-106 bajos. Cómo quedó: Tablero con objetivos y planes anidados, columna \"Trabajando en\", detalle por agente y ficha por ítem con historial.",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 64,
+    "hash": "bc3e4d8f2563a295980372e76a37689a692eedd9",
+    "fecha": "2026-10-10",
+    "horaBogota": "11:20",
+    "resultado": "aceptado (reserva: la suite tests/ del criterio 20 no la pude correr; solo consta el 34/34 que declara la CLI)",
+    "modoVerificacion": "Producción en Chrome (perfil admin 3198e288…, sesión de Carlos ya abierta, sin iniciar sesión), página str-seg-proyecto.html?v=p5c64 abierta directo en vez de por el shell (mismo origen y sesión). Casos sin datos (2, 3, 5, 6, 8, 9, 12, 16, 17) con objetos sintéticos en memoria: cargué en la página el bloque [TB1] real servido en producción y lo llamé con JSON inventados, sin escribir nada. 390 px en iframe en memoria; tema claro solo en memoria (data-theme sin guardar). Reloj real del sistema; ningún criterio depende de la hora.",
+    "criterios": [
+     {
+      "c": 1,
+      "ok": true,
+      "observado": "Objetivos OB-1 (Inventario y operación confiables) y OB-2 (Proyecto visible y gobernado). PT-1 y PT-2 → OB-1; PT-0 y PT-3 → OB-2 (PT-3 activo hoy, esperado por las notas). Cada fila de Planes muestra su objetivo."
+     },
+     {
+      "c": 2,
+      "ok": true,
+      "observado": "Con los JSON de hoy OB-1 y OB-2 están aprobados y no llevan la marca (correcto). En memoria, un objetivo con estado 'propuesto' sale propuesto=true y la vista pinta la etiqueta «propuesto» (código de la tabla y del detalle); uno 'aprobado' sale false."
+     },
+     {
+      "c": 3,
+      "ok": true,
+      "observado": "En memoria: plan sin objetivoId y plan con objetivoId inexistente caen en «Sin objetivo» (PT-D, PT-E); no lanza error. _tbObjetivos({}) devuelve {objetivos:[], sinObjetivo:null} sin romper. La fila «Sin objetivo» solo la comprobé en el código, no pintada."
+     },
+     {
+      "c": 4,
+      "ok": true,
+      "observado": "El encabezado de la tabla de agentes dice «TRABAJANDO EN»; ya no existe «Qué hace»."
+     },
+     {
+      "c": 5,
+      "ok": true,
+      "observado": "En memoria: CLI con REQ-INV2-3b, lote 61, encolado → «REQ-INV2-3b · lote 61». En producción hoy: Arquitecto «REQ-INV2-3a · lote 62», verificador «REQ-TB2 · lote 64»."
+     },
+     {
+      "c": 6,
+      "ok": true,
+      "observado": "En memoria: ítem INC-102 sin lote → «INC-102»."
+     },
+     {
+      "c": 7,
+      "ok": true,
+      "observado": "Diseño, CD y CLI muestran «—» y estado «libre» (producción)."
+     },
+     {
+      "c": 8,
+      "ok": true,
+      "observado": "En memoria: CD con 2 ítems de cola (REQ-A, REQ-B, plan PT-5) → los lista en orden con su PT-n; «lo último que hizo» = REQ-Z · lote 50 · 2026-10-09T14:30 (la vista da hora dd-mmm HH:MM). En producción: clic en Carlos lista 12 ítems con su PT-n o «sin plan» y «lo último» = DA-20 · 10-oct · decidió; clic en verificador → «Cola vacía» y «REQ-TB1 · lote 63 · 09-oct 16:50 · veredicto: aceptado»."
+     },
+     {
+      "c": 9,
+      "ok": true,
+      "observado": "En memoria: Arquitecto sin nada y CD/CLI con datos vacíos o nulos → _tbUltimoDe devuelve null y la cola []; no lanza error. El texto «Sin actividad registrada» lo vi en el código (str-seg-proyecto.html, detalle de agente), no pintado en pantalla."
+     },
+     {
+      "c": 10,
+      "ok": true,
+      "observado": "Clic en OB-1: anida PT-1 (0/7, en definición (pausado)) y PT-2 (0/6, en definición (pausado)); Activos 0, Cerrados 0. Avance 0/13. El REQ decía 0/15; los planes de hoy suman 13 ítems (las notas avisan que los valores cambiaron). La suma es coherente con lo que muestra cada plan."
+     },
+     {
+      "c": 11,
+      "ok": true,
+      "observado": "Clic en OB-2: Activos PT-3 (0/1, activo); Cerrados PT-0 (1/1, cerrado). Avance total 1/2; PT-0 en 1/1."
+     },
+     {
+      "c": 12,
+      "ok": true,
+      "observado": "En memoria: objetivo con PT-A activo, PT-B 'definiendo (pausado)' y PT-C cerrado → grupos Activos [PT-A], En definición [PT-B], Cerrados [PT-C]; avance 2/4."
+     },
+     {
+      "c": 13,
+      "ok": true,
+      "observado": "Ficha de REQ-TB1: etapa «aceptado · lote 63», historial: entregado 09-oct 16:36 · M-52 → encolado lote 63 09-oct → aceptado lote 63 09-oct 16:50 · 318b8e3; lote 63 · aceptado · 318b8e3 · p5c63; «Lo tiene ahora: nadie»; decisiones «sin dato». Detalle menor: la línea «Etapa actual» muestra 16:53 (plan[].desde) mientras el historial muestra 16:50 (aceptacion.horaBogota); son dos fuentes distintas, no contradice el criterio."
+     },
+     {
+      "c": 14,
+      "ok": true,
+      "observado": "Ficha de REQ-INV2-4a: «Etapa actual: en definición · espera DA-30 y a Carlos · 09-oct 16:02»; «Lo tiene ahora: Carlos»; Plan PT-1; Decisiones: DA-30 «¿Das el visto bueno al lote INV2·4a…?» abierta. Historial y lotes «sin dato» (el REQ aún no tiene lote ni entregadoEn)."
+     },
+     {
+      "c": 15,
+      "ok": true,
+      "observado": "Fichas de INC-99, T-1, DA-20, REQ-LIQ1 y «Portal de propietarios» (bolsa, sin plan): muestran el texto de su fuente, «Plan: sin plan» y «sin dato» en historial, lotes y decisiones; DA-20 → etapa «abierta», lo tiene Carlos; T-1 → lo tiene Carlos. No se rompe ninguna."
+     },
+     {
+      "c": 16,
+      "ok": true,
+      "observado": "En memoria: REQ con entregadoEn M-999 que no existe en mensajes y lote 'en redacción' sin desde → historial con hora null; _tbHora(null) devuelve «sin hora», y la vista pone «sin hora» (o «sin dato» si no hay id de mensaje). En producción el 'encolado' de REQ-TB1 usa la fecha de cambios (09-oct) sin hora: es la decisión de la CLI, coherente con el criterio."
+     },
+     {
+      "c": 17,
+      "ok": true,
+      "observado": "La pantalla sale de diseno.json y seguimiento.json leídos por GET al cargar. En memoria: pasar PT-B de pausado a activo cambia los activos del objetivo de 1 a 2 sin tocar el código."
+     },
+     {
+      "c": 18,
+      "ok": true,
+      "observado": "Recarga limpia + clic en agente, objetivos, plan, dos fichas, Volver y Cerrar: 5 peticiones, todas GET (página, str-api.js?v=p5c64, seguimiento.json, diseno.json y mensajes.json una sola vez, al abrir la primera ficha). Ninguna de escritura. Consola sin mensajes."
+     },
+     {
+      "c": 19,
+      "ok": true,
+      "observado": "A 390 px (iframe en memoria): la página mide 371 contra 370 de ancho visible (1 px, redondeo con la barra de desplazamiento); ningún elemento fuera de las tablas pasa de 392 px. Las tablas (760 px) se desplazan dentro de su caja (overflow auto), no la página. Agente, objetivo y ficha abren un solo .tb-det a la vez; «← Volver» de la ficha regresa al detalle de origen, «Cerrar» lo quita (0 abiertos). Tema claro (fondo rgb(240,244,248), texto rgb(15,23,42)) y oscuro (rgb(8,12,20) / rgb(248,250,252)) con contraste legible. No lo vi en pantalla real de celular; la instrucción pide «una columna» y las tablas siguen siendo de varias columnas con scroll interno."
+     },
+     {
+      "c": 20,
+      "ok": null,
+      "observado": "Parcial. Producción: /api/health ok, db ok, schema_version 10; 17 HTML y str-api.js con ?v=p5c64 (shell sin restos de p5c63); la parte de TB1 (agentes, planes, carriles, bolsa, detalle de plan, fichas) funciona. CLAUDE.md actualizado en el mismo commit (fila Tablero v2, INC-37 p5c64). Archivos declarados vs tocados: coinciden (str-seg-proyecto, tests/tablero.test.js, CLAUDE.md, str-api.js y el cambio de ?v= en los HTML). NO VERIFICABLE por mí: «node tests/run.js verde» (mi encargo solo permite archivos y Chrome); solo consta el 34/34 y los 119 OK de tablero.test.js que declara la CLI. Tampoco recorrí uno por uno los 20 criterios de TB1."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Etapa actual y historial del ítem aceptado muestran horas distintas (16:53 y 16:50)",
+      "nivel": "bajo",
+      "causa": "La ficha toma la hora de «Etapa actual» de seguimiento.plan[].desde y la del evento «aceptado» de cambios[].aceptacion.horaBogota; son dos fuentes distintas que no se concilian. No es un error de código sino una diferencia de datos entre las dos fuentes.",
+      "observado": "REQ-TB1: «Etapa actual: aceptado · lote 63 · 09-oct 16:53» frente a «aceptado · lote 63 · 09-oct 16:50 · 318b8e3». Deuda: elegir una sola fuente o rotular cada hora."
+     },
+     {
+      "titulo": "A 390 px las tablas del tablero siguen con varias columnas (scroll interno)",
+      "nivel": "bajo",
+      "causa": "El bloque TB1/TB2 reutiliza tablas de 760 px dentro de un contenedor overflow auto en vez de apilar filas; la página no se desplaza pero la instrucción §2.6 pide «una columna».",
+      "observado": "Tablas con scrollWidth 760 en un contenedor de 321 px; documento 371/370 px."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado: no escribí nada en producción ni en el repo de documentos. Casos en memoria con objetos sintéticos (OB-9/OB-8, PT-A…PT-E, REQ-A/B/Z/S, INC-102) que no se guardaron. El iframe de 390 px y los ganchos de fetch se descartaron al cerrar la pestaña. No toqué datos de colaborador ni operador.",
+    "notas": "Decisiones de la CLI evaluadas: (1) la ficha se abre en el lugar del detalle de origen y «Volver» regresa a él: correcto, observado. (2) Historial en orden lógico (entregado → lote → veredicto) y no por hora: coincide con el orden de los datos de hoy; sin conflicto con el criterio 13. (3) Sin hora de encolado usa la fecha de cambios: se ve como «09-oct» sin hora; aceptable. Cambios a la capa Marco sin prefijo 'modelo:': ninguno detectado (commit y log solo tocan str-seg-proyecto, tests, CLAUDE.md y ?v=). El REQ estaba en el proyecto (la CLI no pudo leerlo en el repo público); lo verifiqué contra su texto. Un intento de leer diseno.json directo de raw.githubusercontent desde el navegador lo bloqueó el sistema de permisos; no lo repetí: tomé los datos de lo que pinta la página. Chrome: pestaña cerrada al terminar."
+   }
   },
   {
    "lote": null,
@@ -6368,16 +6520,16 @@
    "req": "REQ-TB2",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto: tablero v2 (objetivos, 'Trabajando en', clic en agente, objetivo e ítem)",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "planTrabajo": "PT-3",
    "grupo": "SP",
    "riesgo": null,
    "espera": null,
    "orden": 100.5,
-   "desde": "2026-10-10T11:12:00-05:00",
-   "nota": "Encolado 10:59; CLI 11:00–11:11 (bc3e4d8); Agente verificador lanzado 11:12."
+   "desde": "2026-10-10T11:21:00-05:00",
+   "nota": "Aceptado (64-veredicto 11:20, Sonnet, 19/20 + reserva en tests)."
   }
  ],
  "riesgos": [

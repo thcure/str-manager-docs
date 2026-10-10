@@ -19,7 +19,7 @@ $Config  = Join-Path $Aqui 'panel-config.json'
 
 function Leer-Config {
     $def = [pscustomobject]@{
-        url = 'https://app.apartamentosbucaramanga.com'
+        url = 'https://app.apartamentosbucaramanga.com/str-app-shell.html'
         perfiles = @(
             [pscustomobject]@{ rol = 'Administrador'; nombre = ''; carpeta = 'Default' },
             [pscustomobject]@{ rol = 'Colaborador';   nombre = 'valeriaramos.xyz'; carpeta = '' },
@@ -211,7 +211,7 @@ function Empezar {
             }
         }
     }
-    $msg = "Jornada ACTIVA. Se abrieron los perfiles que estaban cerrados (puede tardar unos segundos en verse en Estado).`r`nSi alguno pide iniciar sesion, entra con el usuario de ese perfil:`r`n  Administrador: tu usuario`r`n  Colaborador: zz-verif-colab`r`n  Operador: zz-verif-oper"
+    $msg = "Jornada ACTIVA. Se abrieron los perfiles que estaban cerrados (puede tardar unos segundos en verse en Estado).`r`nSi alguno pide iniciar sesion, entra con el usuario de ese perfil:`r`n  Administrador: zz-verif-admin`r`n  Colaborador: zz-verif-colab`r`n  Operador: zz-verif-oper"
     $avisos += (Avisos-Tokens)
     if ($avisos.Count) { $msg += "`r`n`r`n" + ($avisos -join "`r`n") }
     return $msg

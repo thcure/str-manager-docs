@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-10T16:36:00-05:00",
+ "actualizadoEn": "2026-10-10T17:46:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1497,6 +1497,45 @@
    "pendiente": "Corrección crítica (REQ-U8, M-99): un usuario, un rol = el de MySQL; shell y Equipo leen el rol de la sesión del servidor y dejan Firestore 'profiles'; grupo Proyecto, Seg. Proyecto y Equipo visibles para admin; invitar a un admin desde Equipo (solo un admin invita a un admin). Sin tocar el usuario real de Carlos (su perfil de Firestore queda sin uso). Propuesta al Chat de diseño y cruce con Carlos antes de encolar.",
    "estado": "abierto",
    "origen": "M-89/M-90/M-91/M-95 (Carlos vía Arquitecto y Diseño); diagnóstico del CD leyendo el código el 10-oct."
+  },
+  {
+   "id": "INC-109",
+   "tipo": "INC",
+   "modulo": "Shell / roles",
+   "etapa": "📝",
+   "fecha": "2026-10-10",
+   "severidad": "crítico",
+   "titulo": "El operador ve y abre el Dashboard (ocupación, reservas, turnos, tickets): el lote 67 lo debía ocultar.",
+   "causa": "str-app-shell.html ~984: el ítem '⊞ Dashboard' de la barra lateral (data-panel=dashboard) quedó sin data-roles; solo se marcó 'Portafolio' (~1050). nav() no tiene guarda por rol. El test cubre la función pura, no el HTML.",
+   "pendiente": "Lote de corrección (crítico): data-roles=admin en ese ítem, guarda en nav() y un test que lea el HTML. Antes: confirmar con Carlos si el operador ve o no el Dashboard (Diseño reporta otra versión, M-102).",
+   "estado": "abierto",
+   "origen": "67-veredicto (17:44)"
+  },
+  {
+   "id": "INC-110",
+   "tipo": "INC",
+   "modulo": "Shell / roles",
+   "etapa": "📝",
+   "fecha": "2026-10-10",
+   "severidad": "bajo",
+   "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin.",
+   "causa": "Por revisar contra REQ-U7: el botón no mira _puedeUI('equipo.editar'). El servidor sí rechaza (403).",
+   "pendiente": "Ajuste menor en un lote próximo.",
+   "estado": "abierto",
+   "origen": "67-veredicto (17:44)"
+  },
+  {
+   "id": "INC-111",
+   "tipo": "INC",
+   "modulo": "Shell / roles",
+   "etapa": "📝",
+   "fecha": "2026-10-10",
+   "severidad": "bajo",
+   "titulo": "La barra superior del operador muestra además el nombre de la cuenta de Google del perfil (#userName), no el del usuario del STR.",
+   "causa": "El shell pinta #userName con el displayName de Firebase; tras el lote 67 debería usar el nombre de /api/me.",
+   "pendiente": "Ajuste menor en un lote próximo.",
+   "estado": "abierto",
+   "origen": "67-veredicto (17:44)"
   }
  ],
  "cambios": [
@@ -6042,13 +6081,63 @@
    "req": "REQ-U8 (INC-108, INC-76)",
    "categoria": "crítico",
    "resumen": "Un usuario, un rol: menús y Equipo desde el rol del servidor (fuera Firestore), Proyecto para admin, invitar admin desde Equipo, guardas 'Sin permiso' en módulos de admin.",
-   "estado": "desplegado",
-   "observacion": "Encolado 15:43 en LENOVO (cmp ok). 15:42 la CLI se detuvo sin tocar nada: faltaba el cruce con Carlos en la cabecera (lección: en un lote crítico, la línea Categoría lleva 'cruce previo con Carlos: fecha, qué'). Cabecera corregida y reencolada 15:44. CLI 16:26–16:35: main adbf94d (p5c66), tests 35/35 (roles.test.js, 49 casos). Fuera de lo declarado, explicado: api/lib/session.php (las reglas nuevas del servidor) y str-propiedades.html (carga str-api.js antes). Decisión de la CLI: un 'superadmin' en MySQL se trata como admin. Verificador crítico lanzado 16:36, primera pasada: a, b, d, e, i; c, f, g, h esperan la invitación de zz-verif-admin (Carlos) y el criterio h, de Carlos.",
+   "estado": "no aceptado",
+   "observacion": "Encolado 15:43 en LENOVO (cmp ok). 15:42 la CLI se detuvo sin tocar nada: faltaba el cruce con Carlos en la cabecera (lección: en un lote crítico, la línea Categoría lleva 'cruce previo con Carlos: fecha, qué'). Cabecera corregida y reencolada 15:44. CLI 16:26–16:35: main adbf94d (p5c66), tests 35/35 (roles.test.js, 49 casos). Fuera de lo declarado, explicado: api/lib/session.php (las reglas nuevas del servidor) y str-propiedades.html (carga str-api.js antes). Decisión de la CLI: un 'superadmin' en MySQL se trata como admin. Verificador crítico lanzado 16:36, primera pasada: a, b, d, e, i; c, f, g, h esperan la invitación de zz-verif-admin (Carlos) y el criterio h, de Carlos. Las ejecuciones del verificador de 16:36 y 17:05 no entregaron nada: llegaron sin las carpetas conectadas y quedaron esperando el permiso de acceso (lo concedió Carlos en la de las 17:39). 67-veredicto (17:44): no aceptado. a, b y e cumplen. d falla: el ítem '⊞ Dashboard' de la barra lateral quedó sin data-roles y el operador abre el Dashboard (INC-109, crítico). i no es verificable: zz-verif-oper no tiene equipo.invitar. Segunda pasada (c, f, g, h) pendiente.",
    "costo": {
     "minutosCLI": 9,
     "minutosDueno": 0
    },
-   "cruceDueno": "Carlos, chat del CD, 2026-10-10 15:41: «ok» a la propuesta (borrador 67 y las dos decisiones propuestas)."
+   "cruceDueno": "Carlos, chat del CD, 2026-10-10 15:41: «ok» a la propuesta (borrador 67 y las dos decisiones propuestas).",
+   "aceptacion": {
+    "lote": 67,
+    "hash": "adbf94d74e144e2ff0e391e2e4dc295eb9cdc4cc",
+    "fecha": "2026-10-10",
+    "horaBogota": "17:44",
+    "resultado": "no aceptado",
+    "modoVerificacion": "Primera pasada (a, b, d, e, i) en producción con Chrome: zz-verif-oper (deviceId 261e078d…, barra: 'zz-verif-oper · Carlos Hospedaje', /api/me rol operador) y zz-verif-colab (deviceId 5d576fcc…, str-user rol colaborador). Solo lectura y navegación. Reloj real del sistema. c, f, g, h fuera de esta pasada.",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js en verde; CLAUDE.md en el commit; declarados vs tocados",
+      "ok": true,
+      "observado": "No hay shell en el equipo en esta ejecución: no corrí los tests; leídos el log 67 y el mensaje del commit adbf94d (objeto git leído): 35/35 OK con tests/roles.test.js (49 casos). CLAUDE.md actualizado en el commit (filas shell, Equipo, sesión/invitación, INC-37 p5c66). Diferencias explicadas y cuadran: api/lib/session.php (funciones puras compartidas por usuarios/ e invitacion/ y el test) y str-propiedades.html (ya estaba en el alcance por su guarda; solo se movió la carga de str-api.js antes del script principal). Sin cambios a la capa Marco."
+     },
+     {
+      "c": "b. /api/health esquema 10; ?v=p5c66; consola limpia; sin diálogos nativos",
+      "ok": true,
+      "observado": "/api/health → ok:true, db:true, schema_version:10. El shell solo referencia ?v=p5c66. Sin errores de consola en shell, Equipo y portal. No apareció ningún alert/confirm/prompt."
+     },
+     {
+      "c": "d. Operador: ve operativos y Equipo; no ve Proyecto ni Dashboard; str-seg-proyecto.html directo → sin permiso",
+      "ok": false,
+      "observado": "Visibles: Propiedades, Calendario, Limpieza & HK, Flujos, Conocimiento, Inventario, Check-in, Mantenimiento y Usuarios & Roles (Equipo). Ocultos: grupo Proyecto y sus 6 ítems, y 'Portafolio'. PERO el ítem '⊞ Dashboard' de la barra lateral (div.nav-item.type-dash, data-panel=dashboard) no tiene data-roles: se ve, aparece seleccionado al entrar y al tocarlo el operador abre el Dashboard completo (ocupación 74%, reservas activas, turnos hoy, tickets, por propiedad, actividad reciente). str-seg-proyecto.html por dirección directa → regresa a str-app-shell.html sin mostrar datos (cumple)."
+     },
+     {
+      "c": "e. Colaborador: al portal; 7 páginas directas → sin permiso o regreso al portal, sin datos",
+      "ok": true,
+      "observado": "El shell lo manda a portal.html. str-propiedades, str-calendario, str-inventario, str-flujos, str-conocimiento, str-usuarios y str-seg-proyecto por dirección directa terminan en /portal.html ('Mis turnos…'); ningún dato del módulo visible tras 2,5 s. No medí un posible destello antes de la redirección."
+     },
+     {
+      "c": "i. Operador con equipo.invitar no ve 'Invitar' en una fila admin (403 por API: cuenta la réplica)",
+      "ok": null,
+      "observado": "No verificable: zz-verif-oper tiene equipo.invitar=false (str-user.permisos), así que no ve 'Invitar' en ninguna fila (tampoco en Betty 'sin cuenta'); la ausencia en las filas admin (Carlos Rodriguez, zz-verif-admin) no prueba la regla. No cambio permisos de usuarios. La parte 403 por API queda cubierta solo por la réplica de tests/roles.test.js (no cuenta como aceptado)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Operador ve y abre el Dashboard (lote 67, criterio d)",
+      "nivel": "crítico",
+      "causa": "En str-app-shell.html el ítem de la barra lateral del Dashboard (div.nav-item.type-dash, data-panel=\"dashboard\", onclick=nav(this)) quedó sin data-roles=\"admin\"; _aplicarRolesMenu solo oculta lo que tiene data-roles. Al parecer se puso data-roles=admin en 'Portafolio' y se cerró el panel al entrar, pero no se ocultó el ítem. Tampoco hay guarda en nav('dashboard'). tests/roles.test.js prueba la función pura, no el atributo en el HTML.",
+      "observado": "Como zz-verif-oper: '⊞ Dashboard' visible arriba de Favoritos; clic → panel Dashboard con 'Ocupación promedio 74%', 'Reservas activas 5', 'Turnos hoy 3', 'Tickets abiertos 4' y tablas por propiedad. Decisión de Carlos del 10-oct: el operador no ve el Dashboard."
+     }
+    ],
+    "datosDePrueba": "Ninguno creado. Solo lectura y navegación.",
+    "notas": "Resultado 'no aceptado' por d (el resto de esta pasada cumple; i no verificable). Para la segunda pasada: c, f, g, h siguen pendientes; zz-verif-admin ya aparece en Equipo como 'ADMIN ✓ activo'. Para verificar i hace falta que Carlos dé equipo.invitar a zz-verif-oper (yo no cambio usuarios) o que el criterio se replantee. Observación fuera de criterio: como operador sin equipo.editar, las tarjetas (incluidas las de admin) muestran '✏️ Editar'; no lo abrí, revisar contra REQ-U7. En el shell del operador la barra superior muestra además 'CA Carlos Rodríguez' (#userName), además del chip 'zz-verif-oper'; parece el nombre de la identidad de Firebase del perfil, revisar. Las carpetas de la tarea no llegaron conectadas a la ejecución: pedí acceso a la cola y a str-manager y se concedió. No había device_bash: tests no corridos localmente.",
+    "lecciones": [
+     "El ítem Dashboard pasó sin rol · data-roles se puso a mano por ítem y el test cubre solo la función pura · regla propuesta: un test que lea str-app-shell.html y compruebe que todo .nav-item con data-panel/openModule tiene data-roles (lista blanca explícita de los que no).",
+     "Criterio i sin precondición · zz-verif-oper no tiene equipo.invitar · regla propuesta: antes de lanzar, el Chat de desarrollo confirma los permisos del usuario de prueba que pide el criterio o deja en notas que Carlos los ajustó.",
+     "Carpetas no conectadas al arrancar la tarea · la ejecución llegó sin connectedFolders y sin device_bash · regla propuesta: el verificador pide acceso una vez; si se niega, escribe veredicto-bloqueado."
+    ]
+   }
   },
   {
    "lote": null,
@@ -6956,15 +7045,15 @@
    "req": "REQ-U8 (INC-108)",
    "categoria": "crítico",
    "resumen": "Un usuario, un rol: menús y Equipo desde el rol del servidor (fuera Firestore), Proyecto visible para admin, invitar admin desde Equipo",
-   "estado": "desplegado",
+   "estado": "no aceptado",
    "vista": "en curso",
-   "esperaA": "verificador",
+   "esperaA": "Carlos",
    "grupo": "Roles",
    "riesgo": "R-2",
-   "espera": "primera pasada (a, b, d, e, i); luego Carlos invita a zz-verif-admin desde Equipo para c, f, g; h lo confirma Carlos",
+   "espera": "confirmar si el operador ve el Dashboard; visto bueno al lote de corrección de INC-109",
    "orden": 101,
-   "nota": "Visto bueno de Carlos en el chat del CD (15:41, «ok») con las dos propuestas: el operador no ve el Dashboard; la regla de misma cuenta de Google solo para admin. Encolado 15:43.",
-   "desde": "2026-10-10T16:36:00-05:00",
+   "nota": "a, b, e cumplen; d falla (Dashboard); i no verificable; c, f, g, h pendientes.",
+   "desde": "2026-10-10T17:46:00-05:00",
    "planTrabajo": "PT-7"
   }
  ],

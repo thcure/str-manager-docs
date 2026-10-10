@@ -238,18 +238,19 @@
    "vigenciaDesde": "2026-10-06",
    "para": "Que los chats se pasen trabajo sin que Carlos haga de mensajero, y que el Chat de desarrollo se entere solo cuando hay un mensaje, un veredicto nuevo o la CLI termina un lote, sin gastar créditos esperando.",
    "quien": {
-    "escriben": "Chat de desarrollo y Arquitecto",
+    "escriben": "Chat de desarrollo, Chat de diseño y Arquitecto; Carlos solo recibe",
     "mantiene": "Arquitecto (script, destinatarios.json)",
     "carlos": "LENOVO encendido; instalar la tarea al cambiar de equipo"
    },
    "piezas": [
-    "json-mensajes",
+    "herramienta-panel-str",
+    "herramienta-vigilar-buzon",
     "json-destinatarios",
-    "herramienta-vigilar-buzon"
+    "json-mensajes"
    ],
    "flujo": [
     "Un chat agrega un mensaje M-n en interno/mensajes.json con estado 'pendiente' y lo sube.",
-    "La tarea de Windows 'STR buzon' (cada minuto desde el 9-oct, v4, en LENOVO) pregunta a GitHub el último commit (git ls-remote) y, solo si cambió, descarga los JSON de ese commit sin caché; luego revisa, sin usar Claude, tres fuentes: el buzón, los veredictos nuevos en log\\ y las líneas nuevas de log\\_resumen.txt de la cola.",
+    "La tarea de Windows 'STR buzon' (cada minuto desde el 9-oct, v4, en LENOVO) pregunta a GitHub el último commit (git ls-remote) y, solo si cambió, descarga los JSON de ese commit sin caché; luego revisa, sin usar Claude, siete fuentes: el buzón (con recordatorios y escalamiento), los veredictos nuevos en log\\, las líneas nuevas de log\\_resumen.txt de la cola, el vigía del plan, la cola detenida por fallidas\\, el verificador sin entregar y la CLI sin avance (v9, 10-oct-2026).",
     "Por cada evento nuevo busca el chat destinatario en destinatarios.json (veredictos y cola van al Chat de desarrollo).",
     "Deja en ese chat solo una frase fija: 'Revisa el buzon … M-n', 'Hay veredicto nuevo … log\\<archivo>' o 'La CLI termino el lote NN (OK|FALLO)'.",
     "El chat atiende: responde en el buzón (estado y respuesta), lee el veredicto o revisa la cola.",
@@ -258,12 +259,16 @@
    "reglas": [
     "Quien envía crea el mensaje y no lo cambia; quien recibe solo cambia estado y respuesta.",
     "Nunca se copia el contenido del mensaje al chat: el repositorio es público.",
-    "Lo que necesita decisión de Carlos va al seguimiento (DA-n), no al buzón.",
+    "Lo que necesita decisión de Carlos va al seguimiento (DA-n), no al buzón; la ACCIÓN que se necesita de él (autorizar, borrar un archivo, hacer clic) sí va al buzón con destinatario 'Carlos' (v9, 10-oct-2026).",
     "El verificador y la CLI no leen el buzón.",
     "El Chat de desarrollo no programa revisiones cortas de la cola ni del verificador: espera el aviso y deja, como mucho, un respaldo largo (30 min o más).",
     "Mensajes con palabras propias (lección INC-104, aprobada por Carlos el 10-oct-2026): en el buzón describes el estado y pides la acción con tus palabras; si el otro necesita un texto exacto, le indicas el archivo y la ruta donde está en vez de pegar instrucciones copiadas de otro lugar (el modo automático bloquea las órdenes incrustadas).",
     "Escalamiento del despertador (v7, 10-oct-2026): agrupado por chat. Si un chat tiene mensajes avisados que siguen 'pendiente' más de 30 min, recibe UN recordatorio con la lista (como mucho cada 60 min); si pasan de 60 min, el Chat de diseño recibe UN escalamiento con la lista (como mucho cada 2 h). Entre 7:00 y 22:00; no corre con la jornada en pausa. Marcar 'en curso' al tomar un mensaje evita recordatorios.",
-    "Cola detenida (v8, 10-oct-2026): si un .md sigue en fallidas\\ 15 min o más, el despertador avisa al Chat de desarrollo (y dice si ya hay una copia nueva esperando); si sigue, repite cada 60 min y escala al Chat de diseño. Estado en buzon\\fallidas-avisadas.txt."
+    "Cola detenida (v8, 10-oct-2026): si un .md sigue en fallidas\\ 15 min o más, el despertador avisa al Chat de desarrollo (y dice si ya hay una copia nueva esperando); si sigue, repite cada 60 min y escala al Chat de diseño. Estado en buzon\\fallidas-avisadas.txt.",
+    "Nadie espera en silencio (M-105, aprobado por Carlos el 10-oct-2026): un chat que se detiene a esperar algo deja antes un mensaje «Esperando: <qué>» a quien se lo debe, con la hora; cuando llega, el mismo chat lo marca hecho (excepción a 'quien recibe cambia estado', porque Carlos no edita el JSON).",
+    "Destinatario Carlos (v9): canal 'windows' en destinatarios.json; el despertador le muestra una notificación de Windows con id, remitente y asunto, repite el recordatorio cada 60 min mientras siga pendiente y no lo escala al Chat de diseño; el Panel STR lista 'Esperan de ti' con el texto completo.",
+    "Verificador sin entregar (v9): si log\\verificar.json lleva 25 min sin su archivoVeredicto (ni otro veredicto del lote posterior), aviso al Chat de desarrollo; si sigue, cada 60 min se repite y Carlos recibe el paso exacto (revisar la tarea en Cowork). El verificador bloqueado escribe <lote>-veredicto-bloqueado.json.",
+    "CLI sin avance (v9): si .corriendo lleva 45 min y el log del lote no cambia, aviso al Chat de desarrollo; si sigue, cada 60 min también a Carlos. ejecutar-cola.ps1 limpia el candado a los 90 min."
    ],
    "instalacion": "ins-006, paso 7b",
    "comprobacion": "$t=Get-ScheduledTask -TaskName \"STR buzon\"; $t.State; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; Get-Content \"$HOME\\Downloads\\str-instr-cola\\buzon\\buzon.log\" -Tail 3",

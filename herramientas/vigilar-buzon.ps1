@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v8: aviso de cola detenida por fallidas)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v9: Carlos como destinatario, verificador y CLI sin avance)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -14,6 +14,13 @@
 #      Un aviso por episodio y como mucho uno cada $VigiaEntre min (ficha BAI11-d).
 #   5. Cola detenida: un .md sigue en fallidas\ $FallaMin min o mas           -> Chat de desarrollo
 #      (se repite cada $FallaCada min, tambien al Chat de diseno). Estado: fallidas-avisadas.txt
+#   6. Verificador sin entregar: log\verificar.json con $VerifMin min o mas y sin su archivoVeredicto
+#      -> Chat de desarrollo; si sigue, cada $VerifCada min tambien a Carlos. Estado: verificador-avisado.txt
+#   7. CLI sin avance: .corriendo con $CliMin min o mas y el log del lote sin cambios -> Chat de desarrollo;
+#      si sigue, cada $CliCada min tambien a Carlos. Estado: cli-avisado.txt
+# v9: 'Carlos' es destinatario del buzon (destinatarios.json, canal 'windows'): a el no se le escribe en un chat,
+#     se le muestra una notificacion de Windows en LENOVO (titulo y asunto del mensaje) y el Panel STR lista lo que
+#     espera de el. Los mensajes para Carlos reciben recordatorio, pero no se escalan al Chat de diseno.
 # El chat de cada destinatario sale de interno/destinatarios.json (lo mantiene el Arquitecto).
 # v4: cada corrida pregunta a GitHub el ultimo commit de main (git ls-remote, ~2 KB); solo si cambio,
 # descarga destinatarios, mensajes y seguimiento de ESE commit (raw/<sha>/..., sin cache vieja) a buzon\cache\.
@@ -65,6 +72,12 @@ $EstRecD  = Join-Path $Base 'recordados-dest.txt'
 $EstFalla = Join-Path $Base 'fallidas-avisadas.txt'
 $FallaMin  = 15    # minutos que un .md sigue en fallidas\ antes del primer aviso
 $FallaCada = 60    # minutos entre avisos repetidos (con escalamiento al Chat de diseno)
+$EstVerif  = Join-Path $Base 'verificador-avisado.txt'
+$VerifMin  = 25    # minutos de verificar.json sin veredicto antes del primer aviso
+$VerifCada = 60    # minutos entre avisos repetidos (el segundo y siguientes tambien a Carlos)
+$EstCli    = Join-Path $Base 'cli-avisado.txt'
+$CliMin    = 45    # minutos de .corriendo sin que el log del lote cambie
+$CliCada   = 60    # minutos entre avisos repetidos (el segundo y siguientes tambien a Carlos)
 $EstEscD  = Join-Path $Base 'escalados-dest.txt'
 $EstVigia = Join-Path $Base 'vigia.txt'
 $VigiaMin   = 60    # minutos sin movimiento
@@ -80,8 +93,31 @@ function Log([string]$t) { Add-Content -Path $LogFile -Value ((Get-Date -Format 
 if ((Test-Path $Lock) -and (((Get-Date) - (Get-Item $Lock).LastWriteTime).TotalMinutes -lt 10)) { exit 0 }
 Set-Content -Path $Lock -Value (Get-Date)
 
+function Notificar-Windows([string]$titulo, [string]$texto) {
+    # Notificacion de Windows (centro de notificaciones) para Carlos; si falla, globo de la bandeja.
+    try {
+        $null = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
+        $null = [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime]
+        $e1 = [System.Security.SecurityElement]::Escape($titulo); $e2 = [System.Security.SecurityElement]::Escape($texto)
+        $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+        $xml.LoadXml("<toast duration='long'><visual><binding template='ToastGeneric'><text>$e1</text><text>$e2</text></binding></visual></toast>")
+        $appId = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'
+        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($appId).Show((New-Object Windows.UI.Notifications.ToastNotification $xml))
+        return $true
+    } catch { Log ('Aviso: notificacion de Windows fallo (' + $_.Exception.Message + '); se intenta globo.') }
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        $ni = New-Object System.Windows.Forms.NotifyIcon
+        $ni.Icon = [System.Drawing.SystemIcons]::Information; $ni.Visible = $true
+        $ni.ShowBalloonTip(20000, $titulo, $texto, [System.Windows.Forms.ToolTipIcon]::Info)
+        Start-Sleep -Seconds 6; $ni.Dispose()
+        return $true
+    } catch { Log ('ERROR al notificar a Carlos: ' + $_.Exception.Message); return $false }
+}
+
 function Avisar([string]$destNombre, [string]$texto, $dest) {
     $d = $dest | Where-Object { $_.nombre -eq $destNombre } | Select-Object -First 1
+    if ($d -and ([string]$d.canal) -eq 'windows') { return (Notificar-Windows 'STR: te esperan' $texto) }
     if (-not $d -or -not $d.sesion) { Log "Sin sesion registrada para '$destNombre'; no se avisa."; return $false }
     $sesion = [string]$d.sesion
     if ($sesion -notmatch '^(cse|session)_[A-Za-z0-9]+$') { Log "Sesion con formato invalido para '$destNombre'; no se avisa."; return $false }
@@ -139,6 +175,8 @@ try {
                     continue
                 }
                 $texto = "Revisa el buzon (interno/mensajes.json): tienes el mensaje pendiente $id."
+                $dPara = $dest | Where-Object { $_.nombre -eq $para } | Select-Object -First 1
+                if (([string]$dPara.canal) -eq 'windows') { $texto = "$id de $($m.de): $($m.asunto). Detalle en el Panel STR o en interno/mensajes.json." }
                 if (Avisar ([string]$m.para) $texto $dest) { Add-Content -Path $EstMsg -Value $id; Add-Content -Path $EstHora -Value ($id + '|' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')); Log "$id avisado a $($m.para)." }
             }
         }
@@ -174,7 +212,7 @@ try {
                     $t1 = "Recordatorio: tienes " + $g.rec.Count + " mensaje(s) pendiente(s) en el buzon (" + ($g.rec -join ', ') + "). Atiendelos o responde por que esperan."
                     if (Avisar $para $t1 $dest) { $recD[$para] = $ahoraE; Log ("Recordatorio a $para de " + ($g.rec -join ',') + ".") }
                 }
-                if ($g.esc.Count -gt 0 -and $dis -and $para -notmatch '^Chat de dise.o$' -and (-not $escD.ContainsKey($para) -or ($ahoraE - $escD[$para]).TotalMinutes -ge $EscCada)) {
+                if ($g.esc.Count -gt 0 -and $dis -and $para -notmatch '^Chat de dise.o$' -and $para -ne 'Carlos' -and (-not $escD.ContainsKey($para) -or ($ahoraE - $escD[$para]).TotalMinutes -ge $EscCada)) {
                     $t2 = "Escalamiento: " + $para + " tiene " + $g.esc.Count + " mensaje(s) sin atender hace mas de $EscMin minutos (" + ($g.esc -join ', ') + "). Revisalo como jefe de proyecto; si la causa es una sola, tratala una vez."
                     if (Avisar ([string]$dis.nombre) $t2 $dest) { $escD[$para] = $ahoraE; Log ("Escalamiento de $para al Chat de diseno: " + ($g.esc -join ',') + ".") }
                 }
@@ -310,6 +348,65 @@ try {
         if ($lineasF.Count -gt 0) { Set-Content -Path $EstFalla -Value $lineasF }
         elseif (Test-Path $EstFalla) { Remove-Item -Path $EstFalla -Force -ErrorAction SilentlyContinue }
     } catch { Log ('ERROR en fallidas: ' + $_.Exception.Message) }
+
+    # --- 6. Verificador sin entregar (v9, 10-oct-2026) ---
+    # Si log\verificar.json lleva $VerifMin min o mas y no existe su archivoVeredicto (ni otro veredicto del lote
+    # posterior), la tarea del verificador no corrio, murio o quedo esperando un permiso. Primer aviso al Chat de
+    # desarrollo (relanza); si sigue, cada $VerifCada min se repite y Carlos recibe el paso exacto.
+    try {
+        $vj = Join-Path $LogDir 'verificar.json'
+        if (Test-Path $vj) {
+            $fv = Get-Item $vj; $ahoraV = Get-Date
+            $edadV = ($ahoraV - $fv.LastWriteTime).TotalMinutes
+            $v = Get-Content -Path $vj -Raw -Encoding UTF8 | ConvertFrom-Json
+            $arch = [string]$v.archivoVeredicto; $loteV = [string]$v.lote
+            $entregado = ($arch -and (Test-Path (Join-Path $Cola $arch)))
+            if (-not $entregado -and $loteV) {
+                $otro = @(Get-ChildItem -Path $LogDir -Filter ($loteV + '-veredicto*.json') -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt $fv.LastWriteTime })
+                if ($otro.Count -gt 0) { $entregado = $true }
+            }
+            $claveV = 'verificar@' + $fv.LastWriteTime.ToString('yyyyMMddHHmmss')
+            $prevV = if (Test-Path $EstVerif) { ([string](Get-Content -Path $EstVerif | Select-Object -First 1)) -split '\|' } else { @('') }
+            $ultV = $null; if ($prevV[0] -eq $claveV -and $prevV.Count -gt 1 -and $prevV[1]) { try { $ultV = [DateTime]::Parse($prevV[1]) } catch { } }
+            if ($entregado) { if (Test-Path $EstVerif) { Remove-Item -Path $EstVerif -Force -ErrorAction SilentlyContinue } }
+            elseif ($edadV -ge $VerifMin -and ((-not $ultV) -or (($ahoraV - $ultV).TotalMinutes -ge $VerifCada))) {
+                $desdeV = $fv.LastWriteTime.ToString('HH:mm')
+                $t6 = "El verificador no ha entregado $arch y log\verificar.json espera desde las $desdeV (lote $loteV, " + [int]$edadV + " min). Revisa en LENOVO si la tarea del verificador corrio, murio o quedo esperando un permiso, y relanzala si hace falta."
+                if (Avisar 'Chat de desarrollo' $t6 $dest) {
+                    Log "Verificador sin entregar: lote $loteV avisado a Chat de desarrollo."
+                    if ($ultV) { [void](Avisar 'Carlos' ("El verificador sigue sin entregar el veredicto del lote $loteV desde las $desdeV. Abre Cowork > Tareas programadas > Agente verificador y mira si espera una aprobacion o un clic.") $dest) }
+                    Set-Content -Path $EstVerif -Value ($claveV + '|' + $ahoraV.ToString('yyyy-MM-dd HH:mm:ss'))
+                }
+            }
+        }
+    } catch { Log ('ERROR en verificador: ' + $_.Exception.Message) }
+
+    # --- 7. CLI sin avance (v9, 10-oct-2026) ---
+    # Si la cola tiene .corriendo desde hace $CliMin min o mas y el log del lote no cambia desde hace $CliMin min,
+    # la CLI quedo esperando algo o murio (ejecutar-cola.ps1 limpia el candado a los 90 min). Primer aviso al Chat
+    # de desarrollo; si sigue, cada $CliCada min se repite y Carlos recibe el paso exacto.
+    try {
+        $lockC = Join-Path $Cola '.corriendo'
+        if (Test-Path $lockC) {
+            $fl = Get-Item -Force $lockC; $ahoraC = Get-Date
+            $edadC = ($ahoraC - $fl.LastWriteTime).TotalMinutes
+            $ultLog = Get-ChildItem -Path $LogDir -Filter '*-instr-*.txt' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
+            $quieto = (-not $ultLog) -or (($ahoraC - $ultLog.LastWriteTime).TotalMinutes -ge $CliMin)
+            $claveC = 'cli@' + $fl.LastWriteTime.ToString('yyyyMMddHHmmss')
+            $prevC = if (Test-Path $EstCli) { ([string](Get-Content -Path $EstCli | Select-Object -First 1)) -split '\|' } else { @('') }
+            $ultC = $null; if ($prevC[0] -eq $claveC -and $prevC.Count -gt 1 -and $prevC[1]) { try { $ultC = [DateTime]::Parse($prevC[1]) } catch { } }
+            if ($edadC -ge $CliMin -and $quieto -and ((-not $ultC) -or (($ahoraC - $ultC).TotalMinutes -ge $CliCada))) {
+                $numC = if ($ultLog -and $ultLog.Name -match '^(\d{1,3})-') { $Matches[1] } else { '?' }
+                $desdeC = $fl.LastWriteTime.ToString('HH:mm')
+                $t7 = "La CLI lleva " + [int]$edadC + " min con el lote $numC (desde las $desdeC) y su log no cambia. Revisa en LENOVO si claude.exe sigue corriendo o quedo esperando; si murio, se limpia solo a los 90 min."
+                if (Avisar 'Chat de desarrollo' $t7 $dest) {
+                    Log "CLI sin avance: lote $numC avisado a Chat de desarrollo."
+                    if ($ultC) { [void](Avisar 'Carlos' ("La CLI sigue sin avanzar con el lote $numC desde las $desdeC. Mira en LENOVO si hay una ventana de claude.exe esperando algo.") $dest) }
+                    Set-Content -Path $EstCli -Value ($claveC + '|' + $ahoraC.ToString('yyyy-MM-dd HH:mm:ss'))
+                }
+            }
+        } elseif (Test-Path $EstCli) { Remove-Item -Path $EstCli -Force -ErrorAction SilentlyContinue }
+    } catch { Log ('ERROR en cli: ' + $_.Exception.Message) }
 } finally {
     Remove-Item -Path $Lock -Force -ErrorAction SilentlyContinue
 }

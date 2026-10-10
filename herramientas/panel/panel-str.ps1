@@ -1,8 +1,8 @@
-﻿# panel-str.ps1 - Panel de jornada del STR (Arquitecto, 2026-10-10)
+﻿# panel-str.ps1 - Panel de jornada del STR (Arquitecto, 2026-10-10; v2: lista lo que espera de Carlos)
 # Ventana con tres botones: Empezar jornada, Terminar jornada y Estado.
 #  - Empezar: quita el archivo PAUSA de la cola y abre los perfiles de Chrome del verificador con el STR.
 #  - Terminar: crea PAUSA. El lote que esté corriendo termina; no empieza otro y el despertador no avisa.
-#  - Estado: muestra cola, lote en curso, verificación, despertador y perfiles abiertos.
+#  - Estado: muestra lo que espera de Carlos (buzón), cola, lote en curso, verificación, despertador y perfiles abiertos.
 # No inicia sesión en ningún sitio ni guarda contraseñas. No usa Claude (no gasta créditos).
 # Configuración: panel-config.json en esta misma carpeta (nombres de los perfiles de Chrome).
 # Se abre con el acceso directo del escritorio (lanzar-panel.vbs).
@@ -137,6 +137,19 @@ function Texto-Estado {
     $s = New-Object System.Text.StringBuilder
     if (Test-Path $Pausa) { [void]$s.AppendLine('Jornada: EN PAUSA desde ' + (Get-Item $Pausa).LastWriteTime.ToString('dd-MM HH:mm')) }
     else { [void]$s.AppendLine('Jornada: ACTIVA (cola y despertador trabajando)') }
+    # Lo que espera de Carlos (v2, 10-oct-2026): mensajes 'pendiente' para Carlos en la copia del buzon del despertador.
+    try {
+        $mj = Join-Path $Buzon 'cache\mensajes.json'
+        if (Test-Path $mj) {
+            $pc = @(((Get-Content -Path $mj -Raw -Encoding UTF8 | ConvertFrom-Json).mensajes) | Where-Object { ([string]$_.para) -eq 'Carlos' -and ([string]$_.estado) -eq 'pendiente' })
+            if ($pc.Count -gt 0) {
+                [void]$s.AppendLine('')
+                [void]$s.AppendLine('ESPERAN DE TI (' + $pc.Count + '):')
+                foreach ($m in $pc) { [void]$s.AppendLine('  ' + [string]$m.id + ' ' + [string]$m.hora + ' de ' + [string]$m.de + ': ' + [string]$m.asunto); [void]$s.AppendLine('      ' + [string]$m.texto) }
+                [void]$s.AppendLine('')
+            }
+        }
+    } catch { }
     $lock = Join-Path $Cola '.corriendo'
     if (Test-Path $lock) { [void]$s.AppendLine('Cola: CONSTRUYENDO un lote desde ' + (Get-Item $lock).LastWriteTime.ToString('HH:mm')) }
     else { [void]$s.AppendLine('Cola: sin lote corriendo') }

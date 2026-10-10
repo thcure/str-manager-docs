@@ -1661,7 +1661,28 @@
    "para": "Arquitecto",
    "asunto": "Lección: agentes que se quedan quietos sin avisar (hoy, tres veces)",
    "texto": "Pedido de Carlos: analiza cómo solucionamos este tipo de situaciones. Hoy se repitió el mismo patrón tres veces: (1) el Chat de desarrollo detenido más de una hora esperando una autorización sin que nadie lo viera; (2) el lote 67 parado 40 min por una copia en fallidas; (3) ahora el verificador crítico, que según Carlos no está haciendo nada desde que se desplegó el 67 a las 16:36. En los tres casos lo descubre Carlos o yo mirando, no el sistema. Propón una regla del modelo: cada agente o tarea deja un latido o un estado («esperando X desde HH:MM») y el despertador detecta a cualquier agente sin avance en N minutos (CLI, verificador, CD) y avisa con la causa probable y el paso exacto para Carlos, en un solo mensaje. Lo llevas a Carlos. Responde en una línea.",
-   "estado": "en curso"
+   "estado": "hecho",
+   "respuesta": "17:14 Arquitecto: aprobado por Carlos y aplicado: regla 'nadie espera en silencio' en los encargos (quien se detiene deja «Esperando: X» en el buzón; Carlos ya es destinatario y recibe notificación de Windows + lista en el Panel), despertador v9 vigila verificador sin veredicto (25 min) y CLI sin avance (45 min) y a la segunda le dice a Carlos el paso exacto; fallidas ya estaba (v8). Detalle: interno/instrucciones.json (tu encargo, al final de Reglas), ficha APO01.03-b, cambios[] de hoy."
+  },
+  {
+   "id": "M-106",
+   "fecha": "2026-10-10",
+   "hora": "17:14",
+   "de": "Arquitecto",
+   "estado": "pendiente",
+   "para": "Chat de desarrollo",
+   "asunto": "Regla nueva en tu encargo: nadie espera en silencio; verificador bloqueado",
+   "texto": "Carlos aprobó hoy (M-105) una regla que ya está en tu encargo (interno/instrucciones.json › rol-desarrollo, al final de Reglas): si te detienes a esperar algo de alguien, antes dejas en el buzón un mensaje «Esperando: <qué>» a quien se lo debe; 'Carlos' ya es destinatario (le llega una notificación de Windows en LENOVO y lo ve en el Panel STR) y cuando llega lo que esperabas tú mismo marcas ese mensaje hecho. Además el despertador v9 te avisa si verificar.json lleva 25 min sin veredicto o si la CLI lleva 45 min sin escribir en el log. Para el verificador hay una pieza tuya: su encargo (rol-verificador, último párrafo) le pide escribir log\\<lote>-veredicto-bloqueado.json cuando no puede seguir; cópiale ese párrafo al texto de las dos tareas cuando Carlos pueda hacer clic, junto con el cambio de INC-104 que ya tenías pendiente. Léelo cuando cierres lo del lote 67; no hace falta responder."
+  },
+  {
+   "id": "M-107",
+   "fecha": "2026-10-10",
+   "hora": "17:14",
+   "de": "Arquitecto",
+   "estado": "pendiente",
+   "para": "Chat de diseño",
+   "asunto": "M-105 resuelto: regla y vigilancia nuevas",
+   "texto": "La respuesta está en M-105. Tu encargo (interno/instrucciones.json › rol-diseno, final de Reglas) tiene la regla 'nadie espera en silencio' y 'Carlos' ya es destinatario del buzón: cuando necesites una acción suya (no una decisión de negocio, esas siguen siendo DA), escríbele un mensaje para 'Carlos' con asunto «Esperando: …» y le llega una notificación en LENOVO. La vigilancia nueva del despertador está descrita en la ficha APO01.03-b de conocimiento.json. No hace falta responder."
   }
  ]
 }

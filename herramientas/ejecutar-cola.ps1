@@ -1,4 +1,4 @@
-# ejecutar-cola.ps1 (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+# ejecutar-cola.ps1 (v4, 11-oct-2026: STR_INSTR/STR_LOTE para los hooks; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por nombre: 01-..., 02-...)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -101,7 +101,14 @@ try {
 
     # Modo de permisos: el mismo "auto" de la CLI interactiva. Si tu versión de la CLI
     # no acepta "auto", cambia la línea por:  --permission-mode bypassPermissions
-    & $Claude -p $prompt --permission-mode auto --output-format text @flagsExtra 2>&1 | Out-File -FilePath $salida -Append -Encoding UTF8
+    # v4 (A7): la instruccion del lote viaja a los hooks de la CLI por variables de entorno;
+    # auto-mode.json (si existe) declara la infraestructura de confianza del modo automatico.
+    $env:STR_INSTR = $f.FullName
+    $env:STR_LOTE  = $f.BaseName
+    $flagsLote = @() + $flagsExtra
+    $autoCfg = Join-Path $Cola 'auto-mode.json'
+    if (Test-Path $autoCfg) { $flagsLote += @('--settings', $autoCfg) }
+    & $Claude -p $prompt --permission-mode auto --output-format text @flagsLote 2>&1 | Out-File -FilePath $salida -Append -Encoding UTF8
     $codigo = $LASTEXITCODE
 
     $despues = (git rev-parse HEAD 2>$null | Select-Object -First 1).Trim()

@@ -1,0 +1,46 @@
+{
+ "_plantilla": "log\\verificar.json v2 (LM-1 §2.2). La escribe el Chat Desarrollo DESPUÉS de log\\pre-vuelo.json válido y ANTES de lanzar la tarea. Borra las claves que empiezan por _ al usarla. Ejemplo real: la del lote 69 (11-oct-2026).",
+ "lote": 0,
+ "prueba": false,
+ "instruccion": "hechas\\NN-instr-<nombre>.md",
+ "commit": "<hash>",
+ "version": "<p5cNN>",
+ "archivoVeredicto": "NN-veredicto.json",
+ "_archivoVeredicto": "Otra pasada = otro archivo: NN-veredicto-2.json, -3… Nunca se renombra ni se edita un veredicto.",
+ "notas": "<qué queda de una pasada parcial anterior; datos zz-verif- ya creados; hora real o simulada>",
+ "escritoPor": "Chat Desarrollo",
+ "fecha": "AAAA-MM-DD HH:MM",
+ "preVuelo": "log\\pre-vuelo.json",
+ "paginas": [
+  "https://app.apartamentosbucaramanga.com/str-app-shell.html",
+  "https://app.apartamentosbucaramanga.com/str-<pagina>.html"
+ ],
+ "_paginas": "Direcciones completas. Nunca la raíz del sitio (devuelve 403).",
+ "criterios": [
+  {
+   "c": "a",
+   "perfil": "operador",
+   "paginas": [
+    "https://app.apartamentosbucaramanga.com/str-<pagina>.html"
+   ],
+   "precondiciones": "<usuario, permisos y datos que deben existir; si no se cumplen → 'no verificable' con esa causa>",
+   "espera": "<lo observable, literal>",
+   "soloLectura": true
+  },
+  {
+   "c": "b",
+   "perfil": "tests/",
+   "cubiertoPor": "tests/<archivo>.test.js",
+   "espera": "verde en log\\NN-<nombre>.txt"
+  }
+ ],
+ "_criterios": "Un objeto por prueba derivada de la instrucción, con la misma letra. perfil ∈ {admin, operador, colaborador, tests/}. Anchos/móvil y permisos/403 → perfil tests/ (el verificador no cambia el viewport). «Desde el menú» → paginas empieza por str-app-shell.html.",
+ "pruebasApi": [],
+ "_pruebasApi": "Solo si la instrucción lo pide: [{\"c\":\"d\",\"perfil\":\"colaborador\",\"metodo\":\"GET\",\"ruta\":\"/api/col/...\",\"cuerpo\":null,\"espera\":403}]. Método, ruta y cuerpo exactos; el verificador no improvisa.",
+ "resultadosPermitidos": [
+  "aceptado",
+  "parcial",
+  "no aceptado",
+  "bloqueado"
+ ]
+}

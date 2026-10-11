@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nomenclatura del modelo STR</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: una tarjeta de referencia por tema, leída de arriba abajo; ids en monoespaciada; máquina vs criterio en dos tintas */
+:root{
+  --bg:#f6f7f4; --fg:#1d2430; --muted:#5b6472; --line:#d6dbd3; --card:#ffffff;
+  --accent:#1f5f8b;           /* criterio: decisiones de los chats */
+  --maquina:#1d7c6a;          /* mecánico: cola, despertador, validador */
+  --maquina-bg:#e3f1ec; --accent-bg:#e4edf5; --dueno:#8a5a12; --dueno-bg:#f6ecd9; --fase:#eef0ea;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15191f;--fg:#e6e9ee;--muted:#9aa3b0;--line:#2c333c;--card:#1d2229;--accent:#7fb6e0;--maquina:#6fcbb5;--maquina-bg:#1a3a34;--accent-bg:#1e3042;--dueno:#e0b56a;--dueno-bg:#3b2d14;--fase:#242a32;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15191f;--fg:#e6e9ee;--muted:#9aa3b0;--line:#2c333c;--card:#1d2229;--accent:#7fb6e0;--maquina:#6fcbb5;--maquina-bg:#1a3a34;--accent-bg:#1e3042;--dueno:#e0b56a;--dueno-bg:#3b2d14;--fase:#242a32;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.45;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;padding-inline:16px}
+header h1{font-size:26px;font-weight:600;margin:0 0 4px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:70ch}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12.5px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+section{margin-top:32px}
+h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+h2 span{color:var(--fg);font-size:17px;letter-spacing:0;text-transform:none;display:block;margin-top:2px}
+.tabla{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;background:var(--fase)}
+tr:last-child td{border-bottom:0}
+code,.id{font-family:var(--mono);font-size:12.5px;background:var(--fase);padding:1px 5px;border-radius:3px;white-space:nowrap}
+.id.m{background:var(--maquina-bg);color:var(--maquina)}
+.id.c{background:var(--accent-bg);color:var(--accent)}
+.id.d{background:var(--dueno-bg);color:var(--dueno)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
+.card h3{margin:0 0 6px;font-size:14px;font-weight:600}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:3px 0}
+.nota{color:var(--muted);font-size:12.5px}
+.flujo{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--card);padding:8px}
+svg text{font-family:var(--sans)}
+.voc dt{font-weight:600;margin-top:8px}
+.voc dd{margin:0 0 0 0;color:var(--muted)}
+.voc{columns:2;column-gap:28px}
+@media (max-width:640px){.voc{columns:1}}
+</style>
+<style>html,body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <h1>Nomenclatura del modelo STR</h1>
+  <p>Nombres, identificadores, entidades, estados y archivos del modelo de operación v2. Una sola forma de llamar a cada cosa; lo que no esté aquí no existe en el modelo.</p>
+  <div class="leyenda">
+    <span><i class="dot" style="background:var(--maquina)"></i>Mecánico: lo escribe la máquina (cola, despertador, validador)</span>
+    <span><i class="dot" style="background:var(--accent)"></i>Criterio: lo decide un chat</span>
+    <span><i class="dot" style="background:var(--dueno)"></i>Carlos</span>
+  </div>
+</header>
+
+<section>
+  <h2>1<span>Roles y chats</span></h2>
+  <div class="tabla"><table>
+    <tr><th>Nombre</th><th>Id del rol</th><th>Tipo</th><th>Qué decide o hace</th><th>Escribe (fuente única)</th></tr>
+    <tr><td><strong>Carlos</strong></td><td><span class="id d">rol-dueno</span></td><td>Persona</td><td>Aprueba objetivos, decisiones (DA), críticos y cambios del modelo</td><td>Nada; recibe por el Panel y la notificación de Windows</td></tr>
+    <tr><td><strong>Chat Diseño</strong></td><td><span class="id c">rol-diseno</span></td><td>Chat (Sonnet)</td><td>Analista y jefe de proyecto: requisitos, decisiones, planes, prioridades</td><td><code>diseno.json</code>, documentos de REQ</td></tr>
+    <tr><td><strong>Chat Desarrollo</strong></td><td><span class="id c">rol-desarrollo</span></td><td>Chat (Opus)</td><td>Convierte REQ en lotes, encola, registra veredictos, gestiona INC</td><td><code>seguimiento.json</code>, la cola, <code>verificar.json</code>, <code>pre-vuelo.json</code></td></tr>
+    <tr><td><strong>Chat Arquitecto</strong></td><td><span class="id c">rol-arquitecto</span></td><td>Chat (Opus)</td><td>Diseña y mantiene el modelo: proceso, encargos, herramientas, fichas</td><td><code>proceso.json</code>, encargos, <code>conocimiento.json</code>, <code>herramientas/</code></td></tr>
+    <tr><td><strong>Agente CLI</strong></td><td><span class="id m">rol-cli</span></td><td>claude.exe en LENOVO</td><td>Construye el lote y hace commit y push</td><td>Código de <code>str-manager</code>, <code>log\NN-*.txt</code></td></tr>
+    <tr><td><strong>Agente verificador</strong></td><td><span class="id c">rol-verificador</span></td><td>Tarea de Cowork atada a LENOVO (Sonnet o Opus si es crítico)</td><td>Acepta o rechaza; nunca construye ni corrige</td><td><code>log\NN-veredicto*.json</code></td></tr>
+    <tr><td><strong>Despertador</strong> (supervisor MEA01)</td><td><span class="id m">maquina</span></td><td>Script cada minuto en LENOVO</td><td>Vigila plazos y señales, avisa, repite, escala; orquesta por código</td><td><code>estado-vivo.json</code>, <code>buzon.log</code></td></tr>
+    <tr><td><strong>Cola</strong></td><td><span class="id m">maquina</span></td><td>Script cada minuto en LENOVO</td><td>Arranca lotes si pasan las guardas</td><td><code>_resumen.txt</code>, <code>.corriendo</code>, <code>fallidas\</code></td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>2<span>Identificadores</span></h2>
+  <div class="tabla"><table>
+    <tr><th>Prefijo</th><th>Patrón</th><th>Ejemplo</th><th>Entidad</th><th>Lo crea</th></tr>
+    <tr><td><span class="id">REQ</span></td><td><code>REQ-&lt;MOD&gt;-&lt;n&gt;</code> · MOD = módulo en 1–4 mayúsculas · la <code>-n</code> es obligatoria</td><td><code>REQ-U-8</code>, <code>REQ-INV2-5</code>, <code>REQ-TB-3</code>, <code>REQ-MOD-2</code></td><td>Requisito</td><td>Diseño (los <code>REQ-MOD</code>, el Arquitecto)</td></tr>
+    <tr><td><span class="id">DA</span></td><td><code>DA-&lt;n&gt;</code></td><td><code>DA-30</code></td><td>Decisión de Carlos</td><td>Diseño; decide Carlos</td></tr>
+    <tr><td><span class="id">P</span></td><td><code>P-&lt;n&gt;</code></td><td><code>P-10</code></td><td>Pedido de Carlos, aún sin REQ</td><td>Diseño</td></tr>
+    <tr><td><span class="id">OB</span> / <span class="id">PT</span></td><td><code>OB-&lt;n&gt;</code> · <code>PT-&lt;n&gt;</code> (<code>PT-M&lt;n&gt;</code> si es del modelo)</td><td><code>OB-3</code>, <code>PT-7</code>, <code>PT-M1</code></td><td>Objetivo · Plan de trabajo</td><td>Diseño</td></tr>
+    <tr><td><span class="id">L</span></td><td><code>L-&lt;n&gt;</code> en el modelo; en la cola sigue el archivo <code>NN-instr-&lt;tema&gt;.md</code></td><td><code>L-67</code> ↔ <code>67-instr-fix-inc108-un-usuario-un-rol.md</code></td><td>Lote</td><td>Desarrollo; el número se asigna <em>al encolar</em></td></tr>
+    <tr><td><span class="id">V</span></td><td><code>V-&lt;lote&gt;-&lt;pasada&gt;</code> ↔ <code>log\NN-veredicto[-k].json</code></td><td><code>V-67-2</code> ↔ <code>67-veredicto-2.json</code></td><td>Veredicto (inmutable)</td><td>Verificador</td></tr>
+    <tr><td><span class="id">INC</span></td><td><code>INC-&lt;n&gt;</code> · nivel: crítico · medio · bajo</td><td><code>INC-109</code></td><td>Incidente</td><td>Verificador lo detecta; Desarrollo lo gestiona</td></tr>
+    <tr><td><span class="id">DT</span></td><td><code>DT-&lt;n&gt;</code></td><td><code>DT-26</code></td><td>Deuda técnica</td><td>Desarrollo</td></tr>
+    <tr><td><span class="id">C</span></td><td><code>C-&lt;n&gt;</code> · tipo: producto · modelo</td><td><code>C-112</code></td><td>Registro de cambio (BAI06)</td><td>Desarrollo (producto) · Arquitecto (modelo)</td></tr>
+    <tr><td><span class="id">R</span></td><td><code>R-&lt;n&gt;</code></td><td><code>R-2</code></td><td>Riesgo</td><td>Arquitecto</td></tr>
+    <tr><td><span class="id">M</span></td><td><code>M-&lt;n&gt;</code></td><td><code>M-116</code></td><td>Mensaje del buzón</td><td>Quien envía</td></tr>
+    <tr><td><span class="id">S</span></td><td><code>S-&lt;rol&gt;-&lt;n&gt;</code> · grupos <code>G-&lt;n&gt;</code></td><td><code>S-cd-5</code>, <code>S-dis-11</code>, <code>S-arq-16</code>, <code>G-5</code></td><td>Situación · Grupo consolidado</td><td>Cada rol · Arquitecto</td></tr>
+    <tr><td><span class="id">LEC</span></td><td><code>LEC-&lt;n&gt;</code></td><td><code>LEC-12</code></td><td>Lección aprendida</td><td>Arquitecto</td></tr>
+    <tr><td><span class="id">E</span></td><td><code>E-&lt;secuencial&gt;</code></td><td><code>E-4031</code></td><td>Evento: cambio de estado con hora y autor</td><td>Quien provoca la transición</td></tr>
+    <tr><td><span class="id">ENC</span> / <span class="id">PROC</span></td><td><code>ENC-&lt;rol&gt;-v&lt;n&gt;</code> · <code>PROC-&lt;nombre&gt;-v&lt;n&gt;</code></td><td><code>ENC-desarrollo-v3</code>, <code>PROC-lote-v1</code></td><td>Encargo · Proceso (versionados)</td><td>Arquitecto</td></tr>
+    <tr><td>Ficha</td><td><code>&lt;objetivo COBIT&gt;-&lt;letra&gt;</code></td><td><code>APO01.03-b</code>, <code>BAI07.05-v</code></td><td>Ficha de la base de conocimiento</td><td>Arquitecto</td></tr>
+    <tr><td>Proyecto</td><td>corto, minúsculas; va en toda entidad</td><td><code>str</code></td><td>Proyecto</td><td>Arquitecto</td></tr>
+  </table></div>
+  <p class="nota">Reglas: mayúsculas, guiones, sin espacios ni símbolos (<code>REQ-INV2 · 5</code>, <code>REQ-U8 (INC-108)</code> no valen). Un id nunca se reutiliza ni se renombra. Lo que se cierra se archiva, no se borra. Fuera de un proyecto la clave es <code>(proyecto, id)</code>.</p>
+</section>
+
+<section>
+  <h2>3<span>Entidades por capa y quién las escribe</span></h2>
+  <div class="grid">
+    <div class="card"><h3>Estructura · <span class="id c">Arquitecto</span></h3><ul><li>proyecto, rol, encargo, proceso</li><li>ficha, lección, herramienta, riesgo</li></ul></div>
+    <div class="card"><h3>Definición · <span class="id c">Diseño</span></h3><ul><li>objetivo, plan de trabajo, requisito</li><li>decisión (DA), pedido, módulo</li><li>La <em>bolsa</em> no es entidad: es la vista de lo que no tiene plan</li></ul></div>
+    <div class="card"><h3>Ejecución · <span class="id c">Desarrollo</span></h3><ul><li>lote (los estados mecánicos los pone la <span class="id m">máquina</span>)</li><li>cambio, incidente, deuda</li><li>veredicto: lo escribe el <strong>verificador</strong>, nadie lo edita</li><li>evento: quien provoca la transición</li></ul></div>
+    <div class="card"><h3>Comunicación · todos</h3><ul><li>mensaje: quien envía lo crea; quien recibe cambia estado y respuesta; si es para Carlos, el remitente lo cierra</li><li>estado vivo: solo el <span class="id m">despertador</span></li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>4<span>Camino de un lote · estados de <code>PROC-lote-v1</code></span></h2>
+  <div class="flujo">
+  <svg viewBox="0 0 1040 330" width="1040" height="330" role="img" aria-label="Estados del lote de definido a aceptado">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+    <g style="color:var(--muted)" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)">
+      <path d="M126 70H146"/><path d="M256 70H276"/><path d="M386 70H406"/><path d="M516 70H536"/><path d="M646 70H666"/><path d="M776 70H796"/><path d="M906 70H926"/>
+      <path d="M581 96V150"/><path d="M581 196V210"/>
+      <path d="M711 96V150"/>
+      <path d="M841 96V150"/><path d="M841 196V210"/>
+      <path d="M520 180H470" /><path d="M470 180V96"/>
+    </g>
+    <!-- fases -->
+    <g font-size="11" fill="var(--muted)"><text x="16" y="24">BAI02 Definir</text><text x="276" y="24">BAI03 Construir</text><text x="666" y="24">BAI07 Verificar y aceptar</text></g>
+    <g font-size="12.5" font-weight="500">
+      <rect x="16" y="48" width="110" height="44" rx="6" fill="var(--accent-bg)" stroke="var(--accent)"/><text x="71" y="68" text-anchor="middle" fill="var(--fg)">definido</text><text x="71" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">Diseño</text>
+      <rect x="146" y="48" width="110" height="44" rx="6" fill="var(--accent-bg)" stroke="var(--accent)"/><text x="201" y="68" text-anchor="middle" fill="var(--fg)">entregado</text><text x="201" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">Diseño · M-n</text>
+      <rect x="276" y="48" width="110" height="44" rx="6" fill="var(--accent-bg)" stroke="var(--accent)"/><text x="331" y="68" text-anchor="middle" fill="var(--fg)">redactado</text><text x="331" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">Desarrollo · revisor</text>
+      <rect x="406" y="48" width="110" height="44" rx="6" fill="var(--maquina-bg)" stroke="var(--maquina)"/><text x="461" y="68" text-anchor="middle" fill="var(--fg)">encolado</text><text x="461" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">cola · 3 min</text>
+      <rect x="536" y="48" width="110" height="44" rx="6" fill="var(--maquina-bg)" stroke="var(--maquina)"/><text x="591" y="68" text-anchor="middle" fill="var(--fg)">construyendo</text><text x="591" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">CLI · 45 min sin log</text>
+      <rect x="666" y="48" width="110" height="44" rx="6" fill="var(--maquina-bg)" stroke="var(--maquina)"/><text x="721" y="68" text-anchor="middle" fill="var(--fg)">construido</text><text x="721" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">OK en _resumen · 15 min</text>
+      <rect x="796" y="48" width="110" height="44" rx="6" fill="var(--maquina-bg)" stroke="var(--maquina)"/><text x="851" y="68" text-anchor="middle" fill="var(--fg)">verificando</text><text x="851" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">pre-vuelo · 25 min</text>
+      <rect x="926" y="48" width="100" height="44" rx="6" fill="var(--accent-bg)" stroke="var(--accent)"/><text x="976" y="68" text-anchor="middle" fill="var(--fg)">con veredicto</text><text x="976" y="83" text-anchor="middle" font-size="10.5" fill="var(--muted)">V-n-k · 15 min</text>
+      <!-- fila 2 -->
+      <rect x="526" y="150" width="110" height="46" rx="6" fill="var(--card)" stroke="var(--dueno)" stroke-dasharray="4 3"/><text x="581" y="170" text-anchor="middle" fill="var(--fg)">fallido</text><text x="581" y="185" text-anchor="middle" font-size="10.5" fill="var(--muted)">fallidas\ · 15 min</text>
+      <rect x="656" y="150" width="110" height="46" rx="6" fill="var(--card)" stroke="var(--line)"/><text x="711" y="170" text-anchor="middle" fill="var(--fg)">aceptado</text><text x="711" y="185" text-anchor="middle" font-size="10.5" fill="var(--muted)">fija el verificador</text>
+      <rect x="786" y="150" width="110" height="46" rx="6" fill="var(--card)" stroke="var(--dueno)" stroke-dasharray="4 3"/><text x="841" y="170" text-anchor="middle" fill="var(--fg)">bloqueado</text><text x="841" y="185" text-anchor="middle" font-size="10.5" fill="var(--muted)">≠ no aceptado · 15 min</text>
+      <!-- fila 3 -->
+      <rect x="526" y="210" width="110" height="46" rx="6" fill="var(--card)" stroke="var(--line)"/><text x="581" y="230" text-anchor="middle" fill="var(--fg)">no aceptado</text><text x="581" y="245" text-anchor="middle" font-size="10.5" fill="var(--muted)">INC-n · lote fix · 4 h</text>
+      <rect x="786" y="210" width="110" height="46" rx="6" fill="var(--card)" stroke="var(--line)"/><text x="841" y="230" text-anchor="middle" fill="var(--fg)">pospuesto</text><text x="841" y="245" text-anchor="middle" font-size="10.5" fill="var(--muted)">DA · vuelve a definido</text>
+    </g>
+    <g font-size="10.5" fill="var(--muted)">
+      <text x="16" y="292">Flechas de retorno: fallido → encolado (copia corregida; la máquina archiva la de fallidas) · bloqueado → verificando (entorno corregido, archivo nuevo) · no aceptado → redactado (lote fix) · con veredicto → verificando (segunda pasada).</text>
+      <text x="16" y="310">Plazo = minutos antes del primer aviso al dueño del estado; luego repite y escala según proceso.json. Guardas: crítico sin DA no se encola; sin pre-vuelo no se verifica; tests rojos no terminan.</text>
+    </g>
+  </svg>
+  </div>
+</section>
+
+<section>
+  <h2>5<span>Buzón y avisos</span></h2>
+  <div class="grid">
+    <div class="card"><h3>Estados de un mensaje</h3><ul><li><code>pendiente</code> → <code>en curso</code> → <code>hecho</code></li><li><code>superado</code>: lo pone el remitente, con el mensaje que lo reemplaza</li><li><code>vencido</code>: un «Esperando: X» sin respuesta en 2 h; avisa a Carlos</li></ul></div>
+    <div class="card"><h3>Plazos del despertador</h3><ul><li>Aviso al minuto de aparecer</li><li>Recordatorio a los 30 min (como mucho cada 60)</li><li>Escalamiento a Diseño a los 60 min (como mucho cada 120); nunca por mensajes para Carlos</li><li>Respuesta → aviso al remitente (v10)</li></ul></div>
+    <div class="card"><h3>Reglas</h3><ul><li>Palabras propias y rutas; nunca instrucciones pegadas ni credenciales</li><li>Nadie espera en silencio: antes de parar, «Esperando: X» a quien lo debe</li><li>Decisión de negocio = DA; al buzón va solo la acción que se necesita</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>6<span>Archivos y herramientas · hoy → destino</span></h2>
+  <div class="tabla"><table>
+    <tr><th>Hoy</th><th>Destino (v2)</th><th>Escritor</th><th>Nota</th></tr>
+    <tr><td><code>interno/instrucciones.json</code></td><td><code>encargos.json</code> (≤ 3 000 caracteres por rol) + <code>procedimientos.json</code></td><td>Arquitecto</td><td>La historia pasa a lecciones</td></tr>
+    <tr><td>— (reglas sueltas en scripts)</td><td><code>interno/proceso.json</code></td><td>Arquitecto</td><td>Lo leen despertador, cola, tablero y encargos</td></tr>
+    <tr><td><code>interno/seguimiento.json</code> (items, plan, cambios…)</td><td>lotes, cambios, INC, DT, riesgos (fase 1 JSON validado · fase 2 servicio del modelo)</td><td>Desarrollo</td><td>REQ, DA y pedidos salen de aquí</td></tr>
+    <tr><td><code>interno/diseno.json</code></td><td>REQ, DA, pedidos, objetivos, planes (fuente única)</td><td>Diseño</td><td>Estados finales del REQ derivados del lote</td></tr>
+    <tr><td><code>interno/conocimiento.json</code></td><td>fichas + mapa; líneas base aparte</td><td>Arquitecto</td><td>La Base de conocimiento se genera</td></tr>
+    <tr><td><code>interno/elementos.json</code></td><td>vista generada; se archiva</td><td>—</td><td></td></tr>
+    <tr><td><code>interno/marco-trabajo.json</code> · <code>situaciones/*.json</code></td><td>lecciones con <code>aplicadaEn</code> · situaciones por rol</td><td>Arquitecto · cada rol</td><td>Cada lección termina en regla, guardia, plantilla o descartada</td></tr>
+    <tr><td><code>interno/mensajes.json</code> · <code>destinatarios.json</code></td><td>mensajes (archivo mensual) · absorbido por <em>rol</em></td><td>todos · Arquitecto</td><td></td></tr>
+    <tr><td><code>herramientas/vigilar-buzon.ps1</code> (v9)</td><td>despertador v10: motor de <code>proceso.json</code>; escribe <code>estado-vivo.json</code></td><td>Arquitecto</td><td>Instalado en LENOVO · <code>buzon\</code></td></tr>
+    <tr><td><code>herramientas/ejecutar-cola.ps1</code></td><td>cola con guardas (PAUSA, fallidas, DA en críticos)</td><td>Arquitecto</td><td>Instalado en LENOVO</td></tr>
+    <tr><td><code>herramientas/panel/panel-str.ps1</code> (v2)</td><td>Panel v3: empezar/terminar jornada (cierra perfiles de prueba), pre-vuelo, estado vivo, «esperan de ti»</td><td>Arquitecto</td><td>Acceso directo «Panel STR»</td></tr>
+    <tr><td><code>str-manager/CLAUDE.md</code></td><td>podado + hooks en <code>.claude/settings.json</code> (cabecera, tests, recarga tras compactar)</td><td>Arquitecto redacta; CLI aplica</td><td></td></tr>
+    <tr><td><code>log\verificar.json</code></td><td>+ <code>paginas</code>, precondiciones · <code>log\pre-vuelo.json</code> · <code>NN-veredicto-bloqueado.json</code></td><td>Desarrollo · verificador</td><td></td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>7<span>Vocabulario</span></h2>
+  <dl class="voc">
+    <dt>negocio</dt><dd>El tenant del STR. Nunca «cuenta».</dd>
+    <dt>lote</dt><dd>Una instrucción construida por la CLI en una sola corrida. Un lote a la vez.</dd>
+    <dt>categoría</dt><dd>estándar · normal · crítico. Un crítico no se encola sin DA y cruce con Carlos.</dd>
+    <dt>cruce</dt><dd>Visto bueno de Carlos a un lote crítico, con fecha, conducido por Diseño y citado en la cabecera.</dd>
+    <dt>DA</dt><dd>Decisión de Carlos registrada con opciones y consecuencias. Una decisión, una DA, antes de encolar.</dd>
+    <dt>veredicto</dt><dd>Resultado del verificador: aceptado · parcial · no aceptado · bloqueado. Inmutable; otra pasada es otro archivo.</dd>
+    <dt>bloqueado</dt><dd>El verificador no pudo trabajar (carpetas, perfil, sesión, permiso). No cuenta como «no aceptado».</dd>
+    <dt>pre-vuelo</dt><dd>Comprobación antes de lanzar el verificador: enlace con LENOVO vivo, perfiles abiertos, usuario correcto en la barra.</dd>
+    <dt>quien construye no acepta</dt><dd>El estado «aceptado» lo fija el veredicto del verificador, nunca el Chat Desarrollo por su cuenta.</dd>
+    <dt>despertador</dt><dd>El script de LENOVO que cada minuto vigila señales y plazos y avisa a los chats. Es el supervisor MEA01 y el orquestador por código.</dd>
+    <dt>estado vivo</dt><dd>Archivo que el despertador escribe al minuto con lo mecánico: qué hay en cola, qué se construye, qué se verifica, qué está bloqueado.</dd>
+    <dt>encargo</dt><dd>El texto que define el papel de un rol. Corto; apunta a <code>proceso.json</code> y a las fichas.</dd>
+    <dt>ficha</dt><dd>El porqué y el cómo de un procedimiento, con su objetivo COBIT.</dd>
+    <dt>situación · lección</dt><dd>Algo que no salió a la primera, con causa y costo · lo que se aprendió y dónde se aplicó.</dd>
+    <dt>cambio <code>modelo:</code></dt><dd>Todo cambio a la capa Marco: aprobado por Carlos, registrado como cambio tipo modelo, commit con ese prefijo.</dd>
+    <dt>jornada</dt><dd>Entre «Empezar» y «Terminar» en el Panel. Fuera de jornada: <code>PAUSA</code>, la cola no arranca y el despertador no avisa.</dd>
+    <dt>usuarios de prueba</dt><dd><code>zz-verif-admin</code>, <code>zz-verif-oper</code>, <code>zz-verif-colab</code>, cada uno en su perfil de Chrome. Nunca el usuario ni el perfil de Carlos.</dd>
+  </dl>
+</section>
+</div>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-11; v10 LM-2: respuestas al remitente, pre-vuelo, planes pausados, estado vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-11; v10.2 LM-2: respuestas al remitente, pre-vuelo, planes pausados, estado vivo)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -215,6 +215,8 @@ try {
                 $de = [string]$m.de
                 $dDe = BuscarDest $dest $de
                 if (-not $dDe -or ([string]$dDe.canal) -eq 'windows') { Add-Content -Path $EstResp -Value $id; continue }   # Carlos o remitente desconocido: no se avisa
+                $deResp = ''; try { $deResp = [string]$m.respuesta.de } catch { }
+                if ($deResp -and ((Nom $deResp) -eq (Nom $de))) { Add-Content -Path $EstResp -Value $id; continue }   # v10.2: el remitente cerro su propio mensaje (p. ej. uno para Carlos): no se avisa a si mismo
                 $texto = "Respondieron $id en el buzon (interno/mensajes.json): lee la respuesta y sigue con lo que esperaba."
                 if (Avisar ([string]$dDe.nombre) $texto $dest) { Add-Content -Path $EstResp -Value $id; Log "$id respondido: avisado a $($dDe.nombre)." }
             }

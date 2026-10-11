@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-11; v10.2 LM-2: respuestas al remitente, pre-vuelo, planes pausados, estado vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-11; v10.3 LM-2: respuestas al remitente, pre-vuelo, planes pausados, estado vivo)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -77,7 +77,7 @@ $EstFalla = Join-Path $Base 'fallidas-avisadas.txt'
 $FallaMin  = 15    # minutos que un .md sigue en fallidas\ antes del primer aviso
 $FallaCada = 60    # minutos entre avisos repetidos (con escalamiento al Chat de diseno)
 $EstVerif  = Join-Path $Base 'verificador-avisado.txt'
-$VerifMin  = 25    # minutos de verificar.json sin veredicto antes del primer aviso
+$VerifMin  = 15    # minutos de verificar.json sin veredicto antes del primer aviso (v10.3: 15, alineado con LM-1 s3.4)
 $VerifCada = 60    # minutos entre avisos repetidos (el segundo y siguientes tambien a Carlos)
 $EstCli    = Join-Path $Base 'cli-avisado.txt'
 $EstResp   = Join-Path $Base 'respondidos.txt'     # v10: ids de mensajes cuya respuesta ya se aviso al remitente

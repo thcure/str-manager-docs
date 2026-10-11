@@ -30,10 +30,12 @@
 | 2 | Simulación despertador: primera corrida marca respuestas sin avisar; respuesta nueva → aviso al remitente; `verificar.json` sin `pre-vuelo.json` → aviso; con pre-vuelo válido reciente → sin aviso; `estado-vivo.json` escrito con `verificando` | OK (11-oct 11:55) |
 | 3 | Normalización de nombres: «Chat de diseño», «Chat Diseño», «Diseño» → `diseno` | OK |
 | 4 | Análisis sintáctico de los dos scripts; archivos ASCII (acentos como `\uXXXX`) para Windows PowerShell 5.1 | OK |
-| 5 | Primer ciclo real en LENOVO: `buzon.log` sin `ERROR` tras la instalación; `estado-vivo.json` creado | Pendiente de comprobar tras instalar |
+| 5 | Primer ciclo real en LENOVO: `buzon.log` sin `ERROR` tras la instalación; `estado-vivo.json` creado | OK (11-oct 12:03: 0 `ERROR`, `estado-vivo.json` con `verificando` lote 69 y pre-vuelo 11:59) |
+| 6 | v10.2: al cerrar el Arquitecto su propio M-108 el despertador avisó al remitente (él mismo); corregido: no avisa cuando `respuesta.de` es el remitente | Instalado 12:05 (S-arq-17) |
 
 ## 4. Instalación
 11-oct-2026 ~11:58: respaldos `buzon\vigilar-buzon.v9.ps1` y `ejecutar-cola.v2.ps1`; nuevos `buzon\vigilar-buzon.ps1` (v10) y `ejecutar-cola.ps1` (v3). La cola estaba construyendo el lote 69: el proceso en curso termina con la versión vieja ya cargada; la siguiente corrida usa v3.
+11-oct-2026 12:05: `buzon\vigilar-buzon.ps1` actualizado a v10.2 (mismo respaldo v9).
 
 ## 5. Criterios de aceptación
 1. `buzon.log` sin líneas `ERROR en …` durante 30 min tras la instalación.

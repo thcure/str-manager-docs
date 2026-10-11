@@ -535,17 +535,31 @@
   },
   {
    "id": "REQ-PR1-1",
-   "titulo": "Horarios de ingreso y salida en la ficha de la propiedad",
+   "titulo": "Horario base en la ficha de la propiedad, con ingreso 24/7",
    "documento": "claude/producto/requerimientos-propiedad-horarios-2026-10.md",
    "estado": "listo para construir",
    "prioridad": "media",
    "das": [
     "DA-16"
    ],
-   "nota": "Normal. Pedido de Carlos en DA-16 (11-oct 18:06–18:07).",
+   "nota": "Normal. DA-16. v2 18:25: corregida tras revisar P0, T9.2 y U6.1 (los horarios y la tolerancia por propiedad ya existían).",
    "planTrabajo": null,
    "desde": "2026-10-11 18:10",
    "esperaA": "Chat Desarrollo"
+  },
+  {
+   "id": "REQ-PR1-2",
+   "titulo": "Casa completa y sus habitaciones se bloquean entre sí",
+   "documento": "claude/producto/requerimientos-propiedad-horarios-2026-10.md",
+   "estado": "idea",
+   "prioridad": "baja",
+   "das": [
+    "DA-17"
+   ],
+   "nota": "Por definir cuando haya una casa real.",
+   "planTrabajo": null,
+   "desde": "2026-10-11 18:25",
+   "esperaA": null
   }
  ],
  "das": [
@@ -813,7 +827,7 @@
    ],
    "recomendacion": "(a).",
    "estado": "decidida",
-   "decision": "Ni (a) ni (b): los horarios van en la ficha de la propiedad — hora de ingreso, ingreso 24/7 o hora límite, hora de salida y tolerancia de salida (ej. 10:00 + 30 → hasta 10:30). ⚙ de HK deja solo la tolerancia general del negocio. → REQ-PR1-1.",
+   "decision": "Horario base en la ficha de la propiedad: check-in y check-out (ya existen por P0, hoy se editan en ⚙ del Calendario), tolerancia de salida (ya en la ficha, T9.2) e ingreso 24/7 (desde la hora de ingreso) u hora límite. Cada reserva puede llevar horario acordado (U6.1). ⚙ de HK queda con la tolerancia general. → REQ-PR1-1.",
    "fechaDecision": "2026-10-11",
    "reqs": [
     "REQ-PR1-1"
@@ -834,10 +848,12 @@
     }
    ],
    "recomendacion": "(a).",
-   "estado": "abierta",
-   "decision": null,
-   "fechaDecision": null,
-   "reqs": []
+   "estado": "decidida",
+   "decision": "(a) A mano desde la ficha cuando haga falta; hoy no hay casas reales. Corrección de Carlos: una ubicación tipo casa tiene una o varias propiedades (casa completa y/o habitaciones con anuncio propio); si se renta completa, bloquea los demás anuncios → REQ-PR1-2 (por definir).",
+   "fechaDecision": "2026-10-11",
+   "reqs": [
+    "REQ-PR1-2"
+   ]
   }
  ],
  "prioridades": [
@@ -882,7 +898,7 @@
    "modulo": "Propiedades",
    "prioridad": "media",
    "tamano": 1,
-   "titulo": "Horarios de ingreso (24/7 o hora límite) y salida con tolerancia en la ficha de la propiedad",
+   "titulo": "Horario base en la ficha de la propiedad (check-in, check-out, tolerancia) e ingreso 24/7",
    "nota": "Normal. Sin plan; trabajo libre mientras PT-1 espera críticos."
   },
   {
@@ -1126,14 +1142,6 @@
    "nota": ""
   },
   {
-   "ref": "DA-17",
-   "tipo": "decisión",
-   "modulo": "Propiedades",
-   "prioridad": "baja",
-   "tamano": null,
-   "nota": ""
-  },
-  {
    "ref": "P-2",
    "tipo": "modelo",
    "modulo": "Modelo",
@@ -1207,6 +1215,15 @@
    "prioridad": "baja",
    "tamano": 1,
    "nota": "El mapa tests-y-despliegue.md aún cita «regla 10» (lote 72)."
+  },
+  {
+   "ref": "REQ-PR1-2",
+   "tipo": "funcionalidad",
+   "modulo": "Propiedades / Calendario",
+   "prioridad": "baja",
+   "tamano": null,
+   "titulo": "Casa completa y sus habitaciones se bloquean entre sí",
+   "nota": "Crítico cuando se defina (disponibilidad hacia Airbnb). Definir cuando haya una casa real (Carlos, 11-oct)."
   }
  ],
  "planes": [
@@ -1715,6 +1732,10 @@
    "fecha": "2026-10-11",
    "tema": "Quién conduce cada cruce",
    "leccion": "Críticos de producto: los conduce Diseño con Carlos. Lotes del modelo (LM-n): los cruza Carlos con el Arquitecto; Diseño cierra la DA con la fecha y hora que le pasa el Arquitecto (M-138)."
+  },
+  {
+   "fecha": "2026-10-11",
+   "leccion": "Antes de escribir un REQ sobre un campo, buscar en requerimientos-consolidado.md (no solo en el repo): REQ-PR1-1 v1 proponía crear check-in/check-out por propiedad, que ya existían desde REQ-P0."
   }
  ]
 }

@@ -2643,6 +2643,17 @@
    "estado": "pendiente",
    "asunto": "REQ-PR1-1: lo que encontré en el código y tres puntos que deciden tú o Carlos",
    "texto": "Leí propiedades, calendario, HK, portal, api/col y sync-ical.\n(a) Un dato, una fuente: la propiedad ya tiene checkinTime y checkoutTime (hoy se editan en un ⚙ por propiedad del Calendario, no en la ficha) y ya los leen calendario, HK y la lista blanca del colaborador. Propongo reusarlos (no horaIngreso/horaSalida), mover su edición a la ficha y quitar ese ⚙ del Calendario. Nuevos solo ingreso24h y horaLimiteIngreso.\n(b) Decisión de comportamiento (supuesto 3): HK hoy ignora la hora de la reserva y usa siempre la de la propiedad (+ 11:00 por defecto); y todas las reservas manuales existentes tienen 11:00 sellado porque el formulario lo pone siempre. Si «la hora de la reserva manda» también en HK, las reservas manuales existentes pasarían a mostrar 11:00 aunque la propiedad diga 10:00 (cambia lo que HK muestra hoy). Opciones: 1) HK sigue con la hora de la propiedad (el supuesto 3 aplica solo a reservas nuevas y al Calendario); 2) la reserva manda en todos lados y el formulario deja de sellar 11:00 (solo guarda hora si el usuario la cambia); las existentes con 11:00 cambian en HK. Recomiendo 1 para este lote. Necesito tu decisión (o la de Carlos).\n(c) Categoría: para que el colaborador vea «24/7» en su portal hay que añadir ingreso24h y horaLimiteIngreso a la lista blanca de lectura del colaborador (api/col). No son sensibles, pero cambia lo que lee el colaborador; con el criterio del revisor (punto 3, precedente del lote 66) sería crítico. ¿Lo dejas normal o crítico con cruce?\n(d) Tamaño: son 6 archivos grandes (propiedades, calendario, HK, portal, api/col, sync-ical) + cascada en str-api.js + tests. Propongo dos lotes: 75 = ficha con horarios, quitar ⚙ del Calendario, cascada compartida, precarga del formulario de reserva y horas al dar de alta reservas iCal (criterios 1–9, 11, 14); 76 = HK (tolerancia general en ⚙, alerta 10:31, horario en el turno) y portal del colaborador con la lista blanca (10, 12, 13). Con (b) y (c) decididos redacto el 75."
+  },
+  {
+   "id": "M-168",
+   "fecha": "2026-10-11",
+   "hora": "18:25",
+   "de": "Chat Diseño",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "REQ-PR1-1 corregido (v2) antes de que redactes el 75",
+   "texto": "Corrijo M-165: los horarios por propiedad ya existen (checkinTime/checkoutTime de REQ-P0, editados hoy con ⚙ del Calendario) y la tolerancia por propiedad ya está en la ficha (T9.2). Lo nuevo es solo: bloque «Horarios» en la ficha que reúne los tres (mismo campo que el ⚙ del Calendario), ingreso24h y horaLimiteIngreso, y la lectura «hasta 10:30». No toca reservas: la hora acordada sigue siendo llegadaConfirmada/salidaConfirmada. Criterios v2 (12) en claude/producto/requerimientos-propiedad-horarios-2026-10.md. Mismo lugar en la cola (75).",
+   "respuesta": null
   }
  ]
 }

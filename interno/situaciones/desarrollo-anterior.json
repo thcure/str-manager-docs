@@ -1,0 +1,486 @@
+{
+ "rol": "rol-desarrollo (Chat de desarrollo anterior, sesiones 7–9 oct; hoy solo de consulta)",
+ "actualizadoEn": "2026-10-11",
+ "nota": "Situaciones del chat anterior al relevo M-26. Las de antes de la compactación salen del resumen del chat; las horas y costos son aproximados.",
+ "situaciones": [
+  {
+   "id": "S-cda-1",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "lote 50",
+    "R13"
+   ],
+   "quePaso": "Di por subida a GitHub un cambio comparando con git diff --stat y alineé main con origin antes de que la subida existiera; el commit local quedó fuera.",
+   "causa": "git diff --stat devuelve 0 aunque haya diferencias; usé un comando de presentación como prueba de igualdad.",
+   "costoMin": 15,
+   "comoSeResolvio": "git reset --keep a la rama de respaldo y nueva subida.",
+   "leccion": "Comprobar igualdad con git diff --quiet y respaldar la rama antes de alinear.",
+   "reglaPropuesta": "R13 de transiciones-chat. (Cubierta por: R13.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-2",
+   "fecha": "2026-10-08",
+   "veces": 9,
+   "categoria": "herramienta",
+   "refs": [
+    "INC-87"
+   ],
+   "quePaso": "El formulario web de GitHub ('Commit changes') no enviaba al primer clic; hubo que repetir el clic, a veces por coordenadas tras una captura.",
+   "causa": "Página pesada tras subir un JSON de ~400 KB (el renderizador se congela y el clic se pierde).",
+   "costoMin": 20,
+   "comoSeResolvio": "Repetir el clic y comprobar con git fetch + diff --quiet.",
+   "leccion": "No dar por subido nada sin comprobar origin/main.",
+   "reglaPropuesta": "Desaparece con git push directo (INC-87); mientras tanto, bucle clic → fetch → diff. (Cubierta por: R13.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-3",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "comunicacion",
+   "refs": [],
+   "quePaso": "Navegué la pestaña del STR que Carlos tenía abierta hacia GitHub para subir un archivo.",
+   "causa": "Usé la pestaña existente en lugar de crear una propia.",
+   "costoMin": 5,
+   "comoSeResolvio": "La devolví al STR; desde entonces uso tabs_create_mcp.",
+   "leccion": "Nunca usar pestañas de Carlos; crear pestaña propia y cerrarla al terminar.",
+   "reglaPropuesta": "Chrome limpio: pestaña propia por tarea. (Cubierta por: Chrome limpio.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-4",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "artefacto Plan de trabajo STR"
+   ],
+   "quePaso": "Publiqué el artefacto desde un archivo nuevo sin url y se creó un segundo artefacto; hubo que borrarlo con permiso de Carlos.",
+   "causa": "Publicar sin url crea artefacto nuevo.",
+   "costoMin": 10,
+   "comoSeResolvio": "Borrado del duplicado; republicar siempre con url.",
+   "leccion": "Un artefacto existente se actualiza pasando su url.",
+   "reglaPropuesta": "Mismo archivo o url explícito al republicar.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-5",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "credencial",
+   "refs": [
+    "lote 49",
+    "K3a"
+   ],
+   "quePaso": "Carlos pegó en el chat la clave DRIVE_TOKEN_KEY generada en PowerShell.",
+   "causa": "Pasos de configuración de secretos sin decir explícitamente que el resultado no se pega en el chat.",
+   "costoMin": 15,
+   "comoSeResolvio": "Se dio por quemada; Carlos generó otra y la pegó directo en secrets.php.",
+   "leccion": "En pasos con secretos, decir en cada paso dónde va el valor y que nunca va al chat.",
+   "reglaPropuesta": "Plantilla de pasos para secretos con advertencia fija.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-6",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "permiso-plataforma",
+   "refs": [
+    "lote 49"
+   ],
+   "quePaso": "Conectar Drive devolvió 403 access_denied de Google.",
+   "causa": "La app de Google estaba en modo prueba sin Carlos como usuario de prueba.",
+   "costoMin": 15,
+   "comoSeResolvio": "Se agregó thcure@gmail.com como usuario de prueba y luego Carlos publicó la app.",
+   "leccion": "OAuth en modo prueba exige usuarios de prueba.",
+   "reglaPropuesta": "Lista de verificación de OAuth antes de probar.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-7",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "permiso-plataforma",
+   "refs": [
+    "lote 49"
+   ],
+   "quePaso": "El clasificador bloqueó 'Publicar app' en la consola de Google; también guardar la marca falló al primer intento.",
+   "causa": "Acción pública con efecto externo; formulario que no guardó.",
+   "costoMin": 10,
+   "comoSeResolvio": "Carlos hizo el clic de publicar; la marca se volvió a llenar y guardar.",
+   "leccion": "Acciones públicas o de publicación las hace Carlos.",
+   "reglaPropuesta": "Marcar en las instrucciones los pasos que solo hace Carlos. (Cubierta por: regla de acciones públicas.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-8",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "entorno-verificador",
+   "refs": [
+    "lote 49",
+    "49-veredicto-2"
+   ],
+   "quePaso": "Una ejecución del verificador arrancó sin carpetas conectadas y no dejó veredicto.",
+   "causa": "La tarea programada a veces arranca sin las carpetas del equipo.",
+   "costoMin": 20,
+   "comoSeResolvio": "Relanzado con archivoVeredicto nuevo (49-veredicto-3).",
+   "leccion": "Si no aparece el veredicto, relanzar con nombre nuevo; nunca reutilizar el nombre.",
+   "reglaPropuesta": "Comprobar el veredicto a los ~10 min y relanzar con nombre nuevo. (Cubierta por: R12.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-9",
+   "fecha": "2026-10-08",
+   "veces": 1,
+   "categoria": "comunicacion",
+   "refs": [
+    "M-23"
+   ],
+   "quePaso": "Afirmé en el buzón que había dos ejecuciones del verificador cuando no era así; hubo que corregir.",
+   "causa": "Afirmación sin comprobar el estado real de las tareas.",
+   "costoMin": 5,
+   "comoSeResolvio": "Corregido en el buzón.",
+   "leccion": "Lo que se afirma en el buzón sale de una comprobación, no de memoria.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-10",
+   "fecha": "2026-10-08",
+   "veces": 2,
+   "categoria": "permiso-plataforma",
+   "refs": [
+    "recordatorios de respaldo"
+   ],
+   "quePaso": "No pude borrar recordatorios de respaldo ya inútiles (el clasificador bloqueó delete_trigger) y siguieron disparando después de terminar el lote.",
+   "causa": "Borrar tareas programadas está bloqueado en modo automático.",
+   "costoMin": 3,
+   "comoSeResolvio": "Se reconocen al llegar y no se hace nada.",
+   "leccion": "Un recordatorio de respaldo puede llegar tarde: comprobar estado antes de actuar.",
+   "reglaPropuesta": "Recordatorios de una vez con texto que diga 'si ya terminó, ignorar'.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-11",
+   "fecha": "2026-10-08",
+   "veces": 30,
+   "categoria": "credencial",
+   "refs": [
+    "INC-87"
+   ],
+   "quePaso": "git push a str-manager-docs devolvía 403 todo el tiempo; cada actualización de seguimiento o buzón se subió por el formulario web de GitHub.",
+   "causa": "El repositorio no estaba en las fuentes autorizadas de la sesión; el proxy no inyectaba credencial.",
+   "costoMin": 120,
+   "comoSeResolvio": "Subida web desde str-instr-cola\\subir\\<carpeta única> + verificación con git; relevo a un chat con el repo seleccionado (M-26).",
+   "leccion": "Comprobar push al arrancar; si falla, decirlo en la primera respuesta.",
+   "reglaPropuesta": "Comprobar el push al arrancar y tras cada compactación. (Cubierta por: ins-007 / R11.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-12",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "entorno-verificador",
+   "refs": [
+    "lote 53",
+    "53-veredicto"
+   ],
+   "quePaso": "El verificador del 53 salió 'no verificable': sesión admin vencida y perfil zz-verif-colab no conectado.",
+   "causa": "Perfiles de Chrome cerrados o sesión de una pestaña vieja; nadie comprobó antes de lanzar.",
+   "costoMin": 25,
+   "comoSeResolvio": "Carlos abrió los perfiles; relanzado con 53-veredicto-2, aceptado.",
+   "leccion": "Antes de lanzar, comprobar con list_connected_browsers que estén los perfiles del lote.",
+   "reglaPropuesta": "El Chat de desarrollo comprueba los deviceId del lote antes de lanzar el verificador.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-13",
+   "fecha": "2026-10-09",
+   "veces": 2,
+   "categoria": "permiso-plataforma",
+   "refs": [
+    "lote 53"
+   ],
+   "quePaso": "Al revisar la sesión del admin, el clasificador bloqueó el JavaScript (exploración de credenciales) y luego también la navegación a str-inventario en esa pestaña.",
+   "causa": "Leer localStorage o /api/me se considera exploración de credenciales.",
+   "costoMin": 5,
+   "comoSeResolvio": "Cerré la pestaña y pedí a Carlos que comprobara él.",
+   "leccion": "No inspeccionar sesiones; solo mirar la pantalla o preguntar.",
+   "reglaPropuesta": "No usar JavaScript sobre sesiones o tokens en ningún rol.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-14",
+   "fecha": "2026-10-09",
+   "veces": 2,
+   "categoria": "herramienta",
+   "refs": [
+    "instrucción 55",
+    "M-40"
+   ],
+   "quePaso": "device_commit_files escribió en el equipo una versión anterior del archivo que yo acababa de editar en outputs/ (instrucción 55 y mensajes.json).",
+   "causa": "La herramienta tomó una copia previa del mismo archivo de outputs.",
+   "costoMin": 15,
+   "comoSeResolvio": "Copiar a una ruta nueva y única, volver a escribir y comprobar con cmp; la 55 se corrigió antes de que la CLI la tomara.",
+   "leccion": "Después de cada escritura al equipo, stage + cmp; editar = ruta nueva.",
+   "reglaPropuesta": "Toda escritura al equipo usa ruta de outputs nueva y se comprueba con cmp. (Cubierta por: regla de nombres únicos + cmp.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-15",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "INC-98",
+    "lote 54"
+   ],
+   "quePaso": "El campo nuevo invPrincipalId no le llegaba al colaborador y su conteo caía en otra zona.",
+   "causa": "La lectura del colaborador usa una lista blanca de campos; un campo nuevo queda fuera hasta agregarlo, y la instrucción 53 no lo previó.",
+   "costoMin": 20,
+   "comoSeResolvio": "Lote 54 agregó el campo a la lista blanca.",
+   "leccion": "Todo campo nuevo de propiedades o reservas exige revisar la lista blanca del colaborador.",
+   "reglaPropuesta": "Paso fijo en la plantilla de instrucción: '¿lo necesita el colaborador?'.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-16",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "INC-101",
+    "lote 56"
+   ],
+   "quePaso": "La colección nueva inv-grupos no entraba al respaldo diario (tampoco guias).",
+   "causa": "api/export tenía su propia lista de colecciones, separada de la de api/col.",
+   "costoMin": 15,
+   "comoSeResolvio": "Lote 56 igualó las listas y agregó un test que las compara.",
+   "leccion": "Listas paralelas se separan; un test las vigila.",
+   "reglaPropuesta": "Test de igualdad entre listas paralelas (ya existe). (Cubierta por: tests/export-colecciones.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-17",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "INC-99",
+    "lote 53"
+   ],
+   "quePaso": "El servidor siguió mandando al colaborador todas las zonas principales aunque ya podían ser de otras propiedades.",
+   "causa": "La instrucción 53 dijo 'sin cambios en api/' y el filtro antiguo suponía una sola principal.",
+   "costoMin": 10,
+   "comoSeResolvio": "Declarado por la CLI, medido por el verificador y llevado a INV2·4a.",
+   "leccion": "Cuando un modelo cambia una suposición (una principal → varias), revisar los filtros que dependían de ella.",
+   "reglaPropuesta": "En la instrucción, listar los lugares que dependen de la suposición que cambia.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-18",
+   "fecha": "2026-10-09",
+   "veces": 2,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "INC-100",
+    "lotes 53 y 54"
+   ],
+   "quePaso": "El log de la CLI no traía la lista de archivos declarados vs tocados aunque la instrucción la pedía.",
+   "causa": "La instrucción decía 'también en el log' sin formato; la CLI solo lo puso en el commit.",
+   "costoMin": 5,
+   "comoSeResolvio": "Desde el 55 se pidió 'la misma lista en el log de la cola' y salió.",
+   "leccion": "Pedir el formato exacto, no solo el contenido.",
+   "reglaPropuesta": "Plantilla de cierre de instrucción con la lista literal. (Cubierta por: desde lote 55.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-19",
+   "fecha": "2026-10-09",
+   "veces": 2,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "53-veredicto-2",
+    "55-veredicto"
+   ],
+   "quePaso": "El verificador escribió 'aceptado con salvedades' en vez de 'aceptado' o 'no aceptado'.",
+   "causa": "El texto del encargo no impide resultados fuera de la lista cerrada.",
+   "costoMin": 3,
+   "comoSeResolvio": "Se tomó como aceptado y las salvedades como INC bajos.",
+   "leccion": "El resultado debe ser de lista cerrada.",
+   "reglaPropuesta": "Validar el campo resultado del veredicto contra la lista cerrada.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-20",
+   "fecha": "2026-10-09",
+   "veces": 5,
+   "categoria": "comunicacion",
+   "refs": [
+    "cruce INV2·4"
+   ],
+   "quePaso": "Carlos no entendió varias preguntas de diseño ('no entiendo', 'sin ejemplos', 'formula la pregunta de otra manera', 'aún en pregunta dos').",
+   "causa": "Preguntas largas, con ejemplo o varias a la vez; no numeré bien en qué pregunta íbamos.",
+   "costoMin": 15,
+   "comoSeResolvio": "Preguntas de una en una, cortas, con opción recomendada y el número de pregunta.",
+   "leccion": "Con Carlos: una pregunta, corta, sin ejemplos salvo que los pida, y decir siempre 'pregunta n de m'.",
+   "reglaPropuesta": "Formato fijo de pregunta de diseño.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-21",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "comunicacion",
+   "refs": [],
+   "quePaso": "Carlos escribió 'ya lo envié, ¿era para el normal o el crítico?' y no supe a qué se refería.",
+   "causa": "Mensaje sin el objeto; el chat no tenía el contexto de lo que él envió en otro chat.",
+   "costoMin": 3,
+   "comoSeResolvio": "Respondí la regla para los dos casos y pedí que dijera qué envió.",
+   "leccion": "Cuando falta el objeto, dar la regla general y pedir el dato, no adivinar.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-22",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "id-roto",
+   "refs": [
+    "lote 57",
+    "INV2·4a"
+   ],
+   "quePaso": "Llamé 'lote 57' al de accesos por zona en el borrador y en el plan; otro chat usó el 57 para otra cosa y el número quedó equivocado.",
+   "causa": "El número de lote se fijó antes de encolar.",
+   "costoMin": 5,
+   "comoSeResolvio": "En el plan se dejó 'toma número al encolar'.",
+   "leccion": "El número de lote se asigna solo al encolar.",
+   "reglaPropuesta": "plan[] sin lote hasta encolar (ya es la nota habitual). (Cubierta por: nota 'número al encolar'.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-23",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "otro",
+   "refs": [
+    "M-40",
+    "R10"
+   ],
+   "quePaso": "Puse en un mensaje del buzón las 16:02 cuando el reloj marcaba las 15:36.",
+   "causa": "Hora estimada, no tomada del reloj.",
+   "costoMin": 3,
+   "comoSeResolvio": "Corregida antes de subir.",
+   "leccion": "Toda hora sale de date.",
+   "reglaPropuesta": "R10. (Cubierta por: R10.)",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-24",
+   "fecha": "2026-10-09",
+   "veces": 3,
+   "categoria": "herramienta",
+   "refs": [],
+   "quePaso": "Tras subir archivos en GitHub, las capturas de pantalla fallaban por renderizador congelado (30 s de espera).",
+   "causa": "Página pesada tras subir JSON grandes.",
+   "costoMin": 5,
+   "comoSeResolvio": "Usar find por referencia en vez de captura.",
+   "leccion": "Si la captura falla, usar find/ref y no reintentar la captura.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-25",
+   "fecha": "2026-10-09",
+   "veces": 2,
+   "categoria": "otro",
+   "refs": [],
+   "quePaso": "Carlos cerró por error el grupo de pestañas mientras yo trabajaba en Chrome.",
+   "causa": "Grupo de pestañas visible en su navegador de uso diario.",
+   "costoMin": 3,
+   "comoSeResolvio": "Reabrí lo necesario o seguí sin la pestaña.",
+   "leccion": "Trabajar en pocas pestañas y cortas; avisar cuando hay una en uso.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-26",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "artefacto Plan de trabajo STR",
+    "M-40"
+   ],
+   "quePaso": "Al volver a pedirme el plan, mi foto estaba desfasada: otro chat ya había hecho los lotes 57–60.",
+   "causa": "Chat de consulta con estado de su última sesión; el plan vivo cambió.",
+   "costoMin": 5,
+   "comoSeResolvio": "Releí seguimiento.json y republiqué antes de enviar el mensaje.",
+   "leccion": "Releer el JSON antes de presentar cualquier estado.",
+   "reglaPropuesta": "Toda foto del plan se arma leyendo seguimiento.json en ese momento.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-27",
+   "fecha": "2026-10-08",
+   "veces": 4,
+   "categoria": "herramienta",
+   "refs": [],
+   "quePaso": "Las conexiones a herramientas (equipo de Carlos, tareas, correo) se cayeron y volvieron a mitad de tarea.",
+   "causa": "Reconexión de servidores de herramientas.",
+   "costoMin": 5,
+   "comoSeResolvio": "Volver a cargar las herramientas y repetir la llamada.",
+   "leccion": "Una herramienta 'no disponible' puede volver: buscarla antes de declarar que no existe.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cda-28",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "stop hook"
+   ],
+   "quePaso": "El control de cierre exigía hacer push de un commit local, pero el push estaba prohibido por el 403.",
+   "causa": "El control de cierre no sabe del flujo de subida web.",
+   "costoMin": 3,
+   "comoSeResolvio": "Subí por la web y alineé la rama.",
+   "leccion": "Commit local solo justo antes de subir.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  }
+ ]
+}

@@ -1,4 +1,4 @@
-# panel-str.ps1 - Panel de jornada del STR (Arquitecto; v3.1 2026-10-11, LM-3 / REQ-MOD-7)
+# panel-str.ps1 - Panel de jornada del STR (Arquitecto; v3.3 2026-10-11, LM-3 / REQ-MOD-7)
 # Ventana con tres botones: Empezar jornada, Terminar jornada y Estado.
 #  - Empezar: quita el archivo PAUSA de la cola, abre los perfiles de Chrome de prueba con el STR
 #             y comprueba que cada uno tenga ventana.
@@ -7,15 +7,16 @@
 #              este corriendo termina; no empieza otro y el despertador no avisa.
 #  - Estado: lo que espera de Carlos (buzon), maquina (estado-vivo.json del despertador),
 #            pre-vuelo del verificador (log\pre-vuelo.json), cola, tokens y perfiles.
-# Como distingue las ventanas de cada perfil: Chrome marca cada ventana con un AppUserModelID
-# que termina en el nombre de la carpeta del perfil (p. ej. "Chrome.Profile4"). El panel lee esa
-# marca con la API de Windows; no toca procesos, no mata Chrome, solo pide cerrar esas ventanas.
+# Como distingue las ventanas de cada perfil (v3.2): lee con UI Automation el boton de perfil de la
+# barra de herramientas de cada ventana de Chrome y lo compara con los nombres de Local State.
+# No toca procesos, no mata Chrome, solo pide cerrar esas ventanas (WM_CLOSE).
 # No inicia sesion en ningun sitio ni guarda contrasenas. No usa Claude (no gasta creditos).
 # Configuracion: panel-config.json en esta misma carpeta (perfiles de prueba: carpeta o nombre).
 # Se abre con el acceso directo del escritorio (lanzar-panel.vbs). Archivo ASCII (PowerShell 5.1).
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
+try { Add-Type -AssemblyName UIAutomationClient; Add-Type -AssemblyName UIAutomationTypes } catch { }
 
 $Cola    = Join-Path $HOME 'Downloads\str-instr-cola'
 $Pausa   = Join-Path $Cola 'PAUSA'
@@ -53,16 +54,19 @@ public static class VentanasChrome {
     try {
       Guid iid = typeof(IPropertyStore).GUID;
       IPropertyStore ps;
-      if (SHGetPropertyStoreForWindow(h, ref iid, out ps) != 0 || ps == null) return "";
+      int hr = SHGetPropertyStoreForWindow(h, ref iid, out ps);
+      if (hr != 0 || ps == null) return "?hr=" + hr;
       PROPERTYKEY k = new PROPERTYKEY();
       k.fmtid = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"); k.pid = 5;
       PROPVARIANT v;
-      ps.GetValue(ref k, out v);
+      int hr2 = ps.GetValue(ref k, out v);
       string s = "";
       if (v.vt == 31 && v.p != IntPtr.Zero) s = Marshal.PtrToStringUni(v.p);
+      else if (v.vt == 8 && v.p != IntPtr.Zero) s = Marshal.PtrToStringBSTR(v.p);
+      else s = "?vt=" + v.vt + " hr2=" + hr2;
       PropVariantClear(ref v);
       return s == null ? "" : s;
-    } catch { return ""; }
+    } catch (Exception e) { return "?ex=" + e.GetType().Name; }
   }
   public static List<string[]> Listar() {
     List<string[]> r = new List<string[]>();
@@ -88,14 +92,70 @@ function Ventanas-Chrome {
     try { return @([VentanasChrome]::Listar()) } catch { return @() }
 }
 
-# Ventanas cuyo AppUserModelID termina en la carpeta del perfil. Nunca "Default".
+# Nombres con los que Chrome muestra un perfil (Local State: name, gaia_name, gaia_given_name, correo).
+function Nombres-Perfil([string]$dir) {
+    $r = @()
+    try {
+        $ls = Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data\Local State'
+        $j = Get-Content -Path $ls -Raw -Encoding UTF8 | ConvertFrom-Json
+        $v = $j.profile.info_cache.$dir
+        if ($v) {
+            foreach ($c in @([string]$v.name, [string]$v.gaia_name, [string]$v.gaia_given_name, [string]$v.shortcut_name)) { if ($c.Trim()) { $r += $c.Trim() } }
+            if ([string]$v.user_name) { $r += ([string]$v.user_name).Trim(); $r += (([string]$v.user_name).Split('@')[0]).Trim() }
+        }
+    } catch { }
+    return @($r | Select-Object -Unique)
+}
+
+# Nombre del perfil que muestra una ventana de Chrome: el boton de perfil de su barra de herramientas (UI Automation).
+# Devuelve el nombre del boton que coincide con alguno de los nombres conocidos de perfiles, o '' si no hay.
+$script:NombresTodos = $null
+function Nombres-TodosPerfiles {
+    if ($null -ne $script:NombresTodos) { return $script:NombresTodos }
+    $m = @{}
+    try {
+        $ls = Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data\Local State'
+        $j = Get-Content -Path $ls -Raw -Encoding UTF8 | ConvertFrom-Json
+        # Un nombre solo sirve si pertenece a UN perfil; los repetidos (p. ej. la misma cuenta de Google en dos
+        # perfiles) se descartan, y el perfil Default nunca entra: asi el panel no puede confundir el perfil personal.
+        $cuenta = @{}
+        foreach ($prop in $j.profile.info_cache.PSObject.Properties) { foreach ($n in (Nombres-Perfil $prop.Name)) { $k = $n.ToLower(); if (-not $cuenta.ContainsKey($k)) { $cuenta[$k] = @() }; $cuenta[$k] += $prop.Name } }
+        foreach ($k in $cuenta.Keys) { $dirs = @($cuenta[$k] | Select-Object -Unique); if ($dirs.Count -eq 1 -and (Norm $dirs[0]) -ne 'default') { $m[$k] = $dirs[0] } }
+    } catch { }
+    $script:NombresTodos = $m
+    return $m
+}
+
+function Perfil-DeVentana([long]$hwnd) {
+    try {
+        $el = [System.Windows.Automation.AutomationElement]::FromHandle([IntPtr]$hwnd)
+        if (-not $el) { return '' }
+        $condTb = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::ToolBar)
+        $tb = $el.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condTb)
+        $raiz = if ($tb) { $tb } else { $el }
+        $condBt = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)
+        $btns = $raiz.FindAll([System.Windows.Automation.TreeScope]::Descendants, $condBt)
+        $mapa = Nombres-TodosPerfiles
+        $script:UltimosBotones = @()
+        foreach ($b in $btns) {
+            $n = [string]$b.Current.Name
+            if (-not $n) { continue }
+            $script:UltimosBotones += $n
+            $nl = $n.Trim().ToLower()
+            foreach ($k in $mapa.Keys) { if ($nl -eq $k -or $nl.StartsWith($k + ' ') -or $nl.StartsWith($k + ':')) { return $mapa[$k] } }
+        }
+    } catch { }
+    return ''
+}
+
+# Ventanas de un perfil: las que muestran su nombre en el boton de perfil. Nunca "Default".
 function Ventanas-DePerfil([string]$dir) {
     $d = Norm $dir
     if (-not $d -or $d -eq 'default') { return @() }
     $r = @()
     foreach ($v in (Ventanas-Chrome)) {
-        $a = Norm $v[2]
-        if ($a -and ($a -eq ('chrome.' + $d) -or $a.EndsWith('.' + $d))) { $r += ,$v }
+        $pv = Perfil-DeVentana ([long]$v[0])
+        if ($pv -and (Norm $pv) -eq $d) { $r += ,$v }
     }
     return $r
 }
@@ -295,8 +355,13 @@ function Texto-Estado {
     if (-not $algunoAbierto) {
         $todas = @(Ventanas-Chrome)
         [void]$s.AppendLine('')
-        [void]$s.AppendLine('Ventanas de Chrome vistas (titulo | marca): ' + $todas.Count)
-        foreach ($v in $todas) { $tit = [string]$v[1]; if ($tit.Length -gt 45) { $tit = $tit.Substring(0, 45) + '...' }; [void]$s.AppendLine('  ' + $tit + ' | ' + [string]$v[2]) }
+        [void]$s.AppendLine('Ventanas de Chrome vistas: ' + $todas.Count + ' (titulo | perfil detectado | botones de la barra)')
+        foreach ($v in $todas) {
+            $tit = [string]$v[1]; if ($tit.Length -gt 40) { $tit = $tit.Substring(0, 40) + '...' }
+            $pv = Perfil-DeVentana ([long]$v[0])
+            $bts = @($script:UltimosBotones | Select-Object -First 6) -join ', '
+            [void]$s.AppendLine('  ' + $tit + ' | perfil: ' + $(if ($pv) { $pv } else { '?' }) + ' | botones: ' + $bts)
+        }
     }
     return $s.ToString()
 }
@@ -364,6 +429,8 @@ $f.Text = 'Panel STR v3'
 $f.Size = New-Object System.Drawing.Size(600, 520)
 $f.StartPosition = 'CenterScreen'
 $f.Font = New-Object System.Drawing.Font('Segoe UI', 10)
+$f.AutoScaleDimensions = New-Object System.Drawing.SizeF(96, 96)
+$f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Dpi
 
 $b1 = New-Object System.Windows.Forms.Button
 $b1.Text = 'Empezar jornada'; $b1.Size = New-Object System.Drawing.Size(175, 44); $b1.Location = New-Object System.Drawing.Point(12, 12)

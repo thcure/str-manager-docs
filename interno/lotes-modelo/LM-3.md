@@ -10,19 +10,19 @@
 | Empezar | Abre los perfiles cerrados según `Local State` | Abre los que no tienen ventana y a los 4 s **confirma que cada uno muestre ventana**. Recuerda que el usuario de la barra lo comprueba el pre-vuelo del Chat Desarrollo (el Panel no entra al STR) |
 | Estado | Buzón, cola, verificación, tokens, perfiles | + **Máquina** (`buzon\estado-vivo.json`: en cola, rechazados, fallidas, construyendo, verificando con pre-vuelo y entrega; avisa si el despertador lleva >3 min sin escribir) + **Pre-vuelo** (`log\pre-vuelo.json`: lote, válido, vigencia ≤10 min, usuario en la barra por perfil) + perfiles por ventanas reales |
 
-## 2. Cómo distingue las ventanas de cada perfil
-Chrome usa un solo proceso para todos los perfiles, así que no se puede cerrar «el proceso del perfil». Pero marca cada ventana con un AppUserModelID (el que usa la barra de tareas para agrupar) que termina en la carpeta del perfil, p. ej. `Chrome.Profile4`. El Panel enumera las ventanas de clase `Chrome_WidgetWin_1`, lee esa marca con `SHGetPropertyStoreForWindow` y envía `WM_CLOSE` solo a las que coinciden (comparación sin espacios ni mayúsculas). Si la marca no coincide con ninguna ventana, el Panel lo dice («no había ventanas de prueba abiertas») y no cierra nada: en ese caso hay que mirar qué AppUserModelID trae Chrome en LENOVO y ajustar la comparación.
+## 2. Cómo distingue las ventanas de cada perfil (v3.2–v3.4)
+Chrome usa un solo proceso para todos los perfiles, así que no se puede cerrar «el proceso del perfil». El primer intento (AppUserModelID de cada ventana) falló en LENOVO: Chrome no escribe esa marca (`VT_EMPTY`). Lo que funciona: **UI Automation** lee el botón de perfil de la barra de herramientas de cada ventana de Chrome (`Chrome_WidgetWin_1`) y lo compara con los nombres de `Local State` (name, gaia_name, correo). Reglas de seguridad: un nombre solo identifica a un perfil si es **único** entre todos los perfiles; los repetidos se descartan y el perfil `Default` nunca entra. Por eso el operador, cuyo perfil usa la misma cuenta de Google que el personal, no se detecta: para que lo haga, Carlos renombra ese perfil en Chrome (Personalizar perfil → nombre `zz-verif-oper`); lo mismo conviene para admin y colab (`zz-verif-admin`, `zz-verif-colab`), y queda documentado en comandos-usuario.md. Solo se envía `WM_CLOSE` a las ventanas identificadas.
 
 ## 3. Instalación
-11-oct-2026 12:36 en LENOVO: respaldo `panel\panel-str.v2.ps1`; nuevo `panel\panel-str.ps1` (v3, ASCII, bloque C# compilado en pruebas con pwsh 7). `panel-config.json` y `lanzar-panel.vbs` sin cambios.
+11-oct-2026 12:36 en LENOVO: respaldo `panel\panel-str.v2.ps1`; v3. 13:38–13:46: v3.1 (diagnóstico), v3.2 (UI Automation), v3.3/v3.4 (nombres únicos, nunca Default; escala DPI). Lección de herramienta: `device_commit_files` reutiliza el contenido de una ruta ya enviada: cada versión nueva se envía con un nombre de archivo nuevo (S-arq-18).
 
 ## 4. Pruebas
 | # | Prueba | Resultado |
 |---|---|---|
 | 1 | Análisis sintáctico (0 errores) y bloque C# compila | OK 11-oct 12:34 |
-| 2 | Carlos: **Estado** muestra Máquina y Pre-vuelo con los datos del día; perfiles de prueba «abierto (n ventanas)» | Pendiente (Carlos) |
-| 3 | Carlos: **Terminar** cierra solo las ventanas de zz-verif-admin/oper/colab; su Chrome personal sigue abierto | Pendiente (Carlos) |
-| 4 | Carlos: **Empezar** reabre los tres y los confirma con ventana | Pendiente (Carlos) |
+| 2 | **Estado** muestra Máquina y Pre-vuelo con los datos del día; perfiles de prueba «abierto (n ventanas)» | OK 13:43 (Arquitecto por control del equipo, con permiso de Carlos): Máquina, Pre-vuelo, tokens y perfiles admin y colab «abierto (1 ventana)» |
+| 3 | **Terminar** cierra solo las ventanas de zz-verif-admin/oper/colab; el Chrome personal sigue abierto | Parcial 13:44: cerró admin (1) y colab (1); el Chrome personal siguió abierto; **operador no detectado** (su perfil de Chrome usa la misma cuenta/nombre de Google que el personal: nombre ambiguo, y el panel nunca cierra por un nombre ambiguo) |
+| 4 | **Empezar** reabre los tres y los confirma con ventana | OK 13:44: reabrió admin y colab; el operador ya tenía ventana (abrió el STR en una pestaña nueva) |
 
 ## 5. Criterios de aceptación
 1. Prueba 3 sin tocar el perfil personal (criterio clave de REQ-MOD-7).

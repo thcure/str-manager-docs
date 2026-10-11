@@ -404,7 +404,8 @@ try {
             # v10: pre-vuelo. Al escribirse verificar.json debia existir pre-vuelo.json valido y de menos de $PreVueloMin min.
             try {
                 $claveP = 'verificar@' + $fv.LastWriteTime.ToString('yyyyMMddHHmmss')
-                $yaP = if (Test-Path $EstPreV) { @(Get-Content -Path $EstPreV) } else { @() }
+                if (-not (Test-Path $EstPreV)) { Add-Content -Path $EstPreV -Value $claveP; Log 'Inicio pre-vuelo: lanzamiento actual marcado sin avisar.' }
+                $yaP = @(Get-Content -Path $EstPreV)
                 if ($yaP -notcontains $claveP) {
                     $pv = Join-Path $LogDir 'pre-vuelo.json'; $motivoP = ''
                     if (-not (Test-Path $pv)) { $motivoP = 'no existe pre-vuelo.json' }

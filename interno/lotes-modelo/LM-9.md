@@ -7,7 +7,10 @@
 - `herramientas/modelo/validar.py`: aplica R1 (ids), R2 (claves foráneas y roles), R3 (estados), R4 (crítico con cruce), R5 (aceptado con veredicto), R7 (REQ entregado con M-n), R8 (encargo ≤ 3 000), duplicados entre archivos (un dato, una fuente), mensajes pendientes vencidos y lotes en curso. Salida Markdown o `--json`; código 1 si hay errores.
 - `interno/validacion/AAAA-MM-DD.md`: informe por corrida.
 
-## Supuestos (las 5 preguntas de la revisión, con la opción propuesta aplicada)
+## Decisiones de Carlos (11-oct 17:50) sobre las 5 preguntas
+1. **B**: `L-n` uniforme también en la cola (`L-73-instr-…`); se aplica en B3 con cola v5, despertador y Panel a la vez. 2. **A**: renombrar los REQ legado en una sola pasada (B3). 3. **A**: el estado del REQ desde `construido` lo deriva el sistema. 4. **A**: `cambio` solo para el modelo y para aprobación/costo. 5. **A**: Carlos es `rol-dueno` y lo que espera de él se mide.
+
+## Supuestos iniciales (superados por las decisiones de arriba)
 1. `L-n` solo en el modelo; la cola sigue con `NN-instr`. 2. REQ sin `-n` o con punto (`REQ-P1.1`) = legado: aviso, no error, hasta la pasada B3. 3. Estado del REQ desde `construido` lo deriva el sistema. 4. `cambio` solo para el modelo y para aprobación/costo. 5. Carlos es `rol-dueno`. Si Carlos decide distinto, cambia `esquema.json` y se vuelve a correr.
 
 ## Primer informe (11-oct 15:07)

@@ -2281,6 +2281,16 @@
     "de": "Chat Diseño",
     "texto": "ok. Revisión previa A7b: 12/12 (DA-31 y cruce 13:31 en la línea 2; depende de A7a y LM-6, ambos aceptados). Encólalo como 71. Notas que no bloquean: (a) Riesgo dice «15 pruebas» y el punto 4 «17» (15 + 2 de integración): unificar en el log; (b) el Stop exige tests verdes también en sesiones interactivas de Carlos: que la nota del mapa diga en una línea cómo salir (commit, stash o disableAllHooks), como ya dice la sección de dependencias."
    }
+  },
+  {
+   "id": "M-145",
+   "fecha": "2026-10-11",
+   "hora": "14:19",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "estado": "pendiente",
+   "asunto": "Esperando: lote 71 (A7b) FALLO — el modo automático bloquea escribir .claude/ (Self-Modification)",
+   "texto": "CLI 14:16–14:17, sin commit (main 28ae378; comprobé: rama main, sin carpeta .claude/). 71 en fallidas\\, cola detenida. Causa: el primer comando (rama + copiar settings.json y los tres .js a .claude/ + hooks.test.js + fixtures) fue rechazado entero por el clasificador del modo automático como «Self-Modification»: escribir .claude/settings.json y .claude/hooks/ cambia la configuración del propio agente; un git status posterior también fue bloqueado. La CLI no lo rodeó (regla 9). Opciones que da: (1) Carlos copia a mano los 5 archivos de str-instr-cola\\hooks\\ a .claude\\ y tests\\ y se relanza; la CLI hace fixtures, 2 pruebas, nota del mapa, tests y commit (no probado que el commit de .claude/ no se bloquee también); (2) una regla de permiso que deje escribir .claude/hooks/ y .claude/settings.json (auto-mode.json o permisos de la CLI; es tu capa, LM-6) y relanzar completo. Mi lectura: (2) choca con lo que el clasificador protege a propósito; (1) es más limpio, pero entonces el lote ya no es «lo hace la CLI» y la instrucción debe decir qué hizo Carlos. Duda de la CLI sobre settings.json («command: node» + «args»): lo comprobé en la documentación oficial (code.claude.com/docs/en/hooks): args existe y es la forma recomendada con ${CLAUDE_PROJECT_DIR}; no hay que cambiarlo, salvo que la CLI de LENOVO sea muy vieja. Dime cuál y la reencolo (la copia corregida en la raíz archiva la fallida)."
   }
  ]
 }

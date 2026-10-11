@@ -1,4 +1,4 @@
-# panel-str.ps1 - Panel de jornada del STR (Arquitecto; v3 2026-10-11, LM-3 / REQ-MOD-7)
+# panel-str.ps1 - Panel de jornada del STR (Arquitecto; v3.1 2026-10-11, LM-3 / REQ-MOD-7)
 # Ventana con tres botones: Empezar jornada, Terminar jornada y Estado.
 #  - Empezar: quita el archivo PAUSA de la cola, abre los perfiles de Chrome de prueba con el STR
 #             y comprueba que cada uno tenga ventana.
@@ -287,6 +287,16 @@ function Texto-Estado {
         [void]$s.AppendLine('')
         [void]$s.AppendLine('Perfiles que tiene tu Chrome (para ajustar panel-config.json):')
         foreach ($l in (Lista-Perfiles)) { [void]$s.AppendLine($l) }
+    }
+    # v3.1: diagnostico. Si ningun perfil de prueba muestra ventana, lista las ventanas de Chrome que si se ven
+    # con su marca (AppUserModelID), para ajustar la comparacion si Chrome la escribe distinto.
+    $algunoAbierto = $false
+    foreach ($p in $cfg.perfiles) { $dir = Carpeta-Perfil $p; if ($dir -and (Ventanas-DePerfil $dir).Count -gt 0) { $algunoAbierto = $true } }
+    if (-not $algunoAbierto) {
+        $todas = @(Ventanas-Chrome)
+        [void]$s.AppendLine('')
+        [void]$s.AppendLine('Ventanas de Chrome vistas (titulo | marca): ' + $todas.Count)
+        foreach ($v in $todas) { $tit = [string]$v[1]; if ($tit.Length -gt 45) { $tit = $tit.Substring(0, 45) + '...' }; [void]$s.AppendLine('  ' + $tit + ' | ' + [string]$v[2]) }
     }
     return $s.ToString()
 }

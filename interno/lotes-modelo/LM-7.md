@@ -13,3 +13,7 @@ Fuente de los hooks: `herramientas/hooks-cli/` (probados aquí: 15 pruebas, `nod
 1. A7a: veredicto aceptado con pruebas a–d; CLAUDE.md ≤ 12 000 y conservación ≥ 98 %.
 2. A7b: veredicto aceptado con pruebas a–c; prueba d anotada por Desarrollo en el lote siguiente.
 3. Registro: cambios[] LM-7 con los dos hashes; tablero PT-M1 A7 en «hecho».
+
+## Notas
+- Lote 71 (1.er intento, 14:16): el modo automático bloqueó escribir `.claude/` (Self-Modification); las herramientas remotas también lo rechazan. Decisión: Carlos copia los 4 archivos de `.claude/`; el Arquitecto dejó `tests/hooks.test.js` y `tests/fixtures/hooks/` en `str-manager` por el puente (excepción de lote del modelo: archivos del modelo, probados, sin lógica de la aplicación); la CLI solo comprueba, añade pruebas, nota y commit (A7b v3).
+- Apagado de emergencia: si la cola se traba por los hooks, reemplazar `str-instr-cola\auto-mode.json` por `auto-mode.sin-hooks.json` (mismo contenido + `disableAllHooks: true`); la cola lo pasa con `--settings` y los hooks dejan de correr sin tocar el repo.

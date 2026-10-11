@@ -1,6 +1,6 @@
 {
  "rol": "rol-desarrollo",
- "actualizadoEn": "2026-10-11T13:37:00-05:00",
+ "actualizadoEn": "2026-10-11T13:40:00-05:00",
  "situaciones": [
   {
    "id": "S-cd-1",
@@ -477,10 +477,28 @@
    "quePaso": "La CLI paró el 70 sin commit porque la cabecera decía «¿Toca el modelo?: sí».",
    "causa": "CLAUDE.md › Tu encargo y rol-agente-cli mandan parar si el campo es sí; los lotes del modelo que viven en str-manager no tienen excepción escrita. El revisor previo no lo vio (no está en los 12 puntos).",
    "costoMin": 10,
-   "comoSeResolvio": "Pendiente del Arquitecto (M-139).",
+   "comoSeResolvio": "Arquitecto (M-139): campo en «no» con la razón, excepción LM-n en rol-agente-cli y plantilla corregida; reencolado.",
    "leccion": "El revisor previo debe cruzar el campo «¿Toca el modelo?» con lo que la CLI tiene prohibido.",
    "reglaPropuesta": "Punto nuevo o ampliar el 3 del revisor previo: si «¿Toca el modelo?: sí», no va a la cola salvo excepción escrita en rol-agente-cli.",
-   "yaCubierta": false,
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-26",
+   "fecha": "2026-10-11",
+   "veces": 1,
+   "categoria": "error",
+   "refs": [
+    "lote 70",
+    "LM-6"
+   ],
+   "quePaso": "En el primer lote con la cola v4, la CLI escribió el cierre en inglés y no pudo escribir log\\70-*.txt («Device or resource busy»).",
+   "causa": "El encargo de la CLI no fijaba idioma del cierre; la cola v4 tiene abierto el log mientras corre la CLI.",
+   "costoMin": 3,
+   "comoSeResolvio": "Arquitecto (M-139): cierre en español al final de la respuesta; la CLI no escribe el log, lo guarda la cola.",
+   "leccion": "Un cambio de la cola se prueba con un lote real antes de darlo por aceptado.",
+   "reglaPropuesta": "",
+   "yaCubierta": true,
    "estado": "nueva"
   }
  ]

@@ -42,6 +42,6 @@
 2. `estado-vivo.json` existe y se actualiza cada minuto. **Cumplido.**
 3. El primer mensaje respondido después de la instalación genera «Respondieron M-n» al remitente. **Cumplido** 12:17 (M-122 → Chat Desarrollo) y 12:28 (M-123).
 4. Un lote crítico de ensayo sin cruce queda `.sin-cruce.md` con aviso a Chat Desarrollo (prueba controlada, lunes).
-5. Cruce de Carlos: una línea. **Pendiente.**
+5. Cruce de Carlos: una línea. **Cumplido** 11-oct-2026 13:58 («lm-2 aceptado»). LM-2 aceptado.
 
 Nota: el archivo de ensayo `.sin-cruce.md` queda en la raíz de la cola hasta que Carlos lo borre (el Panel no borra archivos). No se cambia el texto del aviso para ensayos: no habrá más ensayos de este tipo.

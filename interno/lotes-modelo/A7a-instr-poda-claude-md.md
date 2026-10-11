@@ -1,5 +1,5 @@
 # instr — REQ-MOD-5 / A7a: CLAUDE.md podado con mapas por área
-Categoría: **crítico** (reestructura el CLAUDE.md de 244 KB que lee la CLI en todos los lotes; DA-31 · cruce previo con Carlos: <fecha hora, en el chat del Arquitecto>; lote del modelo LM-7a; lo redacta el Arquitecto)
+Categoría: **crítico** (reestructura el CLAUDE.md de 244 KB que lee la CLI en todos los lotes; DA-31 · cruce previo con Carlos: 11-oct-2026 13:58, chat del Arquitecto («a7 cruzado»); lote del modelo LM-7a; lo redacta el Arquitecto)
 Alcance: `CLAUDE.md` · `docs/claude/` (carpeta nueva: `reglas-fijas.md` y un mapa por área) · `tests/claude-md.test.js` · `tests/run.js` (solo si registra tests por lista) · **sin cambio de `?v=`** (no se toca ningún HTML ni JS de la aplicación) · `schema_version` igual · sin cambios de base de datos ni de datos
 Impacto: CLAUDE.md pasa de 244 KB a ≤ 12 000 caracteres (reglas fijas + índice + versión); el detalle vive en `docs/claude/` por área y la CLI lee solo el mapa del área que toca. Nada se resume ni se pierde: se mueve.
 Riesgo: medio (R-A): perder una nota técnica al mover. Mitigación: copia literal por bloques, test de conservación (≥ 90 % de los caracteres), y `git revert` devuelve el archivo entero.

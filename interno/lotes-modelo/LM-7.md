@@ -1,6 +1,6 @@
 # LM-7 · Hooks de la CLI y CLAUDE.md podado (A7)
 
-**Lote del modelo** · REQ-MOD-3, REQ-MOD-5 · ítem del plan A7 · **Categoría: crítico** · Decisión: DA-31 (Diseño, 11-oct-2026, «visto bueno a A7, partido en A7a y A7b») · Cruce con Carlos: pendiente (una línea; Diseño la conduce y pasa fecha y hora) · Riesgo R-A · ¿Toca el modelo? Sí · Redacta: Chat Arquitecto · Construye: Agente CLI en dos lotes de la cola · Acepta: Agente verificador crítico (archivos y tests) · Reversión: `git revert` de cada lote.
+**Lote del modelo** · REQ-MOD-3, REQ-MOD-5 · ítem del plan A7 · **Categoría: crítico** · Decisión: DA-31 (Diseño, 11-oct-2026, «visto bueno a A7, partido en A7a y A7b») · Cruce con Carlos: 11-oct-2026 13:58 en el chat del Arquitecto («a7 cruzado») · Riesgo R-A · ¿Toca el modelo? Sí · Redacta: Chat Arquitecto · Construye: Agente CLI en dos lotes de la cola · Acepta: Agente verificador crítico (archivos y tests) · Reversión: `git revert` de cada lote.
 
 | Parte | Instrucción | Qué entrega | Depende de |
 |---|---|---|---|

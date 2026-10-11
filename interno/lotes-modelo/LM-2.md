@@ -38,8 +38,10 @@
 11-oct-2026 12:05: `buzon\vigilar-buzon.ps1` actualizado a v10.2 (mismo respaldo v9).
 
 ## 5. Criterios de aceptación
-1. `buzon.log` sin líneas `ERROR en …` durante 30 min tras la instalación.
-2. `estado-vivo.json` existe y se actualiza cada minuto.
-3. El primer mensaje respondido después de la instalación genera «Respondieron M-n» al remitente.
+1. `buzon.log` sin líneas `ERROR en …` durante 30 min tras la instalación. **Cumplido** (11:58 → 12:30, también tras el reinicio de LENOVO de ~12:20).
+2. `estado-vivo.json` existe y se actualiza cada minuto. **Cumplido.**
+3. El primer mensaje respondido después de la instalación genera «Respondieron M-n» al remitente. **Cumplido** 12:17 (M-122 → Chat Desarrollo) y 12:28 (M-123).
 4. Un lote crítico de ensayo sin cruce queda `.sin-cruce.md` con aviso a Chat Desarrollo (prueba controlada, lunes).
-5. Cruce de Carlos: una línea.
+5. Cruce de Carlos: una línea. **Pendiente.**
+
+Nota: el archivo de ensayo `.sin-cruce.md` queda en la raíz de la cola hasta que Carlos lo borre (el Panel no borra archivos). No se cambia el texto del aviso para ensayos: no habrá más ensayos de este tipo.

@@ -1,0 +1,408 @@
+{
+ "version": 1,
+ "actualizadoEn": "2026-10-11",
+ "descripcion": "Consolidación de las situaciones de los tres roles (59 entradas + 1) en grupos. Fuente: interno/situaciones/*.json. Escribe el Arquitecto.",
+ "grupos": [
+  {
+   "id": "G-1",
+   "titulo": "Credencial perdida tras compactar o sin autorización en el chat",
+   "categoria": "credencial",
+   "situaciones": [
+    "S-cd-7",
+    "S-dis-1",
+    "S-arq-1"
+   ],
+   "veces": 3,
+   "costoMin": 120,
+   "cubierta": "Sí: ins-007 (archivo + frase)",
+   "accion": "Comprobar el push al arrancar y tras cada compactación"
+  },
+  {
+   "id": "G-2",
+   "titulo": "CD esperando en silencio más de 2 h; nadie lo sabía",
+   "categoria": "espera-invisible",
+   "situaciones": [
+    "S-dis-11",
+    "S-arq-1"
+   ],
+   "veces": 14,
+   "costoMin": 140,
+   "cubierta": "Sí: 'nadie espera en silencio' + Carlos destinatario + v7",
+   "accion": "Medir: mensajes 'Esperando' por semana"
+  },
+  {
+   "id": "G-3",
+   "titulo": "Copia en fallidas\\ detiene la cola",
+   "categoria": "espera-invisible",
+   "situaciones": [
+    "S-cd-11",
+    "S-dis-13",
+    "S-arq-2"
+   ],
+   "veces": 1,
+   "costoMin": 40,
+   "cubierta": "Sí: despertador v8",
+   "accion": "Guardia en la cola: al reencolar un lote, mover su copia de fallidas a archivo"
+  },
+  {
+   "id": "G-4",
+   "titulo": "Verificador arranca sin carpetas (enlace caído) y muere; 'SUCCEEDED' engaña",
+   "categoria": "entorno-verificador",
+   "situaciones": [
+    "S-cd-13",
+    "S-dis-14",
+    "S-arq-3"
+   ],
+   "veces": 3,
+   "costoMin": 70,
+   "cubierta": "Parcial: v9 + pre-vuelo prometido",
+   "accion": "Pre-vuelo del CD como archivo; despertador mira duración de la última ejecución"
+  },
+  {
+   "id": "G-5",
+   "titulo": "Veredictos repetidos por entorno (lotes 38, 40, 62): perfil, sesión, extensión",
+   "categoria": "entorno-verificador",
+   "situaciones": [
+    "S-cd-5",
+    "S-arq-10"
+   ],
+   "veces": 8,
+   "costoMin": 330,
+   "cubierta": "No",
+   "accion": "Resultado 'bloqueado' ≠ 'no aceptado'; criterios de permisos a tests de servidor; pre-vuelo"
+  },
+  {
+   "id": "G-6",
+   "titulo": "Usuario de Carlos con dos roles (Firestore vs MySQL)",
+   "categoria": "dato-duplicado",
+   "situaciones": [
+    "S-cd-17"
+   ],
+   "veces": 1,
+   "costoMin": 180,
+   "cubierta": "Sí: lote 67 (producto)",
+   "accion": "—"
+  },
+  {
+   "id": "G-7",
+   "titulo": "Decisión del Dashboard tomada distinta en dos chats",
+   "categoria": "decision-duplicada",
+   "situaciones": [
+    "S-cd-14",
+    "S-dis-10",
+    "S-arq-5"
+   ],
+   "veces": 1,
+   "costoMin": 60,
+   "cubierta": "No",
+   "accion": "DA obligatoria antes de encolar; el cruce de un crítico lo conduce un solo rol (Diseño)"
+  },
+  {
+   "id": "G-8",
+   "titulo": "Cabecera de lote crítico sin cruce; la CLI la rechaza",
+   "categoria": "instruccion-ambigua",
+   "situaciones": [
+    "S-cd-10",
+    "S-arq-9"
+   ],
+   "veces": 1,
+   "costoMin": 20,
+   "cubierta": "No",
+   "accion": "Validador de cabecera antes de mover a la cola"
+  },
+  {
+   "id": "G-9",
+   "titulo": "Cuadro de aprobación de tarea bloquea al CD",
+   "categoria": "permiso-plataforma",
+   "situaciones": [
+    "S-arq-4"
+   ],
+   "veces": 1,
+   "costoMin": 25,
+   "cubierta": "No",
+   "accion": "Cambios al texto de las tareas agrupados; un clic semanal"
+  },
+  {
+   "id": "G-10",
+   "titulo": "Modo automático bloquea acciones legítimas (buzón, reset, permisos del verificador)",
+   "categoria": "permiso-plataforma",
+   "situaciones": [
+    "S-dis-5",
+    "S-cd-4",
+    "S-cd-8"
+   ],
+   "veces": 5,
+   "costoMin": 95,
+   "cubierta": "Parcial: palabras propias; autorizacionEnTarea",
+   "accion": "Lista de lo que el clasificador bloquea y su alternativa, en una ficha"
+  },
+  {
+   "id": "G-11",
+   "titulo": "Push rechazado por escritura concurrente; un JSON quedó roto",
+   "categoria": "herramienta",
+   "situaciones": [
+    "S-cd-1",
+    "S-dis-3"
+   ],
+   "veces": 8,
+   "costoMin": 20,
+   "cubierta": "Parcial: reintento con rebase",
+   "accion": "Base de datos o un archivo por mensaje (entregable c)"
+  },
+  {
+   "id": "G-12",
+   "titulo": "Ids de mensaje que chocan entre chats",
+   "categoria": "id-roto",
+   "situaciones": [
+    "S-cd-2",
+    "S-dis-4"
+   ],
+   "veces": 3,
+   "costoMin": 17,
+   "cubierta": "No",
+   "accion": "Id asignado al guardar (servidor) o con prefijo por rol"
+  },
+  {
+   "id": "G-13",
+   "titulo": "Ids de REQ sin formato; enlaces rotos en el plan",
+   "categoria": "id-roto",
+   "situaciones": [
+    "S-cd-20",
+    "S-dis-19",
+    "S-arq-11"
+   ],
+   "veces": 8,
+   "costoMin": 15,
+   "cubierta": "Parcial: normalización a mano",
+   "accion": "Validador de ids y enlaces (modelo de datos §4)"
+  },
+  {
+   "id": "G-14",
+   "titulo": "Mapa de perfiles de Chrome en dos lugares",
+   "categoria": "dato-duplicado",
+   "situaciones": [
+    "S-cd-18"
+   ],
+   "veces": 2,
+   "costoMin": 20,
+   "cubierta": "No",
+   "accion": "Fuente única: línea base; DA-24 solo referencia"
+  },
+  {
+   "id": "G-15",
+   "titulo": "Diagnóstico técnico sin leer el código (copia en el servidor)",
+   "categoria": "conocimiento-desactualizado",
+   "situaciones": [
+    "S-dis-7",
+    "S-cd-9",
+    "S-arq-8"
+   ],
+   "veces": 1,
+   "costoMin": 60,
+   "cubierta": "Lección anotada, sin mecanismo",
+   "accion": "Antes de pedir una acción técnica, citar el código o dato que la justifica"
+  },
+  {
+   "id": "G-16",
+   "titulo": "Proponer lo que ya estaba definido en los documentos",
+   "categoria": "conocimiento-desactualizado",
+   "situaciones": [
+    "S-dis-6"
+   ],
+   "veces": 4,
+   "costoMin": 25,
+   "cubierta": "No",
+   "accion": "Búsqueda obligatoria en el proyecto antes de proponer REQ o DA, citando lo encontrado"
+  },
+  {
+   "id": "G-17",
+   "titulo": "Regla de Carlos interpretada sin confirmar (K3c, QR, DA-30)",
+   "categoria": "instruccion-ambigua",
+   "situaciones": [
+    "S-dis-8",
+    "S-dis-9",
+    "S-dis-18"
+   ],
+   "veces": 4,
+   "costoMin": 28,
+   "cubierta": "No",
+   "accion": "Un crítico no se entrega sin que Carlos vea la tabla final de reglas"
+  },
+  {
+   "id": "G-18",
+   "titulo": "Preguntas a Carlos sin contexto",
+   "categoria": "comunicacion",
+   "situaciones": [
+    "S-dis-16"
+   ],
+   "veces": 3,
+   "costoMin": 15,
+   "cubierta": "No",
+   "accion": "Plantilla: contexto, opciones con recomendación, plan"
+  },
+  {
+   "id": "G-19",
+   "titulo": "Respuesta en el buzón que no avisa al remitente; mensajes sin efecto que siguen escalando",
+   "categoria": "comunicacion",
+   "situaciones": [
+    "S-dis-12",
+    "S-arq-16"
+   ],
+   "veces": 3,
+   "costoMin": 30,
+   "cubierta": "No",
+   "accion": "Despertador avisa al remitente cuando su mensaje pasa a hecho; estado 'superado' que pone el remitente"
+  },
+  {
+   "id": "G-20",
+   "titulo": "Escalamientos uno por mensaje",
+   "categoria": "comunicacion",
+   "situaciones": [
+    "S-cd-19",
+    "S-arq-7"
+   ],
+   "veces": 1,
+   "costoMin": 20,
+   "cubierta": "Sí: v7",
+   "accion": "—"
+  },
+  {
+   "id": "G-21",
+   "titulo": "Vigía avisa 'trabajo libre' con los planes pausados por Carlos",
+   "categoria": "herramienta",
+   "situaciones": [
+    "S-dis-15"
+   ],
+   "veces": 2,
+   "costoMin": 5,
+   "cubierta": "No",
+   "accion": "El vigía lee planes[].estado"
+  },
+  {
+   "id": "G-22",
+   "titulo": "Raíz del sitio responde 403 (Panel, verificador, Diseño)",
+   "categoria": "herramienta",
+   "situaciones": [
+    "S-cd-6",
+    "S-dis-22",
+    "S-arq-6"
+   ],
+   "veces": 3,
+   "costoMin": 30,
+   "cubierta": "Parcial: Panel corregido",
+   "accion": "verificar.json con 'paginas'; prueba de aceptación de cada herramienta"
+  },
+  {
+   "id": "G-23",
+   "titulo": "device_commit_files deja la versión anterior",
+   "categoria": "herramienta",
+   "situaciones": [
+    "S-cd-12"
+   ],
+   "veces": 2,
+   "costoMin": 5,
+   "cubierta": "Sí: cmp en el ciclo",
+   "accion": "—"
+  },
+  {
+   "id": "G-24",
+   "titulo": "Horas escritas de memoria",
+   "categoria": "comunicacion",
+   "situaciones": [
+    "S-cd-3",
+    "S-arq-15"
+   ],
+   "veces": 3,
+   "costoMin": 10,
+   "cubierta": "Parcial: R10",
+   "accion": "El script de escritura pone la hora"
+  },
+  {
+   "id": "G-25",
+   "titulo": "Test que no cubrió el HTML; criterio con precondición no comprobada",
+   "categoria": "instruccion-ambigua",
+   "situaciones": [
+    "S-cd-15",
+    "S-cd-16"
+   ],
+   "veces": 2,
+   "costoMin": 40,
+   "cubierta": "No",
+   "accion": "Test de data-roles en todo ítem con panel; precondiciones de usuarios de prueba en la plantilla de criterios"
+  },
+  {
+   "id": "G-26",
+   "titulo": "Numeración de lote en el borrador antes de encolar",
+   "categoria": "otro",
+   "situaciones": [
+    "S-cd-22"
+   ],
+   "veces": 1,
+   "costoMin": 5,
+   "cubierta": "No",
+   "accion": "El número se asigna al encolar; el borrador va sin número"
+  },
+  {
+   "id": "G-27",
+   "titulo": "Encargo de Diseño pedía aprobación de Carlos para planes",
+   "categoria": "instruccion-ambigua",
+   "situaciones": [
+    "S-dis-17"
+   ],
+   "veces": 1,
+   "costoMin": 5,
+   "cubierta": "No",
+   "accion": "Encargo: planes los decide Diseño; Carlos DA, críticos y objetivos"
+  },
+  {
+   "id": "G-28",
+   "titulo": "Artefactos mantenidos a mano desactualizados",
+   "categoria": "conocimiento-desactualizado",
+   "situaciones": [
+    "S-dis-2",
+    "S-dis-20"
+   ],
+   "veces": 2,
+   "costoMin": 30,
+   "cubierta": "Sí: tablero TB1",
+   "accion": "—"
+  },
+  {
+   "id": "G-29",
+   "titulo": "Encargos de 8–13 KB que no se cumplen",
+   "categoria": "conocimiento-desactualizado",
+   "situaciones": [
+    "S-arq-14"
+   ],
+   "veces": 1,
+   "costoMin": null,
+   "cubierta": "No",
+   "accion": "Encargos ≤ 3 000 caracteres; reglas en scripts"
+  },
+  {
+   "id": "G-30",
+   "titulo": "Herramienta instalada sin prueba de aceptación registrada (M-108); metadato de token no fiable",
+   "categoria": "herramienta",
+   "situaciones": [
+    "S-arq-12",
+    "S-arq-13"
+   ],
+   "veces": 2,
+   "costoMin": 45,
+   "cubierta": "Parcial",
+   "accion": "Prueba de aceptación registrada por herramienta; credenciales se prueban con una petición real"
+  },
+  {
+   "id": "G-31",
+   "titulo": "Lectura por raw con caché de 5 min sin token",
+   "categoria": "herramienta",
+   "situaciones": [
+    "S-cd-21"
+   ],
+   "veces": 1,
+   "costoMin": 10,
+   "cubierta": "Sí: token",
+   "accion": "—"
+  }
+ ]
+}

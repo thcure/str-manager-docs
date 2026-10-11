@@ -4,7 +4,7 @@
 //  2. `git commit` con archivos fuera del Alcance de la instrucción del lote (env STR_INSTR), salvo que el mensaje
 //     del commit los declare con la línea «Fuera de alcance: <archivo> - <causa>».
 //  3. `git commit` sin CLAUDE.md ni docs/claude/*.md en el índice cuando se tocó código, o con tests en rojo.
-// Si no hay STR_INSTR (corrida fuera de la cola) solo aplica el punto 1 y el de tests.
+// Si no hay STR_INSTR (corrida fuera de la cola) no se comprueba el Alcance; siguen aplicando destructivos, mapa y tests.
 'use strict';
 const fs = require('fs');
 const path = require('path');

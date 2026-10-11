@@ -1,0 +1,193 @@
+{
+ "version": "0.1",
+ "fecha": "2026-10-11",
+ "fuente": "claude/marco/modelo-de-datos-2026-10.md (entregable B1). Supuestos mientras Carlos revisa las 5 preguntas: (1) L-n solo en el modelo, la cola sigue con NN; (2) REQ sin -n se acepta como legado (aviso, no error) hasta la pasada B3; (3) estado del REQ de 'construido' en adelante lo deriva el sistema; (4) cambio solo para modelo y aprobacion/costo; (5) Carlos es rol-dueno.",
+ "patrones": {
+  "REQ": "^REQ-[A-Z0-9]{1,4}-\\d+$",
+  "REQ_legado": "^REQ-[A-Z0-9][A-Za-z0-9]{0,6}([.-][A-Za-z0-9]{1,4})*$",
+  "INC": "^INC-\\d+$",
+  "DA": "^DA-\\d+$",
+  "DT": "^DT-\\d+$",
+  "P": "^P-\\d+$",
+  "PT": "^PT-(M?\\d+)$",
+  "OB": "^OB-\\d+$",
+  "L": "^L-\\d+$",
+  "LM": "^LM-\\d+[ab]?$",
+  "C": "^C-\\d+$",
+  "M": "^M-\\d+$",
+  "R": "^R-\\d+$",
+  "LEC": "^LEC-\\d+$",
+  "V": "^V-\\d+-\\d+$",
+  "S": "^S-(arq|cd|dis|cda)-\\d+$",
+  "G": "^G-\\d+$",
+  "ENC": "^ENC-[a-z-]+-v\\d+$",
+  "PROC": "^PROC-[a-z-]+-v\\d+$"
+ },
+ "estados": {
+  "proyecto": [
+   "activo",
+   "pausado",
+   "cerrado"
+  ],
+  "rol": [
+   "activo",
+   "relevo",
+   "retirado"
+  ],
+  "encargo": [
+   "vigente",
+   "superado"
+  ],
+  "objetivo": [
+   "propuesto",
+   "aprobado",
+   "logrado",
+   "descartado"
+  ],
+  "planTrabajo": [
+   "en definición",
+   "activo",
+   "pausado",
+   "cerrado"
+  ],
+  "requisito": [
+   "borrador",
+   "definido",
+   "aprobado",
+   "entregado",
+   "construido",
+   "aceptado",
+   "cerrado",
+   "pospuesto",
+   "descartado"
+  ],
+  "decision": [
+   "abierta",
+   "decidida",
+   "pospuesta"
+  ],
+  "pedido": [
+   "nuevo",
+   "convertido",
+   "descartado",
+   "bloqueado"
+  ],
+  "lote": [
+   "redactado",
+   "encolado",
+   "construyendo",
+   "construido",
+   "fallido",
+   "verificando",
+   "desplegado",
+   "parcial",
+   "aceptado",
+   "no aceptado",
+   "revertido",
+   "superado",
+   "previsto",
+   "espera DA",
+   "pospuesto"
+  ],
+  "veredicto": [
+   "aceptado",
+   "parcial",
+   "no aceptado",
+   "bloqueado"
+  ],
+  "cambio": [
+   "registrado",
+   "instalado",
+   "probado",
+   "publicado",
+   "cruzado",
+   "aceptado",
+   "cerrado",
+   "no aceptado",
+   "superado",
+   "vigente",
+   "parcial"
+  ],
+  "incidente": [
+   "abierto",
+   "en fix",
+   "cerrado",
+   "pospuesto"
+  ],
+  "deuda": [
+   "abierta",
+   "programada",
+   "pagada",
+   "descartada"
+  ],
+  "riesgo": [
+   "propuesto",
+   "abierto",
+   "mitigado",
+   "aceptado",
+   "cerrado"
+  ],
+  "mensaje": [
+   "pendiente",
+   "en curso",
+   "hecho",
+   "vencido",
+   "superado"
+  ],
+  "leccion": [
+   "abierta",
+   "aplicada",
+   "descartada"
+  ]
+ },
+ "roles": [
+  "Chat Diseño",
+  "Chat Desarrollo",
+  "Chat Arquitecto",
+  "Carlos",
+  "Agente verificador",
+  "Agente CLI"
+ ],
+ "rolesAlias": {
+  "chat de diseño": "Chat Diseño",
+  "diseño": "Chat Diseño",
+  "chat de desarrollo": "Chat Desarrollo",
+  "desarrollo": "Chat Desarrollo",
+  "arquitecto": "Chat Arquitecto",
+  "verificador": "Agente verificador",
+  "cli": "Agente CLI"
+ },
+ "limites": {
+  "encargoCaracteres": 3000,
+  "mensajePendienteMin": 60,
+  "lotesEnCurso": 1
+ },
+ "mapaMigracion": {
+  "interno/diseno.json": {
+   "reqs[]": "requisito",
+   "das[]": "decision",
+   "pedidos[]": "pedido",
+   "planes[]": "planTrabajo",
+   "objetivos[]": "objetivo"
+  },
+  "interno/seguimiento.json": {
+   "plan[]": "lote",
+   "cambios[]": "cambio",
+   "items[] tipo INC": "incidente",
+   "items[] tipo DT": "deuda",
+   "items[] tipo REQ": "requisito (duplicado; se archiva tras B3)",
+   "items[] tipo DA": "decision (duplicado; se archiva)",
+   "riesgos[]": "riesgo"
+  },
+  "interno/mensajes.json": {
+   "mensajes[]": "mensaje"
+  },
+  "interno/instrucciones.json": {
+   "items[] rol-*": "encargo",
+   "items[] reglas-comunes": "encargo comun"
+  },
+  "interno/situaciones/*.json": {
+   "situaciones[]": "situacion"
+  }
+ }
+}

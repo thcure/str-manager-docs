@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-10; v9: Carlos como destinatario, verificador y CLI sin avance)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-11; v10 LM-2: respuestas al remitente, pre-vuelo, planes pausados, estado vivo)
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -18,6 +18,10 @@
 #      -> Chat de desarrollo; si sigue, cada $VerifCada min tambien a Carlos. Estado: verificador-avisado.txt
 #   7. CLI sin avance: .corriendo con $CliMin min o mas y el log del lote sin cambios -> Chat de desarrollo;
 #      si sigue, cada $CliCada min tambien a Carlos. Estado: cli-avisado.txt
+# v10 (LM-2): 1c) cuando un mensaje enviado por un chat pasa a 'hecho' con respuesta, se avisa al remitente;
+#     el estado 'superado' lo pone el remitente y no genera avisos; el vigia calla si ningun plan esta activo
+#     (diseno.json); la fuente 6 avisa si se lanzo el verificador sin pre-vuelo.json valido; cada corrida
+#     escribe buzon\estado-vivo.json (lo lee el Panel). Lineas RECHAZADO de la cola -> Chat de desarrollo.
 # v9: 'Carlos' es destinatario del buzon (destinatarios.json, canal 'windows'): a el no se le escribe en un chat,
 #     se le muestra una notificacion de Windows en LENOVO (titulo y asunto del mensaje) y el Panel STR lista lo que
 #     espera de el. Los mensajes para Carlos reciben recordatorio, pero no se escalan al Chat de diseno.
@@ -76,6 +80,10 @@ $EstVerif  = Join-Path $Base 'verificador-avisado.txt'
 $VerifMin  = 25    # minutos de verificar.json sin veredicto antes del primer aviso
 $VerifCada = 60    # minutos entre avisos repetidos (el segundo y siguientes tambien a Carlos)
 $EstCli    = Join-Path $Base 'cli-avisado.txt'
+$EstResp   = Join-Path $Base 'respondidos.txt'     # v10: ids de mensajes cuya respuesta ya se aviso al remitente
+$EstPreV   = Join-Path $Base 'prevuelo-avisado.txt' # v10: verificar.json (por fecha) ya avisado por falta de pre-vuelo
+$EstadoVivo = Join-Path $Base 'estado-vivo.json'
+$PreVueloMin = 10   # minutos de validez de pre-vuelo.json
 $CliMin    = 45    # minutos de .corriendo sin que el log del lote cambie
 $CliCada   = 60    # minutos entre avisos repetidos (el segundo y siguientes tambien a Carlos)
 $EstEscD  = Join-Path $Base 'escalados-dest.txt'
@@ -115,8 +123,17 @@ function Notificar-Windows([string]$titulo, [string]$texto) {
     } catch { Log ('ERROR al notificar a Carlos: ' + $_.Exception.Message); return $false }
 }
 
+function Nom([string]$n) {
+    # v10: nombres equivalentes de un rol: 'Chat de diseno' = 'Chat Diseno' = 'Diseno'; sin acentos ni mayusculas (archivo ASCII: acentos como \uXXXX)
+    $t = $n.ToLowerInvariant()
+    $t = $t -replace '[\u00e1\u00e0\u00e4]', 'a' -replace '[\u00e9\u00e8\u00eb]', 'e' -replace '[\u00ed\u00ec\u00ef]', 'i' -replace '[\u00f3\u00f2\u00f6]', 'o' -replace '[\u00fa\u00f9\u00fc]', 'u' -replace '\u00f1', 'n'
+    $t = ($t -replace '\bchat\b', '' -replace '\bde\b', '' -replace '\s+', ' ').Trim()
+    return $t
+}
+function BuscarDest($dest, [string]$nombre) { $k = Nom $nombre; return ($dest | Where-Object { (Nom ([string]$_.nombre)) -eq $k } | Select-Object -First 1) }
+
 function Avisar([string]$destNombre, [string]$texto, $dest) {
-    $d = $dest | Where-Object { $_.nombre -eq $destNombre } | Select-Object -First 1
+    $d = BuscarDest $dest $destNombre
     if ($d -and ([string]$d.canal) -eq 'windows') { return (Notificar-Windows 'STR: te esperan' $texto) }
     if (-not $d -or -not $d.sesion) { Log "Sin sesion registrada para '$destNombre'; no se avisa."; return $false }
     $sesion = [string]$d.sesion
@@ -139,13 +156,13 @@ try {
         if ($lr -match '^([0-9a-f]{40})\s') { $sha = $Matches[1] }
     } catch { }
     if (-not $sha) { Log 'Aviso: git ls-remote no respondio; se usa la copia local.' ; $sha = $shaPrev }
-    $faltan = -not (Test-Path (Join-Path $CacheDir 'mensajes.json')) -or -not (Test-Path (Join-Path $CacheDir 'destinatarios.json')) -or -not (Test-Path (Join-Path $CacheDir 'seguimiento.json'))
+    $faltan = -not (Test-Path (Join-Path $CacheDir 'mensajes.json')) -or -not (Test-Path (Join-Path $CacheDir 'destinatarios.json')) -or -not (Test-Path (Join-Path $CacheDir 'seguimiento.json')) -or -not (Test-Path (Join-Path $CacheDir 'diseno.json'))
     if ($sha -and ($sha -ne $shaPrev -or $faltan)) {
         try {
-            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json')) {
+            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json')) {
                 Invoke-WebRequest -Uri "$RawBase/$sha/interno/$f" -UseBasicParsing -OutFile (Join-Path $CacheDir ($f + '.tmp'))
             }
-            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json')) {
+            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json')) {
                 Move-Item -Force (Join-Path $CacheDir ($f + '.tmp')) (Join-Path $CacheDir $f)
             }
             if ($sha -ne $shaPrev) { $vistoEn = Get-Date }
@@ -169,18 +186,40 @@ try {
                 $id = [string]$m.id
                 if ($id -notmatch '^M-\d+$' -or $m.estado -ne 'pendiente' -or $avisados -contains $id) { continue }
                 $para = [string]$m.para
-                if (-not ($dest | Where-Object { $_.nombre -eq $para })) {
+                if (-not (BuscarDest $dest $para)) {
                     $yaS = if (Test-Path $EstSinS) { @(Get-Content -Path $EstSinS) } else { @() }
                     if ($yaS -notcontains $id) { Add-Content -Path $EstSinS -Value $id; Log "Sin sesion registrada para el destinatario de $id; espera a que se registre." }
                     continue
                 }
                 $texto = "Revisa el buzon (interno/mensajes.json): tienes el mensaje pendiente $id."
-                $dPara = $dest | Where-Object { $_.nombre -eq $para } | Select-Object -First 1
+                $dPara = BuscarDest $dest $para
                 if (([string]$dPara.canal) -eq 'windows') { $texto = "$id de $($m.de): $($m.asunto). Detalle en el Panel STR o en interno/mensajes.json." }
                 if (Avisar ([string]$m.para) $texto $dest) { Add-Content -Path $EstMsg -Value $id; Add-Content -Path $EstHora -Value ($id + '|' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')); Log "$id avisado a $($m.para)." }
             }
         }
     } catch { Log ('ERROR en buzon: ' + $_.Exception.Message) }
+
+
+    # --- 1c. Respuestas al remitente (v10, LM-2) ---
+    # Un mensaje enviado por un chat que pasa a 'hecho' con respuesta avisa a quien lo envio (una vez).
+    try {
+        $yaResp = if (Test-Path $EstResp) { @(Get-Content -Path $EstResp) } else { @() }
+        if (-not (Test-Path $EstResp)) {
+            # primera corrida: marcar lo ya respondido sin avisar
+            $msgs | Where-Object { $_.estado -eq 'hecho' -and $_.respuesta } | ForEach-Object { Add-Content -Path $EstResp -Value ([string]$_.id) }
+            Log 'Inicio respuestas: marcadas sin avisar.'
+        } else {
+            foreach ($m in $msgs) {
+                $id = [string]$m.id
+                if ($id -notmatch '^M-\d+$' -or $m.estado -ne 'hecho' -or -not $m.respuesta -or $yaResp -contains $id) { continue }
+                $de = [string]$m.de
+                $dDe = BuscarDest $dest $de
+                if (-not $dDe -or ([string]$dDe.canal) -eq 'windows') { Add-Content -Path $EstResp -Value $id; continue }   # Carlos o remitente desconocido: no se avisa
+                $texto = "Respondieron $id en el buzon (interno/mensajes.json): lee la respuesta y sigue con lo que esperaba."
+                if (Avisar ([string]$dDe.nombre) $texto $dest) { Add-Content -Path $EstResp -Value $id; Log "$id respondido: avisado a $($dDe.nombre)." }
+            }
+        }
+    } catch { Log ('ERROR en respuestas: ' + $_.Exception.Message) }
 
     # --- 1b. Escalamiento agrupado por destinatario (v7, 10-oct-2026) ---
     # Por chat destinatario: si tiene mensajes avisados que siguen 'pendiente' mas de $RecMin min, UN recordatorio
@@ -201,7 +240,7 @@ try {
                 if ($m.estado -ne 'pendiente' -or -not $horas.ContainsKey($id)) { continue }
                 $min = ($ahoraE - $horas[$id]).TotalMinutes
                 if ($min -lt $RecMin) { continue }
-                $para = [string]$m.para
+                $dPx = BuscarDest $dest ([string]$m.para); $para = $(if ($dPx) { [string]$dPx.nombre } else { [string]$m.para })
                 if (-not $porDest.ContainsKey($para)) { $porDest[$para] = @{ rec = @(); esc = @() } }
                 $porDest[$para].rec += $id
                 if ($min -ge $EscMin) { $porDest[$para].esc += $id }
@@ -253,10 +292,10 @@ try {
                 if ($lineas.Count -lt $vistas) { $vistas = 0 }
                 for ($i = $vistas; $i -lt $lineas.Count; $i++) {
                     $l = [string]$lineas[$i]
-                    $estado = if ($l -match '\bFALLO\b') { 'FALLO' } elseif ($l -match '\bOK\b') { 'OK' } else { '' }
+                    $estado = if ($l -match '\bFALLO\b') { 'FALLO' } elseif ($l -match '\bOK\b') { 'OK' } elseif ($l -match '\bRECHAZADO\b') { 'RECHAZADO' } else { '' }
                     if (-not $estado) { Set-Content -Path $EstCola -Value ($i + 1); continue }
                     $num = if ($l -match '(\d{1,3})-instr') { $Matches[1] } elseif ($l -match '\|\s*(\d{1,3})\b') { $Matches[1] } else { '' }
-                    $texto = if ($num) { "La CLI termino el lote $num ($estado): revisa la cola." } else { "La CLI termino un lote ($estado): revisa la cola." }
+                    $texto = if ($estado -eq 'RECHAZADO') { "La cola rechazo el lote ${num}: es critico y su cabecera no cita DA-n ni el cruce con Carlos; quedo como .sin-cruce.md. Corrige la cabecera y renombralo." } elseif ($num) { "La CLI termino el lote $num ($estado): revisa la cola." } else { "La CLI termino un lote ($estado): revisa la cola." }
                     if (Avisar 'Chat de desarrollo' $texto $dest) { Set-Content -Path $EstCola -Value ($i + 1); Log "Cola: lote $num $estado avisado a Chat de desarrollo." }
                     else { break }
                 }
@@ -268,7 +307,9 @@ try {
     try {
         $dv = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
         $ahora = Get-Date
-        if ($dv -and $ahora.Hour -ge $VigiaDesde -and $ahora.Hour -lt $VigiaHasta) {
+        $hayActivo = $true
+        try { $dz = LeerCache 'diseno.json'; $pls = @($dz.planes); if ($pls.Count -gt 0) { $hayActivo = (@($pls | Where-Object { ([string]$_.estado) -match '^activo' }).Count -gt 0) } } catch { }
+        if ($dv -and $hayActivo -and $ahora.Hour -ge $VigiaDesde -and $ahora.Hour -lt $VigiaHasta) {
             $seg = LeerCache 'seguimiento.json'
             $libres = @($seg.plan | Where-Object {
                 ($_.estado -eq 'previsto' -or $_.estado -eq 'siguiente') -and -not $_.espera -and
@@ -360,6 +401,24 @@ try {
             $edadV = ($ahoraV - $fv.LastWriteTime).TotalMinutes
             $v = Get-Content -Path $vj -Raw -Encoding UTF8 | ConvertFrom-Json
             $arch = [string]$v.archivoVeredicto; $loteV = [string]$v.lote
+            # v10: pre-vuelo. Al escribirse verificar.json debia existir pre-vuelo.json valido y de menos de $PreVueloMin min.
+            try {
+                $claveP = 'verificar@' + $fv.LastWriteTime.ToString('yyyyMMddHHmmss')
+                $yaP = if (Test-Path $EstPreV) { @(Get-Content -Path $EstPreV) } else { @() }
+                if ($yaP -notcontains $claveP) {
+                    $pv = Join-Path $LogDir 'pre-vuelo.json'; $motivoP = ''
+                    if (-not (Test-Path $pv)) { $motivoP = 'no existe pre-vuelo.json' }
+                    else {
+                        $fp = Get-Item $pv
+                        if ($fp.LastWriteTime -gt $fv.LastWriteTime.AddMinutes(1)) { $motivoP = '' }
+                        elseif (($fv.LastWriteTime - $fp.LastWriteTime).TotalMinutes -gt $PreVueloMin) { $motivoP = 'pre-vuelo.json tenia mas de ' + $PreVueloMin + ' min' }
+                        else { try { $pj = Get-Content -Path $pv -Raw -Encoding UTF8 | ConvertFrom-Json; if (-not $pj.valido) { $motivoP = 'pre-vuelo.json con valido=false' } } catch { $motivoP = 'pre-vuelo.json ilegible' } }
+                    }
+                    if ($motivoP) {
+                        if (Avisar 'Chat de desarrollo' ("Lanzaste el verificador del lote $loteV sin pre-vuelo valido ($motivoP). Escribe log\pre-vuelo.json como dice interno/lotes-modelo/LM-1.md y relanza con archivo de veredicto nuevo.") $dest) { Add-Content -Path $EstPreV -Value $claveP; Log "Pre-vuelo: lote $loteV lanzado sin pre-vuelo valido ($motivoP); avisado." }
+                    } else { Add-Content -Path $EstPreV -Value $claveP }
+                }
+            } catch { Log ('ERROR en pre-vuelo: ' + $_.Exception.Message) }
             $entregado = ($arch -and (Test-Path (Join-Path $Cola $arch)))
             if (-not $entregado -and $loteV) {
                 $otro = @(Get-ChildItem -Path $LogDir -Filter ($loteV + '-veredicto*.json') -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt $fv.LastWriteTime })
@@ -407,6 +466,20 @@ try {
             }
         } elseif (Test-Path $EstCli) { Remove-Item -Path $EstCli -Force -ErrorAction SilentlyContinue }
     } catch { Log ('ERROR en cli: ' + $_.Exception.Message) }
+
+    # --- 8. Estado vivo (v10, LM-2): lo mecanico al minuto, para el Panel (y mas adelante el tablero) ---
+    try {
+        $ev = [ordered]@{ actualizadoEn = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'); proyecto = 'str'; jornada = $(if (Test-Path (Join-Path $Cola 'PAUSA')) { 'pausa' } else { 'activa' }) }
+        $ev.enCola = @(Get-ChildItem -Path $Cola -Filter '*-instr-*.md' -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch '\.sin-cruce\.md$' } | Sort-Object Name | ForEach-Object { $_.Name })
+        $ev.rechazados = @(Get-ChildItem -Path $Cola -Filter '*.sin-cruce.md' -File -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+        $lk = Join-Path $Cola '.corriendo'
+        $ev.construyendo = $(if (Test-Path $lk) { $fl2 = Get-Item -Force $lk; $ul = Get-ChildItem -Path $LogDir -Filter '*-instr-*.txt' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1; [ordered]@{ desde = $fl2.LastWriteTime.ToString('HH:mm'); lote = $(if ($ul) { $ul.BaseName } else { '' }); logHace = $(if ($ul) { [int]((Get-Date) - $ul.LastWriteTime).TotalMinutes } else { $null }) } } else { $null })
+        $ev.fallidas = @(Get-ChildItem -Path (Join-Path $Cola 'fallidas') -Filter '*.md' -File -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+        $vj2 = Join-Path $LogDir 'verificar.json'; $pv2 = Join-Path $LogDir 'pre-vuelo.json'
+        $ev.verificando = $(if (Test-Path $vj2) { $fv2 = Get-Item $vj2; $v2 = $null; try { $v2 = Get-Content -Path $vj2 -Raw -Encoding UTF8 | ConvertFrom-Json } catch { }; $arch2 = $(if ($v2) { [string]$v2.archivoVeredicto } else { '' }); [ordered]@{ lote = $(if ($v2) { [string]$v2.lote } else { '' }); desde = $fv2.LastWriteTime.ToString('HH:mm'); archivoEsperado = $arch2; entregado = ($arch2 -and (Test-Path (Join-Path $Cola $arch2))); preVuelo = $(if (Test-Path $pv2) { (Get-Item $pv2).LastWriteTime.ToString('HH:mm') } else { '' }) } } else { $null })
+        $ev.ultimoResumen = $(if (Test-Path $Resumen) { [string](Get-Content -Path $Resumen -Tail 1) } else { '' })
+        ($ev | ConvertTo-Json -Depth 4) | Set-Content -Path $EstadoVivo -Encoding UTF8
+    } catch { Log ('ERROR en estado vivo: ' + $_.Exception.Message) }
 } finally {
     Remove-Item -Path $Lock -Force -ErrorAction SilentlyContinue
 }

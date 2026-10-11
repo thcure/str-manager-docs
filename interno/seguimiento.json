@@ -6719,10 +6719,90 @@
    "req": "REQ-INV2-3b-1",
    "categoria": "normal",
    "resumen": "Circuito de la ropa: colección inv-estados, tipo de movimiento 'estado', estado y lugar del juego calculados desde movimientos, incompleto manual, pestañas «Circuito de la ropa» y «¿Dónde está la ropa?» con filtro por propiedad.",
-   "estado": "desplegado",
-   "observacion": "Revisión previa 7/12 → 12/12 (subagente). Alcance recortado con ok de Diseño (M-162): proveedores y criterios 6–9 a 3b-2; DT-33 aparte. Encolado 17:44 (cmp ok; fallidas vacía). CLI 17:44–17:52: main 2e20264 (p5c69), 39/39. Hecho todo; fuera de alcance declarado en el commit (el hook guard-bash lo exigió): str-conocimiento.html y str-nomenclatura.html también llevaban ?v=p5c68 (mi lista de 16 HTML los omitió). Tras el merge, core.autocrlf reescribió CLAUDE.md con CRLF y claude-md.test.js falló localmente; la CLI lo dejó en LF sin otro commit. El log de la cola solo guardó ese último mensaje: el cierre está en el commit, sin la línea «Reglas fijas recibidas». Pre-vuelo 18:00 (zz-verif-admin, p5c69) y verificador estándar lanzado 18:01.",
+   "estado": "aceptado",
+   "observacion": "Revisión previa 7/12 → 12/12 (subagente). Alcance recortado con ok de Diseño (M-162): proveedores y criterios 6–9 a 3b-2; DT-33 aparte. Encolado 17:44 (cmp ok; fallidas vacía). CLI 17:44–17:52: main 2e20264 (p5c69), 39/39. Hecho todo; fuera de alcance declarado en el commit (el hook guard-bash lo exigió): str-conocimiento.html y str-nomenclatura.html también llevaban ?v=p5c68 (mi lista de 16 HTML los omitió). Tras el merge, core.autocrlf reescribió CLAUDE.md con CRLF y claude-md.test.js falló localmente; la CLI lo dejó en LF sin otro commit. El log de la cola solo guardó ese último mensaje: el cierre está en el commit, sin la línea «Reglas fijas recibidas». Pre-vuelo 18:00 (zz-verif-admin, p5c69) y verificador estándar lanzado 18:01. 73-veredicto (18:15): aceptado, sin INC. Observaciones: el modal de Existencias no ofrece Conteo (se preparó con Compra); queda activa la zona zz-verif-Apto (dato de prueba).",
    "costo": {
     "minutosCLI": 8,
+    "minutosDueno": 0
+   },
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 73,
+    "hash": "2e2026429ba302c6fec088d4d61ccafb1ce18ef9",
+    "fecha": "2026-10-11",
+    "horaBogota": "18:15",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome con zz-verif-admin (chip del shell «zz-verif-admin · Carlos Hospedaje»; la barra también muestra el nombre de Google, INC-111 conocido). Reloj real. Criterios a, h, i cubiertos por tests/: solo leí el log/commit, no ejecuté tests. Sin pruebasApi.",
+    "criterios": [
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "Cubierto por tests/: log de la cola (mensaje final de la CLI) dice «Los tests vuelven a pasar (39/39)» y que main/origin/main siguen en 2e20264; el fallo previo fue solo fin de línea CRLF de CLAUDE.md en disco tras el merge, no del commit. No ejecuté node tests/run.js."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "/api/health: ok, db, schema_version 10. str-inventario.html cargó str-api.js?v=p5c69 (200). Consola sin errores al cargar y tras toda la sesión. CLAUDE.md § 3 declara p5c69 (líneas 82 y 85)."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "Sin estados previos, «Circuito de la ropa» mostró «Sin estados todavía… (no se crean solos)» y las 6 sugerencias: Lista, En uso, Lavándose, Secando, Por organizar, Sucia por lavar, cada una con «＋ Agregar»."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "Creé zz-verif-lista, zz-verif-en uso, zz-verif-secando; subí secando a la posición 2 y marqué «pasa como pendiente». Tras recargar la página: orden lista, secando, en uso y casilla de secando marcada se conservaron (el modal de cambio de estado también los lista en ese orden)."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "Juego 1 pasó de zz-verif-lista en zz-verif-Principal a zz-verif-en uso en zz-verif-Apto: la vista cambió de zona/estado y Movimientos muestra Traslado Juego 1 Principal→Apto, nota «estado: zz-verif-en uso», quién zz-verif-admin, 11 oct 18:09 (hora real del servidor). Desviaciones de precondición, no defectos: (1) el modal de movimientos de Existencias no ofrece «Conteo» (solo Compra/Ajuste/Trasladar/Prestar; los conteos nacen en turnos), así que dejé los componentes en la principal con una Compra de 6 zz-verif-Sábana (Juegos completos 3); (2) Juego 1 ya tenía lugar de un traslado del lote 62 (zz-verif-B inactiva), por lo que su asignación inicial fue un traslado B→Principal con estado lista (aceptado), no la «primera asignación» de tipo estado; la primera asignación (movimiento tipo estado, «Cambio de estado») sí se probó con J2 y J3. El estadoId no es visible en la UI; se infiere de la nota «estado: …»."
+     },
+     {
+      "c": "f",
+      "ok": true,
+      "observado": "Marqué J1 incompleto, «falta 1 sábana», dónde: zz-verif-Apto. La vista muestra el juego con etiqueta naranja «incompleto: falta 1 sábana · está en zz-verif-Apto · zz-verif-Propiedad». Toast «Marcado incompleto»."
+     },
+     {
+      "c": "g",
+      "ok": true,
+      "observado": "J2 en secando y J3 en lista asignados en la principal (movimientos «Cambio de estado», zz-verif-admin). «¿Dónde está la ropa?» agrupa: zz-verif-Principal (lista: J3; secando: J2) y zz-verif-Apto·zz-verif-Propiedad (en uso: J1), en el orden de estados. Filtro zz-verif-Propiedad: muestra los tres. Filtro propiedad 1708: oculta J1 (zona apto) y mantiene J2/J3 porque la principal no tiene propIds («Todo el negocio»)."
+     },
+     {
+      "c": "h",
+      "ok": true,
+      "observado": "Cubierto por tests/ (inventario.test.js, permisos-col.test.js): el log solo reporta 39/39 en conjunto; no leí el detalle por caso ni lo ejecuté, y no hice pruebas de rechazo 403 (pruebasApi vacío)."
+     },
+     {
+      "c": "i",
+      "ok": true,
+      "observado": "Cubierto por tests/export-colecciones.test.js: incluido en el 39/39 del log; no lo ejecuté."
+     },
+     {
+      "c": "j",
+      "ok": true,
+      "observado": "Sin regresión visible: Artículos, Juegos y kits (activar, duplicar, desactivar), Existencias (conteos por zona y «completos por zona» correctos: 6 sábanas → 3 completos; tras J1 a apto, principal 3 y apto 1), Movimientos (compras, traslados, préstamos/devoluciones del lote 62 listados sin «undefined»; el tipo estado se muestra como «Cambio de estado» con juego, zona y nota). No creé préstamos nuevos. [INV-puras] sin cambios: cubierto por tests (39/39 en log)."
+     }
+    ],
+    "criteriosPendientes": [],
+    "incs": [],
+    "datosDePrueba": "creados: estados zz-verif-lista, zz-verif-en uso, zz-verif-secando (desactivados); zona zz-verif-Apto (tipo Apartamento, uso apto, propiedad zz-verif-Propiedad) que queda ACTIVA porque la lista cerrada no permite borrarla ni la UI de este lote la desactiva sin tocar zonas (puedes desactivarla); zz-verif-Juego 3 (duplicado de Juego 2, desactivado); movimientos inmutables que quedan: Compra 6 zz-verif-Sábana en la principal, traslados J1 B→Principal y Principal→Apto, cambios de estado J2 y J3. Reactivados y vueltos a desactivar: zz-verif-Sábana, zz-verif-Juego 1, zz-verif-Juego 2. J1 queda marcado incompleto («falta 1 sábana»). Nada sin prefijo zz-verif- tocado. Pestaña cerrada.",
+    "notas": "Hechos del despliegue: str-api.js?v=p5c69 confirmado por red; el ?v= de los 16 HTML no se revisó uno a uno (sin acceso al fuente sin JS). No verifiqué el diff declarados vs tocados contra git: el log de la cola solo trae el último mensaje de la CLI y las notas de verificar.json explican fuera de alcance de str-conocimiento.html y str-nomenclatura.html (solo ?v=); el cierre completo está en el mensaje del commit 2e20264, que no leí. No vi cambios a la capa Marco. Observación (no INC): el modal de «Registrar movimiento» no permite crear Conteo desde Existencias, por lo que los criterios con «conteo» se prepararon con Compra. La pestaña del navegador se colgó una vez 30 s tras reactivar un artículo; recargar la resolvió (no reproducido, sin hallazgo)."
+   }
+  },
+  {
+   "lote": 74,
+   "fecha": "2026-10-11",
+   "hash": null,
+   "version": "p5c70",
+   "req": "REQ-INV2-9",
+   "categoria": "normal",
+   "resumen": "Juego con propiedad dueña («pertenece a» o «común»), «mezclado» por lugar y filtro por pertenencia en «¿Dónde está la ropa?»; test de ancho 390 px.",
+   "estado": "encolado",
+   "observacion": "Revisión previa 8/12 → 12/12. Encolado 18:15 (cmp ok; fallidas vacía). Criterio f: mitad «ve la propiedad» no aplica (el colaborador no abre Inventario; avisado a Diseño).",
+   "costo": {
+    "minutosCLI": null,
     "minutosDueno": 0
    },
    "cruceDueno": null
@@ -7543,9 +7623,9 @@
    "req": "REQ-INV2-3b-1",
    "categoria": "normal",
    "resumen": "Circuito de la ropa: estados del negocio, juego con estado y lugar, lavandería externa, pendientes al cerrar, '¿Dónde está la ropa?'",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV2",
    "riesgo": "R-1",
    "espera": null,
@@ -7698,12 +7778,12 @@
    "req": "REQ-INV2-9",
    "categoria": "normal",
    "resumen": "Juego con propiedad dueña («pertenece a» o «común»), «mezclado» en un mismo lugar y filtro por pertenencia en «¿Dónde está la ropa?»",
-   "estado": "en redacción",
+   "estado": "encolado",
    "vista": "en curso",
-   "esperaA": "verificador",
-   "espera": "redactado (revisión previa 12/12); se encola con el 73 aceptado",
+   "esperaA": "CLI",
+   "espera": null,
    "orden": 116.4,
-   "desde": "2026-10-11 18:13",
+   "desde": "2026-10-11 18:15",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "M-163/M-164. Criterio g (390 px) por tests/ leyendo el CSS."

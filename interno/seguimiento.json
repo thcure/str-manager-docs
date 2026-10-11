@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-11T17:21:00-05:00",
+ "actualizadoEn": "2026-10-11T17:28:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1543,11 +1543,21 @@
    "id": "DT-32",
    "tipo": "DT",
    "modulo": "Tests",
-   "etapa": "pendiente",
+   "etapa": "✔",
    "fecha": "2026-10-11",
    "titulo": "tests/README.md cita «regla 10 de CLAUDE.md»; tras la poda (lote 70) es la regla 5.",
-   "pendiente": "Lo corrige el próximo lote que toque tests/ (M-143).",
+   "pendiente": "Cerrado por el lote 72 (469213a).",
    "severidad": "bajo"
+  },
+  {
+   "id": "DT-33",
+   "tipo": "DT",
+   "modulo": "Tests",
+   "etapa": "pendiente",
+   "fecha": "2026-10-11",
+   "severidad": "bajo",
+   "titulo": "docs/claude/tests-y-despliegue.md (línea ~10) aún dice «(regla 10)» y «no hay PHP local» (observación de 72-veredicto).",
+   "pendiente": "Próximo lote que toque ese mapa."
   }
  ],
  "cambios": [
@@ -5315,8 +5325,8 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Inventario: movimientos traslado/prestamo/devolucion (servidor: solo admin u operador con inventario.editar), existencias con traslados y préstamos en [INV-puras], Préstamos abiertos, aviso al cerrar el turno en HK.",
-   "estado": "no aceptado",
-   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104. 62-veredicto-2 (12:25): no aceptado solo por el criterio 11 no verificable (perfiles de colaborador y operador no conectados); 1–10 y 12–15 cumplen en producción. INC-104 cerrado; INC-107 (bajo) registrado. 62-veredicto-3 (~12:35): criterio 11 sigue no verificable — sesión del colaborador vencida; perfil operador muestra \"portal como administrador\" y el modo automático bloqueó JavaScript en esa pestaña. 62-veredicto-4 (~14:22): no verificable — el verificador abrió la raíz del sitio, que no tiene página de inicio (403 para todos; no es falla). 62-veredicto-5 (~14:26): 11a colaborador CUMPLE (403 'Solo puedes registrar conteos y niveles'); 11b operador no verificable (perfil viejo con sesión vencida). 62-veredicto-6 (~14:29): 11b no verificable — perfil nuevo del operador confirmado (zz-verif-oper, inventario.editar=false), pero el modo automático bloqueó el PUT ('Modify Shared Resources'). Queda solo 11b; propuesta a Carlos: prueba automática del 403 en tests/ (opción B de M-81).",
+   "estado": "aceptado",
+   "observacion": "Encolado 15:52. CLI 15:52–16:03, 33/33 (58 casos nuevos). Servidor sin chequeo de saldo (declarado). Límite declarado: el colaborador no lee préstamos registrados por otra persona, así que el aviso al cerrar solo aparece si cierra admin/operador; arreglarlo toca la lectura del colaborador en api/col (crítico, R-2). Agente verificador (Sonnet) lanzado 16:05. 62-veredicto (16:08): no aceptado por no verificable — el clasificador del modo automático bloqueó crear datos zz-verif-; 14 (existencias sin regresión) y 15 ok; INC-104. 62-veredicto-2 (12:25): no aceptado solo por el criterio 11 no verificable (perfiles de colaborador y operador no conectados); 1–10 y 12–15 cumplen en producción. INC-104 cerrado; INC-107 (bajo) registrado. 62-veredicto-3 (~12:35): criterio 11 sigue no verificable — sesión del colaborador vencida; perfil operador muestra \"portal como administrador\" y el modo automático bloqueó JavaScript en esa pestaña. 62-veredicto-4 (~14:22): no verificable — el verificador abrió la raíz del sitio, que no tiene página de inicio (403 para todos; no es falla). 62-veredicto-5 (~14:26): 11a colaborador CUMPLE (403 'Solo puedes registrar conteos y niveles'); 11b operador no verificable (perfil viejo con sesión vencida). 62-veredicto-6 (~14:29): 11b no verificable — perfil nuevo del operador confirmado (zz-verif-oper, inventario.editar=false), pero el modo automático bloqueó el PUT ('Modify Shared Resources'). Queda solo 11b; propuesta a Carlos: prueba automática del 403 en tests/ (opción B de M-81). 17:28: 11b cubierto por tests/inv-traslado-403.test.js (lote 72, 72-veredicto aceptado: Parte A 16/16 y Parte B con php real 11/11 en la copia del verificador). Con 1–10, 11a y 12–15 ya cumplidos en producción, el lote 62 queda aceptado (decisión de Diseño M-152/M-155).",
    "costo": {
     "minutosCLI": 11,
     "minutosDueno": 0
@@ -6649,13 +6659,47 @@
    "req": "REQ-INV2-3a",
    "categoria": "estándar",
    "resumen": "tests/inv-traslado-403.test.js: 403 al operador sin inventario.editar en traslados contra el PHP real (Parte A lee; Parte B ejecuta si hay php); cierra el 11b del lote 62 y DT-32.",
-   "estado": "desplegado",
-   "observacion": "Revisión previa 12/12 (Parte B corregida). Diseño (M-155): la Parte A + réplica bastan. Encolado 17:21 (cmp ok; fallidas vacía). Primer lote con hooks activos: comprobar en su log las reglas fijas de ctx.js (prueba d de A7b). CLI 17:21–17:23: main 469213a, 39/39; Parte A 16/16, Parte B omitida (sin php en LENOVO); declarados = tocados; ningún hook frenó. Prueba d de A7b: el log de la cola NO muestra «Instrucción del lote en curso:» (ctx.js inyecta en el contexto de la CLI, no en su salida). Pre-vuelo sin perfiles y verificador estándar lanzados 17:25.",
+   "estado": "aceptado",
+   "observacion": "Revisión previa 12/12 (Parte B corregida). Diseño (M-155): la Parte A + réplica bastan. Encolado 17:21 (cmp ok; fallidas vacía). Primer lote con hooks activos: comprobar en su log las reglas fijas de ctx.js (prueba d de A7b). CLI 17:21–17:23: main 469213a, 39/39; Parte A 16/16, Parte B omitida (sin php en LENOVO); declarados = tocados; ningún hook frenó. Prueba d de A7b: el log de la cola NO muestra «Instrucción del lote en curso:» (ctx.js inyecta en el contexto de la CLI, no en su salida). Pre-vuelo sin perfiles y verificador estándar lanzados 17:25. 72-veredicto (17:28): aceptado, sin INC; el verificador corrió también la Parte B con php 8.3.6 en su copia: 11/11.",
    "costo": {
     "minutosCLI": 2,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 72,
+    "hash": "469213a1478b177fcc7cb12fc109779cbdf19646",
+    "fecha": "2026-10-11",
+    "horaBogota": "17:28",
+    "resultado": "aceptado",
+    "modoVerificacion": "Sin navegador (lote de tests). Copia de solo lectura del árbol de trabajo de C:\\Users\\ktcol\\str-manager (main = 469213a según el log) en la nube; allí sí hay php 8.3.6 y node 22. No hay shell en el equipo de Carlos, así que no pude correr git (show/diff): el criterio c se comprobó por fechas de modificación y por el log. Reloj: no aplica.",
+    "criterios": [
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "node tests/run.js en la copia completa: 39/39 archivos OK; inv-traslado-403.test.js 27 OK, 0 FAIL. El log del lote dice 39/39. Sin php (simulado quitándolo del PATH, como LENOVO) el test da 16 OK, 0 FAIL y «OMITIDA: php no está en este equipo». Primera corrida: hooks.test.js falló solo porque mi copia no traía .claude/hooks; al añadirlo, 39/39."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "Parte A 16/16 OK sobre api/col/index.php y api/lib/session.php del repo. Compara lo que dice §1: dos 403 al inicio de _colInvMovSanearCircuito, delegación de traslado/prestamo/devolucion con $puedeEditar como 5.º argumento, una sola línea $puedeInv = _puede(...'inventario.editar') antes de la llamada del PUT, y justo después isset($mv['error']) con rollBack, http_response_code($mv['status']) y exit sin execute( en medio. No es trivial: en una copia, cambiar la guarda !$puedeEditar por false hace fallar A1 (y dos casos de la Parte B); pasar true en vez de $puedeInv en la llamada del PUT hace fallar A3 (2 FAIL). Bonus: con php 8.3.6 la Parte B también corrió, 11/11 OK (5 casos de 403/paso). Parte A + réplica de permisos-col.test.js bastan para el 11b (M-155)."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "Por fechas de modificación (sin git): solo tests/inv-traslado-403.test.js, tests/README.md y docs/claude/tests-y-despliegue.md se modificaron a las 17:23; api/, HTML, JS de la aplicación, CLAUDE.md y tests/run.js conservan fechas anteriores al lote. CLAUDE.md sigue con ?v= p5c68. El log declara los mismos tres archivos y «diferencias: ninguna»."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "tests/README.md no contiene «regla 10» (0 coincidencias); línea 3 cita «regla 5 de docs/claude/reglas-fijas.md» y la línea 26 describe el test nuevo."
+     }
+    ],
+    "criteriosPendientes": [],
+    "incs": [],
+    "datosDePrueba": "ninguno",
+    "notas": "Criterio e (reglas fijas en el log) lo comprueba el Chat Desarrollo; no lo conté. Observación menor, no es INC: docs/claude/tests-y-despliegue.md línea 10 aún dice «(regla 10)» y «no hay PHP local» (texto previo al lote, fuera del alcance de DT-32 que pedía solo el README). Sin cambios a la capa Marco. Chrome no se abrió; no hay pestañas que cerrar."
+   }
   }
  ],
  "esquema": {
@@ -7203,12 +7247,12 @@
    "req": "REQ-INV2-3a",
    "categoria": "normal",
    "resumen": "Traslados, préstamos y devoluciones (movimientos nuevos, [INV-puras], aviso al cerrar el turno)",
-   "estado": "no aceptado",
-   "vista": "esperando a Carlos",
-   "esperaA": "Carlos",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "grupo": "INV2",
    "riesgo": "R-1, R-2",
-   "espera": "decisión de Carlos sobre 11b (operador): prueba automática en tests/ (recomendada) o prueba a mano en su consola; 11a ya cumplió",
+   "espera": null,
    "orden": 102,
    "nota": "14/15 + 11a; falta 11b (operador) por bloqueo del modo automático en 62-veredicto-6. 15:09: 11b se cierra con el lote 72 (tests/inv-traslado-403.test.js), redactado; se encola tras el 71 aceptado (M-152).",
    "desde": "2026-10-10T15:25:00-05:00",
@@ -7613,9 +7657,9 @@
    "req": "REQ-INV2-3a",
    "categoria": "estándar",
    "resumen": "Prueba del 403 al operador sin inventario.editar en traslados contra el PHP real (cierra el criterio 11b del lote 62) + DT-32",
-   "estado": "desplegado",
-   "vista": "en curso",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "espera": null,
    "orden": 116.3,
    "nota": "Revisión previa 12/12 (subagente, Parte B corregida). Pregunta a Diseño sobre suficiencia de la Parte A (M-155). Diseño (M-155): basta la Parte A + réplica para aceptar el 11b; no parcial.",

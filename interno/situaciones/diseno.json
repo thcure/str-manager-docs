@@ -1,5 +1,410 @@
 {
  "rol": "rol-diseno",
- "actualizadoEn": null,
- "situaciones": []
+ "actualizadoEn": "2026-10-11",
+ "situaciones": [
+  {
+   "id": "S-dis-1",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "credencial",
+   "refs": [
+    "M-51"
+   ],
+   "quePaso": "Tras compactarse el chat, el push a str-manager-docs dio 403: el token pegado al inicio ya no estaba en el contexto.",
+   "causa": "La credencial vivía solo en la conversación; la compactación la borra.",
+   "costoMin": 5,
+   "comoSeResolvio": "Se agregó el repositorio a la sesión (conexión de GitHub de la sesión) y se reintentó.",
+   "leccion": "Una credencial en el chat no sobrevive a una compactación.",
+   "reglaPropuesta": "Token en archivo con frase de autorización (M-84) o conexión de la sesión; comprobar push al arrancar.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-2",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [],
+   "quePaso": "Al republicar el artefacto 'Plan de trabajo STR' el publicador lo rechazó porque el archivo fuente local ya no existía.",
+   "causa": "El archivo local se perdió entre turnos; el artefacto solo se podía actualizar desde una copia local.",
+   "costoMin": 10,
+   "comoSeResolvio": "La herramienta restauró la última versión publicada; se editó y republicó en la misma URL.",
+   "leccion": "Un artefacto mantenido a mano depende de un archivo local frágil.",
+   "reglaPropuesta": "Retirar el artefacto transitorio en cuanto existe el tablero (hecho con TB1).",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-3",
+   "fecha": "2026-10-10",
+   "veces": 4,
+   "categoria": "herramienta",
+   "refs": [
+    "M-91",
+    "M-110"
+   ],
+   "quePaso": "git push rechazado por cambios concurrentes en mensajes.json; una vez el rebase dejó el JSON roto con marcas de conflicto.",
+   "causa": "Varios chats escriben el mismo archivo (mensajes.json, diseno.json lo leen otros) casi al mismo tiempo.",
+   "costoMin": 15,
+   "comoSeResolvio": "rebase --abort, reset a origin/main y rehacer el cambio sobre la versión nueva.",
+   "leccion": "Un archivo compartido por varios escritores choca aunque cada uno toque mensajes distintos.",
+   "reglaPropuesta": "Un archivo por mensaje o escritura solo-añadir validada; siempre pull --rebase inmediatamente antes de escribir.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-4",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "id-roto",
+   "refs": [
+    "M-57",
+    "M-58"
+   ],
+   "quePaso": "El aviso al Arquitecto citaba M-56 en vez de M-57 porque el número se calculó antes de crear el mensaje.",
+   "causa": "Numeración manual de mensajes dentro de un script que crea dos a la vez.",
+   "costoMin": 2,
+   "comoSeResolvio": "Se corrigió el texto con un commit adicional.",
+   "leccion": "Los ids generados a mano dentro de un mismo envío se desfasan.",
+   "reglaPropuesta": "El id lo asigna una función única al guardar; las referencias se escriben después.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-5",
+   "fecha": "2026-10-10",
+   "veces": 3,
+   "categoria": "permiso-plataforma",
+   "refs": [
+    "M-59",
+    "M-60",
+    "INC-104"
+   ],
+   "quePaso": "El modo automático bloqueó tres envíos al buzón: dos como 'Auto-Mode Bypass' (pedir ampliar permisos del verificador) y uno como 'Instruction Poisoning' (reenviar un paso que venía de otro chat).",
+   "causa": "El clasificador trata como evasión o inyección un mensaje que pide relajar un control o que transcribe órdenes de terceros.",
+   "costoMin": 30,
+   "comoSeResolvio": "Carlos permitió un envío; para los otros, Carlos actuó de mensajero; el tercero salió reescrito como estado con palabras propias.",
+   "leccion": "Los mensajes que tocan permisos o citan a otros chats se bloquean; escribirlos como estado funciona.",
+   "reglaPropuesta": "Buzón con palabras propias y rutas en vez de textos pegados (aprobada M-72); autorizaciones de Carlos en el texto de la tarea.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-6",
+   "fecha": "2026-10-10",
+   "veces": 4,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "P-8",
+    "P-9",
+    "REQ-LIQ1",
+    "REQ-INV2-5",
+    "REQ-PC1-2"
+   ],
+   "quePaso": "Propuse cosas ya definidas: un módulo de liquidación nuevo (existía REQ-PG1), 'etiqueta' cuando el sistema ya tiene 'categoría del sistema', 'absorber' INV2·5 (definido en INV2 punto 7) y omití que el respaldo del QR ya ofrecía elegir de una lista.",
+   "causa": "Respondí desde la memoria del chat sin buscar en los documentos del proyecto; Carlos tampoco recuerda esos detalles.",
+   "costoMin": 25,
+   "comoSeResolvio": "Se buscó en el proyecto y se corrigieron REQ, bolsa y documentos; se retiró REQ-LIQ1.",
+   "leccion": "Antes de proponer, buscar lo ya decidido; Carlos lo pidió expresamente.",
+   "reglaPropuesta": "Búsqueda obligatoria en los documentos del proyecto antes de proponer un REQ o una DA, citando lo encontrado.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-7",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "comunicacion",
+   "refs": [
+    "M-76",
+    "M-77",
+    "M-80"
+   ],
+   "quePaso": "Diagnostiqué que el tablero leía una copia publicada en el servidor y pedí al CD publicar los JSON; en realidad lee GitHub con caché de 5 min.",
+   "causa": "Supuse la causa sin leer el código de la página.",
+   "costoMin": 60,
+   "comoSeResolvio": "El Arquitecto leyó el código, anuló M-77 y se definió REQ-TB3; M-77 siguió escalando por estar pendiente.",
+   "leccion": "Diagnosticar leyendo la fuente real o preguntando a quien construyó.",
+   "reglaPropuesta": "Antes de pedir una acción técnica, citar la línea de código o el dato que la justifica.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-8",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "REQ-K3c",
+    "M-70",
+    "M-71"
+   ],
+   "quePaso": "Entendí 'si no tiene Drive, avisar' como 'sin Drive no se borra nada' y lo entregué al CD; Carlos quería un corte mensual único que borra con o sin Drive.",
+   "causa": "Interpreté la regla sin repetirla a Carlos antes de entregarla.",
+   "costoMin": 15,
+   "comoSeResolvio": "Se reescribió K3c y se corrigió M-70 con M-71 antes de que el CD empezara.",
+   "leccion": "Repetir en una tabla 'cómo queda' antes de entregar un crítico.",
+   "reglaPropuesta": "Un crítico no se entrega hasta que Carlos ve la tabla final de reglas y dice sí.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-9",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "decision-duplicada",
+   "refs": [
+    "REQ-PC1-2"
+   ],
+   "quePaso": "La regla del respaldo del QR cambió dos veces: foto en vivo desde el sistema y luego foto subida con control de metadatos.",
+   "causa": "Pregunté por un detalle sin explicar el escenario completo (si falla la cámara, no sirve tomarla desde el sistema).",
+   "costoMin": 8,
+   "comoSeResolvio": "Carlos corrigió; quedó la foto subida con metadatos, tolerancia 15 min e instructivo previo.",
+   "leccion": "Dar el escenario de falla completo antes de preguntar por el respaldo.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-10",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "decision-duplicada",
+   "refs": [
+    "M-101",
+    "M-102",
+    "REQ-U8"
+   ],
+   "quePaso": "Carlos me dijo que el operador viera todo (15:36) y en el chat del CD aprobó que el operador no vea Dashboard ni Proyecto (15:41).",
+   "causa": "El mismo cruce se hizo en dos chats a la vez.",
+   "costoMin": 5,
+   "comoSeResolvio": "Carlos aclaró que vale lo del CD; quedó anotado en REQ-U8.",
+   "leccion": "Un cruce, un solo chat.",
+   "reglaPropuesta": "El cruce de un lote crítico lo conduce un solo rol (Diseño) y el CD encola citando ese mensaje.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-11",
+   "fecha": "2026-10-10",
+   "veces": 14,
+   "categoria": "espera-invisible",
+   "refs": [
+    "M-77",
+    "M-80",
+    "M-81",
+    "M-82",
+    "M-83",
+    "M-85",
+    "M-87",
+    "M-88"
+   ],
+   "quePaso": "El CD no atendió el buzón de 13:07 a 15:27; recibí unos 8 escalamientos, uno por mensaje, y dos veces pedí a Carlos abrir el chat.",
+   "causa": "El CD esperaba en silencio la autorización para leer su token; el despertador escalaba cada mensaje por separado.",
+   "costoMin": 140,
+   "comoSeResolvio": "Carlos autorizó el token; el Arquitecto agrupó escalamientos (despertador v7) y aprobó 'nadie espera en silencio'.",
+   "leccion": "Un escalamiento por causa, no por mensaje.",
+   "reglaPropuesta": "Despertador v7 (agrupado) y regla 'Esperando: X' (M-105).",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-12",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "espera-invisible",
+   "refs": [
+    "M-77",
+    "M-82"
+   ],
+   "quePaso": "Mensajes ya sin efecto (M-77 anulado, M-82 congelado por la urgencia) siguieron escalándose porque solo el destinatario puede cerrarlos.",
+   "causa": "El remitente no puede marcar como 'sin efecto' su propio mensaje.",
+   "costoMin": 10,
+   "comoSeResolvio": "Mensaje adicional al CD pidiendo marcarlos hechos.",
+   "leccion": "Un mensaje superado debe poder cerrarse por quien lo envió.",
+   "reglaPropuesta": "Estado 'superado' que puede poner el remitente, con referencia al mensaje que lo reemplaza.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-13",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "espera-invisible",
+   "refs": [
+    "lote 67",
+    "M-103"
+   ],
+   "quePaso": "El lote 67 (urgencia de roles) estuvo 40 min encolado sin arrancar; lo detecté mirando plan[].",
+   "causa": "Una copia vieja en fallidas bloqueaba la cola.",
+   "costoMin": 40,
+   "comoSeResolvio": "Arquitecto diagnosticó; Carlos borró el archivo; despertador v8.",
+   "leccion": "Ver S-arq-2.",
+   "reglaPropuesta": "Despertador v8 vigila fallidas.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-14",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "entorno-verificador",
+   "refs": [
+    "lote 67",
+    "M-104",
+    "M-109"
+   ],
+   "quePaso": "Carlos vio al verificador crítico del 67 sin hacer nada; tres ejecuciones sin veredicto (16:36, 17:05, 17:39).",
+   "causa": "Las ejecuciones arrancaban esperando el permiso de carpetas en LENOVO, sin aviso.",
+   "costoMin": 70,
+   "comoSeResolvio": "Carlos aprobó el permiso; veredicto a las 17:44; despertador v9 vigila 25 min.",
+   "leccion": "Ver S-arq-3.",
+   "reglaPropuesta": "Pre-vuelo del CD y despertador v9.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-15",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "herramienta",
+   "refs": [
+    "M-49",
+    "M-53"
+   ],
+   "quePaso": "El aviso 'el plan tiene trabajo libre, retómalo' llegó mientras Carlos había pausado todo lo demás hasta nuevo aviso.",
+   "causa": "El vigía no sabe que un plan está pausado por decisión de Carlos.",
+   "costoMin": 5,
+   "comoSeResolvio": "Respondí que no había plan activo y pregunté qué reanudar.",
+   "leccion": "El vigía debe leer el estado de los planes.",
+   "reglaPropuesta": "El despertador no avisa 'trabajo libre' si los planes están pausados por Carlos (leer planes[].estado).",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-16",
+   "fecha": "2026-10-09",
+   "veces": 3,
+   "categoria": "comunicacion",
+   "refs": [
+    "REQ-TB1",
+    "DA-30",
+    "REQ-PC1-2"
+   ],
+   "quePaso": "Carlos respondió 'no tengo contexto', 'dame el contexto' o 'de qué se trata' a preguntas mías sin contexto.",
+   "causa": "Pregunté por decisiones dando por sabido el tema.",
+   "costoMin": 15,
+   "comoSeResolvio": "Pasé a dar contexto breve más tabla en cada pregunta.",
+   "leccion": "Cada pregunta a Carlos lleva contexto en una frase y una tabla con opciones.",
+   "reglaPropuesta": "Plantilla de pregunta: contexto, tabla de opciones con recomendación, plan asociado.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-17",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "M-56"
+   ],
+   "quePaso": "Pedí a Carlos aprobar objetivos y planes y respondió que no debía ser cuello de botella.",
+   "causa": "El encargo decía que Carlos aprueba los planes; en la práctica quería delegarlo.",
+   "costoMin": 10,
+   "comoSeResolvio": "Carlos delegó en Diseño proponer y ordenar planes; se informa al Arquitecto.",
+   "leccion": "Lo que puede decidir Diseño no se le pregunta a Carlos.",
+   "reglaPropuesta": "Encargo de Diseño: planes y orden los decide Diseño; Carlos solo DA, críticos y objetivos.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-18",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "DA-30"
+   ],
+   "quePaso": "Interpreté la regla 'otro colaborador con turno accede' como un reemplazo; Carlos se refería a dos personas en el mismo turno.",
+   "causa": "No releí el texto original de la regla antes de proponer.",
+   "costoMin": 5,
+   "comoSeResolvio": "Carlos aclaró; quedó un solo responsable por turno (el titular).",
+   "leccion": "Releer el texto fuente antes de reformular una regla.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-19",
+   "fecha": "2026-10-10",
+   "veces": 6,
+   "categoria": "id-roto",
+   "refs": [
+    "REQ-K3b",
+    "REQ-K3c",
+    "REQ-TB1",
+    "REQ-TB2",
+    "REQ-TB3",
+    "REQ-BT1"
+   ],
+   "quePaso": "Seis REQ quedaron sin '-n' final y uno de la bolsa se llamaba 'Portal de propietarios'.",
+   "causa": "No había un formato de id validado.",
+   "costoMin": 5,
+   "comoSeResolvio": "Se renombró a REQ-PP1; los seis esperan la decisión del miércoles 14 (M-112).",
+   "leccion": "Validar el id al crearlo.",
+   "reglaPropuesta": "Validador de ids del modelo de datos (sección 4).",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-20",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "M-36",
+    "M-39"
+   ],
+   "quePaso": "El artefacto de plan del chat anterior estaba desactualizado; hubo que preguntar al chat de desarrollo anterior por el buzón.",
+   "causa": "El plan vivía en un artefacto mantenido a mano.",
+   "costoMin": 20,
+   "comoSeResolvio": "Respuesta del chat anterior y traspaso en claude/archivo/traspaso-chat-anterior.md.",
+   "leccion": "El estado no debe vivir en un artefacto manual.",
+   "reglaPropuesta": "Tablero leído de los JSON (hecho, TB1).",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-21",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "M-55"
+   ],
+   "quePaso": "Al volver al modo normal, el aviso decía que el tablero no debía construirse, pero ya estaba construido y aceptado.",
+   "causa": "El mensaje se redactó con un estado viejo.",
+   "costoMin": 2,
+   "comoSeResolvio": "Lo aclaré al responder.",
+   "leccion": "",
+   "reglaPropuesta": "Leer plan[] antes de escribir sobre un ítem.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-dis-22",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [],
+   "quePaso": "Abriendo el STR en el Chrome del administrador: la raíz respondió 403, la pestaña anterior ya no era del grupo y la extensión se desconectó a mitad.",
+   "causa": "La raíz del sitio no tiene página de inicio y la extensión de Chrome se reinició.",
+   "costoMin": 5,
+   "comoSeResolvio": "Carlos interrumpió el pedido.",
+   "leccion": "Abrir directamente la página del shell, no la raíz.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  }
+ ]
 }

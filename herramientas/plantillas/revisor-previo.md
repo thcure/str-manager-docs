@@ -5,7 +5,7 @@ Quién: el Chat Desarrollo la pasa **siempre** antes de copiar la instrucción a
 | # | Pregunta | Si falla | Origen |
 |---|---|---|---|
 | 1 | ¿La cabecera (15 primeras líneas) trae Categoría, Alcance, Riesgo, Reversión, Origen y Requerimiento con ruta? | Completar; la guardia de la cola lee solo esas líneas | G-8 |
-| 2 | Si es **crítico**: ¿cita `DA-n` y «cruce previo con Carlos: fecha, dónde»? ¿Existe esa DA en `diseno.json`? | No se encola (la cola lo rechaza igual); pedir la DA a Diseño | G-7, G-18 |
+| 2 | Si es **crítico**: ¿cita `DA-n` y «cruce previo con Carlos: fecha, dónde»? ¿Existe esa DA en `diseno.json`? (Lote del modelo: en vez de DA-n cita `LM-n` de `interno/lotes-modelo/` y el cruce de Carlos; la decisión es del dueño, no de producto) | No se encola (la cola lo rechaza igual); pedir la DA a Diseño o el LM-n al Arquitecto | G-7, G-18 |
 | 3 | ¿La categoría es coherente con lo que toca (roles, accesos, dinero, datos reales, base de datos, scripts que corren solos → crítico)? | Subir la categoría | G-9 |
 | 4 | ¿Cada archivo que se va a tocar está en Alcance, incluidos `tests/`, `CLAUDE.md` y el `?v=` nuevo? | Añadir; «declarados vs tocados» se explica en el cierre | G-8, G-25 |
 | 5 | ¿Dice **quién más depende** de lo que cambia (listas blancas, filtros, respaldos, páginas que leen el mismo dato)? | Buscar en el código antes de encolar; añadir a Alcance o justificar | G-35 |

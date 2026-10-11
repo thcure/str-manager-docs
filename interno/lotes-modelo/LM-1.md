@@ -11,7 +11,7 @@
 | Campo `resultado` | Texto libre («aceptado con salvedades») | Lista cerrada: `aceptado` · `parcial` · `no aceptado` · `bloqueado`. Otro valor = veredicto inválido: el CD lo rechaza y relanza |
 | `verificar.json` | Sin páginas ni precondiciones | Lleva `paginas[]` (direcciones completas, nunca la raíz) y `precondiciones` (usuario, permisos, datos) por criterio |
 | Texto de las dos tareas | 9 KB acumulados por capas | Un texto único, más corto, con lo anterior (archivo `LM-1-texto-tarea-verificador.md`) |
-| Después de lanzar | Nadie mira | A los 3 min el CD comprueba la última ejecución; si duró menos de 2 min, comprueba el enlace y relanza (hasta 3) |
+| Después de lanzar | Nadie mira | A los 15 min el CD mira si existe el veredicto o `NN-veredicto-bloqueado.json`; si no, «Esperando: …» a Carlos y un solo relanzamiento (ajuste del 11-oct, §7) |
 
 ## 2. Formatos
 
@@ -66,7 +66,7 @@ Igual que hoy, con `resultado` de la lista cerrada y, si es `parcial`, `criterio
 1. Lote construido → escribir `verificar.json` v2.
 2. Pre-vuelo: `get_device_info`; por cada perfil del lote, `select_browser` con su `deviceId`, abrir `str-app-shell.html`, leer el usuario de la barra, cerrar la pestaña. Escribir `pre-vuelo.json`. Si no es válido, no lanzar.
 3. Lanzar la tarea (estándar o crítica según la categoría) sin mensaje adicional.
-4. A los 3 min: `list_triggers` → `last_run`. Si `finished_at − fired_at` < 2 min, la ejecución murió: comprobar enlace y perfiles, relanzar con `archivoVeredicto` nuevo (hasta 3 veces); a la tercera, «Esperando: …» a Carlos.
+4. `last_run` no sirve (siempre 4–5 s: marca la entrega del lanzamiento, no el fin de la sesión). A los 15 min, si en `log\` no existe ni el veredicto ni `NN-veredicto-bloqueado.json`, la ejecución murió o espera una aprobación en LENOVO: comprobar enlace y perfiles, «Esperando: aprobar acceso a carpetas de la ejecución de las HH:MM» a Carlos y un solo relanzamiento con `archivoVeredicto` nuevo; si tampoco deja archivo, queda en Carlos (el despertador avisa a los 25 min).
 5. Veredicto `bloqueado` → corregir lo que dice `queFalta`, relanzar con archivo nuevo. No se registra INC ni «no aceptado» por un bloqueo.
 6. Veredicto con `resultado` fuera de la lista → inválido: relanzar; anotar la situación.
 7. Lo verificado en una pasada `parcial` no se repite: la pasada siguiente lleva en `notas` qué criterios quedan.
@@ -86,3 +86,7 @@ El texto nuevo, idéntico para «Agente verificador» (Sonnet) y «Agente verifi
 
 ## 6. Reversión
 Clic en cada tarea restaurando el texto anterior (respaldo en `interno/respaldos/tarea-verificador-2026-10-10.txt`). Los archivos `pre-vuelo.json` y `*-bloqueado.json` son inertes para el texto viejo.
+
+## 7. Ajustes
+- 11-oct 12:10 (M-122, Chat Desarrollo): el chequeo de 3 min por `last_run` no distingue nada; se reemplaza por la señal de archivo a los 15 min (§3.4). Pendiente para la próxima edición del texto de las tareas (se agrupa con otros cambios, nunca un clic por retoque): el verificador escribe `log\NN-empece.json` al leer el pre-vuelo, para que el CD y el despertador distingan «arrancó y trabaja» de «murió sin carpetas».
+- Estado 11-oct 12:10: criterio 1 cumplido (las dos tareas con el texto nuevo, re-firmadas 11:45/11:46 en LENOVO: ese fue el cruce); criterio 2 en curso (lote 69 lanzado 12:00 con `pre-vuelo.json` 11:59 y `verificar.json` v2); 3 y 4 pendientes del veredicto del 69 y de la prueba controlada; 5 cumplido.

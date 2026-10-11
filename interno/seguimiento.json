@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-11T12:00:00-05:00",
+ "actualizadoEn": "2026-10-11T12:45:00-05:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -6314,13 +6314,76 @@
    "req": "REQ-SP-3",
    "categoria": "estándar",
    "resumen": "Página Nomenclatura del modelo (copia de la fuente del Arquitecto, solo admin) en el grupo Proyecto y enlace en la cabecera de Seg. Proyecto.",
-   "estado": "desplegado",
-   "observacion": "Encolado 11:53 (cmp ok, fallidas vacía). CLI 11:54–11:58: main 9fa6948 (p5c68), 36/36; fuera de lo declarado: tests/README.md (explicado). Primer lanzamiento con LM-1: pre-vuelo.json válido 11:59 (enlace vivo; admin, oper y colab con sesión y p5c68) y verificar.json v2. Verificador estándar lanzado 12:00.",
+   "estado": "parcial",
+   "observacion": "Encolado 11:53 (cmp ok, fallidas vacía). CLI 11:54–11:58: main 9fa6948 (p5c68), 36/36; fuera de lo declarado: tests/README.md (explicado). Primer lanzamiento con LM-1: pre-vuelo.json válido 11:59 (enlace vivo; admin, oper y colab con sesión y p5c68) y verificar.json v2. Verificador estándar lanzado 12:00. La pasada de las 12:00 murió con el reinicio de LENOVO (~12:20); pre-vuelo rehecho 12:29 y relanzado una vez 12:30. 69-veredicto-2 (12:36): parcial; a–h cumplen, sin INC; pendientes i (390 px: resize_window no cambió el viewport) y j (las seis páginas abren por dirección directa, no desde el menú).",
    "costo": {
     "minutosCLI": 4,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": 69,
+    "hash": "9fa69485d42f31ed5590b62480468ffeb34670e7",
+    "fecha": "2026-10-11",
+    "horaBogota": "12:36",
+    "resultado": "parcial",
+    "modoVerificacion": "Producción en Chrome (versión p5c68) con zz-verif-admin, zz-verif-oper y zz-verif-colab; solo lectura y navegación; reloj real. Usuario del admin confirmado por la barra del shell (zz-verif-admin · Carlos Hospedaje); /api/me no se pudo leer desde la barra de direcciones (Token requerido), se confía en el /me del pre-vuelo.",
+    "criterios": [
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "Cubierto por tests/: el log del lote dice 'node tests/run.js' 36/36 en verde (incluye tests/nomenclatura.test.js). Solo leído, no probado en navegador."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "/api/health: ok true, db true, schema_version 10. Las peticiones de shell, str-api.js, str-flujos y str-nomenclatura llevan ?v=p5c68. Consola sin mensajes en la página de Nomenclatura (el rastreo de consola empezó después de la carga; se reconsulta sin errores)."
+     },
+     {
+      "c": "c",
+      "ok": true,
+      "observado": "Con zz-verif-admin, el grupo Proyecto muestra siete entradas (Seg. Proyecto, Marco de Trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura). Al pulsar Nomenclatura, el shell cargó str-nomenclatura.html?v=p5c68 en su iframe (red: página, str-api.js, fuentes). Justo después, una captura de pantalla expiró por 30 s (renderer sin respuesta); no se repitió al navegar de nuevo ni en otras pasadas. No pude ver la captura del iframe; el contenido se leyó abriendo la dirección directa."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "En str-seg-proyecto.html (fuera del shell) el enlace '📘 Nomenclatura' de la cabecera abrió str-nomenclatura.html con el contenido de la tarjeta. La rama dentro del shell (window.top → ítem del menú) no se probó."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "La página muestra las 7 secciones numeradas 1–7 con los títulos esperados (Roles y chats, Identificadores, Entidades por capa, Camino de un lote, Buzón y avisos, Archivos y herramientas, Vocabulario). No conté los 41 tr en el DOM; esa comparación exacta la cubre tests/nomenclatura.test.js (byte a byte con la fuente)."
+     },
+     {
+      "c": "f",
+      "ok": true,
+      "observado": "Con el tema claro y con el oscuro del shell (botón de tema, sin tocar localStorage), el texto de Nomenclatura se lee bien en ambos. Tema del admin devuelto a claro al terminar."
+     },
+     {
+      "c": "g",
+      "ok": true,
+      "observado": "zz-verif-oper: la barra del shell muestra 'zz-verif-oper · Carlos Hospedaje'; el menú tiene solo 4 grupos, sin Proyecto; abrir la dirección directa str-nomenclatura.html lo devolvió al shell con el área central vacía, sin contenido de Nomenclatura. zz-verif-colab: la dirección directa lo llevó a portal.html (usuario zz-verif-colab). No pude ver 'Sin permiso' literal del oper (la ruta directa fuera del shell vuelve al inicio, según instr-69 §1). Para colab no se miró el menú del shell porque el shell lo redirige al portal."
+     },
+     {
+      "c": "h",
+      "ok": true,
+      "observado": "Al abrir str-nomenclatura.html directo (admin): solo la página, str-api.js?v=p5c68 y fuentes de Google (fonts.googleapis.com/gstatic); ninguna petición a /api/ ni escritura. Lo mismo dentro del iframe del shell."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "i",
+      "motivo": "No verificable: resize_window a 390 px no cambió la ventana visible (el viewport siguió en ~1101 px, mismo ancho en las capturas). Falta una pasada con ventana a 390 px real."
+     },
+     {
+      "c": "j",
+      "motivo": "Parcial: las otras seis páginas del grupo (Seg. Proyecto, Marco de Trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento) se abrieron directo, con título y contenido, sin error visible. No se abrieron desde el menú del shell por el cuelgue de captura de c; se da por cumplido salvo que Desarrollo pida repetirlo desde el menú."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "ninguno",
+    "notas": "Sin cambios a la capa Marco detectados. CLAUDE.md actualizado en el commit (modificado el mismo día) y la diferencia declarada vs tocada (tests/README.md) está explicada en el log. Único hecho raro: la captura del shell expiró una vez tras abrir Nomenclatura en el iframe; no reproducido, no anotado como INC. Pestañas cerradas."
+   }
   },
   {
    "lote": "LM-2",
@@ -7262,12 +7325,12 @@
    "req": "REQ-SP-3",
    "categoria": "estándar",
    "resumen": "Página Nomenclatura del modelo en el grupo Proyecto (copia tal cual de la fuente del Arquitecto, solo admin) y enlace en la cabecera del tablero",
-   "estado": "desplegado",
+   "estado": "parcial",
    "vista": "en curso",
    "esperaA": "verificador",
    "espera": null,
    "orden": 101.6,
-   "nota": "Excepción a la cola congelada (M-117). Instrucción lista.",
+   "nota": "69-veredicto-2: parcial (a–h ok, sin INC). Falta otra pasada solo de i (ancho 390 px real) y j (desde el menú del shell); riesgo bajo, la página ya está en uso.",
    "desde": "2026-10-11T12:00:00-05:00",
    "planTrabajo": "PT-8"
   }

@@ -1,5 +1,410 @@
 {
  "rol": "rol-desarrollo",
- "actualizadoEn": null,
- "situaciones": []
+ "actualizadoEn": "2026-10-11",
+ "situaciones": [
+  {
+   "id": "S-cd-1",
+   "fecha": "2026-10-09",
+   "veces": 4,
+   "categoria": "herramienta",
+   "refs": [
+    "seguimiento.json",
+    "mensajes.json"
+   ],
+   "quePaso": "Varios push a str-manager-docs fueron rechazados ('fetch first' o 'cannot lock ref') porque otro chat había subido entre mi pull y mi push.",
+   "causa": "Tres escritores (CD, Diseño, Arquitecto) suben al mismo repositorio en minutos; el push no se reintenta solo.",
+   "costoMin": 5,
+   "comoSeResolvio": "pull --rebase y push otra vez; quedó en el patrón de subida.",
+   "leccion": "Siempre empujar con reintento automático.",
+   "reglaPropuesta": "El comando de subida del CD incluye el reintento con pull --rebase.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-2",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "id-roto",
+   "refs": [
+    "M-76",
+    "M-78",
+    "M-79",
+    "M-81"
+   ],
+   "quePaso": "Dos veces asigné a un mensaje mío un id que otro chat acababa de usar (M-76 y M-79); hubo que renumerar a M-78 y M-81.",
+   "causa": "El id se calcula como máximo+1 sobre una copia local vieja; otro chat escribe entre mi lectura y mi subida.",
+   "costoMin": 15,
+   "comoSeResolvio": "Renumeración y nueva subida; la segunda vez dejé la copia en una rama de respaldo.",
+   "leccion": "El número se toma justo antes de escribir, tras un pull.",
+   "reglaPropuesta": "Ids generados por el servidor o con prefijo por chat (M-cd-n) para que no choquen.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-3",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "otro",
+   "refs": [
+    "R10"
+   ],
+   "quePaso": "Escribí horas estimadas (16:44, 12:36) que no coincidían con el reloj; hubo que corregirlas.",
+   "causa": "Hora tomada de memoria y no del comando date.",
+   "costoMin": 5,
+   "comoSeResolvio": "Corregidas con el reloj.",
+   "leccion": "Toda hora sale de date en el mismo comando que escribe.",
+   "reglaPropuesta": "R10 ya lo exige; el script de escritura debería poner la hora solo.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-4",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "permiso-plataforma",
+   "refs": [
+    "lote 62",
+    "INC-104",
+    "62-veredicto"
+   ],
+   "quePaso": "El verificador no pudo crear datos zz-verif- porque el modo automático no tomó como permiso la autorización que estaba en un archivo del repositorio.",
+   "causa": "El modo automático solo acepta autorizaciones escritas en el texto de la tarea que firma Carlos.",
+   "costoMin": 60,
+   "comoSeResolvio": "Autorización copiada al primer párrafo de las dos tareas (clic de Carlos).",
+   "leccion": "Las autorizaciones viven en el texto de la tarea.",
+   "reglaPropuesta": "Encargo rol-verificador › autorizacionEnTarea.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-5",
+   "fecha": "2026-10-10",
+   "veces": 5,
+   "categoria": "entorno-verificador",
+   "refs": [
+    "lote 62",
+    "62-veredicto-2..6",
+    "M-69",
+    "M-81",
+    "M-85",
+    "M-87"
+   ],
+   "quePaso": "El criterio 11 del lote 62 (403 a colaborador y operador) quedó 'no verificable' cinco veces: perfiles no conectados, sesión vencida, operador entrado como admin, raíz del sitio con 403, perfil viejo del operador y, al final, el modo automático bloqueó el PUT del operador.",
+   "causa": "Los perfiles de prueba no tenían un estado comprobado antes de lanzar y la prueba de rechazo depende de cómo el modo automático juzgue cada ejecución.",
+   "costoMin": 150,
+   "comoSeResolvio": "El colaborador cumplió en 62-veredicto-5; el operador sigue pendiente y se propuso una prueba automática en tests/.",
+   "leccion": "Una prueba de rechazo del servidor se cubre mejor con un test que con el navegador.",
+   "reglaPropuesta": "Antes de lanzar, el CD comprueba sesión y usuario de cada perfil; los 403 se prueban en tests/ y no en producción.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-6",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "62-veredicto-4"
+   ],
+   "quePaso": "El verificador abrió la raíz del sitio, que no tiene página de inicio y da 403, y lo reportó como incidente.",
+   "causa": "Mi verificar.json no decía qué página abrir.",
+   "costoMin": 20,
+   "comoSeResolvio": "En la siguiente le di la dirección de cada página (portal.html, str-app-shell.html).",
+   "leccion": "Las notas de verificación nombran la URL exacta de cada página.",
+   "reglaPropuesta": "Plantilla de verificar.json con el campo 'paginas'.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-7",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "credencial",
+   "refs": [
+    "M-83",
+    "M-88",
+    "INC-87"
+   ],
+   "quePaso": "Tras compactarse el chat perdí el token pegado; el modo automático bloqueó buscarlo en la conversación y después leerlo del archivo de claves hasta que Carlos lo autorizó en mi chat (unas dos horas sin poder subir).",
+   "causa": "Una credencial guardada en archivo requiere la autorización expresa del dueño en el chat; el token pegado no sobrevive a la compactación.",
+   "costoMin": 120,
+   "comoSeResolvio": "Carlos escribió la autorización; el token se lee de claves\\desarrollo.txt.",
+   "leccion": "Pedir la frase de autorización apenas se arranca o se compacta, sin esperar al primer push.",
+   "reglaPropuesta": "Procedimiento de apertura con la frase (ins-007) y regla 'nadie espera en silencio'.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-8",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "M-79"
+   ],
+   "quePaso": "Intenté descartar un commit local con git reset --hard y el modo automático lo bloqueó.",
+   "causa": "El clasificador trata reset --hard como destrucción irreversible.",
+   "costoMin": 5,
+   "comoSeResolvio": "Dejé el commit en la rama respaldo-m79-local y moví main al remoto con checkout -B.",
+   "leccion": "Para descartar trabajo local, usar una rama de respaldo, no reset.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-9",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "M-77",
+    "M-80"
+   ],
+   "quePaso": "Diseño pidió 'publicar los JSON en el servidor' porque Carlos veía datos viejos en el tablero; no había nada que publicar.",
+   "causa": "El tablero lee raw de GitHub, que guarda hasta 5 minutos; nadie lo tenía claro.",
+   "costoMin": 15,
+   "comoSeResolvio": "Se explicó; el REQ-TB3 propone leer del último commit y mostrar su hora.",
+   "leccion": "El tablero debe decir de qué hora son sus datos.",
+   "reglaPropuesta": "REQ-TB3.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-10",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "lote 67"
+   ],
+   "quePaso": "La CLI rechazó el lote 67 (crítico) porque la cabecera no anotaba el cruce con Carlos, aunque Carlos lo había aprobado en mi chat.",
+   "causa": "Escribí la instrucción antes del visto bueno y no actualicé la línea Categoría al encolar.",
+   "costoMin": 5,
+   "comoSeResolvio": "Cabecera corregida y reencolada en 2 minutos.",
+   "leccion": "Un lote crítico no se copia a la cola sin la línea 'cruce previo con Carlos: fecha, qué'.",
+   "reglaPropuesta": "Validar la cabecera antes de copiar a la cola.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-11",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "espera-invisible",
+   "refs": [
+    "lote 67",
+    "M-103"
+   ],
+   "quePaso": "La copia rechazada del 67 quedó en fallidas\\ y la cola no tomó la corregida durante 40 minutos.",
+   "causa": "La cola se detiene con cualquier .md en fallidas\\; al reencolar no lo revisé.",
+   "costoMin": 40,
+   "comoSeResolvio": "Carlos borró el archivo.",
+   "leccion": "Al reencolar, mirar fallidas\\.",
+   "reglaPropuesta": "Despertador v8 vigila fallidas.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-12",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "herramienta",
+   "refs": [
+    "v62f",
+    "lote 67"
+   ],
+   "quePaso": "device_commit_files dejó en el equipo la versión anterior del archivo (verificar.json y la instrucción 67); el cmp lo detectó.",
+   "causa": "La herramienta parece reusar un contenido en caché cuando el mismo archivo se sube dos veces seguidas.",
+   "costoMin": 5,
+   "comoSeResolvio": "Volví a subir con expectedMtimeMs y confirmé con cmp.",
+   "leccion": "Siempre confirmar con cmp después de subir.",
+   "reglaPropuesta": "El cmp ya es parte del ciclo.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-13",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "entorno-verificador",
+   "refs": [
+    "lote 67",
+    "M-104",
+    "M-109"
+   ],
+   "quePaso": "Dos ejecuciones del verificador crítico (16:36 y 17:05) no entregaron nada; arrancaron sin carpetas conectadas y quedaron esperando un permiso que nadie veía. fire_trigger decía 'SUCCEEDED'.",
+   "causa": "La tarea en el equipo depende del enlace; el estado 'SUCCEEDED' solo indica que se entregó el lanzamiento, no que corrió.",
+   "costoMin": 70,
+   "comoSeResolvio": "Carlos concedió el acceso en la tercera; veredicto a las 17:44. El encargo pide ahora veredicto-bloqueado.",
+   "leccion": "No dar por lanzado un verificador sin ver señal de vida.",
+   "reglaPropuesta": "Pre-vuelo y comprobación a los 3 min (M-111); despertador v9; veredicto-bloqueado.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-14",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "decision-duplicada",
+   "refs": [
+    "lote 67",
+    "M-102",
+    "INC-109"
+   ],
+   "quePaso": "Carlos aprobó en mi chat que el operador no vea el Dashboard y a Diseño le dijo que admin y operador vean todo.",
+   "causa": "La misma decisión se tomó por dos canales sin registrarla como DA.",
+   "costoMin": 20,
+   "comoSeResolvio": "Pendiente de que Carlos confirme; el lote 68 está listo para cualquiera de las dos.",
+   "leccion": "Las decisiones de alcance se registran como DA antes de construir.",
+   "reglaPropuesta": "DA obligatoria para cambios de visibilidad por rol.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-15",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "otro",
+   "refs": [
+    "lote 67",
+    "INC-109",
+    "67-veredicto"
+   ],
+   "quePaso": "El lote 67 ocultó 'Portafolio' para el operador pero dejó visible la otra entrada '⊞ Dashboard'; el verificador lo vio.",
+   "causa": "Hay dos ítems que abren el mismo panel y mi instrucción solo nombró uno; el test cubría la función pura, no el HTML.",
+   "costoMin": 30,
+   "comoSeResolvio": "INC-109 crítico; lote 68 propone test que lea el HTML.",
+   "leccion": "Al pedir ocultar un panel, buscar todos los ítems que lo abren.",
+   "reglaPropuesta": "Test que exija data-roles en todo ítem con panel.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-16",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "instruccion-ambigua",
+   "refs": [
+    "lote 67",
+    "67-veredicto"
+   ],
+   "quePaso": "El criterio i del 67 (operador con equipo.invitar) no se pudo verificar porque zz-verif-oper no tiene ese permiso.",
+   "causa": "No comprobé la precondición de permisos del usuario de prueba al escribir el criterio.",
+   "costoMin": 10,
+   "comoSeResolvio": "Queda cubierto solo por la réplica del test.",
+   "leccion": "Cada criterio con usuario de prueba declara su precondición y el CD la comprueba antes de lanzar.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-17",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "dato-duplicado",
+   "refs": [
+    "INC-108",
+    "INC-76",
+    "lote 67"
+   ],
+   "quePaso": "El usuario de Carlos tenía dos roles (superadmin en Firestore, admin en MySQL) y un admin nuevo no podía entrar.",
+   "causa": "El shell y Equipo leían el rol de Firestore y el servidor el de MySQL; Equipo no permitía invitar a un admin.",
+   "costoMin": 180,
+   "comoSeResolvio": "Lote 67: un solo rol, el del servidor; invitación de admin.",
+   "leccion": "Un dato, una fuente.",
+   "reglaPropuesta": "Lote 67 desplegado.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-18",
+   "fecha": "2026-10-10",
+   "veces": 2,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "DA-24",
+    "M-87",
+    "M-89"
+   ],
+   "quePaso": "El perfil de Chrome del operador cambió y el viejo pasó a ser del admin; mi mapa en DA-24 quedó desalineado y una verificación usó el perfil viejo.",
+   "causa": "El mapa de perfiles vive en dos lugares (DA-24 y la línea base lb-lenovo) y lo cambia otro chat.",
+   "costoMin": 20,
+   "comoSeResolvio": "Alineé DA-24 con lb-lenovo.",
+   "leccion": "El mapa de perfiles tiene una sola fuente.",
+   "reglaPropuesta": "La línea base lb-lenovo es la fuente; DA-24 solo la referencia.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-19",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "comunicacion",
+   "refs": [
+    "M-77..M-99",
+    "M-100"
+   ],
+   "quePaso": "El despertador me recordó uno por uno 16 mensajes pendientes cuya causa era una sola (el token).",
+   "causa": "Los recordatorios no agrupaban por causa.",
+   "costoMin": 15,
+   "comoSeResolvio": "Despertador v7 agrupa por chat.",
+   "leccion": "Un recordatorio por causa.",
+   "reglaPropuesta": "Despertador v7.",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-20",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "id-roto",
+   "refs": [
+    "plan[]",
+    "M-111"
+   ],
+   "quePaso": "En plan[] los ids de REQ tenían formatos distintos ('REQ-INV2 · 4a', 'REQ-U8 (INC-108)', 'REQ-F9.n + REQ-F9.p').",
+   "causa": "No había un formato de id obligatorio y escribí texto libre.",
+   "costoMin": 10,
+   "comoSeResolvio": "Normalizados el 10-oct (21 cambios).",
+   "leccion": "Un campo de id solo lleva el id.",
+   "reglaPropuesta": "Formato REQ-<MOD>-n del modelo de datos (pendiente de aprobar).",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-21",
+   "fecha": "2026-10-10",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "M-87"
+   ],
+   "quePaso": "Para leer mensajes nuevos dependía de raw.githubusercontent.com, que tardó hasta 5 minutos en mostrar M-87.",
+   "causa": "Mientras no tenía token, solo podía leer el repositorio por la copia con caché.",
+   "costoMin": 10,
+   "comoSeResolvio": "Esperé y volví a leer.",
+   "leccion": "Con token, leer siempre con git pull, no por raw.",
+   "reglaPropuesta": "",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-22",
+   "fecha": "2026-10-09",
+   "veces": 1,
+   "categoria": "otro",
+   "refs": [
+    "lote 66",
+    "borrador 57"
+   ],
+   "quePaso": "El lote INV2·4a se redactó como 57 y terminó numerado 66 porque otros lotes se encolaron antes.",
+   "causa": "El número se asigna al encolar, pero el borrador ya llevaba número.",
+   "costoMin": 5,
+   "comoSeResolvio": "Renumerado al redactar la versión final.",
+   "leccion": "Los borradores no llevan número.",
+   "reglaPropuesta": "",
+   "yaCubierta": false,
+   "estado": "nueva"
+  }
+ ]
 }

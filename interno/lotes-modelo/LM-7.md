@@ -5,7 +5,7 @@
 | Parte | Instrucción | Qué entrega | Depende de |
 |---|---|---|---|
 | LM-7a | `A7a-instr-poda-claude-md.md` | `docs/claude/` (reglas-fijas + 11 mapas por área, copia literal), `CLAUDE.md` ≤ 12 000, `tests/claude-md.test.js` (conservación ≥ 98 %, duplicados listados) | — · **Aceptado** 11-oct 14:08: lote 70, commit `28ae378` (2.º intento; el 1.º paró por «¿Toca el modelo?: sí»); CLAUDE.md 7 313 car., 12 mapas, conservación 106 %, tests 79/79 |
-| LM-7b | `A7b-instr-hooks-cli.md` | `.claude/settings.json`, hooks `guard-bash.js` / `stop-check.js` / `ctx.js` (copiados de `str-instr-cola\hooks\`), `tests/hooks.test.js` (15 + 2 de integración con fixtures) | LM-7a aceptado · LM-6 aceptado |
+| LM-7b · **Aceptado** 17:19 (lote 71, `d0eaf51`, sin INC) | `A7b-instr-hooks-cli.md` | `.claude/settings.json`, hooks `guard-bash.js` / `stop-check.js` / `ctx.js` (copiados de `str-instr-cola\hooks\`), `tests/hooks.test.js` (15 + 2 de integración con fixtures) | LM-7a aceptado · LM-6 aceptado |
 
 Fuente de los hooks: `herramientas/hooks-cli/` (probados aquí: 15 pruebas, `node tests/hooks.test.js`). Revisor previo (Desarrollo, M-130/M-132): A7 9/12 → partido; A7a 12/12; A7b 9/12 → corregido (quién más depende, perfil de la prueba d, dependencia de LM-6, nota sobre hooks.test.js).
 
@@ -17,3 +17,4 @@ Fuente de los hooks: `herramientas/hooks-cli/` (probados aquí: 15 pruebas, `nod
 ## Notas
 - Lote 71 (1.er intento, 14:16): el modo automático bloqueó escribir `.claude/` (Self-Modification); las herramientas remotas también lo rechazan. Decisión: Carlos copia los 4 archivos de `.claude/`; el Arquitecto dejó `tests/hooks.test.js` y `tests/fixtures/hooks/` en `str-manager` por el puente (excepción de lote del modelo: archivos del modelo, probados, sin lógica de la aplicación); la CLI solo comprueba, añade pruebas, nota y commit (A7b v3).
 - Apagado de emergencia: si la cola se traba por los hooks, reemplazar `str-instr-cola\auto-mode.json` por `auto-mode.sin-hooks.json` (mismo contenido + `disableAllHooks: true`); la cola lo pasa con `--settings` y los hooks dejan de correr sin tocar el repo.
+- Verificador crítico sin carpetas (13:43–15:12, cuatro ejecuciones): la tarea perdió el enlace a las carpetas tras el reinicio de LENOVO de ~12:20; al actualizarla Carlos en la app (17:13) volvió a recibirlas. Lección: tras un reinicio del equipo, comprobar las dos tareas del verificador (abrir y guardar) antes del primer lanzamiento; va a la ficha BAI07.05-v y al Panel (Estado avisará si la última ejecución duró < 1 min sin archivo).

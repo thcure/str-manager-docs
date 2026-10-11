@@ -1,4 +1,4 @@
-# panel-str.ps1 - Panel de jornada del STR (Arquitecto; v3.3 2026-10-11, LM-3 / REQ-MOD-7)
+# panel-str.ps1 - Panel de jornada del STR (Arquitecto; v3.7 2026-10-11, LM-3 / REQ-MOD-7)
 # Ventana con tres botones: Empezar jornada, Terminar jornada y Estado.
 #  - Empezar: quita el archivo PAUSA de la cola, abre los perfiles de Chrome de prueba con el STR
 #             y comprueba que cada uno tenga ventana.
@@ -16,7 +16,6 @@
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
-try { Add-Type -AssemblyName UIAutomationClient; Add-Type -AssemblyName UIAutomationTypes } catch { }
 
 $Cola    = Join-Path $HOME 'Downloads\str-instr-cola'
 $Pausa   = Join-Path $Cola 'PAUSA'
@@ -82,9 +81,16 @@ public static class VentanasChrome {
     return r;
   }
   public static void Cerrar(long h) { PostMessage(new IntPtr(h), 0x0010, IntPtr.Zero, IntPtr.Zero); }
+  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
 }
 '@
 try { if (-not ('VentanasChrome' -as [type])) { Add-Type -TypeDefinition $CsVentanas -ErrorAction Stop } } catch { }
+# DPI: el panel se declara consciente del DPI desde el inicio (UI Automation lo haria a medias y la ventana se veria diminuta)
+# y escala sus medidas con el factor real de la pantalla.
+try { [void][VentanasChrome]::SetProcessDPIAware() } catch { }
+$Dpi = 1.0
+try { $g = [System.Drawing.Graphics]::FromHwnd([IntPtr]::Zero); $Dpi = [double]$g.DpiX / 96.0; $g.Dispose() } catch { }
+function Px([double]$n) { return [int][math]::Round($n * $Dpi) }
 
 function Norm([string]$s) { if ($null -eq $s) { return '' }; return (($s -replace '\s', '')).ToLower() }
 
@@ -99,9 +105,10 @@ function Nombres-Perfil([string]$dir) {
         $ls = Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data\Local State'
         $j = Get-Content -Path $ls -Raw -Encoding UTF8 | ConvertFrom-Json
         $v = $j.profile.info_cache.$dir
+        # Solo el nombre local del perfil (name) y el del acceso directo: es lo que Chrome escribe en el boton de
+        # la barra. La cuenta de Google (gaia_name, correo) NO se usa: dos perfiles pueden compartirla.
         if ($v) {
-            foreach ($c in @([string]$v.name, [string]$v.gaia_name, [string]$v.gaia_given_name, [string]$v.shortcut_name)) { if ($c.Trim()) { $r += $c.Trim() } }
-            if ([string]$v.user_name) { $r += ([string]$v.user_name).Trim(); $r += (([string]$v.user_name).Split('@')[0]).Trim() }
+            foreach ($c in @([string]$v.name, [string]$v.shortcut_name)) { if ($c.Trim()) { $r += $c.Trim() } }
         }
     } catch { }
     return @($r | Select-Object -Unique)
@@ -126,7 +133,15 @@ function Nombres-TodosPerfiles {
     return $m
 }
 
+$script:UiaCargado = $false
+function Cargar-Uia {
+    # Se carga al primer uso y no al arrancar: si se carga antes de crear la ventana, Windows deja de escalar el panel (se ve diminuto).
+    if ($script:UiaCargado) { return }
+    try { Add-Type -AssemblyName UIAutomationClient; Add-Type -AssemblyName UIAutomationTypes } catch { }
+    $script:UiaCargado = $true
+}
 function Perfil-DeVentana([long]$hwnd) {
+    Cargar-Uia
     try {
         $el = [System.Windows.Automation.AutomationElement]::FromHandle([IntPtr]$hwnd)
         if (-not $el) { return '' }
@@ -426,26 +441,24 @@ function Terminar {
 # --- Ventana ---
 $f = New-Object System.Windows.Forms.Form
 $f.Text = 'Panel STR v3'
-$f.Size = New-Object System.Drawing.Size(600, 520)
+$f.Size = New-Object System.Drawing.Size((Px 600), (Px 520))
 $f.StartPosition = 'CenterScreen'
 $f.Font = New-Object System.Drawing.Font('Segoe UI', 10)
-$f.AutoScaleDimensions = New-Object System.Drawing.SizeF(96, 96)
-$f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Dpi
 
 $b1 = New-Object System.Windows.Forms.Button
-$b1.Text = 'Empezar jornada'; $b1.Size = New-Object System.Drawing.Size(175, 44); $b1.Location = New-Object System.Drawing.Point(12, 12)
+$b1.Text = 'Empezar jornada'; $b1.Size = New-Object System.Drawing.Size((Px 175), (Px 44)); $b1.Location = New-Object System.Drawing.Point((Px 12), (Px 12))
 $b1.BackColor = [System.Drawing.Color]::FromArgb(220, 245, 225)
 
 $b2 = New-Object System.Windows.Forms.Button
-$b2.Text = 'Terminar jornada'; $b2.Size = New-Object System.Drawing.Size(175, 44); $b2.Location = New-Object System.Drawing.Point(197, 12)
+$b2.Text = 'Terminar jornada'; $b2.Size = New-Object System.Drawing.Size((Px 175), (Px 44)); $b2.Location = New-Object System.Drawing.Point((Px 197), (Px 12))
 $b2.BackColor = [System.Drawing.Color]::FromArgb(250, 230, 220)
 
 $b3 = New-Object System.Windows.Forms.Button
-$b3.Text = 'Estado'; $b3.Size = New-Object System.Drawing.Size(175, 44); $b3.Location = New-Object System.Drawing.Point(382, 12)
+$b3.Text = 'Estado'; $b3.Size = New-Object System.Drawing.Size((Px 175), (Px 44)); $b3.Location = New-Object System.Drawing.Point((Px 382), (Px 12))
 
 $t = New-Object System.Windows.Forms.TextBox
 $t.Multiline = $true; $t.ReadOnly = $true; $t.ScrollBars = 'Vertical'
-$t.Location = New-Object System.Drawing.Point(12, 68); $t.Size = New-Object System.Drawing.Size(555, 395)
+$t.Location = New-Object System.Drawing.Point((Px 12), (Px 68)); $t.Size = New-Object System.Drawing.Size((Px 555), (Px 395))
 $t.Font = New-Object System.Drawing.Font('Consolas', 9.5)
 
 $b1.Add_Click({ $t.Text = (Empezar) + "`r`n`r`n" + (Texto-Estado) })

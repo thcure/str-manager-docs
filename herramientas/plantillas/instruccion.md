@@ -31,4 +31,4 @@ Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién lo
 Los criterios de permisos y 403 van «cubierto por tests/<archivo>»: el verificador lee el resultado, no los prueba en el navegador. Lo mismo los criterios de **ancho o móvil** (390 px, media queries): el verificador no puede cambiar el tamaño de la ventana; se prueban con un test que lea el CSS (lote 69, 11-oct). Si un criterio exige llegar «desde el menú», la prueba lo dice y empieza en `str-app-shell.html`.
 
 ## Cierre (la CLI lo dice en español al final de su respuesta; la cola lo guarda en `log\NN-<nombre>.txt`, que la CLI no debe abrir)
-Hecho / No hecho por apartado · archivos declarados vs tocados (toda diferencia explicada) · versión `?v=` · hash del commit · tests: n/n · «CLAUDE.md actualizado: sí/no».
+Hecho / No hecho por apartado · archivos declarados vs tocados (toda diferencia explicada) · versión `?v=` · hash del commit · tests: n/n · «mapa del área / CLAUDE.md actualizado: sí/no» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook; así se comprueba ctx.js sin leer el contexto).

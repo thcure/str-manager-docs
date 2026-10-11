@@ -1,4 +1,15 @@
-# LM-5 · Encargos cortos (borrador para revisión de Carlos, 11-oct-2026)
+# LM-5 · Encargos cortos
+
+**Lote del modelo** · REQ-MOD-5, REQ-MOD-8 · ítem del plan A9 · **Categoría: crítico** (cambia lo que cada chat cree que es su trabajo) · Cruce: Carlos leyó el borrador (claude/marco/encargos-v2-borrador-2026-10.md) y aprobó el 11-oct-2026 13:05 («aprobado») · Riesgo: un chat deja de hacer algo que antes hacía → mitigado: nada se quita, cambia de sitio (reglas-comunes, plantillas, fichas); respaldo `interno/respaldos/encargos-2026-10-11.json` · ¿Toca el modelo? Sí · Redacta y construye: Chat Arquitecto · Acepta: cada chat firma la relectura (respuesta al mensaje del buzón) y su primer turno con el encargo nuevo no viola «No tocas» · Reversión: volver a copiar los textos del respaldo.
+
+Publicado en `interno/instrucciones.json` el 11-oct-2026 13:05: ítem nuevo `reglas-comunes`; textos v2 de rol-desarrollo (2 775), rol-diseno (2 720), rol-arquitecto (2 897), rol-verificador (808; el operativo vive en las tareas); rol-agente-cli con tres retoques (3 519: lo poda A7 junto con CLAUDE.md). Pendiente: las instrucciones del proyecto en claude.ai (ins-proyecto) deberían apuntar a `reglas-comunes`; las cambia Carlos cuando quiera (texto propuesto al final).
+
+## Texto propuesto para las instrucciones del proyecto (claude.ai)
+Proyecto STR Manager; Carlos es el dueño. Claude trabaja en varios chats y tareas, cada uno con un rol fijado por su mensaje de arranque y su encargo en str-manager-docs/interno/instrucciones.json (rol-diseno, rol-desarrollo, rol-arquitecto, rol-verificador, rol-agente-cli) más el ítem reglas-comunes. Al empezar y después de cada compactación, relee tu encargo y reglas-comunes: mandan sobre estas líneas. Si no sabes tu rol, pregúntalo a Carlos antes de escribir nada. Responde en español, breve y tuteando.
+
+---
+
+# Borrador aprobado (texto publicado)
 
 Cada encargo cabe en 3 000 caracteres y apunta a las piezas que ya existen (proceso, plantillas, fichas) en vez de repetirlas. Lo común a todos los chats va en un solo texto, `reglas-comunes`, que cada encargo cita. Nada de lo que hoy rige se pierde: cambia de sitio. Al aprobarse, sustituye los textos de `interno/instrucciones.json` (los actuales quedan en `interno/respaldos/encargos-2026-10-11.json`).
 

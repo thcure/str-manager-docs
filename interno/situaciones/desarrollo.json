@@ -1,6 +1,6 @@
 {
  "rol": "rol-desarrollo",
- "actualizadoEn": "2026-10-11",
+ "actualizadoEn": "2026-10-11T13:37:00-05:00",
  "situaciones": [
   {
    "id": "S-cd-1",
@@ -427,6 +427,61 @@
    "yaCubierta": false,
    "estado": "consolidada",
    "grupo": "G-26"
+  },
+  {
+   "id": "S-cd-23",
+   "fecha": "2026-10-11",
+   "veces": 1,
+   "categoria": "espera",
+   "refs": [
+    "lote 69",
+    "LENOVO"
+   ],
+   "quePaso": "El verificador del 69 (12:00) murió con el reinicio de LENOVO; el pre-vuelo de las 12:20 no llegó a Chrome.",
+   "causa": "Equipo reiniciado durante la ejecución.",
+   "costoMin": 30,
+   "comoSeResolvio": "Esperando a Carlos (M-123); al volver, pre-vuelo nuevo y un relanzamiento (69-veredicto-2).",
+   "leccion": "Sin enlace no se escribe pre-vuelo ni se relanza; se deja Esperando.",
+   "reglaPropuesta": "",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-24",
+   "fecha": "2026-10-11",
+   "veces": 2,
+   "categoria": "error",
+   "refs": [
+    "lote 70",
+    "M-137"
+   ],
+   "quePaso": "device_commit_files escribió una copia vieja del 70 en la cola; y al cerrar M-137 pisé la respuesta de Diseño que llegó en el mismo pull.",
+   "causa": "Escritura sobre un archivo recién editado; reemplazar respuesta sin mirar si ya existía.",
+   "costoMin": 5,
+   "comoSeResolvio": "cmp detectó la copia vieja y se reescribió desde una ruta nueva; la respuesta se restauró.",
+   "leccion": "Siempre cmp tras commit_files; nunca sobrescribir respuesta ajena: si ya hay, se añade.",
+   "reglaPropuesta": "",
+   "yaCubierta": true,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-25",
+   "fecha": "2026-10-11",
+   "veces": 1,
+   "categoria": "bloqueo",
+   "refs": [
+    "lote 70",
+    "A7a",
+    "M-139"
+   ],
+   "quePaso": "La CLI paró el 70 sin commit porque la cabecera decía «¿Toca el modelo?: sí».",
+   "causa": "CLAUDE.md › Tu encargo y rol-agente-cli mandan parar si el campo es sí; los lotes del modelo que viven en str-manager no tienen excepción escrita. El revisor previo no lo vio (no está en los 12 puntos).",
+   "costoMin": 10,
+   "comoSeResolvio": "Pendiente del Arquitecto (M-139).",
+   "leccion": "El revisor previo debe cruzar el campo «¿Toca el modelo?» con lo que la CLI tiene prohibido.",
+   "reglaPropuesta": "Punto nuevo o ampliar el 3 del revisor previo: si «¿Toca el modelo?: sí», no va a la cola salvo excepción escrita en rol-agente-cli.",
+   "yaCubierta": false,
+   "estado": "nueva"
   }
  ]
 }

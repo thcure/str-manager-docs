@@ -1,6 +1,6 @@
-# ejecutar-cola.ps1 (v4, 11-oct-2026: STR_INSTR/STR_LOTE para los hooks; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+# ejecutar-cola.ps1 (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
-#   *.md            → instrucciones pendientes (se ejecutan por nombre: 01-..., 02-...)
+#   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
 #   fallidas\       → instrucciones que terminaron sin commit (la cola se detiene ahí)
 #   log\<nombre>.txt → salida completa de la CLI por instrucción
@@ -67,7 +67,9 @@ try {
   # Jornada en pausa (panel STR, 10-oct-2026): con el archivo PAUSA en la cola no se empieza ningun lote.
   if (Test-Path (Join-Path $Cola 'PAUSA')) { exit 0 }
 
-  $pendientes = Get-ChildItem -Path $Cola -Filter '*.md' -File | Where-Object { $_.Name -notmatch '\.sin-cruce\.md$' } | Sort-Object Name
+  # v5 (B3b): orden por numero de lote, no por nombre; acepta 75-instr-*.md y L-75-instr-*.md (id L-n del modelo)
+  $pendientes = Get-ChildItem -Path $Cola -Filter '*.md' -File | Where-Object { $_.Name -notmatch '\.sin-cruce\.md$' } |
+    Sort-Object @{ Expression = { if ($_.Name -match '^(?:L-)?(\d+)-') { [int]$Matches[1] } else { 999999 } } }, Name
   if (-not $pendientes) { exit 0 }
 
   # v3: la CLI acepta --permission-prompts none desde la 2.1.259; si esta version no lo conoce, no se pasa

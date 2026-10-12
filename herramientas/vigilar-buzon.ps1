@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
 #     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
@@ -293,7 +293,7 @@ try {
     # --- 2. Veredictos del verificador ---
     try {
         if (Test-Path $LogDir) {
-            $ver = @(Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File | Where-Object { $_.Name -match '^\d{1,3}-veredicto[A-Za-z0-9-]*\.json$' } | Sort-Object LastWriteTime)
+            $ver = @(Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File | Where-Object { $_.Name -match '^(?:L-)?\d{1,3}-veredicto[A-Za-z0-9-]*\.json$' } | Sort-Object LastWriteTime)
             if (-not (Test-Path $EstVer)) {
                 $ver | ForEach-Object { $_.Name } | Set-Content -Path $EstVer
                 Log ("Inicio veredictos: " + $ver.Count + " marcados sin avisar.")
@@ -397,7 +397,7 @@ try {
             }
             $toca = (($ahoraF - $desde).TotalMinutes -ge $FallaMin) -and ((-not $ult) -or (($ahoraF - $ult).TotalMinutes -ge $FallaCada))
             if ($toca) {
-                $num = if ($f.Name -match '^(\d{1,3})-') { $Matches[1] } else { $f.BaseName }
+                $num = if ($f.Name -match '^(?:L-)?(\d{1,3})-') { $Matches[1] } else { $f.BaseName }
                 $copia = Join-Path $Cola $f.Name
                 $texto = if ((Test-Path $copia) -and ((Get-Item $copia).LastWriteTime -gt $f.LastWriteTime)) {
                     "La cola esta detenida: hay una copia nueva del lote $num en la cola, pero no corre mientras siga fallidas\$($f.Name). Pidele a Carlos que borre ese archivo."
@@ -451,7 +451,7 @@ try {
             } catch { Log ('ERROR en pre-vuelo: ' + $_.Exception.Message) }
             $entregado = ($arch -and (Test-Path (Join-Path $Cola $arch)))
             if (-not $entregado -and $loteV) {
-                $otro = @(Get-ChildItem -Path $LogDir -Filter ($loteV + '-veredicto*.json') -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt $fv.LastWriteTime })
+                $otro = @(Get-ChildItem -Path $LogDir -Filter ('*' + $loteV + '-veredicto*.json') -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt $fv.LastWriteTime })
                 if ($otro.Count -gt 0) { $entregado = $true }
             }
             $claveV = 'verificar@' + $fv.LastWriteTime.ToString('yyyyMMddHHmmss')
@@ -485,7 +485,7 @@ try {
             $prevC = if (Test-Path $EstCli) { ([string](Get-Content -Path $EstCli | Select-Object -First 1)) -split '\|' } else { @('') }
             $ultC = $null; if ($prevC[0] -eq $claveC -and $prevC.Count -gt 1 -and $prevC[1]) { try { $ultC = [DateTime]::Parse($prevC[1]) } catch { } }
             if ($edadC -ge $CliMin -and $quieto -and ((-not $ultC) -or (($ahoraC - $ultC).TotalMinutes -ge $CliCada))) {
-                $numC = if ($ultLog -and $ultLog.Name -match '^(\d{1,3})-') { $Matches[1] } else { '?' }
+                $numC = if ($ultLog -and $ultLog.Name -match '^(?:L-)?(\d{1,3})-') { $Matches[1] } else { '?' }
                 $desdeC = $fl.LastWriteTime.ToString('HH:mm')
                 $t7 = "La CLI lleva " + [int]$edadC + " min con el lote $numC (desde las $desdeC) y su log no cambia. Revisa en LENOVO si claude.exe sigue corriendo o quedo esperando; si murio, se limpia solo a los 90 min."
                 if (Avisar 'Chat de desarrollo' $t7 $dest) {
@@ -511,12 +511,12 @@ try {
         # v11 (LM-12): plazos en vigor y metricas mecanicas (ventana de 7 dias)
         try {
             $okHoras = @{}
-            if (Test-Path $Resumen) { foreach ($l in @(Get-Content -Path $Resumen)) { if (([string]$l) -match '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) \| OK \| (\d{1,3})-instr') { try { $okHoras[$Matches[2]] = [DateTime]::ParseExact($Matches[1], 'yyyy-MM-dd HH:mm', $null) } catch { } } } }
+            if (Test-Path $Resumen) { foreach ($l in @(Get-Content -Path $Resumen)) { if (([string]$l) -match '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) \| OK \| (?:L-)?(\d{1,3})-instr') { try { $okHoras[$Matches[2]] = [DateTime]::ParseExact($Matches[1], 'yyyy-MM-dd HH:mm', $null) } catch { } } } }
             $desde7 = (Get-Date).AddDays(-7)
-            $vers = @(Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^\d{1,3}-veredicto' -and $_.LastWriteTime -ge $desde7 })
+            $vers = @(Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^(?:L-)?\d{1,3}-veredicto' -and $_.LastWriteTime -ge $desde7 })
             $porLote = @{}; $mins = @(); $bloqHoy = 0
             foreach ($vf in $vers) {
-                $n = $(if ($vf.Name -match '^(\d{1,3})-') { $Matches[1] } else { '' })
+                $n = $(if ($vf.Name -match '^(?:L-)?(\d{1,3})-') { $Matches[1] } else { '' })
                 if (-not $porLote.ContainsKey($n)) { $porLote[$n] = 0 }
                 $porLote[$n] = $porLote[$n] + 1
                 if ($vf.Name -match 'bloqueado' -and $vf.LastWriteTime.Date -eq (Get-Date).Date) { $bloqHoy++ }

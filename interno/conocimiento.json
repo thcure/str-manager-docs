@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-11",
+ "actualizadoEn": "2026-10-12",
  "titulo": "Base de conocimiento del modelo de operación",
  "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
  "cobit": {
@@ -739,6 +739,77 @@
    "creditos": "Ahorra: cada bloqueo evitado son 5–20 min de una sesión.",
    "riesgos": [
     "La lista envejece con cada versión de la plataforma: se revisa en la revisión semanal con las situaciones nuevas."
+   ]
+  },
+  {
+   "codigo": "BAI10-m",
+   "nombre": "Modelo de operación v2: ids, estados, plazos y validador (una sola fuente)",
+   "dueno": "Arquitecto",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-12",
+   "para": "Que todos los chats, la cola, el despertador y el tablero usen los mismos ids, estados y plazos, y que cualquier desviación la detecte una herramienta, no una persona.",
+   "quien": {
+    "aplican": "Chat Diseño, Chat Desarrollo, Chat Arquitecto, Agente CLI, verificador, cola, despertador",
+    "mantiene": "Arquitecto (LM-9, LM-10, LM-12, LM-14, LM-15)"
+   },
+   "piezas": [
+    "herramientas/modelo/esquema.json v0.3: patrones de id (REQ-<MOD>-n o -n-m; L-n; LM-n; V-n-m; M-n), listas cerradas de estados, roles y alias, límites, mapa de migración",
+    "interno/proceso.json PROC-lote-v2 (vigente 12-oct): máquinas requisito / lote / lote del modelo con señal, plazo, RACI y guardas; supervisor.plazosHoy es lo que lee el despertador",
+    "herramientas/modelo/validar.py: 0 errores desde el 12-oct; se corre antes de cada commit a interno/*.json (python3 herramientas/modelo/validar.py .)",
+    "herramientas/modelo/normalizar.py (estados a listas cerradas; --renombrar con renombres-req.json) y partir-items.py (B4)",
+    "ejecutar-cola.ps1 v5 (orden por número; acepta NN- y L-NN-) · vigilar-buzon.ps1 v11.1 (plazos de proceso.json; métricas en estado-vivo.json; nombres L-NN-)"
+   ],
+   "flujo": [
+    "Un lote nuevo: Desarrollo lo nombra L-<n>-instr-<tema>.md (desde el 76); plan[].lote y cambios[].lote = \"L-<n>\"; veredicto log\\L-<n>-veredicto[-m].json.",
+    "Un REQ crítico: Diseño registra DA-n y hace el cruce con Carlos al definirlo (una sola visita por lote); Desarrollo copia DA y cruce a la cabecera.",
+    "Un estado nuevo o un plazo nuevo: cambio al modelo (LM-n, cruce de Carlos) en esquema.json o proceso.json; nunca a mano en los JSON de datos.",
+    "Antes de cada commit a interno/*.json: validar.py; si da error, no se sube."
+   ],
+   "reglas": [
+    "Un dato, una fuente: REQ y DA solo en diseno.json; INC y DT en seguimiento.json (incs[]/dts[] tras B4); histórico en interno/archivo/.",
+    "Los ids viejos de REQ quedan en reqs[].antes; mensajes y documentos históricos no se renombran.",
+    "Lo entregado antes del buzón lleva entregadoEn = «legado»; un plan[] sin REQ lleva req = «legado» (histórico) u «operación» (tarea de Carlos).",
+    "Las métricas (mediana construido→aceptado, lotes con >1 veredicto, bloqueados, espera de Carlos) salen de estado-vivo.json; el tablero no las calcula."
+   ],
+   "instalacion": "Cola y despertador por el puente de archivos con respaldo versionado (temp\\ejecutar-cola.v4.ps1; buzon\\vigilar-buzon.v11.ps1); vuelta atrás = copiar el respaldo encima.",
+   "comprobacion": "validar.py en 0 errores; estado-vivo.json con plazos.origen = «proceso.json PROC-lote-v2»; primer lote L-76 tomado por la cola v5 (12-oct 13:55).",
+   "creditos": "Nulos: scripts locales; el validador corre en segundos.",
+   "riesgos": [
+    "Un chat que escriba un estado fuera de la lista: lo marca validar.py; se corrige antes del commit.",
+    "Si proceso.json deja de estar «vigente», el despertador vuelve a sus constantes (mismos valores)."
+   ]
+  },
+  {
+   "codigo": "APO01.11-n",
+   "nombre": "Plan de ejecución: siempre en marcha; lo que está en manos de Carlos se pide de inmediato",
+   "dueno": "Arquitecto (regla) · todos los chats (la aplican)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-12",
+   "para": "Que ningún plan quede parado por una decisión, un permiso o un acceso que solo Carlos puede dar, y que Carlos vea de un vistazo qué le toca.",
+   "quien": {
+    "aplican": "Chat Arquitecto, Chat Diseño, Chat Desarrollo",
+    "mantiene": "Arquitecto (reglas-comunes regla 5)"
+   },
+   "piezas": [
+    "interno/instrucciones.json › reglas-comunes › 5",
+    "Plan de ejecución PT-M1 (artefacto de Claude) con columnas Herramientas y Permiso de Carlos",
+    "herramientas/plantillas/pregunta-a-carlos.md"
+   ],
+   "flujo": [
+    "El plan se ejecuta de corrido; se detiene solo si Carlos lo dice o si el chat le pide parar porque impide otro plan en curso.",
+    "Cada ítem declara herramientas y qué permiso de Carlos necesita (equipo, escritorio, login, acceso, decisión, una línea).",
+    "Cuando un ítem llega a ese punto, se le pide a Carlos en el momento, en tabla y con contexto breve; nunca se deja «bloqueado» esperando.",
+    "Si Carlos no está, se sigue con el siguiente ítem que no lo requiera y lo pedido queda en el plan como lo que está en sus manos."
+   ],
+   "reglas": [
+    "Las preguntas a Carlos van en tabla con opciones y recomendación; una línea suya basta.",
+    "Lo que Carlos tarda se mide (esperaDueno), no se escala."
+   ],
+   "instalacion": "Regla 5 de reglas-comunes (12-oct); plan de ejecución v2 publicado.",
+   "comprobacion": "Ningún ítem del plan en «bloqueado» por Carlos sin una pregunta hecha el mismo día.",
+   "creditos": "Nulos.",
+   "riesgos": [
+    "Preguntar demasiado: se agrupa lo que pueda decidirse junto (una tabla, no cinco mensajes)."
    ]
   }
  ],

@@ -1,4 +1,9 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-11; v10.3 LM-2: respuestas al remitente, pre-vuelo, planes pausados, estado vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+#
+# v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
+#     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
+#     constantes de abajo. estado-vivo.json suma 'plazos' (origen y valores en vigor) y 'metricas' (construido->aceptado
+#     de los ultimos 7 dias por _resumen.txt y veredictos, lotes con mas de un veredicto, bloqueados hoy, espera de Carlos).
 #
 # Revisa tres fuentes sin usar Claude y, por cada evento nuevo, deja en el chat destinatario SOLO una
 # frase fija (nunca el contenido de mensajes ni de archivos):
@@ -156,13 +161,13 @@ try {
         if ($lr -match '^([0-9a-f]{40})\s') { $sha = $Matches[1] }
     } catch { }
     if (-not $sha) { Log 'Aviso: git ls-remote no respondio; se usa la copia local.' ; $sha = $shaPrev }
-    $faltan = -not (Test-Path (Join-Path $CacheDir 'mensajes.json')) -or -not (Test-Path (Join-Path $CacheDir 'destinatarios.json')) -or -not (Test-Path (Join-Path $CacheDir 'seguimiento.json')) -or -not (Test-Path (Join-Path $CacheDir 'diseno.json'))
+    $faltan = -not (Test-Path (Join-Path $CacheDir 'mensajes.json')) -or -not (Test-Path (Join-Path $CacheDir 'destinatarios.json')) -or -not (Test-Path (Join-Path $CacheDir 'seguimiento.json')) -or -not (Test-Path (Join-Path $CacheDir 'diseno.json')) -or -not (Test-Path (Join-Path $CacheDir 'proceso.json'))
     if ($sha -and ($sha -ne $shaPrev -or $faltan)) {
         try {
-            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json')) {
+            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json', 'proceso.json')) {
                 Invoke-WebRequest -Uri "$RawBase/$sha/interno/$f" -UseBasicParsing -OutFile (Join-Path $CacheDir ($f + '.tmp'))
             }
-            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json')) {
+            foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json', 'proceso.json')) {
                 Move-Item -Force (Join-Path $CacheDir ($f + '.tmp')) (Join-Path $CacheDir $f)
             }
             if ($sha -ne $shaPrev) { $vistoEn = Get-Date }
@@ -173,6 +178,28 @@ try {
     try {
         $dest = (LeerCache 'destinatarios.json').destinatarios
     } catch { Log ('ERROR al leer destinatarios: ' + $_.Exception.Message); return }
+
+    # --- 0b. Plazos desde proceso.json (v11, LM-12) ---
+    $ProcVer = ''; $PlazosOrigen = 'constantes del script'
+    function PlazoNum($v, $def) { try { $n = [int]$v; if ($n -gt 0) { return $n } } catch { }; return $def }
+    try {
+        $proc = LeerCache 'proceso.json'
+        $ProcVer = [string]$proc.version
+        if (([string]$proc.estado) -eq 'vigente') {
+            $ph = $proc.supervisor.plazosHoy
+            $RecMin = PlazoNum $ph.RecMin $RecMin; $RecCada = PlazoNum $ph.RecCada $RecCada; $EscCada = PlazoNum $ph.EscCada $EscCada
+            $FallaCada = PlazoNum $ph.FallaCada $FallaCada; $VerifMin = PlazoNum $ph.VerifMin $VerifMin; $VerifCada = PlazoNum $ph.VerifCada $VerifCada
+            $EscMin = PlazoNum $proc.mensajes.plazos.escalamientoMin $EscMin
+            foreach ($e in @($proc.lote.estados)) {
+                switch ([string]$e.id) {
+                    'construyendo' { $CliMin = PlazoNum $e.plazoMin $CliMin }
+                    'fallido' { $FallaMin = PlazoNum $e.plazoMin $FallaMin }
+                    'verificando' { $VerifMin = PlazoNum $e.plazoMin $VerifMin }
+                }
+            }
+            $PlazosOrigen = 'proceso.json ' + $ProcVer
+        }
+    } catch { Log ('Aviso: proceso.json no se pudo leer (' + $_.Exception.Message + '); se usan las constantes.') }
 
     # --- 1. Buzon ---
     try {
@@ -481,6 +508,29 @@ try {
         $vj2 = Join-Path $LogDir 'verificar.json'; $pv2 = Join-Path $LogDir 'pre-vuelo.json'
         $ev.verificando = $(if (Test-Path $vj2) { $fv2 = Get-Item $vj2; $v2 = $null; try { $v2 = Get-Content -Path $vj2 -Raw -Encoding UTF8 | ConvertFrom-Json } catch { }; $arch2 = $(if ($v2) { [string]$v2.archivoVeredicto } else { '' }); [ordered]@{ lote = $(if ($v2) { [string]$v2.lote } else { '' }); desde = $fv2.LastWriteTime.ToString('HH:mm'); archivoEsperado = $arch2; entregado = ($arch2 -and (Test-Path (Join-Path $Cola $arch2))); preVuelo = $(if (Test-Path $pv2) { (Get-Item $pv2).LastWriteTime.ToString('HH:mm') } else { '' }) } } else { $null })
         $ev.ultimoResumen = $(if (Test-Path $Resumen) { [string](Get-Content -Path $Resumen -Tail 1) } else { '' })
+        # v11 (LM-12): plazos en vigor y metricas mecanicas (ventana de 7 dias)
+        try {
+            $okHoras = @{}
+            if (Test-Path $Resumen) { foreach ($l in @(Get-Content -Path $Resumen)) { if (([string]$l) -match '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) \| OK \| (\d{1,3})-instr') { try { $okHoras[$Matches[2]] = [DateTime]::ParseExact($Matches[1], 'yyyy-MM-dd HH:mm', $null) } catch { } } } }
+            $desde7 = (Get-Date).AddDays(-7)
+            $vers = @(Get-ChildItem -Path $LogDir -Filter '*veredicto*.json' -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^\d{1,3}-veredicto' -and $_.LastWriteTime -ge $desde7 })
+            $porLote = @{}; $mins = @(); $bloqHoy = 0
+            foreach ($vf in $vers) {
+                $n = $(if ($vf.Name -match '^(\d{1,3})-') { $Matches[1] } else { '' })
+                if (-not $porLote.ContainsKey($n)) { $porLote[$n] = 0 }
+                $porLote[$n] = $porLote[$n] + 1
+                if ($vf.Name -match 'bloqueado' -and $vf.LastWriteTime.Date -eq (Get-Date).Date) { $bloqHoy++ }
+                $res = ''; try { $res = [string](Get-Content -Path $vf.FullName -Raw -Encoding UTF8 | ConvertFrom-Json).resultado } catch { }
+                if ($res -eq 'aceptado' -and $okHoras.ContainsKey($n)) { $mins += [int]($vf.LastWriteTime - $okHoras[$n]).TotalMinutes }
+            }
+            $mediana = $null; if ($mins.Count -gt 0) { $sm = @($mins | Sort-Object); $mediana = $sm[[int][Math]::Floor(($sm.Count - 1) / 2)] }
+            $masDeUno = @($porLote.Keys | Where-Object { $porLote[$_] -gt 1 }).Count
+            $pendC = @($msgs | Where-Object { $_.estado -eq 'pendiente' -and (Nom ([string]$_.para)) -eq 'carlos' })
+            $masAnt = $null
+            foreach ($mc in $pendC) { try { $tm = [DateTime]::ParseExact(([string]$mc.fecha + ' ' + [string]$mc.hora), 'yyyy-MM-dd HH:mm', $null); $dm = [int]((Get-Date) - $tm).TotalMinutes; if ($masAnt -eq $null -or $dm -gt $masAnt) { $masAnt = $dm } } catch { } }
+            $ev.plazos = [ordered]@{ origen = $PlazosOrigen; verificadorMin = $VerifMin; cliMin = $CliMin; fallidasMin = $FallaMin; recordatorioMin = $RecMin; escalamientoMin = $EscMin }
+            $ev.metricas = [ordered]@{ ventanaDias = 7; construidoAceptadoMedianaMin = $mediana; lotesMedidos = $mins.Count; lotesConVeredicto = $porLote.Count; lotesConMasDeUnVeredicto = $masDeUno; bloqueadosHoy = $bloqHoy; esperaDueno = [ordered]@{ pendientes = $pendC.Count; masAntiguoMin = $masAnt } }
+        } catch { Log ('ERROR en metricas: ' + $_.Exception.Message) }
         ($ev | ConvertTo-Json -Depth 4) | Set-Content -Path $EstadoVivo -Encoding UTF8
     } catch { Log ('ERROR en estado vivo: ' + $_.Exception.Message) }
 } finally {

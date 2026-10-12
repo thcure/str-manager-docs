@@ -71,19 +71,19 @@ Criterio de REQ-MOD-6 «las páginas muestran lo mismo antes y después»: el lo
 
 | # | Lote | Qué | Prueba de aceptación |
 |---|---|---|---|
-| 1 | LM-12 Prueba técnica (sin cruce, solo lectura) | `GET /modelo/api/salud` desplegado en una carpeta vacía; desde cada agente (3 chats, cola, verificador en tarea, Chrome) una petición real `GET` y una `POST` a un eco: dice **quién puede escribir por HTTPS y quién no** | Tabla agente × GET/POST en `conocimiento.json` |
-| 2 | LM-13 Base y esquema (crítico) | Carlos crea la base y el usuario en hPanel y pone `modelo/secrets.php`; migración `001_inicial.sql` con las tablas de §4; `proyecto = 'str'` | Tablas creadas; `salud` dice `db:true`; ningún dato aún |
-| 3 | LM-14 Carga inicial (crítico, después de B3) | `migrar.py` lee los JSON normalizados (0 errores del validador) y carga todo, incluida la historia (`cambios[]` → `cambio` + `evento` + `veredicto`); corre en limpio tantas veces como haga falta | Conteos iguales JSON ↔ base; `validar.py` sobre la exportación = 0 errores |
-| 4 | LM-15 API de lectura + exportación | `GET` de todas las entidades, `estado`, `export.php` + cron; rama `espejo` | La exportación reproduce los JSON byte a byte salvo el orden de claves |
-| 5 | LM-16 API de escritura + credenciales (crítico) | `POST/PATCH` con reglas; tabla `credencial`; tokens que pone Carlos; prueba de 422 por cada regla | Réplica `tests/modelo/reglas.test.js` en verde; un lote real registrado por API por la cola |
-| 6 | LM-17 Corte (crítico, con Carlos presente) | Los chats y la cola escriben por API; Git pasa a espejo (la rama `espejo` se fusiona a `main` a diario); el verificador deja el veredicto por API si LM-12 lo permitió, si no sigue por archivo y la cola lo sube | Un lote de punta a punta sin tocar JSON a mano; `estado-vivo.json` sale de `GET /estado` |
+| 1 | B7-1 Prueba técnica (sin cruce, solo lectura) | `GET /modelo/api/salud` desplegado en una carpeta vacía; desde cada agente (3 chats, cola, verificador en tarea, Chrome) una petición real `GET` y una `POST` a un eco: dice **quién puede escribir por HTTPS y quién no** | Tabla agente × GET/POST en `conocimiento.json` |
+| 2 | B7-2 Base y esquema (crítico) | Carlos crea la base y el usuario en hPanel y pone `modelo/secrets.php`; migración `001_inicial.sql` con las tablas de §4; `proyecto = 'str'` | Tablas creadas; `salud` dice `db:true`; ningún dato aún |
+| 3 | B7-3 Carga inicial (crítico, después de B3) | `migrar.py` lee los JSON normalizados (0 errores del validador) y carga todo, incluida la historia (`cambios[]` → `cambio` + `evento` + `veredicto`); corre en limpio tantas veces como haga falta | Conteos iguales JSON ↔ base; `validar.py` sobre la exportación = 0 errores |
+| 4 | B7-4 API de lectura + exportación | `GET` de todas las entidades, `estado`, `export.php` + cron; rama `espejo` | La exportación reproduce los JSON byte a byte salvo el orden de claves |
+| 5 | B7-5 API de escritura + credenciales (crítico) | `POST/PATCH` con reglas; tabla `credencial`; tokens que pone Carlos; prueba de 422 por cada regla | Réplica `tests/modelo/reglas.test.js` en verde; un lote real registrado por API por la cola |
+| 6 | B7-6 Corte (crítico, con Carlos presente) | Los chats y la cola escriben por API; Git pasa a espejo (la rama `espejo` se fusiona a `main` a diario); el verificador deja el veredicto por API si B7-1 lo permitió, si no sigue por archivo y la cola lo sube | Un lote de punta a punta sin tocar JSON a mano; `estado-vivo.json` sale de `GET /estado` |
 
 Vuelta atrás en cualquier punto: los JSON de Git siguen vigentes hasta el lote 6; en el 6, volver = reactivar la escritura en Git (los encargos v2 ya la describen) y apagar los tokens de escritura. Nada se borra.
 
 ## 7. Rutina de API para tests y canal para las tareas
 
 - **Rutina (`tests/modelo/api.test.js`, corre en `node tests/run.js` y en el verificador):** `salud` → crea un `lote` en `proyecto = 'prueba'` → cambia estado por las transiciones de `proceso.json` → intenta una transición prohibida (espera 422) → intenta escribir con el rol equivocado (espera 403) → marca `superado`. El proyecto `prueba` se limpia solo (el servidor borra `prueba` con más de un día) y nunca se exporta. Sin PHP local (la CLI no lo tiene), la prueba corre contra el servicio desplegado como ya hacen los criterios «contra producción».
-- **Canal para las tareas (verificador):** `POST /modelo/api/veredicto` con el token `verificador` = el mismo JSON que hoy deja en `log\`. Si la prueba técnica (LM-12) muestra que una tarea de Cowork no puede hacer `POST`, el canal queda como hoy (archivo en carpeta) y la cola lo sube; y el problema de «sin carpetas tras reinicio» se ataca por su ficha (BAI07.05-v), no por el servicio.
+- **Canal para las tareas (verificador):** `POST /modelo/api/veredicto` con el token `verificador` = el mismo JSON que hoy deja en `log\`. Si la prueba técnica (B7-1) muestra que una tarea de Cowork no puede hacer `POST`, el canal queda como hoy (archivo en carpeta) y la cola lo sube; y el problema de «sin carpetas tras reinicio» se ataca por su ficha (BAI07.05-v), no por el servicio.
 - **Despertador:** pasa de leer tres JSON de raw a `GET /estado` y `GET /mensaje?estado=pendiente` (B9); mismos avisos.
 
 ## 8. Costos y riesgos
@@ -92,13 +92,13 @@ Vuelta atrás en cualquier punto: los JSON de Git siguen vigentes hasta el lote 
 |---|---|
 | Dinero | 0 adicional. **Atención:** Hostinger Premium vence el **3-nov-2026** (R-3); renovarlo es prerrequisito de B7, con o sin este ADR |
 | Tiempo de la CLI | ~6 lotes × 10–25 min |
-| Tiempo de Carlos | Decidir este ADR (una línea) · crear base y usuario en hPanel y poner `secrets.php` (10 min, LM-13) · poner los tokens en `claves\` (5 min, LM-16) · estar presente en el corte (LM-17, 20 min) |
-| Riesgos | Credenciales (crítico: tokens solo en `secrets.php` y `claves\`; el navegador nunca los ve) · doble escritura durante la transición (mitigación: Git es espejo de solo lectura desde LM-17; antes, la API no acepta escrituras de chats) · hosting compartido con el STR (mitigación §3) · el servicio **nunca** guarda datos del negocio (tenant `negocio`): solo el modelo |
+| Tiempo de Carlos | Decidir este ADR (una línea) · crear base y usuario en hPanel y poner `secrets.php` (10 min, B7-2) · poner los tokens en `claves\` (5 min, B7-5) · estar presente en el corte (B7-6, 20 min) |
+| Riesgos | Credenciales (crítico: tokens solo en `secrets.php` y `claves\`; el navegador nunca los ve) · doble escritura durante la transición (mitigación: Git es espejo de solo lectura desde B7-6; antes, la API no acepta escrituras de chats) · hosting compartido con el STR (mitigación §3) · el servicio **nunca** guarda datos del negocio (tenant `negocio`): solo el modelo |
 | Qué NO entra | Tiempo real (polling, como ADR-001) · interfaz de edición (las páginas siguen de solo lectura; se escribe por los chats y la cola) · mover `conocimiento.json`, encargos y plantillas (siguen en Git) |
 
 ## 9. Lo que necesito de Carlos
 
-1. **Sí o no a la opción B** (o «quiero C» con el proveedor). Con el sí, B7 arranca por LM-12 (prueba técnica, sin cruce) de corrido.
+1. **Sí o no a la opción B** (o «quiero C» con el proveedor). Con el sí, B7 arranca por B7-1 (prueba técnica, sin cruce) de corrido.
 2. Renovar Hostinger antes del 3-nov (ya estaba en R-3; lo repito porque B7 depende de eso).
 3. Preferencia: carpeta `modelo/` en el mismo repo `str-manager` (propuesta) o repositorio aparte.
 

@@ -37,6 +37,10 @@ for r in riesgos: ids['R'].add(r.get('id'))
 for m in mensajes: ids['M'].add(m.get('id'))
 for c in cambios: ids['LM' if str(c.get('lote', '')).startswith('LM') else 'L'].add(str(c.get('lote')))
 lotes_num = {str(l.get('lote')) for l in lotes if l.get('lote') is not None}
+# B3b (12-oct): «76» y «L-76» son el mismo lote; se comparan por número
+def num_lote(x):
+    m = re.match(r'^(?:L-)?(\d+)$', str(x or '')); return m.group(1) if m else str(x)
+lotes_num |= {num_lote(x) for x in lotes_num}
 
 # R1 ids por patrón
 for r in reqs:
@@ -53,7 +57,7 @@ for it in items:
 for c in cambios:
     l = str(c.get('lote', ''))
     if c.get('lote') is None and c.get('tipo') == 'modelo': avi('R1 id', 'cambio', c.get('fecha'), 'cambio del modelo sin id (anteriores a LM-n): se numeran C-n en B3')
-    elif not (l.isdigit() or PAT['LM'].match(l)): err('R1 id', 'cambio', l, 'lote debe ser número (L-n) o LM-n')
+    elif not (l.isdigit() or PAT['LM'].match(l) or PAT['L'].match(l)): err('R1 id', 'cambio', l, 'lote debe ser número (≤ 75), L-n (desde el 76) o LM-n')
 # ids duplicados dentro de cada lista
 for nombre, lista in (('requisito', reqs), ('decision', das), ('lote', lotes), ('mensaje', mensajes), ('items', items)):
     cnt = Counter(str(x.get('id')) for x in lista)
@@ -90,7 +94,7 @@ for p in pedidos:
     if p.get('req') and p['req'] not in reqs_todos: err('R2 FK', 'pedido', p.get('id'), f'req {p["req"]} no existe')
 for c in cambios:
     l = str(c.get('lote', ''))
-    if l.isdigit() and l not in lotes_num: avi('R2 FK', 'cambio', l, 'lote sin fila en seguimiento.plan[]')
+    if (l.isdigit() or PAT['L'].match(l)) and num_lote(l) not in lotes_num: avi('R2 FK', 'cambio', l, 'lote sin fila en seguimiento.plan[]')
 rol_norm = {}
 def norm_rol(s):
     s = re.sub(r'[áàä]', 'a', re.sub(r'[éèë]', 'e', re.sub(r'[íìï]', 'i', re.sub(r'[óòö]', 'o', re.sub(r'[úùü]', 'u', str(s or '').lower())))))
@@ -124,7 +128,7 @@ for it in items:
 # R4 críticos con cruce
 for l in lotes:
     if str(l.get('categoria', '')).startswith('crítico') and l.get('estado') not in ('previsto', 'espera DA', 'pospuesto', 'superado', 'cerrado'):
-        c = next((c for c in cambios if str(c.get('lote')) == str(l.get('lote'))), None)
+        c = next((c for c in cambios if num_lote(c.get('lote')) == num_lote(l.get('lote'))), None)
         texto = json.dumps({k: l.get(k) for k in ('nota', 'resumen')}, ensure_ascii=False) + (json.dumps(c, ensure_ascii=False) if c else '')
         if not re.search(r'cruce|DA-\d+', texto, re.I): err('R4 crítico', 'lote', l.get('lote'), 'crítico sin cruce ni DA-n en nota/cambios')
 

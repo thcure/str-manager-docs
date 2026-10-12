@@ -1,7 +1,7 @@
 {
  "version": "PROC-lote-v2",
  "reemplaza": "PROC-lote-v1",
- "estado": "borrador",
+ "estado": "vigente",
  "actualizadoEn": "2026-10-12",
  "escritor": "rol-arquitecto",
  "proyecto": "str",
@@ -273,7 +273,7 @@
    {
     "id": "definido",
     "fase": "BAI02",
-    "que": "El REQ tiene criterios de aceptación en su documento (claude/producto/requerimientos-*.md) y, si es crítico, su DA decidida.",
+    "que": "El REQ tiene criterios de aceptación en su documento (claude/producto/requerimientos-*.md). Si es crítico, aquí mismo Diseño registra la DA-n y hace el cruce con Carlos (alcance, riesgo, reversión): es la única visita a Carlos del lote.",
     "dueno": "diseno",
     "raci": {
      "R": "diseno",
@@ -291,6 +291,9 @@
      "aprobado",
      "entregado",
      "pospuesto"
+    ],
+    "guardas": [
+     "crítico ⇒ DA-n decidida en diseno.json y cruce con Carlos con fecha y hora, antes de entregar (R4); sin eso no pasa a entregado"
     ]
    },
    {
@@ -334,6 +337,9 @@
     "transiciones": [
      "construido (derivado)",
      "pospuesto"
+    ],
+    "guardas": [
+     "el M-n de entrega cita la ruta del REQ y, si es crítico, DA-n y cruce (Desarrollo los copia a la cabecera tal cual)"
     ]
    },
    {
@@ -455,7 +461,7 @@
    {
     "id": "espera DA",
     "fase": "BAI03",
-    "que": "No se redacta hasta que Diseño registre la DA-n (o Carlos decida). Lo que Carlos tarda se mide (minutosDueno), no se escala.",
+    "que": "Solo si un REQ llegó a plan[] sin su DA-n (excepción, no camino normal): no se redacta hasta que Diseño la registre. Lo que Carlos tarda se mide (minutosDueno), no se escala.",
     "dueno": "diseno",
     "raci": {
      "R": "diseno",
@@ -477,11 +483,11 @@
    {
     "id": "redactado",
     "fase": "BAI03",
-    "que": "El Chat Desarrollo escribió la instrucción con herramientas/plantillas/instruccion.md y pasó el revisor previo (plantillas/revisor-previo.md, 12 puntos, subagente); si es crítico, además el «ok» de Diseño por el buzón y la DA-n + cruce de Carlos en la cabecera.",
+    "que": "El Chat Desarrollo escribió la instrucción con herramientas/plantillas/instruccion.md y pasó el revisor previo (plantillas/revisor-previo.md, 12 puntos, subagente); si es crítico, la cabecera cita la DA-n y el cruce ya hechos en definido y lleva el «ok» de Diseño por el buzón. No vuelve a Carlos salvo que la instrucción amplíe el alcance o suba el riesgo del REQ: entonces Diseño repite el cruce.",
     "dueno": "desarrollo",
     "raci": {
      "R": "desarrollo",
-     "A": "dueno (si crítico)",
+     "A": "desarrollo",
      "C": [
       "diseno"
      ],
@@ -493,7 +499,7 @@
     "plazoMin": null,
     "guardas": [
      "cabecera de 15 líneas con etiquetas exactas (Categoría, Alcance:, Riesgo, Reversión, Origen, Requerimiento con ruta)",
-     "crítico ⇒ DA-n y «cruce previo con Carlos: fecha, dónde» + «ok» de Diseño (asunto «Revisión previa: <lote>»)",
+     "crítico ⇒ cabecera con DA-n y «cruce previo con Carlos: fecha, dónde» (hechos en definido) + «ok» de Diseño (asunto «Revisión previa: <lote>»); alcance o riesgo mayor que el REQ ⇒ nuevo cruce por Diseño",
      "lote del modelo ⇒ LM-n en vez de DA-n y «¿Toca el modelo?: no (lote del modelo LM-n…)»",
      "todo archivo que se toque está en Alcance (el hook guard-bash.js lo exige en el commit)",
      "pruebas derivadas con perfil, página completa y precondición; 403 y ancho/móvil en tests/",
@@ -875,10 +881,7 @@
   ]
  },
  "pendienteRevision": [
-  "1. Plazos por estado: entregado 120 · encolado 3 · construyendo 45 (desde el último log) · fallido 15 · construido 15 · verificando 15 · parcial 240 · no aceptado 240 · publicado (LM) 120. ¿Alguno distinto?",
-  "2. 'no aceptado': hoy avisa a Diseño y escala a Carlos a las 4 h. ¿Así, o a Carlos solo si hay INC crítico?",
-  "3. Pre-vuelo también para el verificador estándar (Sonnet). Propuesta: sí (ya lo hace el CD desde el lote 72).",
-  "4. 'parcial': el REQ no pasa a aceptado hasta cerrar lo pendiente (propuesta). Alternativa: aceptado con INC menor abierto."
+  "Resueltas el 12-oct con «así»: plazos como están; no aceptado avisa a Diseño y a Carlos a las 4 h; pre-vuelo también para el estándar; parcial no deja el REQ en aceptado."
  ],
  "resueltoDesdeV1": [
   "revisor previo: obligatorio en todo lote (plantilla instruccion.md y revisor-previo.md, A8); para críticos además el ok de Diseño",
@@ -886,6 +889,8 @@
   "'bloqueado' y 'con veredicto' dejan de ser estados: bloqueado es un resultado de veredicto que relanza; el registro del veredicto es una guarda de verificando (≤ 15 min)",
   "estados nuevos del lote: previsto, espera DA, parcial, revertido, superado (lista cerrada de esquema.json)",
   "ids L-n (decisión 1-B) y REQ derivado desde construido (3-A)",
-  "Carlos como rol-dueno medido (5-A): sin escalamiento, con métrica esperaDueno"
- ]
+  "Carlos como rol-dueno medido (5-A): sin escalamiento, con métrica esperaDueno",
+  "12-oct (Carlos): DA-n y cruce de críticos en definido/entregado, conducidos por Diseño; redactado solo los cita; a Carlos se le visita una vez por lote"
+ ],
+ "aprobacion": "Carlos, 12-oct-2026 11:58 («de acuerdo, así»: cruce de LM-10 y las 4 preguntas con la propuesta). Ajuste de Carlos en el mismo cruce: la DA-n y el cruce de un crítico se garantizan en definido/entregado (los conduce Diseño), no en redactado."
 }

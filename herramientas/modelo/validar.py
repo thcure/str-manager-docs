@@ -21,7 +21,9 @@ def carga(rel):
 
 dis = carga('interno/diseno.json'); seg = carga('interno/seguimiento.json'); men = carga('interno/mensajes.json'); ins = carga('interno/instrucciones.json')
 reqs = dis.get('reqs', []); das = dis.get('das', []); pedidos = dis.get('pedidos', []); planes = dis.get('planes', [])
-lotes = seg.get('plan', []); cambios = seg.get('cambios', []); items = seg.get('items', []); riesgos = seg.get('riesgos', [])
+lotes = seg.get('plan', []); cambios = seg.get('cambios', []); riesgos = seg.get('riesgos', [])
+# B4 (LM-15): tras el corte, seguimiento.json trae incs[] y dts[] en vez de items[]; se aceptan las dos formas
+items = seg.get('items', []) + [dict(i, tipo='INC') for i in seg.get('incs', [])] + [dict(i, tipo='DT') for i in seg.get('dts', [])]
 mensajes = men.get('mensajes', []); encargos = [x for x in ins.get('items', []) if str(x.get('id', '')).startswith('rol-')]
 
 ids = defaultdict(set)

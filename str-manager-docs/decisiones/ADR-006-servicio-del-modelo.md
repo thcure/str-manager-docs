@@ -1,6 +1,6 @@
 # ADR-006 — Servicio del modelo de operación (API + base propia)
 
-**Fecha:** 2026-10-12 · **Estado:** propuesta (LM-11; espera la decisión de Carlos) · **Autor:** Chat Arquitecto · **REQ:** REQ-MOD-6 · **Plan:** PT-M1 B5 (decide), B7 (servicio), B8 (páginas), B9 (conocimiento generado), B11 (segundo proyecto).
+**Fecha:** 2026-10-12 · **Estado:** aceptada por Carlos el 12-oct-2026 12:45 (opción B; carpeta `modelo/` en `str-manager`; la renovación de Hostinger se trata aparte, no traba B7-1) · **Autor:** Chat Arquitecto · **REQ:** REQ-MOD-6 · **Plan:** PT-M1 B5 (decide), B7 (servicio), B8 (páginas), B9 (conocimiento generado), B11 (segundo proyecto).
 Copia idéntica en el proyecto de Claude: `claude/marco/adr-servicio-modelo-2026-10.md`. Esta es la fuente.
 
 ## 1. Contexto: cómo vive el modelo hoy y qué duele

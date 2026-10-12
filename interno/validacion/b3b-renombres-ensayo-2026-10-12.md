@@ -1,0 +1,51 @@
+## Renombres de REQ (ensayo) · 50
+- reqs[REQ-INV2-4a].id → REQ-INV2-4-1 (antes=REQ-INV2-4a)
+- reqs[REQ-BC1].id → REQ-BC-1 (antes=REQ-BC1)
+- reqs[REQ-INV2-3a].id → REQ-INV2-3-1 (antes=REQ-INV2-3a)
+- reqs[REQ-INV2-3b].id → REQ-INV2-3-2 (antes=REQ-INV2-3b)
+- reqs[REQ-TB1].id → REQ-TB-1 (antes=REQ-TB1)
+- reqs[REQ-INV2-PLANTILLAS].id → REQ-INV2-8 (antes=REQ-INV2-PLANTILLAS)
+- reqs[REQ-INV2-4b].id → REQ-INV2-4-2 (antes=REQ-INV2-4b)
+- reqs[REQ-CMP1].id → REQ-CMP-1 (antes=REQ-CMP1)
+- reqs[REQ-K3b].id → REQ-K3-2 (antes=REQ-K3b)
+- reqs[REQ-K3c].id → REQ-K3-3 (antes=REQ-K3c)
+- reqs[REQ-F11-5b].id → REQ-F11-5-2 (antes=REQ-F11-5b)
+- reqs[REQ-TB2].id → REQ-TB-2 (antes=REQ-TB2)
+- reqs[REQ-MI1-a].id → REQ-MI1-1 (antes=REQ-MI1-a)
+- reqs[REQ-MI1-b].id → REQ-MI1-2 (antes=REQ-MI1-b)
+- reqs[REQ-MI1-c].id → REQ-MI1-3 (antes=REQ-MI1-c)
+- reqs[REQ-PG1-B2].id → REQ-PG1-2 (antes=REQ-PG1-B2)
+- reqs[REQ-BT1].id → REQ-BT-1 (antes=REQ-BT1)
+- reqs[REQ-TB3].id → REQ-TB-3 (antes=REQ-TB3)
+- reqs[REQ-U8].id → REQ-U-8 (antes=REQ-U8)
+- reqs[REQ-INV2-3b-1].id → REQ-INV2-3-3 (antes=REQ-INV2-3b-1)
+- reqs[REQ-INV2-3b-2].id → REQ-INV2-3-4 (antes=REQ-INV2-3b-2)
+- das[0].reqs: ['REQ-INV2-3b-2'] → ['REQ-INV2-3-4']
+- das[1].reqs: ['REQ-K3b', 'REQ-K3c'] → ['REQ-K3-2', 'REQ-K3-3']
+- das[3].reqs: ['REQ-INV2-4a'] → ['REQ-INV2-4-1']
+- das[4].reqs: ['REQ-F11-5b', 'REQ-F11-6'] → ['REQ-F11-5-2', 'REQ-F11-6']
+- das[6].reqs: ['REQ-INV2-3', 'REQ-CMP1'] → ['REQ-INV2-3', 'REQ-CMP-1']
+- pedidos[2].req: «REQ-BC1» → «REQ-BC-1»
+- pedidos[5].req: «REQ-TB2» → «REQ-TB-2»
+- plan[4].req: «REQ-F11-5b» → «REQ-F11-5-2»
+- plan[34].req: «REQ-K3b» → «REQ-K3-2»
+- plan[35].req: «REQ-K3c» → «REQ-K3-3»
+- plan[41].req: «REQ-INV2-3a» → «REQ-INV2-3-1»
+- plan[42].req: «REQ-INV2-4a» → «REQ-INV2-4-1»
+- plan[49].req: «REQ-CMP1» → «REQ-CMP-1»
+- plan[53].req: «REQ-INV2-4b» → «REQ-INV2-4-2»
+- plan[58].req: «REQ-BC1» → «REQ-BC-1»
+- plan[60].req: «REQ-INV2-3b-1» → «REQ-INV2-3-3»
+- plan[61].req: «REQ-TB1» → «REQ-TB-1»
+- plan[62].req: «REQ-TB2» → «REQ-TB-2»
+- plan[64].req: «REQ-U8» → «REQ-U-8»
+- plan[65].req: «REQ-U8» → «REQ-U-8»
+- plan[69].req: «REQ-INV2-3a» → «REQ-INV2-3-1»
+- cambios[76].req: «REQ-BC1» → «REQ-BC-1»
+- cambios[79].req: «REQ-INV2-3a» → «REQ-INV2-3-1»
+- cambios[83].req: «REQ-TB1» → «REQ-TB-1»
+- cambios[86].req: «REQ-TB2» → «REQ-TB-2»
+- cambios[97].req: «REQ-U8 (INC-108, INC-76)» → «REQ-U-8 (INC-108, INC-76)»
+- cambios[102].req: «REQ-U8» → «REQ-U-8»
+- cambios[115].req: «REQ-INV2-3a» → «REQ-INV2-3-1»
+- cambios[116].req: «REQ-INV2-3b-1» → «REQ-INV2-3-3»

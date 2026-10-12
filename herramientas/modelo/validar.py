@@ -63,6 +63,11 @@ def refs_req(texto):
     return re.findall(r'REQ-[A-Z0-9][A-Za-z0-9]{0,6}(?:-[A-Za-z0-9]{1,4})*', str(texto or ''))
 reqs_todos = ids['REQ'] | {it.get('id') for it in items if it.get('tipo') == 'REQ'}
 for l in lotes:
+    rq = str(l.get('req') or '')
+    if rq in ('legado', 'operación'):  # B3a (12-oct): 'legado' = lote anterior al buzón sin REQ; 'operación' = tarea del dueño sin lote (R-3, token)
+        avi('R2 FK', 'lote', l.get('lote') or l.get('id'), f'req={rq}')
+    elif not re.match(r'^(REQ|INC|DT|P)-', rq):
+        avi('R2 FK', 'lote', l.get('lote') or l.get('id'), f'req «{rq}» sin id (REQ-n, INC-n, DT-n o P-n)')
     for r in refs_req(l.get('req')):
         if r not in reqs_todos and not r.startswith('REQ-MOD'): err('R2 FK', 'lote', l.get('lote') or l.get('id'), f'req {r} no existe en diseno.reqs ni en seguimiento.items')
     pt = l.get('planTrabajo')

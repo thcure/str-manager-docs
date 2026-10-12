@@ -145,11 +145,59 @@ def normalizar_seguimiento(aplicar):
     return cambios, manual
 
 
+def renombrar(aplicar):
+    """B3b: aplica herramientas/modelo/renombres-req.json (requiere 'aprobacion' no vacía) a diseno.json y seguimiento.json.
+    reqs[].id → nuevo con reqs[].antes = viejo; das[].req, pedidos[].reqs, planes[].items/reqs (texto exacto), plan[].req, cambios[].req.
+    No toca mensajes.json ni los documentos .md (históricos): el campo 'antes' mantiene el vínculo."""
+    rn = json.load(open(os.path.join(RAIZ, 'herramientas/modelo/renombres-req.json'), encoding='utf-8'))
+    mapa = rn['mapa']
+    salida = []
+    if aplicar and not rn.get('aprobacion'):
+        return ['renombres-req.json sin aprobacion: no se aplica'], []
+    pat = re.compile('|'.join(re.escape(k) for k in sorted(mapa, key=len, reverse=True)))
+    def sub(v):
+        return pat.sub(lambda m: mapa[m.group(0)], v) if isinstance(v, str) else v
+    def recorrer(obj, ruta, campos):
+        n = 0
+        if isinstance(obj, dict):
+            for k, v in list(obj.items()):
+                if k in campos:
+                    if isinstance(v, str) and pat.search(v):
+                        salida.append(f"{ruta}.{k}: «{v}» → «{sub(v)}»"); n += 1
+                        if aplicar: obj[k] = sub(v)
+                    elif isinstance(v, list) and any(isinstance(x, str) and pat.search(x) for x in v):
+                        salida.append(f"{ruta}.{k}: {v} → {[sub(x) for x in v]}"); n += 1
+                        if aplicar: obj[k] = [sub(x) for x in v]
+                elif isinstance(v, (dict, list)):
+                    n += recorrer(v, f"{ruta}.{k}", campos)
+        elif isinstance(obj, list):
+            for i, x in enumerate(obj):
+                n += recorrer(x, f"{ruta}[{i}]", campos)
+        return n
+    ruta_d, d = cargar('diseno.json')
+    for r in d.get('reqs', []):
+        if r.get('id') in mapa:
+            salida.append(f"reqs[{r['id']}].id → {mapa[r['id']]} (antes={r['id']})")
+            if aplicar:
+                r['antes'] = r['id']; r['id'] = mapa[r['id']]
+    recorrer(d.get('das', []), 'das', {'req', 'reqs'}); recorrer(d.get('pedidos', []), 'pedidos', {'req', 'reqs'})
+    recorrer(d.get('planes', []), 'planes', {'req', 'reqs', 'items', 'prioridades'}); recorrer(d.get('reqs', []), 'reqs', {'dependeDe', 'partidoEn', 'absorbidoPor', 'reemplazaA'})
+    if aplicar == 'diseno' or aplicar == 'todo': guardar(ruta_d, d)
+    ruta_s, s = cargar('seguimiento.json')
+    recorrer(s.get('plan', []), 'plan', {'req'}); recorrer(s.get('cambios', []), 'cambios', {'req'})
+    if aplicar == 'seguimiento' or aplicar == 'todo': guardar(ruta_s, s)
+    return salida, []
+
+
 def main():
     aplicar = None
     if '--aplicar' in sys.argv:
         aplicar = sys.argv[sys.argv.index('--aplicar') + 1]
     salida = []
+    if '--renombrar' in sys.argv:  # B3b: python3 normalizar.py --renombrar [--aplicar diseno|seguimiento]
+        cambios, _ = renombrar(aplicar)
+        print('## Renombres de REQ (' + ('APLICADO en ' + aplicar if aplicar else 'ensayo') + f') · {len(cambios)}')
+        print('\n'.join('- ' + c for c in cambios)); return
     for nombre, fn, dueno in (('diseno', normalizar_diseno, 'Chat Diseño'), ('seguimiento', normalizar_seguimiento, 'Chat Desarrollo')):
         if aplicar and aplicar != nombre:
             continue

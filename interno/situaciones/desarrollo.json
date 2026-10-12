@@ -1,6 +1,6 @@
 {
  "rol": "rol-desarrollo",
- "actualizadoEn": "2026-10-12 10:47",
+ "actualizadoEn": "2026-10-12 11:49",
  "situaciones": [
   {
    "id": "S-cd-1",
@@ -558,6 +558,26 @@
    "comoSeResolvio": "12-oct 10:42: pre-vuelo nuevo y disparo en la misma llamada que el commit del pre-vuelo.",
    "leccion": "El pre-vuelo y el disparo del verificador van juntos, sin pasos intermedios; si el turno se corta, lo primero al volver es comprobar list_triggers.",
    "reglaPropuesta": "LM-1: escribir pre-vuelo.json y fire_trigger en el mismo paso; tras cada aviso «no ha entregado», mirar primero si hubo ejecución.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-cd-30",
+   "fecha": "2026-10-12",
+   "veces": 2,
+   "categoria": "bloqueo",
+   "refs": [
+    "lote 74",
+    "LM-1",
+    "M-171",
+    "M-172"
+   ],
+   "quePaso": "Dos disparos del Agente verificador (10:42 y 11:15) arrancaron 31 min después; ambos se bloquearon por pre-vuelo caducado (74-veredicto-bloqueado-2 y -3).",
+   "causa": "La ejecución de la tarea en Claude Desktop (Windows) arranca con ~31 min de demora; la vigencia de 10 min del pre-vuelo no la contempla.",
+   "costoMin": 10,
+   "comoSeResolvio": "Pendiente del Arquitecto (M-172).",
+   "leccion": "Relanzar no sirve si la demora de arranque es mayor que la vigencia del pre-vuelo.",
+   "reglaPropuesta": "Vigencia ligada al arranque: el verificador rehace él mismo la comprobación de sesiones si el pre-vuelo pasó de 10 min, o vigencia de 60 min.",
    "yaCubierta": false,
    "estado": "nueva"
   }

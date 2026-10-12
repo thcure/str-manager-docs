@@ -114,7 +114,7 @@ for it in items:
 
 # R4 críticos con cruce
 for l in lotes:
-    if str(l.get('categoria', '')).startswith('crítico') and l.get('estado') not in ('previsto', 'espera DA', 'pospuesto'):
+    if str(l.get('categoria', '')).startswith('crítico') and l.get('estado') not in ('previsto', 'espera DA', 'pospuesto', 'superado', 'cerrado'):
         c = next((c for c in cambios if str(c.get('lote')) == str(l.get('lote'))), None)
         texto = json.dumps({k: l.get(k) for k in ('nota', 'resumen')}, ensure_ascii=False) + (json.dumps(c, ensure_ascii=False) if c else '')
         if not re.search(r'cruce|DA-\d+', texto, re.I): err('R4 crítico', 'lote', l.get('lote'), 'crítico sin cruce ni DA-n en nota/cambios')

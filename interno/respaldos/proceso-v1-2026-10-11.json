@@ -1,0 +1,414 @@
+{
+ "version": "PROC-lote-v1",
+ "estado": "borrador",
+ "actualizadoEn": "2026-10-11",
+ "escritor": "rol-arquitecto",
+ "proyecto": "str",
+ "descripcion": "Camino de un lote de punta a punta como máquina de estados. Lo leen el despertador (plazos, señales, avisos), la cola (guardas), el tablero (dibujo y tiempos) y los encargos (papel de cada rol). Un cambio aquí es un cambio del modelo (prefijo modelo:, aprobado por Carlos). Borrador para la revisión del miércoles 14-oct.",
+ "roles": {
+  "diseno": "Chat Diseño",
+  "desarrollo": "Chat Desarrollo",
+  "cli": "Agente CLI (LENOVO)",
+  "verificador": "Agente verificador (tarea de Cowork)",
+  "arquitecto": "Chat Arquitecto",
+  "dueno": "Carlos",
+  "maquina": "cola y despertador (LENOVO)"
+ },
+ "hitosDeFase": [
+  "definido",
+  "entregado",
+  "encolado",
+  "construido",
+  "verificado",
+  "aceptado"
+ ],
+ "estados": [
+  {
+   "id": "definido",
+   "fase": "BAI02",
+   "que": "El REQ tiene criterios en su documento y, si es crítico, su DA decidida.",
+   "dueno": "diseno",
+   "raci": {
+    "R": "diseno",
+    "A": "dueno",
+    "C": [
+     "arquitecto"
+    ],
+    "I": [
+     "desarrollo"
+    ]
+   },
+   "senal": "diseno.json › reqs[].estado = definido",
+   "plazoMin": null,
+   "transiciones": [
+    "entregado",
+    "pospuesto"
+   ]
+  },
+  {
+   "id": "entregado",
+   "fase": "BAI02",
+   "que": "Diseño entrega el REQ al Chat Desarrollo con un mensaje M-n.",
+   "dueno": "diseno",
+   "raci": {
+    "R": "diseno",
+    "A": "diseno",
+    "C": [],
+    "I": [
+     "desarrollo"
+    ]
+   },
+   "senal": "mensaje M-n para desarrollo con el id del REQ",
+   "plazoMin": 120,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "REQ entregado hace más de 2 h sin instrucción redactada",
+    "repetirCadaMin": 120,
+    "escalarA": "diseno"
+   },
+   "transiciones": [
+    "redactado"
+   ]
+  },
+  {
+   "id": "redactado",
+   "fase": "BAI03",
+   "que": "El Chat Desarrollo escribe NN-instr-*.md con la plantilla; un revisor con contexto limpio la revisa; si es crítico, el cruce con Carlos y la DA van en la cabecera.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "dueno (si crítico)",
+    "C": [
+     "diseno"
+    ],
+    "I": [
+     "arquitecto"
+    ]
+   },
+   "senal": "borrador en claude/producto/borradores/",
+   "guardas": [
+    "cabecera válida (categoría, REQ, riesgo, reversión)",
+    "crítico ⇒ DA-n y cruce con fecha en la cabecera",
+    "archivos declarados listados",
+    "pruebas derivadas con precondiciones (usuario, página)"
+   ],
+   "plazoMin": null,
+   "transiciones": [
+    "encolado"
+   ]
+  },
+  {
+   "id": "encolado",
+   "fase": "BAI03",
+   "que": "La instrucción está en la raíz de la cola de LENOVO.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "desarrollo",
+    "C": [],
+    "I": [
+     "diseno",
+     "maquina"
+    ]
+   },
+   "senal": "archivo NN-instr-*.md en la raíz de la cola",
+   "plazoMin": 3,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "Encolado hace N min y la CLI no arranca: PAUSA, fallidas o tarea apagada",
+    "repetirCadaMin": 15,
+    "escalarA": "dueno"
+   },
+   "guardasMaquina": [
+    "no arranca si hay PAUSA",
+    "no arranca si hay un .md en fallidas (y avisa)",
+    "no arranca un crítico sin DA-n en la cabecera"
+   ],
+   "transiciones": [
+    "construyendo"
+   ]
+  },
+  {
+   "id": "construyendo",
+   "fase": "BAI03",
+   "que": "claude.exe ejecuta la instrucción.",
+   "dueno": "cli",
+   "raci": {
+    "R": "cli",
+    "A": "desarrollo",
+    "C": [],
+    "I": [
+     "maquina"
+    ]
+   },
+   "senal": ".corriendo y log\\NN-*.txt creciendo",
+   "plazoMin": 45,
+   "plazoDesde": "último cambio del log",
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "La CLI lleva N min sin escribir en el log",
+    "repetirCadaMin": 60,
+    "escalarA": "dueno"
+   },
+   "guardasCli": [
+    "PreToolUse: cabecera y archivos declarados vs tocados antes de git commit",
+    "Stop: node tests/run.js en verde",
+    "SessionStart(compact): reinyectar encargo y punteros"
+   ],
+   "transiciones": [
+    "construido",
+    "fallido"
+   ]
+  },
+  {
+   "id": "fallido",
+   "fase": "BAI03",
+   "que": "Terminó sin commit; la copia está en fallidas\\ y la cola se detiene.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "desarrollo",
+    "C": [
+     "cli"
+    ],
+    "I": [
+     "diseno",
+     "dueno"
+    ]
+   },
+   "senal": "línea FALLO en _resumen.txt; .md en fallidas\\",
+   "plazoMin": 15,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "Lote en fallidas hace N min; la cola no corre",
+    "repetirCadaMin": 60,
+    "escalarA": "diseno"
+   },
+   "transiciones": [
+    "encolado (copia corregida; la máquina archiva la de fallidas)"
+   ]
+  },
+  {
+   "id": "construido",
+   "fase": "BAI03",
+   "que": "Commit y push en main; versión desplegada.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "cli",
+    "A": "desarrollo",
+    "C": [],
+    "I": [
+     "diseno",
+     "verificador"
+    ]
+   },
+   "senal": "línea OK en _resumen.txt con hash",
+   "plazoMin": 15,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "Construido hace N min sin verificar.json ni pre-vuelo",
+    "repetirCadaMin": 30,
+    "escalarA": "diseno"
+   },
+   "transiciones": [
+    "verificando"
+   ]
+  },
+  {
+   "id": "verificando",
+   "fase": "BAI07",
+   "que": "Pre-vuelo escrito (enlace vivo, perfiles, usuario de la barra), verificar.json escrito y tarea lanzada.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "verificador",
+    "A": "desarrollo",
+    "C": [],
+    "I": [
+     "diseno"
+    ]
+   },
+   "senal": "log\\pre-vuelo.json (≤10 min) + log\\verificar.json nuevo",
+   "plazoMin": 25,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "Sin veredicto a los N min: revisa la ejecución (duración, carpetas) y relanza",
+    "repetirCadaMin": 60,
+    "escalarA": "dueno",
+    "textoDueno": "El verificador del lote N sigue sin entregar; abre Cowork › Tareas programadas › Agente verificador"
+   },
+   "guardas": [
+    "el verificador no corre sin pre-vuelo.json reciente",
+    "resultado ∈ {aceptado, parcial, no aceptado, bloqueado}"
+   ],
+   "transiciones": [
+    "con veredicto",
+    "bloqueado"
+   ]
+  },
+  {
+   "id": "bloqueado",
+   "fase": "BAI07",
+   "que": "El verificador no pudo trabajar (carpetas, perfil, sesión, permiso). No es un 'no aceptado'.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "desarrollo",
+    "C": [
+     "verificador"
+    ],
+    "I": [
+     "diseno"
+    ]
+   },
+   "senal": "log\\NN-veredicto-bloqueado.json",
+   "plazoMin": 15,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "Veredicto bloqueado hace N min sin relanzar",
+    "repetirCadaMin": 30,
+    "escalarA": "dueno"
+   },
+   "transiciones": [
+    "verificando (entorno corregido; archivo de veredicto nuevo)"
+   ]
+  },
+  {
+   "id": "con veredicto",
+   "fase": "BAI07",
+   "que": "Existe V-<lote>-<pasada>; el Chat Desarrollo lo copia sin cambios a cambios[] y decide.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "desarrollo",
+    "C": [],
+    "I": [
+     "diseno",
+     "dueno"
+    ]
+   },
+   "senal": "log\\NN-veredicto*.json nuevo",
+   "plazoMin": 15,
+   "alVencer": {
+    "aviso": "desarrollo",
+    "texto": "Veredicto sin registrar hace N min",
+    "repetirCadaMin": 30,
+    "escalarA": "diseno"
+   },
+   "regla": "quien construyó no acepta: el estado lo fija el veredicto del verificador, nunca el CD por su cuenta",
+   "transiciones": [
+    "aceptado",
+    "no aceptado",
+    "verificando (segunda pasada)"
+   ]
+  },
+  {
+   "id": "aceptado",
+   "fase": "BAI07",
+   "que": "Todos los criterios cumplen; REQ pasa a aceptado; plan[] y cambios[] al día.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "verificador",
+    "C": [],
+    "I": [
+     "diseno",
+     "dueno"
+    ]
+   },
+   "senal": "cambios[].estado = aceptado con veredictoFinal",
+   "plazoMin": null,
+   "transiciones": [
+    "cerrado"
+   ]
+  },
+  {
+   "id": "no aceptado",
+   "fase": "BAI07",
+   "que": "Algún criterio falló; INC con nivel y causa; lote fix.",
+   "dueno": "desarrollo",
+   "raci": {
+    "R": "desarrollo",
+    "A": "verificador",
+    "C": [
+     "diseno"
+    ],
+    "I": [
+     "dueno"
+    ]
+   },
+   "senal": "veredicto no aceptado + INC-n abierto",
+   "plazoMin": 240,
+   "alVencer": {
+    "aviso": "diseno",
+    "texto": "No aceptado hace N h sin lote fix planificado",
+    "repetirCadaMin": 240,
+    "escalarA": "dueno"
+   },
+   "transiciones": [
+    "redactado (lote fix)",
+    "pospuesto (DA)"
+   ]
+  },
+  {
+   "id": "pospuesto",
+   "fase": "APO",
+   "que": "Decisión de Carlos o de Diseño de no seguir por ahora.",
+   "dueno": "diseno",
+   "raci": {
+    "R": "diseno",
+    "A": "dueno",
+    "C": [],
+    "I": [
+     "desarrollo"
+    ]
+   },
+   "senal": "REQ estado pospuesto con DA o nota",
+   "plazoMin": null,
+   "transiciones": [
+    "definido"
+   ]
+  }
+ ],
+ "mensajes": {
+  "estados": [
+   "pendiente",
+   "en curso",
+   "hecho",
+   "superado",
+   "vencido"
+  ],
+  "plazos": {
+   "recordatorioMin": 30,
+   "escalamientoMin": 60,
+   "recordarCadaMin": 60,
+   "escalarCadaMin": 120,
+   "esperandoVenceMin": 120
+  },
+  "reglas": [
+   "nadie espera en silencio: antes de parar, mensaje «Esperando: X» a quien lo debe, con hora",
+   "una respuesta despierta al remitente (v10)",
+   "el remitente puede marcar 'superado' con referencia al mensaje que lo reemplaza",
+   "mensajes para Carlos: notificación de Windows + Panel; recordatorio cada 60 min; sin escalamiento a Diseño",
+   "un mensaje con 'esperando' sin respuesta en esperandoVenceMin pasa a vencido y avisa a Carlos"
+  ]
+ },
+ "supervisor": {
+  "nombre": "MEA01 · despertador",
+  "que": "Cada minuto: lee este archivo, mide cada estado contra su señal y su plazo, avisa al dueño, repite y escala según alVencer, escribe estado-vivo.json. No decide, no construye, no acepta.",
+  "noHace": [
+   "no cambia estados de criterio (aceptado, pospuesto)",
+   "no escribe en archivos de otros roles salvo estado-vivo.json"
+  ]
+ },
+ "metrica": {
+  "nombre": "minutos de construido a aceptado",
+  "objetivo": "mediana semanal ≤ 20 min; lotes con más de un veredicto ≤ 15 %",
+  "fuente": "eventos del lote"
+ },
+ "pendienteRevision": [
+  "¿plazos correctos por estado? (hoy 3/45/15/25/15/15/240)",
+  "¿'no aceptado' escala a Diseño o a Carlos primero?",
+  "¿el revisor previo al encolado es obligatorio en todo lote o solo en normal y crítico?",
+  "¿pre-vuelo también para el verificador estándar (Sonnet)? propuesta: sí"
+ ]
+}

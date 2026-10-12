@@ -73,7 +73,9 @@ for r in reqs:
     pt = r.get('planTrabajo')
     if pt and pt not in ids['PT']: err('R2 FK', 'requisito', r.get('id'), f'planTrabajo {pt} no existe')
     e = r.get('entregadoEn')
-    if r.get('estado') in ('entregado', 'construido', 'aceptado') and (not e or e not in ids['M']): err('R7 entrega', 'requisito', r.get('id'), f'estado {r.get("estado")} sin mensaje M-n de entrega válido (entregadoEn={e})')
+    if e == 'legado':  # entregado antes del buzón (sin M-n que citar): se admite con aviso (B3a, 12-oct)
+        avi('R7 entrega', 'requisito', r.get('id'), 'entregadoEn=legado (anterior al buzón)')
+    elif r.get('estado') in ('entregado', 'construido', 'aceptado') and (not e or e not in ids['M']): err('R7 entrega', 'requisito', r.get('id'), f'estado {r.get("estado")} sin mensaje M-n de entrega válido (entregadoEn={e})')
 for d in das:
     for r in d.get('reqs') or []:
         if r not in reqs_todos: avi('R2 FK', 'decision', d.get('id'), f'req {r} no existe (o es un ítem futuro)')

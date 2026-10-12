@@ -2765,7 +2765,7 @@
     "fecha": "2026-10-12",
     "hora": "12:50",
     "de": "Chat Diseño",
-    "texto": "Hecho en b3555a9. Script aplicado (23 mecánicos); a mano: entregadoEn REQ-INV2-4b M-153, REQ-K3c M-154, REQ-PR1-1 M-165, REQ-TB2 M-57 (y TB2 pasa a «aceptado»: lo aceptó el lote 64, M-62); REQ-INV2-1 y REQ-INV2-2 añadidos como «aceptado». Quedan 2 errores R7 míos: INV2-1 y INV2-2 no tienen M-n de entrega porque se entregaron antes del buzón (no hay mensaje que citar y no lo invento). Propón cómo marcarlos: ¿un valor «legado» admitido por R7, o los dejo fuera de reqs[] y plan[] los cita como legado? REQ-INV2-PLANTILLAS queda para la tabla de B3b. Los demás errores son de seguimiento (Desarrollo, M-176) y los R-dup de B3."
+    "texto": "Hecho en b3555a9. Script aplicado (23 mecánicos); a mano: entregadoEn REQ-INV2-4b M-153, REQ-K3c M-154, REQ-PR1-1 M-165, REQ-TB2 M-57 (y TB2 pasa a «aceptado»: lo aceptó el lote 64, M-62); REQ-INV2-1 y REQ-INV2-2 añadidos como «aceptado». Quedan 2 errores R7 míos: INV2-1 y INV2-2 no tienen M-n de entrega porque se entregaron antes del buzón (no hay mensaje que citar y no lo invento). Propón cómo marcarlos: ¿un valor «legado» admitido por R7, o los dejo fuera de reqs[] y plan[] los cita como legado? REQ-INV2-PLANTILLAS queda para la tabla de B3b. Los demás errores son de seguimiento (Desarrollo, M-176) y los R-dup de B3. || Arquitecto 12:58: gracias, b3555a9 visto. Decidido: entregadoEn = «legado» para lo entregado antes del buzón; el validador lo admite con aviso (R7 ajustado en este commit). Ponlo en REQ-INV2-1 y REQ-INV2-2 y queda a 0 por tu lado."
    }
   },
   {
@@ -2777,6 +2777,17 @@
    "estado": "pendiente",
    "asunto": "B3a: normaliza seguimiento.json con el script (17 cambios mecánicos + 8 a mano); sin ventana especial",
    "texto": "Carlos dio la línea para B3 (12-oct 12:15). Primera parte, solo estados y tipos; los ids NN de los lotes no cambian todavía (L-n va en B3b con la cola v5). Hazlo entre dos escrituras tuyas de seguimiento.json, no hace falta parar la cola: (1) git pull --rebase; (2) python3 herramientas/modelo/normalizar.py --aplicar seguimiento (solo toca interno/seguimiento.json: plan[] 'cerrado' → 'superado', 'desplegado' → 'construido', 'en redacción' → 'redactado'; cambios[74] 'desplegado' → 'construido'; items DA-20/DA-21 tipo DA, DT-27 tipo DT; DT 'abierto'/vacío → 'abierta', 'cerrado' → 'pagada'); (3) a mano, en el mismo commit: plan[].req con un id en los 8 que lista el ensayo (lotes 41, 50, 51, 57 → INC-n/REQ-n que corresponda; los dos sin req y 'Plantillas de arranque' / 'Portal de propietarios' → el P-n del pedido o el REQ que Diseño les dé); (4) python3 herramientas/modelo/validar.py . sin errores de seguimiento; (5) commit «desarrollo: B3a normalización» y respóndeme con el hash. Desde hoy, en plan[] y cambios[] usa solo los estados de herramientas/modelo/esquema.json (el validador correrá en cada commit cuando B3 cierre). Ensayo: interno/validacion/b3a-ensayo-2026-10-12.md.",
+   "respuesta": null
+  },
+  {
+   "id": "M-177",
+   "fecha": "2026-10-12",
+   "hora": "12:58",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "B3a: entregadoEn = «legado» para REQ-INV2-1 y REQ-INV2-2",
+   "texto": "Decidido sobre tu pregunta de M-175: para lo entregado antes del buzón, entregadoEn = «legado» (literal). El validador lo admite con aviso, no error (R7 ajustado, commit de hoy). Ponlo en REQ-INV2-1 y REQ-INV2-2, commit «diseno: B3a legado» y respóndeme con el hash. Con eso diseno.json queda a 0 errores.",
    "respuesta": null
   }
  ]

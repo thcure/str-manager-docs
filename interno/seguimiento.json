@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-13 10:06",
+ "actualizadoEn": "2026-10-13 10:14",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -566,8 +566,8 @@
    "severidad": "medio",
    "titulo": "La guardia del verificador local corta los GET de las páginas del grupo Proyecto a raw.githubusercontent.com (y cortará api.github.com): las pestañas que leen los JSON de str-manager-docs se prueban vacías.",
    "causa": "herramientas/pw/comun.js › HOSTS_OK no incluye raw.githubusercontent.com ni api.github.com; decidir() responde «host fuera de la lista» y ctx.route aborta. No es un defecto de str-seg-proyecto.html.",
-   "pendiente": "pw 0.4.3 (Arquitecto, 10:07): GET/HEAD/OPTIONS a raw.githubusercontent.com y api.github.com permitidos. Se cierra al ver L-82-veredicto-2.",
-   "estado": "en fix",
+   "pendiente": "Cerrado: pw 0.4.3; L-82-veredicto-2 (10:09) aceptado con datos reales.",
+   "estado": "cerrado",
    "origen": "L-82-pruebas.json y L-82-veredicto.json (13-oct 10:03): a, b, c rojos con «la guardia cortó 3 escrituras: GET …/seguimiento.json, diseno.json, reqs-historial.json»; d, g, h verdes pero con 0 datos."
   }
  ],
@@ -6443,10 +6443,104 @@
    "req": "REQ-TB-4",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto › Ítems une REQ/DA de diseno.json, INC/DT de incs[]/dts[] (o items[]) y el histórico de reqs-historial.json, sin repetir; id viejo «antes»; histórico plegado; chips DT/DA; avisos por fuente; ?v= p5c76.",
-   "estado": "no aceptado",
-   "observacion": "Encolado 13-oct 09:57 (cola en pausa). Revisión previa 13/13 (fallaban 4, 5, 6, 11 y 13, corregidos). Niveles propuestos por Desarrollo (M-235 a Diseño). Diseño confirmó niveles e interpretación del criterio 6 (respuesta a M-233, 13-oct 00:15) y el orden TB-4 → TB-3 → TB-5 + INC-118. CLI 09:58–10:02: main 600c526 (p5c76), 46/46, declarados = tocados. Pruebas rojo (a, b, c) y juez «no aceptado» 10:03: la guardia de pw cortó los GET a raw.githubusercontent.com, la página quedó sin datos (conteos 0) y d, g, h pasaron vacíos. Las 3 INC que propone el juez tienen esa misma causa del entorno, no del código: se registran como una sola, INC-119 (pw), y el lote espera una segunda pasada con la guardia corregida. N1 46/46 y la captura a 390 px sin desplazamiento horizontal.",
+   "estado": "aceptado",
+   "observacion": "Encolado 13-oct 09:57 (cola en pausa). Revisión previa 13/13 (fallaban 4, 5, 6, 11 y 13, corregidos). Niveles propuestos por Desarrollo (M-235 a Diseño). Diseño confirmó niveles e interpretación del criterio 6 (respuesta a M-233, 13-oct 00:15) y el orden TB-4 → TB-3 → TB-5 + INC-118. CLI 09:58–10:02: main 600c526 (p5c76), 46/46, declarados = tocados. Pruebas rojo (a, b, c) y juez «no aceptado» 10:03: la guardia de pw cortó los GET a raw.githubusercontent.com, la página quedó sin datos (conteos 0) y d, g, h pasaron vacíos. Las 3 INC que propone el juez tienen esa misma causa del entorno, no del código: se registran como una sola, INC-119 (pw), y el lote espera una segunda pasada con la guardia corregida. N1 46/46 y la captura a 390 px sin desplazamiento horizontal. Segunda pasada (reprobar\\, pw 0.4.3) 10:09: aceptado; conteos INC 45 · DT 8 · DA 25 · REQ 44 + 85 históricos iguales a los JSON; captura 390 px ok. B4 aplicado por el Arquitecto tras la aceptación (ae9cbb4).",
    "hash": "600c526",
-   "version": "p5c76"
+   "version": "p5c76",
+   "aceptacion": {
+    "lote": "L-82",
+    "hash": "600c526",
+    "fecha": "2026-10-13",
+    "horaBogota": "10:09",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: conteos en pantalla {\"inc\":45,\"dt\":8,\"da\":25,\"req\":44,\"hist\":85} · esperados {\"inc\":45,\"dt\":8,\"da\":25,\"req\":44,\"hist\":85} | si: ids repetidos: ninguno"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: filas REQ-K3-2: 1 | si: fila propia REQ-K3b (también en el histórico): no | si: REQ-K3-2 muestra: antes REQ-K3b"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: visibles: REQ-INV2-3-3, REQ-INV2-3-4, REQ-INV2-3-2"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: histórico cerrado al entrar: sí | si: resumen: «Histórico (anterior al buzón) · 85» · n = 85 | si: filas del histórico 85 · esperadas 85"
+     },
+     {
+      "c": "e",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 46/46 archivos OK"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 46/46 archivos OK"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: filas con DT 8 · esperadas 8 | si: filas con DA 25 · esperadas 25 | si: Ítems sigue abierta tras recargar: sí"
+     },
+     {
+      "c": "h",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: peticiones de escritura: ninguna"
+     },
+     {
+      "c": "i",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "captura i-movil a 390 px: se ven #itemsResumen (\"INC 45 · DT 8 · DA 25 · REQ 44 vigentes + 85 históricos\"), los chips de ETAPA/TIPO/SEVERIDAD y la primera fila (INC-94, crítico) completos, sin texto cortado a la derecha; texto legible. N2 ya confirmó scrollWidth 390 = clientWidth 390 (sin desplazamiento horizontal)"
+     },
+     {
+      "c": "j",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 46/46 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "regresion: [] (sin INC de regresión). Semilla zz-verif- completa (propiedades, usuarios, flujos, zonas ok). Guion N2 copiado literal a tests/e2e/REQ-TB-4.spec.js (7 casos) según entrada."
+   },
+   "costo": {
+    "minutosCLI": 4,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 10:02",
+    "aceptado": "2026-10-13 10:09",
+    "veredictos": 2,
+    "bloqueados": 0
+   }
+  },
+  {
+   "lote": "L-83",
+   "fecha": "2026-10-13",
+   "req": "REQ-TB-3",
+   "categoria": "estándar",
+   "resumen": "STRApi.docs (commit de main por la API de GitHub, raw/<sha>, encabezado «Datos de las HH:MM · sha», respaldo a main) en las 6 páginas del grupo Proyecto; botón Actualizar sin recargar; ?v= p5c77.",
+   "estado": "registrado",
+   "observacion": "Encolado 13-oct 10:12. Revisión previa 13/13 (fallaban 5, 11 —guardia de pw sin GitHub, resuelto con INC-119— y 13, corregidos)."
   }
  ],
  "esquema": {
@@ -7466,12 +7560,12 @@
    "req": "REQ-TB-4",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto › Ítems lee las fuentes nuevas (reqs/incs/dts/das + historial) con compatibilidad items[] y búsqueda por id viejo; posible junto con REQ-TB-3",
-   "estado": "verificando",
-   "vista": "en curso",
-   "esperaA": "juez local",
-   "espera": "segunda pasada (reprobar\\, pw 0.4.3 deja GET a GitHub): L-82-pruebas.json y L-82-veredicto-2.json",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.64999999999999,
-   "desde": "2026-10-13 10:08",
+   "desde": "2026-10-13 10:09",
    "planTrabajo": "PT-6",
    "grupo": "TB",
    "nota": "M-187 (Diseño). Corte con partir-items.py --aplicar después de aceptado (LM-15)."

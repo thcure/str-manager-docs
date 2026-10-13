@@ -138,6 +138,17 @@ for c in cambios:
         acc = ' '.join(str(c.get(k, '')) for k in c if k.startswith('aceptacion')) + str(c.get('observacion', ''))
         if 'aceptado' not in acc.lower() and 'veredicto' not in acc.lower(): avi('R5 veredicto', 'cambio', c.get('lote'), 'aceptado sin rastro de veredicto en aceptacion/observacion')
 
+# R-tiempos (A12, proceso.json › metrica): lote de producto aceptado desde L-76 lleva tiempos {construido, aceptado, veredictos, bloqueados}
+for c in cambios:
+    m_ = re.match(r'^L-(\d+)$', str(c.get('lote', '')))
+    if c.get('estado') == 'aceptado' and c.get('tipo') != 'modelo' and m_ and int(m_.group(1)) >= 76:
+        t = c.get('tiempos')
+        if not isinstance(t, dict): avi('R-tiempos', 'cambio', c.get('lote'), 'aceptado sin tiempos (métrica A12)')
+        else:
+            falta = [k for k in ('construido', 'aceptado', 'veredictos', 'bloqueados') if k not in t]
+            mal = [k for k in ('construido', 'aceptado') if k in t and not re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$', str(t[k]))]
+            if falta or mal: err('R-tiempos', 'cambio', c.get('lote'), 'tiempos incompletos o con formato distinto de AAAA-MM-DD HH:MM: ' + ', '.join(falta + mal))
+
 # R8 encargos
 for e in encargos:
     n = len(e.get('texto', ''))

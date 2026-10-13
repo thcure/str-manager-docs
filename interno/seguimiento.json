@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-13 09:58",
+ "actualizadoEn": "2026-10-13 10:06",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1663,6 +1663,19 @@
    "pendiente": "Con REQ-TB-5 (la métrica también lee lotes L-n).",
    "estado": "abierto",
    "origen": "Lectura de str-seg-proyecto.html p5c75 al redactar L-82 (12-oct)."
+  },
+  {
+   "id": "INC-119",
+   "tipo": "INC",
+   "modulo": "Pruebas (pw)",
+   "etapa": "📝",
+   "fecha": "2026-10-13",
+   "severidad": "medio",
+   "titulo": "La guardia del verificador local corta los GET de las páginas del grupo Proyecto a raw.githubusercontent.com (y cortará api.github.com): las pestañas que leen los JSON de str-manager-docs se prueban vacías.",
+   "causa": "herramientas/pw/comun.js › HOSTS_OK no incluye raw.githubusercontent.com ni api.github.com; decidir() responde «host fuera de la lista» y ctx.route aborta. No es un defecto de str-seg-proyecto.html.",
+   "pendiente": "Arquitecto: añadir esos dos hosts solo para GET; luego repetir pruebas + juez del L-82 sin reconstruir.",
+   "estado": "abierto",
+   "origen": "L-82-pruebas.json y L-82-veredicto.json (13-oct 10:03): a, b, c rojos con «la guardia cortó 3 escrituras: GET …/seguimiento.json, diseno.json, reqs-historial.json»; d, g, h verdes pero con 0 datos."
   }
  ],
  "cambios": [
@@ -7444,8 +7457,10 @@
    "req": "REQ-TB-4",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto › Ítems une REQ/DA de diseno.json, INC/DT de incs[]/dts[] (o items[]) y el histórico de reqs-historial.json, sin repetir; id viejo «antes»; histórico plegado; chips DT/DA; avisos por fuente; ?v= p5c76.",
-   "estado": "registrado",
-   "observacion": "Encolado 13-oct 09:57 (cola en pausa). Revisión previa 13/13 (fallaban 4, 5, 6, 11 y 13, corregidos). Niveles propuestos por Desarrollo (M-235 a Diseño). Diseño confirmó niveles e interpretación del criterio 6 (respuesta a M-233, 13-oct 00:15) y el orden TB-4 → TB-3 → TB-5 + INC-118."
+   "estado": "publicado",
+   "observacion": "Encolado 13-oct 09:57 (cola en pausa). Revisión previa 13/13 (fallaban 4, 5, 6, 11 y 13, corregidos). Niveles propuestos por Desarrollo (M-235 a Diseño). Diseño confirmó niveles e interpretación del criterio 6 (respuesta a M-233, 13-oct 00:15) y el orden TB-4 → TB-3 → TB-5 + INC-118. CLI 09:58–10:02: main 600c526 (p5c76), 46/46, declarados = tocados. Pruebas rojo (a, b, c) y juez «no aceptado» 10:03: la guardia de pw cortó los GET a raw.githubusercontent.com, la página quedó sin datos (conteos 0) y d, g, h pasaron vacíos. Las 3 INC que propone el juez tienen esa misma causa del entorno, no del código: se registran como una sola, INC-119 (pw), y el lote espera una segunda pasada con la guardia corregida. N1 46/46 y la captura a 390 px sin desplazamiento horizontal.",
+   "hash": "600c526",
+   "version": "p5c76"
   }
  ],
  "esquema": {
@@ -8465,12 +8480,12 @@
    "req": "REQ-TB-4",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto › Ítems lee las fuentes nuevas (reqs/incs/dts/das + historial) con compatibilidad items[] y búsqueda por id viejo; posible junto con REQ-TB-3",
-   "estado": "encolado",
+   "estado": "verificando",
    "vista": "en curso",
-   "esperaA": "CLI",
-   "espera": "la CLI toma L-82-instr-tb4-items-fuentes.md (jornada reanudada); luego L-82-pruebas.json y juez local",
+   "esperaA": "Arquitecto",
+   "espera": "INC-119: permitir GET a raw.githubusercontent.com y api.github.com en la guardia de pw; luego repetir pruebas y juez (L-82-veredicto-2)",
    "orden": 116.64999999999999,
-   "desde": "2026-10-13 10:00",
+   "desde": "2026-10-13 10:05",
    "planTrabajo": "PT-6",
    "grupo": "TB",
    "nota": "M-187 (Diseño). Corte con partir-items.py --aplicar después de aceptado (LM-15)."

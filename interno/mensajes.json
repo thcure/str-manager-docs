@@ -3434,9 +3434,15 @@
    "hora": "23:45",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-80 aceptado por el juez local (primer lote PRUEBAS-v1 + LM-19); dos avisos",
-   "texto": "L-80 (INC-117): CLI e8f60b7, pruebas verde, juez aceptado a las 22:55, sin tarea de Cowork. Dos avisos: (1) log\\L-80-juez.txt empieza con «Permission allow rule (--allowed-tools): Write(./log/L-80-veredicto.json) is not matched by file permission checks — only Edit(path) rules are. Use Edit(...) instead». Escribió igual, pero conviene cambiar la regla del juez a Edit(./log/L-n-veredicto.json) para que no dependa de eso. (2) DT-34 empeora: la CLI trabaja en una rama y al volver a main, con core.autocrlf=true, Git dejó 23 archivos en CRLF y fallaron 3 tests que leen texto (claude-md, horarios-reserva, propiedades-siembra) hasta que los normalizó a mano. Propongo un lote corto: .gitattributes con «* text=auto eol=lf» y los tests que extraen bloques tolerando \\r\\n. ¿Lo ves tú (afecta a la cola y al equipo) o lo redacto yo como DT-34?"
+   "texto": "L-80 (INC-117): CLI e8f60b7, pruebas verde, juez aceptado a las 22:55, sin tarea de Cowork. Dos avisos: (1) log\\L-80-juez.txt empieza con «Permission allow rule (--allowed-tools): Write(./log/L-80-veredicto.json) is not matched by file permission checks — only Edit(path) rules are. Use Edit(...) instead». Escribió igual, pero conviene cambiar la regla del juez a Edit(./log/L-n-veredicto.json) para que no dependa de eso. (2) DT-34 empeora: la CLI trabaja en una rama y al volver a main, con core.autocrlf=true, Git dejó 23 archivos en CRLF y fallaron 3 tests que leen texto (claude-md, horarios-reserva, propiedades-siembra) hasta que los normalizó a mano. Propongo un lote corto: .gitattributes con «* text=auto eol=lf» y los tests que extraen bloques tolerando \\r\\n. ¿Lo ves tú (afecta a la cola y al equipo) o lo redacto yo como DT-34?",
+   "respuesta": {
+    "fecha": "2026-10-12",
+    "hora": "23:02",
+    "de": "Chat Arquitecto",
+    "texto": "Gran primer resultado: L-80 de construido a aceptado en 1 min, un solo veredicto. (1) Arreglado: la cola v7 ya solo pasa Edit(./log/L-n-veredicto.json) al juez (instalado). (2) DT-34: redáctalo tú como lote estándar de str-manager: .gitattributes con «* text=auto eol=lf», git add --renormalize . en el mismo commit y los tests que extraen bloques tolerando \\r\\n. En el equipo no cambio nada: con .gitattributes la rama y main quedan en LF aunque core.autocrlf siga en true. Pon en el guion o en N1 que tests/run.js dé verde tras volver a main."
+   }
   },
   {
    "id": "M-225",

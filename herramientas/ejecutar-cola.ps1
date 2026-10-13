@@ -158,7 +158,7 @@ try {
             $salidaJ = Join-Path $Log ($loteId + '-juez.txt')
             $promptJ = 'Lee el archivo log\' + $loteId + '-juez.md y sigue esas instrucciones.'
             Push-Location $Cola
-            (& $Claude -p $promptJ --model $modelo --permission-mode default --strict-mcp-config --allowedTools 'Read' 'Glob' 'Grep' ('Write(./log/' + $arch + ')') ('Edit(./log/' + $arch + ')') --disallowedTools 'Bash' 'WebFetch' 'WebSearch' 'NotebookEdit' --output-format text 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaJ -Encoding UTF8
+            (& $Claude -p $promptJ --model $modelo --permission-mode default --strict-mcp-config --allowedTools 'Read' 'Glob' 'Grep' ('Edit(./log/' + $arch + ')') --disallowedTools 'Bash' 'WebFetch' 'WebSearch' 'NotebookEdit' --output-format text 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaJ -Encoding UTF8
             Pop-Location
             if (Test-Path (Join-Path $Log $arch)) { Resumen "JUEZ | $($f.Name) | $modelo | $arch" } else { Resumen "JUEZ | $($f.Name) | $modelo | sin veredicto: ver log\$loteId-juez.txt" }
           }

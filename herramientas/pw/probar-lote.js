@@ -53,7 +53,7 @@ async function main() {
   const fin = (resultado, causa) => {
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
     fs.writeFileSync(path.join(COLA, 'log', lote + '-pruebas.json'), JSON.stringify(out, null, 1));
-    console.log('Pruebas ' + lote + ': ' + resultado + (causa ? ' · ' + causa : '') + ' · log\\' + lote + '-pruebas.json');
+    console.log('Pruebas ' + lote + ': ' + resultado + (causa ? ' - ' + causa : '') + ' - log\\' + lote + '-pruebas.json');
     process.exit(resultado === 'verde' ? 0 : 1);
   };
 

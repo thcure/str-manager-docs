@@ -19,7 +19,8 @@ const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
 const HOSTS_SOLO_LECTURA = ['raw.githubusercontent.com', 'api.github.com'];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 // v0.4.5 (LM-20): sondeo sin token a /modelo/api/cargar, solo con cuerpo vacío «{}» (espera 403).
-const SONDEO_SIN_TOKEN = [/^\/modelo\/api\/cargar$/];
+// v0.5.0 (LM-27b): también /modelo/api/credenciales, con las mismas condiciones.
+const SONDEO_SIN_TOKEN = [/^\/modelo\/api\/cargar$/, /^\/modelo\/api\/credenciales$/];
 
 // v0.4.2 (N2 con camara simulada): true = video sintetico de Chrome; '<ruta>.y4m' = ese video (p. ej. un QR).
 // Sin dialogo de permiso: --use-fake-ui-for-media-stream lo acepta solo.

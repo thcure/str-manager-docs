@@ -17,6 +17,8 @@ const casos = [
   ['https://api.github.com/repos/thcure/str-manager-docs/contents/x', 'PUT', '{}', false],
   [B + '/modelo/api/cargar', 'POST', '{}', true],
   [B + '/modelo/api/cargar', 'POST', '{"proyecto":"str","tablas":{}}', false],
+  [B + '/modelo/api/credenciales', 'POST', '{}', true],
+  [B + '/modelo/api/credenciales', 'POST', '{"credenciales":[]}', false],
   [B + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-Propiedad-2"}}],"deleted":[]}', true],
   [B + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-Propiedad-2"}},{"id":"b","data":{"nombre":"Real"}}],"deleted":[]}', false],
   [B + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-P"}}],"deleted":["b"]}', false],

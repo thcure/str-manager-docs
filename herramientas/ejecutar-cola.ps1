@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -118,6 +118,11 @@ try {
   $Reprobar = Join-Path $Cola 'reprobar'
   foreach ($rp in @(Get-ChildItem -Path $Reprobar -Filter '*.txt' -File -ErrorAction SilentlyContinue)) {
     $nomR = $rp.BaseName + '.md'
+    # v7.5: tambien el id corto (reprobar\L-85.txt -> hechas\L-85-instr-*.md, si hay uno solo)
+    if (-not (Test-Path (Join-Path $Hechas $nomR))) {
+      $candR = @(Get-ChildItem -Path $Hechas -Filter ($rp.BaseName + '-instr-*.md') -File -ErrorAction SilentlyContinue)
+      if ($candR.Count -eq 1) { $nomR = $candR[0].Name }
+    }
     if (Test-Path (Join-Path $Hechas $nomR)) {
       $hR = (git rev-parse HEAD 2>$null | Select-Object -First 1).Trim()
       Resumen "REPROBAR | $nomR | pedido con reprobar\$($rp.Name)"

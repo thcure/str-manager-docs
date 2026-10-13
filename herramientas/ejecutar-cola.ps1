@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -129,6 +129,22 @@ try {
     } else { Resumen "SEMILLA | reponer | sin node o sin pw\guion.js" }
     $destS = Join-Path $Cola 'hechas'; if (-not (Test-Path $destS)) { New-Item -ItemType Directory -Path $destS | Out-Null }
     Move-Item -Path $Reponer -Destination (Join-Path $destS ('REPONER-SEMILLA.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
+  }
+
+  # v7.8 (M-282): correr\<nombre>.txt -> node pw\guion.js <nombre>.spec.js --lote <NOMBRE>; el guion corre con la guardia
+  # de pw (solo escribe zz-verif-). Resultado en log\<NOMBRE>-guion.json; el .txt pasa a correr\hechos\.
+  $Correr = Join-Path $Cola 'correr'
+  foreach ($cg in @(Get-ChildItem -Path $Correr -Filter '*.txt' -File -ErrorAction SilentlyContinue)) {
+    $specG = Join-Path $Cola ('pw\' + $cg.BaseName + '.spec.js')
+    $nodeG = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+    if ($nodeG -and (Test-Path $specG)) {
+      Push-Location (Join-Path $Cola 'pw')
+      $resG = (& $nodeG (Join-Path $Cola 'pw\guion.js') ($cg.BaseName + '.spec.js') '--lote' $cg.BaseName.ToUpper() 2>&1 | ForEach-Object { "$_" })
+      Pop-Location
+      Resumen ("GUION | " + $cg.BaseName + " | " + (($resG | Select-Object -Last 2) -join ' / ' -replace '[^\x20-\x7E]', ''))
+    } else { Resumen ("GUION | " + $cg.BaseName + " | no existe pw\" + $cg.BaseName + ".spec.js o falta node") }
+    $destG = Join-Path $Correr 'hechos'; if (-not (Test-Path $destG)) { New-Item -ItemType Directory -Path $destG | Out-Null }
+    Move-Item -Path $cg.FullName -Destination (Join-Path $destG ($cg.BaseName + '.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
   }
 
   # v7.1: reprobar\<archivo de hechas sin .md>.txt -> repite pruebas y juez de ese lote sin reconstruirlo

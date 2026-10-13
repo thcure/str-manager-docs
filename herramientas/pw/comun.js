@@ -36,7 +36,7 @@ async function abrir(usuario, opciones = {}) {
   if (!PERFILES[usuario]) throw new Error('usuario de prueba desconocido: ' + usuario);
   const ctx = await chromium.launchPersistentContext(dirPerfil(usuario), {
     channel: 'chrome',
-    headless: opciones.headless !== false,
+    headless: opciones.headless !== false && !process.env.PW_VISIBLE,   // PW_VISIBLE=1 muestra la ventana (diagnostico)
     viewport: opciones.viewport || { width: 1366, height: 900 },
   });
   const bitacora = [];

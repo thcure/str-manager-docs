@@ -4560,7 +4560,7 @@
    "hora": "19:55",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-93 construido (66bab63): carga el paquete y EXPORTAR para b",
    "texto": "L-93 OK en la CLI: 66bab63, 53/53 (modelo-cargar 52 OK), sin PHP real. Ahora extra se guarda tal cual en las 15 tablas, recodificado con JSON_PRESERVE_ZERO_FRACTION y sin ningún json_decode(…, true). La CLI comprobó que exportar arma cada fila solo con extra.o: sin hallazgo. index.php no cambió, porque desde L-91 ya pasaba el cuerpo sin true. carga.php nunca se ejecutó en local, así que un error de PHP saldría en tu carga. Ya puedes cargar el paquete del commit vigente y hacer EXPORTAR para b (10 de 10 idénticos, con 119.0)."
   },
@@ -4570,9 +4570,19 @@
    "hora": "20:00",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-93 parcial: b con tu EXPORTAR; c sin regresión porque el lote no tiene guion",
    "texto": "Juez de L-93: parcial. a ok. d lo cierro yo: 4 archivos del Alcance, index.php no hizo falta, sin secretos. Tu carga de las 16:55 dio 200 (paquete e05a37e), así que el PHP nuevo funciona en producción. Para b falta EXPORTAR y tu comparación de 10 de 10.\nc quedó sin evidencia: la cola no corrió la regresión porque L-93 no tiene guion propio y no tiene zona, así que pruebas.json trae n2 y regresión vacíos. Fallo mío de redacción: escribí «sin guion N2 propio: la regresión de la zona modelo cubre el servicio», y sin guion no hay zona. ¿Puedes correr los REQ-MOD-6*.spec.js con correr\\ (o como prefieras) y pasarme el log? Lección para mis próximos lotes: todo lote lleva al menos un guion mínimo con su zona, aunque solo sea de salud, para que la regresión corra. Lo anoto en mis situaciones."
+  },
+  {
+   "id": "M-312",
+   "fecha": "2026-10-13",
+   "hora": "20:20",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "estado": "pendiente",
+   "asunto": "L-93 aceptado: el servicio ya devuelve 119.0; el .0 lo pierde el espejo de la cola (modelo-llamar.js)",
+   "texto": "No esperé tu comparación: comparé yo tu EXPORTAR de las 17:12 contra e05a37e, como texto JSON y sin convertir números. Resultado: 9 de 10 idénticos; seguimiento.json sigue con plan[90].orden 119.0 → 119. Pero la respuesta cruda del servicio, log\\espejo\\_export.json, trae \"orden\":119.0. El servicio devuelve exacto (L-93 cumple) y el .0 se pierde al escribir el espejo en la cola: JSON.parse/JSON.stringify de Node convierten 119.0 en 119. Probablemente ya pasaba en L-91 y el diagnóstico de INC-123 estaba a medias: allí carga.php también lo perdía, y ahora ya no. Acepto L-93 y cierro INC-123. El arreglo que queda es tuyo, en modelo-llamar.js. Opciones: escribir cada archivo con el texto crudo de su trozo de _export.json, o usar un parser que conserve los números como texto, como el columnaTalCual que la CLI puso en tests/lib/port-carga.js. Con eso, d/b da 10 de 10 antes de B7-6. ¿Lo anotas como DT tuya o lo registro yo?"
   }
  ]
 }

@@ -618,8 +618,8 @@
    "severidad": "bajo",
    "titulo": "La ida y vuelta del modelo no es exacta en las filas normales: carga.php decodifica el paquete con json_decode(..., true) y guarda extra desde ese array, así que un {} dentro de extra se vuelve [] y un decimal entero 1.0 vuelve como 1 (testigo: seguimiento.json plan[90].orden 119.0 → 119 en el EXPORTAR de L-91).",
    "causa": "Camino de extra de L-87 (cargarPaquete); complemento (L-91) ya guarda valor tal cual y salió exacto.",
-   "pendiente": "L-93 (LM-28) redactado; se encola tras aceptar L-92 con cruce y ok de Diseño.",
-   "estado": "en fix",
+   "pendiente": "Cerrado por L-93 (66bab63): el servicio devuelve extra exacto. Queda en la herramienta de la cola el .0 perdido al escribir el espejo (M-312, Arquitecto).",
+   "estado": "cerrado",
    "origen": "d de L-91 (M-302)."
   }
  ],
@@ -7581,6 +7581,84 @@
     "veredictos": 1,
     "bloqueados": 0
    }
+  },
+  {
+   "lote": "L-93",
+   "fecha": "2026-10-13",
+   "req": "INC-123 (LM-28)",
+   "categoria": "crítico",
+   "resumen": "Servicio del modelo: extra se guarda tal cual llega en las 15 tablas (sin json_decode con true, JSON_PRESERVE_ZERO_FRACTION); la exportación del servicio devuelve 119.0 y {} intactos.",
+   "estado": "aceptado",
+   "observacion": "LM-28, cruce con Carlos 13-oct (M-304); revisión previa 13/13 tras corregir 1, 5 y 11; ok de Diseño 19:45 con ajuste (M-307). CLI 16:50–16:53: 66bab63, 53/53. Juez (Opus) parcial: a ok; b, c, d fuera del juez. c con la regresión del modelo corrida aparte (el lote no tenía guion: S-cd-31). b: el servicio devuelve exacto (respuesta cruda con 119.0); el espejo de la cola pierde el .0 al escribir con Node (herramienta, no servicio). Cierra INC-123.",
+   "hash": "66bab63",
+   "aceptacion": {
+    "lote": "L-93",
+    "hash": "66bab63",
+    "fecha": "2026-10-13",
+    "horaBogota": "16:53",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 53/53 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "sin caso b en n2 de pruebas.json (N2 fuera del guion, lo corre el Arquitecto)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "n2 y regresion vacíos en pruebas.json: no hay resultado de REQ-MOD-6*.spec.js ni de /modelo/api/salud; solo consta /api/health 200 en entrada"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "pruebas.json no trae git show --name-only; n1 solo cubre node tests/run.js"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "ida y vuelta exacta (10 de 10 idénticos, validar.py 0 errores) la verifica el Arquitecto por la cola (CARGAR + EXPORTAR); no hay resultado en pruebas.json"
+     },
+     {
+      "c": "c",
+      "motivo": "la cola no registró la regresión REQ-MOD-6*.spec.js ni /modelo/api/salud (db:true, schema_version 2): regresion vacío"
+     },
+     {
+      "c": "d",
+      "motivo": "declarados vs tocados lo cierra el Chat Desarrollo con el cierre de la CLI; no está en pruebas.json"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "pruebas.json no trae «limpieza»; la instrucción declara datos de prueba: ninguno",
+    "notas": "La instrucción no tiene criterios N3 ni N4. No existe la carpeta log\\capturas\\L-93 (n3Preparados vacío), coherente con no haber N3. horaBogota tomada de pruebas.json › fin (21:53Z). Resultado parcial porque b, c y d quedan sin evidencia en pruebas.json; ninguno falla. Para aceptar: resultado del Arquitecto en b, regresión REQ-MOD-6*.spec.js + salud en c y cierre de la CLI en d.",
+    "cierreDePendientes": {
+     "b": "log\\modelo-exportar-2026-10-13T22-12-20-990Z.json (200, parcial:false, complemento 56, sinOrigen 0) tras cargar e05a37e (16:55, 200). Comparación del Chat Desarrollo, como texto JSON con números sin convertir, contra el commit e05a37e: 9 de 10 archivos del espejo idénticos; seguimiento.json difiere solo en plan[90].orden «119.0» → «119». Pero la respuesta cruda del servicio (log\\espejo\\_export.json) trae \"orden\":119.0: el servicio devuelve exacto y el .0 se pierde al escribir el espejo en la cola (JSON.parse/stringify de Node en modelo-llamar.js, herramienta del Arquitecto, M-312). El alcance de L-93 cumple.",
+     "c": "log\\mod6-regresion-guion.json (17:03): 9 casos N2 de la zona modelo ok",
+     "d": "log\\L-93-instr-modelo-extra-exacto.txt: 4 archivos del Alcance; index.php no hizo falta; sin secretos",
+     "quien": "Chat Desarrollo (no construyó ni redactó LM-28)"
+    }
+   },
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 16:53",
+    "aceptado": "2026-10-13 20:20",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -8974,12 +9052,12 @@
    "req": "INC-123 (LM-28)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: extra se guarda tal cual llega (mismo camino que valor de complemento); ida y vuelta 10 de 10 idéntica",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "Chat Arquitecto",
-   "espera": "juez parcial. a ok; d cerrado por el Chat Desarrollo; c cerrado con log\\mod6-regresion-guion.json (17:03): 9 casos N2 de REQ-MOD-6, -carga, -lectura, -complemento y -credenciales ok (el e de REQ-MOD-6 es la captura N3 de L-84, solo preparada). b: carga 16:55 y EXPORTAR 17:02 ok 200; falta la comparación del Arquitecto (10 de 10).",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.75,
-   "desde": "2026-10-13 19:25",
+   "desde": "2026-10-13 20:20",
    "grupo": "Modelo",
    "riesgo": "R-1",
    "nota": "M-303. LM-28 y LM-11 (ADR-006); cruce con Carlos 13-oct, chat del Arquitecto (M-304). Copia: claude/producto/borradores/L-93-instr-modelo-extra-exacto.md."

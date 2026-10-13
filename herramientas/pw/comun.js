@@ -15,6 +15,8 @@ const PERFILES = { admin: 'zz-verif-admin', oper: 'zz-verif-oper', colab: 'zz-ve
 const HOSTS_OK = ['app.apartamentosbucaramanga.com', 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
   'firestore.googleapis.com', 'www.googleapis.com', 'apis.google.com', 'www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
+// v0.4.3 (INC-119): el grupo Proyecto lee str-manager-docs de GitHub (raw y la API de commits). Solo lectura.
+const HOSTS_SOLO_LECTURA = ['raw.githubusercontent.com', 'api.github.com'];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 
 // v0.4.2 (N2 con camara simulada): true = video sintetico de Chrome; '<ruta>.y4m' = ese video (p. ej. un QR).
@@ -35,6 +37,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
   let u;
   try { u = new URL(url); } catch (e) { return { ok: false, motivo: 'url invalida' }; }
   if (u.protocol === 'data:' || u.protocol === 'blob:') return { ok: true };
+  if (HOSTS_SOLO_LECTURA.includes(u.hostname)) return LECTURA.includes(String(metodo).toUpperCase()) ? { ok: true } : { ok: false, motivo: 'escritura a ' + u.hostname + ' (solo lectura)' };
   if (!HOSTS_OK.includes(u.hostname)) return { ok: false, motivo: 'host fuera de la lista: ' + u.hostname };
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
   if (u.hostname !== 'app.apartamentosbucaramanga.com') return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
@@ -82,4 +85,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, PERFILES, HOSTS_OK, decidir, abrir, dirPerfil, argsCamara };
+module.exports = { COLA, BASE, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara };

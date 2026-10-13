@@ -1,5 +1,8 @@
 // comun.js - verificador local (Playwright) del STR (B10-1, LM-17; lo mantiene el Arquitecto).
-// Perfiles persistentes de prueba en pw\perfiles\<usuario>\ (cookies del STR); nunca el perfil de Carlos.
+// Perfiles persistentes de prueba en pw\perfiles-chrome\<usuario>\ (cookies del STR); nunca el perfil de Carlos.
+// v0.2 (12-oct): usa el Chrome instalado (channel 'chrome'), no el Chromium de Playwright: Google no deja iniciar sesion
+// en un navegador automatizado, asi que el inicio de sesion se hace en Chrome normal (abrir-perfil.js) y Playwright
+// reutiliza ese mismo perfil despues, ya con la sesion del STR.
 // Guardia de red: el navegador solo habla con la lista de hosts; toda escritura al STR sin 'zz-verif-' se corta.
 'use strict';
 const path = require('path');
@@ -13,7 +16,7 @@ const HOSTS_OK = ['app.apartamentosbucaramanga.com', 'securetoken.googleapis.com
 const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 
-function dirPerfil(u) { return path.join(__dirname, 'perfiles', u); }
+function dirPerfil(u) { return path.join(__dirname, 'perfiles-chrome', u); }
 
 // Funcion pura (test en guardia.test.js): ¿se deja pasar esta peticion?
 function decidir(url, metodo, cuerpo) {
@@ -32,6 +35,7 @@ function decidir(url, metodo, cuerpo) {
 async function abrir(usuario, opciones = {}) {
   if (!PERFILES[usuario]) throw new Error('usuario de prueba desconocido: ' + usuario);
   const ctx = await chromium.launchPersistentContext(dirPerfil(usuario), {
+    channel: 'chrome',
     headless: opciones.headless !== false,
     viewport: opciones.viewport || { width: 1366, height: 900 },
   });

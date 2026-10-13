@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-13 10:14",
+ "actualizadoEn": "2026-10-13 10:23",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -6539,10 +6539,89 @@
    "req": "REQ-TB-3",
    "categoria": "estándar",
    "resumen": "STRApi.docs (commit de main por la API de GitHub, raw/<sha>, encabezado «Datos de las HH:MM · sha», respaldo a main) en las 6 páginas del grupo Proyecto; botón Actualizar sin recargar; ?v= p5c77.",
-   "estado": "publicado",
-   "observacion": "Encolado 13-oct 10:12. Revisión previa 13/13 (fallaban 5, 11 —guardia de pw sin GitHub, resuelto con INC-119— y 13, corregidos). CLI 10:12–10:18: main 961bdf2 (p5c77), 47/47 (tablero-al-dia 59 casos), declarados = tocados; nomenclatura y conocimiento no leen de GitHub (solo ?v=). Riesgo que anota la CLI: la regresión de REQ-TB-4 recuenta contra raw/main y la página ya lee raw/<sha>: con un commit de menos de 5 min puede dar una diferencia pasajera.",
+   "estado": "aceptado",
+   "observacion": "Encolado 13-oct 10:12. Revisión previa 13/13 (fallaban 5, 11 —guardia de pw sin GitHub, resuelto con INC-119— y 13, corregidos). CLI 10:12–10:18: main 961bdf2 (p5c77), 47/47 (tablero-al-dia 59 casos), declarados = tocados; nomenclatura y conocimiento no leen de GitHub (solo ?v=). Riesgo que anota la CLI: la regresión de REQ-TB-4 recuenta contra raw/main y la página ya lee raw/<sha>: con un commit de menos de 5 min puede dar una diferencia pasajera. Pruebas verde y juez 10:20: aceptado (a–i; API 1 consulta por carga, quedaban 58; regresión REQ-TB-4 en verde contra las fuentes nuevas).",
    "hash": "961bdf2",
-   "version": "p5c77"
+   "version": "p5c77",
+   "aceptacion": {
+    "lote": "L-83",
+    "hash": "961bdf2",
+    "fecha": "2026-10-13",
+    "horaBogota": "10:20",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "consultas a la API al cargar: 1 · respuesta 200 (quedan 58); seguimiento.json y diseno.json desde raw/<sha>: 1 y 1; todos los JSON con el sha del encabezado (ba6cd1f)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "encabezado «Datos de las 10:16 · ba6cd1f» con sha corto que coincide con data-sha (ba6cd1fe…); ya no dice «Actualizado»"
+     },
+     {
+      "c": "c",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: node tests/run.js 47/47 (incluye _docsUrl con sha nuevo = URL nueva). N2: al pulsar Actualizar, 1 consulta a la API y 3 JSON pedidos de nuevo con el sha devuelto; sin commit nuevo entre carga y Actualizar (mismo sha)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: 47/47 (incluye _docsEncabezado(null) → texto de respaldo). N2: con la API bloqueada, encabezado «Datos de main (pueden tener hasta 5 min de atraso)»; seguimiento.json leído de main; #tbHdr con datos («Según lo último anotado a las 10:14»)"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "la página no se recargó; pestaña Ítems sigue abierta y la búsqueda «K3» se conserva"
+     },
+     {
+      "c": "f",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: 47/47 (incluye prueba de ausencia de Authorization/token). N2: ninguna petición de escritura; sin cabecera authorization en la consulta a la API"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "en cobit, instrucciones, marco-trabajo, base-conocimiento y elementos: 1 consulta a la API cada una, su JSON propio leído de raw/<sha> y encabezado «Datos de…» con el mismo sha"
+     },
+     {
+      "c": "h",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "captura h-movil a 390 px (modo oscuro): el encabezado «Datos de las 10:19 · 20ac7aa» y el botón «⟳ Actualizar» se leen completos en una sola línea, sin cortes ni superposición; coincide con N2 (scrollWidth 390 = clientWidth 390)"
+     },
+     {
+      "c": "i",
+      "nivel": "N1+regresión N2",
+      "ok": true,
+      "observado": "N1: node tests/run.js 47/47. Regresión de la zona proyecto (REQ-TB-4.spec.js): casos a, b, c, d, g, h todos en verde, sin romper lo existente"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Este lote no trae criterios N4. Semilla zz-verif- completa y sesión admin ok en la entrada. Guion N2 copiado igual a la instrucción (8 casos)."
+   },
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 10:18",
+    "aceptado": "2026-10-13 10:20",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   },
   {
    "lote": "LM-20",
@@ -7809,7 +7888,7 @@
    "estado": "previsto",
    "vista": "siguiente",
    "esperaA": null,
-   "espera": "después de TB-3; con INC-118 (orden de lotes L-n en Cambios)",
+   "espera": "redactando L-84 (TB-5 + INC-118)",
    "orden": 116.655,
    "desde": "2026-10-12",
    "planTrabajo": "PT-6",

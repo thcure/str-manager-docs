@@ -96,7 +96,9 @@ async function main() {
   // P4.d semilla zz-verif- y P4.e sesiones de los perfiles que usa el guion
   const sem = await comprobarSemilla();
   out.semilla = sem;
-  if (!entra('semilla zz-verif-', sem.estado !== 'incompleta', sem.estado + (sem.error ? ' · ' + sem.error : '') + ' · ' + sem.grupos.map(x => x.id + ' ' + x.estado).join(', '))) return fin('bloqueado', 'semilla incompleta: ' + sem.grupos.filter(x => x.estado === 'falta').map(x => x.observado).join('; '));
+  // Sin guion N2 la cola no usa la semilla: queda como aviso y no bloquea (v0.3.1)
+  if (!spec && sem.estado === 'incompleta') entra('semilla zz-verif- (aviso, el lote no trae guion)', true, sem.grupos.filter(x => x.estado === 'falta').map(x => x.id + ': ' + x.observado).join('; '));
+  else if (!entra('semilla zz-verif-', sem.estado !== 'incompleta', sem.estado + (sem.error ? ' · ' + sem.error : '') + ' · ' + sem.grupos.map(x => x.id + ' ' + x.estado).join(', '))) return fin('bloqueado', 'semilla incompleta: ' + sem.grupos.filter(x => x.estado === 'falta').map(x => x.observado).join('; '));
   const perfiles = [...new Set(((spec && spec.casos) || []).map(c => c.perfil))];
   for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
 

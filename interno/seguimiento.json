@@ -608,6 +608,19 @@
    "pendiente": "Latente por decisión de Diseño (M-290, 17:10). El segundo camino, una principal elegida que después se hace privada, ya lo bloquea L-86: _invValidarZona(zonas, d, props) rechaza privada:true si la zona es la invPrincipalId de alguna propiedad («Una zona privada no puede ser la del apto ni la principal de una propiedad.»), con test N1. Solo se da con datos sembrados a mano o con escritura directa a la API; Diseño lo reabre si Carlos importa zonas de otra fuente.",
    "estado": "pospuesto",
    "origen": "Cierre de la CLI de L-90."
+  },
+  {
+   "id": "INC-123",
+   "tipo": "INC",
+   "modulo": "Servicio del modelo",
+   "etapa": "📝",
+   "fecha": "2026-10-13",
+   "severidad": "bajo",
+   "titulo": "La ida y vuelta del modelo no es exacta en las filas normales: carga.php decodifica el paquete con json_decode(..., true) y guarda extra desde ese array, así que un {} dentro de extra se vuelve [] y un decimal entero 1.0 vuelve como 1 (testigo: seguimiento.json plan[90].orden 119.0 → 119 en el EXPORTAR de L-91).",
+   "causa": "Camino de extra de L-87 (cargarPaquete); complemento (L-91) ya guarda valor tal cual y salió exacto.",
+   "pendiente": "Lote del modelo (toca carga: crítico, LM-n y cruce): guardar extra de las filas normales como valor (sin decodificar con true), igual que complemento; caso en modelo-cargar.test.js. Antes de B7-6 (desde el corte el servicio es el registro oficial). Lo redacta el Arquitecto como LM-28 o Desarrollo con su LM (M-303).",
+   "estado": "abierto",
+   "origen": "d de L-91 (M-302)."
   }
  ],
  "dts": [
@@ -721,8 +734,8 @@
    "fecha": "2026-10-13",
    "severidad": "bajo",
    "titulo": "cargar (carga.php) guarda actualizado_en con la hora por defecto de MySQL; lectura.php fija la sesión en UTC. Si el servidor no está en UTC, el filtro since de GET <tabla> se corre ese desfase (aviso de la CLI en L-88).",
-   "pendiente": "El Arquitecto lo corrige en el lote de B7-5 (SET time_zone='+00:00' en la conexión de escritura); nadie usa since antes de B7-5. En el ensayo de la migración (M6) comprueba la zona horaria del servidor nuevo (M-285).",
-   "estado": "programada"
+   "pendiente": "Pagada por L-91 (6d55294): SET time_zone en la conexión del modelo; lectura.php ya no lo repite.",
+   "estado": "pagada"
   }
  ],
  "cambios": [
@@ -7371,6 +7384,101 @@
     "veredictos": 1,
     "bloqueados": 0
    }
+  },
+  {
+   "lote": "L-91",
+   "fecha": "2026-10-13",
+   "req": "REQ-MOD-6 (LM-27a, B7-5a)",
+   "categoria": "crítico",
+   "resumen": "Servicio del modelo: esquema 2 con la tabla complemento (clave archivo+clave, sin id), exportación completa (parcial:false cuando todo archivo tiene complemento), UTC al conectar (cierra DT-36), migrar aplica 001 y 002, cargar responde la versión real.",
+   "estado": "aceptado",
+   "observacion": "LM-27a, LM-11 (ADR-006), cruce con Carlos 13-oct (chat del Arquitecto, M-297); revisión previa dos veces; ok de Diseño 17:50 (M-294). CLI 16:17–16:23: 6d55294, 52/52 sin PHP real. Primeras pruebas rotas por un comun.js viejo en LENOVO (S-arq-23); reprobar 16:31: juez (Opus) parcial, a y e ok, regresión 7/7. b, c y d del Arquitecto; f del Chat Desarrollo. d: 9 de 10 archivos idénticos con el orden; la diferencia (119.0 → 119) es heredada de L-87 → INC-123.",
+   "hash": "6d55294",
+   "aceptacion": {
+    "lote": "L-91",
+    "hash": "6d55294",
+    "fecha": "2026-10-13",
+    "horaBogota": "16:31",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 52/52 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): no hay caso b en n2 de L-91-pruebas.json"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): no hay caso c en n2 de L-91-pruebas.json"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): no hay caso d en n2 de L-91-pruebas.json"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: complemento {\"s\":403,\"e\":\"Token requerido\"} | si: credencial 404 | si: salud {\"ok\":true,\"servicio\":\"modelo\",\"version\":\"0.1\",\"proyecto\":\"str\",\"server_time\":1791927045452,\"db\":true,\"schema_version\":2,\"php\":\"8.3.35\"} | si: /api/health 200"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "cierre de la CLI (git show --name-only); no figura en L-91-pruebas.json"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "migración a 2 la cierra el Arquitecto con log\\modelo-migrar-*.json, que no está entre lo que lee el juez; indicio: la salud del modelo ya responde schema_version 2"
+     },
+     {
+      "c": "c",
+      "motivo": "carga v3 la cierra el Arquitecto con log\\modelo-cargar-*.json (200, 15 conteos, schema_version 2), que no está entre lo que lee el juez"
+     },
+     {
+      "c": "d",
+      "motivo": "ida y vuelta (EXPORTAR, espejo igual con orden de claves, validar.py 0 errores, parcial:false) la cierra el Arquitecto; sin evidencia en pruebas.json"
+     },
+     {
+      "c": "f",
+      "motivo": "declarados = tocados y sin secretos lo cierra el Chat Desarrollo con git show --name-only; sin evidencia en pruebas.json"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Entrada P4 en verde (despliegue, tests 52/52, guion N2 igual a la instrucción, semilla completa, sesión admin). Regresión: 7/7 casos ok (REQ-MOD-6-carga b,e; REQ-MOD-6-lectura d,e; REQ-MOD-6 b,c,g), ninguno rompe. La instrucción no tiene criterios N3 ni N4; la cola no preparó capturas (n3Preparados vacío y la carpeta log\\capturas\\L-91 no existe), sin efecto porque no hay N3. Resultado parcial solo por b, c, d (Arquitecto) y f (Chat Desarrollo), fuera del alcance del juez local. horaBogota tomada del fin de la corrida de la cola (21:31Z), porque el juez no ejecuta comandos.",
+    "cierreDePendientes": {
+     "b": "log\\modelo-migrar-2026-10-13T21-26-22-340Z.json: 200, schema_version 2, 2 aplicadas, salud db true (Arquitecto, M-301)",
+     "c": "log\\modelo-cargar-2026-10-13T21-28-21-991Z.json: 200, sha 2d2df50, 15 conteos, complemento 56, schema_version 2 (Arquitecto, M-301)",
+     "d": "log\\modelo-exportar-2026-10-13T21-31-28-342Z.json: 200, parcial:false, complemento 56, sinOrigen 0, 10 archivos; 9 de 10 idénticos a 2d2df50 como texto JSON, con el orden de claves; seguimiento.json igual salvo plan[90].orden 119.0 → 119; validar.py 0 errores (Arquitecto, M-302). La diferencia viene de L-87 (extra decodificado con true), fuera del alcance de L-91, donde complemento salió exacto: se acepta y se abre INC-123. Riesgo 1 (MySQL reordena JSON) descartado: la base conserva el orden.",
+     "f": "log\\L-91-instr-modelo-complemento.txt: 13 de 14 declarados (CLAUDE.md sin cambio, justificado), sin secretos, sin ?v=, base del STR sin tocar (Chat Desarrollo)",
+     "quien": "Arquitecto (b, c, d; redactó LM-27a, no construyó) y Chat Desarrollo (f; decide aceptar con d heredado)"
+    }
+   },
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 16:23",
+    "aceptado": "2026-10-13 19:05",
+    "veredictos": 1,
+    "bloqueados": 1
+   }
   }
  ],
  "esquema": {
@@ -8734,12 +8842,12 @@
    "req": "REQ-MOD-6 (LM-27a, B7-5a)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: esquema 2, tabla complemento (clave archivo+clave), exportación completa (parcial:false) y UTC al conectar (DT-36)",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "Chat Arquitecto",
-   "espera": "juez 16:31 (Opus): parcial. a y e ok; regresión 7/7. b y c cerradas por el Arquitecto (M-301: migrar schema 2; cargar 2d2df50, complemento 56). f cerrada por el Chat Desarrollo con el cierre de la CLI (13 de 14 declarados; CLAUDE.md sin cambio justificado; sin secretos; base del STR sin tocar). d: EXPORTAR 16:31 ok 200; falta la comparación del Arquitecto (orden de claves, validar.py, parcial:false). CLI 6d55294.",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.73,
-   "desde": "2026-10-13 17:30",
+   "desde": "2026-10-13 19:05",
    "grupo": "Modelo",
    "riesgo": "R-1",
    "nota": "M-292. LM-27 y LM-11 (ADR-006, aceptado por Carlos 12-oct); cruce con Carlos 13-oct, chat del Arquitecto (M-297). Copia: claude/producto/borradores/L-91-instr-modelo-complemento.md."
@@ -8749,10 +8857,10 @@
    "req": "REQ-MOD-6 (LM-27b, B7-5b)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida, hash_equals, 503) y POST credenciales; tokens de tablero, desarrollo y diseño solo de lectura",
-   "estado": "redactado",
-   "vista": "previsto",
-   "esperaA": "Carlos",
-   "espera": "cruce (M-297), ok de Diseño (M-294) y herramientas de pw publicadas (M-298); solo espera L-91 aceptado",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
+   "espera": "encolado 19:05 tras aceptar L-91 (copia verificada); herramientas de pw verificadas en LENOVO (M-298, M-302)",
    "orden": 116.74,
    "desde": "2026-10-13 17:30",
    "grupo": "Modelo",

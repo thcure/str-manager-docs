@@ -37,6 +37,8 @@
 
 **Independencia (BAI07.05):** quien construye (CLI) no escribe el guion; lo escribe Desarrollo desde los criterios de Diseño, la CLI lo copia sin cambios y el verificador comprueba que el archivo del commit es igual al de la instrucción. Ejecuta la cola; juzga el verificador.
 
+**N4 · dispositivo real** (aprobado por Carlos 12-oct, tras la revisión de REQ-PC1-2): lo que exige un celular físico (cámara real, GPS, notificaciones, lector en iPhone o Android). Se declara en P2, no va en el guion, queda en `dispositivo` del veredicto sin afectar el resultado del lote y lo cierra una prueba corta de usuario con zz-verif-colab (BAI07.05: participación de usuarios). Lo que solo necesita que llegue una imagen es N2 con cámara simulada.
+
 ## 4. Entorno de pruebas (BAI07.04)
 
 - **Semilla fija `zz-verif-`** que no se borra entre lotes: `zz-verif-Propiedad` y `zz-verif-Propiedad-2` (sin iCal); usuarios admin, oper, colab y colab2; zonas principal, apto, tendedero y otra; flujo base; un juego y artículos por zona. Un script de semilla (`pw\semilla.js`) **comprueba** que existe y la **repone** si falta, con zz-verif-admin y la guardia.

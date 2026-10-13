@@ -1,5 +1,5 @@
 # instr — R-3: conexión del STR configurable desde secrets.php (DB_HOST, DB_NAME, DB_USER)
-Categoría: **crítico** (toca la conexión a la base del STR; lote del modelo LM-23, lo redacta el Arquitecto · cruce previo con Carlos: <fecha hora>, chat del Arquitecto)
+Categoría: **crítico** (toca la conexión a la base del STR; lote del modelo LM-23, lo redacta el Arquitecto · cruce previo con Carlos: 13-oct-2026 12:24, chat del Arquitecto («ok» tras ver alcance, riesgo medio y reversión))
 Alcance: `api/config/database.php` (solo las tres propiedades y el constructor) · `api/config/secrets.example.php` · `api/health/index.php` (solo: campo `dbConfig`) · `tests/db-config.test.js` (nuevo) · `tests/e2e/R-3-db-config.spec.js` (nuevo, copia literal del Guion N2) · `docs/claude/tests-y-despliegue.md` · **sin cambio de `?v=`** · `schema_version` del STR igual · el servicio del modelo (`modelo/`) no se toca
 Impacto: el STR puede conectar a una base con otro nombre o usuario poniéndolos en `secrets.php`, sin tocar código. Hoy, sin esas constantes, todo sigue igual.
 Riesgo: medio (R-1 datos del negocio: la conexión). Mitigación: si faltan las constantes se usan exactamente los valores de hoy; ninguna consulta cambia; `/api/health` nunca devuelve valores, solo de dónde salen.

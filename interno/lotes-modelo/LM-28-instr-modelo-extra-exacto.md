@@ -5,14 +5,15 @@ Impacto: la exportación devuelve cada archivo idéntico al cargado, también en
 Riesgo: bajo (R-1 datos del modelo, no del negocio). Mitigación: solo cambia la forma de serializar `extra`; la carga sigue en una transacción; la fuente sigue siendo `str-manager-docs` hasta B7-6.
 ¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (lote del modelo LM-28; solo `str-manager/modelo/` y `tests/`)
 Reversión: `git revert <hash>` y volver a cargar el último paquete.
-Origen: INC-123 (M-303), prueba d de L-91 (M-302: `seguimiento.plan[90].orden` 119.0 → 119). Requerimiento: REQ-MOD-6. Decisión: LM-11 (ADR) + LM-28.
-Depende de: L-91 (LM-27a) aceptado. Puede ir antes o después de L-92: no se tocan.
+Origen: INC-123 (M-303), prueba d de L-91 (M-302: `seguimiento.plan[90].orden` 119.0 → 119). Requerimiento: `claude/marco/requerimientos-modelo-2026-10.md` › REQ-MOD-6. Decisión: LM-11 (ADR) + LM-28.
+Depende de: L-92 (LM-27b) aceptado: comparte `index.php` y `tests/modelo-cargar.test.js`.
 Precondiciones para verificar: `/modelo/api/salud` con `schema_version` 2; la carga y la exportación las hace el Arquitecto por la cola.
-¿Quién más depende de lo que cambia?: B7-6, el espejo de la cola y `paquete.py` (no cambia). Dentro del modelo: `lectura.php` (lee `extra` con `json_decode` sin `true`, no cambia) y los guiones `REQ-MOD-6*.spec.js` como regresión.
+¿Quién más depende de lo que cambia?: B7-6, el espejo de la cola y `paquete.py` (no cambia). Dentro del modelo: `lectura.php` (lee `extra` con `json_decode` sin `true`, no cambia), `index.php` y `tests/modelo-cargar.test.js` (los tocó L-92), `tests/modelo-router.test.js` y los guiones `REQ-MOD-6*.spec.js` como regresión.
 
 ## 1. `carga.php`
 - `extra` de las filas de las 14 tablas se guarda con el mismo camino que `valor` de `complemento` (L-91): desde el cuerpo decodificado **sin** `true` y recodificado con `JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION`, sin reordenar claves. Así `{}` sigue siendo `{}` y `119.0` sigue siendo `119.0`.
 - Las columnas proyectadas (las que no son `extra`) no cambian.
+- Comprobar que `exportar` saca cada fila solo de `extra.o`; si alguna columna numérica (p. ej. `lote.orden`) llegara a la salida, que conserve también su `.0`.
 - Validaciones, transacción y respuestas, igual que hoy.
 
 ## 2. Tests
@@ -21,8 +22,8 @@ Precondiciones para verificar: `/modelo/api/salud` con `schema_version` 2; la ca
 
 ## Pruebas derivadas (juez local; niveles PRUEBAS-v1)
 - a. `node tests/run.js` en verde con `modelo-cargar` · nivel: N1 · perfil: tests/ · página: — · precondición: ninguna · espera: cubierto por tests/modelo-cargar.test.js · **Detener**
-- b. Ida y vuelta exacta: el Arquitecto carga el paquete v3 del commit actual y pide `EXPORTAR`; cada archivo de `log\espejo\` es idéntico como texto JSON (orden de claves, `{}` y `1.0` incluidos) al del commit cargado; `validar.py` → 0 errores · nivel: N2 fuera del guion (Arquitecto) · perfil: Arquitecto · página: — · precondición: commit desplegado · espera: 10 de 10 idénticos, 0 errores · **Detener**
-- c. Regresión del modelo: `REQ-MOD-6*.spec.js` en verde; `/modelo/api/salud` con `db:true` y `schema_version` 2; `/api/health` del STR 200 · nivel: N2 (regresión) · perfil: zz-verif-admin · página: https://app.apartamentosbucaramanga.com/str-app-shell.html · precondición: ninguna · espera: como dice · **Detener**
+- b. Ida y vuelta exacta (15 tablas, incluida `complemento`): el Arquitecto carga el paquete v3 del commit actual y pide `EXPORTAR`; cada archivo de `log\espejo\` es idéntico como texto JSON (orden de claves, `{}` y `1.0` incluidos) al del commit cargado; `validar.py` → 0 errores · nivel: N2 fuera del guion (Arquitecto) · perfil: Arquitecto · página: — · precondición: commit desplegado · espera: 10 de 10 idénticos, 0 errores · **Detener**
+- c. Regresión del modelo: `REQ-MOD-6*.spec.js` en verde; `/modelo/api/salud` con `db:true` y `schema_version` 2; `/api/health` del STR 200 · nivel: N2 (regresión, sin caso nuevo) · perfil: zz-verif-admin · página: https://app.apartamentosbucaramanga.com/str-app-shell.html · precondición: ninguna · espera: como dice · **Detener**
 - d. `git show --name-only`: solo archivos del Alcance; ningún secreto · nivel: N1 (cierre de la CLI; lo cierra el Chat Desarrollo) · perfil: tests/ · página: — · precondición: ninguna · espera: declarados = tocados · **Detener**
 - Datos de prueba: ninguno.
 - Sin guion N2 propio: la regresión de la zona `modelo` cubre el servicio.

@@ -15,7 +15,7 @@ Precondiciones para verificar: `GET /modelo/api/salud` devuelve `db:true` tras l
 - `database.php`: clase `ModeloDb` con `tryConnect()` (PDO MySQL, `utf8mb4`, excepciones → `null`), `connect()` y `migrar()`; lee `../../secrets.php` si existe (`__DIR__ . '/../../secrets.php'`), si no, `db:false` sin fatal. `.htaccess` con `Deny from all` (como `api/config/`).
 
 ## 2. Esquema (`modelo/sql/001_inicial.sql`)
-Tablas (todas `InnoDB`, `utf8mb4`, con `proyecto VARCHAR(16) NOT NULL DEFAULT 'str'`, `creado_en DATETIME(3)`, `actualizado_en DATETIME(3)`, `actualizado_por VARCHAR(32)`; ids como texto, clave primaria `(proyecto, id)`):
+Tablas (todas `InnoDB`, `utf8mb4`, con `proyecto VARCHAR(16) NOT NULL DEFAULT 'str'`, `creado_en DATETIME(3)`, `actualizado_en DATETIME(3)`, `actualizado_por VARCHAR(32)`, `extra JSON NULL` (campos del JSON de hoy que no tienen columna; la carga de B7-3 y la exportación de B7-4 los conservan, LM-20); ids como texto, clave primaria `(proyecto, id)`):
 `requisito` (id, titulo, estado, modulo, categoria, documento, entregado_en, antes, detalle, nota, plan_trabajo) · `decision` (id, titulo, estado, decidida_en, texto, reqs JSON) · `pedido` (id, texto, origen, estado, reqs JSON) · `plan_trabajo` (id, nombre, objetivo, carril, estado) · `lote` (id, req, categoria, estado, resumen, orden, desde, nota, superado_por) · `cambio` (id, tipo, lote, req, categoria, estado, resumen, motivo, aprobacion, hash, version, costo JSON) · `veredicto` (id, lote, pasada, resultado, hora, archivo, criterios JSON, incs JSON, notas) · `incidente` (id, titulo, modulo, severidad, estado, causa, origen, cierre) · `deuda` (id, titulo, estado, origen) · `riesgo` (id, nombre, escenario, tolerancia, respuesta, estado) · `mensaje` (id, fecha, hora, de, para, estado, asunto, texto, respuesta JSON) · `evento` (n AUTO_INCREMENT, entidad, id, de_estado, a_estado, rol, en DATETIME(3); solo INSERT) · `leccion` (id, texto, destino, estado) · `situacion` (id, rol, grupo, que_paso, en) · `credencial` (rol PRIMARY KEY con proyecto, hash CHAR(64), vence DATE, proyectos JSON) · `schema_version` (version INT).
 Estados: los mismos textos de `str-manager-docs/herramientas/modelo/esquema.json` (no se validan aún en la base; eso es B7-5). Sin claves foráneas duras (los ids históricos no siempre existen); índices por `estado` y por `req`/`lote`.
 
@@ -25,7 +25,7 @@ Estados: los mismos textos de `str-manager-docs/herramientas/modelo/esquema.json
 - `eco` queda igual. Ninguna ruta devuelve valores de secretos.
 
 ## 4. Tests y mapa
-- `tests/modelo-sql.test.js`: lee `modelo/sql/001_inicial.sql` y comprueba que cada tabla de la lista del punto 2 tiene su `CREATE TABLE`, que ninguna sentencia es `DROP`, que todas llevan `proyecto` y que `schema_version` existe. Patrón de los demás tests.
+- `tests/modelo-sql.test.js`: lee `modelo/sql/001_inicial.sql` y comprueba que cada tabla de la lista del punto 2 tiene su `CREATE TABLE`, que ninguna sentencia es `DROP`, que todas llevan `proyecto` y `extra` (salvo `schema_version`) y que `schema_version` existe. Patrón de los demás tests.
 - `docs/claude/tests-y-despliegue.md` › sección «Servicio del modelo»: cómo se migra (ruta `migrar` con el token del Arquitecto), dónde viven los secretos, que la base del STR no se toca. `CLAUDE.md`: fila del mapa si cambia.
 
 ## Pruebas derivadas (verificador crítico; sin perfiles)

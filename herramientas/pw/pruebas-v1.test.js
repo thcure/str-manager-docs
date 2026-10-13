@@ -24,7 +24,8 @@ t('plantilla no da version', versionNueva('Alcance: <archivos> · `?v=<actual>` 
 const caso = { c: 'a', perfil: 'admin', pagina: '/p.html', que: 'q' };
 t('caso con esperas buenas pasa', cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, []).ok === true);
 t('caso sin esperas no pasa', cerrarCaso(caso, [], null, []).ok === false);
-t('caso con escritura cortada no pasa', cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, [{ metodo: 'PUT', url: '/api/col' }]).ok === false);
+const cc = cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, [{ metodo: 'PUT', url: '/api/col' }]);
+t('escritura cortada es aviso, no fallo', cc.ok === true && cc.escriturasCortadas === 1 && cc.observado.includes('aviso'));
 t('caso con error no pasa', cerrarCaso(caso, [{ ok: true, observado: 'x' }], 'boom', []).ok === false);
 const c3 = { c: 'e', perfil: 'admin', pagina: '/p.html', nivel: 'N3' };
 t('N3 preparado queda para el juez (ok null)', cerrarCaso(c3, [], null, [], [{ nombre: 'x', png: 'a.png' }]).ok === null);

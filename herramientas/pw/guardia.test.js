@@ -12,6 +12,13 @@ const casos = [
   ['https://evil.example.com/x', 'GET', '', false],
   ['https://securetoken.googleapis.com/v1/token', 'POST', 'grant_type=refresh_token', true],
   ['https://www.google-analytics.com/collect', 'POST', '', false],
+  [B + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-Propiedad-2"}}],"deleted":[]}', true],
+  [B + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-Propiedad-2"}},{"id":"b","data":{"nombre":"Real"}}],"deleted":[]}', false],
+  [B + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-P"}}],"deleted":["b"]}', false],
+  [B + '/api/col/propiedades', 'PUT', '{"items":[],"deleted":["a"]}', true],
+  [B + '/api/col/propiedades', 'PUT', '{"items":[],"deleted":["real-9"]}', false],
+  [B + '/api/col/prop-tipos', 'PUT', '{"items":[{"id":"t","data":{"nombre":"Apto"}}]}', false],
+  [B + '/api/col/flujos', 'PUT', 'no-json zz-verif-', false],
 ];
 let n = 0;
 for (const [url, m, body, esperado] of casos) { assert.strictEqual(decidir(url, m, body).ok, esperado, m + ' ' + url); n++; }

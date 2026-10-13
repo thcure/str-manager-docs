@@ -3,7 +3,8 @@
 // v0.2 (12-oct): usa el Chrome instalado (channel 'chrome'), no el Chromium de Playwright: Google no deja iniciar sesion
 // en un navegador automatizado, asi que el inicio de sesion se hace en Chrome normal (abrir-perfil.js) y Playwright
 // reutiliza ese mismo perfil despues, ya con la sesion del STR.
-// Guardia de red: el navegador solo habla con la lista de hosts; toda escritura al STR sin 'zz-verif-' se corta.
+// Guardia de red: el navegador solo habla con la lista de hosts; toda escritura al STR sin 'zz-verif-' se corta
+// (v0.4.1: con respuesta 409, para que la app no la reintente).
 'use strict';
 const path = require('path');
 const { chromium } = require('playwright');
@@ -19,7 +20,9 @@ const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 function dirPerfil(u) { return path.join(__dirname, 'perfiles-chrome', u); }
 
 // Funcion pura (test en guardia.test.js): ¿se deja pasar esta peticion?
-function decidir(url, metodo, cuerpo) {
+// idsZz: ids de filas zz-verif- que esta misma corrida ya subio; solo esas se pueden borrar por id (limpiar()).
+const ID_ZZ = new Set();
+function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
   let u;
   try { u = new URL(url); } catch (e) { return { ok: false, motivo: 'url invalida' }; }
   if (u.protocol === 'data:' || u.protocol === 'blob:') return { ok: true };
@@ -27,6 +30,19 @@ function decidir(url, metodo, cuerpo) {
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
   if (u.hostname !== 'app.apartamentosbucaramanga.com') return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
   if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true };
+  // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion
+  // entera que solo incluya una fila de prueba arrastraria datos reales (y podria pisarlos con una copia vieja).
+  if (/^\/api\/col(\/|$)/.test(u.pathname)) {
+    let j = null; try { j = JSON.parse(cuerpo || ''); } catch (e) { }
+    if (!j || !Array.isArray(j.items)) return { ok: false, motivo: 'escritura a ' + u.pathname + ' sin cuerpo legible' };
+    const borra = Array.isArray(j.deleted) ? j.deleted.map(String) : [];
+    if (borra.some(id => !idsZz.has(id))) return { ok: false, motivo: 'borrado de un id que esta corrida no creo como zz-verif- en ' + u.pathname };
+    if (!j.items.length) return borra.length ? { ok: true } : { ok: false, motivo: 'escritura vacia a ' + u.pathname };
+    const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-'));
+    if (reales.length) return { ok: false, motivo: reales.length + ' fila(s) sin zz-verif- en ' + u.pathname };
+    j.items.forEach(it => { if (it && it.id != null) idsZz.add(String(it.id)); });
+    return { ok: true };
+  }
   if (String(cuerpo || '').includes('zz-verif-') || u.href.includes('zz-verif-')) return { ok: true };
   return { ok: false, motivo: 'escritura sin zz-verif- a ' + u.pathname };
 }
@@ -45,7 +61,11 @@ async function abrir(usuario, opciones = {}) {
       const r = route.request();
       const d = decidir(r.url(), r.method(), r.postData());
       if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().split('?')[0].slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '' });
-      return d.ok ? route.continue() : route.abort('blockedbyclient');
+      if (d.ok) return route.continue();
+      // v0.4.1: al STR se le responde 409 en vez de cortar la conexion. Asi str-api.js lo trata como rechazo del
+      // servidor (no lo guarda en su cola de reintentos) y vacia los reintentos que ya tuviera guardados.
+      if (new URL(r.url()).hostname === 'app.apartamentosbucaramanga.com') return route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: 'guardia del verificador: escritura sin zz-verif- cortada' }) });
+      return route.abort('blockedbyclient');
     });
   }
   return { ctx, bitacora };

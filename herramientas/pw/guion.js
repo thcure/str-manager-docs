@@ -49,12 +49,15 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = []) {
   if (!n3 && !esperas.length && !error) partes.push('el caso no comprobo nada (sin h.espera)');
   if (n3 && !capturas.length && !error) partes.push('el caso N3 no guardo ninguna captura (sin h.captura)');
   if (error) partes.push('error: ' + error);
-  if (bloqueos.length) partes.push('la guardia corto ' + bloqueos.length + ' escritura(s): ' + bloqueos.map(b => b.metodo + ' ' + b.url).join(', '));
-  const limpio = !error && fallan.length === 0 && bloqueos.length === 0;
+  // v0.4.1: una escritura cortada es aviso, no fallo: la guardia ya la impidio y la app hace escrituras de fondo
+  // (reintentos, colecciones enteras) que no son del caso. Queda en avisos para que Desarrollo y el juez la vean.
+  if (bloqueos.length) partes.push('aviso: la guardia corto ' + bloqueos.length + ' escritura(s) sin zz-verif-: ' + [...new Set(bloqueos.map(b => b.metodo + ' ' + b.url))].join(', '));
+  const limpio = !error && fallan.length === 0;
   let ok;
   if (n3) { ok = limpio && capturas.length > 0 ? null : false; if (ok === null) partes.push('preparado para el juez: ' + capturas.length + ' captura(s)'); }
   else ok = limpio && esperas.length > 0;
   const r = { c: caso.c, nivel: n3 ? 'N3' : 'N2', perfil: caso.perfil, pagina: caso.pagina, que: caso.que || '', ok, observado: partes.join(' | ').slice(0, 900) };
+  if (bloqueos.length) r.escriturasCortadas = bloqueos.length;
   if (n3) r.capturas = capturas;
   return r;
 }

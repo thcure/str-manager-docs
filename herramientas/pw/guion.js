@@ -5,6 +5,7 @@
 //   module.exports = { req: 'REQ-X-n', zona: '<area>', casos: [ { c: 'a', perfil: 'admin|oper|colab|colab2',
 //     pagina: '/str-<pagina>.html', que: '<criterio>', async prueba(h) { ... } } ], async limpiar(h) { ... } }
 //   h = { page, BASE, lote, espera(condicion, observado), dato(nombre), respuesta(fragmentoRuta, accion), captura(nombre, {ancho}) }
+//   camara: true (video sintetico) o 'fixtures/qr.y4m' (relativo al guion) en el caso -> Chrome con camara simulada (N2).
 //   Caso N3 (LM-19): nivel: 'N3' prepara la pantalla y llama h.captura(); no lo juzga el guion: queda ok=null para el juez local.
 //
 // Uso manual:  node guion.js <ruta\al\archivo.spec.js> [--lote L-n]      (escribe log\<lote>-guion.json)
@@ -68,15 +69,18 @@ async function correrGuion(spec, opciones = {}) {
   const prefijo = opciones.prefijo || ('zz-verif-' + lote + '-');
   const resultados = [];
   const casos = (spec && Array.isArray(spec.casos)) ? spec.casos : [];
+  // Grupos por perfil y camara, en el orden en que aparecen (un perfil persistente no se abre dos veces a la vez).
   const porPerfil = {};
-  for (const c of casos) (porPerfil[c.perfil] = porPerfil[c.perfil] || []).push(c);
-  for (const perfil of Object.keys(porPerfil)) {
-    if (!PERFILES[perfil]) { porPerfil[perfil].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'perfil desconocido: ' + perfil })); continue; }
+  for (const c of casos) { const k = c.perfil + (c.camara ? '|camara:' + c.camara : ''); (porPerfil[k] = porPerfil[k] || []).push(c); }
+  for (const clave of Object.keys(porPerfil)) {
+    const perfil = clave.split('|')[0];
+    const camara = porPerfil[clave][0].camara || null;
+    if (!PERFILES[perfil]) { porPerfil[clave].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'perfil desconocido: ' + perfil })); continue; }
     let ctx, a;
     try {
-      a = await abrir(perfil, { headless: opciones.headless });
+      a = await abrir(perfil, { headless: opciones.headless, camara: camara === true || camara === 'si' ? true : (camara ? path.resolve(opciones.dirGuion || process.cwd(), camara) : null) });
       ctx = a.ctx;
-      for (const caso of porPerfil[perfil]) {
+      for (const caso of porPerfil[clave]) {
         const esperas = []; const capturas = []; let error = null; const marca = a.bitacora.length;
         const page = await ctx.newPage();
         const dirCapt = path.join(COLA, 'log', 'capturas', lote);
@@ -111,7 +115,7 @@ async function correrGuion(spec, opciones = {}) {
         await page.close().catch(() => { });
       }
     } catch (e) {
-      porPerfil[perfil].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'no se pudo abrir el perfil: ' + e.message }));
+      porPerfil[clave].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'no se pudo abrir el perfil: ' + e.message }));
     } finally { if (ctx) await ctx.close().catch(() => { }); }
   }
   // limpieza de los datos del lote (se intenta siempre; lo que quede se lista)
@@ -140,7 +144,7 @@ if (require.main === module) {
     const archivo = args.find(x => !x.startsWith('--'));
     const iL = args.indexOf('--lote'); const lote = iL >= 0 ? args[iL + 1] : 'L-0';
     if (!archivo) { console.log('Uso: node guion.js <archivo.spec.js> [--lote L-n]'); process.exit(2); }
-    const r = await correrGuion(cargar(path.resolve(archivo)), { lote });
+    const r = await correrGuion(cargar(path.resolve(archivo)), { lote, dirGuion: path.dirname(path.resolve(archivo)) });
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.c + ' · ' + x.observado));
     fs.writeFileSync(path.join(COLA, 'log', lote + '-guion.json'), JSON.stringify(r, null, 1));
     process.exit(r.casos.every(x => x.ok !== false) ? 0 : 1);

@@ -3,6 +3,7 @@
 const { extraerGuion, igual, loteDe, cerrarCaso } = require('./guion');
 const { nombresZz, evaluar } = require('./semilla');
 const { versionNueva } = require('./probar-lote');
+const { argsCamara } = require('./comun');
 let ok = 0, fail = 0;
 const t = (n, c) => { if (c) { ok++; console.log('OK   ' + n); } else { fail++; console.log('FAIL ' + n); } };
 
@@ -41,5 +42,8 @@ t('semilla: incremental no concluye', evaluar(gr, n, true, true).estado === 'no 
 t('semilla: no vista no concluye', evaluar(gr, n, false, false).estado === 'no concluyente');
 t('semilla: completa', evaluar(gr, new Set(['zz-verif-Propiedad', 'zz-verif-Propiedad-2']), true, false).estado === 'ok');
 t('semilla: minimo', evaluar({ id: 'f', fuente: 'x', minimo: 1 }, new Set(), true, false).estado === 'falta');
+t('sin camara no hay argumentos', argsCamara(null).length === 0);
+t('camara sintetica', argsCamara(true).includes('--use-fake-device-for-media-stream') && argsCamara(true).length === 2);
+t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-for-fake-video-capture=')));
 console.log(ok + ' OK, ' + fail + ' FAIL');
 process.exit(fail ? 1 : 0);

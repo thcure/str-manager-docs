@@ -12,6 +12,9 @@
 // - Selectores estables (id o data-*); si la página no los tiene, el lote los añade y lo dice en Alcance.
 // - N3 (LM-19): caso con nivel: 'N3' que deja la pantalla lista y llama h.captura('nombre', { ancho: 390 }); no lleva
 //   h.espera obligatoria: lo juzga el juez local mirando la captura y su texto. Un caso N3 por criterio N3.
+// - Cámara simulada (N2): camara: true en el caso abre Chrome con video sintético y permiso aceptado (foto «en vivo»,
+//   sin galería); camara: 'fixtures/<archivo>.y4m' (relativo al guion) muestra ese video, p. ej. un QR. Los casos se
+//   agrupan por perfil y cámara en el orden en que aparecen.
 // - Cada caso tiene 90 s. Para esperar una respuesta del servidor: await h.respuesta('/api/col/reservas', () => clic).
 
 module.exports = {

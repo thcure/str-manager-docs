@@ -17,6 +17,15 @@ const HOSTS_OK = ['app.apartamentosbucaramanga.com', 'securetoken.googleapis.com
 const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 
+// v0.4.2 (N2 con camara simulada): true = video sintetico de Chrome; '<ruta>.y4m' = ese video (p. ej. un QR).
+// Sin dialogo de permiso: --use-fake-ui-for-media-stream lo acepta solo.
+function argsCamara(camara) {
+  if (!camara) return [];
+  const a = ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'];
+  if (typeof camara === 'string') a.push('--use-file-for-fake-video-capture=' + path.resolve(camara));
+  return a;
+}
+
 function dirPerfil(u) { return path.join(__dirname, 'perfiles-chrome', u); }
 
 // Funcion pura (test en guardia.test.js): ¿se deja pasar esta peticion?
@@ -54,7 +63,9 @@ async function abrir(usuario, opciones = {}) {
     channel: 'chrome',
     headless: opciones.headless !== false && !process.env.PW_VISIBLE,   // PW_VISIBLE=1 muestra la ventana (diagnostico)
     viewport: opciones.viewport || { width: 1366, height: 900 },
+    args: argsCamara(opciones.camara),
   });
+  if (opciones.camara) { try { await ctx.grantPermissions(['camera'], { origin: BASE }); } catch (e) { } }
   const bitacora = [];
   if (opciones.guardia !== false) {
     await ctx.route('**/*', async (route) => {
@@ -71,4 +82,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, PERFILES, HOSTS_OK, decidir, abrir, dirPerfil };
+module.exports = { COLA, BASE, PERFILES, HOSTS_OK, decidir, abrir, dirPerfil, argsCamara };

@@ -1,4 +1,4 @@
-# ejecutar-cola.ps1 (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+# ejecutar-cola.ps1 (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -125,6 +125,22 @@ try {
     } else { Resumen "REPROBAR | $nomR | no esta en hechas; se ignora" }
     $destR = Join-Path $Reprobar 'hechos'; if (-not (Test-Path $destR)) { New-Item -ItemType Directory -Path $destR | Out-Null }
     Move-Item -Path $rp.FullName -Destination (Join-Path $destR ($rp.BaseName + '.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
+  }
+
+  # v7.2 (B7, LM-16/LM-20): modelo-cargas\MIGRAR o modelo-cargas\paquete-*.json -> pw\modelo-llamar.js (token de
+  # claves\modelo-arq.txt, nunca en el log). Solo datos: la cola no ejecuta nada del paquete. Pasa a modelo-cargas\hechas\.
+  $Cargas = Join-Path $Cola 'modelo-cargas'
+  $llamar = Join-Path $Cola 'pw\modelo-llamar.js'
+  $nodeM = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+  if ($nodeM -and (Test-Path $llamar)) {
+    foreach ($mc in @(Get-ChildItem -Path $Cargas -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'MIGRAR' -or $_.Name -match '^paquete-[A-Za-z0-9-]+\.json$' })) {
+      Push-Location (Join-Path $Cola 'pw')
+      if ($mc.Name -eq 'MIGRAR') { $resM = (& $nodeM $llamar 'migrar' 2>&1 | ForEach-Object { "$_" }) } else { $resM = (& $nodeM $llamar 'cargar' $mc.FullName 2>&1 | ForEach-Object { "$_" }) }
+      Pop-Location
+      Resumen ("MODELO | " + $mc.Name + " | " + (($resM | Select-Object -Last 1) -replace '[^\x20-\x7E]', ''))
+      $destM = Join-Path $Cargas 'hechas'; if (-not (Test-Path $destM)) { New-Item -ItemType Directory -Path $destM | Out-Null }
+      Move-Item -Path $mc.FullName -Destination (Join-Path $destM ((Get-Date -Format 'yyyyMMdd-HHmm') + '-' + $mc.Name)) -Force
+    }
   }
 
   # v5 (B3b): orden por numero de lote, no por nombre; acepta 75-instr-*.md y L-75-instr-*.md (id L-n del modelo)

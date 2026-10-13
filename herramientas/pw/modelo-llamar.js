@@ -13,6 +13,7 @@ const crypto = require('crypto');
 const ROLES = ['tablero', 'desarrollo', 'diseno'];
 const DIAS_VIGENCIA = 180;
 const { COLA, BASE } = require('./comun');
+const { bonito, valorCrudo } = require('./json-crudo');   // pw 0.5.2: espejo exacto (119.0 sigue 119.0)
 
 async function main() {
   const accion = process.argv[2];
@@ -79,7 +80,8 @@ async function main() {
         if (!/^interno\/[a-z0-9_\/-]+\.json$/.test(ruta) || ruta.includes('..')) continue;   // solo rutas del modelo
         const destino = path.join(esp, ...ruta.split('/'));
         fs.mkdirSync(path.dirname(destino), { recursive: true });
-        fs.writeFileSync(destino, JSON.stringify(contenido, null, 1));
+        const crudo = valorCrudo(texto, ['archivos', ruta]);
+        fs.writeFileSync(destino, (crudo ? bonito(crudo) : JSON.stringify(contenido, null, 1)));
         escritos.push(ruta);
       }
       cuerpo = { parcial: cuerpo.parcial, cubre: cuerpo.cubre, sinOrigen: cuerpo.sinOrigen, complemento: cuerpo.complemento, escritos };   // el log no guarda los datos

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-13 10:50",
+ "actualizadoEn": "2026-10-13 11:06",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -6678,9 +6678,90 @@
    "req": "REQ-MOD-6 (LM-16)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo con base propia: ModeloDb, secrets fuera del repo, 001_inicial.sql, salud con db y schema_version, GET migrar con X-Modelo-Token (403 {error:'Token requerido'}).",
-   "estado": "parcial",
-   "observacion": "Encolado 11:01. Lote del modelo LM-16 con ADR-006 y cruce con Carlos 12-oct 23:12. Revisión previa 13/13 + ok de Diseño 10:55 (M-243). CLI 10:41–10:45: main e735827, 48/48, declarados = tocados (CLAUDE.md declarado y no tocado; .gitignore como fuera de alcance). Pruebas verde; juez (Opus) 10:46: parcial — a, b, c, f, g ok; d y e pendientes de MIGRAR. La cola avisó: «crítico con cruce pero sin DA-n (desde el 20-oct será obligatoria)».",
-   "hash": "e735827"
+   "estado": "aceptado",
+   "observacion": "Encolado 11:01. Lote del modelo LM-16 con ADR-006 y cruce con Carlos 12-oct 23:12. Revisión previa 13/13 + ok de Diseño 10:55 (M-243). CLI 10:41–10:45: main e735827, 48/48, declarados = tocados (CLAUDE.md declarado y no tocado; .gitignore como fuera de alcance). Pruebas verde; juez (Opus) 10:46: parcial — a, b, c, f, g ok; d y e pendientes de MIGRAR. La cola avisó: «crítico con cruce pero sin DA-n (desde el 20-oct será obligatoria)». MIGRAR 10:53 (log\\modelo-migrar-2026-10-13T15-53-21-188Z.json: ok, schema_version 1, 16 aplicadas). L-84-veredicto-2 (10:54): a, b, c, e, g ok; d y f pendientes por evidencia fuera del juez, cerrados con esos logs (leídos por el Chat Desarrollo y confirmados por el Arquitecto, M-251). Aceptado.",
+   "hash": "e735827",
+   "aceptacion": {
+    "lote": "L-84",
+    "hash": "e735827",
+    "fecha": "2026-10-13",
+    "horaBogota": "10:54",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 48/48 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: salud 200 · db true | si: schema_version 1 (ya migrado)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: migrar sin token → 403 | si: cuerpo del 403: {\"error\":\"Token requerido\"}"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "fuera del guion; no está en pruebas.json › n2"
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "captura e-salud (PNG y texto): JSON de /modelo/api/salud con \"ok\":true, \"servicio\":\"modelo\", \"db\":true, \"schema_version\":1; no aparece ningún valor de secretos"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "n1 (node tests/run.js) no lo cubre; el cierre de la CLI (declarados vs tocados, sin secrets.php) no está entre lo que lee el juez"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · ok true · db true · schema_version 10"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "d",
+      "motivo": "N2 fuera del guion: pendiente del Arquitecto; se cierra con log\\modelo-migrar-*.json (ok:true, schema_version:1). b y e ya muestran schema_version 1, lo que indica que la migración corrió, pero la evidencia de d es ese archivo"
+     },
+     {
+      "c": "f",
+      "motivo": "la instrucción lo apoya en el cierre de la CLI (declarados = tocados, sin secrets.php, línea de .gitignore) y no hay test; ese cierre no está en pruebas.json ni en las capturas. Lo confirma el Arquitecto con el cierre del lote o git show --name-only e735827"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Regresión vacía. Entrada P4 toda en verde (despliegue, 48/48, guion igual a la instrucción con 4 casos, semilla completa, sesión admin). Sin N4. Único N3 (e) cumplido. Queda «parcial» por d (previsto por la instrucción) y f (sin evidencia del cierre de la CLI en lo que lee el juez). horaBogota tomada del fin de la corrida (15:54Z), porque el juez no ejecuta comandos para leer la hora.",
+    "cierreDePendientes": {
+     "d": "log\\modelo-migrar-2026-10-13T15-53-21-188Z.json: status 200, {ok:true, schema_version:1, aplicadas:16} (leído por el Chat Desarrollo 13-oct 11:05; también b y e ven schema_version 1)",
+     "f": "log\\L-84-instr-modelo-base.txt y COMMIT_EDITMSG de e735827: declarados = tocados salvo CLAUDE.md sin tocar (justificado), secrets.php fuera del commit, línea de .gitignore declarada fuera de alcance (leído por el Chat Desarrollo)",
+     "quien": "Evidencia leída por el Chat Desarrollo, que no construyó ni redactó LM-16; confirmación también del Arquitecto (M-251)"
+    }
+   },
+   "costo": {
+    "minutosCLI": 4,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 10:45",
+    "aceptado": "2026-10-13 10:55",
+    "veredictos": 2,
+    "bloqueados": 0
+   }
   },
   {
    "lote": "LM-22",
@@ -7941,12 +8022,12 @@
    "req": "REQ-MOD-6 (LM-16, B7-2)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo con base propia: config/secrets fuera del repo, esquema inicial 001_inicial.sql, salud con db y schema_version, ruta migrar con token del Arquitecto",
-   "estado": "parcial",
-   "vista": "en curso",
-   "esperaA": "Chat Arquitecto",
-   "espera": "MIGRAR (d) y luego reprobar\\ para e (L-84-veredicto-2)",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.70100000000001,
-   "desde": "2026-10-13 10:46",
+   "desde": "2026-10-13 10:55",
    "grupo": "Modelo",
    "nota": "M-241 (Arquitecto). Lote del modelo LM-16 con ADR-006 y cruce con Carlos 12-oct 23:12 (sin DA-n por ser del modelo). Revisión previa 13/13 (fallaban 4, 5, 10, 13; corregidos en la copia L-84)."
   },

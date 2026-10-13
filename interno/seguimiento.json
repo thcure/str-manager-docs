@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-12 23:35",
+ "actualizadoEn": "2026-10-12 23:45",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1570,7 +1570,7 @@
    "fecha": "2026-10-11",
    "severidad": "bajo",
    "titulo": "core.autocrlf=true en LENOVO reescribe CLAUDE.md y docs/claude/*.md con CRLF tras cada merge y rompe claude-md.test.js en local (lote 73). Propuesta de la CLI: .gitattributes con CLAUDE.md y docs/claude/*.md eol=lf.",
-   "pendiente": "Próximo lote que toque tests-y-despliegue (con DT-33).",
+   "pendiente": "Próximo lote que toque tests-y-despliegue (con DT-33). 12-oct L-80: con core.autocrlf=true el cambio de rama de la CLI dejó 23 archivos en CRLF y fallaron claude-md.test.js, horarios-reserva.test.js y propiedades-siembra.test.js hasta normalizarlos; sube la prioridad: .gitattributes (* text=auto eol=lf) y tests que toleren \\r\\n en un lote corto.",
    "estado": "abierta"
   },
   {
@@ -1647,8 +1647,8 @@
    "severidad": "medio",
    "titulo": "En un navegador sin datos guardados, str-propiedades.html sube al servidor propiedades y tipos de demostración antes de traer los reales.",
    "causa": "getProps() y getTipos() siembran datos de ejemplo cuando localStorage está vacío (prop-1 «Apto Centro» y prop-2 «Casa Laureles» con iCal falsos; tp-1…tp-7 por defecto) y llaman a saveProps/saveTipos → _persistCol. Como la caché str-col-lastpush-v1 también está vacía, todas las filas cuentan como cambiadas y se suben con PUT /api/col/<x> antes de que _syncColFromApi haga el pull. Efecto: dos propiedades falsas en el servidor y los tipos tp-1…tp-5 reales pisados con la versión por defecto (más tp-6 y tp-7 nuevos).",
-   "pendiente": "Con L-80 (encolado 12-oct 22:58).",
-   "estado": "abierto",
+   "pendiente": "Cerrado por L-80 (e8f60b7), aceptado 12-oct por el juez local.",
+   "estado": "cerrado",
    "origen": "M-210: la guardia de pw 0.4.1 cortó PUT /api/col/propiedades y /api/col/prop-tipos al correr el guion de semilla en un perfil limpio. Comprobado en el servidor 22:30: no hay prop-1/prop-2 (no llegó a pasar); prop-tipos tiene tp-1…tp-5 sin cambios desde el 10-sep."
   }
  ],
@@ -7161,8 +7161,10 @@
    "req": "INC-117",
    "categoria": "normal",
    "resumen": "getProps devuelve [] sin datos locales (sin ejemplo ni subida); getTipos siembra tp-1…tp-7 solo en localStorage; _syncColFromApi sube prop-tipos solo si el servidor no tiene (_tiposTrasPull); tests/propiedades-siembra.test.js; guion N2 tests/e2e/INC-117.spec.js; ?v= p5c75.",
-   "estado": "registrado",
-   "observacion": "Encolado 22:58. Revisión previa 13/13 (subagente: fallaban 5 —quién más lee str-prop-tipos-v1— y 13 —espera networkidle en el guion—, corregidos)."
+   "estado": "aceptado",
+   "observacion": "Encolado 22:58. Revisión previa 13/13 (subagente: fallaban 5 —quién más lee str-prop-tipos-v1— y 13 —espera networkidle en el guion—, corregidos). CLI 22:51–22:54: main e8f60b7 (p5c75), 44/44, declarados = tocados. Pruebas 22:55 verde (entrada ok, N1 44/44, N2 d ok: 0 PUT al cargar). Juez local 22:55: aceptado (primer lote con PRUEBAS-v1 + LM-19). Nota de la CLI: al volver de su rama a main, core.autocrlf=true reescribió 23 archivos en CRLF y rompió 3 tests que leen texto; los devolvió a LF sin commit (DT-34).",
+   "hash": "e8f60b7",
+   "version": "p5c75"
   }
  ],
  "esquema": {
@@ -8300,12 +8302,12 @@
    "req": "INC-117",
    "categoria": "normal",
    "resumen": "Propiedades no siembra ni sube datos de ejemplo antes del primer pull (getProps sin ejemplo; getTipos siembra solo en local; tipos al servidor solo si no tiene)",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
-   "espera": "la CLI toma L-80-instr-fix-inc117-siembra-propiedades.md; luego log\\L-80-pruebas.json y log\\L-80-veredicto.json (juez local, LM-19)",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.645,
-   "desde": "2026-10-12 22:58",
+   "desde": "2026-10-12 22:55",
    "grupo": "Sync",
    "nota": "Primer lote con PRUEBAS-v1 (N1 a–c, e; N2 d) y juez local. Revisión previa 13/13 (fallaban 5 y 13, corregidos)."
   },

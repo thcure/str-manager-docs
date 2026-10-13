@@ -18,6 +18,8 @@ const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
 // v0.4.3 (INC-119): el grupo Proyecto lee str-manager-docs de GitHub (raw y la API de commits). Solo lectura.
 const HOSTS_SOLO_LECTURA = ['raw.githubusercontent.com', 'api.github.com'];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
+// v0.4.5 (LM-20): sondeo sin token a /modelo/api/cargar, solo con cuerpo vacío «{}» (espera 403).
+const SONDEO_SIN_TOKEN = [/^\/modelo\/api\/cargar$/];
 
 // v0.4.2 (N2 con camara simulada): true = video sintetico de Chrome; '<ruta>.y4m' = ese video (p. ej. un QR).
 // Sin dialogo de permiso: --use-fake-ui-for-media-stream lo acepta solo.
@@ -42,6 +44,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
   if (u.hostname !== 'app.apartamentosbucaramanga.com') return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
   if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true };
+  if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
   // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion
   // entera que solo incluya una fila de prueba arrastraria datos reales (y podria pisarlos con una copia vieja).
   if (/^\/api\/col(\/|$)/.test(u.pathname)) {

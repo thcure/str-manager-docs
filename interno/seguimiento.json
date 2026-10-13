@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-12 23:45",
+ "actualizadoEn": "2026-10-12 23:05",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -7029,10 +7029,39 @@
    "estado": "aceptado",
    "observacion": "Revisión previa 11/12 → 12/12. CLI 13:48–13:50: main 9c14abf (p5c72), 41/41; declarados = tocados; HK y api/ no leen incompleto. Causa INC-113: .row2 .field con min-width:auto y selects al ancho de su opción más larga. CRLF local otra vez (DT-34). Pre-vuelo 13:52 (p5c72 sin caché); verificador lanzado 13:52 (L-76-veredicto.json). 14:20 L-76-veredicto parcial: b–f ok en navegador (sin «está en», modal sin «Dónde está», sin barra horizontal), agrupación de h ok; a y g sin leer el commit ni el test, y filtro/mezclado de h sin ejercer. Segunda pasada lanzada 14:08 (L-76-veredicto-2) con las rutas de los archivos y J2 común para el filtro. 14:20 L-76-veredicto-2 aceptado: a y g por lectura del commit y del test; h con J2 común: el filtro por zz-verif-Propiedad lo oculta y no hay «mezclado» con un dueño + común (dos dueños por tests/).",
    "costo": {
-    "minutosCLI": 3,
+    "minutosCLI": 2,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": "L-76",
+    "hash": "9c14abf0ce45bccf4d60752d8bfc6fd3cebc71a9",
+    "fecha": "2026-10-12",
+    "horaBogota": "14:20",
+    "resultado": "aceptado",
+    "modoVerificacion": "Segunda pasada. Pre-vuelo de 14:08, comprobado a las ~14:10 (menos de 10 min, sin rehacer). Archivos leídos en la carpeta str-manager (a, g). Criterio h en producción, Chrome, perfil zz-verif-admin (deviceId del pre-vuelo; /api/me desde el navegador pide token, pero str-inventario.html cargó con sesión activa). Reloj real; ningún criterio depende de la hora. No se ejecutaron los tests; se leyó el commit y el código del test.",
+    "criterios": [
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "Cubierto por tests/. COMMIT_EDITMSG de 9c14abf leído: «Tests: node tests/run.js 41/41», Hecho 1–4, No hecho: ninguno, «Declarados vs tocados … diferencias: ninguna». CLAUDE.md § 3 leído: ?v= / STR_API_VERSION p5c72 (líneas 82 y 85). Cifra 41/41 declarada en commit y en el log de la cola; no ejecuté los tests."
+     },
+     {
+      "c": "g",
+      "ok": true,
+      "observado": "Cubierto por tests/inventario-ancho.test.js. Leído el archivo: sobre el CSS real de str-inventario.html comprueba .row2 .field con min-width: 0, .field select con max-width: 100% y min-width: 0, y box-sizing: border-box; además .prest-fila con flex-wrap: wrap y sin width fijo mayor de 360 px ni nowrap. Cuenta dentro del 41/41 declarado. No probado en navegador a 390 px (regla de LM-1); cubre también la parte «ventana angosta» de f."
+     },
+     {
+      "c": "h",
+      "ok": true,
+      "observado": "Tras reactivar zz-verif-Sábana, zz-verif-Juego 1, zz-verif-Juego 2 y la zona zz-verif-Tendedero (Existencias: Sábana 4 en Tendedero; J1 2 y J2 2, completos, sin hacer Ajuste): sin filtro, bajo ZZ-VERIF-TENDEDERO · 2 aparecen J2 (común, estado secando) y J1 (zz-verif-Propiedad, en uso, «incompleto: falta 1 sábana»). Con filtro por zz-verif-Propiedad desaparece J2 y queda ZZ-VERIF-TENDEDERO · 1 con J1. En la zona con un dueño + común no aparece «⚠ mezclado». El caso de dos dueños («mezclado» presente) queda cubierto por tests/inventario.test.js (dos dueños → mezclado), según indicó el brief; no lo leí ni ejecuté."
+     }
+    ],
+    "criteriosPendientes": [],
+    "incs": [],
+    "datosDePrueba": "creados y borrados: ninguno nuevo. Reactivados y vueltos a desactivar al terminar: zz-verif-Juego 1, zz-verif-Juego 2, zz-verif-Sábana y zona zz-verif-Tendedero (verificado: todos inactivos). Juego 1 no estaba en la lista del brief; lo activé porque sin él no había par para el filtro, y lo desactivé. Pestaña cerrada.",
+    "notas": "Con esta pasada y L-76-veredicto.json (b, c, d, e, f y agrupación de h ok) quedan todos los criterios del lote cumplidos. El filtro se aplicó con teclado (End+Enter) sobre el select; el desplegable nativo no se ve en captura. Los criterios a y g se aceptan como cubiertos por tests/ por lectura de código y commit, no por ejecución propia. No vi cambios a la capa Marco. La nota de CRLF/DT-34 del log (CLAUDE.md local pasado a LF, git diff vacío) no afecta al commit."
+   }
   },
   {
    "lote": "LM-16",
@@ -7066,7 +7095,31 @@
     "minutosCLI": 4,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": "L-77",
+    "hash": "1e99b74d0864d0249f218c33760540ca1a155f89",
+    "fecha": "2026-10-12",
+    "horaBogota": "15:05",
+    "resultado": "aceptado",
+    "modoVerificacion": "Segunda pasada. Producción en Chrome, perfil zz-verif-admin (deviceId del pre-vuelo), criterios g y f-hk; reloj real del navegador (HK sincronizó 15:01, pasada la ventana 11:00+30). g(3) por lectura de tests/horarios-reserva.test.js (no ejecutado). Primera pasada (a–f, h) en L-77-veredicto.json.",
+    "criterios": [
+     {
+      "c": "g",
+      "ok": true,
+      "observado": "(1) Creé zz-verif-reserva-g1 (3→4 nov, zz-verif-Propiedad) con salida 13:00 (ficha en 11:00, 'Reserva creada'). Cambié la ficha a 09:30 (Cambios guardados). Al abrir Editar la reserva muestra Hora entrada 15:00 y Hora salida 13:00: la hora sellada no se migra; su turno de limpieza mostró 'Mié 4 nov · 09:30-15:30' (sigue la ficha, como ya anotó la primera pasada para e). (2) Reservas sin hora siguen la ficha: no repetido, ya probado por d de L-77-veredicto y el 75, según verificar.json. (3) tests/horarios-reserva.test.js líneas 62-63 cubre que no se migra: 'existente con 11:00 sellado sin cambiar → 11:00' y 'existente con 11:00 sellado y base 10:00 → 11:00 (no se migra)'; línea 65 'hora cambiada → la nueva'. Cubierto por tests/, leído, no ejecutado. Ficha restaurada a 11:00 (Cambios guardados) y g1 cancelada con motivo."
+     },
+     {
+      "c": "f-hk",
+      "ok": true,
+      "observado": "Creé zz-verif-reserva-f en zz-verif-Propiedad con check-in 11 oct, check-out 12 oct y Salida confirmada 23:00 (el formulario aceptó check-in pasado; 'Reserva creada'), ficha en 11:00. En HK, 'HOY · LUN 12 OCT', el turno de zz-verif-Propiedad (11:00–17:00, 'Checkout: zz-verif-reserva-f') aparece SIN '⚠ checkout tardío', mientras los turnos de hoy de 1801 y 1901 (10:30–16:30, sin salida acordada) sí lo muestran en la misma lectura: manda la salida acordada 23:00. Alertas (3) con f; tras cancelar f quedan Alertas (2), Turnos 39→38 y el turno de zz-verif-Propiedad desapareció de HK (recarga). Nota informativa: en el panel del calendario el turno de f aparecía con el chip 'atrasado / crítico' (no es la alerta de checkout tardío de HK; el criterio no lo cubre, no lo marco como fallo)."
+     }
+    ],
+    "criteriosPendientes": [],
+    "incs": [],
+    "datosDePrueba": "creados y cancelados: reservas zz-verif-reserva-g1 (3→4 nov) y zz-verif-reserva-f (11→12 oct) en zz-verif-Propiedad, ambas canceladas con motivo 'zz-verif prueba L-77 g/f' (quedan canceladas en el sistema, no se borran; los turnos asociados desaparecieron). Ficha de zz-verif-Propiedad restaurada a 15:00 / 11:00 sin tolerancia, 24/7 ni límite tocados (Cambios guardados). Ninguna reserva ni propiedad real tocada.",
+    "notas": "Pre-vuelo de 14:40, sesiones comprobadas a las 14:58: /api/me por navegación directa devolvió 'Token requerido' (el token va en cabecera; no ejecuto JS), así que confirmé el usuario por el chip 'zz-verif-admin · Carlos Hospedaje' de la barra del Shell (la barra de las páginas no lo muestra; el nombre de Google es el del perfil, INC-111). Sin cambios a la capa Marco observados. Pestaña de Chrome cerrada. Con esta pasada, a–h de L-77 cumplidos entre las dos pasadas; ningún criterio incumplido. Aceptación sobre L-77-veredicto (a–f, h) + L-77-veredicto-2 (g, f-hk)."
+   }
   },
   {
    "lote": "L-78",
@@ -7082,7 +7135,51 @@
     "minutosCLI": 3,
     "minutosDueno": 0
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": "L-78",
+    "hash": "50b3cbef1f7b2b77566c7aaf96d33e350eab23a9",
+    "fecha": "2026-10-12",
+    "horaBogota": "19:31",
+    "resultado": "aceptado",
+    "modoVerificacion": "Producción en Chrome (perfil zz-verif-admin, deviceId del pre-vuelo, solo abrir URLs por GET) + lectura de COMMIT_EDITMSG. Reloj real. Pre-vuelo de 19:19, arranque 19:28 (menos de 10 min), no rehecho.",
+    "criterios": [
+     {
+      "c": "a",
+      "ok": true,
+      "observado": "COMMIT_EDITMSG 50b3cbe: «Tests: node tests/run.js 43/43», Hecho 1–4, No hecho: ninguno. Cubierto por tests/, no ejecutados. La fila nueva de CLAUDE.md figura en Hecho 4 del commit; no abrí CLAUDE.md para verla."
+     },
+     {
+      "c": "b",
+      "ok": true,
+      "observado": "GET /modelo/api/salud → {\"ok\":true,\"servicio\":\"modelo\",\"version\":\"0.1\",\"proyecto\":\"str\",\"server_time\":1791851308836,\"db\":false,\"php\":\"8.3.35\"}; server_time de 13 cifras. El código HTTP 200 no se leyó, se infiere del JSON."
+     },
+     {
+      "c": "d",
+      "ok": true,
+      "observado": "GET /modelo/api/eco → {\"error\":\"Método no permitido\"}. El cuerpo coincide con 405, pero no leí el código numérico."
+     },
+     {
+      "c": "e",
+      "ok": true,
+      "observado": "GET /api/health → {\"ok\":true,\"db\":true,\"schema_version\":10,...}"
+     },
+     {
+      "c": "f",
+      "ok": true,
+      "observado": "COMMIT_EDITMSG: declarados = tocados (modelo/api/.htaccess, modelo/api/index.php, tests/modelo-router.test.js, docs/claude/tests-y-despliegue.md, CLAUDE.md); diferencias: ninguna. Sin cambio de ?v=. El log de la cola trae el aviso del CRLF local en CLAUDE.md (DT-34), corregido solo en la copia local, sin efecto en el commit."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c",
+      "motivo": "POST /modelo/api/eco no enviado: mi autorización cubre solo /api/col y /api/me, y el POST exigiría ejecutar código en la página con el navegador. Se anota «bloqueado por permisos» como dato de la prueba técnica B7-1, no como fallo del lote. Falta comprobar recibidoBytes 12 y tieneToken true."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "ninguno",
+    "notas": "Dato B7-1: desde esta tarea el GET al servicio del modelo funciona (b, d). El POST (c) queda bloqueado por permisos de la tarea; para cubrirlo hace falta autorizar la ruta /modelo/api/eco en el texto de la tarea o probarlo por otra vía. No hubo cambios a la capa Marco. Pestaña cerrada. Criterio c (POST /modelo/api/eco) cumplido por el verificador local (log\\pw-humo.json, 20:30, M-200): 200, recibidoBytes 12, tieneToken true. Aceptado con L-78-veredicto (parcial) + pw-humo."
+   }
   },
   {
    "lote": "LM-17",
@@ -7115,9 +7212,28 @@
    "observacion": "Revisión previa 10/12 → 12/12 + decisiones de Diseño (M-198). CLI 19:47–19:53: main 5956017 (p5c74), 43/43. No hecho declarado: ningún formulario pone windowStartManual (no existe edición manual de la hora de un turno con reserva). Fuera de alcance declarado: tests/turnover-guardado.test.js (solo su extracción). CRLF local en CLAUDE.md y str-api.js (DT-34); la CLI avisa que el patrón \\n de horarios-reserva.test.js es frágil con CRLF. Pre-vuelo 19:54 (admin; colab sin comprobar) y verificador lanzado 19:54 (L-79-veredicto.json). 20:05 L-79-veredicto-bloqueado: los perfiles de Chrome zz-verif-admin y zz-verif-colab no están conectados (solo aparece el Chrome personal de Carlos, que no se usa). No fue LM-17 (el verificador local usa perfiles propios): las ventanas de prueba se cerraron. Sin relanzar: espera perfiles o el verificador local (M-201). 21:22 L-79-veredicto-3 parcial: a, b, c, d, e, g, g2, h, i cumplen; f cumple la parte llegada/salida; falta la parte duración (zz-verif-Propiedad sin flujo base). Cuarta pasada disparada 21:26 solo para f (L-79-veredicto-4). Observaciones fuera de criterios → INC-115 e INC-116. 21:42 L-79-veredicto-4 aceptado: f (duración) cumple con flujo zz-verif-Flujo L79 de 8 h en ventana 12:00–15:00 («⚠ la duración supera la ventana del turno»). Aceptado 12-oct sobre veredicto-3 + veredicto-4. Observaciones sin INC: el flujo base de la ficha solo se guarda con «Guardar cambios»; «Planificadas (h): 7» frente a «manos 8h».",
    "costo": {
     "minutosCLI": 6,
-    "minutosDueno": 0
+    "minutosDueno": 1
    },
-   "cruceDueno": null
+   "cruceDueno": null,
+   "aceptacion": {
+    "lote": "L-79",
+    "hash": "5956017c4d57119c838a192450275c8781803bec",
+    "fecha": "2026-10-12",
+    "horaBogota": "21:42",
+    "resultado": "aceptado",
+    "modoVerificacion": "Cuarta pasada, solo criterio f-duracion. Producción en Chrome, perfil zz-verif-admin (deviceId 63059a77…, nunca el 3198e288…). Identidad confirmada por el chip de str-app-shell.html «zz-verif-admin · Carlos Hospedaje» a las ~21:33; pre-vuelo de 21:30 (menos de 10 min al arrancar, no se rehízo). Reloj real del navegador (hoy lun 12 oct 2026). Páginas usadas: str-flujos, str-propiedades, str-calendario, str-m1-housekeeping (no se pulsó «Sincronizar ahora»; formularios abiertos por coordenadas del botón «Nueva reserva» confirmadas con captura y refs de read_page).",
+    "criterios": [
+     {
+      "c": "f-duracion",
+      "ok": true,
+      "observado": "Flujo 'zz-verif-Flujo L79' (1 actividad, 1 tarea de 480 min = 8 h) asignado como flujo base de zz-verif-Propiedad (no había ningún flujo zz-verif- existente). Reserva zz-verif-E (20→22 nov, salida acordada 12:00) y zz-verif-F (22→24 nov, llegada acordada 15:00): el turno del 22 nov en HK mostró ventana 12:00 – 15:00, Flujo zz-verif-Flujo L79 y, en «Flujos del turno», «⏱ manos 8h · duración 8h ⚠ la duración supera la ventana del turno». Cumple. Además el detalle confirma «Salida 12:00 ✔ confirmada · Llegada 15:00 ✔ confirmada»."
+     }
+    ],
+    "criteriosPendientes": [],
+    "incs": [],
+    "datosDePrueba": "creados y borrados/restaurados: flujo 'zz-verif-Flujo L79' (borrado, ya no aparece en Flujos); flujo base de zz-verif-Propiedad quitado y guardado («— sin flujo base —»); reservas zz-verif-E y zz-verif-F canceladas con motivo «zz-verif- prueba L-79» (el sistema solo cancela: quedan tachadas, sus turnos desaparecen); ficha de zz-verif-Propiedad no se tocó (sigue 15:00 / 11:00). Pestaña cerrada.",
+    "notas": "1) Observación (no es INC de L-79, para el Chat Desarrollo): asignar el flujo base en la ficha de Propiedades con el desplegable NO guarda por sí solo; hay que pulsar «Guardar cambios» (la primera vez que lo seleccioné sin guardar, HK mostró 'sin flujo'). Puede ser el diseño esperado. 2) En el panel de horas del turno aparecía «Planificadas (h): 7» frente a «manos 8h» del flujo; no es criterio de este lote. 3) En el Calendario, al abrir el panel de la reserva E, el turno de limpieza aparecía como asignado a zz-verif-colab (colaborador base de la propiedad). 4) Capa Marco: no vi cambios sin prefijo 'modelo:'. 5) Resultado 'aceptado' sobre el conjunto: L-79-veredicto-3 dejó a–e, g, g2, h, i y f (llegada/salida) en ok; esta pasada cierra el único pendiente (f duración). Aceptación sobre L-79-veredicto-3 (a–e, g, g2, h, i y f llegada/salida) + L-79-veredicto-4 (f duración)."
+   }
   },
   {
    "lote": "LM-18",
@@ -7164,7 +7280,55 @@
    "estado": "aceptado",
    "observacion": "Encolado 22:58. Revisión previa 13/13 (subagente: fallaban 5 —quién más lee str-prop-tipos-v1— y 13 —espera networkidle en el guion—, corregidos). CLI 22:51–22:54: main e8f60b7 (p5c75), 44/44, declarados = tocados. Pruebas 22:55 verde (entrada ok, N1 44/44, N2 d ok: 0 PUT al cargar). Juez local 22:55: aceptado (primer lote con PRUEBAS-v1 + LM-19). Nota de la CLI: al volver de su rama a main, core.autocrlf=true reescribió 23 archivos en CRLF y rompió 3 tests que leen texto; los devolvió a LF sin commit (DT-34).",
    "hash": "e8f60b7",
-   "version": "p5c75"
+   "version": "p5c75",
+   "aceptacion": {
+    "lote": "L-80",
+    "hash": "e8f60b7",
+    "fecha": "2026-10-12",
+    "horaBogota": "22:55",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. Navegador sin datos: getProps no arma ejemplo ni sube",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 44/44 archivos OK"
+     },
+     {
+      "c": "b. getTipos siembra solo en local",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 44/44 archivos OK"
+     },
+     {
+      "c": "c. Los tipos se suben solo si el servidor no tiene",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 44/44 archivos OK"
+     },
+     {
+      "c": "d. Comprobación de regresión: al abrir Propiedades con sesión no sale ninguna subida y se ven las propiedades del servidor",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: PUT a propiedades/prop-tipos al cargar: 0 | si: la lista muestra zz-verif-Propiedad y zz-verif-Propiedad-2 | si: la lista no muestra propiedades de ejemplo"
+     },
+     {
+      "c": "e. Sin código de ejemplo en la página",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 44/44 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Sin N3 en esta instrucción (lo declara el lote: no hay juicio visual, el caso real del INC -navegador sin datos- no se puede reproducir desde un perfil con sesión sin tocar localStorage; a-c y e quedan en N1 y d comprueba la página real con sesión). n3Preparados viene vacío en L-80-pruebas.json, consistente con eso; no hay capturas que revisar. regresion: [] (sin casos con ok:false). Todos los criterios ok:true → aceptado."
+   },
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0
+   }
   }
  ],
  "esquema": {
@@ -8356,6 +8520,22 @@
    "espera": "según PT-5; antes de REQ-CMP-1 y REQ-F11-5-2",
    "planTrabajo": "PT-5",
    "nota": "M-217: DA-37 (a), cruce con Carlos 12-oct 22:53; 15 criterios con nivel (93 % N1/N2) en claude/producto/requerimientos-pg1-2-adelantos-liquidacion-2026-10.md. Número al encolar."
+  },
+  {
+   "lote": null,
+   "req": "REQ-F11-5-2",
+   "resumen": "Colaborador de un sub-flujo pasa a apoyo con duración llamada (5 h / 7 h / libre); se paga el turno llamado completo y la diferencia va a su saldo de horas",
+   "estado": "previsto",
+   "orden": 110.7,
+   "desde": "2026-10-12",
+   "grupo": "F11",
+   "riesgo": "R-1 (dinero), R-2",
+   "categoria": "crítico",
+   "vista": "previsto",
+   "esperaA": null,
+   "espera": "después de REQ-PG1-2",
+   "planTrabajo": "PT-5",
+   "nota": "M-225: DA-20 (decidida 10-oct), cruce con Carlos 12-oct 22:56; 11 criterios N1/N2 en claude/producto/requerimientos-f11-5-2-pago-subflujo-2026-10.md. Cálculo en el helper único de B1. Número al encolar."
   }
  ],
  "riesgos": [

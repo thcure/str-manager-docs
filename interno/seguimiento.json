@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-12 23:10",
+ "actualizadoEn": "2026-10-12 23:22",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1570,8 +1570,8 @@
    "fecha": "2026-10-11",
    "severidad": "bajo",
    "titulo": "core.autocrlf=true en LENOVO reescribe CLAUDE.md y docs/claude/*.md con CRLF tras cada merge y rompe claude-md.test.js en local (lote 73). Propuesta de la CLI: .gitattributes con CLAUDE.md y docs/claude/*.md eol=lf.",
-   "pendiente": "Próximo lote que toque tests-y-despliegue (con DT-33). 12-oct L-80: con core.autocrlf=true el cambio de rama de la CLI dejó 23 archivos en CRLF y fallaron claude-md.test.js, horarios-reserva.test.js y propiedades-siembra.test.js hasta normalizarlos; sube la prioridad: .gitattributes (* text=auto eol=lf) y tests que toleren \\r\\n en un lote corto. Con L-81 (encolado 12-oct 23:15).",
-   "estado": "abierta"
+   "pendiente": "Cerrada por L-81 (4787247), aceptado 12-oct.",
+   "estado": "cerrado"
   },
   {
    "id": "INC-112",
@@ -1650,6 +1650,19 @@
    "pendiente": "Cerrado por L-80 (e8f60b7), aceptado 12-oct por el juez local.",
    "estado": "cerrado",
    "origen": "M-210: la guardia de pw 0.4.1 cortó PUT /api/col/propiedades y /api/col/prop-tipos al correr el guion de semilla en un perfil limpio. Comprobado en el servidor 22:30: no hay prop-1/prop-2 (no llegó a pasar); prop-tipos tiene tp-1…tp-5 sin cambios desde el 10-sep."
+  },
+  {
+   "id": "INC-118",
+   "tipo": "INC",
+   "modulo": "Seg. Proyecto",
+   "etapa": "📝",
+   "fecha": "2026-10-12",
+   "severidad": "bajo",
+   "titulo": "Seg. Proyecto ordena los lotes «L-n» como 0: la pestaña Cambios los pone al final y «Producción» toma el último lote numérico (75) en vez de L-81.",
+   "causa": "renderCambios (~398) y _planProduccion ordenan con Number(lote); «L-80» da NaN → 0.",
+   "pendiente": "Con REQ-TB-5 (la métrica también lee lotes L-n).",
+   "estado": "abierto",
+   "origen": "Lectura de str-seg-proyecto.html p5c75 al redactar L-82 (12-oct)."
   }
  ],
  "cambios": [
@@ -7366,8 +7379,27 @@
    "req": "DT-34",
    "categoria": "estándar",
    "resumen": ".gitattributes con LF y binarios; git add --renormalize .; tests/lib/leer-texto.js y tests que lo usan; tests/saltos-de-linea.test.js; docs de tests.",
-   "estado": "registrado",
-   "observacion": "Encolado 23:15. Revisión previa 13/13 (subagente: fallaban 4 —Alcance que el hook no reconoce: .gitattributes y archivos renormalizados— y 9 —qué hacer si main da rojo sin reset—, corregidos; ajustes 3, 5, 6, 8)."
+   "estado": "aceptado",
+   "observacion": "Encolado 23:15. Revisión previa 13/13 (subagente: fallaban 4 —Alcance que el hook no reconoce: .gitattributes y archivos renormalizados— y 9 —qué hacer si main da rojo sin reset—, corregidos; ajustes 3, 5, 6, 8). CLI 23:08–23:11: main 4787247, 45/45 en la rama y en main tras volver (§ 4); índice ya estaba en LF (renormalización sin cambios), 41 tests pasan a leerTexto (excepción hooks.test.js). Pruebas 23:11 verde (todo N1). Juez local: aceptado.",
+   "hash": "4787247",
+   "costo": {
+    "minutosCLI": 3,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-12 23:11",
+    "aceptado": "2026-10-12 23:12",
+    "veredictos": 1,
+    "bloqueados": 0
+   },
+   "aceptacion": {
+    "lote": "L-81",
+    "hash": "4787247",
+    "fecha": "2026-10-12",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19 (todo N1: node tests/run.js 45/45 en la puerta de entrada)",
+    "notas": "Registrado desde el aviso de la cola; el archivo log\\L-81-veredicto.json no se pudo leer en ese momento (equipo desconectado del puente): hora de aceptación aproximada, se corrige al leerlo."
+   }
   }
  ],
  "esquema": {
@@ -8383,16 +8415,16 @@
    "nota": "M-181: después del 75, antes de LM-13 si la cola lo permite. Revisión previa 11/12 → 12/12. Encolado (cmp ok). Orden confirmado por Diseño (M-188)."
   },
   {
-   "lote": null,
+   "lote": "L-82",
    "req": "REQ-TB-4",
    "categoria": "estándar",
    "resumen": "Seg. Proyecto › Ítems lee las fuentes nuevas (reqs/incs/dts/das + historial) con compatibilidad items[] y búsqueda por id viejo; posible junto con REQ-TB-3",
-   "estado": "previsto",
-   "vista": "siguiente",
-   "esperaA": null,
-   "espera": null,
+   "estado": "redactado",
+   "vista": "en curso",
+   "esperaA": "equipo LENOVO",
+   "espera": "instrucción lista (revisión previa 13/13); se encola cuando el equipo vuelva a estar conectado",
    "orden": 116.64999999999999,
-   "desde": "2026-10-12",
+   "desde": "2026-10-12 23:20",
    "planTrabajo": "PT-6",
    "grupo": "TB",
    "nota": "M-187 (Diseño). Corte con partir-items.py --aplicar después de aceptado (LM-15)."
@@ -8581,12 +8613,12 @@
    "req": "DT-34",
    "categoria": "estándar",
    "resumen": ".gitattributes (* text=auto eol=lf) + renormalización; tests leen con tests/lib/leer-texto.js; tests/run.js verde en main tras volver de la rama",
-   "estado": "encolado",
-   "vista": "en curso",
-   "esperaA": "CLI",
-   "espera": "la CLI toma L-81-instr-dt34-saltos-de-linea.md; luego L-81-pruebas.json y juez local",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.646,
-   "desde": "2026-10-12 23:15",
+   "desde": "2026-10-12 23:12",
    "grupo": "Calidad",
    "nota": "M-224 (el Arquitecto pidió redactarlo). Revisión previa 13/13 (fallaban 4 y 9, corregidos). Todo N1, sin guion."
   },
@@ -8598,7 +8630,7 @@
    "estado": "previsto",
    "vista": "siguiente",
    "esperaA": null,
-   "espera": "con REQ-TB-4 (y TB-3) si cabe en un lote",
+   "espera": "después de TB-3; con INC-118 (orden de lotes L-n en Cambios)",
    "orden": 116.655,
    "desde": "2026-10-12",
    "planTrabajo": "PT-6",

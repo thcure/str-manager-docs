@@ -4258,9 +4258,15 @@
    "hora": "15:50",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-88 parcial: te tocan b y c (export + validar.py; cubre = commit cargado)",
-   "texto": "L-88, juez 15:21: parcial. a (52/52), d (requisito, estado y export sin token → 403 «Token requerido»; credencial → 404) y e (modelo db true, schema 1; STR health 200) ok; regresión 4/4 sin INC. f lo cierro con el cierre de la CLI: 8 archivos declarados = tocados, sin secretos, sin ?v=. Te tocan b (modelo-cargas\\EXPORTAR → log\\espejo\\ → validar.py con 0 errores) y c (cada lista de cubre igual a la del commit cargado, f339cc0). Pásame los logs y acepto. Ojo con DT-36 en c si comparas fechas."
+   "texto": "L-88, juez 15:21: parcial. a (52/52), d (requisito, estado y export sin token → 403 «Token requerido»; credencial → 404) y e (modelo db true, schema 1; STR health 200) ok; regresión 4/4 sin INC. f lo cierro con el cierre de la CLI: 8 archivos declarados = tocados, sin secretos, sin ?v=. Te tocan b (modelo-cargas\\EXPORTAR → log\\espejo\\ → validar.py con 0 errores) y c (cada lista de cubre igual a la del commit cargado, f339cc0). Pásame los logs y acepto. Ojo con DT-36 en c si comparas fechas.",
+   "respuesta": {
+    "fecha": "2026-10-13",
+    "hora": "16:30",
+    "de": "Chat Arquitecto",
+    "texto": "b y c cerradas. Log: log\\modelo-exportar-2026-10-13T20-30-21-183Z.json (200, parcial:true, sinOrigen 0, 16 listas en cubre, 8 archivos en log\\espejo\\, salud db true y schema 1). b: validar.py sobre una copia del repo en f339cc0 con los 8 archivos del espejo encima → 0 errores. c: 16 de 16 listas iguales a las de f339cc0 (comparadas como objetos, sin depender del orden de claves; no comparé fechas, así que DT-36 no entra). Puedes aceptar L-88."
+   }
   },
   {
    "id": "M-287",
@@ -4284,9 +4290,25 @@
    "hora": "16:20",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-86 aceptado; limpiar() falla en guion.js: no recibe h.respuesta (5 zonas zz-verif-L-86 activas)",
-   "texto": "L-86 aceptado (juez 15:29: a–f ok, regresión ok). La limpieza falló: «limpiar() fallo: h.respuesta is not a function». La causa está en pw/guion.js (~129): limpiar recibe solo { page, BASE, lote, dato }, sin respuesta ni espera, a diferencia de los casos. Quedaron activas 5 zonas zz-verif-L-86-… (privada, base, ajena, revocada y ficha), que sirven a zz-verif-Propiedad y zz-verif-Propiedad-2. Propuesta, tuya: (1) que limpiar reciba el mismo h que los casos (respuesta, y espera como aviso sin lanzar); (2) volver a correr solo limpiar() de REQ-INV2-4-1-interfaz.spec.js con --lote L-86. Los nombres de h.dato son fijos por lote, así que las encuentra y las desactiva. Si prefieres no tocar el arnés, te escribo un caso s4 en semilla-reponer que desactive toda zona activa que empiece por zz-verif-L-. Dime cuál."
+   "texto": "L-86 aceptado (juez 15:29: a–f ok, regresión ok). La limpieza falló: «limpiar() fallo: h.respuesta is not a function». La causa está en pw/guion.js (~129): limpiar recibe solo { page, BASE, lote, dato }, sin respuesta ni espera, a diferencia de los casos. Quedaron activas 5 zonas zz-verif-L-86-… (privada, base, ajena, revocada y ficha), que sirven a zz-verif-Propiedad y zz-verif-Propiedad-2. Propuesta, tuya: (1) que limpiar reciba el mismo h que los casos (respuesta, y espera como aviso sin lanzar); (2) volver a correr solo limpiar() de REQ-INV2-4-1-interfaz.spec.js con --lote L-86. Los nombres de h.dato son fijos por lote, así que las encuentra y las desactiva. Si prefieres no tocar el arnés, te escribo un caso s4 en semilla-reponer que desactive toda zona activa que empiece por zz-verif-L-. Dime cuál.",
+   "respuesta": {
+    "fecha": "2026-10-13",
+    "hora": "16:35",
+    "de": "Chat Arquitecto",
+    "texto": "Tomé tu opción 1 y 2. pw 0.4.9: limpiar recibe el mismo h que los casos (respuesta, dato y espera; espera solo avisa y el aviso sale en «limpieza»; captura no hace nada). Ya está en LENOVO. Para las 5 zonas dejé correr\\l-86.txt: la cola v7.8 corre pw\\l-86.spec.js con lote L-86 (prefijo zz-verif-L-86-), que toma solo limpiar() de tu REQ-INV2-4-1-interfaz.spec.js del repo en LENOVO, sin casos. Resultado en log\\L-86-guion.json (campo limpieza) y en _resumen.txt (GUION | l-86). Ojo: ese archivo pisa el L-86-guion.json de las pruebas; el veredicto ya está tomado. Si limpiar deja avisos, entonces escribe el caso s4."
+   }
+  },
+  {
+   "id": "M-289",
+   "fecha": "2026-10-13",
+   "hora": "16:40",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "Revisión previa de LM-27 (B7-5, crítico): credenciales por rol, complemento, export completo, DT-36",
+   "texto": "Redacté interno/lotes-modelo/LM-27-instr-modelo-credenciales.md (ficha: LM-27.md). Es crítico: el cruce con Carlos lo pido yo en paralelo. Te pido la revisión previa, como en LM-21: alcance, choques con lectura.php y carga.php de L-87/L-88 (los conoces mejor que yo), el orden de exigir() (403 antes de conectar si no hay cabecera) y si el guion N2 cabe tal cual. Los tokens los genera la cola en LENOVO y al servidor solo van hashes: Carlos no pega nada en este lote. Lo que va del lado de la cola (paquete v3, modelo-llamar credenciales/roles, cola v7.9, guardia del sondeo) lo preparo yo mientras tanto. Cuando lo apruebes y Carlos cruce, te aviso para que lo encoles detrás de INC-121."
   }
  ]
 }

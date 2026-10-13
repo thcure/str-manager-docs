@@ -5,6 +5,7 @@
 //   module.exports = { req: 'REQ-X-n', zona: '<area>', casos: [ { c: 'a', perfil: 'admin|oper|colab|colab2',
 //     pagina: '/str-<pagina>.html', que: '<criterio>', async prueba(h) { ... } } ], async limpiar(h) { ... } }
 //   h = { page, BASE, lote, espera(condicion, observado), dato(nombre), respuesta(fragmentoRuta, accion), captura(nombre, {ancho}) }
+//   limpiar(h) recibe el mismo h (v0.4.9): espera solo avisa y captura no hace nada.
 //   camara: true (video sintetico) o 'fixtures/qr.y4m' (relativo al guion) en el caso -> Chrome con camara simulada (N2).
 //   Caso N3 (LM-19): nivel: 'N3' prepara la pantalla y llama h.captura(); no lo juzga el guion: queda ok=null para el juez local.
 //
@@ -126,8 +127,20 @@ async function correrGuion(spec, opciones = {}) {
       const a = await abrir('admin', { headless: opciones.headless }); ctx = a.ctx;
       const page = await ctx.newPage();
       await page.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded' });
-      await spec.limpiar({ page, BASE, lote, dato: n => prefijo + n });
-      limpieza = 'limpiar() corrio sin error';
+      // v0.4.9 (M-288): limpiar recibe el mismo h que los casos (respuesta y espera); espera solo avisa, nunca lanza
+      const avisos = [];
+      const hL = {
+        page, BASE, lote,
+        dato: n => prefijo + n,
+        espera(cond, observado) { if (!cond) avisos.push(String(observado || '')); return !!cond; },
+        respuesta(fragmento, accion) {
+          const p = page.waitForResponse(r => r.url().includes(fragmento), { timeout: 30000 });
+          return accion ? Promise.all([p, accion()]).then(x => x[0]) : p;
+        },
+        async captura() { return null; },
+      };
+      await spec.limpiar(hL);
+      limpieza = avisos.length ? ('limpiar() corrio con avisos: ' + avisos.join(' | ').slice(0, 600)) : 'limpiar() corrio sin error';
     } catch (e) { limpieza = 'limpiar() fallo: ' + e.message + ' (borrar a mano lo que empiece por ' + prefijo + ')'; }
     finally { if (ctx) await ctx.close().catch(() => { }); }
   }

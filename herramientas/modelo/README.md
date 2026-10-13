@@ -53,11 +53,10 @@ Cada pedido pasa después a `modelo-cargas\hechas\<fecha>-<nombre>`. El token nu
 |---|---|---|
 | B7-1 prueba técnica (`salud`, `eco`) | L-78 | aceptado |
 | B7-2 base propia, `secrets.php`, `migrar`, 16 sentencias | LM-16 / L-84 | aceptado |
-| B7-3 carga inicial (`POST cargar`) | LM-20 / L-87 | cruzado por Carlos (13-oct 11:04), ok de Diseño 11:55, **espera la cola** (límite semanal de la CLI hasta el 17-oct 03:00) |
-| B7-4 lectura y export | LM-21 | instrucción lista; revisión previa de Desarrollo; entra tras L-87 aceptado |
-| B7-5 credenciales por rol, `complemento`, export completo | — | por redactar (crítico: esquema 2 y tokens; Carlos pone los tokens) |
+| B7-3 carga inicial (`POST cargar`) | LM-20 / L-87 | aceptado (dos cargas iguales del paquete f339cc0) |
+| B7-4 lectura y export | LM-21 / L-88 | juez parcial; b y c cerradas por el Arquitecto (16/16 listas iguales, 0 errores); falta la aceptación de Desarrollo |
+| B7-5 credenciales por rol, `complemento`, export completo, UTC (DT-36) | LM-27 | redactado; revisión previa de Desarrollo (M-289) y cruce de Carlos. Los tokens los genera la cola en LENOVO; al servidor solo van hashes |
 | B7-6 corte: el servicio es el registro oficial, Git el espejo | — | por redactar (Carlos presente, 20 min) |
-Al construirse L-87: el Arquitecto deja `paquete-<sha>.json` dos veces (criterios c y d: mismos conteos) y lo informa a Desarrollo.
 
 ## 7. Recuperación
 - Código: `git revert` en `str-manager`; Hostinger vuelve a publicar.

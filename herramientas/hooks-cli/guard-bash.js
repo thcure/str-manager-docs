@@ -1,4 +1,4 @@
-// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; lo mantiene el Arquitecto).
+// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; lo mantiene el Arquitecto, lo instala Carlos).
 // Bloquea (exit 2 + motivo en stderr) tres cosas, de forma determinista:
 //  1. Comandos destructivos de git (reset --hard, push --force, checkout -- <archivo>, clean -f, branch -D).
 //  2. `git commit` con archivos fuera del Alcance de la instrucción del lote (env STR_INSTR), salvo que el mensaje
@@ -25,7 +25,10 @@ function leerAlcance(rutaInstr) {
 function patronesAlcance(texto) {
   const pats = [];
   if (!texto) return pats;
-  const re = new RegExp('`?([\\w./-]+?(?:\\.' + EXT + '|/))`?', 'g');
+  // v2 (LM-22, 13-oct-2026): token entero (no perezoso). Con el patrón perezoso de v1, «modelo/api/config/database.php»
+  // casaba primero «modelo/» y abría la carpeta entera (incluido modelo/secrets.php). Ahora una carpeta solo cuenta si
+  // el Alcance la escribe terminada en «/» y aislada; un archivo, si termina en una extensión conocida.
+  const re = new RegExp('(?:^|[\\s`(·,;])\\.?\\/?([\\w][\\w./-]*?(?:\\.' + EXT + '|/))(?=$|[\\s`),;·])', 'g');
   let m;
   while ((m = re.exec(texto))) {
     let p = m[1].replace(/^\.?\//, '');

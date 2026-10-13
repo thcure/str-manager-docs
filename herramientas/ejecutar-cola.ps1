@@ -1,4 +1,4 @@
-# ejecutar-cola.ps1 (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -133,9 +133,10 @@ try {
   $llamar = Join-Path $Cola 'pw\modelo-llamar.js'
   $nodeM = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
   if ($nodeM -and (Test-Path $llamar)) {
-    foreach ($mc in @(Get-ChildItem -Path $Cargas -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'MIGRAR' -or $_.Name -match '^paquete-[A-Za-z0-9-]+\.json$' })) {
+    foreach ($mc in @(Get-ChildItem -Path $Cargas -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'MIGRAR' -or $_.Name -eq 'EXPORTAR' -or $_.Name -match '^paquete-[A-Za-z0-9-]+\.json$' })) {
       Push-Location (Join-Path $Cola 'pw')
-      if ($mc.Name -eq 'MIGRAR') { $resM = (& $nodeM $llamar 'migrar' 2>&1 | ForEach-Object { "$_" }) } else { $resM = (& $nodeM $llamar 'cargar' $mc.FullName 2>&1 | ForEach-Object { "$_" }) }
+      if ($mc.Name -eq 'MIGRAR') { $resM = (& $nodeM $llamar 'migrar' 2>&1 | ForEach-Object { "$_" }) }
+      elseif ($mc.Name -eq 'EXPORTAR') { $resM = (& $nodeM $llamar 'exportar' 2>&1 | ForEach-Object { "$_" }) } else { $resM = (& $nodeM $llamar 'cargar' $mc.FullName 2>&1 | ForEach-Object { "$_" }) }
       Pop-Location
       Resumen ("MODELO | " + $mc.Name + " | " + (($resM | Select-Object -Last 1) -replace '[^\x20-\x7E]', ''))
       $destM = Join-Path $Cargas 'hechas'; if (-not (Test-Path $destM)) { New-Item -ItemType Directory -Path $destM | Out-Null }

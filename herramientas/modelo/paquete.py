@@ -3,90 +3,120 @@
 
 Uso:  python3 herramientas/modelo/paquete.py [--salida RUTA]   (por defecto paquete-<sha>.json en el directorio actual)
 Condición: validar.py en 0 errores (si no, no escribe nada).
-Cada fila lleva las columnas de su tabla (LM-16 §2) y todo lo demás del JSON en `extra`, para que la exportación
-de B7-4 devuelva los archivos con la forma de hoy. Solo proyecto «str». Nunca datos del negocio.
+v2 (13-oct): cada fila lleva sus columnas como proyección indexable (ajustadas al tipo de 001_inicial.sql: lo que no
+encaja va a None) y en `extra` {f: archivo.lista, i: posición, o: objeto completo}; la exportación de B7-4 (LM-21)
+rehace los archivos desde extra, sin perder ni cambiar nada. Filas derivadas (veredicto, evento): extra.derivado. Solo proyecto «str». Nunca datos del negocio.
 """
 import json, os, re, subprocess, sys, datetime
 from collections import Counter
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-COLS = {
-    'requisito': ['id', 'titulo', 'estado', 'modulo', 'categoria', 'documento', 'entregado_en', 'antes', 'detalle', 'nota', 'plan_trabajo'],
-    'decision': ['id', 'titulo', 'estado', 'decidida_en', 'texto', 'reqs'],
-    'pedido': ['id', 'texto', 'origen', 'estado', 'reqs'],
-    'plan_trabajo': ['id', 'nombre', 'objetivo', 'carril', 'estado'],
-    'lote': ['id', 'req', 'categoria', 'estado', 'resumen', 'orden', 'desde', 'nota', 'superado_por'],
-    'cambio': ['id', 'tipo', 'lote', 'req', 'categoria', 'estado', 'resumen', 'motivo', 'aprobacion', 'hash', 'version', 'costo'],
-    'veredicto': ['id', 'lote', 'pasada', 'resultado', 'hora', 'archivo', 'criterios', 'incs', 'notas'],
-    'incidente': ['id', 'titulo', 'modulo', 'severidad', 'estado', 'causa', 'origen', 'cierre'],
-    'deuda': ['id', 'titulo', 'estado', 'origen'],
-    'riesgo': ['id', 'nombre', 'escenario', 'tolerancia', 'respuesta', 'estado'],
-    'mensaje': ['id', 'fecha', 'hora', 'de', 'para', 'estado', 'asunto', 'texto', 'respuesta'],
-    'evento': ['entidad', 'id', 'de_estado', 'a_estado', 'rol', 'en'],
-    'situacion': ['id', 'rol', 'grupo', 'que_paso', 'en'],
+# Tipos de modelo/sql/001_inicial.sql (str-manager, L-84). Si cambia el esquema, se actualiza aquí y en el test.
+TIPOS = {
+    'requisito': {'id': 'V64', 'titulo': 'T', 'estado': 'V32', 'modulo': 'V64', 'categoria': 'V32', 'documento': 'T', 'entregado_en': 'V32', 'antes': 'V64', 'detalle': 'T', 'nota': 'T', 'plan_trabajo': 'V64'},
+    'decision': {'id': 'V64', 'titulo': 'T', 'estado': 'V32', 'decidida_en': 'V32', 'texto': 'T', 'reqs': 'J'},
+    'pedido': {'id': 'V64', 'texto': 'T', 'origen': 'V64', 'estado': 'V32', 'reqs': 'J'},
+    'plan_trabajo': {'id': 'V64', 'nombre': 'T', 'objetivo': 'T', 'carril': 'V32', 'estado': 'V32'},
+    'lote': {'id': 'V64', 'req': 'V64', 'categoria': 'V32', 'estado': 'V32', 'resumen': 'T', 'orden': 'I', 'desde': 'V32', 'nota': 'T', 'superado_por': 'V64'},
+    'cambio': {'id': 'V64', 'tipo': 'V32', 'lote': 'V64', 'req': 'V64', 'categoria': 'V32', 'estado': 'V32', 'resumen': 'T', 'motivo': 'T', 'aprobacion': 'T', 'hash': 'V64', 'version': 'V32', 'costo': 'J'},
+    'veredicto': {'id': 'V64', 'lote': 'V64', 'pasada': 'I', 'resultado': 'V32', 'hora': 'V32', 'archivo': 'T', 'criterios': 'J', 'incs': 'J', 'notas': 'T'},
+    'incidente': {'id': 'V64', 'titulo': 'T', 'modulo': 'V64', 'severidad': 'V32', 'estado': 'V32', 'causa': 'T', 'origen': 'T', 'cierre': 'T'},
+    'deuda': {'id': 'V64', 'titulo': 'T', 'estado': 'V32', 'origen': 'T'},
+    'riesgo': {'id': 'V64', 'nombre': 'T', 'escenario': 'T', 'tolerancia': 'V32', 'respuesta': 'T', 'estado': 'V32'},
+    'mensaje': {'id': 'V64', 'fecha': 'V16', 'hora': 'V16', 'de': 'V32', 'para': 'V32', 'estado': 'V32', 'asunto': 'T', 'texto': 'T', 'respuesta': 'J'},
+    'leccion': {'id': 'V64', 'texto': 'T', 'destino': 'T', 'estado': 'V32'},
+    'evento': {'entidad': 'V32', 'id': 'V64', 'de_estado': 'V32', 'a_estado': 'V32', 'rol': 'V32', 'en': 'D'},
+    'situacion': {'id': 'V64', 'rol': 'V32', 'grupo': 'V64', 'que_paso': 'T', 'en': 'V32'},
 }
+COLS = {t: list(c) for t, c in TIPOS.items()}
+AVISOS = []
 
 def snake(k): return re.sub(r'(?<!^)(?=[A-Z])', '_', k).lower()
 
-def fila(tabla, obj, fijos=None):
-    """Columnas de la tabla desde el objeto (camelCase → snake_case); el resto, completo, en extra."""
-    f, extra = {}, {}
+def ajustar(tabla, col, v, ident):
+    """Valor para la columna según su tipo; si no encaja, None (el objeto completo va en extra.o, no se pierde nada)."""
+    if v is None: return None
+    t = TIPOS[tabla][col]
+    escalar = isinstance(v, (str, int, float, bool))
+    if t == 'J': r = v if isinstance(v, (list, dict)) else None
+    elif t == 'I': r = v if isinstance(v, int) and not isinstance(v, bool) else (int(v) if isinstance(v, str) and v.strip().lstrip('-').isdigit() else None)
+    elif t == 'D': r = v if isinstance(v, str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}( \d{2}:\d{2}(:\d{2})?)?', v) else None
+    elif t == 'T': r = str(v) if escalar else None
+    else:
+        n = int(t[1:]); r = str(v) if escalar else None
+        if r is not None and len(r) > n: r = None
+    if r is None: AVISOS.append(f'{tabla} {ident} {col}: no encaja en {t}, queda en extra.o')
+    return r
+
+def fila(tabla, obj, f_origen, i, fijos=None):
+    """Columnas = proyección indexable del objeto (camelCase → snake_case); extra = {f: origen, i: posición, o: objeto completo}.
+    La exportación (LM-21) rehace los archivos solo desde extra (f, i, o): por eso es exacta."""
+    r = {}
     for k, v in obj.items():
         c = snake(k)
-        if c in COLS[tabla] and c not in (fijos or {}): f[c] = v
-        else: extra[k] = v
-    f.update(fijos or {})
-    f['extra'] = extra or None
-    return f
+        if c in COLS[tabla] and c not in (fijos or {}): r[c] = v
+    r.update(fijos or {})
+    ident = str(r.get('id'))
+    for c in list(r):
+        if c != 'id': r[c] = ajustar(tabla, c, r[c], ident)
+    r['extra'] = {'f': f_origen, 'i': i, 'o': obj}
+    return r
+
+def derivada(tabla, obj, f_origen, i, fijos):
+    """Filas que salen de otra (veredicto desde cambios[].aceptacion): la exportación las ignora."""
+    r = fila(tabla, obj, f_origen, i, fijos); r['extra'] = {'f': f_origen, 'i': i, 'derivado': True}
+    return r
 
 def ids_unicos(filas, prefijo):
-    """Garantiza id no vacío y único (clave primaria proyecto+id); los repetidos o vacíos reciben <prefijo>-n y conservan el original en extra."""
+    """Garantiza id no vacío, único y de ≤ 64 caracteres (clave primaria proyecto+id); el original sigue en extra.o."""
     vistos, n = set(), 0
     for f in filas:
         i = f.get('id')
-        if i in (None, '') or str(i) in vistos:
-            n += 1
-            (f.setdefault('extra', None) or {})
-            f['extra'] = dict(f['extra'] or {}, idOriginal=i)
-            f['id'] = f'{prefijo}-{n}'
+        if i in (None, '') or str(i) in vistos or len(str(i)) > 64:
+            n += 1; f['id'] = f'{prefijo}-{n}'
+            AVISOS.append(f'id {i!r} → {f["id"]}')
         f['id'] = str(f['id']); vistos.add(f['id'])
     return filas
 
 def main():
-    v = subprocess.run([sys.executable, os.path.join(RAIZ, 'herramientas/modelo/validar.py')], capture_output=True, text=True)
+    v = subprocess.run([sys.executable, os.path.join(RAIZ, 'herramientas/modelo/validar.py')], capture_output=True, text=True, cwd=RAIZ)
     m = re.search(r'## Errores: (\d+)', v.stdout)
     if not m or m.group(1) != '0': print('validar.py no da 0 errores: no se arma el paquete'); sys.exit(1)
     J = lambda r: json.load(open(os.path.join(RAIZ, r), encoding='utf-8'))
     dis, seg, men = J('interno/diseno.json'), J('interno/seguimiento.json'), J('interno/mensajes.json')
     hist = J('interno/archivo/reqs-historial.json') if os.path.exists(os.path.join(RAIZ, 'interno/archivo/reqs-historial.json')) else {'reqs': []}
     t = {k: [] for k in COLS}
-    t['requisito'] = [fila('requisito', r) for r in dis.get('reqs', [])] + [fila('requisito', r, {'estado': r.get('estado') or 'histórico'}) for r in hist.get('reqs', [])]
-    for f, r in zip(t['requisito'][len(dis.get('reqs', [])):], hist.get('reqs', [])): f['extra'] = dict(f['extra'] or {}, historico=True)
-    t['decision'] = [fila('decision', d) for d in dis.get('das', [])]
-    t['pedido'] = [fila('pedido', p) for p in dis.get('pedidos', [])]
-    t['plan_trabajo'] = [fila('plan_trabajo', p) for p in dis.get('planes', [])]
-    t['lote'] = [fila('lote', p, {'id': p.get('lote')}) for p in seg.get('plan', [])]
-    for c in seg.get('cambios', []):
-        t['cambio'].append(fila('cambio', c, {'id': c.get('lote')}))
+    t['requisito'] = [fila('requisito', r, 'diseno.reqs', i) for i, r in enumerate(dis.get('reqs', []))] + \
+                     [fila('requisito', r, 'reqs-historial.reqs', i, {'estado': r.get('estado') or 'histórico'}) for i, r in enumerate(hist.get('reqs', []))]
+    t['decision'] = [fila('decision', d, 'diseno.das', i) for i, d in enumerate(dis.get('das', []))]
+    t['pedido'] = [fila('pedido', p, 'diseno.pedidos', i) for i, p in enumerate(dis.get('pedidos', []))]
+    t['plan_trabajo'] = [fila('plan_trabajo', p, 'diseno.planes', i) for i, p in enumerate(dis.get('planes', []))]
+    t['leccion'] = [fila('leccion', x, 'diseno.lecciones', i) for i, x in enumerate(dis.get('lecciones', []))]
+    t['lote'] = [fila('lote', p, 'seguimiento.plan', i, {'id': p.get('lote')}) for i, p in enumerate(seg.get('plan', []))]
+    for i, c in enumerate(seg.get('cambios', [])):
+        t['cambio'].append(fila('cambio', c, 'seguimiento.cambios', i, {'id': c.get('lote')}))
         a = c.get('aceptacion')
         if isinstance(a, dict):
-            t['veredicto'].append(fila('veredicto', a, {'id': f"V-{c.get('lote')}", 'lote': c.get('lote')}))
+            t['veredicto'].append(derivada('veredicto', a, 'seguimiento.cambios.aceptacion', i, {'id': f"V-{c.get('lote')}", 'lote': c.get('lote')}))
         ti = c.get('tiempos')
         if isinstance(ti, dict):
-            for clave, estado in (('construido', 'construido'), ('aceptado', 'aceptado')):
-                if ti.get(clave): t['evento'].append({'entidad': 'lote', 'id': str(c.get('lote')), 'de_estado': None, 'a_estado': estado, 'rol': 'desarrollo', 'en': ti[clave], 'extra': None})
-    t['incidente'] = [fila('incidente', i) for i in seg.get('incs', [])]
-    t['deuda'] = [fila('deuda', i) for i in seg.get('dts', [])]
-    t['riesgo'] = [fila('riesgo', r) for r in seg.get('riesgos', [])]
-    t['mensaje'] = [fila('mensaje', x) for x in men.get('mensajes', [])]
+            for clave in ('construido', 'aceptado'):
+                if ti.get(clave):
+                    t['evento'].append({'entidad': 'lote', 'id': str(c.get('lote')), 'de_estado': None, 'a_estado': clave, 'rol': 'desarrollo',
+                                        'en': ajustar('evento', 'en', ti[clave], str(c.get('lote'))), 'extra': {'f': 'seguimiento.cambios.tiempos', 'i': i, 'derivado': True}})
+    t['incidente'] = [fila('incidente', x, 'seguimiento.incs', i) for i, x in enumerate(seg.get('incs', []))]
+    t['deuda'] = [fila('deuda', x, 'seguimiento.dts', i) for i, x in enumerate(seg.get('dts', []))]
+    t['riesgo'] = [fila('riesgo', x, 'seguimiento.riesgos', i) for i, x in enumerate(seg.get('riesgos', []))]
+    t['mensaje'] = [fila('mensaje', x, 'mensajes.mensajes', i) for i, x in enumerate(men.get('mensajes', []))]
     sdir = os.path.join(RAIZ, 'interno/situaciones')
     for nombre in sorted(os.listdir(sdir)):
         if nombre.startswith('_') or not nombre.endswith('.json'): continue
         d = json.load(open(os.path.join(sdir, nombre), encoding='utf-8'))
-        for s in d.get('situaciones', []): t['situacion'].append(fila('situacion', s, {'rol': d.get('rol')}))
+        for i, x in enumerate(d.get('situaciones', [])):
+            t['situacion'].append(fila('situacion', x, 'situaciones/' + nombre[:-5] + '.situaciones', i, {'rol': d.get('rol')}))
     for tabla, pref in (('requisito', 'REQ-SIN-ID'), ('decision', 'DA-SIN-ID'), ('pedido', 'P-SIN-ID'), ('plan_trabajo', 'PT-SIN-ID'), ('lote', 'LOTE-PREVISTO'),
                         ('cambio', 'C'), ('veredicto', 'V-DUP'), ('incidente', 'INC-SIN-ID'), ('deuda', 'DT-SIN-ID'), ('riesgo', 'R-SIN-ID'),
-                        ('mensaje', 'M-SIN-ID'), ('situacion', 'S-SIN-ID')):
+                        ('mensaje', 'M-SIN-ID'), ('situacion', 'S-SIN-ID'), ('leccion', 'LEC-SIN-ID')):
         ids_unicos(t[tabla], pref)
     sha = subprocess.run(['git', '-C', RAIZ, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip() or 'sin-git'
     paquete = {'sha': sha, 'proyecto': 'str', 'generadoEn': datetime.datetime.now().isoformat(timespec='seconds'),
@@ -94,6 +124,8 @@ def main():
     salida = sys.argv[sys.argv.index('--salida') + 1] if '--salida' in sys.argv else f'paquete-{sha}.json'
     json.dump(paquete, open(salida, 'w', encoding='utf-8'), ensure_ascii=False)
     print('paquete', salida, json.dumps(paquete['conteos'], ensure_ascii=False))
+    print('avisos (valor fuera de columna o id renumerado; nada se pierde):', len(AVISOS))
+    for a in AVISOS[:40]: print('  ', a)
 
 if __name__ == '__main__':
     main()

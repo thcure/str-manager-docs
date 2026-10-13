@@ -10,6 +10,7 @@ Lo mantiene el Chat Arquitecto. Estado al 13-oct-2026. **Sin secretos**: ni toke
 | Base | MariaDB `u…_modelo` (usuario `u…_modelo`), separada de la del STR | la crea Carlos en hPanel; las tablas, `GET migrar` |
 | Secretos | `public_html/app/modelo/secrets.php` (fuera del repo; Git de Hostinger no borra archivos que no están en el repo): `MODELO_DB_HOST/NAME/USER/PASS`, `MODELO_TOKEN_ARQ` | Carlos, a mano |
 | Token del Arquitecto en LENOVO | `str-instr-cola\claves\modelo-arq.txt` (mismo valor que `MODELO_TOKEN_ARQ`) | Carlos |
+| Tokens por rol (LM-27b) | `str-instr-cola\claves\modelo-<rol>.txt`, generados por la cola; al servidor solo va el hash. `claves\` nunca entra al repo, a `log\`, al espejo ni a los respaldos a Drive (K3) | cola |
 | Llamadas del Arquitecto | `str-instr-cola\pw\modelo-llamar.js` (fuente: `herramientas/pw/modelo-llamar.js`), lanzado por la cola | Arquitecto |
 
 La nube del Arquitecto **no** llega al dominio de la app (el proxy lo corta); LENOVO sí. Por eso toda llamada con token va por la cola.
@@ -54,8 +55,9 @@ Cada pedido pasa después a `modelo-cargas\hechas\<fecha>-<nombre>`. El token nu
 | B7-1 prueba técnica (`salud`, `eco`) | L-78 | aceptado |
 | B7-2 base propia, `secrets.php`, `migrar`, 16 sentencias | LM-16 / L-84 | aceptado |
 | B7-3 carga inicial (`POST cargar`) | LM-20 / L-87 | aceptado (dos cargas iguales del paquete f339cc0) |
-| B7-4 lectura y export | LM-21 / L-88 | juez parcial; b y c cerradas por el Arquitecto (16/16 listas iguales, 0 errores); falta la aceptación de Desarrollo |
-| B7-5 credenciales por rol, `complemento`, export completo, UTC (DT-36) | LM-27 | redactado; revisión previa de Desarrollo (M-289) y cruce de Carlos. Los tokens los genera la cola en LENOVO; al servidor solo van hashes |
+| B7-4 lectura y export | LM-21 / L-88 | aceptado 16:45 (b y c del Arquitecto: 16/16 listas iguales, 0 errores) |
+| B7-5a esquema 2, `complemento`, export completo, UTC (DT-36) | LM-27a / L-91 | dos revisiones de Desarrollo y ok de Diseño (M-294); falta el cruce de Carlos |
+| B7-5b acceso por rol, `POST credenciales` | LM-27b / L-92 | ídem; va después de L-91 aceptado y con la guardia de pw publicada |
 | B7-6 corte: el servicio es el registro oficial, Git el espejo | — | por redactar (Carlos presente, 20 min) |
 
 ## 7. Recuperación

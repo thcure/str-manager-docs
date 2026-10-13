@@ -592,8 +592,8 @@
    "severidad": "bajo",
    "titulo": "Sin principal elegida a mano, _invPrincipalDe (copias de [INV-puras]) todavía puede escoger como principal automática una zona privada del propietario que sirva a la propiedad; contradice la decisión 6 (privada no entra en tareas ni conteos). Latente: hoy no hay zonas reales.",
    "causa": "L-86 quitó el paso 3 pero no excluye privada:true en los pasos que quedan (aviso de la CLI en el cierre de L-86).",
-   "pendiente": "Lote corto: excluir privada en _invPrincipalDe (tres copias) + caso en tests/inventario.test.js. Prioridad la decide Diseño (M-287).",
-   "estado": "abierto",
+   "pendiente": "L-90 encolado 16:45 (normal, decisión de Diseño M-287).",
+   "estado": "en fix",
    "origen": "Cierre de la CLI de L-86 (log\\L-86-instr-inv2-4-1-interfaz-zonas.txt)."
   }
  ],
@@ -7152,7 +7152,7 @@
    "categoria": "crítico",
    "resumen": "Interfaz de accesos por zona: [INV-puras] sin paso 3 y con ≥1 propiedad por zona activa y reglas de privada; Inventario con aviso de zonas sin propiedad y bloque Acceso (privada del propietario y colaboradores base con casilla → revocados); ficha de Propiedades con zona por bloque, «🔒 privada» e interruptor del colaborador base; sin «todo el negocio». Con L-85 cierra REQ-INV2-4-1.",
    "estado": "aceptado",
-   "observacion": "DA-30 y cruce con Carlos 9-oct; partición de Diseño (M-255); revisión previa 13/13; ok de Diseño 12:55 (M-264) con condición, cumplida 15:40 (M-283: 0 zonas reales). CLI 15:22–15:27: 66d7f40 (p5c79), 52/52. Agregado de la CLI: el selector de principal de la ficha no ofrece privadas. Hueco: INC-121. Juez 15:29: aceptado, a–e y f (N3, 390 px) ok; regresión g ok. limpiar() falló en el arnés (h.respuesta no llega a limpiar): 5 zonas zz-verif-L-86-… quedaron activas; arreglo y limpieza pedidos al Arquitecto (M-288).",
+   "observacion": "DA-30 y cruce con Carlos 9-oct; partición de Diseño (M-255); revisión previa 13/13; ok de Diseño 12:55 (M-264) con condición, cumplida 15:40 (M-283: 0 zonas reales). CLI 15:22–15:27: 66d7f40 (p5c79), 52/52. Agregado de la CLI: el selector de principal de la ficha no ofrece privadas. Hueco: INC-121. Juez 15:29: aceptado, a–e y f (N3, 390 px) ok; regresión g ok. limpiar() falló en el arnés (h.respuesta no llega a limpiar): 5 zonas zz-verif-L-86-… quedaron activas; arreglo y limpieza pedidos al Arquitecto (M-288). Limpieza repetida 16:40 con pw 0.4.9 (correr\\l-86.txt): «limpiar() corrio sin error»; las 5 zonas zz-verif-L-86-… quedaron inactivas.",
    "hash": "66d7f40",
    "aceptacion": {
     "lote": "L-86",
@@ -7212,6 +7212,96 @@
    "tiempos": {
     "construido": "2026-10-13 15:27",
     "aceptado": "2026-10-13 16:20",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
+  },
+  {
+   "lote": "L-88",
+   "fecha": "2026-10-13",
+   "req": "REQ-MOD-6 (LM-21, B7-4)",
+   "categoria": "normal",
+   "resumen": "Servicio del modelo: GET estado, export, <tabla> y <tabla>/<id> con el token del Arquitecto (403 antes de conectar; credencial y schema_version → 404); lectura.php solo SELECT con sentencias preparadas y sesión en UTC; métrica de minutos por lote; port en tests/lib/port-export.js.",
+   "estado": "aceptado",
+   "observacion": "LM-21, ADR-006; categoría normal confirmada por el Arquitecto (M-263); revisión previa 13/13; ok de Diseño 12:55 (M-264). CLI 15:14–15:20: 9960466, 52/52 sobre el port (sin PHP real). Decisiones de la CLI revisadas por el Arquitecto (M-285). Juez 15:21: parcial (b, c del Arquitecto; f del Chat Desarrollo). b y c cerradas 16:30 (M-286). DT-36 abierta y programada en B7-5.",
+   "hash": "9960466",
+   "aceptacion": {
+    "lote": "L-88",
+    "hash": "9960466",
+    "fecha": "2026-10-13",
+    "horaBogota": "15:21",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 52/52 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "fuera del guion (ida y vuelta de export + validar.py); no está en pruebas.json ni en capturas"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "fuera del guion (depende de b); no está en pruebas.json ni en capturas"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: requisito {\"s\":403,\"e\":\"Token requerido\"} | si: estado {\"s\":403,\"e\":\"Token requerido\"} | si: export {\"s\":403,\"e\":\"Token requerido\"} | si: credencial {\"s\":404,\"e\":\"Endpoint no encontrado\"}"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: modelo db true | si: modelo schema_version 1 | si: /api/health 200"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "cierre de la CLI (git show --name-only); no está en pruebas.json ni en capturas, lo cierra el Chat Desarrollo"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "N2 fuera del guion: lo cierra el Arquitecto con log\\modelo-exportar-*.json (validar.py sobre el export); no disponible para este juez"
+     },
+     {
+      "c": "c",
+      "motivo": "N2 fuera del guion, depende de b; lo cierra el Arquitecto comparando `cubre` contra el commit cargado"
+     },
+     {
+      "c": "f",
+      "motivo": "cierre de la CLI; lo cierra el Chat Desarrollo leyendo el cierre (git show --name-only), no es parte de lo que lee este juez"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Lote sin criterios N3 (n3Preparados vacío en pruebas.json, consistente con la instrucción: no hay letras N3 en «Pruebas derivadas»). N1 (a) y N2 (d, e) vienen de pruebas.json y están ok. Regresión: 4/4 casos ok, sin INC. b, c y f quedan null porque su cierre no está en lo que lee este juez (Arquitecto para b/c, Chat Desarrollo para f).",
+    "cierreDePendientes": {
+     "b": "log\\modelo-exportar-2026-10-13T20-30-21-183Z.json: 200, sinOrigen 0, 16 listas en cubre, 8 archivos en log\\espejo\\; validar.py sobre copia del repo en f339cc0 con el espejo encima → 0 errores (Arquitecto, M-286)",
+     "c": "16 de 16 listas de cubre iguales a las de f339cc0, comparadas como objetos (Arquitecto, M-286)",
+     "f": "log\\L-88-instr-modelo-lectura.txt: 8 archivos declarados = tocados, sin secretos, sin ?v=, schema del modelo 1 (Chat Desarrollo)",
+     "quien": "Arquitecto (b, c; redactó LM-21 pero no construyó) y Chat Desarrollo (f)"
+    }
+   },
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 15:20",
+    "aceptado": "2026-10-13 16:45",
     "veredictos": 1,
     "bloqueados": 0
    }
@@ -8533,12 +8623,12 @@
    "req": "REQ-MOD-6 (LM-21, B7-4)",
    "categoria": "normal",
    "resumen": "Servicio del modelo: GET estado/export/<tabla> (solo lectura, mismo token y 403 que cargar)",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "Chat Arquitecto",
-   "espera": "juez 15:21: parcial. a, d (403 sin token; credencial 404), e ok; regresión 4/4. f cerrado por el Chat Desarrollo con el cierre de la CLI (8 archivos declarados = tocados, sin secretos, sin ?v=). Faltan b (export con EXPORTAR + validar.py → 0 errores) y c (cubre = commit cargado), del Arquitecto. CLI 9960466.",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.72,
-   "desde": "2026-10-13 12:35",
+   "desde": "2026-10-13 16:45",
    "grupo": "Modelo",
    "riesgo": "R-1",
    "nota": "LM-21, ADR-006. Revisión previa: fallaban 3, 4, 5 y 13 → 4, 5 y 13 corregidos; 3 preguntado. Copia: claude/producto/borradores/L-88-instr-modelo-lectura.md."
@@ -8557,6 +8647,21 @@
    "grupo": "Modelo",
    "riesgo": "R-1",
    "nota": "M-262. LM-23 y cruce con Carlos 13-oct 12:24 (chat del Arquitecto). Revisión previa: fallaban 1, 4, 5 y 6 → corregidos en la copia del Chat Desarrollo."
+  },
+  {
+   "lote": "L-90",
+   "req": "INC-121",
+   "categoria": "normal",
+   "resumen": "La zona privada nunca es la principal automática: _invPrincipalDe excluye privadas en las tres copias de [INV-puras]; test N1; p5c80",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
+   "espera": "encolado 16:45 (revisión previa: fallaban 4 y 13 + ajuste en 6 → corregidos)",
+   "orden": 101.02,
+   "desde": "2026-10-13 16:45",
+   "grupo": "INV2",
+   "riesgo": "R-1",
+   "nota": "M-287. Copia: claude/producto/borradores/L-90-instr-fix-inc121-privada-principal.md."
   }
  ],
  "riesgos": [

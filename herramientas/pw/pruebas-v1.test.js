@@ -26,6 +26,11 @@ t('caso con esperas buenas pasa', cerrarCaso(caso, [{ ok: true, observado: 'x' }
 t('caso sin esperas no pasa', cerrarCaso(caso, [], null, []).ok === false);
 t('caso con escritura cortada no pasa', cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, [{ metodo: 'PUT', url: '/api/col' }]).ok === false);
 t('caso con error no pasa', cerrarCaso(caso, [{ ok: true, observado: 'x' }], 'boom', []).ok === false);
+const c3 = { c: 'e', perfil: 'admin', pagina: '/p.html', nivel: 'N3' };
+t('N3 preparado queda para el juez (ok null)', cerrarCaso(c3, [], null, [], [{ nombre: 'x', png: 'a.png' }]).ok === null);
+t('N3 sin captura no se pudo preparar', cerrarCaso(c3, [], null, [], []).ok === false);
+t('N3 con espera fallida no se pudo preparar', cerrarCaso(c3, [{ ok: false, observado: 'x' }], null, [], [{ nombre: 'x' }]).ok === false);
+t('N3 lleva sus capturas', cerrarCaso(c3, [], null, [], [{ nombre: 'x', png: 'a.png' }]).capturas.length === 1);
 const j = { items: [{ id: 1, data: { nombre: 'zz-verif-Propiedad' } }, { id: 2, data: { nombre: 'Real' } }, { id: 3, deleted: 1, data: { nombre: 'zz-verif-Vieja' } }] };
 const n = nombresZz(j);
 t('nombres zz-verif- sin borrados ni reales', n.has('zz-verif-Propiedad') && !n.has('Real') && !n.has('zz-verif-Vieja') && n.size === 1);

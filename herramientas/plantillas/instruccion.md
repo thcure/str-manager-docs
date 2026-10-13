@@ -30,7 +30,7 @@ Plan de pruebas del lote (PRUEBAS-v1, paso P2). Cada criterio lleva el **nivel**
 - a. <criterio> · nivel: <N1 | N2 | N3> · perfil: <zz-verif-admin | zz-verif-oper | zz-verif-colab | zz-verif-colab2 | tests/> · página: <https://app.apartamentosbucaramanga.com/str-….html> · precondición: <…> · espera: <lo observable, literal> · **<Seguir | Detener | Revertir>**
 - Datos de prueba: <semilla fija (zz-verif-Propiedad, zz-verif-Propiedad-2, usuarios, zonas, flujo base) | creados por el guion con h.dato() → zz-verif-L<n>-…, borrados en limpiar()>
 ```
-N1 → «cubierto por tests/<archivo>» (la cola corre `node tests/run.js` en la puerta de entrada). N2 → un caso del guion con la misma letra. N3 → dice al verificador qué mirar y con qué perfil.
+N1 → «cubierto por tests/<archivo>» (la cola corre `node tests/run.js` en la puerta de entrada). N2 → un caso del guion con la misma letra. N3 → un caso del guion con `nivel: 'N3'` que deja la pantalla lista y llama `h.captura()`; en la prueba derivada dices qué debe verse en esa captura (lo juzga el juez local, LM-19). Solo si un N3 no se puede capturar, «verificador de Cowork» y por qué.
 
 ### Guion N2 → `tests/e2e/<REQ-o-INC>.spec.js` (la CLI lo copia tal cual, sin cambiar un byte; plantilla: `herramientas/plantillas/guion-e2e.js`)
 ```js

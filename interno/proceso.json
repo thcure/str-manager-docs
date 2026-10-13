@@ -636,7 +636,7 @@
    {
     "id": "verificando",
     "fase": "BAI07",
-    "que": "Pre-vuelo escrito (enlace vivo, perfiles, usuario de la barra, /me.nombre), verificar.json escrito (plantilla) y tarea lanzada (estándar o crítica según la categoría). Un veredicto 'bloqueado' no cambia el estado: el CD corrige el entorno y relanza con archivo de veredicto nuevo (LM-1 §3.5), sin repetir lo ya verificado. Con PRUEBAS-v1 y la cola v6 instalada, la cola hace P4 (puerta de entrada) y P5 (guion + regresión) sola tras el despliegue; la tarea o el verificador local solo juzga los N3. Hasta entonces sigue el camino actual.",
+    "que": "Pre-vuelo escrito (enlace vivo, perfiles, usuario de la barra, /me.nombre), verificar.json escrito (plantilla) y tarea lanzada (estándar o crítica según la categoría). Un veredicto 'bloqueado' no cambia el estado: el CD corrige el entorno y relanza con archivo de veredicto nuevo (LM-1 §3.5), sin repetir lo ya verificado. Con PRUEBAS-v1 y la cola v6 instalada, la cola hace P4 (puerta de entrada) y P5 (guion + regresión) sola tras el despliegue; la tarea o el verificador local solo juzga los N3. Con la cola v7 (LM-19) el juez local escribe el veredicto sobre capturas; la tarea de Cowork solo si el juez no deja veredicto. Lotes sin guion siguen el camino anterior (pre-vuelo + tarea).",
     "dueno": "desarrollo",
     "raci": {
      "R": "verificador",
@@ -950,16 +950,16 @@
    {
     "id": "P5",
     "nombre": "ejecución",
-    "quien": "maquina + verificador",
+    "quien": "maquina + juez local",
     "estadoLote": "verificando",
     "sale": "resultado por criterio con nivel y evidencia",
-    "que": "guion del lote + regresión de los guiones de la misma zona; Claude solo para N3"
+    "que": "guion del lote (N2, y casos N3 que preparan la pantalla y guardan capturas) + regresión de los guiones de la misma zona sin los N3; juez local (claude -p en LENOVO, sin navegador, red ni comandos) juzga los N3 sobre las capturas (LM-19)"
    },
    {
     "id": "P6",
     "nombre": "salida",
-    "quien": "verificador",
-    "sale": "veredicto",
+    "quien": "juez local (Cowork de respaldo)",
+    "sale": "log\\L-n-veredicto.json escrito por el juez local",
     "criterios": [
      "aceptado si todo cumple",
      "parcial solo por un N3 no concluyente o un criterio declarado no verificable en P2",
@@ -1016,13 +1016,21 @@
    {
     "n": 4,
     "que": "cola v6 con P4 y P5 automáticos",
-    "estado": "en curso"
+    "estado": "hecho (cola v6 y v7 instaladas)"
    },
    {
     "n": 5,
     "que": "juicio N3 local; la tarea de Cowork queda de respaldo",
-    "estado": "pendiente"
+    "estado": "hecho: LM-19 (cola v7, juez\\texto-juez.md, h.captura); falta la primera corrida real"
    }
-  ]
+  ],
+  "juezLocal": {
+   "lm": "LM-19",
+   "aprobacion": "Carlos, 12-oct-2026 («aprobado»)",
+   "modelo": "sonnet; opus si el lote es crítico",
+   "permisos": "Read, Glob, Grep; Write/Edit solo log\\L-n-veredicto*.json; sin Bash, red ni MCP",
+   "apagar": "archivo SIN-JUEZ en la cola",
+   "respaldo": "tarea de Cowork (Agente verificador / crítico) si el juez no deja veredicto o un N3 no se puede capturar"
+  }
  }
 }

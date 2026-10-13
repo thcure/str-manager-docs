@@ -11,5 +11,6 @@ Carpeta de instalación: `C:\Users\ktcol\Downloads\str-instr-cola\pw\` (fuente: 
   - `guion.js`: corre un guion N2 (`tests/e2e/<REQ-o-INC>.spec.js` del repo str-manager; contrato en `herramientas/plantillas/guion-e2e.js`). A mano: `node guion.js C:\Users\ktcol\str-manager\tests\e2e\REQ-X-n.spec.js --lote L-n`.
   - `probar-lote.js`: P4 (despliegue, `tests/` en verde, guion igual a la instrucción, semilla, sesiones) y P5 (guion + regresión de su zona). Lo lanza la cola v6 tras el commit; escribe `log\L-n-pruebas.json` con `verde | rojo | bloqueado`. A mano: `node probar-lote.js --instr ..\hechas\L-n-instr-x.md`. Con el archivo `SIN-PRUEBAS` en la cola, la cola no lo lanza.
   - `pruebas-v1.test.js`: funciones puras de los tres, sin navegador.
+- **Juez local (LM-19)**: los casos N3 del guion guardan `log\capturas\L-n\<letra>-<nombre>.png/.txt` con `h.captura()`; la cola v7 lanza después `claude -p` con `juez\texto-juez.md` (sin navegador, red ni comandos; solo escribe `log\L-n-veredicto.json`). Con el archivo `SIN-JUEZ` en la cola no corre.
 
 Instalación (una vez, PowerShell): `cd $HOME\Downloads\str-instr-cola\pw ; npm install --no-audit --no-fund ; npx playwright install chromium ; node guardia.test.js`

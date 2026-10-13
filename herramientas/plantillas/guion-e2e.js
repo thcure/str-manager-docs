@@ -10,7 +10,9 @@
 // - h.espera(condición, 'lo observado') registra cada comprobación; un caso sin esperas no pasa.
 // - Sin contraseñas, sin tokens, sin JavaScript sobre la sesión ni localStorage (page.evaluate solo para leer el DOM).
 // - Selectores estables (id o data-*); si la página no los tiene, el lote los añade y lo dice en Alcance.
-// - Cada caso tiene 90 s. Para esperar una respuesta del servidor: await h.respuesta('/api/col?id=reservas', () => clic).
+// - N3 (LM-19): caso con nivel: 'N3' que deja la pantalla lista y llama h.captura('nombre', { ancho: 390 }); no lleva
+//   h.espera obligatoria: lo juzga el juez local mirando la captura y su texto. Un caso N3 por criterio N3.
+// - Cada caso tiene 90 s. Para esperar una respuesta del servidor: await h.respuesta('/api/col/reservas', () => clic).
 
 module.exports = {
   req: 'REQ-X-n',            // REQ o INC del lote
@@ -25,6 +27,14 @@ module.exports = {
         // ... crear la reserva de prueba con la interfaz, usando nombre ...
         const visible = await h.page.isVisible(`text=${nombre}`);
         h.espera(visible, 'la reserva ' + nombre + ' aparece en el calendario');
+      },
+    },
+    {
+      c: 'f', nivel: 'N3', perfil: 'oper', pagina: '/str-calendario.html',
+      que: '<criterio visual: se entiende, se ve bien a 390 px, el aviso está junto al turno>',
+      async prueba(h) {
+        await h.page.waitForSelector('#calendario');
+        await h.captura('movil', { ancho: 390 });   // log\capturas\L-<n>\f-movil.png + f-movil.txt
       },
     },
   ],

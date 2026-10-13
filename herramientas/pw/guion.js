@@ -4,7 +4,8 @@
 // Contrato de un guion (plantilla: str-manager-docs/herramientas/plantillas/guion-e2e.js):
 //   module.exports = { req: 'REQ-X-n', zona: '<area>', casos: [ { c: 'a', perfil: 'admin|oper|colab|colab2',
 //     pagina: '/str-<pagina>.html', que: '<criterio>', async prueba(h) { ... } } ], async limpiar(h) { ... } }
-//   h = { page, BASE, lote, espera(condicion, observado), dato(nombre), respuesta(fragmentoRuta, accion) }
+//   h = { page, BASE, lote, espera(condicion, observado), dato(nombre), respuesta(fragmentoRuta, accion), captura(nombre, {ancho}) }
+//   Caso N3 (LM-19): nivel: 'N3' prepara la pantalla y llama h.captura(); no lo juzga el guion: queda ok=null para el juez local.
 //
 // Uso manual:  node guion.js <ruta\al\archivo.spec.js> [--lote L-n]      (escribe log\<lote>-guion.json)
 'use strict';
@@ -39,15 +40,23 @@ function igual(a, b) { return normalizar(a) === normalizar(b); }
 // Puro: id de lote desde el nombre del archivo de la cola (L-80-instr-x.md o 80-instr-x.md).
 function loteDe(nombre) { const m = String(nombre).split(/[\\/]/).pop().match(/^(?:L-)?(\d+)-/); return m ? 'L-' + m[1] : null; }
 
-// Puro: decide el resultado de un caso.
-function cerrarCaso(caso, esperas, error, bloqueos) {
+// Puro: decide el resultado de un caso. N2: ok true/false. N3 (LM-19): ok null si quedo preparado (capturas
+// y sin fallos) para que lo juzgue el juez local; false si no se pudo preparar.
+function cerrarCaso(caso, esperas, error, bloqueos, capturas = []) {
+  const n3 = caso.nivel === 'N3';
   const fallan = esperas.filter(e => !e.ok);
-  const ok = !error && fallan.length === 0 && bloqueos.length === 0 && esperas.length > 0;
   const partes = esperas.map(e => (e.ok ? 'si: ' : 'NO: ') + e.observado);
-  if (!esperas.length && !error) partes.push('el caso no comprobo nada (sin h.espera)');
+  if (!n3 && !esperas.length && !error) partes.push('el caso no comprobo nada (sin h.espera)');
+  if (n3 && !capturas.length && !error) partes.push('el caso N3 no guardo ninguna captura (sin h.captura)');
   if (error) partes.push('error: ' + error);
   if (bloqueos.length) partes.push('la guardia corto ' + bloqueos.length + ' escritura(s): ' + bloqueos.map(b => b.metodo + ' ' + b.url).join(', '));
-  return { c: caso.c, nivel: 'N2', perfil: caso.perfil, pagina: caso.pagina, que: caso.que || '', ok, observado: partes.join(' | ').slice(0, 900) };
+  const limpio = !error && fallan.length === 0 && bloqueos.length === 0;
+  let ok;
+  if (n3) { ok = limpio && capturas.length > 0 ? null : false; if (ok === null) partes.push('preparado para el juez: ' + capturas.length + ' captura(s)'); }
+  else ok = limpio && esperas.length > 0;
+  const r = { c: caso.c, nivel: n3 ? 'N3' : 'N2', perfil: caso.perfil, pagina: caso.pagina, que: caso.que || '', ok, observado: partes.join(' | ').slice(0, 900) };
+  if (n3) r.capturas = capturas;
+  return r;
 }
 
 // Corre un guion ya cargado. Abre un perfil a la vez (los perfiles persistentes no se abren dos veces).
@@ -59,14 +68,15 @@ async function correrGuion(spec, opciones = {}) {
   const porPerfil = {};
   for (const c of casos) (porPerfil[c.perfil] = porPerfil[c.perfil] || []).push(c);
   for (const perfil of Object.keys(porPerfil)) {
-    if (!PERFILES[perfil]) { porPerfil[perfil].forEach(c => resultados.push({ c: c.c, nivel: 'N2', perfil, ok: false, observado: 'perfil desconocido: ' + perfil })); continue; }
+    if (!PERFILES[perfil]) { porPerfil[perfil].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'perfil desconocido: ' + perfil })); continue; }
     let ctx, a;
     try {
       a = await abrir(perfil, { headless: opciones.headless });
       ctx = a.ctx;
       for (const caso of porPerfil[perfil]) {
-        const esperas = []; let error = null; const marca = a.bitacora.length;
+        const esperas = []; const capturas = []; let error = null; const marca = a.bitacora.length;
         const page = await ctx.newPage();
+        const dirCapt = path.join(COLA, 'log', 'capturas', lote);
         const h = {
           page, BASE, lote,
           espera(cond, observado) { esperas.push({ ok: !!cond, observado: String(observado || '') }); return !!cond; },
@@ -75,17 +85,30 @@ async function correrGuion(spec, opciones = {}) {
             const p = page.waitForResponse(r => r.url().includes(fragmento), { timeout: 30000 });
             return accion ? Promise.all([p, accion()]).then(x => x[0]) : p;
           },
+          // LM-19: guarda la pantalla y su texto visible para el juez local (solo en LENOVO; nunca al repo)
+          async captura(nombre, op = {}) {
+            fs.mkdirSync(dirCapt, { recursive: true });
+            if (op.ancho) await page.setViewportSize({ width: op.ancho, height: op.alto || 900 });
+            await page.waitForTimeout(op.esperaMs || 600);
+            const base = String(caso.c) + '-' + String(nombre).replace(/[^A-Za-z0-9_-]/g, '_');
+            const png = path.join(dirCapt, base + '.png');
+            await page.screenshot({ path: png, fullPage: op.completa !== false });
+            let texto = ''; try { texto = (await page.innerText('body')).slice(0, 6000); } catch (e) { }
+            fs.writeFileSync(path.join(dirCapt, base + '.txt'), texto);
+            capturas.push({ nombre, png: path.relative(COLA, png), ancho: page.viewportSize().width });
+            return png;
+          },
         };
         try {
           await page.goto(BASE + caso.pagina, { waitUntil: 'domcontentloaded', timeout: 45000 });
           await Promise.race([caso.prueba(h), new Promise((_, no) => setTimeout(() => no(new Error('el caso paso de 90 s')), 90000))]);
         } catch (e) { error = (e && e.message ? e.message : String(e)).split('\n')[0]; }
         const bloqueos = a.bitacora.slice(marca).filter(b => !b.paso);
-        resultados.push(cerrarCaso(caso, esperas, error, bloqueos));
+        resultados.push(cerrarCaso(caso, esperas, error, bloqueos, capturas));
         await page.close().catch(() => { });
       }
     } catch (e) {
-      porPerfil[perfil].forEach(c => resultados.push({ c: c.c, nivel: 'N2', perfil, ok: false, observado: 'no se pudo abrir el perfil: ' + e.message }));
+      porPerfil[perfil].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'no se pudo abrir el perfil: ' + e.message }));
     } finally { if (ctx) await ctx.close().catch(() => { }); }
   }
   // limpieza de los datos del lote (se intenta siempre; lo que quede se lista)
@@ -115,8 +138,8 @@ if (require.main === module) {
     const iL = args.indexOf('--lote'); const lote = iL >= 0 ? args[iL + 1] : 'L-0';
     if (!archivo) { console.log('Uso: node guion.js <archivo.spec.js> [--lote L-n]'); process.exit(2); }
     const r = await correrGuion(cargar(path.resolve(archivo)), { lote });
-    r.casos.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + x.c + ' · ' + x.observado));
+    r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.c + ' · ' + x.observado));
     fs.writeFileSync(path.join(COLA, 'log', lote + '-guion.json'), JSON.stringify(r, null, 1));
-    process.exit(r.casos.every(x => x.ok) ? 0 : 1);
+    process.exit(r.casos.every(x => x.ok !== false) ? 0 : 1);
   })();
 }

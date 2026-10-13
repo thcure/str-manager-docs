@@ -102,7 +102,8 @@ def main():
         if isinstance(ti, dict):
             for clave in ('construido', 'aceptado'):
                 if ti.get(clave):
-                    t['evento'].append({'entidad': 'lote', 'id': str(c.get('lote')), 'de_estado': None, 'a_estado': clave, 'rol': 'desarrollo',
+                    # el id se completa después de ids_unicos (cambios sin lote reciben C-n): evento.id no admite vacío (M-281)
+                    t['evento'].append({'entidad': 'lote', 'id': None, '_cambio': t['cambio'][-1], 'de_estado': None, 'a_estado': clave, 'rol': 'desarrollo',
                                         'en': ajustar('evento', 'en', ti[clave], str(c.get('lote'))), 'extra': {'f': 'seguimiento.cambios.tiempos', 'i': i, 'derivado': True}})
     t['incidente'] = [fila('incidente', x, 'seguimiento.incs', i) for i, x in enumerate(seg.get('incs', []))]
     t['deuda'] = [fila('deuda', x, 'seguimiento.dts', i) for i, x in enumerate(seg.get('dts', []))]
@@ -118,6 +119,15 @@ def main():
                         ('cambio', 'C'), ('veredicto', 'V-DUP'), ('incidente', 'INC-SIN-ID'), ('deuda', 'DT-SIN-ID'), ('riesgo', 'R-SIN-ID'),
                         ('mensaje', 'M-SIN-ID'), ('situacion', 'S-SIN-ID'), ('leccion', 'LEC-SIN-ID')):
         ids_unicos(t[tabla], pref)
+    for e in t['evento']:
+        e['id'] = e.pop('_cambio')['id']
+    # M-281: el servidor pone proyecto, creado_en, actualizado_en, actualizado_por y evento.n; si vienen, 422
+    PROHIBIDAS = {'proyecto', 'creado_en', 'actualizado_en', 'actualizado_por', 'n'}
+    for tabla, filas in t.items():
+        for f in filas:
+            for k in list(f):
+                if k in PROHIBIDAS: del f[k]
+            assert (tabla == 'evento' or f.get('id')) and (tabla != 'evento' or f.get('id')), (tabla, f.get('id'))
     sha = subprocess.run(['git', '-C', RAIZ, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip() or 'sin-git'
     paquete = {'sha': sha, 'proyecto': 'str', 'generadoEn': datetime.datetime.now().isoformat(timespec='seconds'),
                'conteos': {k: len(v) for k, v in t.items()}, 'tablas': t}

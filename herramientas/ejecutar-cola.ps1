@@ -1,4 +1,4 @@
-# ejecutar-cola.ps1 (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+# ejecutar-cola.ps1 (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -157,7 +157,7 @@ try {
     # v3: guardia de criticos. La cabecera (primeras 15 lineas) debe citar DA-n o el cruce previo con Carlos.
     $cab = (Get-Content -Path $f.FullName -TotalCount 15 -Encoding UTF8 | Out-String)
     if ($cab -match '(?i)categor[i\u00ed]a[^\r\n]*cr[i\u00ed]tico') {
-      $conDA = $cab -match 'DA-\d+'
+      $conDA = $cab -match '(DA|LM)-\d+'   # v7.3: un lote del modelo cita LM-n en lugar de DA-n
       $conCruce = $cab -match '(?i)cruce[^\r\n]*carlos'
       if (-not ($conDA -or $conCruce)) {
         $nuevo = Join-Path $Cola ($f.BaseName + '.sin-cruce.md')
@@ -166,7 +166,7 @@ try {
         Write-Host "RECHAZADO · critico sin cruce · $($f.Name)"
         continue
       }
-      if (-not $conDA) { Resumen "AVISO | $($f.Name) | critico con cruce pero sin DA-n (desde el 20-oct sera obligatoria)" }
+      if (-not $conDA) { Resumen "AVISO | $($f.Name) | critico con cruce pero sin DA-n ni LM-n (desde el 20-oct sera obligatoria)" }
     }
     # Repositorio al día antes de cada lote
     Write-Host "Lote: $($f.Name)"

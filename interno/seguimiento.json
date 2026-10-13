@@ -7012,6 +7012,96 @@
     "veredictos": 1,
     "bloqueados": 2
    }
+  },
+  {
+   "lote": "L-87",
+   "fecha": "2026-10-13",
+   "req": "REQ-MOD-6 (LM-20, B7-3)",
+   "categoria": "crítico",
+   "resumen": "Servicio del modelo: POST /modelo/api/cargar con el token del Arquitecto (403 sin token, 422 paquete inválido con detalle); carga.php con lista blanca de 14 tablas, validarPaquete y cargarPaquete en una transacción que reemplaza lo de proyecto='str'; port en tests/lib/port-carga.js.",
+   "estado": "aceptado",
+   "observacion": "LM-20, ADR-006 y cruce con Carlos 13-oct 11:04; revisión previa 13/13; ok de Diseño 11:55 (M-256). CLI 15:03–15:07: 931b043, 51/51 sobre el port (sin PHP real, DT-35); regla de ports en CLAUDE.md § 0. Juez 15:08: parcial (c y d cargas del Arquitecto, f cierre de la CLI). Cargas 15:12 dos veces con el paquete f339cc0: 200 y mismos conteos. Primera ejecución real del PHP en producción sin errores.",
+   "hash": "931b043",
+   "aceptacion": {
+    "lote": "L-87",
+    "hash": "931b043",
+    "fecha": "2026-10-13",
+    "horaBogota": "15:08",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 51/51 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: status 403 | si: cuerpo {\"error\":\"Token requerido\"}"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "fuera del guion: carga real del Arquitecto, sin log\\modelo-cargar-*.json en lo que lee el juez"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "fuera del guion: segunda carga del mismo paquete, la cierra el Arquitecto"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: modelo db true | si: modelo schema_version 1 | si: /api/health 200"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "cierre de la CLI (git show --name-only); el juez no lo lee"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c",
+      "motivo": "N2 fuera del guion: la cierra el Arquitecto con log\\modelo-cargar-*.json (status 200, ok:true, conteos = los del paquete)"
+     },
+     {
+      "c": "d",
+      "motivo": "N2 fuera del guion: la cierra el Arquitecto con el segundo log\\modelo-cargar-*.json (mismos conteos); precondición c hecho"
+     },
+     {
+      "c": "f",
+      "motivo": "N1 de cierre de la CLI: lo cierra el Chat Desarrollo leyendo el cierre (declarados = tocados, sin secretos)"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Entrada P4 en verde (despliegue, tests 51/51, guion igual a la instrucción con 2 casos, semilla zz-verif- completa, sesión admin). Regresión REQ-MOD-6.spec.js (b, c, g) toda ok: salud db true y schema_version 1; migrar sin token 403 «Token requerido»; API del STR health 200, schema_version 10. La instrucción no tiene criterios N3 ni N4: n3Preparados vacío y la carpeta log\\capturas\\L-87 no existe, sin efecto en el veredicto. Parcial solo por c, d y f, que cierran el Arquitecto y el Chat Desarrollo. horaBogota tomada del fin de la corrida de la cola (20:08Z); el juez no tiene reloj propio.",
+    "cierreDePendientes": {
+     "c": "log\\modelo-cargar-2026-10-13T20-12-25-016Z.json: status 200, ok:true, sha f339cc0, 14 tablas (requisito 130, cambio 148, mensaje 282, …), schema_version 1; salud después db true, php 8.3.35",
+     "d": "log\\modelo-cargar-2026-10-13T20-12-27-241Z.json: segunda carga del mismo sha, status 200 y los mismos 14 conteos (idempotente)",
+     "f": "log\\L-87-instr-modelo-carga.txt: 7 archivos declarados = tocados, sin secretos, base del STR sin tocar, schema del modelo 1",
+     "quien": "Chat Desarrollo (no construyó; LM-20 lo redactó el Arquitecto, que hizo las cargas)"
+    }
+   },
+   "costo": {
+    "minutosCLI": 4,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 15:07",
+    "aceptado": "2026-10-13 15:35",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -8303,7 +8393,7 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "Chat Desarrollo",
-   "espera": "ok de Diseño 12:55 (M-264) con condición: contar en solo lectura zonas reales activas sin propiedad y propiedades reales que quedarían sin principal (lo hago cuando termine L-85); semilla: pw 0.4.6 ya comprueba las relaciones (M-263) → antes de encolar, leer log\\pw-semilla.json de la puerta del lote anterior; si falta alguna relación, reponerla con el guion semilla-reponer",
+   "espera": "conteo 15:12 (CONTEO-ZONAS-guion.json): 0 zonas reales activas (ninguna sin propiedad); 4 propiedades reales sin principal propia (1708, 1808, 1801, 1901) porque no hay zonas reales. Esperando a Diseño (M-283) para encolar.",
    "orden": 101.01,
    "desde": "2026-10-13",
    "planTrabajo": "PT-1",
@@ -8316,12 +8406,12 @@
    "req": "REQ-MOD-6 (LM-20, B7-3)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: POST cargar (paquete del Arquitecto en una transacción, lista blanca, validarPaquete con port)",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "Chat Arquitecto",
-   "espera": "juez 15:08: parcial. a, b, e ok; f cerrado por el Chat Desarrollo con el cierre de la CLI (7 archivos declarados = tocados, sin secretos, base del STR sin tocar); c y d: dos cargas del Arquitecto (log\\modelo-cargar-*.json). CLI 931b043, 51/51 sin PHP real.",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.71,
-   "desde": "2026-10-13 12:15",
+   "desde": "2026-10-13 15:35",
    "grupo": "Modelo",
    "nota": "M-254. Lote del modelo LM-20, ADR-006 y cruce con Carlos 13-oct 11:04. Copia corregida: claude/producto/borradores/L-87-instr-modelo-carga.md."
   },
@@ -8330,10 +8420,10 @@
    "req": "REQ-MOD-6 (LM-21, B7-4)",
    "categoria": "normal",
    "resumen": "Servicio del modelo: GET estado/export/<tabla> (solo lectura, mismo token y 403 que cargar)",
-   "estado": "redactado",
-   "vista": "siguiente",
+   "estado": "encolado",
+   "vista": "en curso",
    "esperaA": "CLI",
-   "espera": "ok de Diseño 12:55 (M-264) y categoría normal confirmada por el Arquitecto 12:30 (M-263); se encola cuando L-87 esté aceptado, al final del orden",
+   "espera": "encolado 15:35 tras aceptar L-87 (copia verificada)",
    "orden": 116.72,
    "desde": "2026-10-13 12:35",
    "grupo": "Modelo",

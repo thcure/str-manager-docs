@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-12 21:50",
+ "actualizadoEn": "2026-10-12 22:32",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1637,6 +1637,19 @@
    "pendiente": "Decidir con Diseño si el estado debe seguir la hora acordada.",
    "estado": "abierto",
    "origen": "L-79-veredicto-3 (21:22), notas 3"
+  },
+  {
+   "id": "INC-117",
+   "tipo": "INC",
+   "modulo": "Propiedades",
+   "etapa": "📝",
+   "fecha": "2026-10-12",
+   "severidad": "medio",
+   "titulo": "En un navegador sin datos guardados, str-propiedades.html sube al servidor propiedades y tipos de demostración antes de traer los reales.",
+   "causa": "getProps() y getTipos() siembran datos de ejemplo cuando localStorage está vacío (prop-1 «Apto Centro» y prop-2 «Casa Laureles» con iCal falsos; tp-1…tp-7 por defecto) y llaman a saveProps/saveTipos → _persistCol. Como la caché str-col-lastpush-v1 también está vacía, todas las filas cuentan como cambiadas y se suben con PUT /api/col/<x> antes de que _syncColFromApi haga el pull. Efecto: dos propiedades falsas en el servidor y los tipos tp-1…tp-5 reales pisados con la versión por defecto (más tp-6 y tp-7 nuevos).",
+   "pendiente": "Fix antes del siguiente lote de Propiedades: no sembrar ni subir nada hasta terminar el primer pull; la siembra solo si el servidor responde vacío (patrón INC-38). Revisar si otras páginas siembran igual.",
+   "estado": "abierto",
+   "origen": "M-210: la guardia de pw 0.4.1 cortó PUT /api/col/propiedades y /api/col/prop-tipos al correr el guion de semilla en un perfil limpio. Comprobado en el servidor 22:30: no hay prop-1/prop-2 (no llegó a pasar); prop-tipos tiene tp-1…tp-5 sin cambios desde el 10-sep."
   }
  ],
  "cambios": [

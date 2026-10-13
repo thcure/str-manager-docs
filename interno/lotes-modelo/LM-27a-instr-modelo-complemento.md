@@ -44,7 +44,7 @@ Justo después de abrir la conexión del modelo: `SET time_zone = '+00:00'`. `le
 - `tests/lib/port-export.js` + `tests/fixtures/modelo/filas-export.json`: filas de `complemento` para dos archivos (uno con una lista entre dos claves, otro sin listas) y una fila de `complemento` que el rehacer de listas debe ignorar; el port arma el archivo en el orden de `orden`, conserva `{}` y da `parcial:false`; sin `complemento` da lo de hoy (`parcial:true`).
 - `tests/modelo-sql.test.js`: `002_complemento.sql` existe, crea `complemento` con `proyecto` y `extra` y sin `id`, registra 2, sin `DROP` ni `ALTER`.
 - `tests/modelo-cargar.test.js`: `complemento` válido pasa; par repetido → error; fila con `id` → error; `credencial` sigue → error; la regla de esquema 2 está en `index.php` entre la conexión y `cargarPaquete` (lectura del texto); la respuesta no lleva `schema_version` fijo.
-- `tests/modelo-lectura.test.js`: la lista de tablas tiene 15 y no incluye `credencial` ni `schema_version`; DT-36: `database.php` contiene `SET time_zone = '+00:00'` y `lectura.php` no lo repite (lectura del texto); `GET complemento/<id>` → 404 en el port de rutas o por lectura del texto.
+- `tests/modelo-lectura.test.js`: ajustar los conteos fijos de filas (la fixture crece) y de tablas (14 → 15); la lista no incluye `credencial` ni `schema_version`; DT-36: `database.php` contiene `SET time_zone = '+00:00'` y `lectura.php` no lo repite (lectura del texto); `GET complemento/<id>` → 404, por lectura del texto de `lectura.php` (no hay port de rutas).
 - `docs/claude/tests-y-despliegue.md` › «Servicio del modelo»: esquema 2, `complemento`, exportación completa, UTC. `CLAUDE.md`: filas del mapa si cambian.
 
 ## Pruebas derivadas (juez local; niveles PRUEBAS-v1)

@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo, veredicto del juez y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
 #     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
@@ -496,6 +496,47 @@ try {
             }
         } elseif (Test-Path $EstCli) { Remove-Item -Path $EstCli -Force -ErrorAction SilentlyContinue }
     } catch { Log ('ERROR en cli: ' + $_.Exception.Message) }
+
+    # --- 7b. Pruebas y juez local (v11.2, LM-18/LM-19) ---
+    # Avisa al Chat de desarrollo, una vez por archivo: lote bloqueado en la puerta de entrada (L-n-pruebas.json),
+    # guion o regresion en rojo, veredicto del juez local escrito, y juez sin veredicto 20 min despues de las pruebas.
+    # Estado: pruebas-avisadas.txt (nombres de archivo y claves sinjuez:<archivo>). Primera vez: marca sin avisar.
+    try {
+        $EstPru = Join-Path $Base 'pruebas-avisadas.txt'
+        $arch7 = @(Get-ChildItem -Path $LogDir -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^L-\d+-(pruebas|veredicto(-\d+)?)\.json$' })
+        if (-not (Test-Path $EstPru)) {
+            Set-Content -Path $EstPru -Value '# pruebas y veredictos ya avisados (v11.2)'
+            foreach ($fa in $arch7) { Add-Content -Path $EstPru -Value $fa.Name; Add-Content -Path $EstPru -Value ('sinjuez:' + $fa.Name) }
+            Log 'Inicio pruebas/juez: archivos actuales marcados sin avisar.'
+        }
+        $ya7 = @(Get-Content -Path $EstPru -ErrorAction SilentlyContinue)
+        foreach ($fa in $arch7) {
+            if ($ya7 -contains $fa.Name) { continue }
+            if (((Get-Date) - $fa.LastWriteTime).TotalMinutes -lt 1) { continue }
+            $lote7 = ($fa.Name -replace '^(L-\d+)-.*$', '$1')
+            $j7 = $null; try { $j7 = Get-Content -Path $fa.FullName -Raw -Encoding UTF8 | ConvertFrom-Json } catch { }
+            $t7 = $null
+            if ($fa.Name -like '*-pruebas.json') {
+                if ($j7 -and $j7.resultado -eq 'bloqueado') { $t7 = "Lote $lote7 bloqueado en la puerta de entrada de las pruebas (log\$($fa.Name)): $($j7.causa). Corrige la causa y reencola; no se gasto verificacion." }
+                elseif ($j7 -and $j7.resultado -eq 'rojo') { $t7 = "Lote ${lote7}: el guion o la regresion fallan ($($j7.causa)). El juez local escribe el veredicto; si no aparece en 20 min te aviso." }
+            } elseif ($j7 -and ([string]$j7.modoVerificacion) -like '*juez local*') {
+                $t7 = "El juez local dejo el veredicto del lote ${lote7}: $($j7.resultado) (log\$($fa.Name)). Siguelo como dice proceso.json (aceptado, parcial o no aceptado)."
+            }
+            if ((-not $t7) -or (Avisar 'Chat de desarrollo' $t7 $dest)) { Add-Content -Path $EstPru -Value $fa.Name; if ($t7) { Log "Pruebas/juez: $($fa.Name) avisado." } }
+        }
+        foreach ($fp7 in @($arch7 | Where-Object { $_.Name -like '*-pruebas.json' })) {
+            $clave7 = 'sinjuez:' + $fp7.Name
+            if ($ya7 -contains $clave7) { continue }
+            if (((Get-Date) - $fp7.LastWriteTime).TotalMinutes -lt 20) { continue }
+            $j7 = $null; try { $j7 = Get-Content -Path $fp7.FullName -Raw -Encoding UTF8 | ConvertFrom-Json } catch { }
+            if ((-not $j7) -or ($j7.resultado -ne 'verde' -and $j7.resultado -ne 'rojo')) { Add-Content -Path $EstPru -Value $clave7; continue }
+            $lote7 = ($fp7.Name -replace '^(L-\d+)-.*$', '$1')
+            $hay7 = @(Get-ChildItem -Path $LogDir -Filter ($lote7 + '-veredicto*.json') -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt $fp7.LastWriteTime })
+            if ($hay7.Count -gt 0) { Add-Content -Path $EstPru -Value $clave7; continue }
+            $t7b = "El juez local no dejo veredicto del lote $lote7 (pruebas $($j7.resultado) desde las " + $fp7.LastWriteTime.ToString('HH:mm') + "). Mira log\$lote7-juez.txt y lanza la tarea de Cowork de respaldo (pre-vuelo y verificar.json como antes)."
+            if (Avisar 'Chat de desarrollo' $t7b $dest) { Add-Content -Path $EstPru -Value $clave7; Log "Juez sin veredicto: $lote7 avisado." }
+        }
+    } catch { Log ('ERROR en pruebas/juez: ' + $_.Exception.Message) }
 
     # --- 8. Estado vivo (v10, LM-2): lo mecanico al minuto, para el Panel (y mas adelante el tablero) ---
     try {

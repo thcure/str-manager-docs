@@ -23,5 +23,5 @@ const chrome = rutaChrome();
 if (!chrome) { console.log('No encontre chrome.exe en las rutas habituales.'); process.exit(1); }
 fs.mkdirSync(dirPerfil(u), { recursive: true });
 const p = spawn(chrome, ['--user-data-dir=' + dirPerfil(u), '--no-first-run', '--no-default-browser-check', '--new-window', BASE + '/login.html'], { stdio: 'ignore' });
-console.log('Se abrio una ventana de Chrome aparte (perfil de prueba ' + PERFILES[u] + '). Inicia sesion con ese usuario; cuando veas el STR, cierra esa ventana.');
+console.log('Se abrio una ventana de Chrome aparte (perfil de prueba ' + PERFILES[u] + '). Inicia sesion con ese usuario; cuando veas el STR, CIERRA esa ventana: mientras siga abierta, las pruebas de la cola no pueden usar el perfil.');
 p.on('exit', () => console.log('Sesion de ' + PERFILES[u] + ' guardada en pw\\perfiles-chrome\\' + u + '.'));

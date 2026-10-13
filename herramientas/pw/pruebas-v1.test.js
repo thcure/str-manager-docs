@@ -3,7 +3,7 @@
 const { extraerGuion, igual, loteDe, cerrarCaso } = require('./guion');
 const { nombresZz, evaluar, evaluarRelacion, registros } = require('./semilla');
 const { versionNueva } = require('./probar-lote');
-const { argsCamara } = require('./comun');
+const { argsCamara, explicarError } = require('./comun');
 let ok = 0, fail = 0;
 const t = (n, c) => { if (c) { ok++; console.log('OK   ' + n); } else { fail++; console.log('FAIL ' + n); } };
 
@@ -59,6 +59,8 @@ t('relacion: operador sin permiso ok', evaluarRelacion({ id: 'c', tipo: 'sinPerm
 t('relacion: con todo:true falta', evaluarRelacion({ id: 'c', tipo: 'sinPermiso', usuario: 'zz-verif-oper', permiso: 'inventario.editar' }, { usuarios: [[{ id: 'u2', nombre: 'zz-verif-oper', rol: 'operador', permisos: { todo: true } }]] }, vg).estado === 'falta');
 t('relacion: sin permisos en la respuesta no concluye', evaluarRelacion({ id: 'c', tipo: 'sinPermiso', usuario: 'zz-verif-colab', permiso: 'x' }, cu, vg).estado === 'no concluyente');
 t('relacion: grupo no visto no concluye', evaluarRelacion({ id: 'a', tipo: 'colaboradorBase', propiedad: 'x', usuario: 'y' }, cu, { propiedades: true }).estado === 'no concluyente');
+t('error 21: perfil en uso', explicarError(new Error('browserType.launchPersistentContext: Target page closed\n  - <process did exit: exitCode=21, signal=null>'), 'admin').startsWith('perfil en uso'));
+t('otro error: primera linea', explicarError(new Error('boom\nmas'), 'admin') === 'boom');
 t('sin camara no hay argumentos', argsCamara(null).length === 0);
 t('camara sintetica', argsCamara(true).includes('--use-fake-device-for-media-stream') && argsCamara(true).length === 2);
 t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-for-fake-video-capture=')));

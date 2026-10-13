@@ -63,6 +63,13 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
 }
 
 // Abre el perfil persistente de un usuario de prueba. opciones: { headless, viewport, guardia }
+// v0.4.7 (M-273): Chrome sale con exitCode 21 cuando otra ventana tiene abierto el mismo perfil (user-data-dir).
+function explicarError(e, perfil) {
+  const m = String((e && e.message) || e || '');
+  if (/exitCode=21\b|exit code 21\b|code:? 21\b/i.test(m)) return 'perfil en uso: cierra la ventana de Chrome del perfil de prueba ' + perfil + ' (la que abrio abrir-perfil.js) y repite';
+  return m.split('\n')[0].slice(0, 300);
+}
+
 async function abrir(usuario, opciones = {}) {
   if (!PERFILES[usuario]) throw new Error('usuario de prueba desconocido: ' + usuario);
   const ctx = await chromium.launchPersistentContext(dirPerfil(usuario), {
@@ -88,4 +95,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara };
+module.exports = { COLA, BASE, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara, explicarError };

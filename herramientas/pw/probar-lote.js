@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { BASE, COLA, abrir } = require('./comun');
+const { BASE, COLA, abrir, explicarError } = require('./comun');
 const { extraerGuion, igual, loteDe, correrGuion, cargar } = require('./guion');
 const { comprobarSemilla } = require('./semilla');
 
@@ -37,7 +37,7 @@ async function sesionViva(perfil) {
     await p.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded' });
     const r = await me;
     return r && r.status() === 200 ? { ok: true, observado: perfil + ': /api/me 200' } : { ok: false, observado: perfil + ': sin sesion (Carlos: node abrir-perfil.js ' + perfil + ')' };
-  } catch (e) { return { ok: false, observado: perfil + ': ' + e.message }; }
+  } catch (e) { return { ok: false, observado: perfil + ': ' + explicarError(e, perfil) }; }
   finally { if (ctx) await ctx.close().catch(() => { }); }
 }
 

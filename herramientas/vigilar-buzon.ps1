@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo, veredicto del juez y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
 #     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
@@ -499,7 +499,8 @@ try {
 
     # --- 7b. Pruebas y juez local (v11.2, LM-18/LM-19) ---
     # Avisa al Chat de desarrollo, una vez por archivo: lote bloqueado en la puerta de entrada (L-n-pruebas.json),
-    # guion o regresion en rojo, veredicto del juez local escrito, y juez sin veredicto 20 min despues de las pruebas.
+    # guion o regresion en rojo, y juez sin veredicto 20 min despues de las pruebas (el veredicto escrito ya lo avisa
+    # la seccion de veredictos-avisados).
     # Estado: pruebas-avisadas.txt (nombres de archivo y claves sinjuez:<archivo>). Primera vez: marca sin avisar.
     try {
         $EstPru = Join-Path $Base 'pruebas-avisadas.txt'
@@ -519,9 +520,7 @@ try {
             if ($fa.Name -like '*-pruebas.json') {
                 if ($j7 -and $j7.resultado -eq 'bloqueado') { $t7 = "Lote $lote7 bloqueado en la puerta de entrada de las pruebas (log\$($fa.Name)): $($j7.causa). Corrige la causa y reencola; no se gasto verificacion." }
                 elseif ($j7 -and $j7.resultado -eq 'rojo') { $t7 = "Lote ${lote7}: el guion o la regresion fallan ($($j7.causa)). El juez local escribe el veredicto; si no aparece en 20 min te aviso." }
-            } elseif ($j7 -and ([string]$j7.modoVerificacion) -like '*juez local*') {
-                $t7 = "El juez local dejo el veredicto del lote ${lote7}: $($j7.resultado) (log\$($fa.Name)). Siguelo como dice proceso.json (aceptado, parcial o no aceptado)."
-            }
+            }   # los veredictos (tambien los del juez) ya los avisa la seccion de veredictos-avisados
             if ((-not $t7) -or (Avisar 'Chat de desarrollo' $t7 $dest)) { Add-Content -Path $EstPru -Value $fa.Name; if ($t7) { Log "Pruebas/juez: $($fa.Name) avisado." } }
         }
         foreach ($fp7 in @($arch7 | Where-Object { $_.Name -like '*-pruebas.json' })) {

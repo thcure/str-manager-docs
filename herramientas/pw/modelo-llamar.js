@@ -15,7 +15,7 @@ async function main() {
     const archivo = path.join(COLA, 'log', 'modelo-' + accion + '-' + out.inicio.replace(/[:.]/g, '-') + '.json');
     fs.writeFileSync(archivo, JSON.stringify(out, null, 1));
     console.log('Modelo ' + accion + ': ' + (out.ok ? 'ok' : 'error') + ' ' + (out.status || '') + ' - ' + path.basename(archivo));
-    process.exit(out.ok ? 0 : 1);
+    process.exitCode = out.ok ? 0 : 1;   // sin process.exit: en Windows corta handles de fetch abiertos (assert de libuv)
   };
   if (!fs.existsSync(tokenFile)) return fin({ ok: false, error: 'falta claves\\modelo-arq.txt' });
   const token = fs.readFileSync(tokenFile, 'utf8').trim();

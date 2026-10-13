@@ -34,6 +34,12 @@ for p in planes: ids['PT'].add(p.get('id'))
 for it in items:
     t = it.get('tipo'); ids[t].add(it.get('id'))
 for r in riesgos: ids['R'].add(r.get('id'))
+# B4 (M-234): tras el corte, los REQ históricos viven en interno/archivo/reqs-historial.json; cuentan para las referencias
+if os.path.exists(os.path.join(RAIZ, 'interno/archivo/reqs-historial.json')):
+    for r in carga('interno/archivo/reqs-historial.json').get('reqs', []): ids['REQ'].add(r.get('id'))
+for r in reqs:
+    if r.get('antes'): ids['REQ'].add(r.get('antes'))
+if seg.get('dasPendientesDeTrasladar'): avi('R-B4', 'decision', ','.join(str(d.get('id')) for d in seg['dasPendientesDeTrasladar']), 'DA en seguimiento.dasPendientesDeTrasladar: Diseño las pasa a diseno.das y borra la clave')
 for m in mensajes: ids['M'].add(m.get('id'))
 for c in cambios: ids['LM' if str(c.get('lote', '')).startswith('LM') else 'L'].add(str(c.get('lote')))
 lotes_num = {str(l.get('lote')) for l in lotes if l.get('lote') is not None}

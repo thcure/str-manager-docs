@@ -44,7 +44,7 @@ async function abrir(usuario, opciones = {}) {
     await ctx.route('**/*', async (route) => {
       const r = route.request();
       const d = decidir(r.url(), r.method(), r.postData());
-      if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '' });
+      if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().split('?')[0].slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '' });
       return d.ok ? route.continue() : route.abort('blockedbyclient');
     });
   }

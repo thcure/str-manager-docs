@@ -811,6 +811,40 @@
    "riesgos": [
     "Preguntar demasiado: se agrupa lo que pueda decidirse junto (una tabla, no cinco mensajes)."
    ]
+  },
+  {
+   "codigo": "BAI07.05-p",
+   "nombre": "Verificador local con Playwright (perfiles de prueba, guardia de red, prueba de humo)",
+   "dueno": "Arquitecto",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-12",
+   "para": "Verificar en producción desde LENOVO sin depender de la tarea de Cowork ni de la extensión de Chrome: sin arranque tardío, sin carpetas por reconectar, con ventana de cualquier tamaño.",
+   "quien": {
+    "aplican": "Arquitecto (hoy), cola (B10-2), Chat Desarrollo (lee el resultado)",
+    "mantiene": "Arquitecto (LM-17)"
+   },
+   "piezas": [
+    "str-instr-cola\\pw\\ (fuente herramientas/pw/): comun.js, abrir-perfil.js, humo.js, guardia.test.js, package.json (playwright 1.64.0)",
+    "Perfiles de prueba en pw\\perfiles-chrome\\<usuario> (Chrome instalado, channel 'chrome')"
+   ],
+   "flujo": [
+    "Carlos inicia sesión una vez por usuario de prueba con node abrir-perfil.js <usuario> (Chrome normal, sin automatización: Google rechaza el inicio de sesión en un navegador automatizado).",
+    "Playwright reutiliza ese perfil, ya con la sesión del STR, sin volver a pasar por Google.",
+    "humo.js comprueba servicio del modelo, sesiones y 390 px y escribe log\\pw-humo.json (solo nombre y rol, nunca correos)."
+   ],
+   "reglas": [
+    "Nunca el perfil ni el usuario de Carlos.",
+    "La guardia corta toda escritura al STR sin 'zz-verif-' y todo host fuera de la lista; lo que corta queda en la bitácora.",
+    "Versión de Playwright al día con el Chrome instalado (1.49 no arrancaba con el Chrome de LENOVO).",
+    "Si una sesión caduca: node abrir-perfil.js <usuario> (lo hace Carlos)."
+   ],
+   "instalacion": "cd $HOME\\Downloads\\str-instr-cola\\pw ; npm install --no-audit --no-fund ; node guardia.test.js",
+   "comprobacion": "node humo.js → resultado aceptado (primera vez 12-oct 20:30).",
+   "creditos": "Ninguno en la prueba de humo; en B10-3, Claude solo para lo que no sea guion.",
+   "riesgos": [
+    "Sin el freno de la plataforma, el límite lo pone la guardia: revisar la bitácora en cada corrida.",
+    "Chrome se actualiza solo: si deja de arrancar, subir Playwright."
+   ]
   }
  ],
  "lineasBase": [

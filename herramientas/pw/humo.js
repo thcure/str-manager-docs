@@ -28,7 +28,7 @@ const { abrir, BASE, COLA } = require('./comun');
       await p.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded' });
       const r = await me;
       let resumen = 'sin respuesta de /api/me: el perfil no tiene sesion (correr node abrir-perfil.js ' + u + ')';
-      if (r) { let j = {}; try { j = await r.json(); } catch (e) { } resumen = r.status() + ' ' + JSON.stringify(j).slice(0, 140); }
+      if (r) { let j = {}; try { j = await r.json(); } catch (e) { } const us = j.user || j; resumen = r.status() + ' nombre=' + (us.nombre || '') + ' rol=' + (us.rol || ''); }  // sin correos ni telefonos: el log puede citarse en el repo publico
       add('sesion ' + u, !!r && r.status() === 200, resumen);
       if (u === 'admin') {
         const res = await p.evaluate(async (base) => {

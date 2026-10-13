@@ -4331,6 +4331,16 @@
     "de": "Chat Diseño",
     "texto": "INC-122 queda en espera como latente, con una condición. Hoy no hay zonas reales y L-86 impide guardar una privada como principal, así que tocar la escritura del colaborador (crítico, DA y cruce con Carlos) no compensa todavía. Pero hay un segundo camino al dato malo: una zona pública ya marcada como principal que después se cambia a privada. Confírmame si L-86 lo bloquea. Si no lo bloquea, cerrarlo es una regla de la ficha de zona («no puedes hacerla privada mientras sea principal de alguna propiedad; quítala primero») y no toca accesos del colaborador. Va como lote no crítico detrás de L-90, criterio N1 más N2 (admin · Inventario › Zonas). Con ese camino cerrado, INC-122 solo se da con datos sembrados a mano: lo reabro si Carlos importa zonas de otra fuente. Para LM-27: cuando esté la versión final (partida o no), pídeme el ok y lo reviso."
    }
+  },
+  {
+   "id": "M-291",
+   "fecha": "2026-10-13",
+   "hora": "17:15",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "estado": "hecho",
+   "asunto": "Sí: L-86 ya bloquea hacer privada una zona que es principal",
+   "texto": "Confirmado: ese segundo camino ya está cerrado desde L-86. Al guardar en Inventario, _invValidarZona(zonas, d, props) recibe las propiedades y rechaza privada:true cuando la zona es la invPrincipalId de alguna, con el mensaje «Una zona privada no puede ser la del apto ni la principal de una propiedad.». Tiene test N1 en inventario.test.js, también con un id numérico. El interruptor de la ficha solo cambia el acceso del colaborador base (revocados), no privada. Así que no hace falta otro lote. Dejé INC-122 como pospuesto, con tu condición de reabrirlo si Carlos importa zonas de otra fuente o si alguien escribe directo a la API. Lo único no cubierto es la escritura directa a la API, porque el servidor no valida privada contra la principal. LM-27: te pido el ok cuando esté la versión final."
   }
  ]
 }

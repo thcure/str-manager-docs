@@ -1,10 +1,11 @@
-# ejecutar-cola.ps1 (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+# ejecutar-cola.ps1 (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
 #   fallidas\       → instrucciones que terminaron sin commit (la cola se detiene ahí)
 #   log\<nombre>.txt → salida completa de la CLI por instrucción
 #   log\_resumen.txt → una línea por instrucción: fecha | archivo | hash | estado
+#   log\L-n-pruebas.json → P4/P5 de PRUEBAS-v1 (v6); con el archivo SIN-PRUEBAS en la cola no se corren
 #
 # Uso manual (en una ventana de PowerShell normal, NO dentro de la CLI de Claude Code):
 #   powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\Downloads\str-instr-cola\ejecutar-cola.ps1"
@@ -123,6 +124,21 @@ try {
       Move-Item -Path $f.FullName -Destination (Join-Path $Hechas $f.Name) -Force
       Resumen "OK | $($f.Name) | $($despues.Substring(0,7)) | commit y push"
       Write-Host "OK · $($despues.Substring(0,7))"
+      # v6 (PRUEBAS-v1, LM-18): P4 + P5 sin Claude. Espera el despliegue (hasta 10 min), corre tests/, compara el guion
+      # con la instruccion, comprueba semilla y sesiones, corre el guion N2 y la regresion de su zona.
+      # Resultado en log\L-n-pruebas.json (verde | rojo | bloqueado). No escribe veredicto: juzga el verificador.
+      $probar = Join-Path $Cola 'pw\probar-lote.js'
+      $node = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+      if ($node -and (Test-Path $probar) -and -not (Test-Path (Join-Path $Cola 'SIN-PRUEBAS'))) {
+        $salidaP = Join-Path $Log ($f.BaseName + '.pruebas.txt')
+        Push-Location (Join-Path $Cola 'pw')
+        (& $node $probar --instr (Join-Path $Hechas $f.Name) --repo $Repo 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaP -Encoding UTF8
+        $codP = $LASTEXITCODE
+        Pop-Location
+        $ultima = (Get-Content -Path $salidaP -Encoding UTF8 -ErrorAction SilentlyContinue | Where-Object { $_ -match '^Pruebas ' } | Select-Object -Last 1)
+        Resumen "PRUEBAS | $($f.Name) | codigo $codP | $ultima"
+        Write-Host "PRUEBAS - $ultima"
+      }
     } else {
       Move-Item -Path $f.FullName -Destination (Join-Path $Fallas $f.Name) -Force
       Resumen "FALLO | $($f.Name) | sin commit (código $codigo) | cola detenida"

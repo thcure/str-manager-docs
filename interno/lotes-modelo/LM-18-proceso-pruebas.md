@@ -1,6 +1,6 @@
 # Proceso de pruebas del STR (PRUEBAS-v1) · COBIT adaptado a nuestro modelo
 
-**Estado:** propuesta para aprobación de Carlos (LM-18, REQ-MOD-10) · **Fecha:** 12-oct-2026 · **Autor:** Chat Arquitecto · **Origen:** B6 (revisión con datos: 41 % de lotes con más de un veredicto) y la observación de Carlos: «los demás problemas son de no tener un proceso de gestión de pruebas claro, de comienzo a fin».
+**Estado:** vigente, aprobado por Carlos 12-oct-2026 20:20 (LM-18, REQ-MOD-10) · **Fecha:** 12-oct-2026 · **Autor:** Chat Arquitecto · **Origen:** B6 (revisión con datos: 41 % de lotes con más de un veredicto) y la observación de Carlos: «los demás problemas son de no tener un proceso de gestión de pruebas claro, de comienzo a fin».
 
 ## 1. Qué pide COBIT y qué tenemos
 
@@ -27,11 +27,13 @@
 |---|---|---|---|
 | **P1 · Criterios** (definido) | Diseño | Cada criterio del REQ con valor esperado, perfil y página, **y su nivel de prueba**: N1 `tests/`, N2 guion, N3 juicio | REQ con columna «Nivel» |
 | **P2 · Plan de pruebas del lote** (redactado) | Desarrollo | Sección «Pruebas» de la instrucción: casos N1 que la CLI escribe en `tests/`; **guion N2 escrito por Desarrollo** como bloque literal; criterios N3 con lo que el verificador debe mirar; datos que usa (semilla o `zz-verif-L<n>-`) | instrucción con plan; revisor previo comprueba que cada criterio tiene nivel |
-| **P3 · Construcción** | CLI | Código + `tests/` (N1) + copia **byte a byte** del guion N2 a `tests/e2e/L-<n>.spec.js`; `node tests/run.js` en verde (hook) | commit |
+| **P3 · Construcción** | CLI | Código + `tests/` (N1) + copia **byte a byte** del guion N2 a `tests/e2e/<REQ-o-INC>.spec.js`; `node tests/run.js` en verde (hook) | commit |
 | **P4 · Entrada** (automático) | cola | Despliegue OK (`/api/health` y `?v=`), `tests/` verde, **semilla íntegra**, sesiones vivas (humo) | si falla: «bloqueado» con la causa, sin gastar créditos |
 | **P5 · Ejecución** | verificador local | N2: guion del lote + **regresión** de los guiones de la misma zona; N3: Claude con el navegador local solo para esos criterios | `log\L-<n>-veredicto.json` con nivel y evidencia por criterio |
 | **P6 · Salida** | verificador | Aceptado si todo cumple. N1 se da por cumplido leyendo el resultado de `tests/` del log; `?v=` lo comprueba el guion. **Parcial** solo por un N3 no concluyente o un criterio declarado «no verificable» desde P2 | veredicto |
 | **P7 · Registro y aprendizaje** | Desarrollo · Arquitecto | INC con nivel (menor / significativo / crítico, como pide BAI03.08); el guion queda en `tests/e2e/` como regresión; métricas en `estado-vivo.json` | historia de pruebas que crece con cada lote |
+
+**Nombre del guion:** `tests/e2e/<REQ-o-INC>.spec.js` (no `L-<n>`: el número del lote se asigna al encolar y el guion se escribe antes; así además la regresión se agrupa por requisito y zona).
 
 **Independencia (BAI07.05):** quien construye (CLI) no escribe el guion; lo escribe Desarrollo desde los criterios de Diseño, la CLI lo copia sin cambios y el verificador comprueba que el archivo del commit es igual al de la instrucción. Ejecuta la cola; juzga el verificador.
 

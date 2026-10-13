@@ -20,14 +20,23 @@ Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién lo
 
 ## 1..n. Cambios — un apartado por archivo o pieza, en imperativo, con lo que **no** debe tocarse.
 
-## Tests en `tests/` — qué funciones puras se extraen y prueban; réplicas PHP con el patrón del repo; `node tests/run.js` en verde.
+## Tests en `tests/` — qué funciones puras se extraen y prueban (los criterios N1); réplicas PHP con el patrón del repo; `node tests/run.js` en verde. Si hay guion N2: «copia el bloque de *Guion N2* a `tests/e2e/<REQ-o-INC>.spec.js` sin cambiar nada; no lo corras ni lo arregles: si crees que falla, dilo en el cierre». `tests/e2e/` entra en Alcance.
 
 ## `CLAUDE.md` — filas que cambian; INC-37 con la versión nueva.
 
 ## Pruebas derivadas (criterios del REQ; verificador <estándar | crítico>; perfiles de prueba, nunca el de Carlos)
+Plan de pruebas del lote (PRUEBAS-v1, paso P2). Cada criterio lleva el **nivel** que le puso Diseño en el REQ: **N1** lógica en `tests/` (la escribe la CLI), **N2** guion de Playwright (lo escribes tú abajo), **N3** juicio del verificador (solo lo visual o nuevo que un guion no puede ver). Si el REQ no trae niveles, los pones tú y Diseño los confirma por el buzón.
 ```
-- a. <criterio> · perfil: <zz-verif-admin | zz-verif-oper | zz-verif-colab | tests/> · página: <https://app.apartamentosbucaramanga.com/str-….html> · precondición: <…> · espera: <lo observable, literal> · **<Seguir | Detener | Revertir>**
+- a. <criterio> · nivel: <N1 | N2 | N3> · perfil: <zz-verif-admin | zz-verif-oper | zz-verif-colab | zz-verif-colab2 | tests/> · página: <https://app.apartamentosbucaramanga.com/str-….html> · precondición: <…> · espera: <lo observable, literal> · **<Seguir | Detener | Revertir>**
+- Datos de prueba: <semilla fija (zz-verif-Propiedad, zz-verif-Propiedad-2, usuarios, zonas, flujo base) | creados por el guion con h.dato() → zz-verif-L<n>-…, borrados en limpiar()>
 ```
+N1 → «cubierto por tests/<archivo>» (la cola corre `node tests/run.js` en la puerta de entrada). N2 → un caso del guion con la misma letra. N3 → dice al verificador qué mirar y con qué perfil.
+
+### Guion N2 → `tests/e2e/<REQ-o-INC>.spec.js` (la CLI lo copia tal cual, sin cambiar un byte; plantilla: `herramientas/plantillas/guion-e2e.js`)
+```js
+module.exports = { req: '<REQ-X-n>', zona: '<área de CLAUDE.md § 2>', casos: [ /* un caso por criterio N2 */ ], async limpiar(h) { } };
+```
+Sin criterios N2: borra esta subsección (la cola lo anota y sigue). La cola comprueba que el archivo del commit es igual a este bloque: si la CLI lo cambia, el lote queda «bloqueado» sin gastar verificación.
 Los criterios de permisos y 403 van «cubierto por tests/<archivo>»: el verificador lee el resultado, no los prueba en el navegador. Lo mismo los criterios de **ancho o móvil** (390 px, media queries): el verificador no puede cambiar el tamaño de la ventana; se prueban con un test que lea el CSS (lote 69, 11-oct). Si un criterio exige llegar «desde el menú», la prueba lo dice y empieza en `str-app-shell.html`.
 
 ## Cierre (la CLI lo dice en español al final de su respuesta; la cola lo guarda en `log\NN-<nombre>.txt`, que la CLI no debe abrir)

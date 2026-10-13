@@ -6,5 +6,10 @@ Carpeta de instalación: `C:\Users\ktcol\Downloads\str-instr-cola\pw\` (fuente: 
 - `abrir-perfil.js <usuario>`: abre Chrome normal (sin automatización: Google rechaza el inicio de sesión en navegadores automatizados) y Carlos inicia sesión una vez por usuario de prueba (admin, oper, colab, colab2). Nadie más escribe contraseñas.
 - `humo.js`: prueba de humo (servicio del modelo desde la cola y desde el navegador, sesión de los tres perfiles, ventana de 390 px). Escribe `log\pw-humo.json`.
 - `guardia.test.js`: prueba la guardia sin navegador.
+- **PRUEBAS-v1 (LM-18)**:
+  - `semilla.js` + `semilla.json`: comprueba con zz-verif-admin, solo lectura, que la semilla fija existe (propiedades, usuarios, flujos, zonas). Escribe `log\pw-semilla.json`. Reponer lo que falte: guion de semilla del Chat Desarrollo (siguiente paso).
+  - `guion.js`: corre un guion N2 (`tests/e2e/<REQ-o-INC>.spec.js` del repo str-manager; contrato en `herramientas/plantillas/guion-e2e.js`). A mano: `node guion.js C:\Users\ktcol\str-manager\tests\e2e\REQ-X-n.spec.js --lote L-n`.
+  - `probar-lote.js`: P4 (despliegue, `tests/` en verde, guion igual a la instrucción, semilla, sesiones) y P5 (guion + regresión de su zona). Lo lanza la cola v6 tras el commit; escribe `log\L-n-pruebas.json` con `verde | rojo | bloqueado`. A mano: `node probar-lote.js --instr ..\hechas\L-n-instr-x.md`. Con el archivo `SIN-PRUEBAS` en la cola, la cola no lo lanza.
+  - `pruebas-v1.test.js`: funciones puras de los tres, sin navegador.
 
 Instalación (una vez, PowerShell): `cd $HOME\Downloads\str-instr-cola\pw ; npm install --no-audit --no-fund ; npx playwright install chromium ; node guardia.test.js`

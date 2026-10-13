@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-08",
+ "actualizadoEn": "2026-10-12",
  "fuente": "ISACA, COBIT® 2019 Framework: Governance and Management Objectives (2018), capítulo 4. Traducción propia para uso interno; nombre original en inglés junto a cada objetivo.",
  "estadoProyecto": "2026-09-23 (adopciones parciales acordadas con el dueño); detalle oficial de los 40 objetivos completado el 2026-09-27.",
  "dominios": {
@@ -1880,7 +1880,7 @@
    "estado": "par",
    "interes": true,
    "resumen": "Identificar, diseñar, construir y mantener soluciones.",
-   "posicion": "Proceso natural de todo requerimiento funcional; lo ejecuta la CLI bajo CLAUDE.md y la instrucción es el diseño. Adoptado parcialmente (2026-09-23): 03.06 act. 3 (tests/ con las réplicas de lógica que ya falló), 03.09 (un cambio de alcance durante el lote = REQ-Xn.1 y lote nuevo) y 03.10 act. 4 (patrón de mantenimiento, en la posimplementación).",
+   "posicion": "Proceso natural de todo requerimiento funcional; lo ejecuta la CLI bajo CLAUDE.md y la instrucción es el diseño. Adoptado parcialmente (2026-09-23): 03.06 act. 3 (tests/ con las réplicas de lógica que ya falló), 03.09 (un cambio de alcance durante el lote = REQ-Xn.1 y lote nuevo) y 03.10 act. 4 (patrón de mantenimiento, en la posimplementación). Pruebas (12-oct-2026, LM-18): 03.07 y 03.08 adoptadas con PRUEBAS-v1 (niveles N1/N2/N3, guion conservado como regresión, ejecución automática en la cola).",
    "practicasStr": [
     {
      "c": "BAI03.03",
@@ -1899,6 +1899,18 @@
      "t": "Aseguramiento de calidad",
      "estado": "ok",
      "nuestra": "Act. 3: carpeta tests/ en el repo con las réplicas de Node de merge/remove/stamp, permisos del colaborador y cálculo de horas; node tests/run.js antes de cada commit que las toque (desde B1/B2)."
+    },
+    {
+     "c": "BAI03.07",
+     "t": "Preparar las pruebas de la solución",
+     "estado": "ok",
+     "nuestra": "PRUEBAS-v1 (LM-18, aprobado por Carlos 12-oct-2026): cada criterio nace con nivel (N1 tests/, N2 guion de Playwright, N3 juicio de Claude) en el REQ; la instrucción trae el plan de pruebas y el guion N2 escrito por Desarrollo. Act. 4: los guiones se conservan en tests/e2e/ como regresión."
+    },
+    {
+     "c": "BAI03.08",
+     "t": "Ejecutar las pruebas de la solución",
+     "estado": "ok",
+     "nuestra": "La cola ejecuta tras cada despliegue: puerta de entrada (despliegue, tests/, semilla, sesiones) y luego N1 + N2 + regresión sin Claude; Claude local solo juzga N3. Probador independiente: la CLI no escribe el guion. Errores con nivel menor / significativo / crítico."
     },
     {
      "c": "BAI03.09",
@@ -2358,19 +2370,19 @@
      "c": "BAI07.03",
      "t": "Planificar pruebas de aceptación",
      "estado": "ok",
-     "nuestra": "Criterios de aceptación con valores esperados, proporcionales al riesgo, antes de construir. Act. 8: cada criterio dice qué pasa si falla: seguir (INC bajo), detener (fix obligatorio) o revertir."
+     "nuestra": "Criterios con valor esperado y nivel de prueba (N1/N2/N3), proporcionales al riesgo, antes de construir; cada uno dice seguir, detener o revertir. PRUEBAS-v1 añade criterios de entrada (P4: despliegue, tests/ verde, semilla íntegra, sesiones vivas) y de salida (P6: aceptado si todo cumple; parcial solo por N3 no concluyente)."
     },
     {
      "c": "BAI07.04",
      "t": "Establecer un ambiente de pruebas",
-     "estado": "rel",
-     "nuestra": "Requerimiento de proceso pendiente: cuenta de pruebas en la misma base cuando arranque la operación real."
+     "estado": "par",
+     "nuestra": "Adoptado parcialmente (LM-18): un solo entorno, así que se prueba en producción con una semilla fija zz-verif- (2 propiedades sin iCal, 4 usuarios, zonas, flujo base) que pw\\semilla.js comprueba y repone; datos de cada lote con zz-verif-L<n>- y borrados al terminar; la guardia de red corta toda escritura sin zz-verif-. Sin base separada mientras no haya operación real con terceros."
     },
     {
      "c": "BAI07.05",
      "t": "Ejecutar pruebas de aceptación",
      "estado": "ok",
-     "nuestra": "Réplicas en la CLI (tests/) + verificación en producción por zona tocada, punto por punto. Act. 4: quien construye (CLI) nunca acepta; acepta Claude en producción. Un criterio incumplido = \"desplegado, no aceptado\"."
+     "nuestra": "Independiente y según el plan: Desarrollo escribe el guion, la CLI lo copia sin cambios y la cola comprueba que es igual; ejecuta la cola, juzga el verificador. Quien construye nunca acepta. Equilibrio guion / interactivo: lo repetible por guion, Claude solo para N3. Un criterio incumplido = desplegado, no aceptado."
     },
     {
      "c": "BAI07.06",

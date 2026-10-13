@@ -273,7 +273,7 @@
    {
     "id": "definido",
     "fase": "BAI02",
-    "que": "El REQ tiene criterios de aceptación en su documento (claude/producto/requerimientos-*.md). Si es crítico, aquí mismo Diseño registra la DA-n y hace el cruce con Carlos (alcance, riesgo, reversión): es la única visita a Carlos del lote.",
+    "que": "El REQ tiene criterios de aceptación en su documento (claude/producto/requerimientos-*.md). Si es crítico, aquí mismo Diseño registra la DA-n y hace el cruce con Carlos (alcance, riesgo, reversión): es la única visita a Carlos del lote. Cada criterio lleva su nivel de prueba (N1 tests/, N2 guion, N3 juicio; PRUEBAS-v1).",
     "dueno": "diseno",
     "raci": {
      "R": "diseno",
@@ -293,7 +293,8 @@
      "pospuesto"
     ],
     "guardas": [
-     "crítico ⇒ DA-n decidida en diseno.json y cruce con Carlos con fecha y hora, antes de entregar (R4); sin eso no pasa a entregado"
+     "crítico ⇒ DA-n decidida en diseno.json y cruce con Carlos con fecha y hora, antes de entregar (R4); sin eso no pasa a entregado",
+     "cada criterio con nivel N1/N2/N3 (PRUEBAS-v1, LM-18); un REQ entregado antes sin niveles los recibe de Desarrollo en P2 y Diseño los confirma por el buzón"
     ]
    },
    {
@@ -483,7 +484,7 @@
    {
     "id": "redactado",
     "fase": "BAI03",
-    "que": "El Chat Desarrollo escribió la instrucción con herramientas/plantillas/instruccion.md y pasó el revisor previo (plantillas/revisor-previo.md, 12 puntos, subagente); si es crítico, la cabecera cita la DA-n y el cruce ya hechos en definido y lleva el «ok» de Diseño por el buzón. No vuelve a Carlos salvo que la instrucción amplíe el alcance o suba el riesgo del REQ: entonces Diseño repite el cruce.",
+    "que": "El Chat Desarrollo escribió la instrucción con herramientas/plantillas/instruccion.md y pasó el revisor previo (plantillas/revisor-previo.md, 13 puntos, subagente; el 13 comprueba que cada criterio tiene nivel y que el guion N2 está en la sección Pruebas); si es crítico, la cabecera cita la DA-n y el cruce ya hechos en definido y lleva el «ok» de Diseño por el buzón. No vuelve a Carlos salvo que la instrucción amplíe el alcance o suba el riesgo del REQ: entonces Diseño repite el cruce.",
     "dueno": "desarrollo",
     "raci": {
      "R": "desarrollo",
@@ -635,7 +636,7 @@
    {
     "id": "verificando",
     "fase": "BAI07",
-    "que": "Pre-vuelo escrito (enlace vivo, perfiles, usuario de la barra, /me.nombre), verificar.json escrito (plantilla) y tarea lanzada (estándar o crítica según la categoría). Un veredicto 'bloqueado' no cambia el estado: el CD corrige el entorno y relanza con archivo de veredicto nuevo (LM-1 §3.5), sin repetir lo ya verificado.",
+    "que": "Pre-vuelo escrito (enlace vivo, perfiles, usuario de la barra, /me.nombre), verificar.json escrito (plantilla) y tarea lanzada (estándar o crítica según la categoría). Un veredicto 'bloqueado' no cambia el estado: el CD corrige el entorno y relanza con archivo de veredicto nuevo (LM-1 §3.5), sin repetir lo ya verificado. Con PRUEBAS-v1 y la cola v6 instalada, la cola hace P4 (puerta de entrada) y P5 (guion + regresión) sola tras el despliegue; la tarea o el verificador local solo juzga los N3. Hasta entonces sigue el camino actual.",
     "dueno": "desarrollo",
     "raci": {
      "R": "verificador",
@@ -892,5 +893,136 @@
   "Carlos como rol-dueno medido (5-A): sin escalamiento, con métrica esperaDueno",
   "12-oct (Carlos): DA-n y cruce de críticos en definido/entregado, conducidos por Diseño; redactado solo los cita; a Carlos se le visita una vez por lote"
  ],
- "aprobacion": "Carlos, 12-oct-2026 11:58 («de acuerdo, así»: cruce de LM-10 y las 4 preguntas con la propuesta). Ajuste de Carlos en el mismo cruce: la DA-n y el cruce de un crítico se garantizan en definido/entregado (los conduce Diseño), no en redactado."
+ "aprobacion": "Carlos, 12-oct-2026 11:58 («de acuerdo, así»: cruce de LM-10 y las 4 preguntas con la propuesta). Ajuste de Carlos en el mismo cruce: la DA-n y el cruce de un crítico se garantizan en definido/entregado (los conduce Diseño), no en redactado.",
+ "pruebas": {
+  "version": "PRUEBAS-v1",
+  "estado": "vigente",
+  "aprobacion": "Carlos, 12-oct-2026 20:20 («aprobado»), sobre claude/marco/proceso-pruebas-2026-10.md (LM-18).",
+  "documento": "claude/marco/proceso-pruebas-2026-10.md",
+  "cobit": [
+   "BAI03.07",
+   "BAI03.08",
+   "BAI07.03",
+   "BAI07.04",
+   "BAI07.05"
+  ],
+  "niveles": {
+   "N1": "lógica sin navegador: la CLI escribe el test en tests/ y run.js lo corre",
+   "N2": "guion de Playwright escrito por Desarrollo, copiado byte a byte a tests/e2e/<REQ-o-INC>.spec.js, conservado como regresión",
+   "N3": "juicio de Claude con el navegador local, solo lo visual o nuevo que un guion no puede ver"
+  },
+  "pasos": [
+   {
+    "id": "P1",
+    "nombre": "criterios",
+    "quien": "diseno",
+    "estadoReq": "definido",
+    "sale": "REQ con columna Nivel"
+   },
+   {
+    "id": "P2",
+    "nombre": "plan de pruebas",
+    "quien": "desarrollo",
+    "estadoLote": "redactado",
+    "sale": "sección Pruebas de la instrucción con casos N1, guion N2 literal, criterios N3 y datos que usa"
+   },
+   {
+    "id": "P3",
+    "nombre": "construcción",
+    "quien": "agente-cli",
+    "estadoLote": "construyendo",
+    "sale": "commit con código, tests/ y el guion copiado; run.js en verde"
+   },
+   {
+    "id": "P4",
+    "nombre": "entrada",
+    "quien": "maquina",
+    "estadoLote": "verificando",
+    "sale": "lista o bloqueado con la causa, sin gastar créditos",
+    "criterios": [
+     "/api/health responde y el HTML lleva el ?v= del lote",
+     "tests/ en verde en el log",
+     "tests/e2e/<REQ-o-INC>.spec.js igual al bloque de la instrucción",
+     "semilla zz-verif- íntegra (pw\\semilla.js)",
+     "sesiones vivas (pw\\humo.js)"
+    ]
+   },
+   {
+    "id": "P5",
+    "nombre": "ejecución",
+    "quien": "maquina + verificador",
+    "estadoLote": "verificando",
+    "sale": "resultado por criterio con nivel y evidencia",
+    "que": "guion del lote + regresión de los guiones de la misma zona; Claude solo para N3"
+   },
+   {
+    "id": "P6",
+    "nombre": "salida",
+    "quien": "verificador",
+    "sale": "veredicto",
+    "criterios": [
+     "aceptado si todo cumple",
+     "parcial solo por un N3 no concluyente o un criterio declarado no verificable en P2",
+     "no aceptado si falla un N1 o N2"
+    ]
+   },
+   {
+    "id": "P7",
+    "nombre": "registro",
+    "quien": "desarrollo + arquitecto",
+    "sale": "INC con nivel menor / significativo / crítico; el guion queda en tests/e2e/; métricas en estado-vivo.json"
+   }
+  ],
+  "independencia": "Quien construye no escribe el guion: lo escribe Desarrollo desde los criterios de Diseño, la CLI lo copia sin cambios y la cola comprueba que es igual. Ejecuta la cola; juzga el verificador.",
+  "entorno": "Producción con semilla fija zz-verif- (zz-verif-Propiedad y zz-verif-Propiedad-2 sin iCal; usuarios admin, oper, colab, colab2; zonas; flujo base). Datos de cada lote con zz-verif-L<n>-, borrados al terminar. La guardia de red corta toda escritura sin zz-verif-.",
+  "metricas": [
+   {
+    "id": "lotesConMasDeUnVeredicto",
+    "hoy": "41 %",
+    "meta": "≤ 15 %"
+   },
+   {
+    "id": "pasadasPerdidasPorEntorno",
+    "hoy": "16 en una semana",
+    "meta": "0"
+   },
+   {
+    "id": "criteriosConGuionOTests",
+    "hoy": "sin medir",
+    "meta": "≥ 70 %"
+   },
+   {
+    "id": "minutosConstruidoAAceptado",
+    "hoy": "mediana 12",
+    "meta": "≤ 20"
+   }
+  ],
+  "implantacion": [
+   {
+    "n": 1,
+    "que": "documento aprobado; cobit.json y proceso.json",
+    "estado": "hecho"
+   },
+   {
+    "n": 2,
+    "que": "plantillas (Nivel en REQ, sección Pruebas, revisor previo punto 13) · plantillas/guion-e2e.js",
+    "estado": "hecho"
+   },
+   {
+    "n": 3,
+    "que": "pw\\semilla.js",
+    "estado": "hecho (v1 comprueba; reponer con guion de semilla de Desarrollo)"
+   },
+   {
+    "n": 4,
+    "que": "cola v6 con P4 y P5 automáticos",
+    "estado": "en curso"
+   },
+   {
+    "n": 5,
+    "que": "juicio N3 local; la tarea de Cowork queda de respaldo",
+    "estado": "pendiente"
+   }
+  ]
+ }
 }

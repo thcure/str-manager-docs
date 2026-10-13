@@ -25,16 +25,18 @@
    ],
    "precondiciones": "<usuario, permisos y datos que deben existir; si no se cumplen → 'no verificable' con esa causa>",
    "espera": "<lo observable, literal>",
-   "soloLectura": true
+   "soloLectura": true,
+   "nivel": "N3"
   },
   {
    "c": "b",
    "perfil": "tests/",
    "cubiertoPor": "tests/<archivo>.test.js",
-   "espera": "verde en log\\NN-<nombre>.txt"
+   "espera": "verde en log\\NN-<nombre>.txt",
+   "nivel": "N1"
   }
  ],
- "_criterios": "Un objeto por prueba derivada de la instrucción, con la misma letra. perfil ∈ {admin, operador, colaborador, tests/}. Anchos/móvil y permisos/403 → perfil tests/ (el verificador no cambia el viewport). «Desde el menú» → paginas empieza por str-app-shell.html.",
+ "_criterios": "Un objeto por prueba derivada de la instrucción, con la misma letra. perfil ∈ {admin, operador, colaborador, tests/}. Anchos/móvil y permisos/403 → perfil tests/ (el verificador no cambia el viewport). «Desde el menú» → paginas empieza por str-app-shell.html. nivel ∈ {N1, N2, N3} (PRUEBAS-v1): N1 y N2 llevan 'cubiertoPor' con el test o el caso del guion.",
  "pruebasApi": [],
  "_pruebasApi": "Solo si la instrucción lo pide: [{\"c\":\"d\",\"perfil\":\"colaborador\",\"metodo\":\"GET\",\"ruta\":\"/api/col/...\",\"cuerpo\":null,\"espera\":403}]. Método, ruta y cuerpo exactos; el verificador no improvisa.",
  "resultadosPermitidos": [
@@ -42,5 +44,7 @@
   "parcial",
   "no aceptado",
   "bloqueado"
- ]
+ ],
+ "pruebasCola": "log\\L-<n>-pruebas.json",
+ "_pruebasCola": "PRUEBAS-v1: la cola ya corrió P4 (puerta de entrada) y P5 (N1 + N2 + regresión). El verificador NO repite los N1 ni los N2: los lee de ese archivo y los copia al veredicto con su observado; juzga solo los N3. Si resultado = bloqueado, no se lanza la verificación."
 }

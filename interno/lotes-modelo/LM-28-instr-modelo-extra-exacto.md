@@ -13,7 +13,7 @@ Precondiciones para verificar: `/modelo/api/salud` con `schema_version` 2; la ca
 ## 1. `carga.php`
 - `extra` de las filas de las 14 tablas se guarda con el mismo camino que `valor` de `complemento` (L-91): desde el cuerpo decodificado **sin** `true` y recodificado con `JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION`, sin reordenar claves. Así `{}` sigue siendo `{}` y `119.0` sigue siendo `119.0`.
 - Las columnas proyectadas (las que no son `extra`) no cambian.
-- Comprobar que `exportar` saca cada fila solo de `extra.o`; si alguna columna numérica (p. ej. `lote.orden`) llegara a la salida, que conserve también su `.0`.
+- Comprobar que `exportar` saca cada fila solo de `extra.o`; si alguna columna llegara a la salida, la CLI no toca `lectura.php` y lo anota como hallazgo en el cierre (ajuste de Diseño, M-307).
 - Validaciones, transacción y respuestas, igual que hoy.
 
 ## 2. Tests

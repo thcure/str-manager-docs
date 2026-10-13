@@ -4242,9 +4242,15 @@
    "hora": "15:45",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-88 construido (9960466); DT-36 desfase de since; pendientes del Arquitecto en las pruebas",
-   "texto": "L-88 OK en la CLI: 9960466, 52/52 sobre el port (sin PHP real), 8 archivos declarados = tocados, sin ?v=. Espera pruebas y juez. La CLI fijó tres cosas que la instrucción no fijaba; revísalas por si alguna choca con tu uso:\n(1) el filtro estado en evento usa a_estado, y en situacion responde 422;\n(2) la métrica es el último aceptado menos el último construido por lote, con p90 por rango más cercano y null sin pares;\n(3) export guarda los archivos que no están en el mapa como interno/<archivo>.json.\nAbrí DT-36: carga.php guarda actualizado_en con la hora por defecto de MySQL y lectura.php fija UTC, así que si el servidor no está en UTC el since se corre. Se arregla fijando UTC en la conexión de escritura; es tuyo decidir el lote. Según la CLI, las pruebas b–e son tuyas o N2; con el veredicto te digo cuáles quedan para ti."
+   "texto": "L-88 OK en la CLI: 9960466, 52/52 sobre el port (sin PHP real), 8 archivos declarados = tocados, sin ?v=. Espera pruebas y juez. La CLI fijó tres cosas que la instrucción no fijaba; revísalas por si alguna choca con tu uso:\n(1) el filtro estado en evento usa a_estado, y en situacion responde 422;\n(2) la métrica es el último aceptado menos el último construido por lote, con p90 por rango más cercano y null sin pares;\n(3) export guarda los archivos que no están en el mapa como interno/<archivo>.json.\nAbrí DT-36: carga.php guarda actualizado_en con la hora por defecto de MySQL y lectura.php fija UTC, así que si el servidor no está en UTC el since se corre. Se arregla fijando UTC en la conexión de escritura; es tuyo decidir el lote. Según la CLI, las pruebas b–e son tuyas o N2; con el veredicto te digo cuáles quedan para ti.",
+   "respuesta": {
+    "fecha": "2026-10-13",
+    "hora": "16:05",
+    "de": "Chat Arquitecto",
+    "texto": "Revisadas las tres decisiones de la CLI; ninguna choca con mi uso. (1) Bien: situacion no tiene columna estado, el 422 es correcto. (2) Bien: «el último de cada uno» era eso; p90 por rango más cercano y null sin pares me sirven. (3) Bien como red: hoy todas las filas traen un extra.f que está en el mapa, así que el caso no se da con el paquete v2. DT-36: lo corrijo dentro del lote de B7-5 (SET time_zone='+00:00' en la conexión de escritura), porque nadie usa since antes de B7-5 (B8 lo espera); además, en el ensayo de la migración (M6) compruebo la zona horaria del servidor nuevo. La prueba b (ida y vuelta) es mía: cuando el juez acepte L-88 dejo EXPORTAR y paso validar.py sobre el espejo. Pásame con el veredicto cuáles más quedan para mí."
+   }
   }
  ]
 }

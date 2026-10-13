@@ -1,4 +1,4 @@
-// Guion de semilla (PRUEBAS-v1, M-207). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
+// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
 // Nombres literales (no h.dato), sin limpiar(): lo creado se queda como semilla. Si ya existe, no hace nada.
 module.exports = {
   req: 'SEMILLA',
@@ -57,6 +57,37 @@ module.exports = {
         }
         const hay = await p.locator(`text="${NOMBRE}"`).count();
         h.espera(hay >= 1, NOMBRE + (ya ? ' ya existía' : ' creado') + ' (' + hay + ' en la lista)');
+      },
+    },
+    {
+      c: 's3', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'zz-verif-Propiedad tiene al menos una zona principal activa (zz-verif-Principal)',
+      async prueba(h) {
+        // Relación «zona-principal-propiedad» de semilla.json (M-263). Solo toca la zona zz-verif-Principal.
+        const p = h.page, NOMBRE = 'zz-verif-Principal';
+        const PROP_RE = /^\s*zz-verif-Propiedad\s*$/;
+        await p.waitForSelector('.tab[data-tab="depositos"]');
+        await p.click('.tab[data-tab="depositos"]');
+        await p.waitForSelector('#pane-depositos', { state: 'visible' });
+        await p.waitForTimeout(1500);
+        const fila = p.locator('#dpLista tbody tr', { hasText: NOMBRE });
+        const ya = await fila.count() > 0;
+        if (ya) {
+          await fila.first().getByRole('button', { name: 'Editar' }).click();
+          await p.waitForSelector('#dpModal #dpActiva', { state: 'visible' });
+        } else {
+          await p.click('#pane-depositos button:has-text("＋ Zona")');
+          await p.waitForSelector('#dpModal #dpNombre', { state: 'visible' });
+          await p.fill('#dpNombre', NOMBRE);
+          await p.fill('#dpTipoNombre', 'Bodega');
+        }
+        await p.check('input[name="dpRol"][value="principal"]');
+        await p.locator('#dpSirve label', { hasText: PROP_RE }).locator('input[type=checkbox]').check();
+        if (!(await p.isChecked('#dpActiva'))) await p.check('#dpActiva');
+        if (await p.locator('#dpPrivada').count() && await p.isChecked('#dpPrivada')) await p.uncheck('#dpPrivada');
+        const r = await h.respuesta('/api/col/inv-depositos', () => p.click('#dpModal button:has-text("Guardar")'));
+        const err = ((await p.locator('#dpErr').textContent().catch(() => '')) || '').trim();
+        h.espera(r && r.status() === 200, NOMBRE + (ya ? ' corregida' : ' creada') + ': ' + (r ? r.status() : 'sin respuesta') + (err ? ' · «' + err + '»' : ''));
       },
     },
   ],

@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -112,6 +112,22 @@ try {
 
   # Jornada en pausa (panel STR, 10-oct-2026): con el archivo PAUSA en la cola no se empieza ningun lote.
   if (Test-Path (Join-Path $Cola 'PAUSA')) { exit 0 }
+
+  # v7.6 (M-278): el archivo REPONER-SEMILLA en la cola corre el guion de semilla (crea o corrige la semilla zz-verif- con
+  # zz-verif-admin; solo escribe zz-verif-) y deja log\SEMILLA-guion.json. Va antes de reprobar\ para que el mismo paso ya la vea.
+  $Reponer = Join-Path $Cola 'REPONER-SEMILLA'
+  if (Test-Path $Reponer) {
+    $nodeS = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+    $guionS = Join-Path $Cola 'pw\guion.js'
+    if ($nodeS -and (Test-Path $guionS)) {
+      Push-Location (Join-Path $Cola 'pw')
+      $resS = (& $nodeS $guionS 'semilla-reponer.spec.js' '--lote' 'SEMILLA' 2>&1 | ForEach-Object { "$_" })
+      Pop-Location
+      Resumen ("SEMILLA | reponer | " + (($resS | Select-Object -Last 3) -join ' / ' -replace '[^\x20-\x7E]', ''))
+    } else { Resumen "SEMILLA | reponer | sin node o sin pw\guion.js" }
+    $destS = Join-Path $Cola 'hechas'; if (-not (Test-Path $destS)) { New-Item -ItemType Directory -Path $destS | Out-Null }
+    Move-Item -Path $Reponer -Destination (Join-Path $destS ('REPONER-SEMILLA.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
+  }
 
   # v7.1: reprobar\<archivo de hechas sin .md>.txt -> repite pruebas y juez de ese lote sin reconstruirlo
   # (p. ej. tras arreglar la herramienta de pruebas). El .txt pasa a reprobar\hechos\ con la hora.

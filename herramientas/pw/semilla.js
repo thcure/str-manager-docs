@@ -2,6 +2,7 @@
 // Solo lectura: abre cada pagina con zz-verif-admin y lee las respuestas que la propia app pide (no toca tokens
 // ni ejecuta JavaScript sobre la sesion). Guarda solo nombres zz-verif- y conteos: nada de datos reales.
 // v1 comprueba; reponer lo que falte se hace con un guion de semilla del Chat Desarrollo (paso siguiente).
+// v3 (pw 0.4.8, M-278): una relacion con 'para' bloquea solo al lote que nombra; en los demas es 'aviso' (no bloquea).
 // v2 (pw 0.4.6, M-263, L-86): 'relaciones' de semilla.json (colaborador base, zona principal activa, operador sin un
 // permiso). Se evaluan en memoria sobre las respuestas; al log solo van nombres zz-verif- y conteos.
 // Uso: node semilla.js   (escribe log\pw-semilla.json; sale 0 si esta completa, 1 si falta algo, 2 si no concluye)
@@ -84,6 +85,13 @@ function evaluarRelacion(rel, cuerpos, vistos) {
     : r('falta', rel.usuario + ' tiene ' + rel.permiso + (p.todo !== false ? ' (todo)' : '') + (u.rol !== 'operador' ? ' · rol ' + u.rol : ''));
 }
 
+// Puro: si la relacion es 'para' otro lote, una falta se degrada a aviso. Sin lote (node semilla.js a mano) se evalua estricta.
+function alcanceRelacion(rel, resultado, lote) {
+  if (!rel.para || !lote || resultado.estado !== 'falta') return resultado;
+  const nombra = String(rel.para).split(/[\s,;()]+/).includes(lote);
+  return nombra ? resultado : Object.assign({}, resultado, { estado: 'aviso', observado: resultado.observado + ' (solo bloquea a ' + rel.para + ')' });
+}
+
 async function comprobarSemilla(opciones = {}) {
   const grupos = [], cuerpos = {}, vistosG = {};
   let ctx;
@@ -108,12 +116,12 @@ async function comprobarSemilla(opciones = {}) {
   } catch (e) {
     return { ok: false, estado: 'no concluyente', grupos, error: 'no se pudo abrir zz-verif-admin: ' + e.message };
   } finally { if (ctx) await ctx.close().catch(() => { }); }
-  for (const rel of (CONF.relaciones || [])) grupos.push(evaluarRelacion(rel, cuerpos, vistosG));
-  const estado = grupos.some(g => g.estado === 'falta') ? 'incompleta' : grupos.some(g => g.estado !== 'ok') ? 'no concluyente' : 'completa';
+  for (const rel of (CONF.relaciones || [])) grupos.push(alcanceRelacion(rel, evaluarRelacion(rel, cuerpos, vistosG), opciones.lote));
+  const estado = grupos.some(g => g.estado === 'falta') ? 'incompleta' : grupos.some(g => g.estado !== 'ok' && g.estado !== 'aviso') ? 'no concluyente' : 'completa';
   return { ok: estado === 'completa', estado, grupos };
 }
 
-module.exports = { comprobarSemilla, nombresZz, evaluar, evaluarRelacion, registros, CONF };
+module.exports = { comprobarSemilla, nombresZz, evaluar, evaluarRelacion, alcanceRelacion, registros, CONF };
 
 if (require.main === module) {
   (async () => {

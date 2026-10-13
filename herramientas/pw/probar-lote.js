@@ -94,7 +94,7 @@ async function main() {
   }
 
   // P4.d semilla zz-verif- y P4.e sesiones de los perfiles que usa el guion
-  const sem = await comprobarSemilla();
+  const sem = await comprobarSemilla({ lote });
   out.semilla = sem;
   // Sin guion N2 la cola no usa la semilla: queda como aviso y no bloquea (v0.3.1)
   if (!spec && sem.estado === 'incompleta') entra('semilla zz-verif- (aviso, el lote no trae guion)', true, sem.grupos.filter(x => x.estado === 'falta').map(x => x.id + ': ' + x.observado).join('; '));

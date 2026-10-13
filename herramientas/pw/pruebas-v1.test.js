@@ -1,7 +1,7 @@
 // pruebas-v1.test.js - funciones puras de guion.js, semilla.js y probar-lote.js (sin navegador). Uso: node pruebas-v1.test.js
 'use strict';
 const { extraerGuion, igual, loteDe, cerrarCaso } = require('./guion');
-const { nombresZz, evaluar, evaluarRelacion, registros } = require('./semilla');
+const { nombresZz, evaluar, evaluarRelacion, alcanceRelacion, registros } = require('./semilla');
 const { versionNueva } = require('./probar-lote');
 const { argsCamara, explicarError } = require('./comun');
 let ok = 0, fail = 0;
@@ -59,6 +59,10 @@ t('relacion: operador sin permiso ok', evaluarRelacion({ id: 'c', tipo: 'sinPerm
 t('relacion: con todo:true falta', evaluarRelacion({ id: 'c', tipo: 'sinPermiso', usuario: 'zz-verif-oper', permiso: 'inventario.editar' }, { usuarios: [[{ id: 'u2', nombre: 'zz-verif-oper', rol: 'operador', permisos: { todo: true } }]] }, vg).estado === 'falta');
 t('relacion: sin permisos en la respuesta no concluye', evaluarRelacion({ id: 'c', tipo: 'sinPermiso', usuario: 'zz-verif-colab', permiso: 'x' }, cu, vg).estado === 'no concluyente');
 t('relacion: grupo no visto no concluye', evaluarRelacion({ id: 'a', tipo: 'colaboradorBase', propiedad: 'x', usuario: 'y' }, cu, { propiedades: true }).estado === 'no concluyente');
+t('relacion para otro lote: falta → aviso', alcanceRelacion({ para: 'L-86' }, { estado: 'falta', observado: 'x' }, 'L-85').estado === 'aviso');
+t('relacion para este lote: sigue falta', alcanceRelacion({ para: 'L-86' }, { estado: 'falta', observado: 'x' }, 'L-86').estado === 'falta');
+t('relacion sin lote (a mano): estricta', alcanceRelacion({ para: 'L-86' }, { estado: 'falta', observado: 'x' }, undefined).estado === 'falta');
+t('relacion sin para: siempre bloquea', alcanceRelacion({}, { estado: 'falta', observado: 'x' }, 'L-85').estado === 'falta');
 t('error 21: perfil en uso', explicarError(new Error('browserType.launchPersistentContext: Target page closed\n  - <process did exit: exitCode=21, signal=null>'), 'admin').startsWith('perfil en uso'));
 t('otro error: primera linea', explicarError(new Error('boom\nmas'), 'admin') === 'boom');
 t('sin camara no hay argumentos', argsCamara(null).length === 0);

@@ -6,6 +6,9 @@ Condición: validar.py en 0 errores (si no, no escribe nada).
 v2 (13-oct): cada fila lleva sus columnas como proyección indexable (ajustadas al tipo de 001_inicial.sql: lo que no
 encaja va a None) y en `extra` {f: archivo.lista, i: posición, o: objeto completo}; la exportación de B7-4 (LM-21)
 rehace los archivos desde extra, sin perder ni cambiar nada. Filas derivadas (veredicto, evento): extra.derivado. Solo proyecto «str». Nunca datos del negocio.
+v3 (13-oct, LM-27a): con --complemento añade la tabla complemento (esquema 2): una fila por clave de primer nivel de cada archivo,
+en su orden; las listas que son tablas van con es_lista=1 y valor None; lo demás en valor. Sin id (clave archivo+clave) y sin extra.f.
+Solo con el servicio en schema_version 2: antes, el servidor responde 422.
 """
 import json, os, re, subprocess, sys, datetime
 from collections import Counter
@@ -28,6 +31,26 @@ TIPOS = {
     'evento': {'entidad': 'V32', 'id': 'V64', 'de_estado': 'V32', 'a_estado': 'V32', 'rol': 'V32', 'en': 'D'},
     'situacion': {'id': 'V64', 'rol': 'V32', 'grupo': 'V64', 'que_paso': 'T', 'en': 'V32'},
 }
+# v3 (LM-27a): archivo -> (ruta, listas que son tablas). situaciones/<x> se agregan al recorrer la carpeta.
+ARCHIVOS = {'diseno': ('interno/diseno.json', ('reqs', 'das', 'pedidos', 'planes', 'lecciones')),
+            'seguimiento': ('interno/seguimiento.json', ('plan', 'cambios', 'incs', 'dts', 'riesgos')),
+            'mensajes': ('interno/mensajes.json', ('mensajes',)),
+            'reqs-historial': ('interno/archivo/reqs-historial.json', ('reqs',))}
+
+def complemento():
+    filas = []
+    arch = dict(ARCHIVOS)
+    sdir = os.path.join(RAIZ, 'interno/situaciones')
+    for nombre in sorted(os.listdir(sdir)):
+        if nombre.endswith('.json'):
+            arch['situaciones/' + nombre[:-5]] = ('interno/situaciones/' + nombre, () if nombre.startswith('_') else ('situaciones',))
+    for archivo, (ruta, listas) in arch.items():
+        if not os.path.exists(os.path.join(RAIZ, ruta)): continue
+        d = json.load(open(os.path.join(RAIZ, ruta), encoding='utf-8'))
+        for orden, (clave, valor) in enumerate(d.items()):
+            lista = clave in listas
+            filas.append({'archivo': archivo, 'clave': clave, 'orden': orden, 'es_lista': 1 if lista else 0, 'valor': None if lista else valor, 'extra': None})
+    return filas
 COLS = {t: list(c) for t, c in TIPOS.items()}
 AVISOS = []
 
@@ -128,6 +151,8 @@ def main():
             for k in list(f):
                 if k in PROHIBIDAS: del f[k]
             assert (tabla == 'evento' or f.get('id')) and (tabla != 'evento' or f.get('id')), (tabla, f.get('id'))
+    if '--complemento' in sys.argv:
+        t['complemento'] = complemento()
     sha = subprocess.run(['git', '-C', RAIZ, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip() or 'sin-git'
     paquete = {'sha': sha, 'proyecto': 'str', 'generadoEn': datetime.datetime.now().isoformat(timespec='seconds'),
                'conteos': {k: len(v) for k, v in t.items()}, 'tablas': t}

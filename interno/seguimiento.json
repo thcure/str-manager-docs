@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-12 20:50",
+ "actualizadoEn": "2026-10-12 21:45",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1608,9 +1608,35 @@
    "severidad": "bajo",
    "titulo": "El chip «atrasado / crítico» del turno en el panel del Calendario no mira salidaConfirmada: una reserva con salida acordada 23:00 sale como atrasada a media mañana.",
    "causa": "La alerta del Calendario calcula contra la hora de la ficha; PR1-4 solo cambió la de HK.",
-   "pendiente": "Con REQ-PR1-5 (M-193).",
+   "pendiente": "Verificado en L-79-veredicto-3 (criterio g ok); se cierra al aceptar el L-79.",
    "estado": "abierto",
    "origen": "L-77-veredicto-2 (15:05), M-192/M-193"
+  },
+  {
+   "id": "INC-115",
+   "tipo": "INC",
+   "modulo": "Housekeeping",
+   "etapa": "📝",
+   "fecha": "2026-10-12",
+   "severidad": "bajo",
+   "titulo": "El detalle del turno muestra «→ Check-in … · 3:00 PM» y «La limpieza debe completarse antes de las 3:00 PM» aunque la ficha dice 15:30 y la reserva que entra tiene llegada acordada.",
+   "causa": "Por diagnosticar: el texto de próximo check-in parece usar una hora fija o la del negocio en vez de la cascada llegada acordada → hora propia → ficha.",
+   "pendiente": "Fix en un lote siguiente de la zona (housekeeping/calendario).",
+   "estado": "abierto",
+   "origen": "L-79-veredicto-3 (21:22), notas 1"
+  },
+  {
+   "id": "INC-116",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "etapa": "📝",
+   "fecha": "2026-10-12",
+   "severidad": "bajo",
+   "titulo": "Una reserva con salida hoy y salida acordada 23:00 aparece «Finalizada» en el panel del Calendario antes de esa hora.",
+   "causa": "El estado de la reserva se calcula por fecha, no por la hora de salida acordada.",
+   "pendiente": "Decidir con Diseño si el estado debe seguir la hora acordada.",
+   "estado": "abierto",
+   "origen": "L-79-veredicto-3 (21:22), notas 3"
   }
  ],
  "cambios": [
@@ -7072,8 +7098,8 @@
    "req": "REQ-PR1-5 · INC-114",
    "categoria": "normal",
    "resumen": "La ventana del turno sigue la hora acordada (salida acordada → hora propia → ficha; fin con la llegada de la que entra; sin entrada +6 h con tope 23:59); guardados recalculan salvo windowStartManual; el chip del Calendario se corrige con el windowStart nuevo.",
-   "estado": "publicado",
-   "observacion": "Revisión previa 10/12 → 12/12 + decisiones de Diseño (M-198). CLI 19:47–19:53: main 5956017 (p5c74), 43/43. No hecho declarado: ningún formulario pone windowStartManual (no existe edición manual de la hora de un turno con reserva). Fuera de alcance declarado: tests/turnover-guardado.test.js (solo su extracción). CRLF local en CLAUDE.md y str-api.js (DT-34); la CLI avisa que el patrón \\n de horarios-reserva.test.js es frágil con CRLF. Pre-vuelo 19:54 (admin; colab sin comprobar) y verificador lanzado 19:54 (L-79-veredicto.json). 20:05 L-79-veredicto-bloqueado: los perfiles de Chrome zz-verif-admin y zz-verif-colab no están conectados (solo aparece el Chrome personal de Carlos, que no se usa). No fue LM-17 (el verificador local usa perfiles propios): las ventanas de prueba se cerraron. Sin relanzar: espera perfiles o el verificador local (M-201).",
+   "estado": "parcial",
+   "observacion": "Revisión previa 10/12 → 12/12 + decisiones de Diseño (M-198). CLI 19:47–19:53: main 5956017 (p5c74), 43/43. No hecho declarado: ningún formulario pone windowStartManual (no existe edición manual de la hora de un turno con reserva). Fuera de alcance declarado: tests/turnover-guardado.test.js (solo su extracción). CRLF local en CLAUDE.md y str-api.js (DT-34); la CLI avisa que el patrón \\n de horarios-reserva.test.js es frágil con CRLF. Pre-vuelo 19:54 (admin; colab sin comprobar) y verificador lanzado 19:54 (L-79-veredicto.json). 20:05 L-79-veredicto-bloqueado: los perfiles de Chrome zz-verif-admin y zz-verif-colab no están conectados (solo aparece el Chrome personal de Carlos, que no se usa). No fue LM-17 (el verificador local usa perfiles propios): las ventanas de prueba se cerraron. Sin relanzar: espera perfiles o el verificador local (M-201). 21:22 L-79-veredicto-3 parcial: a, b, c, d, e, g, g2, h, i cumplen; f cumple la parte llegada/salida; falta la parte duración (zz-verif-Propiedad sin flujo base). Cuarta pasada 21:40 solo para f (L-79-veredicto-4). Observaciones fuera de criterios → INC-115 e INC-116.",
    "costo": {
     "minutosCLI": 6,
     "minutosDueno": 0
@@ -8176,12 +8202,12 @@
    "req": "REQ-PR1-5 · INC-114",
    "categoria": "normal",
    "resumen": "Ventana del turno con la hora acordada (salida → hora propia → ficha; fin con la llegada de la que entra) y chip atrasado/crítico del Calendario con la misma regla que HK",
-   "estado": "verificando",
+   "estado": "parcial",
    "vista": "en curso",
    "esperaA": "verificador",
-   "espera": "log\\L-79-veredicto-3.json (tercera corrida 20:50; bloqueado-2 de 20:25 por no poder confirmar identidad: añadido str-app-shell.html)",
+   "espera": "log\\L-79-veredicto-4.json: solo f (aviso de duración mayor que la ventana), con flujo base zz-verif- asignado durante la prueba",
    "orden": 116.63999999999999,
-   "desde": "2026-10-12 20:50",
+   "desde": "2026-10-12 21:40",
    "planTrabajo": "PT-1",
    "grupo": "PR1",
    "nota": "M-193. Antes de REQ-TB-4; después de LM-13. Revisión previa 10/12 → 12/12 con las tres decisiones de Diseño (M-198): sin entrada inicio + 6 h con tope 23:59; guardados recalculan salvo windowStartManual. Encolado (cmp ok)."

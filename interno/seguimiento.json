@@ -6949,6 +6949,68 @@
     "veredictos": 1,
     "bloqueados": 3
    }
+  },
+  {
+   "lote": "L-89",
+   "fecha": "2026-10-13",
+   "req": "R-3 (LM-23, migración de Hostinger)",
+   "categoria": "crítico",
+   "resumen": "Conexión del STR configurable desde secrets.php: DB_HOST/DB_NAME/DB_USER con los valores de hoy como respaldo; Database::origenConfig(); /api/health añade dbConfig ('secrets' o 'codigo', nunca valores); secrets.example.php con las tres constantes.",
+   "estado": "aceptado",
+   "observacion": "LM-23 y cruce con Carlos 13-oct 12:24 (chat del Arquitecto); revisión previa: fallaban 1, 4, 5 y 6 → corregidos; ok de Diseño 12:55 (M-264). Adelantado por la migración a Hostinger Unlimited (M-271). CLI 13:03–13:05: a406a7a, 50/50, health 200 db:true dbConfig «codigo»; sin choque con MODELO_DB_*; zona «api» inexistente en CLAUDE.md § 2. Dos puertas bloqueadas (perfil admin en uso; relación de semilla de L-86). Juez 15:00: parcial por c (cierre de la CLI fuera de lo que lee el juez); c cerrado con el cierre de la CLI.",
+   "hash": "a406a7a",
+   "aceptacion": {
+    "lote": "L-89",
+    "hash": "a406a7a",
+    "fecha": "2026-10-13",
+    "horaBogota": "15:00",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 50/50 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: status 200 | si: db true | si: schema_version 10 | si: dbConfig codigo"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "git show --name-only no consta en pruebas.json; n1 solo cubre node tests/run.js"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c",
+      "motivo": "criterio N1 de cierre de la CLI que cierra el Chat Desarrollo (declarados = tocados, sin secretos); pruebas.json no trae su resultado y el juez no ejecuta comandos ni abre el repositorio"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "La instrucción no tiene criterios N3 ni N4; n3Preparados vacío y la carpeta log\\capturas\\L-89 no existe, lo que es coherente con no haber N3. Regresión vacía. Entrada P4 toda en ok y semilla zz-verif- completa. Queda parcial solo por c: si el Chat Desarrollo confirma en su cierre declarados = tocados y ningún secreto ni valor nuevo de base, el lote pasa a aceptado. horaBogota tomada del fin de la corrida (20:00Z).",
+    "cierreDePendientes": {
+     "c": "log\\L-89-instr-db-config.txt (cierre de la CLI, 13:05): «Declarados = tocados: entraron solo los 6 archivos del Alcance. No hay secretos ni valores nuevos de base, no hay cambio de ?v= y schema_version sigue en 10. modelo/ no se tocó.» (leído por el Chat Desarrollo, que no construyó; LM-23 lo redactó el Arquitecto, al que se pide confirmar con git show --name-only a406a7a, M-280)",
+     "quien": "Chat Desarrollo"
+    }
+   },
+   "costo": {
+    "minutosCLI": 2,
+    "minutosDueno": 1
+   },
+   "tiempos": {
+    "construido": "2026-10-13 13:05",
+    "aceptado": "2026-10-13 15:20",
+    "veredictos": 1,
+    "bloqueados": 2
+   }
   }
  ],
  "esquema": {
@@ -8253,10 +8315,10 @@
    "req": "REQ-MOD-6 (LM-20, B7-3)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: POST cargar (paquete del Arquitecto en una transacción, lista blanca, validarPaquete con port)",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "en curso",
-   "esperaA": "Carlos",
-   "espera": "ok de Diseño 11:55 (M-257); se encola después de L-85, cuando la CLI tenga uso disponible",
+   "esperaA": "CLI",
+   "espera": "encolado 15:20 tras aceptar L-85 y L-89 (orden M-271: L-85 → L-89 → L-87 → L-86 → L-88)",
    "orden": 116.71,
    "desde": "2026-10-13 12:15",
    "grupo": "Modelo",
@@ -8282,12 +8344,12 @@
    "req": "R-3 (LM-23, migración de Hostinger)",
    "categoria": "crítico",
    "resumen": "Conexión del STR configurable desde secrets.php (DB_HOST/DB_NAME/DB_USER, respaldo con los valores de hoy); /api/health añade dbConfig",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "juez local",
-   "espera": "reprobar después de L-85 (semilla ya completa). CLI OK 13:05, a406a7a; tests 50/50; health db:true dbConfig «codigo».",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 101.005,
-   "desde": "2026-10-13 12:40",
+   "desde": "2026-10-13 15:20",
    "grupo": "Modelo",
    "riesgo": "R-1",
    "nota": "M-262. LM-23 y cruce con Carlos 13-oct 12:24 (chat del Arquitecto). Revisión previa: fallaban 1, 4, 5 y 6 → corregidos en la copia del Chat Desarrollo."

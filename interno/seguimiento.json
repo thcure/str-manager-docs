@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-12 22:32",
+ "actualizadoEn": "2026-10-12 23:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1647,7 +1647,7 @@
    "severidad": "medio",
    "titulo": "En un navegador sin datos guardados, str-propiedades.html sube al servidor propiedades y tipos de demostración antes de traer los reales.",
    "causa": "getProps() y getTipos() siembran datos de ejemplo cuando localStorage está vacío (prop-1 «Apto Centro» y prop-2 «Casa Laureles» con iCal falsos; tp-1…tp-7 por defecto) y llaman a saveProps/saveTipos → _persistCol. Como la caché str-col-lastpush-v1 también está vacía, todas las filas cuentan como cambiadas y se suben con PUT /api/col/<x> antes de que _syncColFromApi haga el pull. Efecto: dos propiedades falsas en el servidor y los tipos tp-1…tp-5 reales pisados con la versión por defecto (más tp-6 y tp-7 nuevos).",
-   "pendiente": "Fix antes del siguiente lote de Propiedades: no sembrar ni subir nada hasta terminar el primer pull; la siembra solo si el servidor responde vacío (patrón INC-38). Revisar si otras páginas siembran igual.",
+   "pendiente": "Con L-80 (encolado 12-oct 22:58).",
    "estado": "abierto",
    "origen": "M-210: la guardia de pw 0.4.1 cortó PUT /api/col/propiedades y /api/col/prop-tipos al correr el guion de semilla en un perfil limpio. Comprobado en el servidor 22:30: no hay prop-1/prop-2 (no llegó a pasar); prop-tipos tiene tp-1…tp-5 sin cambios desde el 10-sep."
   }
@@ -7154,6 +7154,15 @@
     "minutosCLI": 0,
     "minutosDueno": 0
    }
+  },
+  {
+   "lote": "L-80",
+   "fecha": "2026-10-12",
+   "req": "INC-117",
+   "categoria": "normal",
+   "resumen": "getProps devuelve [] sin datos locales (sin ejemplo ni subida); getTipos siembra tp-1…tp-7 solo en localStorage; _syncColFromApi sube prop-tipos solo si el servidor no tiene (_tiposTrasPull); tests/propiedades-siembra.test.js; guion N2 tests/e2e/INC-117.spec.js; ?v= p5c75.",
+   "estado": "registrado",
+   "observacion": "Encolado 22:58. Revisión previa 13/13 (subagente: fallaban 5 —quién más lee str-prop-tipos-v1— y 13 —espera networkidle en el guion—, corregidos)."
   }
  ],
  "esquema": {
@@ -7776,13 +7785,14 @@
    "categoria": "crítico",
    "resumen": "Lector QR en el STR, puntos de control (llegada inicia el turno), plan de respaldo y sesión válida durante el turno",
    "estado": "previsto",
-   "vista": "esperando a Carlos",
-   "esperaA": "Carlos",
+   "vista": "previsto",
+   "esperaA": null,
    "grupo": "PC1",
    "riesgo": "R-2 (sesión)",
-   "espera": "cruce previo con Carlos",
+   "espera": "después de REQ-PC1-1, REQ-INV2-4-1 y REQ-INC1-1",
    "orden": 109,
-   "nota": "número al encolar"
+   "nota": "M-214: DA-36 (a), cruce con Carlos 12-oct 22:49; REQ en claude/producto/requerimientos-pc1-2-puntos-control-2026-10.md con niveles. Número al encolar.",
+   "planTrabajo": "PT-2"
   },
   {
    "lote": null,
@@ -7804,13 +7814,14 @@
    "categoria": "crítico",
    "resumen": "Reclamos con plantilla Airbnb (AirCover): reglas por canal, plazos, mensajes, pagos",
    "estado": "previsto",
-   "vista": "esperando a Carlos",
-   "esperaA": "Carlos",
+   "vista": "previsto",
+   "esperaA": null,
    "grupo": "INC1",
    "riesgo": "R-2",
-   "espera": "cruce previo con Carlos",
+   "espera": "después de REQ-INC1-1",
    "orden": 110,
-   "nota": "número al encolar"
+   "nota": "M-213: DA-35 (a), cruce con Carlos 12-oct 22:49; REQ en claude/producto/requerimientos-inc1-2-reclamos-2026-10.md con niveles. Número al encolar.",
+   "planTrabajo": "PT-2"
   },
   {
    "lote": null,
@@ -8282,6 +8293,50 @@
    "planTrabajo": "PT-2",
    "grupo": "INC1",
    "nota": "M-199. Si el colaborador lee o escribe algo nuevo además de su reporte, avisar a Diseño (pasaría a crítico)."
+  },
+  {
+   "lote": "L-80",
+   "req": "INC-117",
+   "categoria": "normal",
+   "resumen": "Propiedades no siembra ni sube datos de ejemplo antes del primer pull (getProps sin ejemplo; getTipos siembra solo en local; tipos al servidor solo si no tiene)",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
+   "espera": "la CLI toma L-80-instr-fix-inc117-siembra-propiedades.md; luego log\\L-80-pruebas.json y log\\L-80-veredicto.json (juez local, LM-19)",
+   "orden": 116.645,
+   "desde": "2026-10-12 22:58",
+   "grupo": "Sync",
+   "nota": "Primer lote con PRUEBAS-v1 (N1 a–c, e; N2 d) y juez local. Revisión previa 13/13 (fallaban 5 y 13, corregidos)."
+  },
+  {
+   "lote": null,
+   "req": "REQ-MI1-2",
+   "categoria": "normal",
+   "resumen": "Eventos de mantenimiento e inventario programados (incluye auditoría de inventario programada, DA-22)",
+   "estado": "previsto",
+   "vista": "previsto",
+   "esperaA": null,
+   "espera": "después de REQ-MI1-1 y de cerrar PT-1",
+   "orden": 118.1,
+   "desde": "2026-10-12",
+   "planTrabajo": "PT-4",
+   "grupo": "MI1",
+   "nota": "M-212. Criterios con nivel en requerimientos-mantenimiento-inventario-flujos-2026-10.md › REQ-MI1-b. El criterio 9 (colaborador ve sus eventos) salió a REQ-MI1-4 (crítico). Número al encolar."
+  },
+  {
+   "lote": null,
+   "req": "REQ-MI1-3",
+   "categoria": "normal",
+   "resumen": "Paso del evento de mantenimiento/inventario al turno",
+   "estado": "previsto",
+   "vista": "previsto",
+   "esperaA": null,
+   "espera": "después de REQ-MI1-2 y REQ-INV2-5",
+   "orden": 118.3,
+   "desde": "2026-10-12",
+   "planTrabajo": "PT-4",
+   "grupo": "MI1",
+   "nota": "M-212. Criterios con nivel en › REQ-MI1-c. Número al encolar."
   }
  ],
  "riesgos": [

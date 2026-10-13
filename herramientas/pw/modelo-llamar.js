@@ -31,9 +31,10 @@ async function main() {
     const r = await fetch(url, opciones);
     const texto = await r.text();
     let cuerpo; try { cuerpo = JSON.parse(texto); } catch (e) { cuerpo = texto.slice(0, 2000); }
-    fin({ ok: r.ok, status: r.status, respuesta: cuerpo });
+    let salud = null;
+    try { const rs = await fetch(BASE + '/modelo/api/salud'); salud = await rs.json(); } catch (e) { salud = { error: e.message }; }  // sin token
+    fin({ ok: r.ok, status: r.status, respuesta: cuerpo, saludDespues: salud });
   } catch (e) { fin({ ok: false, error: e.message }); }
-  // salud despues de la accion (sin token)
 }
 
 main();

@@ -71,6 +71,9 @@ async function main() {
     let cuerpo; try { cuerpo = JSON.parse(texto); } catch (e) { cuerpo = texto.slice(0, 2000); }
     if (accion === 'exportar' && r.ok && cuerpo && cuerpo.archivos) {
       const esp = path.join(COLA, 'log', 'espejo');
+      // v0.5.1 (M-311): JSON.parse de JS convierte 119.0 en 119; la respuesta tal cual queda en _export.json para comparar exacto
+      fs.mkdirSync(esp, { recursive: true });
+      fs.writeFileSync(path.join(esp, '_export.json'), texto);
       const escritos = [];
       for (const [ruta, contenido] of Object.entries(cuerpo.archivos)) {
         if (!/^interno\/[a-z0-9_\/-]+\.json$/.test(ruta) || ruta.includes('..')) continue;   // solo rutas del modelo

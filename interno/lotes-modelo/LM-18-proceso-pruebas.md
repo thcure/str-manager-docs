@@ -55,10 +55,10 @@
 
 ## 6. Cómo se implanta (lotes del modelo)
 
-| Orden | Qué | Quién | Te requiere |
+| Orden | Qué | Quién | Estado |
 |---|---|---|---|
-| 1 | Este documento aprobado; `cobit.json` (BAI03.07/08, BAI07.03/04/05) y `proceso.json` con P1–P7 | Arquitecto | **sí: aprobarlo** |
-| 2 | Plantillas: columna «Nivel» en los REQ (Diseño), sección «Pruebas» con guion en la instrucción, revisor previo con el punto «cada criterio tiene nivel» | Arquitecto | no |
-| 3 | `pw\semilla.js` (comprobar y reponer la semilla) | Arquitecto | no |
-| 4 | Cola v6: P4 y P5 automáticos tras cada despliegue (humo → guion → veredicto) | Arquitecto | no |
-| 5 | Juicio N3 con Claude en LENOVO sobre el navegador local; la tarea de Cowork queda de respaldo | Arquitecto | un clic si cambia el texto de las tareas |
+| 1 | Este documento aprobado; `cobit.json` (BAI03.07/08 adoptadas, BAI07.04 parcial) y `proceso.json › pruebas` con P1–P7 | Arquitecto | **hecho** (Carlos 20:20; commit cd9101a) |
+| 2 | Plantillas: nivel en cada prueba derivada, guion N2 en la instrucción (`plantillas/guion-e2e.js`), revisor previo 13/13, `verificar.json` con nivel | Arquitecto | **hecho**; avisados Desarrollo (M-204) y Diseño (M-205) |
+| 3 | `pw\semilla.js` | Arquitecto | **hecho** v1: comprueba (solo lectura); reponer con un guion de semilla de Desarrollo |
+| 4 | Cola v6: tras el commit corre `pw\probar-lote.js` (P4 + P5) y deja `log\L-n-pruebas.json` con verde, rojo o bloqueado | Arquitecto | **instalada** en LENOVO; falta la primera corrida real |
+| 5 | Juicio N3 con Claude en LENOVO sobre el navegador local; la tarea de Cowork queda de respaldo | Arquitecto | pendiente; un clic de Carlos si cambia el texto de las tareas |

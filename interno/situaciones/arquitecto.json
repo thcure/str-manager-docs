@@ -1,6 +1,6 @@
 {
  "rol": "rol-arquitecto",
- "actualizadoEn": "2026-10-11",
+ "actualizadoEn": "2026-10-12",
  "situaciones": [
   {
    "id": "S-arq-1",
@@ -279,6 +279,60 @@
    "yaCubierta": true,
    "estado": "consolidada",
    "grupo": "G-24"
+  },
+  {
+   "id": "S-arq-16",
+   "fecha": "2026-10-12",
+   "veces": 1,
+   "categoria": "conocimiento-desactualizado",
+   "refs": [
+    "LM-18",
+    "pw-semilla.json"
+   ],
+   "quePaso": "semilla.js buscaba las respuestas en /api/col?id=<x> y la app pide /api/col/<x>; la primera corrida real dio «no concluyente» en tres grupos y Carlos tuvo que repetirla.",
+   "causa": "Deduje la ruta del router PHP ($_GET['id']) en vez de leer el cliente que hace las peticiones (str-api.js).",
+   "costoMin": 10,
+   "comoSeResolvio": "semilla.json con /api/col/<coleccion> (v0.3.1), leído de str-api.js.",
+   "leccion": "Para observar peticiones, leer el código que las emite, no el que las recibe.",
+   "reglaPropuesta": "—",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-arq-17",
+   "fecha": "2026-10-12",
+   "veces": 1,
+   "categoria": "comunicacion",
+   "refs": [
+    "ins-008"
+   ],
+   "quePaso": "Le di a Carlos tres comandos separados por «·» en una tabla; PowerShell falló y tuvo que pedir la línea correcta.",
+   "causa": "Formato de tabla del chat aplicado a un comando que se copia literal.",
+   "costoMin": 3,
+   "comoSeResolvio": "Comandos en bloque de código, separados por «;».",
+   "leccion": "Todo comando para Carlos va en bloque de código, listo para pegar, nunca con separadores de texto.",
+   "reglaPropuesta": "Plantilla pregunta-a-carlos.md: comandos solo en bloque de código.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-arq-18",
+   "fecha": "2026-10-12",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "M-210",
+    "M-211",
+    "INC-117"
+   ],
+   "quePaso": "La guardia del verificador cortaba con abort; str-api.js lo tomó como fallo de red, encoló la escritura y la reintentó en cada carga, y los casos del guion de semilla salieron «NO» aunque crearon lo pedido.",
+   "causa": "El corte no imitaba un rechazo del servidor; además la regla «el cuerpo contiene zz-verif-» dejaba pasar subidas de colecciones enteras.",
+   "costoMin": 15,
+   "comoSeResolvio": "pw 0.4.1: 409 al STR, regla por fila en /api/col, borrados solo de ids de la corrida, corte como aviso. Desarrollo halló la causa de fondo (INC-117: siembra de demostración en navegador limpio).",
+   "leccion": "Una guardia debe responder como el sistema real rechazaría, y comprobar cada fila, no el cuerpo entero.",
+   "reglaPropuesta": "—",
+   "yaCubierta": true,
+   "estado": "nueva"
   }
  ]
 }

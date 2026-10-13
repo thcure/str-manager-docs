@@ -17,3 +17,5 @@ Para decidir basta: «A», «B» o «C» (o la acción hecha: «listo»).
 Reglas: la recomendación va marcada y es una sola; cada opción trae su consecuencia; sin preguntas abiertas («¿qué opinas?»); sin pedir que lea archivos para decidir; sin fechas límite (Carlos decide cuándo). Si la decisión cambia el producto, al recibir la respuesta Diseño la registra como `DA-n` antes de que nada se encole. Si es una acción en LENOVO, di la ventana exacta y el botón.
 
 Ejemplo real: M-123 (11-oct-2026, Chat Desarrollo): «Esperando: LENOVO o Chrome no responden (verificador del lote 69)» — contexto, qué falta, qué hará al recibir respuesta.
+
+Comandos (S-arq-17): todo comando que Carlos deba correr va en un bloque de código, listo para pegar; varios en una línea se separan con `;` (PowerShell), nunca con `·` ni dentro de una tabla.

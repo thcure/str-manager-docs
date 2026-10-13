@@ -592,8 +592,8 @@
    "severidad": "bajo",
    "titulo": "Sin principal elegida a mano, _invPrincipalDe (copias de [INV-puras]) todavía puede escoger como principal automática una zona privada del propietario que sirva a la propiedad; contradice la decisión 6 (privada no entra en tareas ni conteos). Latente: hoy no hay zonas reales.",
    "causa": "L-86 quitó el paso 3 pero no excluye privada:true en los pasos que quedan (aviso de la CLI en el cierre de L-86).",
-   "pendiente": "L-90 encolado 16:45 (normal, decisión de Diseño M-287).",
-   "estado": "en fix",
+   "pendiente": "Cerrado por L-90 (541ed4a), aceptado 13-oct.",
+   "estado": "cerrado",
    "origen": "Cierre de la CLI de L-86 (log\\L-86-instr-inv2-4-1-interfaz-zonas.txt)."
   },
   {
@@ -7318,6 +7318,59 @@
     "veredictos": 1,
     "bloqueados": 0
    }
+  },
+  {
+   "lote": "L-90",
+   "fecha": "2026-10-13",
+   "req": "INC-121",
+   "categoria": "normal",
+   "resumen": "La zona privada nunca es la principal de una propiedad: _invPrincipalDe descarta privada:true en las tres copias de [INV-puras], tanto en la elección automática como si invPrincipalId apunta a una privada; test N1; p5c80.",
+   "estado": "aceptado",
+   "observacion": "Decisión de Diseño (M-287). Revisión previa: fallaban 4 y 13, más un ajuste en 6 → corregidos (la comparación de ?v= entera, no por prefijo). CLI 15:34–15:36: 541ed4a, 52/52 (inventario 232 OK), 23 archivos declarados = tocados. Diferencia con el servidor: INC-122, pospuesto (M-290/M-291). Juez: aceptado.",
+   "hash": "541ed4a",
+   "aceptacion": {
+    "lote": "L-90",
+    "hash": "541ed4a",
+    "fecha": "2026-10-13",
+    "horaBogota": "15:37",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 52/52 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 52/52 archivos OK"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 | si: str-api.js: str-api.js?v=p5c80 (versión ≥ p5c80: el guion corre como regresión en lotes siguientes)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Lote sin criterios N3 ni N4 declarados en «Pruebas derivadas». Regresión (REQ-INV2-4-1-interfaz.spec.js b,c,d,e; REQ-INV2-4-1.spec.js g): 5 casos, todos ok, sin INC."
+   },
+   "costo": {
+    "minutosCLI": 2,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 15:36",
+    "aceptado": "2026-10-13 17:20",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -8666,12 +8719,12 @@
    "req": "INC-121",
    "categoria": "normal",
    "resumen": "La zona privada nunca es la principal automática: _invPrincipalDe excluye privadas en las tres copias de [INV-puras]; test N1; p5c80",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "juez local",
-   "espera": "CLI OK 15:34–15:36: 541ed4a (p5c80), 52/52 (inventario 232 OK), 23 archivos declarados = tocados. Diferencia con el servidor: INC-122.",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 101.02,
-   "desde": "2026-10-13 16:45",
+   "desde": "2026-10-13 17:20",
    "grupo": "INV2",
    "riesgo": "R-1",
    "nota": "M-287. Copia: claude/producto/borradores/L-90-instr-fix-inc121-privada-principal.md."

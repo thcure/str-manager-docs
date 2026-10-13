@@ -7497,6 +7497,90 @@
     "veredictos": 1,
     "bloqueados": 1
    }
+  },
+  {
+   "lote": "L-92",
+   "fecha": "2026-10-13",
+   "req": "REQ-MOD-6 (LM-27b, B7-5b)",
+   "categoria": "crítico",
+   "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida: 403 sin cabecera sin conectar, Arquitecto sin base, hash_equals sobre credenciales vigentes, 503 si no conecta, 403 «Sin permiso»); POST credenciales solo del Arquitecto (solo hashes); tablero, desarrollo y diseño solo leen.",
+   "estado": "aceptado",
+   "observacion": "LM-27b, LM-11 (ADR-006), cruce con Carlos 13-oct (M-297); dos revisiones previas; ok de Diseño 17:50 (M-294). CLI 16:40–16:45: 7deee45, 53/53 sin PHP real; tocó también modelo-sql.test.js (justificado). Juez (Opus) parcial: a y f ok, regresión 8/8. b y c: CREDENCIALES y ROLES del Arquitecto 16:49, ok.",
+   "hash": "7deee45",
+   "aceptacion": {
+    "lote": "L-92",
+    "hash": "7deee45",
+    "fecha": "2026-10-13",
+    "horaBogota": "16:45",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 53/53 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto); no figura en n2 de pruebas.json"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto); no figura en n2 de pruebas.json"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: credenciales {\"s\":403,\"e\":\"Token requerido\"} | si: credencial 404 | si: salud {\"ok\":true,\"servicio\":\"modelo\",\"version\":\"0.1\",\"proyecto\":\"str\",\"server_time\":1791927938572,\"db\":true,\"schema_version\":2,\"php\":\"8.3.35\"} | si: /api/health 200"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "cierre de la CLI que cierra el Chat Desarrollo; no está en n1 de pruebas.json"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "N2 fuera del guion: lo cierra el Arquitecto con modelo-cargas\\CREDENCIALES y log\\modelo-credenciales-*.json (espera roles = tablero, desarrollo, diseno, sin tokens ni hashes); ese log no está entre lo que lee el juez"
+     },
+     {
+      "c": "c",
+      "motivo": "N2 fuera del guion: lo cierra el Arquitecto con modelo-cargas\\ROLES y log\\modelo-roles-*.json (espera 200, 403, 403); depende de b; ese log no está entre lo que lee el juez"
+     },
+     {
+      "c": "g",
+      "motivo": "git show --name-only (declarados = tocados, sin secretos ni hashes) lo cierra el Chat Desarrollo en el cierre de la CLI; no está en pruebas.json"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Puerta P4 en verde (despliegue, tests 53/53, guion N2 igual a la instrucción, semilla completa, sesión admin). Regresión de la zona modelo: 8/8 casos ok (REQ-MOD-6, -carga, -complemento, -lectura). La instrucción no tiene criterios N3 ni N4; n3Preparados vacío y la carpeta log\\capturas\\L-92 no existe, lo que no impide decidir nada. Commit de pruebas.json = 7deee45. horaBogota tomada del fin de pruebas.json (21:45Z). Queda parcial solo por b, c (Arquitecto) y g (Chat Desarrollo); ningún criterio ni regresión en false.",
+    "cierreDePendientes": {
+     "b": "log\\modelo-credenciales-2026-10-13T21-49-21-851Z.json: 200, roles tablero, desarrollo y diseno, vence 2027-04-11, sin tokens ni hashes en el log; salud después db true, schema 2",
+     "c": "log\\modelo-roles-2026-10-13T21-49-23-196Z.json: tablero GET estado 200; tablero POST cargar 403 «Sin permiso»; token inventado GET estado 403 «Token requerido» (solo códigos)",
+     "g": "log\\L-92-instr-modelo-credenciales.txt: archivos del Alcance + tests/modelo-sql.test.js (dos comprobaciones del token de migrar, movido a acceso.php; declarado «Fuera de alcance» en el commit y justificado); sin tokens ni hashes reales",
+     "quien": "Chat Desarrollo (no construyó ni redactó LM-27b), leyendo los logs de la cola que dejó el Arquitecto"
+    }
+   },
+   "costo": {
+    "minutosCLI": 5,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-13 16:45",
+    "aceptado": "2026-10-13 19:50",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -8875,12 +8959,12 @@
    "req": "REQ-MOD-6 (LM-27b, B7-5b)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida, hash_equals, 503) y POST credenciales; tokens de tablero, desarrollo y diseño solo de lectura",
-   "estado": "construido",
-   "vista": "en curso",
-   "esperaA": "Chat Arquitecto",
-   "espera": "juez 16:45: parcial. a y f ok (credenciales sin token 403, credencial 404, salud), regresión 8/8. g cerrado por el Chat Desarrollo con el cierre de la CLI (Alcance + tests/modelo-sql.test.js, declarado «Fuera de alcance» y justificado; sin tokens ni hashes reales). Faltan b (CREDENCIALES) y c (ROLES) del Arquitecto. CLI 7deee45.",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 116.74,
-   "desde": "2026-10-13 17:30",
+   "desde": "2026-10-13 19:50",
    "grupo": "Modelo",
    "riesgo": "R-2",
    "nota": "M-292. LM-27 y LM-11 (ADR-006, aceptado por Carlos 12-oct); cruce con Carlos 13-oct, chat del Arquitecto (M-297). Copia: claude/producto/borradores/L-92-instr-modelo-credenciales.md."
@@ -8890,10 +8974,10 @@
    "req": "INC-123 (LM-28)",
    "categoria": "crítico",
    "resumen": "Servicio del modelo: extra se guarda tal cual llega (mismo camino que valor de complemento); ida y vuelta 10 de 10 idéntica",
-   "estado": "redactado",
-   "vista": "siguiente",
-   "esperaA": "Carlos",
-   "espera": "cruce de Carlos (M-304) y revisión previa hechos; falta el ok de Diseño (M-307); se encola tras aceptar L-92. Antes de B7-6.",
+   "estado": "encolado",
+   "vista": "en curso",
+   "esperaA": "CLI",
+   "espera": "encolado 19:50 tras aceptar L-92; ok de Diseño 19:45 con ajuste del §1 aplicado (M-307); copia verificada",
    "orden": 116.75,
    "desde": "2026-10-13 19:25",
    "grupo": "Modelo",

@@ -659,7 +659,7 @@
    "severidad": "medio",
    "titulo": "Portal: el enlace ?turno= de un turno recién asignado dice «Ese turno no está asignado a ti» y no lo abre",
    "causa": "portal.html _renderListas resuelve el enlace en el primer hk:turnos y lo gasta; HK manda ese primer mensaje desde localStorage antes del pull del servidor (str-m1-housekeeping.html ~2088), sin el turno nuevo.",
-   "pendiente": "Lote fix L-104 (encolado 14-oct 15:41).",
+   "pendiente": "Corregido por L-104 (488f30a): b del guion de L-101 ya pasa. Se cierra cuando L-104 quede aceptado (tras L-105).",
    "estado": "abierto",
    "origen": "Veredicto de L-101 (juez, caso b, 14-oct 15:28)."
   },
@@ -667,12 +667,12 @@
    "id": "INC-127",
    "tipo": "INC",
    "modulo": "Housekeeping",
-   "etapa": "🔍",
+   "etapa": "🔧",
    "fecha": "2026-10-14",
    "severidad": "medio",
-   "titulo": "HK del colaborador: en el turno de zz-verif-Propiedad no aparece la tarea «zz-verif-Conteo de cierre» con su conteo (.task-inv)",
-   "causa": "Por medir: el frame de HK se abre pero la tarea no se adjunta en 30 s. Candidatas: el flujo base no expone esa actividad (compuesto / copia por propiedad) o el colaborador no recibe el flujo actualizado. L-104 d/e lo miden en solo lectura.",
-   "pendiente": "Diagnóstico en L-104 (casos d y e); luego fix o ajuste de semilla.",
+   "titulo": "HK: al abrir desde la lista en caché, el «portal:abrir» se pierde y el panel queda sin el turno (c–d del guion de L-101)",
+   "causa": "str-m1-housekeeping.html: el arranque (6204–6207) llama a _renderList → _hkPostTurnos y manda hk:turnos antes de los <script src> (6220–6227) y antes del listener de portal:abrir (_hkPortalBridge, 6547). Con el turno ya en caché, el portal abre al instante y el mensaje llega sin nadie escuchando. No era la semilla (M-382: flujo base no compuesto, sin copias).",
+   "pendiente": "Lote fix L-105 (encolado 14-oct 16:02).",
    "estado": "abierto",
    "origen": "Veredicto de L-101 (juez, casos c, d, e, 14-oct 15:28)."
   }
@@ -8490,9 +8490,67 @@
    "req": "INC-126 (+ diagnóstico INC-127)",
    "categoria": "estándar",
    "resumen": "Portal: ?turno= espera hasta 20 s la lista del servidor y abre el turno aunque llegue tarde; aviso una sola vez; guion INC-126 con diagnóstico de lo que ve HK; p5c85.",
-   "estado": "registrado",
-   "observacion": "Encolado 15:41. CLI 15:42–15:44: 488f30a, 59/59.",
-   "hash": "488f30a"
+   "estado": "no aceptado",
+   "observacion": "Encolado 15:41. CLI 15:42–15:44: 488f30a, 59/59. Pruebas 15:44–15:50: a–e verdes; regresión rojo en REQ-INV2-7-1-hk-turno c y d (INC-127). Juez 15:50: no aceptado.",
+   "hash": "488f30a",
+   "aceptacion": {
+    "lote": "L-104",
+    "hash": "488f30a",
+    "fecha": "2026-10-14",
+    "horaBogota": "15:50",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 59/59 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: a los 5 s: sin aviso | si: aviso al vencer el plazo: sí | si: HK abierto con un turno ajeno: no"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c85 (versión ≥ p5c85: el guion corre como regresión en lotes siguientes)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: iframe de HK cargado: sí | si: HK colaborador · flujoBaseId f-mv644xbb93uxx · 1 etapa(s): zz-verif-Flujo base [zz-verif-Limpieza480:  | zz-verif-Cierre: zz-verif-Conteo de cierre (inv conteo)]"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: HK admin · flujoBaseId f-mv644xbb93uxx · 1 etapa(s): zz-verif-Flujo base [zz-verif-Limpieza480:  | zz-verif-Cierre: zz-verif-Conteo de cierre (inv conteo)]"
+     },
+     {
+      "c": "f",
+      "nivel": "regresión",
+      "ok": false,
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js b (entra por portal.html?turno=) pasa: #hkFrame.show y la tarea de conteo quedan visibles · fallan c y d del mismo guion: turno sh-m-1792010886359 · error: locator.waitFor: Timeout 30000ms exceeded (los demás guiones de regresión de la zona inventario pasan)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Regresión en REQ-INV2-7-1-hk-turno.spec.js (c y d): timeout esperando un elemento tras abrir el turno por el enlace",
+      "nivel": "medio",
+      "causa": "El nuevo _portalDeepLink puede dejar el turno en 'esperar' hasta 20 s antes de abrirlo (en vez de abrirlo o avisar de inmediato como antes); los casos c y d de REQ-INV2-7-1-hk-turno.spec.js dependen de que el turno abierto por ese mismo enlace en el caso b esté listo para interactuar (cámara/fotos) y agotan el timeout de 30 s del locator mientras esperan esa apertura demorada.",
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js c (foto con cámara, turno sh-m-1792010886359): error: locator.waitFor: Timeout 30000ms exceeded. | REQ-INV2-7-1-hk-turno.spec.js d (con las 5 fotos la tarea se marca, mismo turno): error: locator.waitFor: Timeout 30000ms exceeded."
+     }
+    ],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "No hay criterios N3 ni N4 en este lote (a es N1; b-e son N2; f es regresión). El resto de guiones de regresión de la zona inventario (DT-35, INC-121, INC-125, REQ-INV2-4-1*, REQ-INV2-7-1-hk, REQ-INV2-7-1) pasan en verde; solo c y d de REQ-INV2-7-1-hk-turno fallan. pruebas.json marca 'resultado': 'rojo' con causa exactamente esos dos casos."
+   }
   }
  ],
  "esquema": {
@@ -10004,7 +10062,7 @@
    "estado": "no aceptado",
    "vista": "siguiente",
    "esperaA": "CLI",
-   "espera": "fix L-104 (INC-126) y luego reprueba de L-101",
+   "espera": "L-105 aceptado; luego reprobar\\L-101.txt",
    "orden": 121.09,
    "desde": "2026-10-14 15:41",
    "planTrabajo": "PT-1",
@@ -10017,15 +10075,15 @@
    "categoria": "estándar",
    "riesgo": "R-portal",
    "resumen": "Portal: ?turno= espera la lista del servidor (20 s) antes de avisar; guion INC-126 con diagnóstico de lo que ve HK (colab y admin) del flujo base de zz-verif-Propiedad; p5c85",
-   "estado": "verificando",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": null,
+   "esperaA": "CLI",
+   "espera": "L-105; luego reprobar L-104",
    "orden": 121.095,
-   "desde": "2026-10-14 15:44",
+   "desde": "2026-10-14 16:02",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Fix de L-101 (veredicto 15:28). Revisión previa 12/14 → corregida (4 y 13). Estándar: sin ok de Diseño. L-102 pasa a p5c86. · CLI 15:42–15:44: 488f30a, 59/59. CLAUDE.md:86 dice «shell sigue en p5c84» (la CLI vio el shell en p5c84; corrige la instrucción). El test de versión revisa solo str-api.js y los 5 HTML subidos."
+   "nota": "Fix de L-101 (veredicto 15:28). Revisión previa 12/14 → corregida (4 y 13). Estándar: sin ok de Diseño. L-102 pasa a p5c86. · CLI 15:42–15:44: 488f30a, 59/59. CLAUDE.md:86 dice «shell sigue en p5c84» (la CLI vio el shell en p5c84; corrige la instrucción). El test de versión revisa solo str-api.js y los 5 HTML subidos. · Juez 15:50: no aceptado solo por la regresión c y d de REQ-INV2-7-1-hk-turno (sus criterios a–e en verde; b del guion de L-101 ya pasa). Causa: INC-127 (no es efecto de L-104)."
   },
   {
    "lote": "L-102",
@@ -10036,12 +10094,12 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "verificador",
-   "espera": "L-104 aceptado (luego se encola)",
+   "espera": "L-104 y L-105 aceptados (luego se encola)",
    "orden": 121.1,
    "desde": "2026-10-14 15:51",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 13/14 → corregida (14 ajustes). · ok de Diseño 15:51 (M-383) con un ajuste aplicado: al crear como colaborador, el estado actual del juego = estadoId del pendiente y su marca pendiente = para (403 «Ese juego no queda pendiente»)."
+   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 13/14 → corregida (14 ajustes). · ok de Diseño 15:51 (M-383) con un ajuste aplicado: al crear como colaborador, el estado actual del juego = estadoId del pendiente y su marca pendiente = para (403 «Ese juego no queda pendiente»). Versión pasa a p5c87 (L-105 usa p5c86)."
   },
   {
    "lote": "L-103",
@@ -10058,6 +10116,22 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375."
+  },
+  {
+   "lote": "L-105",
+   "req": "INC-127",
+   "categoria": "estándar",
+   "riesgo": "R-portal",
+   "resumen": "HK no manda hk:turnos hasta que su puente escucha portal:abrir (_hkPuenteListo); p5c86",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "CLI",
+   "espera": null,
+   "orden": 121.097,
+   "desde": "2026-10-14 16:02",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Fix de L-101 c–d y de la regresión de L-104. Revisión previa 13/14 → corregida (4). Estándar: sin ok de Diseño."
   }
  ],
  "riesgos": [

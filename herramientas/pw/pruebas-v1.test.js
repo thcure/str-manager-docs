@@ -95,6 +95,10 @@ t('relacion sin para: siempre bloquea', alcanceRelacion({}, { estado: 'falta', o
   t('relacion: zona con otro rol falta', evaluarRelacion({ id: 'zr', tipo: 'zonaConRol', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Tendedero', rol: 'principal' }, c7, v7).estado === 'falta');
   t('relacion: juego de la propiedad ok', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2'], clase: 'juego' }, c7, v7).estado === 'ok');
   t('relacion: clase distinta falta', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2', 'zz-verif-J4'], clase: 'juego' }, c7, v7).estado === 'falta');
+  const c8 = { estados: [[{ id: 'e1', data: { nombre: 'zz-verif-Secando', pendiente: 'turno' } }, { id: 'e2', data: { nombre: 'zz-verif-Sucia', pendiente: 'nada', activo: false } }]] };
+  t('relacion: estado con su pendiente ok', evaluarRelacion({ id: 'cv', tipo: 'campoValor', grupo: 'estados', nombre: 'zz-verif-Secando', campo: 'pendiente', valor: 'turno' }, c8, { estados: true }).estado === 'ok');
+  t('relacion: estado inactivo falta', evaluarRelacion({ id: 'cv', tipo: 'campoValor', grupo: 'estados', nombre: 'zz-verif-Sucia', campo: 'pendiente', valor: 'nada' }, c8, { estados: true }).estado === 'falta');
+  t('relacion: grupo no visto no concluye', evaluarRelacion({ id: 'cv', tipo: 'campoValor', grupo: 'estados', nombre: 'x' }, c8, {}).estado === 'no concluyente');
   t('para con dos lotes: el segundo bloquea', alcanceRelacion({ para: 'L-86, L-101' }, { estado: 'falta', observado: 'x' }, 'L-101').estado === 'falta');
 }
 t('error 21: perfil en uso', explicarError(new Error('browserType.launchPersistentContext: Target page closed\n  - <process did exit: exitCode=21, signal=null>'), 'admin').startsWith('perfil en uso'));

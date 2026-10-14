@@ -2,6 +2,7 @@
 // Solo lectura: abre cada pagina con zz-verif-admin y lee las respuestas que la propia app pide (no toca tokens
 // ni ejecuta JavaScript sobre la sesion). Guarda solo nombres zz-verif- y conteos: nada de datos reales.
 // v1 comprueba; reponer lo que falte se hace con un guion de semilla del Chat Desarrollo (paso siguiente).
+// v5.1 (pw 0.5.11, M-387): relación campoValor (estados de ropa con su pendiente y proveedor activo, para L-103).
 // v5 (pw 0.5.10, M-384): relaciones zonaConRol y articulosDePropiedad (para L-103).
 // v4.3 (pw 0.5.9, M-377): invPrincipalPropiedad acepta cualquiera de las zonas con ese nombre que sea principal activa de la propiedad.
 // v4.1 (pw 0.5.7, M-370): relaciones flujoBasePropiedad e invPrincipalPropiedad (para L-101).
@@ -68,7 +69,7 @@ function evaluarRelacion(rel, cuerpos, vistos) {
   const necesita = { colaboradorBase: ['propiedades', 'usuarios'], zonaPrincipalActiva: ['propiedades', 'zonas'], sinPermiso: ['usuarios'],
     lugaresEnZonaPrincipal: ['propiedades', 'zonas', 'lugares'], tareaInventario: ['flujos'],
     flujoBasePropiedad: ['propiedades', 'flujos'], invPrincipalPropiedad: ['propiedades', 'zonas'],
-    zonaConRol: ['propiedades', 'zonas'], articulosDePropiedad: ['propiedades', 'articulos'] }[rel.tipo];
+    zonaConRol: ['propiedades', 'zonas'], articulosDePropiedad: ['propiedades', 'articulos'], campoValor: [rel.grupo] }[rel.tipo];
   if (!necesita) return r('no concluyente', 'tipo desconocido: ' + rel.tipo);
   const noVisto = necesita.filter(g => !vistos[g]);
   if (noVisto.length) return r('no concluyente', 'sin respuesta de: ' + noVisto.join(', '));
@@ -110,6 +111,14 @@ function evaluarRelacion(rel, cuerpos, vistos) {
     const detalle = mismas.length + ' zona(s) ' + rel.zona + '; la propiedad apunta a ' + (p.invPrincipalId || 'ninguna');
     return buenas.includes(String(p.invPrincipalId)) ? r('ok', rel.propiedad + ' cuenta en ' + rel.zona + ' (' + detalle + ')')
       : r('falta', rel.propiedad + ' no apunta a una ' + rel.zona + ' principal activa (' + detalle + '; válidas: ' + (buenas.join(', ') || 'ninguna') + ')');
+  }
+  if (rel.tipo === 'campoValor') {
+    // v5.1 (M-387): la fila activa con ese nombre en el grupo tiene campo = valor (estado con su pendiente, proveedor activo)
+    const f = porNombre(registros(cuerpos[rel.grupo]), rel.nombre);
+    if (!f) return r('falta', 'no está ' + rel.nombre);
+    if (f.activo === false) return r('falta', rel.nombre + ' está inactivo');
+    if (rel.campo && String(f[rel.campo]) !== String(rel.valor)) return r('falta', rel.nombre + ': ' + rel.campo + '=' + f[rel.campo] + ', se esperaba ' + rel.valor);
+    return r('ok', rel.nombre + (rel.campo ? ' (' + rel.campo + '=' + rel.valor + ')' : ' activo'));
   }
   if (rel.tipo === 'zonaConRol') {
     // v5 (M-384, L-103): una zona activa con ese nombre y ese rol que sirve a la propiedad

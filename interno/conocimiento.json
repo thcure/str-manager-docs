@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-13",
+ "actualizadoEn": "2026-10-14",
  "titulo": "Base de conocimiento del modelo de operación",
  "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
  "cobit": {
@@ -669,36 +669,36 @@
    "dueno": "Arquitecto (herramienta) · Carlos (lo usa)",
    "estado": "vigente",
    "vigenciaDesde": "2026-10-10",
-   "para": "Que Carlos empiece y termine la jornada con un clic: con la jornada activa trabajan la cola, el despertador y los perfiles de prueba; en pausa nadie despierta a los chats y no hay consumo.",
+   "para": "Que Carlos empiece y termine la jornada con un clic al encender LENOVO: con la jornada activa trabajan la cola y el despertador; el panel muestra la salud de los sitios, las sesiones de prueba y el trabajo; en pausa no hay consumo; al final puede apagar el equipo.",
    "quien": {
     "usa": "Carlos",
     "mantiene": "Arquitecto"
    },
    "piezas": [
-    "herramientas/panel/panel-str.ps1",
-    "herramientas/panel/panel-config.json",
-    "herramientas/panel/lanzar-panel.vbs",
-    "archivo PAUSA en la carpeta de la cola",
-    "ejecutar-cola.ps1 y vigilar-buzon.ps1 (respetan PAUSA)"
+    "herramientas/panel/panel-str.ps1 (v4, WPF) · panel-str.v3.ps1 (respaldo)",
+    "herramientas/panel/panel-config.json (sección v4 opcional: URL y perfil personal)",
+    "herramientas/panel/lanzar-panel.vbs (acceso directo 'Panel STR'; con «Abrir al encender», también en la carpeta Inicio)",
+    "archivo PAUSA y .corriendo en la carpeta de la cola",
+    "pw: sesiones.spec.js y abrir-perfil.js; log\\SESIONES-guion.json, L-n-pruebas.json, L-n-veredicto*.json; buzon\\estado-vivo.json"
    ],
    "flujo": [
-    "Empezar jornada: borra PAUSA, abre los perfiles de Chrome de prueba que no tengan ventana y a los 4 s confirma que cada uno la muestre; si alguno pide sesión, Carlos entra con ese usuario (el usuario de la barra lo comprueba el pre-vuelo del Chat Desarrollo).",
-    "Terminar jornada: crea PAUSA y cierra las ventanas de Chrome de los perfiles de prueba (solo los de panel-config.json; nunca Default ni el personal de Carlos; pide cerrar cada ventana, no mata procesos). El lote que esté corriendo termina, no empieza otro y el despertador deja de avisar.",
-    "Estado: jornada; «esperan de ti» (buzón); máquina (estado-vivo.json del despertador: en cola, rechazados, fallidas, construyendo, verificando con pre-vuelo y entrega); pre-vuelo (log\\pre-vuelo.json: válido, vigencia, usuario en la barra por perfil); último lote; último aviso; tokens; perfiles por ventanas reales."
+    "Empezar: escritorio virtual nuevo (el panel se reabre en él), quita PAUSA, salud de app., pruebas. y fabrica., comprobación de sesiones (por la cola si la jornada está activa; directa si está en pausa), Claude Desktop y Chrome personal con app. y hPanel.",
+    "Terminar: crea PAUSA y cierra solo las ventanas de abrir-perfil.js (perfiles de pw); el lote en curso termina y no empieza otro.",
+    "Terminar y apagar: Terminar, espera a que la cola suelte .corriendo (máx. 45 min) y apaga en 60 s; Cancelar apagado lo detiene.",
+    "Volver a entrar (por perfil): abre abrir-perfil.js; Carlos entra con Google, cierra la ventana y pulsa Comprobar."
    ],
    "reglas": [
-    "El panel no inicia sesión ni guarda contraseñas.",
-    "No usa Claude: no gasta créditos.",
-    "Los nombres de los perfiles se ajustan en panel-config.json (nombre visible en Chrome o carpeta, por ejemplo Default).",
-    "Las ventanas de cada perfil se reconocen por el AppUserModelID que Chrome les pone (termina en la carpeta del perfil); si no coincide ninguna, el panel lo dice y no cierra nada.",
-    "Estado prueba los tres tokens con una petición real; la fecha de vencimiento es orientativa (GitHub no siempre la informa).",
-    "Versión v3 (LM-3, 11-oct-2026); respaldo panel-str.v2.ps1 para volver atrás."
+    "El panel no inicia sesión, no guarda contraseñas ni lee secretos; no usa Claude (cero créditos).",
+    "Nunca cierra tu Chrome ni las ventanas de Playwright (las que llevan --enable-automation): solo las de abrir-perfil.js.",
+    "Cada clic en Empezar crea un escritorio virtual nuevo (Windows no deja saber si ya existe uno).",
+    "Versión v4 (LM-31, 14-oct-2026); respaldo panel-str.v3.ps1 para volver atrás en un minuto."
    ],
    "instalacion": "Archivos en C:\\Users\\ktcol\\Downloads\\str-instr-cola\\panel\\; acceso directo 'Panel STR' en el escritorio (comando en comandos-usuario.md).",
-   "comprobacion": "Abrir el panel → Estado muestra Máquina y Pre-vuelo; Terminar cierra solo zz-verif-admin/oper/colab y el Chrome personal sigue abierto; Empezar los reabre y los confirma con ventana.",
+   "comprobacion": "Abrir el panel → semáforos de Salud, Perfiles y Trabajo → Empezar abre el escritorio, Claude, Chrome y comprueba sesiones → Terminar deja la jornada en pausa y tu Chrome sigue abierto.",
    "creditos": "Cero; en pausa evita todo despertar de chats.",
    "riesgos": [
-    "Si la jornada queda en pausa por olvido, nada avanza: el Estado lo muestra arriba."
+    "Si la jornada queda en pausa por olvido, nada avanza: el chip de arriba lo muestra.",
+    "Empezar dos veces crea dos escritorios virtuales."
    ]
   },
   {

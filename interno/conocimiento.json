@@ -1263,6 +1263,39 @@
     }
    },
    {
+    "id": "PRA-6",
+    "tipo": "practica",
+    "nombre": "Todo lote lleva un guion con su zona",
+    "alcance": "fabrica",
+    "problema": "La regresión se elige por la zona del guion del lote; un lote sin guion no corre ninguna y su criterio queda sin evidencia.",
+    "cuando": "Al redactar cualquier lote, también los del modelo o de herramientas.",
+    "como": [
+     "Incluir al menos un guion mínimo (aunque sea de salud) con su zona.",
+     "El revisor previo lo comprueba: sin guion, la regresión no corre."
+    ],
+    "herramientas": [
+     "HER-2",
+     "HER-3"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "L-93",
+      "fecha": "2026-10-13",
+      "nota": "criterio c sin evidencia; se corrió la regresión aparte"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI07.05-p"
+     ],
+     "lecciones": [
+      "S-cd-31"
+     ]
+    }
+   },
+   {
     "id": "PAT-1",
     "tipo": "patron",
     "nombre": "Migrar un ambiente de hosting sin perder datos",
@@ -1327,6 +1360,9 @@
      ],
      "lecciones": [
       "S-arq-25"
+     ],
+     "ver": [
+      "PAT-8"
      ]
     }
    },
@@ -1639,6 +1675,73 @@
       "APO01.03-b"
      ],
      "lecciones": []
+    }
+   },
+   {
+    "id": "PAT-7",
+    "tipo": "patron",
+    "nombre": "Copia numerada con revisión previa por un subagente sin contexto",
+    "alcance": "fabrica",
+    "problema": "Un lote bien redactado puede romper la regresión o la aceptación por cosas que su autor no ve: archivos compartidos con otro lote no aceptado, tests que leen el texto de otro archivo, detalles del código.",
+    "cuando": "Antes de encolar cualquier lote (sobre todo los críticos).",
+    "como": [
+     "Copiar el lote con su número definitivo.",
+     "Un subagente sin el contexto del autor aplica la lista de revisión previa (13 puntos).",
+     "Se le dan los hechos de los lotes ya aceptados que tocan los mismos archivos.",
+     "Lo que encuentre se corrige en la copia antes de encolar."
+    ],
+    "herramientas": [
+     "HER-2"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "L-88, L-89, L-91, L-92, L-93",
+      "fecha": "2026-10-13",
+      "nota": "en cada revisión de LM-21/23/27/28 encontró algo que habría roto la aceptación"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "APO01.10-a"
+     ],
+     "lecciones": [
+      "M-329"
+     ]
+    }
+   },
+   {
+    "id": "PAT-8",
+    "tipo": "patron",
+    "nombre": "Comparar exportaciones como texto, sin convertir números",
+    "alcance": "fabrica",
+    "problema": "Al comparar datos exportados, las herramientas convierten números (119.0 → 119) y culpan al servicio de un cambio que hizo la propia herramienta.",
+    "cuando": "Al comprobar una ida y vuelta de datos o depurar una diferencia.",
+    "como": [
+     "Leer el JSON sin convertir números (en Python: parse_float=str, parse_int=str).",
+     "Recorrer conservando el orden de claves.",
+     "Contrastar con la respuesta cruda del servicio antes de culparlo."
+    ],
+    "herramientas": [
+     "HER-5"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "L-93",
+      "fecha": "2026-10-13",
+      "nota": "separó la pérdida del .0 en el espejo (DT-37) de la del servicio; M-312"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10-m"
+     ],
+     "lecciones": [
+      "M-329"
+     ]
     }
    }
   ]

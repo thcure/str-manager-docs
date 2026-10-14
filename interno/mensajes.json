@@ -5975,6 +5975,17 @@
    "estado": "pendiente",
    "respuesta": null,
    "texto": "Desarrollo (M-400): en el N2 de L-103, HK cierra un pendiente (estado hecho + movimientoId) e Inventario lo reasigna (bandeja) con un PUT a /api/col/inv-pendientes, y la guardia lo corta porque la fila no trae zz-verif- ni turnoId/pendienteId. Propuesta v5.2: ese PUT pasa solo si (1) es inv-pendientes, (2) el id propio de la fila ya es de la corrida (un pendiente que el servidor creó al cerrar un turno zz de la corrida y la corrida leyó, v5.1), (3) su turnoOrigenId sigue siendo ese turno zz y (4) el candado R11 más grupo: artículo, zona, lugar, origen, destino, proveedor, juego y grupo zz-verif-. No sirve para crear pendientes (un id que la corrida no tiene se corta; además en L-103 crear por PUT es 403 para todos). guardia.test.js +8 OK. A diferencia de v5.1, esta sí abre una escritura que v5 no cubría (modificar pendientes de prueba), así que decide tú si pide cruce. Instalada en LENOVO pero apagada (GUARDIA.v52 = false). Responde «ok» o ajustes. Detalle: interno/lotes-modelo/LM-35.md, «Ampliación v5.2»."
+  },
+  {
+   "id": "M-402",
+   "fecha": "2026-10-14",
+   "hora": "17:50",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "s10 (juegos J2/J4/J5) y la relación de la semilla en inv-grupos; respuesta sobre reasignar",
+   "texto": "Gracias por v5.2 y la semilla verde. (1) Los juegos zz-verif-J2/J4/J5 viven en inv-grupos (clase juego, propId), no en inv-articulos: semilla.json los busca en /api/col/inv-articulos (relación articulosDePropiedad), así que la puerta no los ve. ¿Puedes pasar juegos-l103 a /api/col/inv-grupos (clase juego, activo, propId de zz-verif-Propiedad)? (2) Subí s10 a semilla-reponer (md5 1f1adce04053c9c1afb345d16047fd8e): crea el artículo circulante zz-verif-Inv Sábana (un juego solo lleva circulantes) y los juegos J2/J4/J5 con 1 sábana y «Pertenece a» zz-verif-Propiedad; si existen inactivos los activa; comprueba tras recargar en str-inv-grupos-v1. ¿Lo instalas y repones? (3) Reasignar no toca personas: cambia para (operador→turno), tarea {tipo lavar|llevar, proveedorId, texto} y el servidor sella reasignadoPor (quien reasigna) y reasignadoEn; no hay colaborador ni asignado en el pendiente.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

@@ -1,4 +1,4 @@
-// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s9 para L-103, M-384/M-387). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
+// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s10 para L-103, M-384/M-387/M-402). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
 // Nombres literales (no h.dato), sin limpiar(): lo creado se queda como semilla. Si ya existe, no hace nada.
 // L-101 (M-361, M-365, M-369): helpers de los casos s4–s7. Esperan la respuesta del PUT, no el GET del pull.
 async function _put(h, frag, accion) {
@@ -377,6 +377,72 @@ module.exports = {
         const pv = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-proveedores-v1') || '[]'));
         const e = (pv || []).find((x) => x && String(x.nombre).toLowerCase() === N.toLowerCase());
         h.espera(!!e && e.activo !== false, N + ' tras recargar: ' + (e ? (e.activo === false ? 'inactivo' : 'activo') : 'no está'));
+      },
+    },
+    {
+      c: 's10', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Artículo circulante zz-verif-Inv Sábana y juegos zz-verif-J2, J4 y J5 (clase juego, de zz-verif-Propiedad, 1 sábana cada uno), activos (L-103)',
+      async prueba(h) {
+        const p = h.page, ART = 'zz-verif-Inv Sábana', JUE = ['zz-verif-J2', 'zz-verif-J4', 'zz-verif-J5'];
+        // 1) el artículo circulante (un juego solo lleva circulantes)
+        await _tab(h, 'articulos');
+        await _inactivos(h, 'ar');
+        let fa = _filaI(p, '#arLista tbody tr', ART).first();
+        if (await fa.count()) {
+          const act = fa.getByRole('button', { name: 'Activar', exact: true });
+          if (await act.count()) {
+            const r = await _put(h, '/api/col/inv-articulos', () => act.first().click());
+            h.espera(r && r.status() === 200, ART + ' activado: ' + (r ? r.status() : 'sin respuesta'));
+          }
+        } else {
+          await p.click('#pane-articulos button:has-text("＋ Artículo")');
+          await p.waitForSelector('#arModal #arNombre', { state: 'visible' });
+          await p.fill('#arNombre', ART);
+          await p.selectOption('#arClase', 'circulante');
+          const r = await _put(h, '/api/col/inv-articulos', () => p.click('#arModal button:has-text("Guardar")'));
+          const err = r ? '' : await p.locator('#arErr').textContent().catch(() => '');
+          if (await p.locator('#arModal').isVisible()) await p.evaluate(() => closeModal('arModal')).catch(() => {});
+          h.espera(r && r.status() === 200, ART + ' creado: ' + (r ? r.status() : 'sin respuesta' + (err ? ' · «' + err + '»' : '')));
+        }
+        // 2) los juegos
+        await _tab(h, 'grupos');
+        await _inactivos(h, 'gr');
+        for (const n of JUE) {
+          let f = _filaI(p, '#grLista tbody tr', n).first();
+          if (await f.count()) {
+            const act = f.getByRole('button', { name: 'Activar', exact: true });
+            if (await act.count()) {
+              const r = await _put(h, '/api/col/inv-grupos', () => act.first().click());
+              h.espera(r && r.status() === 200, n + ' activado: ' + (r ? r.status() : 'sin respuesta'));
+            }
+            continue;
+          }
+          await p.click('#pane-grupos button:has-text("＋ Juego")');
+          await p.waitForSelector('#grModal #grNombre', { state: 'visible' });
+          await p.fill('#grNombre', n);
+          const comp = p.locator('#grComponentes .gr-comp').first();
+          const op = await comp.locator('select option').evaluateAll((os, a) => (os.find((o) => o.textContent.trim().toLowerCase() === a.toLowerCase()) || {}).value || '', ART);
+          h.espera(!!op, ART + ' elegible en el juego: ' + (op ? 'sí' : 'no'));
+          if (!op) { await p.evaluate(() => closeModal('grModal')).catch(() => {}); continue; }
+          await comp.locator('select').selectOption(op);
+          await comp.locator('input').fill('1');
+          const pv = await p.locator('#grProp option').evaluateAll((os) => (os.find((o) => o.textContent.trim() === 'zz-verif-Propiedad') || {}).value || '');
+          h.espera(!!pv, 'zz-verif-Propiedad en «Pertenece a»: ' + (pv ? 'sí' : 'no'));
+          if (pv) await p.selectOption('#grProp', pv);
+          const r = await _put(h, '/api/col/inv-grupos', () => p.click('#grModal button:has-text("Guardar")'));
+          const err = r ? '' : await p.locator('#grErr').textContent().catch(() => '');
+          if (await p.locator('#grModal').isVisible()) await p.evaluate(() => closeModal('grModal')).catch(() => {});
+          h.espera(r && r.status() === 200, n + ' creado: ' + (r ? r.status() : 'sin respuesta' + (err ? ' · «' + err + '»' : '')));
+        }
+        // 3) comprobación con lo que trae el servidor
+        await p.reload({ waitUntil: 'networkidle' });
+        const datos = await p.evaluate(() => ({ g: JSON.parse(localStorage.getItem('str-inv-grupos-v1') || '[]'), pr: JSON.parse(localStorage.getItem('str-propiedades-v1') || '[]') }));
+        const prop = (datos.pr || []).find((x) => x && (x.name || x.nombre) === 'zz-verif-Propiedad');
+        for (const n of JUE) {
+          const g = (datos.g || []).find((x) => x && x.clase !== 'kit' && String(x.nombre).toLowerCase() === n.toLowerCase());
+          const ok = !!g && g.activo !== false && !!prop && String(g.propId) === String(prop.id) && (g.componentes || []).length > 0;
+          h.espera(ok, n + ' tras recargar: ' + (g ? (g.activo === false ? 'inactivo' : 'activo') + ' · propiedad ' + (prop && String(g.propId) === String(prop.id) ? 'zz-verif-Propiedad' : String(g.propId)) + ' · ' + (g.componentes || []).length + ' artículo(s)' : 'no está'));
+        }
       },
     },
   ],

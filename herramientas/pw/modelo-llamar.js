@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const ROLES = ['tablero', 'desarrollo', 'diseno'];
+const ROLES = ['tablero', 'desarrollo', 'diseno', 'carga'];   // pw 0.5.5 (LM-34): «carga» = solo cargar/export/estado/salud (L-97); instalar en LENOVO tras desplegar L-97
 const DIAS_VIGENCIA = 180;
 const { COLA, BASE_MODELO: BASE } = require('./comun');   // v0.5.3 (M8): el modelo vive en fabrica.
 const { bonito, valorCrudo, conFinDeLinea } = require('./json-crudo');   // pw 0.5.2: espejo exacto (119.0 sigue 119.0)

@@ -654,14 +654,15 @@
    "id": "INC-126",
    "tipo": "INC",
    "modulo": "Portal",
-   "etapa": "🔧",
+   "etapa": "✅",
    "fecha": "2026-10-14",
    "severidad": "medio",
    "titulo": "Portal: el enlace ?turno= de un turno recién asignado dice «Ese turno no está asignado a ti» y no lo abre",
    "causa": "portal.html _renderListas resuelve el enlace en el primer hk:turnos y lo gasta; HK manda ese primer mensaje desde localStorage antes del pull del servidor (str-m1-housekeeping.html ~2088), sin el turno nuevo.",
-   "pendiente": "Corregido por L-104 (488f30a): b del guion de L-101 ya pasa. Se cierra cuando L-104 quede aceptado (tras L-105).",
-   "estado": "abierto",
-   "origen": "Veredicto de L-101 (juez, caso b, 14-oct 15:28)."
+   "pendiente": "",
+   "estado": "cerrado",
+   "origen": "Veredicto de L-101 (juez, caso b, 14-oct 15:28).",
+   "cierre": "Cerrado por L-104 (488f30a), aceptado en la reprueba del 14-oct 16:18."
   },
   {
    "id": "INC-127",
@@ -8551,8 +8552,8 @@
    "req": "INC-126 (+ diagnóstico INC-127)",
    "categoria": "estándar",
    "resumen": "Portal: ?turno= espera hasta 20 s la lista del servidor y abre el turno aunque llegue tarde; aviso una sola vez; guion INC-126 con diagnóstico de lo que ve HK; p5c85.",
-   "estado": "no aceptado",
-   "observacion": "Encolado 15:41. CLI 15:42–15:44: 488f30a, 59/59. Pruebas 15:44–15:50: a–e verdes; regresión rojo en REQ-INV2-7-1-hk-turno c y d (INC-127). Juez 15:50: no aceptado.",
+   "estado": "aceptado",
+   "observacion": "Encolado 15:41. CLI 15:42–15:44: 488f30a, 59/59. Pruebas 15:44–15:50: a–e verdes; regresión rojo en REQ-INV2-7-1-hk-turno c y d (INC-127). Juez 15:50: no aceptado. Reprueba tras L-105 (juez 16:18): aceptado.",
    "hash": "488f30a",
    "aceptacion": {
     "lote": "L-104",
@@ -8611,6 +8612,57 @@
     ],
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "No hay criterios N3 ni N4 en este lote (a es N1; b-e son N2; f es regresión). El resto de guiones de regresión de la zona inventario (DT-35, INC-121, INC-125, REQ-INV2-4-1*, REQ-INV2-7-1-hk, REQ-INV2-7-1) pasan en verde; solo c y d de REQ-INV2-7-1-hk-turno fallan. pruebas.json marca 'resultado': 'rojo' con causa exactamente esos dos casos."
+   },
+   "aceptacion2": {
+    "lote": "L-104",
+    "hash": "9367c8a",
+    "fecha": "2026-10-14",
+    "horaBogota": "16:18",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 60/60 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: a los 5 s: sin aviso | si: aviso al vencer el plazo: sí | si: HK abierto con un turno ajeno: no"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c86 (versión ≥ p5c85: el guion corre como regresión en lotes siguientes)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: iframe de HK cargado: sí | si: HK colaborador · flujoBaseId f-mv644xbb93uxx · 1 etapa(s): zz-verif-Flujo base [zz-verif-Limpieza480:  | zz-verif-Cierre: zz-verif-Conteo de cierre (inv conteo)]"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: HK admin · flujoBaseId f-mv644xbb93uxx · 1 etapa(s): zz-verif-Flujo base [zz-verif-Limpieza480:  | zz-verif-Cierre: zz-verif-Conteo de cierre (inv conteo)]"
+     },
+     {
+      "c": "f",
+      "nivel": "regresión",
+      "ok": true,
+      "observado": "25 caso(s) de regresión en verde (zona inventario); REQ-INV2-7-1-hk-turno.spec.js caso b: turno sh-m-1792012633292 con «zz-verif-Conteo de cierre» visible en el turno (ya entra por el enlace sin quedar en «no está asignado»)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "La instrucción de L-104 no define criterios N3; no se usaron capturas para este veredicto. La captura log\\capturas\\L-104\\b-medida.png (ancho 390 px, zonas de inventario) no corresponde a ninguna letra N3 de este lote."
    }
   },
   {
@@ -8655,6 +8707,15 @@
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "d (regresión de la zona inventario, sin caso propio) verificada contra el bloque regresion de L-105-pruebas.json: todos los guiones en verde, incluido REQ-INV2-7-1-hk-turno.spec.js c y d (segunda apertura del mismo turno, ya en caché). No hay letras N3 en la instrucción (n3Preparados vacío, consistente)."
    }
+  },
+  {
+   "lote": "L-102",
+   "fecha": "2026-10-14",
+   "req": "REQ-INV2-3-4 (1/2)",
+   "categoria": "crítico",
+   "resumen": "Pendientes al cerrar el turno y lavandería externa: servidor ([PEND], inv-pendientes, inv-proveedores, lavanderia/recepcion) e Inventario (estados con pendiente, Proveedores, Pendientes, recepción, Movimientos); p5c87.",
+   "estado": "registrado",
+   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; decisiones M-375; revisión previa 13/14 corregida; ok de Diseño 15:51 (M-383). Encolado 16:20."
   }
  ],
  "esquema": {
@@ -10179,15 +10240,15 @@
    "categoria": "estándar",
    "riesgo": "R-portal",
    "resumen": "Portal: ?turno= espera la lista del servidor (20 s) antes de avisar; guion INC-126 con diagnóstico de lo que ve HK (colab y admin) del flujo base de zz-verif-Propiedad; p5c85",
-   "estado": "no aceptado",
-   "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": "reprueba tras L-105 (reprobar\\L-104.txt)",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
+   "espera": null,
    "orden": 121.095,
-   "desde": "2026-10-14 16:09",
+   "desde": "2026-10-14 16:18",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Fix de L-101 (veredicto 15:28). Revisión previa 12/14 → corregida (4 y 13). Estándar: sin ok de Diseño. L-102 pasa a p5c86. · CLI 15:42–15:44: 488f30a, 59/59. CLAUDE.md:86 dice «shell sigue en p5c84» (la CLI vio el shell en p5c84; corrige la instrucción). El test de versión revisa solo str-api.js y los 5 HTML subidos. · Juez 15:50: no aceptado solo por la regresión c y d de REQ-INV2-7-1-hk-turno (sus criterios a–e en verde; b del guion de L-101 ya pasa). Causa: INC-127 (no es efecto de L-104)."
+   "nota": "Fix de L-101 (veredicto 15:28). Revisión previa 12/14 → corregida (4 y 13). Estándar: sin ok de Diseño. L-102 pasa a p5c86. · CLI 15:42–15:44: 488f30a, 59/59. CLAUDE.md:86 dice «shell sigue en p5c84» (la CLI vio el shell en p5c84; corrige la instrucción). El test de versión revisa solo str-api.js y los 5 HTML subidos. · Juez 15:50: no aceptado solo por la regresión c y d de REQ-INV2-7-1-hk-turno (sus criterios a–e en verde; b del guion de L-101 ya pasa). Causa: INC-127 (no es efecto de L-104). · Reprueba tras L-105, juez 16:18: aceptado (a–e y regresión 25/25)."
   },
   {
    "lote": "L-102",
@@ -10195,15 +10256,15 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Pendientes al cerrar el turno: servidor + Inventario (estado pendiente, proveedores, pendientes, lavandería/recepción); p5c86",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": "L-104 y L-105 aceptados (luego se encola)",
+   "esperaA": "CLI",
+   "espera": null,
    "orden": 121.1,
-   "desde": "2026-10-14 15:51",
+   "desde": "2026-10-14 16:20",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 13/14 → corregida (14 ajustes). · ok de Diseño 15:51 (M-383) con un ajuste aplicado: al crear como colaborador, el estado actual del juego = estadoId del pendiente y su marca pendiente = para (403 «Ese juego no queda pendiente»). Versión pasa a p5c87 (L-105 usa p5c86)."
+   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 13/14 → corregida (14 ajustes). · ok de Diseño 15:51 (M-383) con un ajuste aplicado: al crear como colaborador, el estado actual del juego = estadoId del pendiente y su marca pendiente = para (403 «Ese juego no queda pendiente»). Versión pasa a p5c87 (L-105 usa p5c86). · Encolado 16:20 (L-104 y L-105 aceptados)."
   },
   {
    "lote": "L-103",

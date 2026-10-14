@@ -1,4 +1,5 @@
-﻿# panel-str.ps1 - Panel de jornada del STR · v4.0 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+﻿# panel-str.ps1 - Panel de jornada del STR · v4.1 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+# v4.1: Chrome maximizado; refresco más liviano (archivos cada 30 s, red cada 5 min, nada si la ventana está minimizada).
 # Un clic al encender LENOVO: Empezar crea el escritorio STR, quita la pausa, revisa la salud de los sitios,
 # comprueba las sesiones de los perfiles de prueba de pw, abre Claude Desktop y tu Chrome con app. y hPanel.
 # Terminar pone la pausa y cierra las ventanas de los perfiles de prueba (las de abrir-perfil.js; nunca tu Chrome).
@@ -345,7 +346,7 @@ function Buscar-Chrome {
 function Abrir-Sitios {
     $ch = Buscar-Chrome
     if (-not $ch) { Mensaje 'No encontré Chrome.'; return }
-    Start-Process -FilePath $ch -ArgumentList @(('--profile-directory=' + $Cfg.perfilPersonal), '--new-window', ($Cfg.app + '/str-app-shell.html'), $Cfg.hpanel)
+    Start-Process -FilePath $ch -ArgumentList @(('--profile-directory=' + $Cfg.perfilPersonal), '--new-window', '--start-maximized', ($Cfg.app + '/str-app-shell.html'), $Cfg.hpanel)
 }
 function Abrir-Claude {
     try {
@@ -464,8 +465,9 @@ $reloj.Add_Tick({
         }
     }
     $script:Ticks++
-    if ($script:Ticks % 20 -eq 0) { Pintar-Jornada; Pintar-Sesiones; Pintar-Trabajo }   # cada 10 s, solo archivos
-    if ($script:Ticks % 240 -eq 0) { Refrescar -ConRed }                                    # cada 2 min, tambien la red
+    $visible = ($win.WindowState -ne 'Minimized')
+    if ($visible -and $script:Ticks % 60 -eq 0) { Pintar-Jornada; Pintar-Sesiones; Pintar-Trabajo }   # cada 30 s, solo archivos
+    if ($visible -and $script:Ticks % 600 -eq 0) { Refrescar -ConRed }                                 # cada 5 min, tambien la red
     if ($script:Apagando) {
         $min = [int]((Get-Date) - $script:EsperaDesde).TotalMinutes
         if ((Test-Path $Lock) -and $min -lt 45) {

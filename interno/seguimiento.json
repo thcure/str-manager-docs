@@ -8134,6 +8134,104 @@
     "veredictos": 1,
     "bloqueados": 0
    }
+  },
+  {
+   "lote": "L-97",
+   "fecha": "2026-10-14",
+   "req": "REQ-MOD-6 (rol carga, LM-34)",
+   "categoria": "crítico",
+   "resumen": "Servicio del modelo: rol «carga» (cargar, estado, export; migrar, credenciales y tablas sueltas 403), LIMIT 8; sha opcional; tabla carga (esquema 3) con sha, hora y quién cargó en la misma transacción; salud devuelve {sha, cargadoEn}; actualizado_por = quien carga.",
+   "estado": "parcial",
+   "observacion": "M-344/M-345/M-348; cruce: «dale» de Carlos a LM-34 (14-oct); revisión previa 14/14; ok de Diseño 16:05 (M-349). CLI 13:36–13:42: 3dfb60f, 57/57 con PHP real; declarados = tocados (16), sin ?v=. Juez 13:43: parcial; a y f en verde (salud con sha/cargadoEn null, esquema 2; carga → 404); regresión del modelo 9/9. g la cierra el Chat Desarrollo: según el cierre de la CLI, 16 archivos del Alcance y ninguno fuera, sin secretos → cumple. Pendientes b–e del Arquitecto (MIGRAR, CREDENCIALES, ROLES, carga real; M-353).",
+   "hash": "3dfb60f",
+   "aceptacion": {
+    "lote": "L-97",
+    "hash": "3dfb60f",
+    "fecha": "2026-10-14",
+    "horaBogota": "13:43",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 57/57 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): sin caso en pruebas.json › n2"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): sin caso en pruebas.json › n2"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): sin caso en pruebas.json › n2"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": null,
+      "observado": "N2 fuera del guion (Arquitecto): sin caso en pruebas.json › n2"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: salud 200 · db true · esquema 2 | si: claves nuevas en salud: sha sí · cargadoEn sí | si: sha null · cargadoEn null | si: salud no expone quién cargó: no | si: GET /modelo/api/carga → 404 | si: /api/health 200"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "cierre de la CLI (git show --name-only) que cierra el Chat Desarrollo: no está en pruebas.json"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "migración a esquema 3: la corre el Arquitecto (MIGRAR → log\\modelo-migrar-*.json con schema_version 3); salud aún dice esquema 2"
+     },
+     {
+      "c": "c",
+      "motivo": "credencial carga: la corre el Arquitecto (CREDENCIALES → log\\modelo-credenciales-*.json); precondición b"
+     },
+     {
+      "c": "d",
+      "motivo": "rol carga de punta a punta (422, 200, 200, 403, 403, 403): la corre el Arquitecto (ROLES → log\\modelo-roles-*.json); precondición c; crítico si carga obtiene 200 en migrar o credenciales"
+     },
+     {
+      "c": "e",
+      "motivo": "carga real del Arquitecto deja salud.sha = sha de la respuesta de cargar; precondición b; hoy sha y cargadoEn son null"
+     },
+     {
+      "c": "g",
+      "motivo": "declarados = tocados y sin secretos: lo cierra el Chat Desarrollo con git show --name-only; el juez no ejecuta comandos"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Sin criterios N3 en la instrucción; n3Preparados vacío y la carpeta log\\capturas\\L-97 no existe (no hace falta: no hay N3). Entrada P4 toda en verde (despliegue, tests 57/57, guion N2 igual a la instrucción, semilla completa, sesión admin). Regresión: 9/9 casos ok (REQ-MOD-6, -carga, -complemento, -credenciales, -lectura); salud ya trae sha y cargadoEn en null y sigue en esquema 2. Parcial porque b–e dependen del Arquitecto (orden M-345/M-348: ROLES y CREDENCIALES en pw\\modelo-llamar.js después del despliegue) y g lo cierra el Chat Desarrollo. horaBogota tomada del fin de la corrida de pruebas (18:43Z): el juez no ejecuta comandos para leer la hora."
+   },
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-14 13:42",
+    "aceptado": null,
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -9568,14 +9666,14 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Servicio del modelo: rol «carga» (solo cargar, export, estado y salud; migrar y credenciales 403) y sha + hora de la carga en salud",
-   "estado": "verificando",
+   "estado": "parcial",
    "vista": "en curso",
    "esperaA": null,
    "espera": "después del fix de L-95; antes de LM-34",
    "orden": 121.1,
    "desde": "2026-10-14 13:42",
    "grupo": "MOD",
-   "nota": "M-345 (Arquitecto, ajuste de Diseño en M-344). Referencia LM-34; cruce: Carlos dio «dale» a LM-34 con este orden (chat del Arquitecto, 14-oct). Número al encolar. · L-97 redactado (revisión previa 14/14); ok de Diseño pedido. · ok de Diseño 16:05 (M-349); encolado 16:10. · CLI 13:36–13:42: 3dfb60f, 57/57 (PHP real), los 6 PHP pasan php -l. Pruebas b–e del Arquitecto (M-353)."
+   "nota": "M-345 (Arquitecto, ajuste de Diseño en M-344). Referencia LM-34; cruce: Carlos dio «dale» a LM-34 con este orden (chat del Arquitecto, 14-oct). Número al encolar. · L-97 redactado (revisión previa 14/14); ok de Diseño pedido. · ok de Diseño 16:05 (M-349); encolado 16:10. · CLI 13:36–13:42: 3dfb60f, 57/57 (PHP real), los 6 PHP pasan php -l. Pruebas b–e del Arquitecto (M-353). · Juez 13:43: parcial (a, f, g ok; b–e del Arquitecto)."
   },
   {
    "lote": "L-96",

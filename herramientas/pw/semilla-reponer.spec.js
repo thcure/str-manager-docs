@@ -1,4 +1,4 @@
-// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s11 para L-103, M-384/M-387/M-402/M-403). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
+// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s12 para L-103, M-384/M-387/M-402/M-403; s8 corrige mayúsculas y s12 la zona zz-verif-Tendedero tras la puerta de L-103). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
 // Nombres literales (no h.dato), sin limpiar(): lo creado se queda como semilla. Si ya existe, no hace nada.
 // L-101 (M-361, M-365, M-369): helpers de los casos s4–s7. Esperan la respuesta del PUT, no el GET del pull.
 async function _put(h, frag, accion) {
@@ -328,6 +328,19 @@ module.exports = {
             if (!r) { await p.evaluate(() => closeModal('esModal')).catch(() => {}); continue; }
             f = _filaI(p, '#esLista tbody tr', n).first();
           }
+          // El nombre exacto (la puerta compara con mayúsculas): si la fila dice «zz-verif-secando», se renombra.
+          const nom = ((await f.locator('strong').first().textContent().catch(() => '')) || '').trim();
+          if (nom && nom !== n) {
+            await f.getByRole('button', { name: 'Editar', exact: true }).click();
+            await p.waitForSelector('#esModal #esNombre', { state: 'visible' });
+            await p.fill('#esNombre', n);
+            await p.selectOption('#esModal select#esPendiente', pend);
+            const r = await _put(h, '/api/col/inv-estados', () => p.click('#esModal button:has-text("Guardar")'));
+            const err = r ? '' : await p.locator('#esErr').textContent().catch(() => '');
+            if (!r) await p.evaluate(() => closeModal('esModal')).catch(() => {});
+            h.espera(r && r.status() === 200, '«' + nom + '» renombrado a ' + n + ': ' + (r ? r.status() : 'sin respuesta' + (err ? ' · «' + err + '»' : '')));
+            f = _filaI(p, '#esLista tbody tr', n).first();
+          }
           const act = f.getByRole('button', { name: 'Activar', exact: true });
           if (await act.count()) {
             const r = await _put(h, '/api/col/inv-estados', () => act.first().click());
@@ -344,7 +357,7 @@ module.exports = {
         await p.reload({ waitUntil: 'networkidle' });
         const est = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-estados-v1') || '[]'));
         for (const [n, pend] of EST) {
-          const e = (est || []).find((x) => x && String(x.nombre).toLowerCase() === n.toLowerCase());
+          const e = (est || []).find((x) => x && x.nombre === n);
           const marca = e ? (e.pendiente || (e.pendienteAlCerrar ? 'turno' : 'nada')) : '—';
           h.espera(!!e && e.activo !== false && marca === pend, n + ' tras recargar: ' + (e ? (e.activo === false ? 'inactivo' : 'activo') + ' · ' + marca : 'no está'));
         }
@@ -482,6 +495,51 @@ module.exports = {
           return pend.filter((x) => x && x.estado === 'abierto' && zz[String(x.grupoId)]).length;
         });
         h.espera(quedan === 0, 'pendientes abiertos de juegos zz-verif- tras recargar: ' + quedan);
+      },
+    },
+    {
+      c: 's12', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Zona zz-verif-Tendedero (rol «otra», activa, sirve a zz-verif-Propiedad, no privada) (L-103)',
+      async prueba(h) {
+        const p = h.page, N = 'zz-verif-Tendedero', PROP_RE = /^\s*zz-verif-Propiedad\s*$/;
+        await _tab(h, 'depositos');
+        await _inactivos(h, 'dp');
+        const f = _filaI(p, '#dpLista tbody tr', N).first();
+        const ya = await f.count() > 0;
+        if (ya) {
+          await f.getByRole('button', { name: 'Editar', exact: true }).click();
+          await p.waitForSelector('#dpModal #dpActiva', { state: 'visible' });
+        } else {
+          await p.click('#pane-depositos button:has-text("＋ Zona")');
+          await p.waitForSelector('#dpModal #dpNombre', { state: 'visible' });
+          await p.fill('#dpNombre', N);
+          await p.fill('#dpTipoNombre', 'Tendedero');
+        }
+        if (await p.locator('#dpNombre').isVisible()) await p.fill('#dpNombre', N);
+        await p.check('input[name="dpRol"][value="otra"]');
+        await p.waitForTimeout(300);
+        // Según el rol, la ficha pide «Sirve a» (casillas) o «Propiedad» (lista): se marca zz-verif-Propiedad en la que se vea.
+        if (await p.locator('#dpSirve').isVisible()) {
+          const c = p.locator('#dpSirve label', { hasText: PROP_RE }).locator('input[type=checkbox]');
+          if (await c.count()) await c.first().check();
+        }
+        if (await p.locator('#dpProp').isVisible()) {
+          const v = await p.locator('#dpProp option').evaluateAll((os) => (os.find((o) => o.textContent.trim() === 'zz-verif-Propiedad') || {}).value || '');
+          if (v) await p.selectOption('#dpProp', v);
+        }
+        if (await p.locator('#dpActiva').count() && !(await p.isChecked('#dpActiva'))) await p.check('#dpActiva');
+        if (await p.locator('#dpPrivada').count() && await p.isChecked('#dpPrivada')) await p.uncheck('#dpPrivada');
+        const r = await _put(h, '/api/col/inv-depositos', () => p.click('#dpModal button:has-text("Guardar")'));
+        const err = r ? '' : ((await p.locator('#dpErr').textContent().catch(() => '')) || '').trim();
+        if (await p.locator('#dpModal').isVisible()) await p.evaluate(() => closeModal('dpModal')).catch(() => {});
+        h.espera(r && r.status() === 200, N + (ya ? ' corregida' : ' creada') + ': ' + (r ? r.status() : 'sin respuesta' + (err ? ' · «' + err + '»' : '')));
+        // Comprobación con lo que trae el servidor.
+        await p.reload({ waitUntil: 'networkidle' });
+        const d = await p.evaluate(() => ({ z: JSON.parse(localStorage.getItem('str-inv-depositos-v1') || '[]'), pr: JSON.parse(localStorage.getItem('str-propiedades-v1') || '[]') }));
+        const prop = (d.pr || []).find((x) => x && (x.name || x.nombre) === 'zz-verif-Propiedad');
+        const z = (d.z || []).find((x) => x && x.nombre === N);
+        const sirve = !!z && !!prop && ([].concat(z.sirveA || [], z.propiedades || [], z.propIds || []).map(String).indexOf(String(prop.id)) >= 0 || String(z.propId) === String(prop.id));
+        h.espera(!!z && z.activo !== false && z.rol === 'otra' && !z.privada && sirve, N + ' tras recargar: ' + (z ? 'rol ' + z.rol + ' · ' + (z.activo === false ? 'inactiva' : 'activa') + (z.privada ? ' · privada' : '') + ' · sirve a zz-verif-Propiedad: ' + (sirve ? 'sí' : 'no') : 'no está'));
       },
     },
   ],

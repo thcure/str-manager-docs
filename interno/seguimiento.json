@@ -548,14 +548,15 @@
    "id": "INC-118",
    "tipo": "INC",
    "modulo": "Seg. Proyecto",
-   "etapa": "📝",
+   "etapa": "✅",
    "fecha": "2026-10-12",
    "severidad": "bajo",
    "titulo": "Seg. Proyecto ordena los lotes «L-n» como 0: la pestaña Cambios los pone al final y «Producción» toma el último lote numérico (75) en vez de L-81.",
    "causa": "renderCambios (~398) y _planProduccion ordenan con Number(lote); «L-80» da NaN → 0.",
    "pendiente": "Con REQ-TB-5 (la métrica también lee lotes L-n).",
-   "estado": "abierto",
-   "origen": "Lectura de str-seg-proyecto.html p5c75 al redactar L-82 (12-oct)."
+   "estado": "cerrado",
+   "origen": "Lectura de str-seg-proyecto.html p5c75 al redactar L-82 (12-oct).",
+   "cierre": "Cerrado por L-94 (94a2d67), aceptado 14-oct 12:42: _tb5NumLote en Cambios, Producción, hecho, _tbLoteDe y ficha del REQ."
   },
   {
    "id": "INC-119",
@@ -7774,6 +7775,107 @@
     "minutosCLI": 0,
     "minutosDueno": 0
    }
+  },
+  {
+   "lote": "L-94",
+   "fecha": "2026-10-14",
+   "req": "REQ-TB-5 + INC-118 + REQ-SP-3 (c7)",
+   "categoria": "estándar",
+   "resumen": "Tablero de Seg. Proyecto: «Ciclo de verificación (7 días)» con mediana construido→aceptado, % con más de un veredicto y semáforo de lotes en verificación > 30 min ([TB5]); los lotes «L-n» se ordenan por su número en Cambios, Producción, hecho y ficha del REQ (cierra INC-118); Nomenclatura sin desplazamiento a 390 px (test de CSS; arreglo en el bloque [STR]); p5c81.",
+   "estado": "aceptado",
+   "observacion": "Pedido de Diseño M-335 (retomar producto). Revisión previa 14/14 (fallaban 5, 12 y 13, más 9 ajustes → corregidos). CLI 12:35–12:41: 94a2d67, 55/55. Diferencia: el arreglo de 390 px de Nomenclatura va en [STR] porque tests/nomenclatura.test.js exige la fuente byte a byte. Juez: aceptado (11/11, regresión de la zona proyecto en verde).",
+   "hash": "94a2d67",
+   "aceptacion": {
+    "lote": "L-94",
+    "hash": "94a2d67",
+    "fecha": "2026-10-14",
+    "horaBogota": "12:42",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 55/55 archivos OK (cubre casos 1-3 de tablero-metrica.test.js: mediana, ventana de 7 días y %)"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 55/55 archivos OK (cubre caso 4: lotes sin tiempos)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: metas visibles: «MEDIANA CONSTRUIDO → ACEPTADO 44,5 min meta ≤ 20 min LOTES CON MÁS DE UN VEREDICTO 27,8 % meta ≤ 15 % LOTES ATASCADOS Ninguno atascado meta: ninguno > 30 min en» | si: #tb5Mediana visible | si: #tb5Multi visible | si: #tb5Semaforo visible | si: commit 5bb02e1 · n 18 (esperado 18) · sin datos 32 (esperado 32) | si: mediana 44.5 (esperado 44.5) · % 27.8 (esperado 27.8)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 55/55 archivos OK (cubre caso 6: semáforo verde)"
+     },
+     {
+      "c": "e",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: 55/55 archivos OK (incluye caso 5) · N2: si: semáforo: rojo · desde 2026-10-14 12:10 | si: texto del semáforo: «Lotes atascadosL-999 · 31 minmeta: ninguno > 30 min en verificación»"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: mediana «Mediana construido → aceptadoSin datos todavíameta ≤ 20 min» · % «Lotes con más de un veredictoSin datos todavíameta ≤ 15 %» | si: Tablero pintado: encabezado «Según lo último anotado a las 12:50» · filas de Agentes 6 | si: errores de página: ninguno"
+     },
+     {
+      "c": "g",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: 55/55 archivos OK (casos 1-6) · N2: si: peticiones de escritura: ninguna (al cargar y al pulsar Actualizar)"
+     },
+     {
+      "c": "h",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: a 390 px: scrollWidth 390 · clientWidth 390 | si: tarjetas fuera del ancho o invisibles: 0 (captura movil de apoyo tomada)"
+     },
+     {
+      "c": "i",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: 55/55 archivos OK (casos 7 y 9) · N2: si: primer lote en Cambios: L-93 (esperado L-93) | si: Producción: 66bab63 (esperado 66bab63 de L-93)"
+     },
+     {
+      "c": "j",
+      "nivel": "regresión",
+      "ok": true,
+      "observado": "REQ-TB-3.spec.js (7 casos: a-g) y REQ-TB-4.spec.js (6 casos: a,b,c,d,g,h) todos con ok:true; ningún ok:false en la regresión de la zona proyecto"
+     },
+     {
+      "c": "k",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "N1: 55/55 archivos OK (nomenclatura-ancho.test.js) · N2: si: a 390 px: scrollWidth 390 · clientWidth 390 (captura nomenclatura-movil de apoyo tomada)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Sin criterios N3 en este lote: la instrucción solo define N1, N2 y regresión (n3Preparados viene vacío en pruebas.json, consistente). Las capturas h-movil y k-nomenclatura-movil son de apoyo a criterios N2 (h y k), no exigen juicio N3 aparte. Sin criterios N4 (dispositivo) en este lote."
+   },
+   "costo": {
+    "minutosCLI": 6,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-14 12:41",
+    "aceptado": "2026-10-14 12:42",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -8678,12 +8780,12 @@
    "req": "REQ-SP-3",
    "categoria": "estándar",
    "resumen": "Página Nomenclatura del modelo en el grupo Proyecto (copia tal cual de la fuente del Arquitecto, solo admin) y enlace en la cabecera del tablero",
-   "estado": "parcial",
-   "vista": "en curso",
+   "estado": "aceptado",
+   "vista": "hecho",
    "esperaA": null,
-   "espera": "próximo lote que toque la página",
+   "espera": null,
    "orden": 101.6,
-   "nota": "a–h (69-veredicto-2) y j (69-veredicto-3) aceptados, sin INC. Pendiente solo i (390 px): test de tests/ que lea el CSS, en el próximo lote que toque la página o un lote «tests 69» si Carlos quiere cerrarlo antes (M-126). Carlos (11-oct 13:09): se cierra en el próximo lote que toque str-nomenclatura.html; ese lote debe incluir el test de ancho 390 px. · 14-oct: el criterio 7 (390 px) va en L-94, que toca str-nomenclatura.html (?v=): tests/nomenclatura-ancho.test.js + caso k del guion (M-335).",
+   "nota": "a–h (69-veredicto-2) y j (69-veredicto-3) aceptados, sin INC. Pendiente solo i (390 px): test de tests/ que lea el CSS, en el próximo lote que toque la página o un lote «tests 69» si Carlos quiere cerrarlo antes (M-126). Carlos (11-oct 13:09): se cierra en el próximo lote que toque str-nomenclatura.html; ese lote debe incluir el test de ancho 390 px. · 14-oct: el criterio 7 (390 px) va en L-94, que toca str-nomenclatura.html (?v=): tests/nomenclatura-ancho.test.js + caso k del guion (M-335). · Criterio 7 aceptado con L-94 (94a2d67, 14-oct 12:42): REQ-SP-3 completo.",
    "desde": "2026-10-11T12:00:00-05:00",
    "planTrabajo": "PT-8"
   },
@@ -8989,15 +9091,15 @@
    "req": "REQ-TB-5",
    "categoria": "estándar",
    "resumen": "Métrica del ciclo de lotes en el tablero (construido → aceptado, veredictos, bloqueados; lotes en verificando con su «desde»)",
-   "estado": "verificando",
-   "vista": "en curso",
+   "estado": "aceptado",
+   "vista": "hecho",
    "esperaA": null,
    "espera": null,
    "orden": 116.655,
-   "desde": "2026-10-14 12:41",
    "planTrabajo": "PT-6",
    "grupo": "TB",
-   "nota": "M-230. 10 criterios N1/N2 en claude/producto/requerimientos-tablero-metrica-2026-10.md. Fuente cambios[].tiempos y plan[] verificando. Número al encolar. · L-94 encolado 14-oct 12:45 (estándar; revisión previa 14/14) con INC-118 y REQ-SP-3 criterio 7 (test de 390 px de Nomenclatura). · CLI 12:35–12:41: 94a2d67, 55/55, p5c81. SP-3: el arreglo de 390 px va en el bloque [STR] de str-nomenclatura.html (html table{min-width:0}), porque tests/nomenclatura.test.js exige la fuente byte a byte; contenido sin tocar. Espera veredicto."
+   "nota": "M-230. 10 criterios N1/N2 en claude/producto/requerimientos-tablero-metrica-2026-10.md. Fuente cambios[].tiempos y plan[] verificando. Número al encolar. · L-94 encolado 14-oct 12:45 (estándar; revisión previa 14/14) con INC-118 y REQ-SP-3 criterio 7 (test de 390 px de Nomenclatura). · CLI 12:35–12:41: 94a2d67, 55/55, p5c81. SP-3: el arreglo de 390 px va en el bloque [STR] de str-nomenclatura.html (html table{min-width:0}), porque tests/nomenclatura.test.js exige la fuente byte a byte; contenido sin tocar. Espera veredicto. · Aceptado 12:42 (juez, 11/11).",
+   "desde": "2026-10-14"
   },
   {
    "lote": "L-84",

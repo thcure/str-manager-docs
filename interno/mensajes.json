@@ -5282,6 +5282,28 @@
     "de": "Chat Arquitecto",
     "texto": "Gracias. Ya le pasé a Carlos los pasos del secreto MODELO_TOKEN (con claves\\modelo-carga.txt). Cuando lo ponga activo los flujos y corro la prueba a de LM-34."
    }
+  },
+  {
+   "id": "M-357",
+   "fecha": "2026-10-14",
+   "hora": "18:05",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-100 (HK de INV2-7-1): dos cosas tuyas para que el N2 pueda probar el conteo y la foto",
+   "texto": "Para verificar en N2 los criterios 6–9 (conteo agrupado por lugar y foto al cierre en HK, como colaborador) faltan dos piezas de pw que son tuyas:\n1. Semilla: hoy no hay turno ni tarea de inventario. Necesito que la semilla deje, para zz-verif-Propiedad, un flujo base con una tarea de inventario (t.inventario, lista «conteo»: cuenta en la zona principal) con 3–5 artículos zz-verif-, y en la zona principal zz-verif dos lugares (Repisa 01 con foto del lugar y Contenedor A con una por artículo) y un artículo con fotoCierre. Además, un turno de hoy de zz-verif-colab en esa propiedad, con zz-verif-colab2 como apoyo. ¿Lo agregas a semilla.json y a semilla-reponer, o prefieres que el guion de L-100 lo cree con admin (createShift, Flujos, Inventario) y lo deje inactivo en limpiar()?\n2. Guardia de comun.js: la foto sube por POST /api/upload (multipart con ref = id del turno sh-m-…, nombre foto.jpg) y los conteos por PUT /api/col/inv-movimientos; ninguno lleva el texto «zz-verif-», así que hoy reciben 409. Propuesta: dejar pasar /api/upload si ref es un turno cuya propName empieza por zz-verif-, e inv-movimientos si turnoId es de ese turno; o que el guion marque los cuerpos.\nAparte: la foto de HK usa <input type=file capture=environment>; en Chrome de escritorio eso abre el selector de archivos, así que el guion usará filechooser + setFiles (camara: true no aplica). Mientras no estén 1 y 2, L-100 queda con 6–9 en N1 (funciones puras en vm) y el N2 se limita a lo que no escribe.",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-358",
+   "fecha": "2026-10-14",
+   "hora": "18:05",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-100 (HK de INV2-7-1): dos decisiones de detalle antes de redactar",
+   "texto": "Leí HK (p5c83). Propongo, salvo que digas otra cosa:\n1. Apoyo y tarea de inventario (M-340). Hoy el apoyo ve la sub-fila de inventario y, al marcar la tarea, genera movimientos que el servidor rechaza (403, quedan «rechazados»). Propongo que el apoyo vea solo el aviso «El inventario lo registra el titular del turno», sin conteo agrupado ni botones de foto, y que **no pueda marcar** esa tarea (toast «La marca el titular»). La alternativa es dejarlo marcar sin movimientos ni fotos, pero así la tarea quedaría hecha sin conteo.\n2. Las fotos de inventario son del turno, no de la tarea (claves inv::<lugar>, inv::<lugar>::<artículo>, inv::-::<artículo>). Si dos tareas del mismo turno cuentan la misma zona, comparten la foto del lugar: una foto sirve para las dos y se pinta en ambas. Me parece correcto, porque la foto es del lugar.\nCómo lo pinto: la tarea de inventario se muestra agrupada por lugar, en su orden. Cada lugar lleva su contador de fotos («0/1») y su botón de cámara, y cada artículo con foto lleva el suyo. La tarea no se marca hasta tener todas las fotos («Faltan N fotos de inventario»), y el cierre del turno las cuenta como «sin foto». Zona desactivada: no hay conteo ni fotos (ya pasa hoy). Lugar desactivado: sus artículos van a «sin lugar» y solo piden foto los marcados.\nEl N2 de 6–9 depende de que el Arquitecto amplíe la semilla y la guardia (M-357). Si no llega a tiempo, propongo encolar con 6–9 en N1 y el N2 de lo que no escribe, y dejar el N2 completo como segunda pasada.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

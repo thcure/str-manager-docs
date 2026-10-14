@@ -4,17 +4,17 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { abrir, BASE, COLA } = require('./comun');
+const { abrir, BASE, BASE_MODELO, COLA } = require('./comun');
 
 (async () => {
   const out = { fecha: new Date().toISOString(), equipo: os.hostname(), herramienta: 'playwright', pruebas: [] };
   const add = (c, ok, obs) => { out.pruebas.push({ c, ok, observado: obs }); console.log((ok ? 'OK  ' : 'NO  ') + c + ' · ' + obs); };
 
   // 1. Servicio del modelo desde el entorno de la cola (Node en LENOVO, sin navegador)
-  try { const r = await fetch(BASE + '/modelo/api/salud'); const j = await r.json(); add('salud GET (cola)', r.status === 200 && j.ok === true, r.status + ' ' + JSON.stringify(j).slice(0, 160)); }
+  try { const r = await fetch(BASE_MODELO + '/modelo/api/salud'); const j = await r.json(); add('salud GET (cola)', r.status === 200 && j.ok === true, r.status + ' ' + JSON.stringify(j).slice(0, 160)); }
   catch (e) { add('salud GET (cola)', false, e.message); }
   try {
-    const r = await fetch(BASE + '/modelo/api/eco', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Modelo-Token': 'prueba' }, body: JSON.stringify({ prueba: 1 }) });
+    const r = await fetch(BASE_MODELO + '/modelo/api/eco', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Modelo-Token': 'prueba' }, body: JSON.stringify({ prueba: 1 }) });
     const j = await r.json(); add('eco POST (cola)', r.status === 200 && j.recibidoBytes === 12 && j.tieneToken === true, r.status + ' ' + JSON.stringify(j).slice(0, 160));
   } catch (e) { add('eco POST (cola)', false, e.message); }
 

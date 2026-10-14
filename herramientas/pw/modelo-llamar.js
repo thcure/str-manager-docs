@@ -12,7 +12,7 @@ const path = require('path');
 const crypto = require('crypto');
 const ROLES = ['tablero', 'desarrollo', 'diseno'];
 const DIAS_VIGENCIA = 180;
-const { COLA, BASE } = require('./comun');
+const { COLA, BASE_MODELO: BASE } = require('./comun');   // v0.5.3 (M8): el modelo vive en fabrica.
 const { bonito, valorCrudo } = require('./json-crudo');   // pw 0.5.2: espejo exacto (119.0 sigue 119.0)
 
 async function main() {

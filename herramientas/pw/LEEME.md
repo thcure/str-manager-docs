@@ -3,6 +3,7 @@
 Carpeta de instalación: `C:\Users\ktcol\Downloads\str-instr-cola\pw\` (fuente: `str-manager-docs/herramientas/pw/`, la mantiene el Arquitecto).
 
 - `comun.js`: abre el perfil persistente de un usuario de prueba (`pw\perfiles-chrome\<usuario>`) con la **guardia de red**: solo hosts de la lista; toda escritura al STR sin `zz-verif-` se corta y queda en la bitácora.
+- **Orígenes (v0.5.3, M8 de la migración):** el STR en `https://app.apartamentosbucaramanga.com` (`BASE`) y el servicio del modelo en `https://fabrica.apartamentosbucaramanga.com` (`BASE_MODELO`). `modelo-llamar.js` y la parte «cola» de `humo.js` usan `BASE_MODELO`. En el navegador las páginas siguen en `app.` y toda petición a `app./modelo/*` se desvía a la fábrica (`destinoModelo`), así los guiones `REQ-MOD-6*` no cambian; la guardia decide sobre la URL original.
 - `abrir-perfil.js <usuario>`: abre Chrome normal (sin automatización: Google rechaza el inicio de sesión en navegadores automatizados) y Carlos inicia sesión una vez por usuario de prueba (admin, oper, colab, colab2). Nadie más escribe contraseñas.
 - `humo.js`: prueba de humo (servicio del modelo desde la cola y desde el navegador, sesión de los tres perfiles, ventana de 390 px). Escribe `log\pw-humo.json`.
 - `guardia.test.js`: prueba la guardia sin navegador.

@@ -5,14 +5,26 @@
 // reutiliza ese mismo perfil despues, ya con la sesion del STR.
 // Guardia de red: el navegador solo habla con la lista de hosts; toda escritura al STR sin 'zz-verif-' se corta
 // (v0.4.1: con respuesta 409, para que la app no la reintente).
+// v0.5.3 (M8 de la migración, M-320/M-321): el servicio del modelo vive en fabrica. (BASE_MODELO). Las páginas siguen
+// en app. (sesión y base del STR), y el navegador desvía app./modelo/* a fabrica. (destinoModelo): los guiones no cambian.
+// Las reglas de la guardia se aplican a la URL original (en el modelo solo eco y los sondeos sin token con «{}»).
 'use strict';
 const path = require('path');
 const { chromium } = require('playwright');
 
 const COLA = path.resolve(__dirname, '..');
-const BASE = 'https://app.apartamentosbucaramanga.com';
+const HOST_STR = 'app.apartamentosbucaramanga.com';
+const HOST_MODELO = 'fabrica.apartamentosbucaramanga.com';
+const BASE = 'https://' + HOST_STR;
+const BASE_MODELO = 'https://' + HOST_MODELO;
+// Puro: URL a la que va de verdad una petición del navegador (app./modelo/* → fabrica.), o null si no se desvía.
+function destinoModelo(url) {
+  let u; try { u = new URL(url); } catch (e) { return null; }
+  if (u.hostname !== HOST_STR || !/^\/modelo(\/|$)/.test(u.pathname)) return null;
+  u.hostname = HOST_MODELO; return u.href;
+}
 const PERFILES = { admin: 'zz-verif-admin', oper: 'zz-verif-oper', colab: 'zz-verif-colab', colab2: 'zz-verif-colab2' };
-const HOSTS_OK = ['app.apartamentosbucaramanga.com', 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
+const HOSTS_OK = [HOST_STR, HOST_MODELO, 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
   'firestore.googleapis.com', 'www.googleapis.com', 'apis.google.com', 'www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
 // v0.4.3 (INC-119): el grupo Proyecto lee str-manager-docs de GitHub (raw y la API de commits). Solo lectura.
@@ -43,9 +55,10 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
   if (HOSTS_SOLO_LECTURA.includes(u.hostname)) return LECTURA.includes(String(metodo).toUpperCase()) ? { ok: true } : { ok: false, motivo: 'escritura a ' + u.hostname + ' (solo lectura)' };
   if (!HOSTS_OK.includes(u.hostname)) return { ok: false, motivo: 'host fuera de la lista: ' + u.hostname };
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
-  if (u.hostname !== 'app.apartamentosbucaramanga.com') return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
+  if (u.hostname !== HOST_STR && u.hostname !== HOST_MODELO) return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
   if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true };
   if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
+  if (u.hostname === HOST_MODELO) return { ok: false, motivo: 'escritura a la fábrica: solo el Arquitecto por la cola' };
   // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion
   // entera que solo incluya una fila de prueba arrastraria datos reales (y podria pisarlos con una copia vieja).
   if (/^\/api\/col(\/|$)/.test(u.pathname)) {
@@ -81,19 +94,28 @@ async function abrir(usuario, opciones = {}) {
   });
   if (opciones.camara) { try { await ctx.grantPermissions(['camera'], { origin: BASE }); } catch (e) { } }
   const bitacora = [];
-  if (opciones.guardia !== false) {
-    await ctx.route('**/*', async (route) => {
-      const r = route.request();
+  const guardia = opciones.guardia !== false;
+  await ctx.route('**/*', async (route) => {
+    const r = route.request();
+    if (guardia) {
       const d = decidir(r.url(), r.method(), r.postData());
       if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().split('?')[0].slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '' });
-      if (d.ok) return route.continue();
-      // v0.4.1: al STR se le responde 409 en vez de cortar la conexion. Asi str-api.js lo trata como rechazo del
-      // servidor (no lo guarda en su cola de reintentos) y vacia los reintentos que ya tuviera guardados.
-      if (new URL(r.url()).hostname === 'app.apartamentosbucaramanga.com') return route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: 'guardia del verificador: escritura sin zz-verif- cortada' }) });
-      return route.abort('blockedbyclient');
-    });
-  }
+      if (!d.ok) {
+        // v0.4.1: al STR se le responde 409 en vez de cortar la conexion. Asi str-api.js lo trata como rechazo del
+        // servidor (no lo guarda en su cola de reintentos) y vacia los reintentos que ya tuviera guardados.
+        if ([HOST_STR, HOST_MODELO].includes(new URL(r.url()).hostname)) return route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: 'guardia del verificador: escritura sin zz-verif- cortada' }) });
+        return route.abort('blockedbyclient');
+      }
+    }
+    // v0.5.3: el modelo se pide a la fábrica; la página cree que respondió app. (sin CORS ni cambio en los guiones)
+    const otro = destinoModelo(r.url());
+    if (otro) {
+      try { const resp = await route.fetch({ url: otro }); return route.fulfill({ response: resp }); }
+      catch (e) { bitacora.push({ metodo: r.method(), url: otro.split('?')[0].slice(0, 200), paso: false, motivo: 'fabrica sin respuesta: ' + String(e.message || e).split('\n')[0] }); return route.abort('failed'); }
+    }
+    return route.continue();
+  });
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara, explicarError };
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara, explicarError };

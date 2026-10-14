@@ -1,4 +1,5 @@
-﻿# panel-str.ps1 - Panel de jornada del STR · v4.3 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+﻿# panel-str.ps1 - Panel de jornada del STR · v4.4 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+# v4.4: Terminar responde al instante, cierra en segundo plano las ventanas de prueba y la de app. que abrió el panel; errores a log\panel.txt.
 # v4.3: la ventana nueva de Chrome se maximiza con Windows (--start-maximized no sirve si Chrome ya estaba abierto).
 # v4.2: Empezar abre solo app. (hPanel queda en «Abrir sitios», para no cargar Chrome).
 # v4.1: Chrome maximizado; refresco más liviano (archivos cada 30 s, red cada 5 min, nada si la ventana está minimizada).
@@ -174,6 +175,13 @@ $bc = New-Object System.Windows.Media.BrushConverter
 function Pintar($punto, [string]$color) { (C $punto).Fill = $bc.ConvertFromString($color) }
 function Escribir($nombre, [string]$texto) { (C $nombre).Text = $texto }
 function Mensaje([string]$t) { Escribir 'TxtMensaje' $t }
+# Registro corto del panel (log\panel.txt): acciones y errores, para poder revisar qué pasó
+function Anotar([string]$t) { try { Add-Content -Path (Join-Path $LogDir 'panel.txt') -Value ((Get-Date).ToString('s') + ' ' + $t) -Encoding UTF8 } catch { } }
+# Corre una acción de botón: si falla, lo dice en el panel y lo anota (antes el error no se veía)
+function Seguro([string]$nombre, [scriptblock]$accion) {
+    Anotar $nombre
+    try { & $accion } catch { Mensaje ('No se pudo completar «' + $nombre + '»: ' + $_.Exception.Message); Anotar ('ERROR ' + $nombre + ': ' + $_.Exception.Message) }
+}
 
 # Ventana a la derecha de la pantalla
 $wa = [System.Windows.SystemParameters]::WorkArea
@@ -345,6 +353,7 @@ function Buscar-Chrome {
     }
     return $null
 }
+$script:VentanasPanel = New-Object System.Collections.ArrayList   # ventanas de Chrome que abrió este panel
 function Abrir-Sitios([switch]$SoloApp) {
     $ch = Buscar-Chrome
     if (-not $ch) { Mensaje 'No encontré Chrome.'; return }
@@ -359,9 +368,10 @@ function Abrir-Sitios([switch]$SoloApp) {
     $t.Interval = [TimeSpan]::FromMilliseconds(400)
     $t.Add_Tick({
         $script:MaxVueltas++
-        $n = [VentanasStr]::MaximizarNuevas($script:MaxAntes)
-        if ($n -gt 0 -or $script:MaxVueltas -ge 25) {
-            if ($n -eq 0) { [void][VentanasStr]::MaximizarPrimerPlano() }
+        $nuevas = @([VentanasStr]::MaximizarNuevas($script:MaxAntes))
+        foreach ($h in $nuevas) { [void]$script:VentanasPanel.Add($h) }
+        if ($nuevas.Count -gt 0 -or $script:MaxVueltas -ge 25) {
+            if ($nuevas.Count -eq 0) { [void][VentanasStr]::MaximizarPrimerPlano() }
             $this.Stop()
         }
     })
@@ -393,11 +403,15 @@ public static class VentanasStr {
     EnumWindows(delegate(IntPtr h, IntPtr l) { if (EsChrome(h)) r.Add(h); return true; }, IntPtr.Zero);
     return r.ToArray();
   }
-  public static int MaximizarNuevas(IntPtr[] antes) {
-    HashSet<IntPtr> v = new HashSet<IntPtr>(antes); int n = 0;
-    foreach (IntPtr h in Chrome()) { if (!v.Contains(h)) { ShowWindowAsync(h, 3); SetForegroundWindow(h); n++; } }
-    return n;
+  [DllImport("user32.dll")] static extern bool PostMessage(IntPtr h, uint msg, IntPtr w, IntPtr l);
+  [DllImport("user32.dll")] static extern bool IsWindow(IntPtr h);
+  public static IntPtr[] MaximizarNuevas(IntPtr[] antes) {
+    HashSet<IntPtr> v = new HashSet<IntPtr>(antes); List<IntPtr> r = new List<IntPtr>();
+    foreach (IntPtr h in Chrome()) { if (!v.Contains(h)) { ShowWindowAsync(h, 3); SetForegroundWindow(h); r.Add(h); } }
+    return r.ToArray();
   }
+  // Cierra la ventana como si se pulsara la X (Chrome guarda la sesión normal)
+  public static bool Cerrar(IntPtr h) { if (!IsWindow(h)) return false; return PostMessage(h, 0x0010, IntPtr.Zero, IntPtr.Zero); }
   public static bool MaximizarPrimerPlano() {
     IntPtr h = GetForegroundWindow();
     if (h == IntPtr.Zero || !EsChrome(h)) return false;
@@ -415,8 +429,9 @@ function Abrir-Claude {
     }
     Mensaje 'No encontré Claude Desktop instalado.'
 }
-# Cierra solo las ventanas de los perfiles de prueba abiertas con abrir-perfil.js (no las de Playwright ni tu Chrome)
-function Cerrar-Perfiles-Prueba {
+# Cierra solo las ventanas de los perfiles de prueba abiertas con abrir-perfil.js (no las de Playwright ni tu Chrome).
+# Corre en segundo plano (la consulta a Windows y la espera tardan unos segundos).
+$sbCerrarPerfiles = {
     $n = 0
     $procs = Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" -ErrorAction SilentlyContinue | Where-Object {
         $_.CommandLine -like '*perfiles-chrome*' -and $_.CommandLine -notlike '*--type=*' -and $_.CommandLine -notlike '*--enable-automation*' }
@@ -450,11 +465,25 @@ function Empezar-Jornada {
 }
 
 $script:Apagando = $false
-function Terminar-Jornada {
+# Pone la pausa al instante; lo lento (cerrar ventanas) va en segundo plano y avisa al terminar
+function Terminar-Jornada([string]$alFinal) {
     if (-not (Test-Path $Pausa)) { Set-Content -Path $Pausa -Value ('panel ' + (Get-Date).ToString('s')) -Encoding ASCII }
-    $n = Cerrar-Perfiles-Prueba
-    Refrescar
-    return $n
+    Pintar-Jornada
+    $v = 0
+    if (-not ('VentanasStr' -as [type])) { Add-Type -TypeDefinition $CsVentanas }
+    foreach ($h in @($script:VentanasPanel)) { if ([VentanasStr]::Cerrar($h)) { $v++ } }
+    $script:VentanasPanel.Clear()
+    $script:CerradasApp = $v; $script:AlFinal = $alFinal
+    Mensaje 'Terminando: jornada en pausa, cerrando ventanas...'
+    En-Fondo $sbCerrarPerfiles $null {
+        param($n)
+        if ($null -eq $n) { $n = 0 }
+        Anotar ('Terminar: app ' + $script:CerradasApp + ', prueba ' + $n)
+        if ($script:AlFinal) { return }   # Terminar y apagar: el mensaje lo lleva la espera del apagado
+        $t = 'Listo, jornada en pausa: la cola no empieza lotes y el despertador no avisa.'
+        $t += ' Cerré ' + $script:CerradasApp + ' ventana(s) del STR y ' + $n + ' de prueba. Tus otras ventanas de Chrome y Claude no se tocan.'
+        Mensaje $t; Pintar-Trabajo
+    }
 }
 
 # --- Botones ---
@@ -465,17 +494,14 @@ function Terminar-Jornada {
     Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', ('"' + $Script + '"'), '-Empezar')
     $win.Close()
 })
-(C 'BtnTerminar').Add_Click({
-    $n = Terminar-Jornada
-    Mensaje ('Jornada en pausa. La cola no empieza lotes y el despertador no avisa. Ventanas de prueba cerradas: ' + $n + '. Tu Chrome no se toca.')
-})
-(C 'BtnApagar').Add_Click({
-    [void](Terminar-Jornada)
+(C 'BtnTerminar').Add_Click({ Seguro 'Terminar' { Terminar-Jornada } })
+(C 'BtnApagar').Add_Click({ Seguro 'Terminar y apagar' {
+    Terminar-Jornada 'Jornada en pausa. Esperando a que la cola termine lo que está corriendo para apagar...'
     $script:Apagando = $true; $script:EsperaDesde = Get-Date
     (C 'BtnApagar').IsEnabled = $false; (C 'BtnEmpezar').IsEnabled = $false
     (C 'BtnCancelarApagado').Visibility = 'Visible'
     Mensaje 'Jornada en pausa. Esperando a que la cola termine lo que está corriendo para apagar...'
-})
+} })
 (C 'BtnCancelarApagado').Add_Click({
     $script:Apagando = $false
     Start-Process -FilePath 'shutdown.exe' -ArgumentList '/a' -WindowStyle Hidden
@@ -486,8 +512,8 @@ function Terminar-Jornada {
 (C 'BtnAdmin').Add_Click({ Volver-A-Entrar 'admin' })
 (C 'BtnOper').Add_Click({ Volver-A-Entrar 'oper' })
 (C 'BtnColab').Add_Click({ Volver-A-Entrar 'colab' })
-(C 'BtnClaude').Add_Click({ Abrir-Claude })
-(C 'BtnSitios').Add_Click({ Abrir-Sitios })
+(C 'BtnClaude').Add_Click({ Seguro 'Abrir Claude' { Abrir-Claude } })
+(C 'BtnSitios').Add_Click({ Seguro 'Abrir sitios' { Abrir-Sitios } })
 (C 'BtnEstado').Add_Click({ Refrescar -ConRed; Mensaje '' })
 
 # Abrir al encender: acceso directo en la carpeta Inicio de Windows

@@ -1,5 +1,30 @@
-// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
+// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
 // Nombres literales (no h.dato), sin limpiar(): lo creado se queda como semilla. Si ya existe, no hace nada.
+// L-101 (M-361, M-365, M-369): helpers de los casos s4–s7. Esperan la respuesta del PUT, no el GET del pull.
+async function _put(h, frag, accion) {
+  const [r] = await Promise.all([
+    h.page.waitForResponse((x) => x.url().includes(frag) && x.request().method() === 'PUT', { timeout: 30000 }).catch(() => null),
+    accion(),
+  ]);
+  return r;
+}
+async function _tab(h, tab) {
+  await h.page.waitForLoadState('networkidle').catch(() => {});
+  await h.page.waitForSelector('.tab[data-tab="' + tab + '"]');
+  await h.page.click('.tab[data-tab="' + tab + '"]');
+  await h.page.waitForSelector('#pane-' + tab, { state: 'visible' });
+}
+const _ARTS = [['zz-verif-Inv A1', true], ['zz-verif-Inv A2', false], ['zz-verif-Inv A3', false],
+  ['zz-verif-Inv B1', false], ['zz-verif-Inv B2', false], ['zz-verif-Inv C1', true]];
+const _LUG = [['zz-verif-Repisa 01', 'repisa', 'lugar', ['zz-verif-Inv A1', 'zz-verif-Inv A2', 'zz-verif-Inv A3']],
+  ['zz-verif-Contenedor A', 'contenedor', 'articulo', ['zz-verif-Inv B1', 'zz-verif-Inv B2']],
+  ['zz-verif-Tendedero vacío', 'tendedero', 'lugar', []]];
+const _esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const _txt = (s) => new RegExp('^\\s*' + _esc(s) + '\\s*$');
+const _pal = (s) => new RegExp('(^|\\s)' + _esc(s) + '(\\s|$)');
+// Fila cuyo <strong> (el nombre) es exactamente n: las celdas se pegan sin espacio en el texto de la fila.
+const _fila = (p, sel, n) => p.locator(sel).filter({ has: p.locator('strong', { hasText: _txt(n) }) });
+
 module.exports = {
   req: 'SEMILLA',
   zona: 'semilla',
@@ -88,6 +113,170 @@ module.exports = {
         const r = await h.respuesta('/api/col/inv-depositos', () => p.click('#dpModal button:has-text("Guardar")'));
         const err = ((await p.locator('#dpErr').textContent().catch(() => '')) || '').trim();
         h.espera(r && r.status() === 200, NOMBRE + (ya ? ' corregida' : ' creada') + ': ' + (r ? r.status() : 'sin respuesta') + (err ? ' · «' + err + '»' : ''));
+      },
+    },
+    {
+      c: 's4', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Artículos zz-verif-Inv A1–A3, B1, B2 y C1 (unidad, activos; A1 y C1 con «Foto al cierre»)',
+      async prueba(h) {
+        const p = h.page;
+        await _tab(h, 'articulos');
+        const chip = p.locator('#arInactivosChip');
+        if (await chip.count() && !(await chip.evaluate((e) => e.classList.contains('active')))) await chip.click();
+        const hechos = [];
+        for (const [nombre, foto] of _ARTS) {
+          const fila = _fila(p, '#arLista tbody tr', nombre);
+          if (await fila.count()) {
+            if (await fila.first().getByRole('button', { name: 'Activar', exact: true }).count()) {
+              const ra = await _put(h, '/api/col/inv-articulos', () => fila.first().getByRole('button', { name: 'Activar', exact: true }).click());
+              h.espera(ra && ra.status() === 200, nombre + ' reactivado: ' + (ra ? ra.status() : 'sin respuesta'));
+            }
+            await fila.first().getByRole('button', { name: 'Editar' }).click();
+          } else {
+            await p.click('#pane-articulos button:has-text("＋ Artículo")');
+            await p.waitForSelector('#arModal #arNombre', { state: 'visible' });
+            await p.fill('#arNombre', nombre);
+          }
+          await p.waitForSelector('#arModal #arFotoCierre', { state: 'visible' });
+          await p.selectOption('#arClase', 'unidad');
+          await p.setChecked('#arFotoCierre', foto);
+          const r = await _put(h, '/api/col/inv-articulos', () => p.click('#arModal button:has-text("Guardar")'));
+          if (await p.locator('#arModal').isVisible()) await p.click('#arModal button:has-text("Cancelar")').catch(() => {});
+          h.espera(r && r.status() === 200, nombre + ' guardado: ' + (r ? r.status() : 'sin respuesta'));
+          hechos.push(nombre.replace('zz-verif-Inv ', '') + ':' + (r ? r.status() : '—'));
+        }
+        await p.reload({ waitUntil: 'networkidle' });
+        await _tab(h, 'articulos');
+        const faltan = [];
+        for (const [nombre] of _ARTS) if (!(await _fila(p, '#arLista tbody tr', nombre).count())) faltan.push(nombre);
+        h.espera(faltan.length === 0, 'artículos: ' + hechos.join(', ') + ' · faltan: ' + (faltan.join(', ') || 'ninguno'));
+      },
+    },
+    {
+      c: 's5', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Lugares de zz-verif-Principal en orden (Repisa 01, Contenedor A, Tendedero vacío) con su foto y artículos; C1 sin lugar',
+      async prueba(h) {
+        const p = h.page;
+        await _tab(h, 'depositos');
+        await _fila(p, '#dpLista tbody tr', 'zz-verif-Principal').first().locator('[data-sub-abrir]').click();
+        await p.waitForSelector('#subModal #subGrupos', { state: 'visible' });
+        if (!(await p.isChecked('#subVerInactivos'))) await p.check('#subVerInactivos');
+        const fila = (n) => _fila(p, '#subLista tr[data-sub-id]', n);
+        for (const [nombre, tipo, foto] of _LUG) {
+          if (!(await fila(nombre).count())) {
+            await p.fill('#subNombre', nombre);
+            await p.fill('#subTipo', tipo);
+            const r = await _put(h, '/api/col/inv-sububicaciones', () => p.click('#subAgregar'));
+            h.espera(r && r.status() === 200, nombre + ' creado: ' + (r ? r.status() : 'sin respuesta'));
+          } else if (/Activar/.test((await fila(nombre).first().locator('[data-sub-toggle]').textContent()) || '')) {
+            await _put(h, '/api/col/inv-sububicaciones', () => fila(nombre).first().locator('[data-sub-toggle]').click());
+          }
+          const sel = fila(nombre).first().locator('select[data-sub-foto]');
+          if ((await sel.inputValue()) !== foto) await _put(h, '/api/col/inv-sububicaciones', () => sel.selectOption(foto));
+        }
+        // Orden: Repisa 01, Contenedor A, Tendedero vacío (sube con ▲ hasta que quede así)
+        for (let vuelta = 0; vuelta < 6; vuelta++) {
+          const orden = await p.$$eval('#subLista tr[data-sub-id]', (fs) => fs.map((f) => f.textContent));
+          const pos = _LUG.map(([n]) => orden.findIndex((t) => t.includes(n)));
+          const mal = pos.findIndex((x, i) => i > 0 && x < pos[i - 1]);
+          if (mal < 0) break;
+          const sube = fila(_LUG[mal][0]).first().locator('[data-sub-subir]');
+          const boton = (await sube.isEnabled()) ? sube : fila(_LUG[mal][0]).first().locator('[data-sub-bajar]');
+          await _put(h, '/api/col/inv-sububicaciones', () => boton.click());
+        }
+        // Artículos: cada uno en su lugar; C1 sin lugar
+        for (const [nombre, , , arts] of _LUG) {
+          for (const a of arts) {
+            const enLista = _fila(p, '#subGrupos [data-sub-ar]', a);
+            if (await enLista.count()) {
+              const s = enLista.first().locator('select[data-sub-asignar]');
+              const actual = await s.evaluate((e) => (e.selectedOptions[0] || {}).textContent || '');
+              if (actual.trim() !== nombre) await _put(h, '/api/col/inv-sububicaciones', () => s.selectOption({ label: nombre }));
+            } else {
+              await p.selectOption('#subArNuevo', { label: a });
+              await p.selectOption('#subArLugar', { label: nombre });
+              await _put(h, '/api/col/inv-sububicaciones', () => p.click('#subArAsignar'));
+            }
+          }
+        }
+        const c1 = _fila(p, '#subGrupos [data-sub-ar]', 'zz-verif-Inv C1');
+        if (await c1.count()) {
+          const s = c1.first().locator('select[data-sub-asignar]');
+          const actual = await s.evaluate((e) => (e.selectedOptions[0] || {}).textContent || '');
+          if (actual.trim() !== 'Sin lugar') await _put(h, '/api/col/inv-sububicaciones', () => s.selectOption({ label: 'Sin lugar' }));
+        }
+        const orden = (await p.$$eval('#subLista tr[data-sub-id]:not(.inactivo)', (fs) => fs.map((f) => f.textContent))).filter((t) => /zz-verif-(Repisa 01|Contenedor A|Tendedero vacío)/.test(t));
+        const ok = orden.length === 3 && orden[0].includes('Repisa 01') && orden[1].includes('Contenedor A') && orden[2].includes('Tendedero');
+        h.espera(ok, 'orden de los lugares: ' + orden.map((t) => t.replace(/\s+/g, ' ').trim().slice(0, 30)).join(' | '));
+        const cuenta = async (n) => p.locator('#subGrupos [data-sub-grupo="' + (await fila(n).first().getAttribute('data-sub-id')) + '"] [data-sub-ar]').count();
+        const nR = await cuenta('zz-verif-Repisa 01'), nC = await cuenta('zz-verif-Contenedor A'), nT = await cuenta('zz-verif-Tendedero vacío');
+        h.espera(nR === 3 && nC === 2 && nT === 0, 'artículos por lugar: Repisa ' + nR + ' · Contenedor ' + nC + ' · Tendedero ' + nT);
+        await p.click('#subModal button:has-text("Cerrar")');
+      },
+    },
+    {
+      c: 's6', perfil: 'admin', pagina: '/str-flujos.html',
+      que: 'zz-verif-Flujo base tiene la tarea zz-verif-Conteo de cierre (actividad zz-verif-Cierre, lista conteo, los 6 artículos) y sin copias por propiedad',
+      async prueba(h) {
+        const p = h.page, TAREA = 'zz-verif-Conteo de cierre';
+        await p.waitForLoadState('networkidle').catch(() => {});
+        await p.waitForTimeout(1500);
+        await p.locator('.flujo-card:not(.clon-card)').filter({ has: p.locator('.flujo-nombre', { hasText: /^\s*zz-verif-Flujo base\s*(simple|🧩)?\s*$/ }) }).first().locator('button:has-text("✏️ Editar")').click();
+        await p.waitForSelector('#propAssignSection');
+        const nCopia = await p.locator('#propAssignSection .prop-item-name', { hasText: /^\s*zz-verif-Propiedad\s*$/ }).count();
+        h.espera(nCopia === 0, 'copias de zz-verif-Flujo base para zz-verif-Propiedad: ' + nCopia);
+        let row = p.locator('.tarea-row:not([data-tar-id="__self__"])').filter({ has: p.locator('input.tarea-nombre-input[value="' + TAREA + '"]') });
+        if (!(await row.count())) {
+          await p.click('button.add-act-btn');
+          const act = p.locator('.actividad-block').last();
+          await act.locator('.actividad-input').fill('zz-verif-Cierre');
+          await act.locator('.add-tarea-btn').click();
+          row = act.locator('.tarea-row:not([data-tar-id="__self__"])').last();
+          await row.locator('.tarea-nombre-input').fill(TAREA);
+          await row.locator('input.tarea-min').fill('15');
+        }
+        const a = await row.first().getAttribute('data-act-id'), t = await row.first().getAttribute('data-tar-id');
+        const wrap = p.locator('#invw-' + a + '-' + t);
+        if (!(await wrap.locator('.inv-subrow select').count())) await p.click('#invb-' + a + '-' + t);
+        const sel = wrap.locator('.inv-subrow select').first();
+        if ((await sel.inputValue()) !== 'conteo') await sel.selectOption('conteo');
+        for (const [nombre] of _ARTS) {
+          const box = wrap.locator('.inv-arts label', { hasText: _pal(nombre) }).locator('input[type=checkbox]');
+          h.espera(await box.count() === 1, 'artículo en la lista conteo: ' + nombre);
+          if (await box.count() && !(await box.isChecked())) await box.check();
+        }
+        const r = await _put(h, '/api/col/flujos', () => p.click('button:has-text("💾 Guardar flujo")'));
+        h.espera(!r || r.status() === 200, 'flujo guardado: ' + (r ? r.status() : 'sin cambios'));
+      },
+    },
+    {
+      c: 's7', perfil: 'admin', pagina: '/str-propiedades.html',
+      que: 'zz-verif-Propiedad usa zz-verif-Flujo base y su zona principal es zz-verif-Principal',
+      async prueba(h) {
+        const p = h.page;
+        await p.waitForLoadState('networkidle').catch(() => {});
+        await p.waitForSelector('#propList');
+        const id = await p.evaluate(() => ((JSON.parse(localStorage.getItem('str-propiedades-v1') || '[]') || []).find((x) => x && x.name === 'zz-verif-Propiedad') || {}).id || null);
+        h.espera(!!id, 'zz-verif-Propiedad encontrada: ' + (id ? 'sí' : 'no'));
+        if (!id) return;
+        await p.evaluate((x) => selectProp(x), id);
+        await p.waitForSelector('#edit-flujo-base');
+        let cambio = false;
+        const fb = await p.$eval('#edit-flujo-base', (e) => (e.selectedOptions[0] || {}).textContent || '');
+        if (fb.trim() !== 'zz-verif-Flujo base') { await p.selectOption('#edit-flujo-base', { label: 'zz-verif-Flujo base' }); cambio = true; }
+        await p.waitForSelector('#edit-inv-principal');
+        const leerIp = () => p.$eval('#edit-inv-principal', (e) => ({ v: e.value, t: ((e.selectedOptions[0] || {}).textContent || '').trim() }));
+        const ip0 = await leerIp();
+        if (!ip0.v || ip0.t !== 'zz-verif-Principal') {
+          const op = await p.$$eval('#edit-inv-principal option', (os) => (os.find((o) => o.value && o.textContent.trim() === 'zz-verif-Principal') || {}).value);
+          h.espera(!!op, 'opción zz-verif-Principal en la zona principal de la propiedad: ' + (op ? 'sí' : 'no'));
+          if (op) { await p.selectOption('#edit-inv-principal', op); cambio = true; }
+        }
+        const ip = (await leerIp()).t;
+        const r = cambio ? await _put(h, '/api/col/propiedades', () => p.click('#btn-save-prop')) : null;
+        h.espera(!cambio || (r && r.status() === 200), 'propiedad: flujo «' + fb.trim() + '» · ' + (cambio ? 'guardada ' + (r ? r.status() : 'sin respuesta') : 'ya estaba'));
+        const fin = await leerIp();
+        h.espera(!!fin.v && fin.t === 'zz-verif-Principal', 'zona principal de zz-verif-Propiedad: «' + fin.t + '» (' + (fin.v ? 'fijada' : 'automática') + ')');
       },
     },
   ],

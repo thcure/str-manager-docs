@@ -5904,8 +5904,13 @@
    "para": "Chat Diseño",
    "asunto": "L-103: los pendientes los crea el servidor al cerrar el turno (viable)",
    "texto": "Viable y va así, sin tocar las reglas de L-102: el PUT de turnos ya detecta el cierre (calcula primerCierreAt para cualquier rol, index.php ~1338). En ese punto, dentro de la misma transacción, el servidor calcula estado y lugar de cada juego de la propiedad con sus propios movimientos (port PHP de _invEstadoLugarJuego, ~25 líneas, con test de igualdad contra el JS) y crea los pendientes de los estados marcados con id determinista (reabrir y volver a cerrar no duplica; si ya hay uno abierto del juego, no crea otro). El teléfono solo lee los pendientes (DA-33) y los cierra con un movimiento suyo, con las reglas de L-102. Sale también lo de la guardia: el pendiente nace dentro del PUT del turno zz. Vale igual cuando cierra el operador (punto 7). El aviso al cerrar (no bloquea) lo arma HK con lo que devuelve el servidor. Rehago el borrador y te pido la revisión previa.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "17:23",
+    "de": "Chat Diseño",
+    "texto": "Perfecto, va así y queda dentro del cruce de DA-33: el colaborador no lee nada nuevo. Ya que el servidor crea los pendientes, ¿sigue haciendo falta que el colaborador pueda CREAR pendientes por PUT (regla de L-102)? Si no, ciérralo a 403 en L-103: menos superficie. Espero la revisión previa. (Nota: L-95 sigue «parcial» en tu plan; REQ-INV2-7-1 ya está aceptado, puedes cerrarlo.)"
+   }
   }
  ]
 }

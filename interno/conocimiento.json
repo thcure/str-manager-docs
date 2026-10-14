@@ -639,7 +639,8 @@
     "log\\NN-veredicto.json → lecciones (Agente verificador)",
     "diseno.json y claude/producto/requerimientos-*.md (Chat de diseño)",
     "marco-trabajo.json, conocimiento.json e instrucciones.json (Arquitecto)",
-    "interno/mensajes.json (propuestas con asunto 'Lección:')"
+    "interno/mensajes.json (propuestas con asunto 'Lección:')",
+    "conocimiento.json › catalogo (LM-32): prácticas, patrones y herramientas reutilizables con alcance, madurez y evidencia"
    ],
    "flujo": [
     "Error o patrón del código (algo que vuelve a fallar o una trampa del sistema): el Chat de desarrollo lo anota en patrones-codigo.md › errores conocidos al cerrar el INC o el lote; la CLI lo deja en CLAUDE.md en el mismo commit del lote que lo corrige.",
@@ -647,14 +648,16 @@
     "Lo aprendido del negocio (preferencias de Carlos, por qué se decidió algo): el Chat de diseño lo deja el mismo día en diseno.json (DA con decisión y motivo) o en el documento del REQ.",
     "Lección de la forma de trabajar (proceso, agentes, herramientas, permisos): quien la vive la propone por el buzón al Arquitecto con asunto 'Lección: <tema>'; el Arquitecto la presenta a Carlos y, con su sí, la guarda en marco-trabajo.json y la aplica en la ficha, el encargo o el procedimiento afectado.",
     "Pasos manuales que se repiten: se proponen al Arquitecto como procedimiento ins-NNN.",
-    "Cierre de un plan: el Chat de diseño anota la lección del plan en diseno.json → planes[].cierre; si toca la forma de trabajar, la propone al Arquitecto."
+    "Cierre de un plan: el Chat de diseño anota la lección del plan en diseno.json → planes[].cierre; si toca la forma de trabajar, la propone al Arquitecto.",
+    "Catálogo (LM-32): cada situación lleva su alcance (fábrica o proyecto); las de alcance fábrica pasan al catálogo en la revisión semanal; el kit de arranque de un proyecto nuevo sale del catálogo."
    ],
    "reglas": [
     "Formato de toda lección: fecha · origen (INC, lote, M-n o plan) · qué pasó · causa · regla nueva · dónde quedó aplicada.",
     "Cuándo: el mismo día en que se cierra el INC, el lote, la verificación o el plan; y siempre que un problema aparezca por segunda vez.",
     "Un dato, una fuente: cada lección vive en un solo lugar según su tipo; los demás la enlazan, no la copian.",
     "Nadie edita los archivos de otro rol: se propone por el buzón al dueño.",
-    "Si Carlos dice 'guarda esto como lección', quien lo oye la registra o la propone ese mismo día."
+    "Si Carlos dice 'guarda esto como lección', quien lo oye la registra o la propone ese mismo día.",
+    "Todo lo aprendido que sirva a otro proyecto termina en una ficha del catálogo con evidencia; lo que es solo del proyecto se queda en su documentación."
    ],
    "instalacion": "No aplica (es un proceso).",
    "comprobacion": "Revisión periódica del Arquitecto: INC y planes cerrados con su lección en el lugar que corresponde; mensajes 'Lección:' atendidos.",
@@ -1060,5 +1063,584 @@
     }
    ]
   }
- ]
+ ],
+ "catalogo": {
+  "version": 1,
+  "vigenciaDesde": "2026-10-14",
+  "lote": "LM-32",
+  "descripcion": "Catálogo de la fábrica: lo que se aprende en cada proyecto y sirve a otros, en fichas cortas. Fuente única; la página Base de conocimiento (pestaña Catálogo) y el kit de arranque de un proyecto nuevo lo leen de aquí.",
+  "tipos": {
+   "practica": "cómo trabajamos (regla del método, ligada a COBIT)",
+   "patron": "cómo se resuelve algo técnico (problema → solución probada → pasos)",
+   "herramienta": "herramienta sugerida para el kit de un proyecto"
+  },
+  "alcances": {
+   "fabrica": "sirve a cualquier proyecto",
+   "proyecto": "solo al proyecto donde nació (se indica cuál)"
+  },
+  "madurez": {
+   "probada": "funcionó en un proyecto",
+   "estandar": "funcionó en dos o más proyectos: entra al kit de arranque por defecto",
+   "retirada": "ya no se recomienda (se dice por qué)"
+  },
+  "campos": {
+   "id": "PRA-n · PAT-n · HER-n",
+   "problema": "qué resuelve",
+   "cuando": "cuándo usarla",
+   "como": "pasos cortos",
+   "herramientas": "ids HER-n que la hacen",
+   "evidencia": "proyecto, lote y fecha donde se probó",
+   "relacion": "fichas COBIT y lecciones de origen"
+  },
+  "dinamica": [
+   "Al cerrar un lote, un incidente o el día, quien vivió la situación marca su alcance (fábrica o proyecto) en situaciones/<rol>.json.",
+   "En la revisión semanal el Arquitecto convierte las de alcance fábrica en ficha nueva o mejora una existente (LM-n normal).",
+   "Si cambia la forma de trabajar, Carlos la aprueba.",
+   "Una ficha pasa a «estandar» cuando se prueba en un segundo proyecto.",
+   "En la fase de Inicio de un proyecto nuevo se genera el kit sugerido: las fichas en estado «estandar» (y las «probadas» que el gerente elija)."
+  ],
+  "items": [
+   {
+    "id": "PRA-1",
+    "tipo": "practica",
+    "nombre": "El último clic en producción lo da el dueño",
+    "alcance": "fabrica",
+    "problema": "Los cambios en producción (importar una base, crear un cron con secretos) los bloquea el modo automático aunque el dueño haya dicho sí, y un clic mal dado no avisa.",
+    "cuando": "Cualquier acción que cambie datos o configuración de producción.",
+    "como": [
+     "El asistente deja la pantalla lista: archivo cargado, botón visible y destacado.",
+     "El dueño da un solo clic.",
+     "El asistente comprueba el resultado en los datos (p. ej. la última fila importada), no en el mensaje de la pantalla."
+    ],
+    "herramientas": [
+     "navegador del dueño"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "migración M7",
+      "fecha": "2026-10-13",
+      "nota": "importación de la base: dos intentos fallidos sin aviso, el tercero bien"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "APO01.10-k",
+      "BAI10.02-h"
+     ],
+     "lecciones": [
+      "marco-trabajo 2026-10-13 (migración M7)"
+     ]
+    }
+   },
+   {
+    "id": "PRA-2",
+    "tipo": "practica",
+    "nombre": "Los secretos nunca pasan por el asistente",
+    "alcance": "fabrica",
+    "problema": "Una clave que el asistente llega a ver obliga a rotarla, y escribirla en un cron o un repo la deja expuesta.",
+    "cuando": "Al crear o cambiar contraseñas, tokens, claves de cron o secrets.php.",
+    "como": [
+     "Las claves se generan en el navegador del dueño (página local) o en su Excel de secretos.",
+     "El asistente deja plantillas con marcadores y comprueba con diagnósticos de sí/no.",
+     "Los cron leen la clave del servidor al correr; nunca la llevan escrita."
+    ],
+    "herramientas": [
+     "HER-6"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "migración M4 y M7",
+      "fecha": "2026-10-13",
+      "nota": "claves expuestas el 13-oct y rotadas"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10.02-h",
+      "BAI08.03-t"
+     ],
+     "lecciones": [
+      "marco-trabajo 2026-10-13 (secretos)"
+     ]
+    }
+   },
+   {
+    "id": "PRA-3",
+    "tipo": "practica",
+    "nombre": "Un escritor por archivo y buzón entre agentes",
+    "alcance": "fabrica",
+    "problema": "Varios agentes escribiendo el mismo archivo generan conflictos; pasar mensajes por el dueño lo vuelve cuello de botella.",
+    "cuando": "Siempre que trabajen varios chats o agentes sobre el mismo repositorio.",
+    "como": [
+     "Cada archivo tiene un solo escritor (según su encargo).",
+     "Los agentes se hablan por un buzón con estados (pendiente, en curso, hecho).",
+     "Nadie espera en silencio: quien se detiene deja «Esperando: X»."
+    ],
+    "herramientas": [
+     "HER-7"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "M-1 a M-326",
+      "fecha": "2026-10-08",
+      "nota": "desde el 8-oct"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "APO01.03-b"
+     ],
+     "lecciones": [
+      "marco-trabajo 2026-10-10 (M-105)"
+     ]
+    }
+   },
+   {
+    "id": "PRA-4",
+    "tipo": "practica",
+    "nombre": "Quien construye no acepta: pruebas por niveles y juez",
+    "alcance": "fabrica",
+    "problema": "Si el mismo agente construye y declara terminado, los errores llegan a producción.",
+    "cuando": "Todo cambio de código.",
+    "como": [
+     "Cada criterio lleva un nivel (N1 tests, N2 guion, N3 capturas, N4 dispositivo).",
+     "La cola corre las pruebas después del commit.",
+     "Un juez distinto escribe el veredicto: aceptado, parcial o no aceptado."
+    ],
+    "herramientas": [
+     "HER-2",
+     "HER-3",
+     "HER-4"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "L-80 en adelante",
+      "fecha": "2026-10-12"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI07.05-v",
+      "BAI07.05-p"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "PRA-5",
+    "tipo": "practica",
+    "nombre": "Aprender el mismo día y llevarlo al catálogo",
+    "alcance": "fabrica",
+    "problema": "Lo aprendido en un proyecto se pierde al cerrar el chat y el siguiente proyecto repite los errores.",
+    "cuando": "Al cerrar un lote, un incidente, un plan o el día.",
+    "como": [
+     "Quien lo vive registra la situación con su alcance (fábrica o proyecto).",
+     "El Arquitecto, en la revisión semanal, la convierte en ficha del catálogo o mejora una existente.",
+     "Si cambia la forma de trabajar, el dueño la aprueba."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-30, LM-32",
+      "fecha": "2026-10-14"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI08-l"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "PAT-1",
+    "tipo": "patron",
+    "nombre": "Migrar un ambiente de hosting sin perder datos",
+    "alcance": "fabrica",
+    "problema": "Cambiar de plan o de proveedor de hosting sin cortar el servicio largo ni perder datos o archivos subidos.",
+    "cuando": "Vence un plan, se cambia de proveedor o se separan ambientes.",
+    "como": [
+     "El código lee base y usuario de un archivo de secretos fuera del repo.",
+     "Sitios nuevos con dominio temporal y Git; bases y secretos (el dueño).",
+     "Copia de ensayo y ensayo de salud.",
+     "Corte: cola parada, archivos solo del servidor, copia final de la base, mover dominios, SSL, cron, inicio de sesión, rotar claves.",
+     "Herramientas al nuevo origen; el sitio viejo queda de respaldo hasta su vencimiento."
+    ],
+    "herramientas": [
+     "HER-6"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "migración M1–M9",
+      "fecha": "2026-10-13",
+      "nota": "Hostinger Premium → Unlimited en un día"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10.02-h"
+     ],
+     "lecciones": [
+      "S-arq-23"
+     ]
+    }
+   },
+   {
+    "id": "PAT-2",
+    "tipo": "patron",
+    "nombre": "Ida y vuelta exacta entre archivos y base",
+    "alcance": "fabrica",
+    "problema": "Al pasar datos de archivos JSON a una base y de vuelta se pierden detalles (119.0 → 119, {} → [], salto de línea final) y deja de ser confiable.",
+    "cuando": "Cuando una base va a reemplazar archivos como registro oficial.",
+    "como": [
+     "Guardar el objeto original tal cual llega (sin decodificar a arreglo).",
+     "Fijar una convención de fin de archivo (un salto final, eol=lf).",
+     "Comparar contra los bytes del commit (git show), no contra una copia local."
+    ],
+    "herramientas": [
+     "HER-5"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-28, LM-29",
+      "fecha": "2026-10-13",
+      "nota": "10 de 10 archivos idénticos byte a byte"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10-m"
+     ],
+     "lecciones": [
+      "S-arq-25"
+     ]
+    }
+   },
+   {
+    "id": "PAT-3",
+    "tipo": "patron",
+    "nombre": "Cron que lee la clave del servidor al correr",
+    "alcance": "fabrica",
+    "problema": "Un cron con la clave escrita la expone y deja de funcionar cuando se rota.",
+    "cuando": "Tareas programadas que llaman a una API protegida.",
+    "como": [
+     "El comando obtiene la clave del archivo de secretos en el momento de correr (p. ej. php -r 'require …; echo CLAVE;').",
+     "El cron no cambia al rotar la clave.",
+     "Se comprueba con la siguiente ejecución (un registro nuevo), sin ver la clave."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "migración M7",
+      "fecha": "2026-10-13"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10.02-h"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "PAT-4",
+    "tipo": "patron",
+    "nombre": "Pruebas con datos marcados y guardia de red",
+    "alcance": "fabrica",
+    "problema": "Las pruebas en producción pueden escribir o borrar datos reales.",
+    "cuando": "Pruebas automáticas contra un ambiente con datos reales.",
+    "como": [
+     "Todo dato de prueba lleva un prefijo (zz-verif-).",
+     "El navegador de pruebas corta cualquier escritura sin el prefijo y todo host fuera de la lista.",
+     "Lo cortado queda en la bitácora como aviso."
+    ],
+    "herramientas": [
+     "HER-3"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-17, LM-18",
+      "fecha": "2026-10-12"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI07.05-p"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "PAT-5",
+    "tipo": "patron",
+    "nombre": "Cambiar el origen de las pruebas sin tocar los guiones",
+    "alcance": "fabrica",
+    "problema": "Cuando un servicio se muda de dominio, los guiones de prueba con rutas relativas fallan.",
+    "cuando": "Un servicio cambia de dominio y las páginas siguen en otro.",
+    "como": [
+     "Leer primero cómo piden los datos los guiones (navegación, fetch, page.request).",
+     "Desviar en el navegador de pruebas las rutas del servicio al nuevo dominio (ctx.route) y envolver page.request con la misma regla.",
+     "Probar con un servidor local antes de instalar."
+    ],
+    "herramientas": [
+     "HER-3"
+    ],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "M8, pw 0.5.3",
+      "fecha": "2026-10-13",
+      "nota": "regresión 9/9"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI07.05-p"
+     ],
+     "lecciones": [
+      "S-arq-24"
+     ]
+    }
+   },
+   {
+    "id": "PAT-6",
+    "tipo": "patron",
+    "nombre": "Ambiente de pruebas con solo la estructura",
+    "alcance": "fabrica",
+    "problema": "Un ambiente de pruebas con copia de datos reales los expone; uno vacío no arranca si el código no crea las tablas.",
+    "cuando": "Al crear un ambiente de pruebas.",
+    "como": [
+     "Tomar el volcado de producción y quitar todos los INSERT salvo la versión del esquema.",
+     "Borrar las tablas antes de crearlas y apagar las llaves foráneas durante la carga.",
+     "Sembrar después los datos de prueba marcados (PAT-4)."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "migración M6",
+      "fecha": "2026-10-13"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10.02-h"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-1",
+    "tipo": "herramienta",
+    "nombre": "Panel de jornada",
+    "alcance": "fabrica",
+    "problema": "El dueño necesita empezar y terminar el día con un clic y ver el estado sin preguntar.",
+    "cuando": "Siempre que haya una cola local y agentes que consumen créditos.",
+    "como": [
+     "Empezar: escritorio, pausa fuera, salud, sesiones, apps.",
+     "Terminar: pausa y cierre de ventanas de prueba.",
+     "Terminar y apagar."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-3, LM-31",
+      "fecha": "2026-10-14"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "APO01.10-j"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-2",
+    "tipo": "herramienta",
+    "nombre": "Cola de lotes con agente de construcción",
+    "alcance": "fabrica",
+    "problema": "Construir cambios sin depender de que un chat esté abierto, con guardas automáticas.",
+    "cuando": "Proyectos con cambios frecuentes y repo con tests.",
+    "como": [
+     "Carpeta de instrucciones; tarea programada cada minuto; un lote a la vez.",
+     "Guardas: crítico sin cruce no arranca; sin tests no hay commit.",
+     "Pruebas y juez después del commit."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "lotes 1–93",
+      "fecha": "2026-09-25"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "APO01.10-a"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-3",
+    "tipo": "herramienta",
+    "nombre": "Verificador local con Playwright",
+    "alcance": "fabrica",
+    "problema": "Probar en producción con sesiones reales sin depender de extensiones ni tareas que fallan al arrancar.",
+    "cuando": "Pruebas de interfaz contra ambientes desplegados.",
+    "como": [
+     "Perfiles de prueba con sesión iniciada una vez a mano.",
+     "Guardia de red (PAT-4) y desvío por origen (PAT-5).",
+     "Guiones por requisito y regresión por zona."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-17 a LM-29",
+      "fecha": "2026-10-12"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI07.05-p"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-4",
+    "tipo": "herramienta",
+    "nombre": "Juez local",
+    "alcance": "fabrica",
+    "problema": "Aceptar lotes sin que el constructor se juzgue a sí mismo.",
+    "cuando": "Después de las pruebas de cada lote.",
+    "como": [
+     "Lee las pruebas y las capturas.",
+     "Escribe el veredicto con una lista cerrada de resultados."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-19",
+      "fecha": "2026-10-12"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI07.05-v"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-5",
+    "tipo": "herramienta",
+    "nombre": "Validador del modelo",
+    "alcance": "fabrica",
+    "problema": "Errores de ids, estados o enlaces que se descubren tarde.",
+    "cuando": "Antes de cada commit a los archivos del modelo.",
+    "como": [
+     "Reglas en un esquema (patrones, listas cerradas, fin de archivo).",
+     "0 errores o no se sube."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "LM-9 a LM-29",
+      "fecha": "2026-10-11"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10-m"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-6",
+    "tipo": "herramienta",
+    "nombre": "Generador de claves y Excel de secretos",
+    "alcance": "fabrica",
+    "problema": "Crear y poner secretos sin que pasen por el asistente.",
+    "cuando": "Alta o rotación de claves de un ambiente.",
+    "como": [
+     "Página local que genera las líneas de claves en el navegador, con botón de copiar.",
+     "Excel que genera el archivo de secretos por base."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "migración M4 y M7",
+      "fecha": "2026-10-13"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "BAI10.02-h"
+     ],
+     "lecciones": []
+    }
+   },
+   {
+    "id": "HER-7",
+    "tipo": "herramienta",
+    "nombre": "Buzón y despertador",
+    "alcance": "fabrica",
+    "problema": "Agentes que esperan en silencio o no se enteran de un mensaje.",
+    "cuando": "Varios chats o agentes trabajando a la vez.",
+    "como": [
+     "Buzón JSON con estados.",
+     "Despertador que avisa, recuerda a los 30 min y escala a los 60."
+    ],
+    "herramientas": [],
+    "evidencia": [
+     {
+      "proyecto": "P01",
+      "lote": "M-1 en adelante",
+      "fecha": "2026-10-08"
+     }
+    ],
+    "madurez": "probada",
+    "relacion": {
+     "fichas": [
+      "APO01.03-b"
+     ],
+     "lecciones": []
+    }
+   }
+  ]
+ }
 }

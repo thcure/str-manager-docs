@@ -68,7 +68,22 @@ function dirPerfil(u) { return path.join(__dirname, 'perfiles-chrome', u); }
 // Funcion pura (test en guardia.test.js): ¿se deja pasar esta peticion?
 // idsZz: ids de filas zz-verif- que esta misma corrida ya subio; solo esas se pueden borrar por id (limpiar()).
 const ID_ZZ = new Set();
-function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
+// v0.5.6 (LM-35, ajuste de Diseño M-359): ids de filas zz-verif- que esta corrida LEYÓ (semilla fija: artículos, zonas,
+// lugares). Solo sirven como referencia de un movimiento de turno zz; nunca habilitan un borrado.
+const ID_ZZ_LEIDOS = new Set();
+function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
+  let j = null; try { j = JSON.parse(texto); } catch (e) { return 0; }
+  let n = 0;
+  (function rec(o) {
+    if (Array.isArray(o)) { o.forEach(rec); return; }
+    if (!o || typeof o !== 'object') return;
+    if (o.id != null && JSON.stringify(o).includes('zz-verif-')) { leidos.add(String(o.id)); n++; }
+    Object.values(o).forEach(v => { if (v && typeof v === 'object') rec(v); });
+  })(j);
+  return n;
+}
+const REF_INVENTARIO = /(articulo|deposito|zona|origen|destino|lugar|ubicacion)/i;
+function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   let u;
   try { u = new URL(url); } catch (e) { return { ok: false, motivo: 'url invalida' }; }
   if (u.protocol === 'data:' || u.protocol === 'blob:') return { ok: true };
@@ -89,7 +104,22 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
     if (!j.items.length) return borra.length ? { ok: true } : { ok: false, motivo: 'escritura vacia a ' + u.pathname };
     // v0.5.6 (LM-35, M-357): una fila sin el texto zz-verif- también es de prueba si cuelga de un turno que esta corrida
     // creó como zz-verif- (p. ej. inv-movimientos con turnoId sh-m-… de zz-verif-Propiedad)
-    const deTurnoZz = it => { const t = it && ((it.data && it.data.turnoId) || it.turnoId); return t != null && idsZz.has(String(t)); };
+    // y además todo lo que nombra (artículo, zona, lugar, origen, destino) es zz-verif- (subido o leído en esta corrida):
+    // un movimiento de un turno zz sobre un artículo real movería inventario de Carlos (R11)
+    const refsZz = it => {
+      let ok = true;
+      (function rec(o) {
+        if (!ok || !o || typeof o !== 'object') return;
+        for (const [k, v] of Object.entries(o)) {
+          if (v && typeof v === 'object') { rec(v); continue; }
+          if (k === 'turnoId' || k === 'id' || !REF_INVENTARIO.test(k) || v == null || v === '') continue;
+          if (String(v).includes('zz-verif-')) continue;   // nombre de una fila de prueba (articuloNombre, zonaNombre…)
+          if (!idsZz.has(String(v)) && !idsLeidos.has(String(v))) { ok = false; return; }
+        }
+      })(it);
+      return ok;
+    };
+    const deTurnoZz = it => { const t = it && ((it.data && it.data.turnoId) || it.turnoId); return t != null && idsZz.has(String(t)) && refsZz(it); };
     const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-') && !deTurnoZz(it));
     if (reales.length) return { ok: false, motivo: reales.length + ' fila(s) sin zz-verif- en ' + u.pathname };
     j.items.forEach(it => { if (it && it.id != null) idsZz.add(String(it.id)); });
@@ -125,6 +155,13 @@ async function abrir(usuario, opciones = {}) {
   if (opciones.camara) { try { await ctx.grantPermissions(['camera'], { origin: BASE }); } catch (e) { } }
   const bitacora = [];
   const guardia = opciones.guardia !== false;
+  // v0.5.6 (LM-35): ids de filas zz-verif- que la app lee de /api/col (semilla fija), para validar referencias de movimientos
+  ctx.on('response', async (resp) => {
+    try {
+      const u = new URL(resp.url());
+      if (u.hostname === HOST_STR && /^\/api\/col(\/|$)/.test(u.pathname) && resp.request().method() === 'GET' && resp.ok()) registrarLeidos(await resp.text());
+    } catch (e) { }
+  });
   await ctx.route('**/*', async (route) => {
     const r = route.request();
     if (guardia) {
@@ -150,4 +187,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara, explicarError };
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, registrarLeidos, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError };

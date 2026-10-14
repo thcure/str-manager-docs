@@ -4,6 +4,8 @@ const assert = require('assert');
 const { decidir, destinoModelo, conDesvio, BASE, BASE_MODELO } = require('./comun');
 const B = 'https://app.apartamentosbucaramanga.com';
 const F = 'https://fabrica.apartamentosbucaramanga.com';   // v0.5.3: servicio del modelo (M8)
+// lecturas simuladas de la semilla fija (lo que haría ctx.on('response') con GET /api/col/...)
+require('./comun').registrarLeidos(JSON.stringify({ items: [{ id: 'art-zz-1', data: { nombre: 'zz-verif-Toalla' } }, { id: 'dep-zz-1', data: { nombre: 'zz-verif-Principal' } }, { id: 'art-real-7', data: { nombre: 'Toalla' } }] }));
 const casos = [
   [B + '/str-app-shell.html', 'GET', '', true],
   [B + '/api/col', 'POST', '{"items":[{"id":"real-1"}]}', false],
@@ -31,6 +33,11 @@ const casos = [
   // v0.5.6 (LM-35): turno zz-verif- creado en esta corrida -> sus movimientos y fotos pasan; los de otro turno no
   [B + '/api/col/turnos', 'PUT', '{"items":[{"id":"sh-m-zz1","data":{"propName":"zz-verif-Propiedad"}}],"deleted":[]}', true],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-1","data":{"turnoId":"sh-m-zz1","cantidad":3}}],"deleted":[]}', true],
+  // ajuste de Diseño (M-359): el artículo y la zona del movimiento también deben ser zz-verif- (subidos o leídos)
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-5","data":{"turnoId":"sh-m-zz1","articuloId":"art-real-7","cantidad":1}}],"deleted":[]}', false],
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-6","data":{"turnoId":"sh-m-zz1","articuloId":"art-zz-1","depositoId":"dep-zz-1","cantidad":1}}],"deleted":[]}', true],
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-8","data":{"turnoId":"sh-m-zz1","origen":{"depositoId":"dep-real-2"},"articuloId":"art-zz-1"}}],"deleted":[]}', false],
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-7","data":{"turnoId":"sh-m-zz1","articuloId":"art-zz-1","depositoId":"dep-real-2","cantidad":1}}],"deleted":[]}', false],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-2","data":{"turnoId":"sh-m-real","cantidad":3}}],"deleted":[]}', false],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-3","data":{"turnoId":"sh-m-zz1"}},{"id":"mv-4","data":{"turnoId":"sh-m-real"}}],"deleted":[]}', false],
   [B + '/api/upload', 'POST', '------b\r\nContent-Disposition: form-data; name="ref"\r\n\r\nsh-m-zz1\r\n------b\r\nContent-Disposition: form-data; name="file"; filename="foto.jpg"\r\n\r\n\xff\xd8\r\n------b--', true],

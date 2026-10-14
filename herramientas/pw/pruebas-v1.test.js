@@ -117,5 +117,13 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('escrituras agrupadas con conteo', r.length === 2 && r[0] === 'PUT app /api/col/inv-movimientos · 1 fila(s) de un turno o pendiente zz de la corrida, con referencias zz (x2)' && r[1].startsWith('POST app /api/upload · foto'));
   t('caso sin escrituras → []', Array.isArray(cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, []).escrituras) && cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, []).escrituras.length === 0);
 }
+// v0.5.17 (M-402): juegos en inv-grupos (relación con grupo)
+{
+  const { evaluarRelacion } = require('./semilla');
+  const c = { propiedades: [[{ id: 'p1', data: { nombre: 'zz-verif-Propiedad' } }]], 'juegos-l103': [[{ id: 'g2', data: { nombre: 'zz-verif-J2', clase: 'juego', propId: 'p1', activo: true } }]] };
+  const v = { propiedades: true, 'juegos-l103': true };
+  t('relacion: juego en inv-grupos ok', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', grupo: 'juegos-l103', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2'], clase: 'juego' }, c, v).estado === 'ok');
+  t('relacion: juego inactivo falta', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', grupo: 'juegos-l103', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2'], clase: 'juego' }, { propiedades: c.propiedades, 'juegos-l103': [[{ id: 'g2', data: { nombre: 'zz-verif-J2', clase: 'juego', propId: 'p1', activo: false } }]] }, v).estado === 'falta');
+}
 console.log(ok + ' OK, ' + fail + ' FAIL');
 process.exit(fail ? 1 : 0);

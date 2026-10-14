@@ -69,7 +69,7 @@ function evaluarRelacion(rel, cuerpos, vistos) {
   const necesita = { colaboradorBase: ['propiedades', 'usuarios'], zonaPrincipalActiva: ['propiedades', 'zonas'], sinPermiso: ['usuarios'],
     lugaresEnZonaPrincipal: ['propiedades', 'zonas', 'lugares'], tareaInventario: ['flujos'],
     flujoBasePropiedad: ['propiedades', 'flujos'], invPrincipalPropiedad: ['propiedades', 'zonas'],
-    zonaConRol: ['propiedades', 'zonas'], articulosDePropiedad: ['propiedades', 'articulos'], campoValor: [rel.grupo] }[rel.tipo];
+    zonaConRol: ['propiedades', 'zonas'], articulosDePropiedad: ['propiedades', rel.grupo || 'articulos'], campoValor: [rel.grupo] }[rel.tipo];
   if (!necesita) return r('no concluyente', 'tipo desconocido: ' + rel.tipo);
   const noVisto = necesita.filter(g => !vistos[g]);
   if (noVisto.length) return r('no concluyente', 'sin respuesta de: ' + noVisto.join(', '));
@@ -133,7 +133,7 @@ function evaluarRelacion(rel, cuerpos, vistos) {
     // v5 (M-384, L-103): artículos de esa clase con propId de la propiedad
     const p = porNombre(props, rel.propiedad);
     if (!p) return r('falta', 'no está ' + rel.propiedad);
-    const regsA = registros(cuerpos.articulos);
+    const regsA = registros(cuerpos[rel.grupo || 'articulos']);   // v0.5.17 (M-402): los juegos viven en inv-grupos (grupo juegos-l103)
     const mal = (rel.nombres || []).filter(n => { const a = porNombre(regsA, n); return !a || a.activo === false || (rel.clase && a.clase !== rel.clase) || String(a.propId) !== String(p.id); });
     return mal.length ? r('falta', 'no son ' + (rel.clase || 'artículos') + ' de ' + rel.propiedad + ': ' + mal.join(', ')) : r('ok', (rel.nombres || []).length + ' ' + (rel.clase || 'artículo') + '(s) de ' + rel.propiedad);
   }

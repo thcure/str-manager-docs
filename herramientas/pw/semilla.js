@@ -2,6 +2,7 @@
 // Solo lectura: abre cada pagina con zz-verif-admin y lee las respuestas que la propia app pide (no toca tokens
 // ni ejecuta JavaScript sobre la sesion). Guarda solo nombres zz-verif- y conteos: nada de datos reales.
 // v1 comprueba; reponer lo que falte se hace con un guion de semilla del Chat Desarrollo (paso siguiente).
+// v4.3 (pw 0.5.9, M-377): invPrincipalPropiedad acepta cualquiera de las zonas con ese nombre que sea principal activa de la propiedad.
 // v4.1 (pw 0.5.7, M-370): relaciones flujoBasePropiedad e invPrincipalPropiedad (para L-101).
 // v4 (pw 0.5.6, M-361): grupos con 'para' (como las relaciones) y relaciones lugaresEnZonaPrincipal y tareaInventario
 //   para la segunda pasada de L-100 (INV2-7-1 en HK); con 'para', también un 'no concluyente' de otro lote es aviso.
@@ -97,9 +98,16 @@ function evaluarRelacion(rel, cuerpos, vistos) {
   }
   if (rel.tipo === 'invPrincipalPropiedad') {
     // v4.1 (M-370): el conteo va a la zona principal fijada en la propiedad (invPrincipalId)
-    const p = porNombre(props, rel.propiedad), z = porNombre(registros(cuerpos.zonas), rel.zona);
-    if (!p || !z) return r('falta', 'no está ' + (!p ? rel.propiedad : rel.zona));
-    return String(p.invPrincipalId) === String(z.id) ? r('ok', rel.propiedad + ' cuenta en ' + rel.zona) : r('falta', rel.propiedad + ' no tiene ' + rel.zona + ' como zona principal de inventario');
+    // v4.3 (M-377): puede haber varias zonas con ese nombre (viejas o inactivas); vale la que apunta la propiedad si es
+    // una principal activa que le sirve. El observado dice cuántas hay y a qué id apunta (solo ids de filas zz-verif-).
+    const p = porNombre(props, rel.propiedad);
+    if (!p) return r('falta', 'no está ' + rel.propiedad);
+    const mismas = registros(cuerpos.zonas).filter(z => Object.values(z).some(v => v === rel.zona));
+    if (!mismas.length) return r('falta', 'no está ' + rel.zona);
+    const buenas = principalesDe(p).filter(z => Object.values(z).some(v => v === rel.zona)).map(z => String(z.id));
+    const detalle = mismas.length + ' zona(s) ' + rel.zona + '; la propiedad apunta a ' + (p.invPrincipalId || 'ninguna');
+    return buenas.includes(String(p.invPrincipalId)) ? r('ok', rel.propiedad + ' cuenta en ' + rel.zona + ' (' + detalle + ')')
+      : r('falta', rel.propiedad + ' no apunta a una ' + rel.zona + ' principal activa (' + detalle + '; válidas: ' + (buenas.join(', ') || 'ninguna') + ')');
   }
   if (rel.tipo === 'tareaInventario') {
     // v4: el flujo tiene una tarea con ese nombre y inventario.lista = rel.lista (y al menos rel.articulos artículos)

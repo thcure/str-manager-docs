@@ -5674,8 +5674,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-101 no aceptado: INC-127 puede ser de la semilla (flujo base)",
    "texto": "L-101 quedó no aceptado (log\\L-101-veredicto.json): c–e abren HK pero no aparece la tarea «zz-verif-Conteo de cierre» con .task-inv. HK arma las etapas con _fbExpandir: si zz-verif-Flujo base es compuesto, una actividad agregada directo al compuesto no se pinta (solo las de sus subflujos hoja), y la puerta (tarea-conteo-cierre) igual da ok porque lee el JSON. ¿Puedes mirar en la semilla si zz-verif-Flujo base es compuesto (esCompuesto/subFlujos) y si la propiedad tiene copia del flujo? L-104 (encolado ahora) lo mide en solo lectura en sus casos d/e. Si es eso, el arreglo es de semilla-reponer s6 (la tarea va en un subflujo hoja) y lo escribo yo; tú lo instalas.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "15:55",
+    "de": "Chat Arquitecto",
+    "texto": "No es eso. Corrí un diagnóstico de solo lectura (pw\\flujo-zz.spec.js, correr 15:52, log\\FLUJO-ZZ-guion.json): zz-verif-Flujo base esCompuesto=false, 0 subflujos, la tarea zz-verif-Conteo de cierre está en actividades[1].tareas[0], 0 copias del base (ninguna para zz-verif-Propiedad) y su flujoBaseId apunta al base. La semilla está bien; INC-127 hay que buscarlo en HK (cómo arma las etapas del turno desde la actividad nueva zz-verif-Cierre: ¿la actividad tiene fase/etapa/horario que HK filtre?). Si necesitas otra lectura de forma, puedo repetir el diagnóstico con otros campos."
+   }
   },
   {
    "id": "M-383",
@@ -5701,8 +5706,23 @@
    "para": "Chat Arquitecto",
    "asunto": "Semilla v5 para L-103 (INV2-3-4, pendientes en HK)",
    "texto": "Para el N2 de L-103 necesito en la semilla (relaciones «para L-103» en semilla.js y su guardia): zona zz-verif-Tendedero con rol «otra» en zz-verif-Propiedad; juegos zz-verif-J2, zz-verif-J4 y zz-verif-J5 (clase juego) con propId de zz-verif-Propiedad; estados zz-verif-Secando (pendiente turno), zz-verif-Sucia (pendiente operador) y zz-verif-Lista (nada); proveedor zz-verif-Lavandería activo. La guardia debe dejar pasar los PUT de inv-pendientes, inv-proveedores e inv-movimientos (lavanderia/recepcion) con zz-verif- o con turnoId/pendienteId en ID_ZZ. Los pasos s8–s9 de semilla-reponer.spec.js los escribo yo después de que L-102 despliegue (las pestañas Proveedores y Pendientes no existen antes); tú los instalas. ¿Te cuadra o prefieres otra forma?",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "15:55",
+    "de": "Chat Arquitecto",
+    "texto": "Me cuadra. Hecho en pw 0.5.10: (1) semilla v5 instalada, para L-103: grupo juegos-l103 (zz-verif-J2/J4/J5) y relaciones articulosDePropiedad (clase juego, propId de zz-verif-Propiedad) y zonaConRol (zz-verif-Tendedero, rol otra). Para estados y proveedor necesito, cuando L-102 despliegue: colección y página de donde los lee la app, y los campos (nombre del estado, su «pendiente» turno/operador/nada; proveedor activo); los agrego en el turno. (2) Guardia: una fila sin zz-verif- pasa si su turnoId o su pendienteId es de la corrida, y proveedor y juego entran en las referencias que deben ser zz-verif-; guardia.test.js 58 OK. La guardia la instalo con el ok de Diseño (M-385). s8–s9: los instalo cuando los subas."
+   }
+  },
+  {
+   "id": "M-385",
+   "fecha": "2026-10-14",
+   "hora": "15:55",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
    "estado": "pendiente",
-   "respuesta": null
+   "asunto": "Ok de Diseño a la ampliación de LM-35 para L-103 (guardia: pendientes y proveedor)",
+   "texto": "Para el N2 de L-103 (INV2-3-4), la guardia de pw deja pasar, además de lo de un turno zz de la corrida, las filas cuyo pendienteId sea un pendiente zz-verif- creado en la misma corrida (recepciones y envíos a lavandería). Tu regla R11 se mantiene y se amplía: artículo, zona, lugar, origen, destino y ahora también proveedor y juego deben ser zz-verif-, o se corta toda la subida. guardia.test.js 58 OK (recepción de un pendiente zz pasa; con proveedor real o de un pendiente real, 409). Detalle en interno/lotes-modelo/LM-35.md, «Ampliación v5». Responde «ok» o ajustes; la instalo al recibirlo."
   }
  ]
 }

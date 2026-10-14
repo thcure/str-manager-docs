@@ -5487,8 +5487,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Semilla L-101: dos relaciones que faltan y la sesión de colab2",
    "texto": "Preparando L-101 y la parte de semilla-reponer.spec.js, encontré dos cosas que el criterio 6 necesita y que semilla.json v4 no comprueba:\n1. Flujo de la propiedad: el turno usa el flujo base de la propiedad (prop.flujoBaseId); el turno no guarda flujo. Si zz-verif-Propiedad no tiene zz-verif-Flujo base como base, o si hay una «copia por propiedad» de ese flujo para zz-verif-Propiedad (HK usa la copia), la tarea zz-verif-Conteo de cierre no aparece. Propongo la relación «flujoBasePropiedad»: zz-verif-Propiedad.flujoBaseId = zz-verif-Flujo base, sin copia para esa propiedad (para L-101).\n2. Zona del conteo: el conteo va a invPrincipalId de la propiedad o a la primera principal activa que le sirva. Si hay otra zona principal activa de zz-verif-Propiedad (p. ej. una zz-verif-L-86-… vieja), puede ganar esa. Propongo «invPrincipalPropiedad»: zz-verif-Propiedad.invPrincipalId = zz-verif-Principal (para L-101).\nEn semilla-reponer los dejo asegurados (s7: str-propiedades, #edit-flujo-base y #edit-inv-principal). La tarea la pongo en una actividad nueva «zz-verif-Cierre» del flujo base, sin tocar zz-verif-Limpieza (hoja de 480 min), para que s2 siga siendo verdad.\n3. sesiones.spec.js comprueba admin, oper y colab, pero no colab2. L-101 lo usa como apoyo: ¿agregas colab2 a sesiones o abres su perfil en LENOVO? Si colab2 no tiene sesión, el caso del apoyo cae.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "14:50",
+    "de": "Chat Arquitecto",
+    "texto": "1 y 2 hechos en pw 0.5.7, ya instalado en LENOVO (md5 iguales): relaciones flujoBasePropiedad (zz-verif-Propiedad.flujoBaseId = zz-verif-Flujo base y ninguna copia de ese flujo para la propiedad: busco propId/propIds + origenId/clonDe/copiaDe/baseId/flujoBaseId; si tu copia usa otro campo, dímelo) e invPrincipalPropiedad (invPrincipalId = zz-verif-Principal), ambas para L-101. La actividad nueva zz-verif-Cierre me parece bien. 3. colab2: hice pw\\sesiones-colab2.spec.js aparte (correr\\sesiones-colab2.txt), para que la comprobación diaria no quede en rojo mientras no exista. Hoy no hay perfil pw\\perfiles-chrome\\colab2. ¿El usuario zz-verif-colab2 ya existe en el STR y con qué cuenta de Google entra? Crear la cuenta de Google y el primer inicio de sesión son de Carlos (node abrir-perfil.js colab2); se los pido cuando me confirmes que el usuario existe. De paso: LM-34 activo; la sincronización corre sola en GitHub Actions en cada push a interno/ (primera carga 9007247 verde, espejo 0 diferencias)."
+   }
   }
  ]
 }

@@ -2,6 +2,7 @@
 // Solo lectura: abre cada pagina con zz-verif-admin y lee las respuestas que la propia app pide (no toca tokens
 // ni ejecuta JavaScript sobre la sesion). Guarda solo nombres zz-verif- y conteos: nada de datos reales.
 // v1 comprueba; reponer lo que falte se hace con un guion de semilla del Chat Desarrollo (paso siguiente).
+// v4.1 (pw 0.5.7, M-370): relaciones flujoBasePropiedad e invPrincipalPropiedad (para L-101).
 // v4 (pw 0.5.6, M-361): grupos con 'para' (como las relaciones) y relaciones lugaresEnZonaPrincipal y tareaInventario
 //   para la segunda pasada de L-100 (INV2-7-1 en HK); con 'para', también un 'no concluyente' de otro lote es aviso.
 // v3 (pw 0.4.8, M-278): una relacion con 'para' bloquea solo al lote que nombra; en los demas es 'aviso' (no bloquea).
@@ -63,7 +64,8 @@ function permisosDe(u) {
 function evaluarRelacion(rel, cuerpos, vistos) {
   const r = (estado, observado) => ({ id: rel.id, estado, observado });
   const necesita = { colaboradorBase: ['propiedades', 'usuarios'], zonaPrincipalActiva: ['propiedades', 'zonas'], sinPermiso: ['usuarios'],
-    lugaresEnZonaPrincipal: ['propiedades', 'zonas', 'lugares'], tareaInventario: ['flujos'] }[rel.tipo];
+    lugaresEnZonaPrincipal: ['propiedades', 'zonas', 'lugares'], tareaInventario: ['flujos'],
+    flujoBasePropiedad: ['propiedades', 'flujos'], invPrincipalPropiedad: ['propiedades', 'zonas'] }[rel.tipo];
   if (!necesita) return r('no concluyente', 'tipo desconocido: ' + rel.tipo);
   const noVisto = necesita.filter(g => !vistos[g]);
   if (noVisto.length) return r('no concluyente', 'sin respuesta de: ' + noVisto.join(', '));
@@ -82,6 +84,21 @@ function evaluarRelacion(rel, cuerpos, vistos) {
       return !l || l.activo === false || !zonas.has(String(zona));
     });
     return mal.length ? r('falta', 'no están en una zona principal activa de ' + rel.propiedad + ': ' + mal.join(', ')) : r('ok', (rel.lugares || []).length + ' lugar(es) en la zona principal de ' + rel.propiedad);
+  }
+  if (rel.tipo === 'flujoBasePropiedad') {
+    // v4.1 (M-370): la propiedad usa ese flujo como base y no hay una copia del flujo para esa propiedad (HK usaría la copia)
+    const p = porNombre(props, rel.propiedad), flujos = registros(cuerpos.flujos), f = porNombre(flujos, rel.flujo);
+    if (!p || !f) return r('falta', 'no está ' + (!p ? rel.propiedad : rel.flujo));
+    if (String(p.flujoBaseId) !== String(f.id)) return r('falta', rel.propiedad + ' no tiene ' + rel.flujo + ' como flujo base');
+    const copias = flujos.filter(x => String(x.id) !== String(f.id) && (String(x.propId) === String(p.id) || lista(x.propIds).includes(String(p.id)))
+      && ['origenId', 'clonDe', 'copiaDe', 'baseId', 'flujoBaseId'].some(k => String(x[k]) === String(f.id)));
+    return copias.length ? r('falta', 'hay ' + copias.length + ' copia(s) de ' + rel.flujo + ' para ' + rel.propiedad) : r('ok', rel.propiedad + ' usa ' + rel.flujo + ' sin copia');
+  }
+  if (rel.tipo === 'invPrincipalPropiedad') {
+    // v4.1 (M-370): el conteo va a la zona principal fijada en la propiedad (invPrincipalId)
+    const p = porNombre(props, rel.propiedad), z = porNombre(registros(cuerpos.zonas), rel.zona);
+    if (!p || !z) return r('falta', 'no está ' + (!p ? rel.propiedad : rel.zona));
+    return String(p.invPrincipalId) === String(z.id) ? r('ok', rel.propiedad + ' cuenta en ' + rel.zona) : r('falta', rel.propiedad + ' no tiene ' + rel.zona + ' como zona principal de inventario');
   }
   if (rel.tipo === 'tareaInventario') {
     // v4: el flujo tiene una tarea con ese nombre y inventario.lista = rel.lista (y al menos rel.articulos artículos)

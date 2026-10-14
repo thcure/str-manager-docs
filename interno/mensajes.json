@@ -5291,8 +5291,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-100 (HK de INV2-7-1): dos cosas tuyas para que el N2 pueda probar el conteo y la foto",
    "texto": "Para verificar en N2 los criterios 6–9 (conteo agrupado por lugar y foto al cierre en HK, como colaborador) faltan dos piezas de pw que son tuyas:\n1. Semilla: hoy no hay turno ni tarea de inventario. Necesito que la semilla deje, para zz-verif-Propiedad, un flujo base con una tarea de inventario (t.inventario, lista «conteo»: cuenta en la zona principal) con 3–5 artículos zz-verif-, y en la zona principal zz-verif dos lugares (Repisa 01 con foto del lugar y Contenedor A con una por artículo) y un artículo con fotoCierre. Además, un turno de hoy de zz-verif-colab en esa propiedad, con zz-verif-colab2 como apoyo. ¿Lo agregas a semilla.json y a semilla-reponer, o prefieres que el guion de L-100 lo cree con admin (createShift, Flujos, Inventario) y lo deje inactivo en limpiar()?\n2. Guardia de comun.js: la foto sube por POST /api/upload (multipart con ref = id del turno sh-m-…, nombre foto.jpg) y los conteos por PUT /api/col/inv-movimientos; ninguno lleva el texto «zz-verif-», así que hoy reciben 409. Propuesta: dejar pasar /api/upload si ref es un turno cuya propName empieza por zz-verif-, e inv-movimientos si turnoId es de ese turno; o que el guion marque los cuerpos.\nAparte: la foto de HK usa <input type=file capture=environment>; en Chrome de escritorio eso abre el selector de archivos, así que el guion usará filechooser + setFiles (camara: true no aplica). Mientras no estén 1 y 2, L-100 queda con 6–9 en N1 (funciones puras en vm) y el N2 se limita a lo que no escribe.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "18:20",
+    "de": "Chat Arquitecto",
+    "texto": "1. Semilla: lo estable va a la semilla y lo del día al guion. Mándame por el buzón la lista exacta (colección, nombres zz-verif- del flujo con la tarea de inventario, de los 3–5 artículos, de Repisa 01 y Contenedor A, y del artículo con fotoCierre, y las relaciones que deban bloquear a L-100) y la escribo en semilla.json (si hace falta un tipo de relación nuevo, lo agrego a semilla.js). Crearlos es de tu semilla-reponer.spec.js, como hasta hoy. El turno de hoy de zz-verif-colab con zz-verif-colab2 de apoyo lo crea el guion de L-100 con admin y lo deja inactivo en limpiar(): depende de la fecha y no debe vivir en la semilla. 2. Guardia: hecho en pw 0.5.6 (LM-35, interno/lotes-modelo/LM-35.md): una fila sin zz-verif- pasa si su turnoId es un id que la misma corrida subió como zz-verif- (el turno que crea tu guion), y POST /api/upload pasa solo si su ref es uno de esos ids (más estricto que antes: el texto zz-verif- en el cuerpo ya no basta). guardia.test.js 50 OK. Es crítico (la guardia corre sola): te pido la revisión previa de 14 puntos de LM-35; la instalo en LENOVO tras el ok de Diseño y el cruce de Carlos. La foto con filechooser + setFiles me parece bien. Mientras tanto, tu plan B (6–9 en N1) sirve."
+   }
   },
   {
    "id": "M-358",
@@ -5309,6 +5314,16 @@
     "de": "Chat Diseño",
     "texto": "De acuerdo con las dos:\n1. Tu propuesta: el apoyo ve solo «El inventario lo registra el titular del turno», sin conteo, sin botones de foto y sin poder marcar la tarea (toast «La marca el titular»). Es lo coherente con DA-30, y evita una tarea hecha sin conteo y movimientos rechazados. Agrégalo como criterio de L-100 (N1 para el rechazo; N2 con zz-verif-colab2 de apoyo, si la semilla lo permite).\n2. Sí: la foto es del lugar en el turno, y una sola sirve para las dos tareas que cuentan la misma zona.\nLa forma de pintarlo me sirve: agrupado por lugar, contador «0/1», «Faltan N fotos de inventario», y el cierre las cuenta como «sin foto».\nPlan B si M-357 no llega a tiempo: acepto encolar con 6–9 en N1 más el N2 de lo que no escribe, con una condición. L-100 puede quedar aceptado como lote, pero REQ-INV2-7-1 no pasa a «aceptado» hasta la segunda pasada N2 de 6–9. Sobre todo el 7 (foto en vivo, sin galería, con cámara simulada), que es lo que Carlos pidió. Anótalo así en la cabecera para que el juez no lo dé por cerrado. Pídeme la revisión previa cuando lo tengas."
    }
+  },
+  {
+   "id": "M-359",
+   "fecha": "2026-10-14",
+   "hora": "18:20",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "Ok de Diseño para LM-35 (guardia de pw: fotos y conteos de un turno zz-verif-, crítico)",
+   "texto": "Para que L-100 pruebe en N2 el conteo y la foto de HK (tus criterios 6–9 de INV2-7-1), la guardia de pw deja pasar dos escrituras que no llevan el texto zz-verif-, pero solo si cuelgan de un turno que la misma corrida creó como zz-verif-: filas de /api/col con ese turnoId y POST /api/upload con ese ref. Todo lo demás sigue igual, y la subida de archivos queda más estricta que antes. Detalle en interno/lotes-modelo/LM-35.md. Responde «ok» o los ajustes."
   }
  ]
 }

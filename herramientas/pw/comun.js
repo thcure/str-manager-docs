@@ -87,10 +87,20 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ) {
     const borra = Array.isArray(j.deleted) ? j.deleted.map(String) : [];
     if (borra.some(id => !idsZz.has(id))) return { ok: false, motivo: 'borrado de un id que esta corrida no creo como zz-verif- en ' + u.pathname };
     if (!j.items.length) return borra.length ? { ok: true } : { ok: false, motivo: 'escritura vacia a ' + u.pathname };
-    const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-'));
+    // v0.5.6 (LM-35, M-357): una fila sin el texto zz-verif- también es de prueba si cuelga de un turno que esta corrida
+    // creó como zz-verif- (p. ej. inv-movimientos con turnoId sh-m-… de zz-verif-Propiedad)
+    const deTurnoZz = it => { const t = it && ((it.data && it.data.turnoId) || it.turnoId); return t != null && idsZz.has(String(t)); };
+    const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-') && !deTurnoZz(it));
     if (reales.length) return { ok: false, motivo: reales.length + ' fila(s) sin zz-verif- en ' + u.pathname };
     j.items.forEach(it => { if (it && it.id != null) idsZz.add(String(it.id)); });
     return { ok: true };
+  }
+  // v0.5.6 (LM-35, M-357): la foto de HK sube por POST /api/upload (multipart) con ref = id del turno; pasa solo si ese
+  // turno lo creó esta corrida como zz-verif-
+  if (u.pathname === '/api/upload') {
+    const m = /name="ref"\r?\n\r?\n([^\r\n]+)/.exec(String(cuerpo || ''));
+    if (m && idsZz.has(m[1].trim())) return { ok: true };
+    return { ok: false, motivo: 'subida de archivo sin turno zz-verif- de esta corrida' };
   }
   if (String(cuerpo || '').includes('zz-verif-') || u.href.includes('zz-verif-')) return { ok: true };
   return { ok: false, motivo: 'escritura sin zz-verif- a ' + u.pathname };
@@ -118,7 +128,9 @@ async function abrir(usuario, opciones = {}) {
   await ctx.route('**/*', async (route) => {
     const r = route.request();
     if (guardia) {
-      const d = decidir(r.url(), r.method(), r.postData());
+      let cuerpo = null; try { cuerpo = r.postData(); } catch (e) { }
+      if (cuerpo == null) { try { const b = r.postDataBuffer(); if (b) cuerpo = b.toString('latin1'); } catch (e) { } }   // v0.5.6: multipart
+      const d = decidir(r.url(), r.method(), cuerpo);
       if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().split('?')[0].slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '' });
       if (!d.ok) {
         // v0.4.1: al STR se le responde 409 en vez de cortar la conexion. Asi str-api.js lo trata como rechazo del

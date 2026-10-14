@@ -1,9 +1,10 @@
-﻿# panel-str.ps1 - Panel de jornada del STR · v4.4 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+﻿# panel-str.ps1 - Panel de jornada del STR · v4.5 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+# v4.5: un solo escritorio (Carlos, 14-oct: LENOVO no aguanta el escritorio virtual); Empezar trabaja en el principal.
 # v4.4: Terminar responde al instante, cierra en segundo plano las ventanas de prueba y la de app. que abrió el panel; errores a log\panel.txt.
 # v4.3: la ventana nueva de Chrome se maximiza con Windows (--start-maximized no sirve si Chrome ya estaba abierto).
 # v4.2: Empezar abre solo app. (hPanel queda en «Abrir sitios», para no cargar Chrome).
 # v4.1: Chrome maximizado; refresco más liviano (archivos cada 30 s, red cada 5 min, nada si la ventana está minimizada).
-# Un clic al encender LENOVO: Empezar crea el escritorio STR, quita la pausa, revisa la salud de los sitios,
+# Un clic al encender LENOVO: Empezar quita la pausa, revisa la salud de los sitios,
 # comprueba las sesiones de los perfiles de prueba de pw, abre Claude Desktop y tu Chrome con app. y hPanel.
 # Terminar pone la pausa y cierra las ventanas de los perfiles de prueba (las de abrir-perfil.js; nunca tu Chrome).
 # Terminar y apagar: lo mismo, espera a que la cola termine lo que esta corriendo y apaga en 60 s (cancelable).
@@ -442,18 +443,6 @@ $sbCerrarPerfiles = {
     foreach ($p in @($procs)) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch { } }
     return $n
 }
-# Escritorio virtual nuevo: Win + Ctrl + D
-$CsTeclas = @'
-using System; using System.Runtime.InteropServices;
-public static class TeclasStr {
-  [DllImport("user32.dll")] static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
-  public static void NuevoEscritorio() {
-    keybd_event(0x5B,0,0,UIntPtr.Zero); keybd_event(0x11,0,0,UIntPtr.Zero); keybd_event(0x44,0,0,UIntPtr.Zero);
-    keybd_event(0x44,0,2,UIntPtr.Zero); keybd_event(0x11,0,2,UIntPtr.Zero); keybd_event(0x5B,0,2,UIntPtr.Zero);
-  }
-}
-'@
-function Nuevo-Escritorio { if (-not ('TeclasStr' -as [type])) { Add-Type -TypeDefinition $CsTeclas }; [TeclasStr]::NuevoEscritorio() }
 
 function Empezar-Jornada {
     if (Test-Path $Pausa) { Remove-Item -Path $Pausa -Force }
@@ -487,13 +476,7 @@ function Terminar-Jornada([string]$alFinal) {
 }
 
 # --- Botones ---
-(C 'BtnEmpezar').Add_Click({
-    # El panel se vuelve a abrir en el escritorio nuevo y sigue ahi con Empezar
-    Nuevo-Escritorio
-    Start-Sleep -Milliseconds 900
-    Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', ('"' + $Script + '"'), '-Empezar')
-    $win.Close()
-})
+(C 'BtnEmpezar').Add_Click({ Seguro 'Empezar' { Empezar-Jornada } })
 (C 'BtnTerminar').Add_Click({ Seguro 'Terminar' { Terminar-Jornada } })
 (C 'BtnApagar').Add_Click({ Seguro 'Terminar y apagar' {
     Terminar-Jornada 'Jornada en pausa. Esperando a que la cola termine lo que está corriendo para apagar...'

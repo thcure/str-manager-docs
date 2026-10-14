@@ -685,23 +685,22 @@
     "pw: sesiones.spec.js y abrir-perfil.js; log\\SESIONES-guion.json, L-n-pruebas.json, L-n-veredicto*.json; buzon\\estado-vivo.json"
    ],
    "flujo": [
-    "Empezar: escritorio virtual nuevo (el panel se reabre en él), quita PAUSA, salud de app., pruebas. y fabrica., comprobación de sesiones (por la cola si la jornada está activa; directa si está en pausa), Claude Desktop y Chrome personal con app. y hPanel.",
-    "Terminar: crea PAUSA y cierra solo las ventanas de abrir-perfil.js (perfiles de pw); el lote en curso termina y no empieza otro.",
+    "Empezar (en el escritorio principal; un solo escritorio desde v4.5): quita PAUSA, salud de app., pruebas. y fabrica., comprobación de sesiones (por la cola si la jornada está activa; directa si está en pausa), Claude Desktop y Chrome personal con app. maximizado (v4.3: con la API de Windows, porque --start-maximized no sirve si Chrome ya está abierto).",
+    "Terminar: crea PAUSA al instante y, en segundo plano, cierra la ventana de app. que abrió el panel y las de abrir-perfil.js (perfiles de pw); el lote en curso termina y no empieza otro. Errores y acciones en log\\panel.txt (v4.4).",
     "Terminar y apagar: Terminar, espera a que la cola suelte .corriendo (máx. 45 min) y apaga en 60 s; Cancelar apagado lo detiene.",
     "Volver a entrar (por perfil): abre abrir-perfil.js; Carlos entra con Google, cierra la ventana y pulsa Comprobar."
    ],
    "reglas": [
     "El panel no inicia sesión, no guarda contraseñas ni lee secretos; no usa Claude (cero créditos).",
     "Nunca cierra tu Chrome ni las ventanas de Playwright (las que llevan --enable-automation): solo las de abrir-perfil.js.",
-    "Cada clic en Empezar crea un escritorio virtual nuevo (Windows no deja saber si ya existe uno).",
+    "Un solo escritorio: el escritorio virtual se quitó en v4.5 porque LENOVO no lo aguanta (Carlos, 14-oct). Lección para otros equipos: medir la memoria antes de sumar escritorios o ventanas.",
     "Versión v4 (LM-31, 14-oct-2026); respaldo panel-str.v3.ps1 para volver atrás en un minuto."
    ],
    "instalacion": "Archivos en C:\\Users\\ktcol\\Downloads\\str-instr-cola\\panel\\; acceso directo 'Panel STR' en el escritorio (comando en comandos-usuario.md).",
-   "comprobacion": "Abrir el panel → semáforos de Salud, Perfiles y Trabajo → Empezar abre el escritorio, Claude, Chrome y comprueba sesiones → Terminar deja la jornada en pausa y tu Chrome sigue abierto.",
+   "comprobacion": "Abrir el panel → semáforos de Salud, Perfiles y Trabajo → Empezar abre Claude, Chrome maximizado y comprueba sesiones → Terminar deja la jornada en pausa, cierra la ventana del STR y las de prueba; tus otras ventanas siguen abiertas.",
    "creditos": "Cero; en pausa evita todo despertar de chats.",
    "riesgos": [
-    "Si la jornada queda en pausa por olvido, nada avanza: el chip de arriba lo muestra.",
-    "Empezar dos veces crea dos escritorios virtuales."
+    "Si la jornada queda en pausa por olvido, nada avanza: el chip de arriba lo muestra."
    ]
   },
   {
@@ -1494,7 +1493,7 @@
     "problema": "El dueño necesita empezar y terminar el día con un clic y ver el estado sin preguntar.",
     "cuando": "Siempre que haya una cola local y agentes que consumen créditos.",
     "como": [
-     "Empezar: escritorio, pausa fuera, salud, sesiones, apps.",
+     "Empezar: pausa fuera, salud, sesiones, apps.",
      "Terminar: pausa y cierre de ventanas de prueba.",
      "Terminar y apagar."
     ],

@@ -1,4 +1,5 @@
-﻿# panel-str.ps1 - Panel de jornada del STR · v4.1 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+﻿# panel-str.ps1 - Panel de jornada del STR · v4.2 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+# v4.2: Empezar abre solo app. (hPanel queda en «Abrir sitios», para no cargar Chrome).
 # v4.1: Chrome maximizado; refresco más liviano (archivos cada 30 s, red cada 5 min, nada si la ventana está minimizada).
 # Un clic al encender LENOVO: Empezar crea el escritorio STR, quita la pausa, revisa la salud de los sitios,
 # comprueba las sesiones de los perfiles de prueba de pw, abre Claude Desktop y tu Chrome con app. y hPanel.
@@ -343,10 +344,12 @@ function Buscar-Chrome {
     }
     return $null
 }
-function Abrir-Sitios {
+function Abrir-Sitios([switch]$SoloApp) {
     $ch = Buscar-Chrome
     if (-not $ch) { Mensaje 'No encontré Chrome.'; return }
-    Start-Process -FilePath $ch -ArgumentList @(('--profile-directory=' + $Cfg.perfilPersonal), '--new-window', '--start-maximized', ($Cfg.app + '/str-app-shell.html'), $Cfg.hpanel)
+    $urls = @($Cfg.app + '/str-app-shell.html')
+    if (-not $SoloApp) { $urls += $Cfg.hpanel }
+    Start-Process -FilePath $ch -ArgumentList (@(('--profile-directory=' + $Cfg.perfilPersonal), '--new-window', '--start-maximized') + $urls)
 }
 function Abrir-Claude {
     try {
@@ -388,7 +391,7 @@ function Empezar-Jornada {
     Refrescar -ConRed
     Comprobar-Sesiones
     Abrir-Claude
-    Abrir-Sitios
+    Abrir-Sitios -SoloApp
     Mensaje 'Jornada activa: la cola y el despertador trabajan. Sesiones: la cola las comprueba en 1-2 min.'
 }
 

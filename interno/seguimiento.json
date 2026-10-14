@@ -667,14 +667,15 @@
    "id": "INC-127",
    "tipo": "INC",
    "modulo": "Housekeeping",
-   "etapa": "🔧",
+   "etapa": "✅",
    "fecha": "2026-10-14",
    "severidad": "medio",
    "titulo": "HK: al abrir desde la lista en caché, el «portal:abrir» se pierde y el panel queda sin el turno (c–d del guion de L-101)",
    "causa": "str-m1-housekeeping.html: el arranque (6204–6207) llama a _renderList → _hkPostTurnos y manda hk:turnos antes de los <script src> (6220–6227) y antes del listener de portal:abrir (_hkPortalBridge, 6547). Con el turno ya en caché, el portal abre al instante y el mensaje llega sin nadie escuchando. No era la semilla (M-382: flujo base no compuesto, sin copias).",
-   "pendiente": "Lote fix L-105 (encolado 14-oct 16:02).",
-   "estado": "abierto",
-   "origen": "Veredicto de L-101 (juez, casos c, d, e, 14-oct 15:28)."
+   "pendiente": "",
+   "estado": "cerrado",
+   "origen": "Veredicto de L-101 (juez, casos c, d, e, 14-oct 15:28).",
+   "cierre": "Cerrado por L-105 (9367c8a), aceptado 14-oct 16:07: c y d de REQ-INV2-7-1-hk-turno en verde."
   }
  ],
  "dts": [
@@ -8558,9 +8559,42 @@
    "req": "INC-127",
    "categoria": "estándar",
    "resumen": "HK no manda hk:turnos hasta que su puente escucha portal:abrir (_hkPuenteListo, bloque [PUENTE]); p5c86.",
-   "estado": "registrado",
-   "observacion": "Encolado 15:59. CLI 16:02–16:03: 9367c8a, 60/60.",
-   "hash": "9367c8a"
+   "estado": "aceptado",
+   "observacion": "Encolado 15:59. CLI 16:02–16:03: 9367c8a, 60/60. Juez 16:07: aceptado; regresión verde (hk-turno a–d).",
+   "hash": "9367c8a",
+   "aceptacion": {
+    "lote": "L-105",
+    "hash": "9367c8a",
+    "fecha": "2026-10-14",
+    "horaBogota": "16:07",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 60/60 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: iframe de HK cargado: sí | si: puente de HK listo: sí | si: lista «Hoy» pintada por hk:turnos: sí | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c86 (versión ≥ p5c86: el guion corre como regresión en lotes siguientes)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: hk:turnos en el Calendario: sí (37 turnos)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "d (regresión de la zona inventario, sin caso propio) verificada contra el bloque regresion de L-105-pruebas.json: todos los guiones en verde, incluido REQ-INV2-7-1-hk-turno.spec.js c y d (segunda apertura del mismo turno, ya en caché). No hay letras N3 en la instrucción (n3Preparados vacío, consistente)."
+   }
   }
  ],
  "esquema": {
@@ -10071,10 +10105,10 @@
    "resumen": "Guion REQ-INV2-7-1-hk-turno.spec.js: turno de hoy con tarea de inventario; criterios 6–9, 13 y apoyo en N2 (foto con filechooser + setFiles); semilla-reponer con la semilla v4",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "L-105 aceptado; luego reprobar\\L-101.txt",
+   "esperaA": "verificador",
+   "espera": "reprueba tras L-105 (reprobar\\L-101.txt)",
    "orden": 121.09,
-   "desde": "2026-10-14 15:41",
+   "desde": "2026-10-14 16:09",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "M-358 (condición de Diseño), M-361/M-363 (semilla v4 del Arquitecto con para: L-101). · Redactado (revisión previa 14/14). Pide ok de Diseño (M-373) y al Arquitecto: instalar semilla-reponer s4–s7, plantillaId, colab2 fuera de «para», visto bueno a alinear lastpush (M-372). El apoyo (f) va aparte (sin perfil colab2). DA-34, cruce con Carlos 12-oct 19:13. · ok de Diseño 15:03 (M-373): el REQ pasa a aceptado con 6–9 y 13 en N2 y el apoyo en N1; N2 del apoyo de seguimiento. · Visto bueno del Arquitecto a alinear lastpush (M-372); pw 0.5.8 instalado. REPONER-SEMILLA y L-101 encolados 15:11. · Semilla repuesta 15:11 (s1–s7 OK). CLI 15:11–15:12: def0dba, 58/58. Espera pruebas y veredicto. · 15:15: puerta de pruebas bloqueada: semilla sin invPrincipalId (error de s7: un solo guardado tras cambiar el flujo). s7 corregido (M-376); falta instalar, REPONER-SEMILLA y reprobar\\L-101. · s7 instalado (M-376); REPONER-SEMILLA y reprobar\\L-101 dejados 15:17. · 15:19: la puerta volvió a bloquear aunque s7 comprobó invPrincipalId tras recargar; causa probable en semilla.js (zona por nombre, primera coincidencia): M-377. · pw 0.5.9 (M-377); reprobar\\L-101 dejado 15:22. · Juez 15:28: no aceptado (b, c, d, e caen en abrir(); a, N1 y regresión 19/19 en verde). Causas: INC-126 (enlace ?turno= gastado por el primer hk:turnos desde caché → b) y INC-127 (HK del colaborador no adjunta la tarea de conteo con .task-inv → c–e, causa por medir). Fix L-104; después reprobar\\L-101.txt."
@@ -10087,10 +10121,10 @@
    "resumen": "Portal: ?turno= espera la lista del servidor (20 s) antes de avisar; guion INC-126 con diagnóstico de lo que ve HK (colab y admin) del flujo base de zz-verif-Propiedad; p5c85",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "L-105; luego reprobar L-104",
+   "esperaA": "verificador",
+   "espera": "reprueba tras L-105 (reprobar\\L-104.txt)",
    "orden": 121.095,
-   "desde": "2026-10-14 16:02",
+   "desde": "2026-10-14 16:09",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Fix de L-101 (veredicto 15:28). Revisión previa 12/14 → corregida (4 y 13). Estándar: sin ok de Diseño. L-102 pasa a p5c86. · CLI 15:42–15:44: 488f30a, 59/59. CLAUDE.md:86 dice «shell sigue en p5c84» (la CLI vio el shell en p5c84; corrige la instrucción). El test de versión revisa solo str-api.js y los 5 HTML subidos. · Juez 15:50: no aceptado solo por la regresión c y d de REQ-INV2-7-1-hk-turno (sus criterios a–e en verde; b del guion de L-101 ya pasa). Causa: INC-127 (no es efecto de L-104)."
@@ -10133,15 +10167,15 @@
    "categoria": "estándar",
    "riesgo": "R-portal",
    "resumen": "HK no manda hk:turnos hasta que su puente escucha portal:abrir (_hkPuenteListo); p5c86",
-   "estado": "verificando",
-   "vista": "siguiente",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "espera": null,
    "orden": 121.097,
-   "desde": "2026-10-14 16:03",
+   "desde": "2026-10-14 16:07",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Fix de L-101 c–d y de la regresión de L-104. Revisión previa 13/14 → corregida (4). Estándar: sin ok de Diseño. · Diseño de acuerdo (M-386, 16:03). CLI 16:02–16:03: 9367c8a, 60/60."
+   "nota": "Fix de L-101 c–d y de la regresión de L-104. Revisión previa 13/14 → corregida (4). Estándar: sin ok de Diseño. · Diseño de acuerdo (M-386, 16:03). CLI 16:02–16:03: 9367c8a, 60/60. · Juez 16:07: aceptado (a–c; regresión toda en verde, incluidos c y d de REQ-INV2-7-1-hk-turno)."
   }
  ],
  "riesgos": [

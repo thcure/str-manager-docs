@@ -1,4 +1,4 @@
-// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
+// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s9 para L-103, M-384/M-387). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
 // Nombres literales (no h.dato), sin limpiar(): lo creado se queda como semilla. Si ya existe, no hace nada.
 // L-101 (M-361, M-365, M-369): helpers de los casos s4–s7. Esperan la respuesta del PUT, no el GET del pull.
 async function _put(h, frag, accion) {
@@ -298,6 +298,74 @@ module.exports = {
         const fl = (flujos || []).find((f) => f && fin && String(f.id) === String(fin.flujoBaseId));
         h.espera(!!zp && zp.nombre === 'zz-verif-Principal', 'invPrincipalId tras recargar: ' + (fin && fin.invPrincipalId ? (zp ? zp.nombre : fin.invPrincipalId) : 'vacío'));
         h.espera(!!fl && fl.nombre === 'zz-verif-Flujo base', 'flujoBaseId tras recargar: ' + (fl ? fl.nombre : (fin && fin.flujoBaseId) || 'vacío'));
+      },
+    },
+    {
+      c: 's8', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Estados zz-verif-Secando (siguiente turno), zz-verif-Sucia (operador) y zz-verif-Lista (nada), activos y con su marca (L-103)',
+      async prueba(h) {
+        const p = h.page;
+        const EST = [['zz-verif-Secando', 'turno'], ['zz-verif-Sucia', 'operador'], ['zz-verif-Lista', 'nada']];
+        await _tab(h, 'circuito');
+        for (const [n, pend] of EST) {
+          let f = _fila(p, '#esLista tbody tr', n).first();
+          if (!(await f.count())) {
+            await p.click('#pane-circuito button:has-text("＋ Estado")');
+            await p.waitForSelector('#esModal #esNombre', { state: 'visible' });
+            await p.fill('#esNombre', n);
+            await p.selectOption('#esModal select#esPendiente', pend);
+            const r = await _put(h, '/api/col/inv-estados', () => p.click('#esModal button:has-text("Guardar")'));
+            h.espera(r && r.status() === 200, n + ' creado: ' + (r ? r.status() : 'sin respuesta'));
+            f = _fila(p, '#esLista tbody tr', n).first();
+          }
+          const act = f.getByRole('button', { name: 'Activar', exact: true });
+          if (await act.count()) {
+            const r = await _put(h, '/api/col/inv-estados', () => act.first().click());
+            h.espera(r && r.status() === 200, n + ' activado: ' + (r ? r.status() : 'sin respuesta'));
+          }
+          const sel = f.locator('select[data-es-pendiente]');
+          if ((await sel.inputValue().catch(() => '')) !== pend) {
+            // El select de la fila guarda al cambiar (_esPendiente → _guardarEstados).
+            const r = await _put(h, '/api/col/inv-estados', () => sel.selectOption(pend));
+            h.espera(r && r.status() === 200, n + ' marca corregida a ' + pend + ': ' + (r ? r.status() : 'sin respuesta'));
+          }
+        }
+        // Comprobación con lo que trae el servidor.
+        await p.reload({ waitUntil: 'networkidle' });
+        const est = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-estados-v1') || '[]'));
+        for (const [n, pend] of EST) {
+          const e = (est || []).find((x) => x && x.nombre === n);
+          const marca = e ? (e.pendiente || (e.pendienteAlCerrar ? 'turno' : 'nada')) : '—';
+          h.espera(!!e && e.activo !== false && marca === pend, n + ' tras recargar: ' + (e ? (e.activo === false ? 'inactivo' : 'activo') + ' · ' + marca : 'no está'));
+        }
+      },
+    },
+    {
+      c: 's9', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Proveedor zz-verif-Lavandería activo (L-103)',
+      async prueba(h) {
+        const p = h.page, N = 'zz-verif-Lavandería';
+        await _tab(h, 'proveedores');
+        let f = _fila(p, '#pvLista tbody tr', N).first();
+        if (!(await f.count())) {
+          await p.click('#pane-proveedores button:has-text("＋ Proveedor")');
+          await p.waitForSelector('#pvModal #pvNombre', { state: 'visible' });
+          await p.fill('#pvNombre', N);
+          await p.fill('#pvDireccion', 'zz-verif- dirección de prueba');
+          await p.fill('#pvContacto', 'zz-verif- contacto de prueba');
+          const r = await _put(h, '/api/col/inv-proveedores', () => p.click('#pvModal button:has-text("Guardar")'));
+          h.espera(r && r.status() === 200, N + ' creado: ' + (r ? r.status() : 'sin respuesta'));
+          f = _fila(p, '#pvLista tbody tr', N).first();
+        }
+        const act = f.getByRole('button', { name: 'Activar', exact: true });
+        if (await act.count()) {
+          const r = await _put(h, '/api/col/inv-proveedores', () => act.first().click());
+          h.espera(r && r.status() === 200, N + ' activado: ' + (r ? r.status() : 'sin respuesta'));
+        }
+        await p.reload({ waitUntil: 'networkidle' });
+        const pv = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-proveedores-v1') || '[]'));
+        const e = (pv || []).find((x) => x && x.nombre === N);
+        h.espera(!!e && e.activo !== false, N + ' tras recargar: ' + (e ? (e.activo === false ? 'inactivo' : 'activo') : 'no está'));
       },
     },
   ],

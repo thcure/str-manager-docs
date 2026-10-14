@@ -99,10 +99,13 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true, v51: true, v52: true };   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
+const GUARDIA = { v5: true, v51: true, v52: true, v53: true };   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
 // v0.5.16 (M-400, L-103): v52 = el PUT a /api/col/inv-pendientes que CIERRA o REASIGNA un pendiente de la corrida (su propio
 // id ya es de la corrida por v51 y su turnoOrigenId sigue siendo un turno zz de la corrida), con el candado R11 más «grupo».
 // No permite crear pendientes (un id que la corrida no tiene se corta). Encendida en 0.5.18 (ok de Diseño y cruce de Carlos 18:22, M-401).
+// v0.5.19 (M-404, s11): v53 = MÁS estricta. En /api/col/inv-pendientes toda fila, aunque traiga el texto zz-verif- (p. ej.
+// cerradoNota), debe nombrar solo juego/grupo, artículo, lugar, zona, destino y proveedor zz-verif-: así nadie cierra un
+// pendiente de un juego real con solo poner zz-verif- en una nota. No abre nada; se apaga con v53 = false.
 const REF_PENDIENTE = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego|grupo)/i;
 // v0.5.14 (M-396/M-397, L-103): en L-103 el SERVIDOR crea los pendientes al cerrar el turno (turnoOrigenId) y el teléfono
 // solo los lee y los cierra con un movimiento (pendienteId). v51 = un pendiente que la corrida LEE (GET o respuesta de un
@@ -134,13 +137,13 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     // creó como zz-verif- (p. ej. inv-movimientos con turnoId sh-m-… de zz-verif-Propiedad)
     // y además todo lo que nombra (artículo, zona, lugar, origen, destino) es zz-verif- (subido o leído en esta corrida):
     // un movimiento de un turno zz sobre un artículo real movería inventario de Carlos (R11)
-    const refsZz = (it, ref) => {
+    const refsZz = (it, ref, saltar = []) => {
       let ok = true;
       (function rec(o) {
         if (!ok || !o || typeof o !== 'object') return;
         for (const [k, v] of Object.entries(o)) {
           if (v && typeof v === 'object') { rec(v); continue; }
-          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || !(ref || (GUARDIA.v5 ? REF_INVENTARIO : REF_INVENTARIO_V41)).test(k) || v == null || v === '') continue;
+          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || saltar.includes(k) || !(ref || (GUARDIA.v5 ? REF_INVENTARIO : REF_INVENTARIO_V41)).test(k) || v == null || v === '') continue;
           if (String(v).includes('zz-verif-')) continue;   // nombre de una fila de prueba (articuloNombre, zonaNombre…)
           if (!idsZz.has(String(v)) && !idsLeidos.has(String(v))) { ok = false; return; }
         }
@@ -163,6 +166,10 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     const conTexto = j.items.filter(it => JSON.stringify(it).includes('zz-verif-'));
     const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-') && !deTurnoZz(it));
     if (reales.length) return { ok: false, motivo: reales.length + ' fila(s) sin zz-verif- en ' + u.pathname };
+    if (GUARDIA.v53 && /^\/api\/col\/inv-pendientes\/?$/.test(u.pathname)) {
+      const ajenas = j.items.filter(it => !refsZz(it, REF_PENDIENTE, ['turnoOrigenId']));
+      if (ajenas.length) return { ok: false, motivo: ajenas.length + ' pendiente(s) que nombran un juego, artículo, lugar o proveedor real en ' + u.pathname };
+    }
     j.items.forEach(it => { if (it && it.id != null) idsZz.add(String(it.id)); });
     const deTurno = j.items.length - conTexto.length;
     return { ok: true, nota: [conTexto.length ? conTexto.length + ' fila(s) con zz-verif-' : '', deTurno ? deTurno + ' fila(s) de un turno o pendiente zz de la corrida, con referencias zz' : '', borra.length ? borra.length + ' borrado(s) zz de la corrida' : ''].filter(Boolean).join(' + ') };

@@ -143,3 +143,18 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   c.GUARDIA.v52 = false;
   console.log('guardia.test.js: v52 (cerrar o reasignar pendientes de la corrida): 8 OK');
 }
+
+// v0.5.19 (M-404, s11): v53, inv-pendientes con texto zz-verif- pero juego real se corta
+{
+  const c = require('./comun'); const dec = c.decidir;
+  const ids = new Set(), leid = new Set(['gr-zz-1', 'prov-zz-1']);
+  const col = B + '/api/col/inv-pendientes';
+  const cierre = g => JSON.stringify({ items: [{ id: 'pd-viejo', data: { grupoId: g, proveedorId: 'prov-zz-1', turnoOrigenId: 'sh-m-viejo', estado: 'hecho', cerradoNota: 'zz-verif- cierre de semilla' } }], deleted: [] });
+  c.GUARDIA.v53 = false;
+  assert.strictEqual(dec(col, 'PUT', cierre('gr-real-1'), ids, leid).ok, true, 'sin v53: el texto bastaba (hueco)');
+  c.GUARDIA.v53 = true;
+  assert.strictEqual(dec(col, 'PUT', cierre('gr-zz-1'), ids, leid).ok, true, 's11: pendiente de un juego zz (leído) se cierra');
+  assert.strictEqual(dec(col, 'PUT', cierre('gr-real-1'), ids, leid).ok, false, 'v53: juego real con nota zz-verif-: 409');
+  assert.strictEqual(dec(B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"m","data":{"nombre":"zz-verif-x","grupoId":"gr-real-1"}}],"deleted":[]}', ids, leid).ok, true, 'v53 solo mira inv-pendientes');
+  console.log('guardia.test.js: v53 (pendientes con texto zz pero juego real): 4 OK');
+}

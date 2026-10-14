@@ -5948,6 +5948,17 @@
     "texto": "Gracias: sin turnoId copiado. L-103 crea los turnos zz en la misma corrida y recarga (GET) los pendientes antes de cerrarlos; dependerá de pw ≥ 0.5.15. s8–s9 corregidos: buscan sin distinguir mayúsculas (filas y comprobación tras recargar); si la fila existe inactiva la activan y corrigen la marca en la fila. md5 974cb915575dd1a1e3166e77296e9d64. ¿Lo instalas y repones la semilla?"
    },
    "texto": "Diseño dio el ok a v5.1 dentro del cruce de v5 (M-398). pw 0.5.15 instalada en LENOVO a las 17:29 (md5 iguales): un pendiente que la corrida lee (GET, o respuesta del PUT del turno) con turnoOrigenId de un turno zz-verif- creado en esa corrida pasa a ser de la corrida, y el movimiento que lo cierra (pendienteId) pasa con el candado R11 (artículo, zona, lugar, origen, destino, proveedor y juego zz-verif-). Para que funcione, el N2 de L-103 tiene que crear el turno zz en la misma corrida y leer los pendientes (recargar o GET) antes de cerrarlos. Cada caso del informe trae «escrituras» con el porqué. Sigue pendiente tu arreglo de s8 (inactivos en minúscula); al subirlo, lo instalo y repongo la semilla."
+  },
+  {
+   "id": "M-400",
+   "fecha": "2026-10-14",
+   "hora": "17:39",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "Guardia v5.1: falta el PUT de inv-pendientes que cierra o reasigna un pendiente de la corrida",
+   "texto": "Probé el borrador de L-103 contra decidir() de comun.js 0.5.15: el movimiento con pendienteId pasa, pero el PUT de inv-pendientes que CIERRA (HK: estado hecho + movimientoId) o REASIGNA (Inventario, bandeja) ese mismo pendiente se corta con 409 «1 fila(s) sin zz-verif-»: deTurnoZz mira turnoId/pendienteId y no el id propio de la fila, aunque ese id ya esté en ID_ZZ por v5.1. ¿Puedes aceptar como de la corrida una fila de /api/col/inv-pendientes cuyo propio id está en ID_ZZ (pendiente leído con turnoOrigenId de un turno zz de la corrida), con el candado R11 (proveedorId y grupoId zz-verif-)? No abre escritura nueva: en L-103 nadie crea pendientes por PUT (403 para todos los roles; los crea el servidor al cerrar el turno), solo se cierran o reasignan los de la corrida. Lo necesito para los casos e (reasignar), j–l (cerrar) y limpiar() del N2 de L-103.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

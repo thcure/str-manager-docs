@@ -63,6 +63,20 @@ t('relacion para otro lote: falta → aviso', alcanceRelacion({ para: 'L-86' }, 
 t('relacion para este lote: sigue falta', alcanceRelacion({ para: 'L-86' }, { estado: 'falta', observado: 'x' }, 'L-86').estado === 'falta');
 t('relacion sin lote (a mano): estricta', alcanceRelacion({ para: 'L-86' }, { estado: 'falta', observado: 'x' }, undefined).estado === 'falta');
 t('relacion sin para: siempre bloquea', alcanceRelacion({}, { estado: 'falta', observado: 'x' }, 'L-85').estado === 'falta');
+// v4 (pw 0.5.6, M-361): lugares en la zona principal y tarea de inventario; 'para' también degrada el no concluyente
+{
+  const c4 = { propiedades: [[{ id: 'p1', data: { nombre: 'zz-verif-Propiedad' } }]], zonas: [[{ id: 'z1', data: { nombre: 'zz-verif-Z', rol: 'principal', propIds: ['p1'] } }]],
+    lugares: [[{ id: 'l1', data: { nombre: 'zz-verif-Repisa 01', depositoId: 'z1' } }, { id: 'l2', data: { nombre: 'zz-verif-Contenedor A', depositoId: 'z9' } }]],
+    flujos: [[{ id: 'f1', data: { nombre: 'zz-verif-Flujo base', tareas: [{ nombre: 'zz-verif-Conteo de cierre', inventario: { lista: 'conteo', articulos: [1, 2, 3, 4, 5, 6] } }] } }]] };
+  const v4 = { propiedades: true, zonas: true, lugares: true, flujos: true };
+  t('relacion: lugar en zona principal ok', evaluarRelacion({ id: 'l', tipo: 'lugaresEnZonaPrincipal', propiedad: 'zz-verif-Propiedad', lugares: ['zz-verif-Repisa 01'] }, c4, v4).estado === 'ok');
+  t('relacion: lugar en otra zona falta', evaluarRelacion({ id: 'l', tipo: 'lugaresEnZonaPrincipal', propiedad: 'zz-verif-Propiedad', lugares: ['zz-verif-Repisa 01', 'zz-verif-Contenedor A'] }, c4, v4).estado === 'falta');
+  t('relacion: tarea de inventario ok', evaluarRelacion({ id: 't', tipo: 'tareaInventario', flujo: 'zz-verif-Flujo base', tarea: 'zz-verif-Conteo de cierre', lista: 'conteo', articulos: 6 }, c4, v4).estado === 'ok');
+  t('relacion: tarea con menos artículos falta', evaluarRelacion({ id: 't', tipo: 'tareaInventario', flujo: 'zz-verif-Flujo base', tarea: 'zz-verif-Conteo de cierre', articulos: 7 }, c4, v4).estado === 'falta');
+  t('relacion: tarea con otra lista falta', evaluarRelacion({ id: 't', tipo: 'tareaInventario', flujo: 'zz-verif-Flujo base', tarea: 'zz-verif-Conteo de cierre', lista: 'entrega' }, c4, v4).estado === 'falta');
+  t('para otro lote: no concluyente → aviso', alcanceRelacion({ para: 'L-86, L-101' }, { estado: 'no concluyente', observado: 'x' }, 'L-100').estado === 'aviso');
+  t('para con dos lotes: el segundo bloquea', alcanceRelacion({ para: 'L-86, L-101' }, { estado: 'falta', observado: 'x' }, 'L-101').estado === 'falta');
+}
 t('error 21: perfil en uso', explicarError(new Error('browserType.launchPersistentContext: Target page closed\n  - <process did exit: exitCode=21, signal=null>'), 'admin').startsWith('perfil en uso'));
 t('otro error: primera linea', explicarError(new Error('boom\nmas'), 'admin') === 'boom');
 t('sin camara no hay argumentos', argsCamara(null).length === 0);

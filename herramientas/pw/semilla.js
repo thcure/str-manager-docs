@@ -2,6 +2,8 @@
 // Solo lectura: abre cada pagina con zz-verif-admin y lee las respuestas que la propia app pide (no toca tokens
 // ni ejecuta JavaScript sobre la sesion). Guarda solo nombres zz-verif- y conteos: nada de datos reales.
 // v1 comprueba; reponer lo que falte se hace con un guion de semilla del Chat Desarrollo (paso siguiente).
+// v4 (pw 0.5.6, M-361): grupos con 'para' (como las relaciones) y relaciones lugaresEnZonaPrincipal y tareaInventario
+//   para la segunda pasada de L-100 (INV2-7-1 en HK); con 'para', también un 'no concluyente' de otro lote es aviso.
 // v3 (pw 0.4.8, M-278): una relacion con 'para' bloquea solo al lote que nombra; en los demas es 'aviso' (no bloquea).
 // v2 (pw 0.4.6, M-263, L-86): 'relaciones' de semilla.json (colaborador base, zona principal activa, operador sin un
 // permiso). Se evaluan en memoria sobre las respuestas; al log solo van nombres zz-verif- y conteos.
@@ -60,11 +62,43 @@ function permisosDe(u) {
 // Puro: evalua una relacion. cuerpos = {idGrupo: [json, ...]}; vistos = {idGrupo: bool}.
 function evaluarRelacion(rel, cuerpos, vistos) {
   const r = (estado, observado) => ({ id: rel.id, estado, observado });
-  const necesita = { colaboradorBase: ['propiedades', 'usuarios'], zonaPrincipalActiva: ['propiedades', 'zonas'], sinPermiso: ['usuarios'] }[rel.tipo];
+  const necesita = { colaboradorBase: ['propiedades', 'usuarios'], zonaPrincipalActiva: ['propiedades', 'zonas'], sinPermiso: ['usuarios'],
+    lugaresEnZonaPrincipal: ['propiedades', 'zonas', 'lugares'], tareaInventario: ['flujos'] }[rel.tipo];
   if (!necesita) return r('no concluyente', 'tipo desconocido: ' + rel.tipo);
   const noVisto = necesita.filter(g => !vistos[g]);
   if (noVisto.length) return r('no concluyente', 'sin respuesta de: ' + noVisto.join(', '));
   const props = registros(cuerpos.propiedades), usuarios = registros(cuerpos.usuarios);
+  const principalesDe = (p) => registros(cuerpos.zonas).filter(z => (z.rol === 'principal' || (!z.rol && z.tipo === 'principal')) && z.activo !== false && z.privada !== true
+    && (lista(z.propIds).includes(String(p.id)) || String(z.propId) === String(p.id)));
+  if (rel.tipo === 'lugaresEnZonaPrincipal') {
+    // v4: cada lugar (inv-sububicaciones) existe, está activo y cuelga de una zona principal activa de la propiedad
+    const p = porNombre(props, rel.propiedad);
+    if (!p) return r('falta', 'no está ' + rel.propiedad);
+    const zonas = new Set(principalesDe(p).map(z => String(z.id)));
+    const regsL = registros(cuerpos.lugares);
+    const mal = (rel.lugares || []).filter(n => {
+      const l = porNombre(regsL, n);
+      const zona = l && (l.depositoId ?? l.zonaId ?? l.invDepositoId ?? l.deposito);
+      return !l || l.activo === false || !zonas.has(String(zona));
+    });
+    return mal.length ? r('falta', 'no están en una zona principal activa de ' + rel.propiedad + ': ' + mal.join(', ')) : r('ok', (rel.lugares || []).length + ' lugar(es) en la zona principal de ' + rel.propiedad);
+  }
+  if (rel.tipo === 'tareaInventario') {
+    // v4: el flujo tiene una tarea con ese nombre y inventario.lista = rel.lista (y al menos rel.articulos artículos)
+    const f = porNombre(registros(cuerpos.flujos), rel.flujo);
+    if (!f) return r('falta', 'no está ' + rel.flujo);
+    let hallada = null;
+    (function rec(o) {
+      if (hallada || !o || typeof o !== 'object') return;
+      if (!Array.isArray(o) && o.inventario && typeof o.inventario === 'object' && Object.values(o).includes(rel.tarea)) { hallada = o; return; }
+      Object.values(o).forEach(rec);
+    })(f);
+    if (!hallada) return r('falta', rel.flujo + ' no tiene la tarea ' + rel.tarea + ' con inventario');
+    const inv = hallada.inventario, n = Array.isArray(inv.articulos) ? inv.articulos.length : 0;
+    if (rel.lista && inv.lista !== rel.lista) return r('falta', rel.tarea + ': lista ' + inv.lista + ', se esperaba ' + rel.lista);
+    if (rel.articulos && n < rel.articulos) return r('falta', rel.tarea + ': ' + n + ' artículo(s), mínimo ' + rel.articulos);
+    return r('ok', rel.tarea + ' en ' + rel.flujo + ' (lista ' + inv.lista + ', ' + n + ' artículos)');
+  }
   if (rel.tipo === 'colaboradorBase') {
     const p = porNombre(props, rel.propiedad), u = porNombre(usuarios, rel.usuario);
     if (!p || !u) return r('falta', 'no está ' + (!p ? rel.propiedad : rel.usuario));
@@ -73,8 +107,7 @@ function evaluarRelacion(rel, cuerpos, vistos) {
   if (rel.tipo === 'zonaPrincipalActiva') {
     const p = porNombre(props, rel.propiedad);
     if (!p) return r('falta', 'no está ' + rel.propiedad);
-    const n = registros(cuerpos.zonas).filter(z => (z.rol === 'principal' || (!z.rol && z.tipo === 'principal')) && z.activo !== false && z.privada !== true
-      && (lista(z.propIds).includes(String(p.id)) || String(z.propId) === String(p.id))).length;
+    const n = principalesDe(p).length;
     return n >= (rel.minimo || 1) ? r('ok', n + ' zona(s) principal(es) activa(s) en ' + rel.propiedad) : r('falta', rel.propiedad + ' tiene ' + n + ' zona(s) principal(es) activa(s); mínimo ' + (rel.minimo || 1));
   }
   const u = porNombre(usuarios, rel.usuario);
@@ -87,7 +120,7 @@ function evaluarRelacion(rel, cuerpos, vistos) {
 
 // Puro: si la relacion es 'para' otro lote, una falta se degrada a aviso. Sin lote (node semilla.js a mano) se evalua estricta.
 function alcanceRelacion(rel, resultado, lote) {
-  if (!rel.para || !lote || resultado.estado !== 'falta') return resultado;
+  if (!rel.para || !lote || (resultado.estado !== 'falta' && resultado.estado !== 'no concluyente')) return resultado;
   const nombra = String(rel.para).split(/[\s,;()]+/).includes(lote);
   return nombra ? resultado : Object.assign({}, resultado, { estado: 'aviso', observado: resultado.observado + ' (solo bloquea a ' + rel.para + ')' });
 }
@@ -110,7 +143,7 @@ async function comprobarSemilla(opciones = {}) {
         await page.goto(BASE + g.pagina, { waitUntil: 'networkidle', timeout: 45000 });
         await page.waitForTimeout(1500);
       } catch (e) { }
-      grupos.push(evaluar(g, vistos, visto, parcial)); vistosG[g.id] = visto && !parcial;
+      grupos.push(alcanceRelacion(g, evaluar(g, vistos, visto, parcial), opciones.lote)); vistosG[g.id] = visto && !parcial;   // v4: grupos con 'para'
       await page.close().catch(() => { });
     }
   } catch (e) {

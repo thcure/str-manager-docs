@@ -68,3 +68,14 @@ assert.strictEqual(BASE, B); assert.strictEqual(BASE_MODELO, F); n += 7;
   n += 6;
 }
 console.log('guardia.test.js: ' + n + ' pruebas OK');
+
+// v0.5.6 (sugerencia de Desarrollo, M-361): otra carga de página = otra corrida sin ids; la cola de reintentos no pasa
+{
+  const { decidir: dec } = require('./comun');
+  const vacio = new Set(), vacioL = new Set();
+  const r1 = dec(B + '/api/upload', 'POST', '------b\r\nContent-Disposition: form-data; name="ref"\r\n\r\nsh-m-zz1\r\n------b--', vacio, vacioL);
+  const r2 = dec(B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-9","data":{"turnoId":"sh-m-zz1","cantidad":1}}],"deleted":[]}', vacio, vacioL);
+  assert.strictEqual(r1.ok, false, 'reintento de foto sin ids de la corrida debe cortarse');
+  assert.strictEqual(r2.ok, false, 'reintento de movimiento sin ids de la corrida debe cortarse');
+  console.log('guardia.test.js: reintento en otra carga (ids vacíos) → 409 OK');
+}

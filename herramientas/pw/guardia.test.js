@@ -102,3 +102,23 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   assert.ok(r3.ok && r3.nota === 'zz-verif- en el cuerpo', 'nota de cuerpo');
   console.log('guardia.test.js: v5 apagada (como la instalada) y notas de paso: 6 OK');
 }
+
+// v0.5.14 (M-396/M-397): pendiente creado por el servidor con turnoOrigenId de un turno zz de la corrida (v51)
+{
+  const c = require('./comun'); const dec = c.decidir;
+  const ids = new Set(['sh-m-zz1', 'art-zz-1']), leid = new Set();
+  const lectura = JSON.stringify({ items: [{ id: 'pd-30', data: { turnoOrigenId: 'sh-m-zz1', juegoId: 'jg-zz-1' } }, { id: 'pd-31', data: { turnoOrigenId: 'sh-m-real' } }] });
+  const mov = id => '{"items":[{"id":"mv-3' + id + '","data":{"pendienteId":"pd-3' + id + '","tipo":"recepcion","articuloId":"art-zz-1"}}],"deleted":[]}';
+  const col = B + '/api/col/inv-movimientos';
+  c.GUARDIA.v5 = true; c.GUARDIA.v51 = false;
+  assert.strictEqual(c.registrarDescendientes(lectura, ids), 0, 'v51 apagada: no registra');
+  assert.strictEqual(dec(col, 'PUT', mov(0), ids, leid).ok, false, 'v51 apagada: movimiento de un pendiente del servidor se corta');
+  c.GUARDIA.v51 = true;
+  assert.strictEqual(c.registrarDescendientes(lectura, ids), 1, 'v51: registra solo el pendiente del turno zz');
+  assert.strictEqual(dec(col, 'PUT', mov(0), ids, leid).ok, true, 'v51: su movimiento pasa');
+  assert.strictEqual(dec(col, 'PUT', mov(1), ids, leid).ok, false, 'pendiente de un turno real: 409');
+  assert.strictEqual(dec(col, 'PUT', '{"items":[{"id":"mv-32","data":{"pendienteId":"pd-30","proveedorId":"prov-real-1"}}],"deleted":[]}', ids, leid).ok, false, 'proveedor real: 409');
+  assert.strictEqual(c.registrarDescendientes(JSON.stringify({ id: 'pd-40', turnoOrigenId: 'sh-m-zz1' }), ids), 1, 'respuesta suelta (PUT del turno) también');
+  c.GUARDIA.v51 = false;
+  console.log('guardia.test.js: v51 (pendientes del servidor con turnoOrigenId): 7 OK');
+}

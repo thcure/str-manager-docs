@@ -71,6 +71,20 @@ const ID_ZZ = new Set();
 // v0.5.6 (LM-35, ajuste de Diseño M-359): ids de filas zz-verif- que esta corrida LEYÓ (semilla fija: artículos, zonas,
 // lugares). Solo sirven como referencia de un movimiento de turno zz; nunca habilitan un borrado.
 const ID_ZZ_LEIDOS = new Set();
+// v0.5.14 (v51): filas leídas que descienden de un turno zz de la corrida (turnoOrigenId) -> ids de la corrida
+function registrarDescendientes(texto, idsZz = ID_ZZ) {
+  if (!GUARDIA.v51) return 0;
+  let j = null; try { j = JSON.parse(texto); } catch (e) { return 0; }
+  let n = 0;
+  (function rec(o) {
+    if (Array.isArray(o)) { o.forEach(rec); return; }
+    if (!o || typeof o !== 'object') return;
+    const t = (o.data && o.data.turnoOrigenId != null) ? o.data.turnoOrigenId : o.turnoOrigenId;
+    if (o.id != null && t != null && idsZz.has(String(t)) && !idsZz.has(String(o.id))) { idsZz.add(String(o.id)); n++; }
+    Object.values(o).forEach(v => { if (v && typeof v === 'object') rec(v); });
+  })(j);
+  return n;
+}
 function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
   let j = null; try { j = JSON.parse(texto); } catch (e) { return 0; }
   let n = 0;
@@ -85,7 +99,11 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true };
+const GUARDIA = { v5: true, v51: false };
+// v0.5.14 (M-396/M-397, L-103): en L-103 el SERVIDOR crea los pendientes al cerrar el turno (turnoOrigenId) y el teléfono
+// solo los lee y los cierra con un movimiento (pendienteId). v51 = un pendiente que la corrida LEE (GET o respuesta de un
+// PUT a /api/col) y cuyo turnoOrigenId es un turno zz de esta corrida pasa a ser de la corrida; así su movimiento pasa por
+// la regla v5 (pendienteId) con el mismo candado R11. APAGADA hasta el ok de Diseño (y el cruce, si Diseño lo pide).
 const REF_INVENTARIO_V41 = /(articulo|deposito|zona|origen|destino|lugar|ubicacion)/i;
 const REF_INVENTARIO = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego)/i;   // v0.5.10 (M-384): proveedor y juego
 function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
@@ -173,7 +191,14 @@ async function abrir(usuario, opciones = {}) {
   ctx.on('response', async (resp) => {
     try {
       const u = new URL(resp.url());
-      if (u.hostname === HOST_STR && /^\/api\/col(\/|$)/.test(u.pathname) && resp.request().method() === 'GET' && resp.ok()) registrarLeidos(await resp.text());
+      if (u.hostname === HOST_STR && /^\/api\/col(\/|$)/.test(u.pathname) && resp.ok()) {
+        const m = resp.request().method();
+        if (m === 'GET' || (GUARDIA.v51 && m === 'PUT')) {
+          const texto = await resp.text();
+          if (m === 'GET') registrarLeidos(texto);
+          registrarDescendientes(texto);   // v0.5.14 (v51)
+        }
+      }
     } catch (e) { }
   });
   await ctx.route('**/*', async (route) => {
@@ -201,4 +226,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError };
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError };

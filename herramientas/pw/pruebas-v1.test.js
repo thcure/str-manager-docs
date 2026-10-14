@@ -77,10 +77,11 @@ t('relacion sin para: siempre bloquea', alcanceRelacion({}, { estado: 'falta', o
   t('para otro lote: no concluyente → aviso', alcanceRelacion({ para: 'L-86, L-101' }, { estado: 'no concluyente', observado: 'x' }, 'L-100').estado === 'aviso');
   const c5 = { propiedades: [[{ id: 'p1', data: { nombre: 'zz-verif-Propiedad', flujoBaseId: 'f1', invPrincipalId: 'z1' } }]], zonas: c4.zonas,
     flujos: [[{ id: 'f1', data: { nombre: 'zz-verif-Flujo base' } }]] };
-  const c6 = { propiedades: c5.propiedades, zonas: c4.zonas, flujos: [[{ id: 'f1', data: { nombre: 'zz-verif-Flujo base' } }, { id: 'f2', data: { nombre: 'zz-verif-Flujo base (copia)', propId: 'p1', origenId: 'f1' } }]] };
+  const c6 = { propiedades: c5.propiedades, zonas: c4.zonas, flujos: [[{ id: 'f1', data: { nombre: 'zz-verif-Flujo base' } }, { id: 'f2', data: { nombre: 'zz-verif-Flujo base', esPlantilla: false, propId: 'p1', plantillaId: 'f1' } }]] };
   const v5 = { propiedades: true, flujos: true, zonas: true };
   t('relacion: flujo base de la propiedad ok', evaluarRelacion({ id: 'fb', tipo: 'flujoBasePropiedad', propiedad: 'zz-verif-Propiedad', flujo: 'zz-verif-Flujo base' }, c5, v5).estado === 'ok');
   t('relacion: con copia por propiedad falta', evaluarRelacion({ id: 'fb', tipo: 'flujoBasePropiedad', propiedad: 'zz-verif-Propiedad', flujo: 'zz-verif-Flujo base' }, c6, v5).estado === 'falta');
+  t('relacion: plantilla de otra propiedad no es copia', evaluarRelacion({ id: 'fb', tipo: 'flujoBasePropiedad', propiedad: 'zz-verif-Propiedad', flujo: 'zz-verif-Flujo base' }, { propiedades: c5.propiedades, zonas: c4.zonas, flujos: [[{ id: 'f1', data: { nombre: 'zz-verif-Flujo base' } }, { id: 'f3', data: { nombre: 'x', esPlantilla: false, propId: 'p9', plantillaId: 'f1' } }]] }, v5).estado === 'ok');
   t('relacion: zona principal de inventario ok', evaluarRelacion({ id: 'ip', tipo: 'invPrincipalPropiedad', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Z' }, c5, v5).estado === 'ok');
   t('relacion: otra zona principal falta', evaluarRelacion({ id: 'ip', tipo: 'invPrincipalPropiedad', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Otra' }, { propiedades: c5.propiedades, zonas: [[{ id: 'z9', data: { nombre: 'zz-verif-Otra' } }]] }, v5).estado === 'falta');
   t('para con dos lotes: el segundo bloquea', alcanceRelacion({ para: 'L-86, L-101' }, { estado: 'falta', observado: 'x' }, 'L-101').estado === 'falta');

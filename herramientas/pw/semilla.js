@@ -90,8 +90,9 @@ function evaluarRelacion(rel, cuerpos, vistos) {
     const p = porNombre(props, rel.propiedad), flujos = registros(cuerpos.flujos), f = porNombre(flujos, rel.flujo);
     if (!p || !f) return r('falta', 'no está ' + (!p ? rel.propiedad : rel.flujo));
     if (String(p.flujoBaseId) !== String(f.id)) return r('falta', rel.propiedad + ' no tiene ' + rel.flujo + ' como flujo base');
-    const copias = flujos.filter(x => String(x.id) !== String(f.id) && (String(x.propId) === String(p.id) || lista(x.propIds).includes(String(p.id)))
-      && ['origenId', 'clonDe', 'copiaDe', 'baseId', 'flujoBaseId'].some(k => String(x[k]) === String(f.id)));
+    // copia por propiedad (str-propiedades _fbFlujoParaProp, M-372): esPlantilla === false, plantillaId = id del general, propId = la propiedad
+    const copias = flujos.filter(x => String(x.id) !== String(f.id) && x.esPlantilla !== true && (String(x.propId) === String(p.id) || lista(x.propIds).includes(String(p.id)))
+      && ['plantillaId', 'origenId', 'clonDe', 'copiaDe', 'baseId'].some(k => String(x[k]) === String(f.id)));
     return copias.length ? r('falta', 'hay ' + copias.length + ' copia(s) de ' + rel.flujo + ' para ' + rel.propiedad) : r('ok', rel.propiedad + ' usa ' + rel.flujo + ' sin copia');
   }
   if (rel.tipo === 'invPrincipalPropiedad') {

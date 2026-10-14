@@ -640,14 +640,15 @@
    "id": "INC-125",
    "tipo": "INC",
    "modulo": "Inventario",
-   "etapa": "📝",
+   "etapa": "✅",
    "fecha": "2026-10-14",
    "severidad": "medio",
    "titulo": "Ventana «Lugares» a 390 px: tabla #subLista cortada (acciones fuera de vista) y palabras partidas a media palabra",
    "causa": "La tabla conserva 5 columnas a 390 px; td.acc con white-space: nowrap y `#subModal .tbl td { overflow-wrap: anywhere }` comprimen y parten el texto. El guion de L-95 solo medía el desbordamiento de la página, no el de la tabla.",
    "pendiente": "Lote fix L-96 (encolado 14-oct 15:25).",
-   "estado": "abierto",
-   "origen": "Veredicto de L-95 (juez, N3 k, 14-oct 13:16)."
+   "estado": "cerrado",
+   "origen": "Veredicto de L-95 (juez, N3 k, 14-oct 13:16).",
+   "cierre": "Cerrado por L-96 (b71957a), aceptado 14-oct 13:29."
   }
  ],
  "dts": [
@@ -746,11 +747,11 @@
    "id": "DT-35",
    "tipo": "DT",
    "modulo": "Tests y despliegue",
-   "etapa": "pendiente",
+   "etapa": "construido",
    "fecha": "2026-10-13",
    "severidad": "medio",
    "titulo": "LENOVO no tiene php: los tests que ejecutan el PHP real quedan «OMITIDA» y los lotes de servidor (L-85, api/col) se aceptan solo sobre los ports JS más chequeos de estructura. Propuesta de la CLI: correr node tests/run.js en un equipo con php.",
-   "pendiente": "Decisión del Arquitecto (M-279): php 8.3 portable en LENOVO (ZIP oficial en C:\\php; la cola lo agrega al PATH; comandos-usuario y lb-lenovo). Carlos lo instala (pedido 13-oct 15:25). Mientras tanto, OMITIDA + ports con nota en el veredicto. El ambiente de pruebas (ADR-007) no lo reemplaza: ahí corren N2/N3.",
+   "pendiente": "L-98 (3a85ceb, 14-oct 13:33): PHP 8.3.33 en LENOVO (winget, usuario); 78 casos con PHP real, 0 en rojo. Falta el veredicto y reiniciar ejecutar-cola.ps1 para que la cola vea php en el PATH.",
    "estado": "programada"
   },
   {
@@ -7896,8 +7897,8 @@
    "req": "REQ-INV2-7-1 (1/2)",
    "categoria": "crítico",
    "resumen": "Lugares dentro de la zona: colección inv-sububicaciones (lectura del colaborador por zona visible, 403 de escritura, export), ventana «Lugares» en Inventario (crear, ordenar, foto al cierre, asignar sin mover existencias, vista agrupada), casilla «Foto al cierre» del artículo; el apoyo no escribe fotos inv::; p5c82.",
-   "estado": "no aceptado",
-   "observacion": "DA-34, cruce 12-oct 19:13; decisiones M-337; revisión previa 14/14; ok de Diseño 14:05 (M-340). CLI 13:03–13:14: a4862b8, 56/56; sin php en LENOVO (DT-35): 0 casos con PHP real. Juez 13:16: no aceptado solo por el N3 k (tabla de lugares cortada a 390 px) → INC-125; todo lo demás en verde (N2 a–g, j, l; regresión 6/6). Lote fix L-96; si pasa, L-95 se registra aceptado con k cubierto por L-96 c.",
+   "estado": "aceptado",
+   "observacion": "DA-34, cruce 12-oct 19:13; decisiones M-337; revisión previa 14/14; ok de Diseño 14:05 (M-340). CLI 13:03–13:14: a4862b8, 56/56; sin php en LENOVO (DT-35): 0 casos con PHP real. Juez 13:16: no aceptado solo por el N3 k (tabla de lugares cortada a 390 px) → INC-125; todo lo demás en verde (N2 a–g, j, l; regresión 6/6). Lote fix L-96; si pasa, L-95 se registra aceptado con k cubierto por L-96 c. 13:29: L-96 aceptado; su prueba c (N3, captura a 390 px) cubre el criterio k → L-95 aceptado (REQ-INV2-7-1 1/2).",
    "hash": "a4862b8",
    "aceptacion": {
     "lote": "L-95",
@@ -8023,7 +8024,66 @@
    },
    "tiempos": {
     "construido": "2026-10-14 13:14",
-    "aceptado": null,
+    "aceptado": "2026-10-14 13:29",
+    "veredictos": 2,
+    "bloqueados": 0
+   }
+  },
+  {
+   "lote": "L-96",
+   "fecha": "2026-10-14",
+   "req": "INC-125 (REQ-INV2-7-1 1/2, criterio k)",
+   "categoria": "normal",
+   "resumen": "Ventana «Lugares» legible a 390 px: a ≤ 560 px cada lugar es una tarjeta con rótulos y botones a la vista; en la lista de lugares los nombres se cortan solo entre palabras; modal de 760 px en escritorio; p5c83.",
+   "estado": "aceptado",
+   "observacion": "Fix de L-95 (no aceptado solo por el N3 k). Revisión previa 14/14 (fallaba 5 y el caso d → corregidos). CLI 13:25–13:27: b71957a, 57/57. Juez 13:29: aceptado 4/4; regresión de la zona inventario (incluido REQ-INV2-7-1) en verde.",
+   "hash": "b71957a",
+   "aceptacion": {
+    "lote": "L-96",
+    "hash": "b71957a",
+    "fecha": "2026-10-14",
+    "horaBogota": "13:29",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 57/57 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: zona: 200 | si: lugar Contenedor de toallas grandes: 200 | si: lugar Repisa 01: 200 | si: a 390 px: página 390/390 · tabla 328/328 | si: filas con ▲ y Desactivar a la vista: 2 de 2 | si: cabecera de la tabla oculta a 390 px (alto 0)"
+     },
+     {
+      "c": "c",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "captura c-lugares.png a 390 px: cada lugar (zz-verif-L-96-Contenedor de toallas grandes-g06fe y zz-verif-L-96-Repisa 01-g06fe) se pinta como tarjeta con el nombre arriba, «Tipo · contenedor» / «Tipo · repisa», «Foto al cierre ·» con su selector «Sin foto», «Artículos · 0» y los cuatro botones ▲ ▼ Editar Desactivar completos y legibles; ninguna palabra partida a la mitad (los nombres zz-verif-L-96-… se cortan solo en sus guiones y espacios)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ancho 1366 px · cabecera 29 px · fila table-row | si: celdas 5 en la misma línea: sí | si: tabla sin desplazamiento: 714/714"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Regresión de la zona inventario (INC-121, REQ-INV2-4-1, REQ-INV2-4-1-interfaz, REQ-INV2-7-1) toda en ok:true, sin INC. La captura c-lugares confirma el cierre de INC-125 y del criterio k de L-95 (REQ-INV2-7-1)."
+   },
+   "costo": {
+    "minutosCLI": 2,
+    "minutosDueno": 0
+   },
+   "tiempos": {
+    "construido": "2026-10-14 13:27",
+    "aceptado": "2026-10-14 13:29",
     "veredictos": 1,
     "bloqueados": 0
    }
@@ -9128,14 +9188,14 @@
    "req": "REQ-INV2-7-1",
    "categoria": "crítico",
    "resumen": "Sub-ubicaciones en la zona y foto al cierre configurable",
-   "estado": "no aceptado",
+   "estado": "aceptado",
    "vista": "en curso",
    "esperaA": null,
    "espera": "después de REQ-INV2-4-1, antes de REQ-INV2-4-2",
    "orden": 121.0,
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "M-195. DA-34, cruce con Carlos 12-oct 19:13. M-220: «foto en vivo, sin galería» → N2 con cámara simulada (camara: true, pw 0.4.2); proponerlo en la instrucción y que Diseño confirme. · 14-oct: se parte en L-95 (servidor + Inventario) y L-96 (HK); decisiones de detalle propuestas a Diseño (M-337). · L-95 redactado (revisión previa 14/14); ok de Diseño pedido (M-340). · ok de Diseño 14:05 (M-340); encolado 14:10. Condición para L-96: HK no muestra al apoyo fotos de inventario ni conteo agrupado. · CLI 13:03–13:14: a4862b8, 56/56, p5c82. Sin php en LENOVO (DT-35): inv-accesos-zona corrió solo con el port JS y la revisión de estructura, 0 casos con PHP real. Espera veredicto. · Juez 13:16: no aceptado solo por N3 k (INC-125). Fix L-96 encolado 15:25 (normal).",
+   "nota": "M-195. DA-34, cruce con Carlos 12-oct 19:13. M-220: «foto en vivo, sin galería» → N2 con cámara simulada (camara: true, pw 0.4.2); proponerlo en la instrucción y que Diseño confirme. · 14-oct: se parte en L-95 (servidor + Inventario) y L-96 (HK); decisiones de detalle propuestas a Diseño (M-337). · L-95 redactado (revisión previa 14/14); ok de Diseño pedido (M-340). · ok de Diseño 14:05 (M-340); encolado 14:10. Condición para L-96: HK no muestra al apoyo fotos de inventario ni conteo agrupado. · CLI 13:03–13:14: a4862b8, 56/56, p5c82. Sin php en LENOVO (DT-35): inv-accesos-zona corrió solo con el port JS y la revisión de estructura, 0 casos con PHP real. Espera veredicto. · Juez 13:16: no aceptado solo por N3 k (INC-125). Fix L-96 encolado 15:25 (normal). · 13:29: aceptado con L-96 (criterio k).",
    "desde": "2026-10-14"
   },
   {
@@ -9456,34 +9516,48 @@
    "nota": "M-346. No tenía entrada en el plan; falta la ruta del REQ (pedida a Diseño)."
   },
   {
-   "lote": null,
+   "lote": "L-97",
    "req": "REQ-MOD-6 (rol carga)",
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Servicio del modelo: rol «carga» (solo cargar, export, estado y salud; migrar y credenciales 403) y sha + hora de la carga en salud",
-   "estado": "previsto",
+   "estado": "redactado",
    "vista": "siguiente",
    "esperaA": null,
    "espera": "después del fix de L-95; antes de LM-34",
    "orden": 121.1,
    "desde": "2026-10-14",
    "grupo": "MOD",
-   "nota": "M-345 (Arquitecto, ajuste de Diseño en M-344). Referencia LM-34; cruce: Carlos dio «dale» a LM-34 con este orden (chat del Arquitecto, 14-oct). Número al encolar."
+   "nota": "M-345 (Arquitecto, ajuste de Diseño en M-344). Referencia LM-34; cruce: Carlos dio «dale» a LM-34 con este orden (chat del Arquitecto, 14-oct). Número al encolar. · L-97 redactado (revisión previa 14/14); ok de Diseño pedido."
   },
   {
    "lote": "L-96",
    "req": "INC-125",
    "categoria": "normal",
    "resumen": "Ventana «Lugares» legible a 390 px: filas de #subLista como tarjetas, botones a la vista, sin palabras partidas; modal de 760 px en escritorio",
-   "estado": "encolado",
-   "vista": "en curso",
+   "estado": "aceptado",
+   "vista": "hecho",
    "esperaA": null,
    "espera": null,
    "orden": 121.05,
    "desde": "2026-10-14",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Fix de L-95 (criterio k). Revisión previa 14/14 (fallaba 5 y el caso d → corregidos). Encolado 15:25."
+   "nota": "Fix de L-95 (criterio k). Revisión previa 14/14 (fallaba 5 y el caso d → corregidos). Encolado 15:25. · Aceptado 13:29 (juez 4/4)."
+  },
+  {
+   "lote": "L-98",
+   "req": "DT-35",
+   "categoria": "estándar",
+   "resumen": "PHP en LENOVO para que los tests corran el PHP real",
+   "estado": "verificando",
+   "vista": "en curso",
+   "esperaA": null,
+   "espera": null,
+   "orden": 121.06,
+   "desde": "2026-10-14 13:33",
+   "grupo": "Tests",
+   "nota": "Pedido de Carlos 14-oct 13:27 («instala php»). Revisión previa 14/14 (fallaba 5 → corregido). CLI 13:31–13:33: 3a85ceb; PHP 8.3.33 (hosting 8.3.35); 57/57, 78 casos con PHP real, 0 en rojo. Hay que reiniciar ejecutar-cola.ps1."
   }
  ],
  "riesgos": [

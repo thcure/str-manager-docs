@@ -99,10 +99,10 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true, v51: true, v52: false };   // v0.5.15: v51 encendida (ok de Diseño M-398, dentro del cruce de v5)
+const GUARDIA = { v5: true, v51: true, v52: true };   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
 // v0.5.16 (M-400, L-103): v52 = el PUT a /api/col/inv-pendientes que CIERRA o REASIGNA un pendiente de la corrida (su propio
 // id ya es de la corrida por v51 y su turnoOrigenId sigue siendo un turno zz de la corrida), con el candado R11 más «grupo».
-// No permite crear pendientes (un id que la corrida no tiene se corta). APAGADA hasta el ok de Diseño (y el cruce si lo pide).
+// No permite crear pendientes (un id que la corrida no tiene se corta). Encendida en 0.5.18 (ok de Diseño y cruce de Carlos 18:22, M-401).
 const REF_PENDIENTE = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego|grupo)/i;
 // v0.5.14 (M-396/M-397, L-103): en L-103 el SERVIDOR crea los pendientes al cerrar el turno (turnoOrigenId) y el teléfono
 // solo los lee y los cierra con un movimiento (pendienteId). v51 = un pendiente que la corrida LEE (GET o respuesta de un

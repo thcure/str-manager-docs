@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """LM-20 (B7-3) · Arma el paquete de carga inicial del servicio del modelo desde los JSON de str-manager-docs.
 
-Uso:  python3 herramientas/modelo/paquete.py [--salida RUTA]   (por defecto paquete-<sha>.json en el directorio actual)
+Uso:  python3 herramientas/modelo/paquete.py [--complemento] [--sha COMMIT] [--salida RUTA]   (por defecto paquete-<sha>.json en el directorio actual)
 Condición: validar.py en 0 errores (si no, no escribe nada).
 v2 (13-oct): cada fila lleva sus columnas como proyección indexable (ajustadas al tipo de 001_inicial.sql: lo que no
 encaja va a None) y en `extra` {f: archivo.lista, i: posición, o: objeto completo}; la exportación de B7-4 (LM-21)
@@ -153,7 +153,8 @@ def main():
             assert (tabla == 'evento' or f.get('id')) and (tabla != 'evento' or f.get('id')), (tabla, f.get('id'))
     if '--complemento' in sys.argv:
         t['complemento'] = complemento()
-    sha = subprocess.run(['git', '-C', RAIZ, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip() or 'sin-git'
+    # LM-34: --sha <commit> lo pasa el flujo de GitHub (el servicio lo guarda y salud lo devuelve)
+    sha = sys.argv[sys.argv.index('--sha') + 1] if '--sha' in sys.argv else (subprocess.run(['git', '-C', RAIZ, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip() or 'sin-git')
     paquete = {'sha': sha, 'proyecto': 'str', 'generadoEn': datetime.datetime.now().isoformat(timespec='seconds'),
                'conteos': {k: len(v) for k, v in t.items()}, 'tablas': t}
     salida = sys.argv[sys.argv.index('--salida') + 1] if '--salida' in sys.argv else f'paquete-{sha}.json'

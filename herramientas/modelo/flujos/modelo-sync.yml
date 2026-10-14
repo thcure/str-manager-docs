@@ -1,0 +1,33 @@
+# LM-34 (B7-6): carga sola el servicio del modelo con cada push a main que toque interno/.
+# Solo push a main y manual. NUNCA pull_request: el secreto no debe quedar al alcance de una rama ajena.
+# Registro público: sync.py solo escribe sha, códigos y conteos. Para apagarlo: Actions › modelo-sync › Disable.
+name: modelo-sync
+on:
+  push:
+    branches: [main]
+    paths: ['interno/**', 'herramientas/modelo/**']
+  workflow_dispatch:
+    inputs:
+      solo_salud:
+        description: 'Solo GET salud (prueba de alcance)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: modelo-sync
+  cancel-in-progress: false
+jobs:
+  cargar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Salud
+        if: ${{ inputs.solo_salud }}
+        run: python3 herramientas/modelo/sync.py salud
+      - name: Validar, armar y cargar
+        if: ${{ !inputs.solo_salud }}
+        env:
+          MODELO_TOKEN: ${{ secrets.MODELO_TOKEN }}
+        run: python3 herramientas/modelo/sync.py cargar

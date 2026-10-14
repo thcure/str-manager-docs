@@ -67,3 +67,9 @@ Cada pedido pasa después a `modelo-cargas\hechas\<fecha>-<nombre>`. El token nu
 - Base perdida: crear la base en hPanel, rehacer `secrets.php`, `MIGRAR`, cargar el último paquete.
 - Cambio de hosting o de plan: ver §1 (qué vive allí) y la lista de comprobación en `claude/marco/servicio-modelo-estado-2026-10.md` (proyecto).
 - **Fin de archivo (LM-29):** todo `.json` de `interno/` es UTF-8 sin BOM y termina con un solo `\n`; el espejo de la cola lo escribe así (`conFinDeLinea`), `validar.py` lo revisa (`FIN-LINEA`, aviso hasta el corte B7-6) y `.gitattributes` fija `eol=lf`. La ida y vuelta se compara contra `git show <sha>:<ruta>`.
+
+## Sincronización automática (LM-34, en preparación)
+- `sync.py cargar` valida (`validar.py`), arma el paquete del commit (`paquete.py --complemento --sha`) y lo carga con el token del rol `carga`; si la validación falla no llama a `cargar` y lista regla · entidad · id · archivo. `sync.py salud` es la prueba de alcance. Prueba: `python3 herramientas/modelo/sync_test.py` (servidor falso).
+- `espejo.js` compara cada día lo que exporta el servicio con `git show <sha cargado>:<ruta>`, byte a byte.
+- Los flujos esperan en `herramientas/modelo/flujos/` y pasan a `.github/workflows/` cuando el rol `carga` esté aceptado y Carlos ponga el secreto `MODELO_TOKEN`. Solo `push` a `main` y manual; **nunca `pull_request`**. Registro público: solo sha, códigos y conteos.
+- Con el flujo activo, la carga manual por la cola (`modelo-cargas\paquete-*`) solo se usa con el flujo apagado.

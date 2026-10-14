@@ -1,0 +1,27 @@
+# LM-34 (B7-6): una vez al día compara lo que exporta el servicio con el commit cargado, byte a byte.
+# Solo programado y manual. NUNCA pull_request. Registro público: solo sha, conteo y rutas distintas.
+name: modelo-espejo
+on:
+  schedule:
+    - cron: '10 11 * * *'   # 06:10 Bogotá
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: modelo-espejo
+  cancel-in-progress: false
+jobs:
+  comparar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Comparar servicio y Git
+        env:
+          MODELO_TOKEN: ${{ secrets.MODELO_TOKEN }}
+        run: node herramientas/modelo/espejo.js

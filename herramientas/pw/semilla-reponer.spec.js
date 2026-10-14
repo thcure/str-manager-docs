@@ -251,32 +251,53 @@ module.exports = {
     },
     {
       c: 's7', perfil: 'admin', pagina: '/str-propiedades.html',
-      que: 'zz-verif-Propiedad usa zz-verif-Flujo base y su zona principal es zz-verif-Principal',
+      que: 'zz-verif-Propiedad usa zz-verif-Flujo base y su zona principal es zz-verif-Principal (comprobado tras recargar)',
       async prueba(h) {
         const p = h.page;
-        await p.waitForLoadState('networkidle').catch(() => {});
-        await p.waitForSelector('#propList');
-        const id = await p.evaluate(() => ((JSON.parse(localStorage.getItem('str-propiedades-v1') || '[]') || []).find((x) => x && x.name === 'zz-verif-Propiedad') || {}).id || null);
-        h.espera(!!id, 'zz-verif-Propiedad encontrada: ' + (id ? 'sí' : 'no'));
-        if (!id) return;
-        await p.evaluate((x) => selectProp(x), id);
-        await p.waitForSelector('#edit-flujo-base');
-        let cambio = false;
-        const fb = await p.$eval('#edit-flujo-base', (e) => (e.selectedOptions[0] || {}).textContent || '');
-        if (fb.trim() !== 'zz-verif-Flujo base') { await p.selectOption('#edit-flujo-base', { label: 'zz-verif-Flujo base' }); cambio = true; }
+        const leerProp = () => p.evaluate(() => ((JSON.parse(localStorage.getItem('str-propiedades-v1') || '[]') || []).find((x) => x && x.name === 'zz-verif-Propiedad') || null));
+        const abrir = async () => {
+          await p.waitForLoadState('networkidle').catch(() => {});
+          await p.waitForSelector('#propList');
+          const pr = await leerProp();
+          if (pr) { await p.evaluate((x) => selectProp(x), pr.id); await p.waitForSelector('#edit-flujo-base'); }
+          return pr;
+        };
+        let pr = await abrir();
+        h.espera(!!pr, 'zz-verif-Propiedad encontrada: ' + (pr ? 'sí' : 'no'));
+        if (!pr) return;
+        // Paso 1: flujo base, con su propio guardado (cambiarlo repinta la ficha).
+        const fb = await p.$eval('#edit-flujo-base', (e) => ((e.selectedOptions[0] || {}).textContent || '').trim());
+        if (fb !== 'zz-verif-Flujo base') {
+          await p.selectOption('#edit-flujo-base', { label: 'zz-verif-Flujo base' });
+          await p.waitForTimeout(800);
+          const r1 = await _put(h, '/api/col/propiedades', () => p.click('#btn-save-prop'));
+          h.espera(r1 && r1.status() === 200, 'flujo base guardado: ' + (r1 ? r1.status() : 'sin respuesta'));
+          await p.reload({ waitUntil: 'networkidle' });
+          pr = await abrir();
+        }
+        // Paso 2: zona principal, con la ficha ya repintada y su propio guardado.
         await p.waitForSelector('#edit-inv-principal');
-        const leerIp = () => p.$eval('#edit-inv-principal', (e) => ({ v: e.value, t: ((e.selectedOptions[0] || {}).textContent || '').trim() }));
-        const ip0 = await leerIp();
-        if (!ip0.v || ip0.t !== 'zz-verif-Principal') {
+        const ip = await p.$eval('#edit-inv-principal', (e) => ({ v: e.value, t: ((e.selectedOptions[0] || {}).textContent || '').trim() }));
+        if (!ip.v || ip.t !== 'zz-verif-Principal' || String((pr && pr.invPrincipalId) || '') === '') {
           const op = await p.$$eval('#edit-inv-principal option', (os) => (os.find((o) => o.value && o.textContent.trim() === 'zz-verif-Principal') || {}).value);
           h.espera(!!op, 'opción zz-verif-Principal en la zona principal de la propiedad: ' + (op ? 'sí' : 'no'));
-          if (op) { await p.selectOption('#edit-inv-principal', op); cambio = true; }
+          if (op) {
+            await p.selectOption('#edit-inv-principal', op);
+            await p.waitForTimeout(500);
+            const r2 = await _put(h, '/api/col/propiedades', () => p.click('#btn-save-prop'));
+            h.espera(r2 && r2.status() === 200, 'zona principal guardada: ' + (r2 ? r2.status() : 'sin respuesta'));
+          }
         }
-        const ip = (await leerIp()).t;
-        const r = cambio ? await _put(h, '/api/col/propiedades', () => p.click('#btn-save-prop')) : null;
-        h.espera(!cambio || (r && r.status() === 200), 'propiedad: flujo «' + fb.trim() + '» · ' + (cambio ? 'guardada ' + (r ? r.status() : 'sin respuesta') : 'ya estaba'));
-        const fin = await leerIp();
-        h.espera(!!fin.v && fin.t === 'zz-verif-Principal', 'zona principal de zz-verif-Propiedad: «' + fin.t + '» (' + (fin.v ? 'fijada' : 'automática') + ')');
+        // Comprobación con lo que trae el servidor: recarga (pull) y lee la copia local.
+        await p.reload({ waitUntil: 'networkidle' });
+        await p.waitForTimeout(1500);
+        const fin = await leerProp();
+        const zonas = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-depositos-v1') || '[]'));
+        const zp = (zonas || []).find((z) => z && fin && String(z.id) === String(fin.invPrincipalId));
+        const flujos = await p.evaluate(() => JSON.parse(localStorage.getItem('str-flujos-v2') || '[]'));
+        const fl = (flujos || []).find((f) => f && fin && String(f.id) === String(fin.flujoBaseId));
+        h.espera(!!zp && zp.nombre === 'zz-verif-Principal', 'invPrincipalId tras recargar: ' + (fin && fin.invPrincipalId ? (zp ? zp.nombre : fin.invPrincipalId) : 'vacío'));
+        h.espera(!!fl && fl.nombre === 'zz-verif-Flujo base', 'flujoBaseId tras recargar: ' + (fl ? fl.nombre : (fin && fin.flujoBaseId) || 'vacío'));
       },
     },
   ],

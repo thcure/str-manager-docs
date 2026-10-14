@@ -69,4 +69,7 @@ function valorCrudo(t, ruta) {
   for (let n = 0; n < ruta.length; n++) { if (!entrar(ruta[n])) return null; }
   const [a, b] = saltarValor(); return t.slice(a, b);
 }
-module.exports = { bonito, valorCrudo };
+// LM-29: todo JSON de interno/ termina con un solo salto de línea (sin \r ni saltos de más).
+function conFinDeLinea(t) { return String(t).replace(/[\r\n]+$/, '') + '\n'; }
+
+module.exports = { bonito, valorCrudo, conFinDeLinea };

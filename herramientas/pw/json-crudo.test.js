@@ -10,4 +10,9 @@ t('cadenas normalizadas', bonito(a).includes('"s": "a/b á"'));
 t('orden de claves', bonito(a).indexOf('"z"') < bonito(a).indexOf('"a"'));
 t('segundo archivo', bonito(valorCrudo(raw, ['archivos', 'interno/b.json'])) === '{\n "x": 2\n}');
 t('clave ausente', valorCrudo(raw, ['archivos', 'nada']) === null);
+// LM-29: un solo salto de línea final
+{ const { conFinDeLinea } = require('./json-crudo');
+  t('fin: agrega \\n', conFinDeLinea('{\n "x": 2\n}') === '{\n "x": 2\n}\n');
+  t('fin: no duplica', conFinDeLinea('{}\n') === '{}\n');
+  t('fin: quita sobrantes y \\r', conFinDeLinea('{}\r\n\n') === '{}\n'); }
 console.log('json-crudo.test.js:', ok, 'OK,', mal, 'FAIL'); process.exitCode = mal ? 1 : 0;

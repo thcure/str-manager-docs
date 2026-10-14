@@ -13,7 +13,7 @@ const crypto = require('crypto');
 const ROLES = ['tablero', 'desarrollo', 'diseno'];
 const DIAS_VIGENCIA = 180;
 const { COLA, BASE_MODELO: BASE } = require('./comun');   // v0.5.3 (M8): el modelo vive en fabrica.
-const { bonito, valorCrudo } = require('./json-crudo');   // pw 0.5.2: espejo exacto (119.0 sigue 119.0)
+const { bonito, valorCrudo, conFinDeLinea } = require('./json-crudo');   // pw 0.5.2: espejo exacto (119.0 sigue 119.0)
 
 async function main() {
   const accion = process.argv[2];
@@ -81,7 +81,7 @@ async function main() {
         const destino = path.join(esp, ...ruta.split('/'));
         fs.mkdirSync(path.dirname(destino), { recursive: true });
         const crudo = valorCrudo(texto, ['archivos', ruta]);
-        fs.writeFileSync(destino, (crudo ? bonito(crudo) : JSON.stringify(contenido, null, 1)));
+        fs.writeFileSync(destino, conFinDeLinea(crudo ? bonito(crudo) : JSON.stringify(contenido, null, 1)));   // LM-29: un \n final
         escritos.push(ruta);
       }
       cuerpo = { parcial: cuerpo.parcial, cubre: cuerpo.cubre, sinOrigen: cuerpo.sinOrigen, complemento: cuerpo.complemento, escritos };   // el log no guarda los datos

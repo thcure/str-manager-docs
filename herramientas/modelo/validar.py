@@ -176,6 +176,16 @@ for m in mensajes:
 en_curso = [l for l in lotes if l.get('estado') in ('encolado', 'construyendo', 'construido', 'verificando', 'desplegado')]
 if len(en_curso) > E['limites']['lotesEnCurso']: avi('R-curso', 'lote', ','.join(str(l.get('lote')) for l in en_curso), f'{len(en_curso)} lotes en curso a la vez')
 
+# LM-29: todo .json de interno/ es UTF-8 sin BOM y termina con un solo salto de línea (aviso hasta el corte B7-6)
+for base, _, nombres in os.walk(os.path.join(RAIZ, 'interno')):
+    for nom in sorted(nombres):
+        if not nom.endswith('.json'): continue
+        ruta = os.path.join(base, nom); rel = os.path.relpath(ruta, RAIZ).replace(os.sep, '/')
+        b = open(ruta, 'rb').read()
+        if b.startswith(b'\xef\xbb\xbf'): avi('FIN-LINEA', 'archivo', rel, 'empieza con BOM')
+        if not b.endswith(b'\n'): avi('FIN-LINEA', 'archivo', rel, 'no termina con salto de línea')
+        elif b.endswith(b'\n\n') or b.endswith(b'\r\n'): avi('FIN-LINEA', 'archivo', rel, 'termina con más de un salto o con \\r\\n')
+
 # Informe
 res = {'fecha': ahora.strftime('%Y-%m-%d %H:%M'), 'errores': ERR, 'avisos': AVI,
        'conteos': {'requisitos': len(reqs), 'decisiones': len(das), 'pedidos': len(pedidos), 'planes': len(planes), 'lotes': len(lotes), 'cambios': len(cambios), 'items': len(items), 'mensajes': len(mensajes), 'encargos': len(encargos)}}

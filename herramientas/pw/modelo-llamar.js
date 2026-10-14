@@ -4,7 +4,7 @@
 // exportar (LM-21, cola v7.4): GET /modelo/api/export y deja cada archivo en log\espejo\<ruta> (JSON con sangría 1).
 // credenciales (LM-27b, cola v7.9): genera en claves\modelo-<rol>.txt los tokens que falten (32 bytes aleatorios) y manda
 //   SOLO su SHA-256 a POST /modelo/api/credenciales. Ni tokens ni hashes van al log. claves\ no entra a ninguna copia (K3).
-// roles (LM-27b, cola v7.9): prueba c: con el token tablero GET estado (200) y POST cargar {} (403 «Sin permiso»);
+// roles (LM-27b, cola v7.9; pw 0.5.5 añade el rol carga, L-97 d): prueba c: con el token tablero GET estado (200) y POST cargar {} (403 «Sin permiso»);
 //   con un token inventado GET estado (403 «Token requerido»). El log guarda solo códigos.
 'use strict';
 const fs = require('fs');
@@ -61,8 +61,19 @@ async function main() {
       const a = await llamar('estado', 'GET', tab);
       const b = await llamar('cargar', 'POST', tab);
       const c = await llamar('estado', 'GET', crypto.randomBytes(32).toString('hex'));
-      const ok = a.s === 200 && b.s === 403 && b.e === 'Sin permiso' && c.s === 403 && c.e === 'Token requerido';
-      return fin({ ok, status: ok ? 200 : 0, respuesta: { tableroEstado: a, tableroCargar: b, inventadoEstado: c } });
+      let ok = a.s === 200 && b.s === 403 && b.e === 'Sin permiso' && c.s === 403 && c.e === 'Token requerido';
+      const respuesta = { tableroEstado: a, tableroCargar: b, inventadoEstado: c };
+      // pw 0.5.5 (LM-34 / L-97 prueba d): con claves\modelo-carga.txt, el rol «carga» solo carga, exporta y lee estado/salud
+      const fc = path.join(COLA, 'claves', 'modelo-carga.txt');
+      if (fs.existsSync(fc)) {
+        const car = fs.readFileSync(fc, 'utf8').trim();
+        const d = {
+          cargarVacio: await llamar('cargar', 'POST', car), exportar: await llamar('export', 'GET', car), estado: await llamar('estado', 'GET', car),
+          migrar: await llamar('migrar', 'GET', car), credenciales: await llamar('credenciales', 'POST', car), requisito: await llamar('requisito', 'GET', car) };
+        const okC = d.cargarVacio.s === 422 && d.exportar.s === 200 && d.estado.s === 200 && d.migrar.s === 403 && d.credenciales.s === 403 && d.requisito.s === 403;
+        respuesta.carga = d; ok = ok && okC;
+      } else respuesta.carga = 'sin claves\\modelo-carga.txt (antes, CREDENCIALES)';
+      return fin({ ok, status: ok ? 200 : 0, respuesta });
     } catch (e) { return fin({ ok: false, error: e.message }); }
   }
   else return fin({ ok: false, error: 'accion desconocida: ' + accion });

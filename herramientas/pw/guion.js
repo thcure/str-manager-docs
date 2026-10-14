@@ -13,7 +13,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { abrir, BASE, COLA, PERFILES } = require('./comun');
+const { abrir, BASE, COLA, PERFILES, conDesvio } = require('./comun');
 
 const MARCA = /^###\s*Guion N2\s*(?:→|->)\s*`(tests\/e2e\/[A-Za-z0-9._-]+\.spec\.js)`/;
 
@@ -86,7 +86,7 @@ async function correrGuion(spec, opciones = {}) {
         const page = await ctx.newPage();
         const dirCapt = path.join(COLA, 'log', 'capturas', lote);
         const h = {
-          page, BASE, lote,
+          page: conDesvio(page), BASE, lote,   // v0.5.3: page.request también va al modelo en fabrica.
           espera(cond, observado) { esperas.push({ ok: !!cond, observado: String(observado || '') }); return !!cond; },
           dato(nombre) { return prefijo + nombre; },
           respuesta(fragmento, accion) {
@@ -130,7 +130,7 @@ async function correrGuion(spec, opciones = {}) {
       // v0.4.9 (M-288): limpiar recibe el mismo h que los casos (respuesta y espera); espera solo avisa, nunca lanza
       const avisos = [];
       const hL = {
-        page, BASE, lote,
+        page: conDesvio(page), BASE, lote,
         dato: n => prefijo + n,
         espera(cond, observado) { if (!cond) avisos.push(String(observado || '')); return !!cond; },
         respuesta(fragmento, accion) {

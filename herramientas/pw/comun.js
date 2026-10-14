@@ -23,6 +23,26 @@ function destinoModelo(url) {
   if (u.hostname !== HOST_STR || !/^\/modelo(\/|$)/.test(u.pathname)) return null;
   u.hostname = HOST_MODELO; return u.href;
 }
+// v0.5.3: page.request (APIRequestContext) no pasa por ctx.route; esta envoltura desvía igual sus URL a la fábrica.
+// La usan guion.js en h.page. Todo lo demás de la página se usa tal cual.
+const METODOS_REQUEST = ['get', 'post', 'put', 'patch', 'delete', 'head', 'fetch'];
+function conDesvio(page) {
+  let req = null;
+  return new Proxy(page, {
+    get(t, k) {
+      if (k === 'request') {
+        if (!req) req = new Proxy(t.request, { get(rt, rk) {
+          const v = rt[rk];
+          if (METODOS_REQUEST.includes(rk) && typeof v === 'function') return (url, ...resto) => v.call(rt, typeof url === 'string' ? (destinoModelo(url) || url) : url, ...resto);
+          return typeof v === 'function' ? v.bind(rt) : v;
+        } });
+        return req;
+      }
+      const v = t[k];
+      return typeof v === 'function' ? v.bind(t) : v;
+    },
+  });
+}
 const PERFILES = { admin: 'zz-verif-admin', oper: 'zz-verif-oper', colab: 'zz-verif-colab', colab2: 'zz-verif-colab2' };
 const HOSTS_OK = [HOST_STR, HOST_MODELO, 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
   'firestore.googleapis.com', 'www.googleapis.com', 'apis.google.com', 'www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
@@ -118,4 +138,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara, explicarError };
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, abrir, dirPerfil, argsCamara, explicarError };

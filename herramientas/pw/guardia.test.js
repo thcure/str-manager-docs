@@ -1,7 +1,7 @@
 // guardia.test.js - prueba la guardia de red sin abrir navegador: node guardia.test.js
 'use strict';
 const assert = require('assert');
-const { decidir, destinoModelo, BASE, BASE_MODELO } = require('./comun');
+const { decidir, destinoModelo, conDesvio, BASE, BASE_MODELO } = require('./comun');
 const B = 'https://app.apartamentosbucaramanga.com';
 const F = 'https://fabrica.apartamentosbucaramanga.com';   // v0.5.3: servicio del modelo (M8)
 const casos = [
@@ -39,4 +39,16 @@ let n = 0;
 for (const [url, m, body, esperado] of casos) { assert.strictEqual(decidir(url, m, body).ok, esperado, m + ' ' + url); n++; }
 assert.strictEqual(destinoModelo(B + '/modelo/api/salud'), F + '/modelo/api/salud'); assert.strictEqual(destinoModelo(B + '/modelo/api/estado?x=1'), F + '/modelo/api/estado?x=1'); assert.strictEqual(destinoModelo(B + '/api/health'), null); assert.strictEqual(destinoModelo(B + '/modelos.html'), null); assert.strictEqual(destinoModelo(F + '/modelo/api/salud'), null);
 assert.strictEqual(BASE, B); assert.strictEqual(BASE_MODELO, F); n += 7;
+// conDesvio: page.request.get/post a app./modelo van a la fábrica; lo demás igual y con su this
+{
+  const vistos = [];
+  const req = { get(u) { vistos.push(['get', u, this === req]); return 1; }, post(u, o) { vistos.push(['post', u, o]); return 2; }, otro: 5 };
+  const page = { request: req, url() { return B + '/x'; }, nombre: 'p' };
+  const p = conDesvio(page);
+  assert.strictEqual(p.request.get(B + '/modelo/api/salud'), 1);
+  assert.strictEqual(p.request.post(B + '/api/health', { a: 1 }), 2);
+  assert.deepStrictEqual(vistos, [['get', F + '/modelo/api/salud', true], ['post', B + '/api/health', { a: 1 }]]);
+  assert.strictEqual(p.url(), B + '/x'); assert.strictEqual(p.nombre, 'p'); assert.strictEqual(p.request.otro, 5);
+  n += 6;
+}
 console.log('guardia.test.js: ' + n + ' pruebas OK');

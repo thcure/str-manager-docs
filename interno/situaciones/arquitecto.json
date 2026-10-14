@@ -427,6 +427,45 @@
    "reglaPropuesta": "Cada envío a LENOVO sale de una carpeta nueva de outputs y termina con md5 de lo escrito contra el repo.",
    "yaCubierta": false,
    "estado": "nueva"
+  },
+  {
+   "id": "S-arq-24",
+   "fecha": "2026-10-13",
+   "veces": 1,
+   "categoria": "herramienta",
+   "refs": [
+    "M8 migración",
+    "M-320",
+    "M-321",
+    "pw 0.5.3"
+   ],
+   "quePaso": "Tras el corte, app./modelo dejó de ser el servicio del modelo. Primer diseño: abrir las páginas de los guiones de la zona modelo en fabrica.; Desarrollo avisó (M-321) que /api/health ahí no tiene base del STR. Segundo diseño: desviar app./modelo/* a fabrica. con ctx.route; la regresión dio 9/10 porque REQ-MOD-6:b pide la salud con page.request, que no pasa por ctx.route.",
+   "causa": "Supuse que todo lo que hace la página pasa por ctx.route; las peticiones de APIRequestContext (page.request) no pasan. No leí los 5 guiones antes de elegir el diseño.",
+   "costoMin": 25,
+   "comoSeResolvio": "conDesvio(page) en comun.js: envuelve page.request y cambia la URL con la misma regla (destinoModelo); guion.js entrega h.page envuelto. Probado con Playwright real en local y con la regresión en LENOVO: 9/9 N2 y el N3 preparado.",
+   "leccion": "Antes de cambiar el origen de las pruebas, leer cómo piden los datos los guiones: navegación y fetch pasan por ctx.route; page.request no.",
+   "reglaPropuesta": "Toda regla de red de pw (guardia o desvío) cubre también page.request; guardia.test.js lo comprueba.",
+   "yaCubierta": false,
+   "estado": "nueva"
+  },
+  {
+   "id": "S-arq-25",
+   "fecha": "2026-10-13",
+   "veces": 1,
+   "categoria": "modelo",
+   "refs": [
+    "M8 migración",
+    "B7-6",
+    "paquete f045dcb"
+   ],
+   "quePaso": "EXPORTAR tras cargar f045dcb en fabrica.: 10 de 10 archivos iguales en contenido, pero 4 (mensajes, seguimiento, situaciones/arquitecto y desarrollo) difieren en el salto de línea final: en el repo terminan con \\n y el espejo sin él. Antes de hoy los 10 terminaban sin \\n.",
+   "causa": "El modelo no guarda si un archivo termina con salto de línea; en el repo hay archivos de las dos formas según quién los escribió.",
+   "costoMin": 5,
+   "comoSeResolvio": "No bloquea M8 (la fuente sigue siendo el repo hasta B7-6). Queda como hallazgo para B7-6.",
+   "leccion": "La ida y vuelta exacta incluye el final del archivo: hay que fijar una convención o guardarla.",
+   "reglaPropuesta": "Antes de B7-6: convención única (todos los JSON de interno/ terminan con \\n) y el espejo la aplica, o complemento guarda el final de cada archivo.",
+   "yaCubierta": false,
+   "estado": "nueva"
   }
  ]
 }

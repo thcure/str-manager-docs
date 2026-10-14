@@ -1,4 +1,4 @@
-// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s10 para L-103, M-384/M-387/M-402). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
+// Guion de semilla (PRUEBAS-v1, M-207; s3 del Chat Desarrollo, M-278; s4–s7 para L-101, M-361/M-365/M-369; s8–s11 para L-103, M-384/M-387/M-402/M-403). Crea lo que falte de la semilla fija zz-verif- con zz-verif-admin.
 // Nombres literales (no h.dato), sin limpiar(): lo creado se queda como semilla. Si ya existe, no hace nada.
 // L-101 (M-361, M-365, M-369): helpers de los casos s4–s7. Esperan la respuesta del PUT, no el GET del pull.
 async function _put(h, frag, accion) {
@@ -443,6 +443,45 @@ module.exports = {
           const ok = !!g && g.activo !== false && !!prop && String(g.propId) === String(prop.id) && (g.componentes || []).length > 0;
           h.espera(ok, n + ' tras recargar: ' + (g ? (g.activo === false ? 'inactivo' : 'activo') + ' · propiedad ' + (prop && String(g.propId) === String(prop.id) ? 'zz-verif-Propiedad' : String(g.propId)) + ' · ' + (g.componentes || []).length + ' artículo(s)' : 'no está'));
         }
+      },
+    },
+    {
+      c: 's11', perfil: 'admin', pagina: '/str-inventario.html',
+      que: 'Ningún pendiente abierto de los juegos zz-verif- (los de una corrida fallida de L-103 se cierran; M-403)',
+      async prueba(h) {
+        const p = h.page;
+        await p.waitForLoadState('networkidle').catch(() => {});
+        await p.waitForTimeout(1500);
+        // Cierra como admin (el servidor de L-102 deja al admin cerrar sin movimientoId) solo pendientes de juegos zz-verif-.
+        // La nota lleva zz-verif- para que la guardia reconozca la fila como de prueba; el servidor copia el resto de lo guardado.
+        const r = await p.evaluate(async () => {
+          const pend = JSON.parse(localStorage.getItem('str-inv-pendientes-v1') || '[]') || [];
+          const grupos = JSON.parse(localStorage.getItem('str-inv-grupos-v1') || '[]') || [];
+          const zz = {};
+          grupos.forEach((g) => { if (g && /^zz-verif-/i.test(String(g.nombre || ''))) zz[String(g.id)] = g.nombre; });
+          const abiertos = pend.filter((x) => x && x.estado === 'abierto' && zz[String(x.grupoId)]);
+          const res = [];
+          for (const x of abiertos) {
+            const data = Object.assign({}, x, { estado: 'hecho', cerradoNota: 'zz-verif- cierre de semilla (pendiente de una corrida fallida)' });
+            try {
+              const out = await STRApi.col.push('inv-pendientes', [{ id: x.id, data: data }], []);
+              const it = out && Array.isArray(out.items) ? out.items.find((i) => String(i.id) === String(x.id)) : null;
+              res.push(zz[String(x.grupoId)] + ': ' + (it && it.data && it.data.estado === 'hecho' ? 'cerrado' : 'sin cerrar'));
+            } catch (e) { res.push(zz[String(x.grupoId)] + ': error ' + (e && e.message ? e.message : e)); }
+          }
+          return { n: abiertos.length, res };
+        }).catch((e) => ({ n: -1, res: ['error: ' + e.message] }));
+        h.espera(r.n >= 0, 'pendientes abiertos de juegos zz-verif-: ' + r.n + (r.res.length ? ' · ' + r.res.join(', ') : ''));
+        await p.reload({ waitUntil: 'networkidle' });
+        await p.waitForTimeout(1500);
+        const quedan = await p.evaluate(() => {
+          const pend = JSON.parse(localStorage.getItem('str-inv-pendientes-v1') || '[]') || [];
+          const grupos = JSON.parse(localStorage.getItem('str-inv-grupos-v1') || '[]') || [];
+          const zz = {};
+          grupos.forEach((g) => { if (g && /^zz-verif-/i.test(String(g.nombre || ''))) zz[String(g.id)] = true; });
+          return pend.filter((x) => x && x.estado === 'abierto' && zz[String(x.grupoId)]).length;
+        });
+        h.espera(quedan === 0, 'pendientes abiertos de juegos zz-verif- tras recargar: ' + quedan);
       },
     },
   ],

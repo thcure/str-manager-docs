@@ -2,6 +2,7 @@
 // Solo lectura: abre cada pagina con zz-verif-admin y lee las respuestas que la propia app pide (no toca tokens
 // ni ejecuta JavaScript sobre la sesion). Guarda solo nombres zz-verif- y conteos: nada de datos reales.
 // v1 comprueba; reponer lo que falte se hace con un guion de semilla del Chat Desarrollo (paso siguiente).
+// v5 (pw 0.5.10, M-384): relaciones zonaConRol y articulosDePropiedad (para L-103).
 // v4.3 (pw 0.5.9, M-377): invPrincipalPropiedad acepta cualquiera de las zonas con ese nombre que sea principal activa de la propiedad.
 // v4.1 (pw 0.5.7, M-370): relaciones flujoBasePropiedad e invPrincipalPropiedad (para L-101).
 // v4 (pw 0.5.6, M-361): grupos con 'para' (como las relaciones) y relaciones lugaresEnZonaPrincipal y tareaInventario
@@ -66,7 +67,8 @@ function evaluarRelacion(rel, cuerpos, vistos) {
   const r = (estado, observado) => ({ id: rel.id, estado, observado });
   const necesita = { colaboradorBase: ['propiedades', 'usuarios'], zonaPrincipalActiva: ['propiedades', 'zonas'], sinPermiso: ['usuarios'],
     lugaresEnZonaPrincipal: ['propiedades', 'zonas', 'lugares'], tareaInventario: ['flujos'],
-    flujoBasePropiedad: ['propiedades', 'flujos'], invPrincipalPropiedad: ['propiedades', 'zonas'] }[rel.tipo];
+    flujoBasePropiedad: ['propiedades', 'flujos'], invPrincipalPropiedad: ['propiedades', 'zonas'],
+    zonaConRol: ['propiedades', 'zonas'], articulosDePropiedad: ['propiedades', 'articulos'] }[rel.tipo];
   if (!necesita) return r('no concluyente', 'tipo desconocido: ' + rel.tipo);
   const noVisto = necesita.filter(g => !vistos[g]);
   if (noVisto.length) return r('no concluyente', 'sin respuesta de: ' + noVisto.join(', '));
@@ -108,6 +110,23 @@ function evaluarRelacion(rel, cuerpos, vistos) {
     const detalle = mismas.length + ' zona(s) ' + rel.zona + '; la propiedad apunta a ' + (p.invPrincipalId || 'ninguna');
     return buenas.includes(String(p.invPrincipalId)) ? r('ok', rel.propiedad + ' cuenta en ' + rel.zona + ' (' + detalle + ')')
       : r('falta', rel.propiedad + ' no apunta a una ' + rel.zona + ' principal activa (' + detalle + '; válidas: ' + (buenas.join(', ') || 'ninguna') + ')');
+  }
+  if (rel.tipo === 'zonaConRol') {
+    // v5 (M-384, L-103): una zona activa con ese nombre y ese rol que sirve a la propiedad
+    const p = porNombre(props, rel.propiedad);
+    if (!p) return r('falta', 'no está ' + rel.propiedad);
+    const z = registros(cuerpos.zonas).filter(x => Object.values(x).some(v => v === rel.zona) && x.activo !== false
+      && (lista(x.propIds).includes(String(p.id)) || String(x.propId) === String(p.id)));
+    if (!z.length) return r('falta', rel.zona + ' no sirve a ' + rel.propiedad);
+    return z.some(x => x.rol === rel.rol) ? r('ok', rel.zona + ' (' + rel.rol + ') en ' + rel.propiedad) : r('falta', rel.zona + ' tiene rol ' + z.map(x => x.rol).join('/') + ', se esperaba ' + rel.rol);
+  }
+  if (rel.tipo === 'articulosDePropiedad') {
+    // v5 (M-384, L-103): artículos de esa clase con propId de la propiedad
+    const p = porNombre(props, rel.propiedad);
+    if (!p) return r('falta', 'no está ' + rel.propiedad);
+    const regsA = registros(cuerpos.articulos);
+    const mal = (rel.nombres || []).filter(n => { const a = porNombre(regsA, n); return !a || a.activo === false || (rel.clase && a.clase !== rel.clase) || String(a.propId) !== String(p.id); });
+    return mal.length ? r('falta', 'no son ' + (rel.clase || 'artículos') + ' de ' + rel.propiedad + ': ' + mal.join(', ')) : r('ok', (rel.nombres || []).length + ' ' + (rel.clase || 'artículo') + '(s) de ' + rel.propiedad);
   }
   if (rel.tipo === 'tareaInventario') {
     // v4: el flujo tiene una tarea con ese nombre y inventario.lista = rel.lista (y al menos rel.articulos artículos)

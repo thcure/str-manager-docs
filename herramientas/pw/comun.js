@@ -82,7 +82,7 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
   })(j);
   return n;
 }
-const REF_INVENTARIO = /(articulo|deposito|zona|origen|destino|lugar|ubicacion)/i;
+const REF_INVENTARIO = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego)/i;   // v0.5.10 (M-384): proveedor y juego
 function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   let u;
   try { u = new URL(url); } catch (e) { return { ok: false, motivo: 'url invalida' }; }
@@ -112,14 +112,19 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
         if (!ok || !o || typeof o !== 'object') return;
         for (const [k, v] of Object.entries(o)) {
           if (v && typeof v === 'object') { rec(v); continue; }
-          if (k === 'turnoId' || k === 'id' || !REF_INVENTARIO.test(k) || v == null || v === '') continue;
+          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || !REF_INVENTARIO.test(k) || v == null || v === '') continue;
           if (String(v).includes('zz-verif-')) continue;   // nombre de una fila de prueba (articuloNombre, zonaNombre…)
           if (!idsZz.has(String(v)) && !idsLeidos.has(String(v))) { ok = false; return; }
         }
       })(it);
       return ok;
     };
-    const deTurnoZz = it => { const t = it && ((it.data && it.data.turnoId) || it.turnoId); return t != null && idsZz.has(String(t)) && refsZz(it); };
+    // v0.5.10 (M-384, L-103): también cuelga de prueba si su pendienteId es un pendiente zz-verif- de esta corrida
+    const deTurnoZz = it => {
+      const d = (it && it.data) || {};
+      const padre = [d.turnoId, it && it.turnoId, d.pendienteId, it && it.pendienteId].find(v => v != null && idsZz.has(String(v)));
+      return padre != null && refsZz(it);
+    };
     const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-') && !deTurnoZz(it));
     if (reales.length) return { ok: false, motivo: reales.length + ' fila(s) sin zz-verif- en ' + u.pathname };
     j.items.forEach(it => { if (it && it.id != null) idsZz.add(String(it.id)); });

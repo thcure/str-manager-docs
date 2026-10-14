@@ -88,6 +88,13 @@ t('relacion sin para: siempre bloquea', alcanceRelacion({}, { estado: 'falta', o
     { propiedades: [[{ id: 'p1', data: { nombre: 'zz-verif-Propiedad', invPrincipalId: 'z0' } }]], zonas: [[{ id: 'z0', data: { nombre: 'zz-verif-Z', rol: 'principal', propIds: ['p1'], activo: false } }, { id: 'z2', data: { nombre: 'zz-verif-Z', rol: 'principal', propIds: ['p1'] } }]] }, v5).estado === 'falta');
   t('relacion: zona principal de inventario ok', evaluarRelacion({ id: 'ip', tipo: 'invPrincipalPropiedad', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Z' }, c5, v5).estado === 'ok');
   t('relacion: otra zona principal falta', evaluarRelacion({ id: 'ip', tipo: 'invPrincipalPropiedad', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Otra' }, { propiedades: c5.propiedades, zonas: [[{ id: 'z9', data: { nombre: 'zz-verif-Otra' } }]] }, v5).estado === 'falta');
+  const c7 = { propiedades: [[{ id: 'p1', data: { nombre: 'zz-verif-Propiedad' } }]], zonas: [[{ id: 'zt', data: { nombre: 'zz-verif-Tendedero', rol: 'otra', propIds: ['p1'] } }]],
+    articulos: [[{ id: 'j2', data: { nombre: 'zz-verif-J2', clase: 'juego', propId: 'p1' } }, { id: 'j4', data: { nombre: 'zz-verif-J4', clase: 'unidad', propId: 'p1' } }]] };
+  const v7 = { propiedades: true, zonas: true, articulos: true };
+  t('relacion: zona con rol ok', evaluarRelacion({ id: 'zr', tipo: 'zonaConRol', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Tendedero', rol: 'otra' }, c7, v7).estado === 'ok');
+  t('relacion: zona con otro rol falta', evaluarRelacion({ id: 'zr', tipo: 'zonaConRol', propiedad: 'zz-verif-Propiedad', zona: 'zz-verif-Tendedero', rol: 'principal' }, c7, v7).estado === 'falta');
+  t('relacion: juego de la propiedad ok', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2'], clase: 'juego' }, c7, v7).estado === 'ok');
+  t('relacion: clase distinta falta', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2', 'zz-verif-J4'], clase: 'juego' }, c7, v7).estado === 'falta');
   t('para con dos lotes: el segundo bloquea', alcanceRelacion({ para: 'L-86, L-101' }, { estado: 'falta', observado: 'x' }, 'L-101').estado === 'falta');
 }
 t('error 21: perfil en uso', explicarError(new Error('browserType.launchPersistentContext: Target page closed\n  - <process did exit: exitCode=21, signal=null>'), 'admin').startsWith('perfil en uso'));

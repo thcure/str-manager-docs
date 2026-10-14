@@ -36,6 +36,11 @@ const casos = [
   // ajuste de Diseño (M-359): el artículo y la zona del movimiento también deben ser zz-verif- (subidos o leídos)
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-5","data":{"turnoId":"sh-m-zz1","articuloId":"art-real-7","cantidad":1}}],"deleted":[]}', false],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-6","data":{"turnoId":"sh-m-zz1","articuloId":"art-zz-1","depositoId":"dep-zz-1","cantidad":1}}],"deleted":[]}', true],
+  // v0.5.10 (M-384): pendiente zz de la corrida -> su recepción pasa; con proveedor real, no
+  [B + '/api/col/inv-pendientes', 'PUT', '{"items":[{"id":"pd-zz1","data":{"turnoId":"sh-m-zz1","nota":"zz-verif-pendiente"}}],"deleted":[]}', true],
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-10","data":{"pendienteId":"pd-zz1","tipo":"recepcion","articuloId":"art-zz-1"}}],"deleted":[]}', true],
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-11","data":{"pendienteId":"pd-zz1","tipo":"lavanderia","proveedorId":"prov-real-1"}}],"deleted":[]}', false],
+  [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-12","data":{"pendienteId":"pd-real-9","tipo":"recepcion"}}],"deleted":[]}', false],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-8","data":{"turnoId":"sh-m-zz1","origen":{"depositoId":"dep-real-2"},"articuloId":"art-zz-1"}}],"deleted":[]}', false],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-7","data":{"turnoId":"sh-m-zz1","articuloId":"art-zz-1","depositoId":"dep-real-2","cantidad":1}}],"deleted":[]}', false],
   [B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"mv-2","data":{"turnoId":"sh-m-real","cantidad":3}}],"deleted":[]}', false],

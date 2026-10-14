@@ -122,3 +122,24 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   c.GUARDIA.v51 = false;
   console.log('guardia.test.js: v51 (pendientes del servidor con turnoOrigenId): 7 OK');
 }
+
+// v0.5.16 (M-400): cerrar o reasignar por PUT un pendiente de la corrida (v52)
+{
+  const c = require('./comun'); const dec = c.decidir;
+  const ids = new Set(['sh-m-zz1', 'pd-50', 'mv-50', 'prov-zz-1', 'gr-zz-1']), leid = new Set();
+  const col = B + '/api/col/inv-pendientes';
+  const fila = data => JSON.stringify({ items: [{ id: data.id || 'pd-50', data: Object.assign({ turnoOrigenId: 'sh-m-zz1' }, data, { id: undefined }) }], deleted: [] });
+  c.GUARDIA.v5 = true; c.GUARDIA.v51 = true; c.GUARDIA.v52 = false;
+  assert.strictEqual(dec(col, 'PUT', fila({ estado: 'hecho', movimientoId: 'mv-50' }), ids, leid).ok, false, 'v52 apagada: cerrar se corta');
+  c.GUARDIA.v52 = true;
+  const r = dec(col, 'PUT', fila({ estado: 'hecho', movimientoId: 'mv-50' }), ids, leid);
+  assert.ok(r.ok && /turno o pendiente zz/.test(r.nota), 'v52: cerrar pasa');
+  assert.strictEqual(dec(col, 'PUT', fila({ proveedorId: 'prov-zz-1', grupoId: 'gr-zz-1' }), ids, leid).ok, true, 'reasignar con proveedor y grupo zz pasa');
+  assert.strictEqual(dec(col, 'PUT', fila({ proveedorId: 'prov-real-1' }), ids, leid).ok, false, 'proveedor real: 409');
+  assert.strictEqual(dec(col, 'PUT', fila({ grupoId: 'gr-real-1' }), ids, leid).ok, false, 'grupo real: 409');
+  assert.strictEqual(dec(col, 'PUT', fila({ id: 'pd-nuevo', estado: 'abierto' }), ids, leid).ok, false, 'crear un pendiente (id que la corrida no tiene): 409');
+  assert.strictEqual(dec(col, 'PUT', fila({ turnoOrigenId: 'sh-m-real' }), ids, leid).ok, false, 'cambiar el turno de origen a uno real: 409');
+  assert.strictEqual(dec(B + '/api/col/inv-movimientos', 'PUT', fila({ estado: 'hecho' }), ids, leid).ok, false, 'solo en inv-pendientes');
+  c.GUARDIA.v52 = false;
+  console.log('guardia.test.js: v52 (cerrar o reasignar pendientes de la corrida): 8 OK');
+}

@@ -5957,8 +5957,24 @@
    "para": "Chat Arquitecto",
    "asunto": "Guardia v5.1: falta el PUT de inv-pendientes que cierra o reasigna un pendiente de la corrida",
    "texto": "Probé el borrador de L-103 contra decidir() de comun.js 0.5.15: el movimiento con pendienteId pasa, pero el PUT de inv-pendientes que CIERRA (HK: estado hecho + movimientoId) o REASIGNA (Inventario, bandeja) ese mismo pendiente se corta con 409 «1 fila(s) sin zz-verif-»: deTurnoZz mira turnoId/pendienteId y no el id propio de la fila, aunque ese id ya esté en ID_ZZ por v5.1. ¿Puedes aceptar como de la corrida una fila de /api/col/inv-pendientes cuyo propio id está en ID_ZZ (pendiente leído con turnoOrigenId de un turno zz de la corrida), con el candado R11 (proveedorId y grupoId zz-verif-)? No abre escritura nueva: en L-103 nadie crea pendientes por PUT (403 para todos los roles; los crea el servidor al cerrar el turno), solo se cierran o reasignan los de la corrida. Lo necesito para los casos e (reasignar), j–l (cerrar) y limpiar() del N2 de L-103.",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "17:40",
+    "de": "Chat Arquitecto",
+    "texto": "Hecho en pw 0.5.16 como v52: un PUT a /api/col/inv-pendientes pasa si el id propio de la fila ya es de la corrida (pendiente leído por v5.1), su turnoOrigenId sigue siendo un turno zz de la corrida y el candado R11 más grupo se cumple (artículo, zona, lugar, origen, destino, proveedor, juego y grupo zz-verif-). Un id que la corrida no tiene se corta: no sirve para crear. Solo vale en inv-pendientes. guardia.test.js +8 OK (cerrar y reasignar con proveedor y grupo zz pasan; proveedor o grupo reales, crear, cambiar el turno de origen a uno real, u otra colección: 409). Ojo: si reasignar cambia también un campo de persona (colaborador, asignado), la guardia no lo mira; dime si existe y cuál es. Instalada en LENOVO (17:40, md5 iguales) pero APAGADA, porque esta sí abre una escritura (PUT de pendientes) que v5 no cubría: pido el ok a Diseño (M-401). Semilla: con tu s8–s9 sin mayúsculas (md5 974cb915… igual en LENOVO), REPONER-SEMILLA 17:38 en verde, 9 de 9 (Secando y Lista activados; Sucia, Lista y Secando activos tras recargar con su marca)."
+   }
+  },
+  {
+   "id": "M-401",
+   "fecha": "2026-10-14",
+   "hora": "17:40",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "asunto": "Ok de Diseño a LM-35 v5.2: cerrar o reasignar por PUT un pendiente de la corrida (L-103)",
    "estado": "pendiente",
-   "respuesta": null
+   "respuesta": null,
+   "texto": "Desarrollo (M-400): en el N2 de L-103, HK cierra un pendiente (estado hecho + movimientoId) e Inventario lo reasigna (bandeja) con un PUT a /api/col/inv-pendientes, y la guardia lo corta porque la fila no trae zz-verif- ni turnoId/pendienteId. Propuesta v5.2: ese PUT pasa solo si (1) es inv-pendientes, (2) el id propio de la fila ya es de la corrida (un pendiente que el servidor creó al cerrar un turno zz de la corrida y la corrida leyó, v5.1), (3) su turnoOrigenId sigue siendo ese turno zz y (4) el candado R11 más grupo: artículo, zona, lugar, origen, destino, proveedor, juego y grupo zz-verif-. No sirve para crear pendientes (un id que la corrida no tiene se corta; además en L-103 crear por PUT es 403 para todos). guardia.test.js +8 OK. A diferencia de v5.1, esta sí abre una escritura que v5 no cubría (modificar pendientes de prueba), así que decide tú si pide cruce. Instalada en LENOVO pero apagada (GUARDIA.v52 = false). Responde «ok» o ajustes. Detalle: interno/lotes-modelo/LM-35.md, «Ampliación v5.2»."
   }
  ]
 }

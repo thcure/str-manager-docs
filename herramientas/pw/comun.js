@@ -99,7 +99,11 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true, v51: true };   // v0.5.15: v51 encendida (ok de Diseño M-398, dentro del cruce de v5)
+const GUARDIA = { v5: true, v51: true, v52: false };   // v0.5.15: v51 encendida (ok de Diseño M-398, dentro del cruce de v5)
+// v0.5.16 (M-400, L-103): v52 = el PUT a /api/col/inv-pendientes que CIERRA o REASIGNA un pendiente de la corrida (su propio
+// id ya es de la corrida por v51 y su turnoOrigenId sigue siendo un turno zz de la corrida), con el candado R11 más «grupo».
+// No permite crear pendientes (un id que la corrida no tiene se corta). APAGADA hasta el ok de Diseño (y el cruce si lo pide).
+const REF_PENDIENTE = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego|grupo)/i;
 // v0.5.14 (M-396/M-397, L-103): en L-103 el SERVIDOR crea los pendientes al cerrar el turno (turnoOrigenId) y el teléfono
 // solo los lee y los cierra con un movimiento (pendienteId). v51 = un pendiente que la corrida LEE (GET o respuesta de un
 // PUT a /api/col) y cuyo turnoOrigenId es un turno zz de esta corrida pasa a ser de la corrida; así su movimiento pasa por
@@ -130,13 +134,13 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     // creó como zz-verif- (p. ej. inv-movimientos con turnoId sh-m-… de zz-verif-Propiedad)
     // y además todo lo que nombra (artículo, zona, lugar, origen, destino) es zz-verif- (subido o leído en esta corrida):
     // un movimiento de un turno zz sobre un artículo real movería inventario de Carlos (R11)
-    const refsZz = it => {
+    const refsZz = (it, ref) => {
       let ok = true;
       (function rec(o) {
         if (!ok || !o || typeof o !== 'object') return;
         for (const [k, v] of Object.entries(o)) {
           if (v && typeof v === 'object') { rec(v); continue; }
-          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || !(GUARDIA.v5 ? REF_INVENTARIO : REF_INVENTARIO_V41).test(k) || v == null || v === '') continue;
+          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || !(ref || (GUARDIA.v5 ? REF_INVENTARIO : REF_INVENTARIO_V41)).test(k) || v == null || v === '') continue;
           if (String(v).includes('zz-verif-')) continue;   // nombre de una fila de prueba (articuloNombre, zonaNombre…)
           if (!idsZz.has(String(v)) && !idsLeidos.has(String(v))) { ok = false; return; }
         }
@@ -148,7 +152,13 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
       if (!GUARDIA.v5) { const t = it && ((it.data && it.data.turnoId) || it.turnoId); return t != null && idsZz.has(String(t)) && refsZz(it); }   // v0.5.6 + M-359
       const d = (it && it.data) || {};
       const padre = [d.turnoId, it && it.turnoId, d.pendienteId, it && it.pendienteId].find(v => v != null && idsZz.has(String(v)));
-      return padre != null && refsZz(it);
+      if (padre != null) return refsZz(it);
+      // v0.5.16 (v52): cerrar o reasignar un pendiente de la corrida
+      if (GUARDIA.v52 && /^\/api\/col\/inv-pendientes\/?$/.test(u.pathname) && it && it.id != null && idsZz.has(String(it.id))) {
+        const t = d.turnoOrigenId != null ? d.turnoOrigenId : it.turnoOrigenId;
+        return t != null && idsZz.has(String(t)) && refsZz(it, REF_PENDIENTE);
+      }
+      return false;
     };
     const conTexto = j.items.filter(it => JSON.stringify(it).includes('zz-verif-'));
     const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-') && !deTurnoZz(it));

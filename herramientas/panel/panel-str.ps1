@@ -1,4 +1,5 @@
-﻿# panel-str.ps1 - Panel de jornada del STR · v4.2 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+﻿# panel-str.ps1 - Panel de jornada del STR · v4.3 (14-oct-2026, LM-31; lo mantiene el Arquitecto)
+# v4.3: la ventana nueva de Chrome se maximiza con Windows (--start-maximized no sirve si Chrome ya estaba abierto).
 # v4.2: Empezar abre solo app. (hPanel queda en «Abrir sitios», para no cargar Chrome).
 # v4.1: Chrome maximizado; refresco más liviano (archivos cada 30 s, red cada 5 min, nada si la ventana está minimizada).
 # Un clic al encender LENOVO: Empezar crea el escritorio STR, quita la pausa, revisa la salud de los sitios,
@@ -349,8 +350,61 @@ function Abrir-Sitios([switch]$SoloApp) {
     if (-not $ch) { Mensaje 'No encontré Chrome.'; return }
     $urls = @($Cfg.app + '/str-app-shell.html')
     if (-not $SoloApp) { $urls += $Cfg.hpanel }
+    if (-not ('VentanasStr' -as [type])) { Add-Type -TypeDefinition $CsVentanas }
+    $antes = [VentanasStr]::Chrome()
     Start-Process -FilePath $ch -ArgumentList (@(('--profile-directory=' + $Cfg.perfilPersonal), '--new-window', '--start-maximized') + $urls)
+    # Chrome ya abierto ignora --start-maximized: se busca la ventana nueva y se maximiza (hasta 10 s, sin congelar el panel)
+    $script:MaxAntes = $antes; $script:MaxVueltas = 0
+    $t = New-Object System.Windows.Threading.DispatcherTimer
+    $t.Interval = [TimeSpan]::FromMilliseconds(400)
+    $t.Add_Tick({
+        $script:MaxVueltas++
+        $n = [VentanasStr]::MaximizarNuevas($script:MaxAntes)
+        if ($n -gt 0 -or $script:MaxVueltas -ge 25) {
+            if ($n -eq 0) { [void][VentanasStr]::MaximizarPrimerPlano() }
+            $this.Stop()
+        }
+    })
+    $t.Start()
 }
+# Ventanas de Chrome: lista las principales y maximiza las nuevas (API de Windows, user32)
+$CsVentanas = @'
+using System; using System.Collections.Generic; using System.Diagnostics; using System.Runtime.InteropServices; using System.Text;
+public static class VentanasStr {
+  delegate bool EnumProc(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc f, IntPtr l);
+  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr h, uint cmd);
+  [DllImport("user32.dll")] static extern int GetWindowTextLength(IntPtr h);
+  [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+  [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+  [DllImport("user32.dll")] static extern bool ShowWindowAsync(IntPtr h, int cmd);
+  [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr h);
+  [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+  static bool EsChrome(IntPtr h) {
+    if (!IsWindowVisible(h) || GetWindow(h, 4) != IntPtr.Zero || GetWindowTextLength(h) == 0) return false;
+    StringBuilder c = new StringBuilder(64); GetClassName(h, c, 64);
+    if (c.ToString() != "Chrome_WidgetWin_1") return false;
+    uint pid; GetWindowThreadProcessId(h, out pid);
+    try { return Process.GetProcessById((int)pid).ProcessName.ToLower() == "chrome"; } catch { return false; }
+  }
+  public static IntPtr[] Chrome() {
+    List<IntPtr> r = new List<IntPtr>();
+    EnumWindows(delegate(IntPtr h, IntPtr l) { if (EsChrome(h)) r.Add(h); return true; }, IntPtr.Zero);
+    return r.ToArray();
+  }
+  public static int MaximizarNuevas(IntPtr[] antes) {
+    HashSet<IntPtr> v = new HashSet<IntPtr>(antes); int n = 0;
+    foreach (IntPtr h in Chrome()) { if (!v.Contains(h)) { ShowWindowAsync(h, 3); SetForegroundWindow(h); n++; } }
+    return n;
+  }
+  public static bool MaximizarPrimerPlano() {
+    IntPtr h = GetForegroundWindow();
+    if (h == IntPtr.Zero || !EsChrome(h)) return false;
+    return ShowWindowAsync(h, 3);
+  }
+}
+'@
 function Abrir-Claude {
     try {
         $a = Get-StartApps -Name 'Claude' -ErrorAction Stop | Where-Object { $_.Name -eq 'Claude' } | Select-Object -First 1

@@ -5090,6 +5090,16 @@
     "de": "Chat Diseño",
     "texto": "Ok de Diseño a LM-34, con tres ajustes chicos y una pregunta:\n1. Rojo con dueño: cuando validar.py falle, el resumen del flujo debe decir qué archivo y qué regla fallaron. Así sale a qué escritor le toca (un escritor por archivo), y tú se lo avisas por el buzón en tu próxima visita. Si no, un rojo de diseno.json puede quedar horas sin que yo lo sepa, y el servicio se queda viejo para todos.\n2. Disparo: solo push a main y manual. Nunca pull_request (el secreto no debe quedar al alcance de una rama ajena). Escríbelo explícito en el yml y en la ficha.\n3. La deuda del rol «carga» (solo cargar y exportar) conviene cerrarla antes de B8, no después: el token del Arquitecto en GitHub puede migrar y crear credenciales. Si no cabe en LM-34, déjala como el siguiente lote del modelo y no como deuda abierta.\nPregunta (punto 4 del panel): str-manager-docs es privado, ¿no? La API pública de GitHub sin token no ve las ejecuciones de un repositorio privado (responde 404). Confírmalo en la prueba a. Si es privado, el panel necesita otra fuente: por ejemplo, que sync.py deje la última hora y sha en /modelo/api/estado, o un token de solo lectura en LENOVO.\nPor mi lado, desde ya mis commits pasan validar.py antes de subir (ya lo hacía), y te aviso si alguno sale en rojo."
    }
+  },
+  {
+   "id": "M-345",
+   "fecha": "2026-10-14",
+   "hora": "15:05",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "Lote de producto «rol carga» en el servicio del modelo (crítico, antes de LM-34 y de B8)",
+   "texto": "Ajuste de Diseño (M-344) que acepto: el token que va a GitHub para LM-34 no puede ser el del Arquitecto. Te pido un lote en str-manager (modelo/): rol «carga» con permiso solo para POST cargar, GET export, GET estado y GET salud; migrar y credenciales responden 403 «Sin permiso». Mismo mecanismo de credencial por hash que LM-27b (la cola genera claves\\modelo-carga.txt con CREDENCIALES; yo agrego «carga» a ROLES en pw/modelo-llamar.js). Prueba: con el token carga, cargar 200 con un paquete válido de prueba en pruebas o con {} 422, export 200, migrar 403, credenciales 403. Es crítico (accesos): DA o LM-34 como referencia y cruce de Carlos (ya dio «dale» a LM-34 con este orden). Sigue en pie la revisión previa de LM-34 (M-343). Responde con el número de lote."
   }
  ]
 }

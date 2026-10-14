@@ -14,6 +14,11 @@ async function _tab(h, tab) {
   await h.page.click('.tab[data-tab="' + tab + '"]');
   await h.page.waitForSelector('#pane-' + tab, { state: 'visible' });
 }
+// s8–s9: muestra también los inactivos (un estado o proveedor inactivo con el mismo nombre bloquea crearlo: «Ya existe…»).
+async function _inactivos(h, q) {
+  const chip = h.page.locator('#' + q + 'InactivosChip');
+  if (await chip.count() && !(await chip.evaluate((e) => e.classList.contains('active')))) await chip.click();
+}
 const _ARTS = [['zz-verif-Inv A1', true], ['zz-verif-Inv A2', false], ['zz-verif-Inv A3', false],
   ['zz-verif-Inv B1', false], ['zz-verif-Inv B2', false], ['zz-verif-Inv C1', true]];
 const _LUG = [['zz-verif-Repisa 01', 'repisa', 'lugar', ['zz-verif-Inv A1', 'zz-verif-Inv A2', 'zz-verif-Inv A3']],
@@ -307,6 +312,7 @@ module.exports = {
         const p = h.page;
         const EST = [['zz-verif-Secando', 'turno'], ['zz-verif-Sucia', 'operador'], ['zz-verif-Lista', 'nada']];
         await _tab(h, 'circuito');
+        await _inactivos(h, 'es');
         for (const [n, pend] of EST) {
           let f = _fila(p, '#esLista tbody tr', n).first();
           if (!(await f.count())) {
@@ -315,7 +321,9 @@ module.exports = {
             await p.fill('#esNombre', n);
             await p.selectOption('#esModal select#esPendiente', pend);
             const r = await _put(h, '/api/col/inv-estados', () => p.click('#esModal button:has-text("Guardar")'));
-            h.espera(r && r.status() === 200, n + ' creado: ' + (r ? r.status() : 'sin respuesta'));
+            const err = r ? '' : await p.locator('#esErr').textContent().catch(() => '');
+            h.espera(r && r.status() === 200, n + ' creado: ' + (r ? r.status() : 'sin respuesta' + (err ? ' · «' + err + '»' : '')));
+            if (!r) { await p.evaluate(() => closeModal('esModal')).catch(() => {}); continue; }
             f = _fila(p, '#esLista tbody tr', n).first();
           }
           const act = f.getByRole('button', { name: 'Activar', exact: true });
@@ -346,6 +354,7 @@ module.exports = {
       async prueba(h) {
         const p = h.page, N = 'zz-verif-Lavandería';
         await _tab(h, 'proveedores');
+        await _inactivos(h, 'pv');
         let f = _fila(p, '#pvLista tbody tr', N).first();
         if (!(await f.count())) {
           await p.click('#pane-proveedores button:has-text("＋ Proveedor")');

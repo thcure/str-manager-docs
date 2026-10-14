@@ -106,5 +106,16 @@ t('otro error: primera linea', explicarError(new Error('boom\nmas'), 'admin') ==
 t('sin camara no hay argumentos', argsCamara(null).length === 0);
 t('camara sintetica', argsCamara(true).includes('--use-fake-device-for-media-stream') && argsCamara(true).length === 2);
 t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-for-fake-video-capture=')));
+// v0.5.12 (M-390): escrituras que pasaron, agrupadas con su porqué
+{
+  const { resumirEscrituras } = require('./guion');
+  const B = 'https://app.apartamentosbucaramanga.com';
+  const r = resumirEscrituras([
+    { metodo: 'PUT', url: B + '/api/col/inv-movimientos', paso: true, motivo: '1 fila(s) de un turno o pendiente zz de la corrida, con referencias zz' },
+    { metodo: 'PUT', url: B + '/api/col/inv-movimientos', paso: true, motivo: '1 fila(s) de un turno o pendiente zz de la corrida, con referencias zz' },
+    { metodo: 'POST', url: B + '/api/upload', paso: true, motivo: 'foto con ref de un turno zz de la corrida' }]);
+  t('escrituras agrupadas con conteo', r.length === 2 && r[0] === 'PUT app /api/col/inv-movimientos · 1 fila(s) de un turno o pendiente zz de la corrida, con referencias zz (x2)' && r[1].startsWith('POST app /api/upload · foto'));
+  t('caso sin escrituras → []', Array.isArray(cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, []).escrituras) && cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, []).escrituras.length === 0);
+}
 console.log(ok + ' OK, ' + fail + ' FAIL');
 process.exit(fail ? 1 : 0);

@@ -44,7 +44,17 @@ function loteDe(nombre) { const m = String(nombre).split(/[\\/]/).pop().match(/^
 
 // Puro: decide el resultado de un caso. N2: ok true/false. N3 (LM-19): ok null si quedo preparado (capturas
 // y sin fallos) para que lo juzgue el juez local; false si no se pudo preparar.
-function cerrarCaso(caso, esperas, error, bloqueos, capturas = []) {
+// v0.5.12 (M-390): resumen de las escrituras que la guardia dejó pasar en el caso, con su porqué (nota de decidir)
+function resumirEscrituras(pasaron) {
+  const g = new Map();
+  for (const b of pasaron || []) {
+    let ruta = b.url; try { const u = new URL(b.url); ruta = u.hostname.split('.')[0] + ' ' + u.pathname; } catch (e) { }
+    const k = b.metodo + ' ' + ruta + (b.motivo ? ' · ' + b.motivo : '');
+    g.set(k, (g.get(k) || 0) + 1);
+  }
+  return [...g].map(([k, n]) => n > 1 ? k + ' (x' + n + ')' : k);
+}
+function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = []) {
   const n3 = caso.nivel === 'N3';
   const fallan = esperas.filter(e => !e.ok);
   const partes = esperas.map(e => (e.ok ? 'si: ' : 'NO: ') + e.observado);
@@ -61,6 +71,7 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = []) {
   const r = { c: caso.c, nivel: n3 ? 'N3' : 'N2', perfil: caso.perfil, pagina: caso.pagina, que: caso.que || '', ok, observado: partes.join(' | ').slice(0, 900) };
   if (bloqueos.length) r.escriturasCortadas = bloqueos.length;
   if (n3) r.capturas = capturas;
+  r.escrituras = resumirEscrituras(pasaron);   // v0.5.12: [] = el caso no escribió nada
   return r;
 }
 
@@ -101,7 +112,17 @@ async function correrGuion(spec, opciones = {}) {
             const base = String(caso.c) + '-' + String(nombre).replace(/[^A-Za-z0-9_-]/g, '_');
             const png = path.join(dirCapt, base + '.png');
             await page.screenshot({ path: png, fullPage: op.completa !== false });
-            let texto = ''; try { texto = (await page.innerText('body')).slice(0, 6000); } catch (e) { }
+            let texto = ''; try { texto = await page.innerText('body'); } catch (e) { }
+            // v0.5.12 (M-390): también el texto de los iframes visibles (HK vive en #hkFrame dentro del portal)
+            for (const f of page.frames()) {
+              if (f === page.mainFrame()) continue;
+              try {
+                const el = await f.frameElement(); if (!(await el.isVisible())) continue;
+                const id = await el.getAttribute('id'); const t = await f.innerText('body');
+                if (t && t.trim()) texto += '\n\n--- iframe ' + (id ? '#' + id : f.url().split('?')[0].split('/').pop()) + ' ---\n' + t;
+              } catch (e) { }
+            }
+            texto = texto.slice(0, 12000);
             fs.writeFileSync(path.join(dirCapt, base + '.txt'), texto);
             capturas.push({ nombre, png: path.relative(COLA, png), ancho: page.viewportSize().width });
             return png;
@@ -111,8 +132,8 @@ async function correrGuion(spec, opciones = {}) {
           await page.goto(BASE + caso.pagina, { waitUntil: 'domcontentloaded', timeout: 45000 });
           await Promise.race([caso.prueba(h), new Promise((_, no) => setTimeout(() => no(new Error('el caso paso de 90 s')), 90000))]);
         } catch (e) { error = (e && e.message ? e.message : String(e)).split('\n')[0]; }
-        const bloqueos = a.bitacora.slice(marca).filter(b => !b.paso);
-        resultados.push(cerrarCaso(caso, esperas, error, bloqueos, capturas));
+        const tramo = a.bitacora.slice(marca);
+        resultados.push(cerrarCaso(caso, esperas, error, tramo.filter(b => !b.paso), capturas, tramo.filter(b => b.paso)));
         await page.close().catch(() => { });
       }
     } catch (e) {
@@ -149,7 +170,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, correrGuion, cargar, MARCA };
+module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

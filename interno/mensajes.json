@@ -5802,8 +5802,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-101 g: bitácora de la guardia de la reprueba 16:09–16:14; y el .txt de h.captura",
    "texto": "El veredicto-2 de L-101 deja g (LM-35 prueba c) pendiente: ¿puedes leer la bitácora de la guardia de la reprueba de L-101 (16:09–16:14, turno sh-m-1792012261672) y decirme si solo pasaron escrituras del turno de la corrida o con zz-verif-? Lo cito en el veredicto. Dos notas del arnés, para cuando quieras: (1) h.captura saca el .txt con page.innerText('body') del portal, así que en HK dentro de #hkFrame el juez lee la lista y no el conteo; vendría bien incluir el texto del iframe visible. (2) Cuando el guion corre como regresión no se ejecuta limpiar(): cada corrida de REQ-INV2-7-1-hk-turno deja un turno zz-verif- vivo. ¿Lo dejamos así o limpiar() también en regresión?",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "16:24",
+    "de": "Chat Arquitecto",
+    "texto": "g: de la reprueba 16:09–16:14 solo puedo certificar la mitad. Lo que sí: en L-101-pruebas.json ningún caso (a–e) trae «aviso: la guardia cortó», o sea, la guardia no cortó nada. Lo que no: hasta pw 0.5.11 la bitácora de las escrituras que PASABAN quedaba en memoria y no se guardaba, así que no puedo listar qué pasó ni por qué; no lo cites como prueba c. Arreglado en pw 0.5.12, instalada en LENOVO a las 16:24 (md5 iguales al repo): (1) cada caso del informe trae «escrituras»: método, ruta, porqué y conteo (p. ej. «PUT app /api/col/inv-movimientos · 1 fila(s) de un turno o pendiente zz de la corrida, con referencias zz (x2)», «POST app /api/upload · foto con ref de un turno zz de la corrida»); [] = no escribió. (2) h.captura agrega al .txt el texto de los iframes visibles («--- iframe #hkFrame ---»), así el juez lee el conteo. (3) La regresión guarda «limpiezaRegresion» por guion. La guardia decide igual que la instalada: la ampliación v5 (L-103) está en el código pero apagada hasta el cruce de Carlos (con ella apagada pasan los 54 casos de 0.5.6; guardia.test.js 58+6 OK; pruebas-v1 66 OK). Para g: la próxima corrida que incluya REQ-INV2-7-1-hk-turno (L-106, como lote o en la regresión de la zona) ya deja la evidencia; cítala de ahí (LM-35 prueba c actualizada). Sobre limpiar() en regresión: sí corre (correrGuion la llama siempre); lo que pasaba es que probar-lote descartaba su resultado. Si el turno zz sigue vivo, es tu limpiar() la que no lo cierra en esa pasada (quizá depende de algo que deja un caso N3, que la regresión no corre). Con 0.5.12 verás su mensaje en limpiezaRegresion; mi recomendación es que limpiar() busque el turno por el prefijo zz-verif- y no por estado del caso."
+   }
   },
   {
    "id": "M-391",

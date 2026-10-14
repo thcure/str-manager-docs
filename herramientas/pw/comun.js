@@ -82,6 +82,11 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
   })(j);
   return n;
 }
+// v0.5.12: la ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) queda APAGADA
+// hasta el nuevo cruce de Carlos (M-385). Con v5 = false la guardia decide igual que la instalada (v0.5.6 + M-359).
+// Se enciende cambiando esta línea a true (un commit, reinstalar comun.js); guardia.test.js prueba las dos.
+const GUARDIA = { v5: false };
+const REF_INVENTARIO_V41 = /(articulo|deposito|zona|origen|destino|lugar|ubicacion)/i;
 const REF_INVENTARIO = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego)/i;   // v0.5.10 (M-384): proveedor y juego
 function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   let u;
@@ -91,8 +96,9 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   if (!HOSTS_OK.includes(u.hostname)) return { ok: false, motivo: 'host fuera de la lista: ' + u.hostname };
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
   if (u.hostname !== HOST_STR && u.hostname !== HOST_MODELO) return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
-  if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true };
-  if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
+  // v0.5.12 (M-390): cada escritura que pasa lleva su porqué en nota (queda en la bitácora y en «escrituras» del caso)
+  if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true, nota: 'ruta de eco permitida' };
+  if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true, nota: 'sondeo sin datos ({})' } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
   if (u.hostname === HOST_MODELO) return { ok: false, motivo: 'escritura a la fábrica: solo el Arquitecto por la cola' };
   // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion
   // entera que solo incluya una fila de prueba arrastraria datos reales (y podria pisarlos con una copia vieja).
@@ -101,7 +107,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     if (!j || !Array.isArray(j.items)) return { ok: false, motivo: 'escritura a ' + u.pathname + ' sin cuerpo legible' };
     const borra = Array.isArray(j.deleted) ? j.deleted.map(String) : [];
     if (borra.some(id => !idsZz.has(id))) return { ok: false, motivo: 'borrado de un id que esta corrida no creo como zz-verif- en ' + u.pathname };
-    if (!j.items.length) return borra.length ? { ok: true } : { ok: false, motivo: 'escritura vacia a ' + u.pathname };
+    if (!j.items.length) return borra.length ? { ok: true, nota: 'borrado de ' + borra.length + ' id(s) zz-verif- de la corrida' } : { ok: false, motivo: 'escritura vacia a ' + u.pathname };
     // v0.5.6 (LM-35, M-357): una fila sin el texto zz-verif- también es de prueba si cuelga de un turno que esta corrida
     // creó como zz-verif- (p. ej. inv-movimientos con turnoId sh-m-… de zz-verif-Propiedad)
     // y además todo lo que nombra (artículo, zona, lugar, origen, destino) es zz-verif- (subido o leído en esta corrida):
@@ -112,7 +118,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
         if (!ok || !o || typeof o !== 'object') return;
         for (const [k, v] of Object.entries(o)) {
           if (v && typeof v === 'object') { rec(v); continue; }
-          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || !REF_INVENTARIO.test(k) || v == null || v === '') continue;
+          if (k === 'turnoId' || k === 'pendienteId' || k === 'id' || !(GUARDIA.v5 ? REF_INVENTARIO : REF_INVENTARIO_V41).test(k) || v == null || v === '') continue;
           if (String(v).includes('zz-verif-')) continue;   // nombre de una fila de prueba (articuloNombre, zonaNombre…)
           if (!idsZz.has(String(v)) && !idsLeidos.has(String(v))) { ok = false; return; }
         }
@@ -121,23 +127,26 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     };
     // v0.5.10 (M-384, L-103): también cuelga de prueba si su pendienteId es un pendiente zz-verif- de esta corrida
     const deTurnoZz = it => {
+      if (!GUARDIA.v5) { const t = it && ((it.data && it.data.turnoId) || it.turnoId); return t != null && idsZz.has(String(t)) && refsZz(it); }   // v0.5.6 + M-359
       const d = (it && it.data) || {};
       const padre = [d.turnoId, it && it.turnoId, d.pendienteId, it && it.pendienteId].find(v => v != null && idsZz.has(String(v)));
       return padre != null && refsZz(it);
     };
+    const conTexto = j.items.filter(it => JSON.stringify(it).includes('zz-verif-'));
     const reales = j.items.filter(it => !JSON.stringify(it).includes('zz-verif-') && !deTurnoZz(it));
     if (reales.length) return { ok: false, motivo: reales.length + ' fila(s) sin zz-verif- en ' + u.pathname };
     j.items.forEach(it => { if (it && it.id != null) idsZz.add(String(it.id)); });
-    return { ok: true };
+    const deTurno = j.items.length - conTexto.length;
+    return { ok: true, nota: [conTexto.length ? conTexto.length + ' fila(s) con zz-verif-' : '', deTurno ? deTurno + ' fila(s) de un turno o pendiente zz de la corrida, con referencias zz' : '', borra.length ? borra.length + ' borrado(s) zz de la corrida' : ''].filter(Boolean).join(' + ') };
   }
   // v0.5.6 (LM-35, M-357): la foto de HK sube por POST /api/upload (multipart) con ref = id del turno; pasa solo si ese
   // turno lo creó esta corrida como zz-verif-
   if (u.pathname === '/api/upload') {
     const m = /name="ref"\r?\n\r?\n([^\r\n]+)/.exec(String(cuerpo || ''));
-    if (m && idsZz.has(m[1].trim())) return { ok: true };
+    if (m && idsZz.has(m[1].trim())) return { ok: true, nota: 'foto con ref de un turno zz de la corrida' };
     return { ok: false, motivo: 'subida de archivo sin turno zz-verif- de esta corrida' };
   }
-  if (String(cuerpo || '').includes('zz-verif-') || u.href.includes('zz-verif-')) return { ok: true };
+  if (String(cuerpo || '').includes('zz-verif-') || u.href.includes('zz-verif-')) return { ok: true, nota: 'zz-verif- en ' + (String(cuerpo || '').includes('zz-verif-') ? 'el cuerpo' : 'la url') };
   return { ok: false, motivo: 'escritura sin zz-verif- a ' + u.pathname };
 }
 
@@ -192,4 +201,4 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, decidir, registrarLeidos, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError };
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError };

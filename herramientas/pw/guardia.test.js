@@ -56,6 +56,7 @@ const casos = [
   [F + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-P"}}],"deleted":[]}', false],
   ['https://pruebas.apartamentosbucaramanga.com/api/health', 'GET', '', false],
 ];
+require('./comun').GUARDIA.v5 = true;   // v0.5.12: la tabla es la de la ampliación v5
 let n = 0;
 for (const [url, m, body, esperado] of casos) { assert.strictEqual(decidir(url, m, body).ok, esperado, m + ' ' + url); n++; }
 assert.strictEqual(destinoModelo(B + '/modelo/api/salud'), F + '/modelo/api/salud'); assert.strictEqual(destinoModelo(B + '/modelo/api/estado?x=1'), F + '/modelo/api/estado?x=1'); assert.strictEqual(destinoModelo(B + '/api/health'), null); assert.strictEqual(destinoModelo(B + '/modelos.html'), null); assert.strictEqual(destinoModelo(F + '/modelo/api/salud'), null);
@@ -83,4 +84,21 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   assert.strictEqual(r1.ok, false, 'reintento de foto sin ids de la corrida debe cortarse');
   assert.strictEqual(r2.ok, false, 'reintento de movimiento sin ids de la corrida debe cortarse');
   console.log('guardia.test.js: reintento en otra carga (ids vacíos) → 409 OK');
+}
+
+// v0.5.12 (M-390): con v5 apagada decide como la instalada (v0.5.6 + M-359); cada paso lleva nota
+{
+  const c = require('./comun'); const dec = c.decidir; c.GUARDIA.v5 = false;
+  const ids = new Set(['sh-m-zz1', 'pd-zz1', 'art-zz-1']), leid = new Set();
+  const col = B + '/api/col/inv-movimientos';
+  assert.strictEqual(dec(col, 'PUT', '{"items":[{"id":"mv-20","data":{"pendienteId":"pd-zz1","tipo":"recepcion","articuloId":"art-zz-1"}}],"deleted":[]}', ids, leid).ok, false, 'v5 apagada: pendienteId zz no basta');
+  assert.strictEqual(dec(col, 'PUT', '{"items":[{"id":"mv-21","data":{"turnoId":"sh-m-zz1","articuloId":"art-zz-1","proveedorId":"prov-real-1"}}],"deleted":[]}', ids, leid).ok, true, 'v5 apagada: proveedor no se mira (como la instalada)');
+  assert.strictEqual(dec(col, 'PUT', '{"items":[{"id":"mv-22","data":{"turnoId":"sh-m-zz1","articuloId":"art-real-7"}}],"deleted":[]}', ids, leid).ok, false, 'artículo real se corta igual');
+  const r1 = dec(col, 'PUT', '{"items":[{"id":"mv-23","data":{"turnoId":"sh-m-zz1","articuloId":"art-zz-1"}},{"id":"x","data":{"nombre":"zz-verif-T"}}],"deleted":[]}', ids, leid);
+  assert.ok(r1.ok && /1 fila\(s\) con zz-verif-/.test(r1.nota) && /1 fila\(s\) de un turno/.test(r1.nota), 'nota de /api/col: ' + r1.nota);
+  const r2 = dec(B + '/api/upload', 'POST', '------b\r\nContent-Disposition: form-data; name="ref"\r\n\r\nsh-m-zz1\r\n------b--', ids, leid);
+  assert.ok(r2.ok && /foto/.test(r2.nota), 'nota de upload');
+  const r3 = dec(B + '/api/otra', 'POST', '{"nombre":"zz-verif-A"}', ids, leid);
+  assert.ok(r3.ok && r3.nota === 'zz-verif- en el cuerpo', 'nota de cuerpo');
+  console.log('guardia.test.js: v5 apagada (como la instalada) y notas de paso: 6 OK');
 }

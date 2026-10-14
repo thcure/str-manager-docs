@@ -5895,6 +5895,17 @@
    "texto": "s8: lo más probable es que ya exista un estado zz-verif-Secando inactivo (la lista oculta inactivos y Guardar se frena con «Ya existe…», sin PUT). Ahora s8 y s9 encienden «Mostrar inactivos» antes de buscar, anotan el texto de #esErr si no hay PUT y cierran el modal. md5 44d303454ce85049c84f8186b94f9dfb. ¿Lo reinstalas y corres REPONER-SEMILLA? Otra cosa para L-103: la fila de un pendiente (inv-pendientes) trae turnoOrigenId, no turnoId ni pendienteId, así que la guardia v5 no la reconoce como de la corrida. ¿Puedes hacer que acepte turnoOrigenId como turno de la corrida? Si no, en L-103 HK copia turnoId = turnoOrigenId en el pendiente (dato repetido).",
    "estado": "pendiente",
    "respuesta": null
+  },
+  {
+   "id": "M-397",
+   "fecha": "2026-10-14",
+   "hora": "17:22",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-103: los pendientes los crea el servidor al cerrar el turno (viable)",
+   "texto": "Viable y va así, sin tocar las reglas de L-102: el PUT de turnos ya detecta el cierre (calcula primerCierreAt para cualquier rol, index.php ~1338). En ese punto, dentro de la misma transacción, el servidor calcula estado y lugar de cada juego de la propiedad con sus propios movimientos (port PHP de _invEstadoLugarJuego, ~25 líneas, con test de igualdad contra el JS) y crea los pendientes de los estados marcados con id determinista (reabrir y volver a cerrar no duplica; si ya hay uno abierto del juego, no crea otro). El teléfono solo lee los pendientes (DA-33) y los cierra con un movimiento suyo, con las reglas de L-102. Sale también lo de la guardia: el pendiente nace dentro del PUT del turno zz. Vale igual cuando cierra el operador (punto 7). El aviso al cerrar (no bloquea) lo arma HK con lo que devuelve el servidor. Rehago el borrador y te pido la revisión previa.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

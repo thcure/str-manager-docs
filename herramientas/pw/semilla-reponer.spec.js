@@ -15,6 +15,8 @@ async function _tab(h, tab) {
   await h.page.waitForSelector('#pane-' + tab, { state: 'visible' });
 }
 // s8–s9: muestra también los inactivos (un estado o proveedor inactivo con el mismo nombre bloquea crearlo: «Ya existe…»).
+// La app puede guardar el nombre en minúscula («zz-verif-secando»): s8–s9 buscan sin distinguir mayúsculas.
+const _filaI = (p, sel, n) => p.locator(sel).filter({ has: p.locator('strong', { hasText: new RegExp('^\\s*' + _esc(n) + '\\s*$', 'i') }) });
 async function _inactivos(h, q) {
   const chip = h.page.locator('#' + q + 'InactivosChip');
   if (await chip.count() && !(await chip.evaluate((e) => e.classList.contains('active')))) await chip.click();
@@ -314,7 +316,7 @@ module.exports = {
         await _tab(h, 'circuito');
         await _inactivos(h, 'es');
         for (const [n, pend] of EST) {
-          let f = _fila(p, '#esLista tbody tr', n).first();
+          let f = _filaI(p, '#esLista tbody tr', n).first();
           if (!(await f.count())) {
             await p.click('#pane-circuito button:has-text("＋ Estado")');
             await p.waitForSelector('#esModal #esNombre', { state: 'visible' });
@@ -324,7 +326,7 @@ module.exports = {
             const err = r ? '' : await p.locator('#esErr').textContent().catch(() => '');
             h.espera(r && r.status() === 200, n + ' creado: ' + (r ? r.status() : 'sin respuesta' + (err ? ' · «' + err + '»' : '')));
             if (!r) { await p.evaluate(() => closeModal('esModal')).catch(() => {}); continue; }
-            f = _fila(p, '#esLista tbody tr', n).first();
+            f = _filaI(p, '#esLista tbody tr', n).first();
           }
           const act = f.getByRole('button', { name: 'Activar', exact: true });
           if (await act.count()) {
@@ -342,7 +344,7 @@ module.exports = {
         await p.reload({ waitUntil: 'networkidle' });
         const est = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-estados-v1') || '[]'));
         for (const [n, pend] of EST) {
-          const e = (est || []).find((x) => x && x.nombre === n);
+          const e = (est || []).find((x) => x && String(x.nombre).toLowerCase() === n.toLowerCase());
           const marca = e ? (e.pendiente || (e.pendienteAlCerrar ? 'turno' : 'nada')) : '—';
           h.espera(!!e && e.activo !== false && marca === pend, n + ' tras recargar: ' + (e ? (e.activo === false ? 'inactivo' : 'activo') + ' · ' + marca : 'no está'));
         }
@@ -355,7 +357,7 @@ module.exports = {
         const p = h.page, N = 'zz-verif-Lavandería';
         await _tab(h, 'proveedores');
         await _inactivos(h, 'pv');
-        let f = _fila(p, '#pvLista tbody tr', N).first();
+        let f = _filaI(p, '#pvLista tbody tr', N).first();
         if (!(await f.count())) {
           await p.click('#pane-proveedores button:has-text("＋ Proveedor")');
           await p.waitForSelector('#pvModal #pvNombre', { state: 'visible' });
@@ -364,7 +366,7 @@ module.exports = {
           await p.fill('#pvContacto', 'zz-verif- contacto de prueba');
           const r = await _put(h, '/api/col/inv-proveedores', () => p.click('#pvModal button:has-text("Guardar")'));
           h.espera(r && r.status() === 200, N + ' creado: ' + (r ? r.status() : 'sin respuesta'));
-          f = _fila(p, '#pvLista tbody tr', N).first();
+          f = _filaI(p, '#pvLista tbody tr', N).first();
         }
         const act = f.getByRole('button', { name: 'Activar', exact: true });
         if (await act.count()) {
@@ -373,7 +375,7 @@ module.exports = {
         }
         await p.reload({ waitUntil: 'networkidle' });
         const pv = await p.evaluate(() => JSON.parse(localStorage.getItem('str-inv-proveedores-v1') || '[]'));
-        const e = (pv || []).find((x) => x && x.nombre === N);
+        const e = (pv || []).find((x) => x && String(x.nombre).toLowerCase() === N.toLowerCase());
         h.espera(!!e && e.activo !== false, N + ' tras recargar: ' + (e ? (e.activo === false ? 'inactivo' : 'activo') : 'no está'));
       },
     },

@@ -82,10 +82,10 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
   })(j);
   return n;
 }
-// v0.5.12: la ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) queda APAGADA
-// hasta el nuevo cruce de Carlos (M-385). Con v5 = false la guardia decide igual que la instalada (v0.5.6 + M-359).
-// Se enciende cambiando esta línea a true (un commit, reinstalar comun.js); guardia.test.js prueba las dos.
-const GUARDIA = { v5: false };
+// v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
+// cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
+// guardia.test.js prueba las dos.
+const GUARDIA = { v5: true };
 const REF_INVENTARIO_V41 = /(articulo|deposito|zona|origen|destino|lugar|ubicacion)/i;
 const REF_INVENTARIO = /(articulo|deposito|zona|origen|destino|lugar|ubicacion|proveedor|juego)/i;   // v0.5.10 (M-384): proveedor y juego
 function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {

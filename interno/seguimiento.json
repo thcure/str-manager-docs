@@ -649,6 +649,32 @@
    "estado": "cerrado",
    "origen": "Veredicto de L-95 (juez, N3 k, 14-oct 13:16).",
    "cierre": "Cerrado por L-96 (b71957a), aceptado 14-oct 13:29."
+  },
+  {
+   "id": "INC-126",
+   "tipo": "INC",
+   "modulo": "Portal",
+   "etapa": "🔧",
+   "fecha": "2026-10-14",
+   "severidad": "medio",
+   "titulo": "Portal: el enlace ?turno= de un turno recién asignado dice «Ese turno no está asignado a ti» y no lo abre",
+   "causa": "portal.html _renderListas resuelve el enlace en el primer hk:turnos y lo gasta; HK manda ese primer mensaje desde localStorage antes del pull del servidor (str-m1-housekeeping.html ~2088), sin el turno nuevo.",
+   "pendiente": "Lote fix L-104 (encolado 14-oct 15:41).",
+   "estado": "abierto",
+   "origen": "Veredicto de L-101 (juez, caso b, 14-oct 15:28)."
+  },
+  {
+   "id": "INC-127",
+   "tipo": "INC",
+   "modulo": "Housekeeping",
+   "etapa": "🔍",
+   "fecha": "2026-10-14",
+   "severidad": "medio",
+   "titulo": "HK del colaborador: en el turno de zz-verif-Propiedad no aparece la tarea «zz-verif-Conteo de cierre» con su conteo (.task-inv)",
+   "causa": "Por medir: el frame de HK se abre pero la tarea no se adjunta en 30 s. Candidatas: el flujo base no expone esa actividad (compuesto / copia por propiedad) o el colaborador no recibe el flujo actualizado. L-104 d/e lo miden en solo lectura.",
+   "pendiente": "Diagnóstico en L-104 (casos d y e); luego fix o ajuste de semilla.",
+   "estado": "abierto",
+   "origen": "Veredicto de L-101 (juez, casos c, d, e, 14-oct 15:28)."
   }
  ],
  "dts": [
@@ -8362,6 +8388,101 @@
     "veredictos": 1,
     "bloqueados": 0
    }
+  },
+  {
+   "lote": "L-101",
+   "fecha": "2026-10-14",
+   "req": "REQ-INV2-7-1 (2/2, segunda pasada N2)",
+   "categoria": "crítico",
+   "resumen": "Guion REQ-INV2-7-1-hk-turno.spec.js (turno de hoy con tarea de conteo; criterios 6–9 y 13 en N2).",
+   "estado": "no aceptado",
+   "observacion": "DA-34, cruce 12-oct 19:13; ok de Diseño 15:03 (M-373). Puerta bloqueada dos veces por la semilla (s7 y semilla.js, pw 0.5.9). Reprueba 15:23–15:28: a ok, b–e rojos en abrir(). INC-126 e INC-127; fix L-104.",
+   "hash": "def0dba",
+   "aceptacion": {
+    "lote": "L-101",
+    "hash": "def0dba",
+    "fecha": "2026-10-14",
+    "horaBogota": "15:28",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "N1 · node tests/run.js",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 58/58 archivos OK"
+     },
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado: 6 turnos | si: turno sh-m-1792009434195: 200"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno de la corrida: sh-m-1792009434195 | error: page.waitForSelector: Timeout 30000ms exceeded."
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno de la corrida: sh-m-1792009434195 | error: locator.waitFor: Timeout 30000ms exceeded."
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno de la corrida: sh-m-1792009434195 | error: locator.waitFor: Timeout 30000ms exceeded."
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "sin captura e-conteo en log\\capturas\\L-101 (n3Preparados vacío); el caso cayó en abrir() antes de capturar: «error: locator.waitFor: Timeout 30000ms exceeded.» y su espera N2 del ancho tampoco llegó a medirse"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "la bitácora de la guardia (LM-35 prueba c) no está entre lo que lee el juez"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "e",
+      "motivo": "el guion no preparó la captura (e-conteo no existe; el caso falló en abrir() antes de h.captura)"
+     },
+     {
+      "c": "g",
+      "motivo": "N1 sobre la bitácora de la guardia pw 0.5.6 de la corrida; la lee el Arquitecto, no está en pruebas.json ni en las capturas"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "L-101 b: el portal del colaborador no muestra el HK del turno de la corrida (#hkFrame.show no aparece en 30 s)",
+      "nivel": "medio",
+      "causa": "abrir() del guion no llega a tener el iframe de HK visible en portal.html?turno=sh-m-1792009434195 con la sesión zz-verif-colab: o el turno creado por admin en a no llega al portal del colaborador, o el portal no abre HK con ese parámetro. Lo que lee el juez no permite distinguir cuál; es la misma falla de origen de c, d y e. Como el guion queda de regresión de la zona inventario, pondría en rojo los lotes siguientes.",
+      "observado": "si: turno de la corrida: sh-m-1792009434195 | error: page.waitForSelector: Timeout 30000ms exceeded."
+     },
+     {
+      "titulo": "L-101 c: no se encuentra la tarea zz-verif-Conteo de cierre con su conteo (.task-inv) en el HK del turno",
+      "nivel": "medio",
+      "causa": "falla en abrir(), antes de probar la foto: dentro de #hkFrame no se adjunta ningún .task-item con «zz-verif-Conteo de cierre» y .task-inv en 30 s (el turno no trae la tarea de conteo del flujo base, o HK no la pinta para el colaborador). Mismo origen que b; el criterio 7/8 queda sin probar.",
+      "observado": "si: turno de la corrida: sh-m-1792009434195 | error: locator.waitFor: Timeout 30000ms exceeded."
+     },
+     {
+      "titulo": "L-101 d: marcado con fotos y subida de conteos sin probar por la misma falla de abrir()",
+      "nivel": "medio",
+      "causa": "depende de c y cae en el mismo locator.waitFor de abrir() (tarea con .task-inv ausente en el HK del turno); no llega a hacer clic en la tarea.",
+      "observado": "si: turno de la corrida: sh-m-1792009434195 | error: locator.waitFor: Timeout 30000ms exceeded."
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Hora: sin reloj (el juez no ejecuta comandos); se toma el fin de la corrida de pruebas.json (2026-10-14T20:28:06Z = 15:28 Bogotá). Entrada P4 toda en verde (despliegue, 58/58, guion igual a la instrucción, semilla completa, sesiones admin y colab 200). Regresión: 19 casos, todos ok: true; ningún INC por regresión. Los cuatro fallos (b, c, d, e) comparten origen en abrir(): el turno se crea bien en a pero el colaborador no ve su HK/tarea de conteo; conviene revisarlo una sola vez antes de recorrer el guion de nuevo. La única captura de la carpeta (b-medida.png/.txt) es de un guion de regresión (lugares de una zona zz-verif-L-101-r-zona-k8gw3 en str-inventario.html a 390 px), no del caso e; no sirve para decidir el criterio 13. e en n2 tiene ok: false por el mismo error; aquí va en null por no tener captura. f queda fuera de este lote (perfil zz-verif-colab2 sin crear, según la semilla). REQ-INV2-7-1 no puede pasar a «aceptado» con este veredicto."
+   }
   }
  ],
  "esquema": {
@@ -9870,15 +9991,63 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Guion REQ-INV2-7-1-hk-turno.spec.js: turno de hoy con tarea de inventario; criterios 6–9, 13 y apoyo en N2 (foto con filechooser + setFiles); semilla-reponer con la semilla v4",
-   "estado": "verificando",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": null,
-   "espera": "después de L-100 y de instalar pw 0.5.6 (LM-35, cruce de Carlos)",
+   "esperaA": "CLI",
+   "espera": "fix L-104 (INC-126) y luego reprueba de L-101",
    "orden": 121.09,
-   "desde": "2026-10-14 15:12",
+   "desde": "2026-10-14 15:41",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "M-358 (condición de Diseño), M-361/M-363 (semilla v4 del Arquitecto con para: L-101). · Redactado (revisión previa 14/14). Pide ok de Diseño (M-373) y al Arquitecto: instalar semilla-reponer s4–s7, plantillaId, colab2 fuera de «para», visto bueno a alinear lastpush (M-372). El apoyo (f) va aparte (sin perfil colab2). DA-34, cruce con Carlos 12-oct 19:13. · ok de Diseño 15:03 (M-373): el REQ pasa a aceptado con 6–9 y 13 en N2 y el apoyo en N1; N2 del apoyo de seguimiento. · Visto bueno del Arquitecto a alinear lastpush (M-372); pw 0.5.8 instalado. REPONER-SEMILLA y L-101 encolados 15:11. · Semilla repuesta 15:11 (s1–s7 OK). CLI 15:11–15:12: def0dba, 58/58. Espera pruebas y veredicto. · 15:15: puerta de pruebas bloqueada: semilla sin invPrincipalId (error de s7: un solo guardado tras cambiar el flujo). s7 corregido (M-376); falta instalar, REPONER-SEMILLA y reprobar\\L-101. · s7 instalado (M-376); REPONER-SEMILLA y reprobar\\L-101 dejados 15:17. · 15:19: la puerta volvió a bloquear aunque s7 comprobó invPrincipalId tras recargar; causa probable en semilla.js (zona por nombre, primera coincidencia): M-377. · pw 0.5.9 (M-377); reprobar\\L-101 dejado 15:22."
+   "nota": "M-358 (condición de Diseño), M-361/M-363 (semilla v4 del Arquitecto con para: L-101). · Redactado (revisión previa 14/14). Pide ok de Diseño (M-373) y al Arquitecto: instalar semilla-reponer s4–s7, plantillaId, colab2 fuera de «para», visto bueno a alinear lastpush (M-372). El apoyo (f) va aparte (sin perfil colab2). DA-34, cruce con Carlos 12-oct 19:13. · ok de Diseño 15:03 (M-373): el REQ pasa a aceptado con 6–9 y 13 en N2 y el apoyo en N1; N2 del apoyo de seguimiento. · Visto bueno del Arquitecto a alinear lastpush (M-372); pw 0.5.8 instalado. REPONER-SEMILLA y L-101 encolados 15:11. · Semilla repuesta 15:11 (s1–s7 OK). CLI 15:11–15:12: def0dba, 58/58. Espera pruebas y veredicto. · 15:15: puerta de pruebas bloqueada: semilla sin invPrincipalId (error de s7: un solo guardado tras cambiar el flujo). s7 corregido (M-376); falta instalar, REPONER-SEMILLA y reprobar\\L-101. · s7 instalado (M-376); REPONER-SEMILLA y reprobar\\L-101 dejados 15:17. · 15:19: la puerta volvió a bloquear aunque s7 comprobó invPrincipalId tras recargar; causa probable en semilla.js (zona por nombre, primera coincidencia): M-377. · pw 0.5.9 (M-377); reprobar\\L-101 dejado 15:22. · Juez 15:28: no aceptado (b, c, d, e caen en abrir(); a, N1 y regresión 19/19 en verde). Causas: INC-126 (enlace ?turno= gastado por el primer hk:turnos desde caché → b) y INC-127 (HK del colaborador no adjunta la tarea de conteo con .task-inv → c–e, causa por medir). Fix L-104; después reprobar\\L-101.txt."
+  },
+  {
+   "lote": "L-104",
+   "req": "INC-126 (+ diagnóstico INC-127)",
+   "categoria": "estándar",
+   "riesgo": "R-portal",
+   "resumen": "Portal: ?turno= espera la lista del servidor (20 s) antes de avisar; guion INC-126 con diagnóstico de lo que ve HK (colab y admin) del flujo base de zz-verif-Propiedad; p5c85",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "CLI",
+   "espera": null,
+   "orden": 121.095,
+   "desde": "2026-10-14 15:41",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Fix de L-101 (veredicto 15:28). Revisión previa 12/14 → corregida (4 y 13). Estándar: sin ok de Diseño. L-102 pasa a p5c86."
+  },
+  {
+   "lote": "L-102",
+   "req": "REQ-INV2-3-4 (1/2)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "Pendientes al cerrar el turno: servidor + Inventario (estado pendiente, proveedores, pendientes, lavandería/recepción); p5c86",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "CD",
+   "espera": "revisión previa y ok de Diseño",
+   "orden": 121.1,
+   "desde": "2026-10-14 15:41",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375."
+  },
+  {
+   "lote": "L-103",
+   "req": "REQ-INV2-3-4 (2/2)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "HK: crear pendientes al cerrar, «Pendientes del turno anterior», marcar hecho, «Llevar a…»; guion N2 con pendientes reales",
+   "estado": "previsto",
+   "vista": "siguiente",
+   "esperaA": "CD",
+   "espera": "L-102 y semilla v5 del Arquitecto",
+   "orden": 121.11,
+   "desde": "2026-10-14 15:41",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375."
   }
  ],
  "riesgos": [

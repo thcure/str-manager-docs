@@ -16,5 +16,5 @@ function caso(c, perfil) {
 module.exports = {
   req: 'SESIONES',
   zona: 'sesiones',
-  casos: [caso('s1', 'admin'), caso('s2', 'oper'), caso('s3', 'colab')],
+  casos: [caso('s1', 'admin'), caso('s2', 'oper'), caso('s3', 'colab'), caso('s4', 'colab2')],   // s4 desde 0.5.20 (M-407: colab2 con sesión, 200)
 };

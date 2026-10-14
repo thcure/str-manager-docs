@@ -1,4 +1,4 @@
-// Sesión del perfil de prueba zz-verif-colab2 (apoyo en L-101, M-370). Aparte de sesiones.spec.js para no poner en
+// (0.5.20: colab2 ya está en sesiones.spec.js como s4; este archivo queda para revisarlo solo) Sesión del perfil de prueba zz-verif-colab2 (apoyo en L-101, M-370). Aparte de sesiones.spec.js para no poner en
 // rojo la comprobación diaria mientras colab2 no tenga perfil. Solo lectura. La cola lo corre con correr\\sesiones-colab2.txt.
 // Si falla: Carlos abre el perfil una vez con  node abrir-perfil.js colab2  (en pw\\) e inicia sesión con ese usuario.
 const base = require('./sesiones.spec.js');

@@ -6,9 +6,9 @@ Lo mantiene el Chat Arquitecto. Estado al 13-oct-2026. **Sin secretos**: ni toke
 | Pieza | Dónde | Quién la escribe |
 |---|---|---|
 | Código del servicio | repo `str-manager`, carpeta `modelo/` (`api/index.php`, `api/config/*.php`, `sql/NNN_*.sql`) | CLI por lotes del modelo (L-n), redactados por el Arquitecto (LM-n) |
-| Despliegue | Git de Hostinger publica `str-manager` en `public_html/app/` → el servicio queda en `https://app.apartamentosbucaramanga.com/modelo/api/` (no en `public_html/modelo/` como decía el ADR §4: la raíz del repo es la raíz de la app) | automático al hacer push |
+| Despliegue | Desde la migración (M8, 13-oct) el servicio vive en el sitio de la fábrica: Git de Hostinger publica `str-manager` en su `public_html/` → `https://fabrica.apartamentosbucaramanga.com/modelo/api/`. En `app./modelo` también se publica (mismo repo) pero sin `secrets.php`: responde `db:false` y 503, a propósito, hasta D3 (modelo a su propio repo) | automático al hacer push |
 | Base | MariaDB `u…_modelo` (usuario `u…_modelo`), separada de la del STR | la crea Carlos en hPanel; las tablas, `GET migrar` |
-| Secretos | `public_html/app/modelo/secrets.php` (fuera del repo; Git de Hostinger no borra archivos que no están en el repo): `MODELO_DB_HOST/NAME/USER/PASS`, `MODELO_TOKEN_ARQ` | Carlos, a mano |
+| Secretos | `public_html/modelo/secrets.php` del sitio `fabrica.` (fuera del repo; Git de Hostinger no borra archivos que no están en el repo): `MODELO_DB_HOST/NAME/USER/PASS`, `MODELO_TOKEN_ARQ` | Carlos, a mano |
 | Token del Arquitecto en LENOVO | `str-instr-cola\claves\modelo-arq.txt` (mismo valor que `MODELO_TOKEN_ARQ`) | Carlos |
 | Tokens por rol (LM-27b) | `str-instr-cola\claves\modelo-<rol>.txt`, generados por la cola; al servidor solo va el hash. `claves\` nunca entra al repo, a `log\`, al espejo ni a los respaldos a Drive (K3) | cola |
 | Llamadas del Arquitecto | `str-instr-cola\pw\modelo-llamar.js` (fuente: `herramientas/pw/modelo-llamar.js`), lanzado por la cola | Arquitecto |
@@ -49,16 +49,17 @@ python3 herramientas/modelo/paquete.py --salida paquete-<sha>.json
 | archivo vacío `EXPORTAR` | `… exportar` (requiere LM-21) | `log\espejo\interno\…json` + `log\modelo-exportar-<hora>.json` (sin datos) |
 Cada pedido pasa después a `modelo-cargas\hechas\<fecha>-<nombre>`. El token nunca se escribe en el log. No necesita la CLI: funciona aunque la CLI no tenga uso.
 
-## 6. Estado de B7 (13-oct-2026)
+## 6. Estado de B7 (13-oct-2026, noche)
 | Paso | Lote | Estado |
 |---|---|---|
 | B7-1 prueba técnica (`salud`, `eco`) | L-78 | aceptado |
 | B7-2 base propia, `secrets.php`, `migrar`, 16 sentencias | LM-16 / L-84 | aceptado |
 | B7-3 carga inicial (`POST cargar`) | LM-20 / L-87 | aceptado (dos cargas iguales del paquete f339cc0) |
 | B7-4 lectura y export | LM-21 / L-88 | aceptado 16:45 (b y c del Arquitecto: 16/16 listas iguales, 0 errores) |
-| B7-5a esquema 2, `complemento`, export completo, UTC (DT-36) | LM-27a / L-91 | dos revisiones de Desarrollo y ok de Diseño (M-294); falta el cruce de Carlos |
-| B7-5b acceso por rol, `POST credenciales` | LM-27b / L-92 | ídem; va después de L-91 aceptado y con la guardia de pw publicada |
-| B7-6 corte: el servicio es el registro oficial, Git el espejo | — | por redactar (Carlos presente, 20 min) |
+| B7-5a esquema 2, `complemento`, export completo, UTC (DT-36) | LM-27a / L-91 | aceptado |
+| B7-5b acceso por rol, `POST credenciales` | LM-27b / L-92 | aceptado |
+| `extra` exacto · salto de línea final | LM-28 / L-93 · LM-29 | aceptados: 10 de 10 archivos idénticos byte a byte (paquete 68b9a1b en `fabrica.`) |
+| B7-6 corte | — | dirección A provisional (sincronización automática por la cola; los chats siguen escribiendo en Git), pendiente de analizar con Carlos: proyecto › `claude/marco/plan-b7-6-2026-10.md` |
 
 ## 7. Recuperación
 - Código: `git revert` en `str-manager`; Hostinger vuelve a publicar.

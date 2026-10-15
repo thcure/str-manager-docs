@@ -10552,7 +10552,7 @@
    "categoria": "crítico",
    "resumen": "Copia a Drive: cron, cola de copia, INC-97; migración 11",
    "estado": "aceptado",
-   "observacion": "Encolado 02:19 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 12/14 corregida). · Construido 477e6b1 (migración 11, 71/71). 02:30 aceptado: a–g en verde (estado sin secretos; ?drive=sin-permiso con «Marca la casilla de Google Drive»; portal sin pedidos a /api/drive; captura a 390 px). Regresión sin casos (zona del guion). · 02:35: reprueba pedida para correr la regresión de inventario (pw 0.5.27, M-463) · 03:05 reprueba con regresión: criterios propios en verde; no aceptado solo por la regresión (12 guiones con esquema 10 fijo y el guion de K3b de L-117), que corrige L-121; se repite tras L-121 · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20)",
+   "observacion": "Encolado 02:19 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 12/14 corregida). · Construido 477e6b1 (migración 11, 71/71). 02:30 aceptado: a–g en verde (estado sin secretos; ?drive=sin-permiso con «Marca la casilla de Google Drive»; portal sin pedidos a /api/drive; captura a 390 px). Regresión sin casos (zona del guion). · 02:35: reprueba pedida para correr la regresión de inventario (pw 0.5.27, M-463) · 03:05 reprueba con regresión: criterios propios en verde; no aceptado solo por la regresión (12 guiones con esquema 10 fijo y el guion de K3b de L-117), que corrige L-121; se repite tras L-121 · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20) · 10:38 reprueba: no aceptado, pero todos los criterios propios en verde (a-g; h-j son N4 de Carlos). Rojo de herramienta en la regresión: turnos zz de corridas anteriores en zz-verif-Propiedad (precondición de REQ-INV2-4-2 y -dif), ERR_CONNECTION_CLOSED, y el orden de casos del guion K3b (d antes que c) → L-126. Se reprueba tras limpiar esos turnos (M-485)",
    "hash": "477e6b1",
    "aceptacion": {
     "lote": "L-116",
@@ -10779,6 +10779,77 @@
     ],
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "Los criterios del lote pasan: N1 a y g (73/73), N2 b, c, d, e en verde, N3 f cumplido en la captura. El «no aceptado» viene solo de la regresión (14 casos con ok false). 12 de ellos comparten una causa de herramienta: guiones viejos con /api/health schema_version 10 exacto, mientras producción está en 12 y p5c96 (hay un lote posterior a L-116 desplegado: el entorno no es L-116 solo); se arreglan cambiando esas aserciones a «≥». Los otros 2 (REQ-K3b-aviso c y d, guion de L-117) no se pueden atribuir a L-116 con lo leído: d corrió antes que c por el orden de perfiles y c no llegó a subir la foto; hay que repetirlos. Repetir la corrida con los guiones corregidos. En la captura f el aviso rojo convive con el recuadro verde de conexión (el regreso ?drive=sin-permiso es simulado con Drive ya conectado). horaBogota tomada de pruebas.json › fin (08:05Z), el juez no lee el reloj."
+   },
+   "aceptacion3": {
+    "lote": "L-116",
+    "hash": "8903b67",
+    "fecha": "2026-10-15",
+    "horaBogota": "10:38",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /api/health schema_version: 12 | si: GET /api/drive/estado: 200 | si: estado sin secretos: sí · claves: configurado,conectado,google_email,carpeta,conectado_en,estado,ultimo_error,copia,retencion,avisoCorte | si: conectado: true · copia: {\"pendientes\":0,\"copiados\":0,\"omitidos\":0,\"ultimaPasada\":null} | si: tarjeta: «☁ Copia en Google Drive Cada 15 minutos el STR copia a tu Drive las fotos y videos de tareas e incidentes (primero la evidencia de incidentes), en la carpeta \"STR Manager\" › negocio › propiedad › mes. El STR solo puede ver y crear los archi»"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: aviso: «Google no dio permiso sobre Drive. Marca la casilla de Google Drive cuando Google la muestre y vuelve a conectar.» | si: URL sin ?drive=: https://app.apartamentosbucaramanga.com/str-app-shell.html | si: panel Configuración abierto: sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: destino: https://app.apartamentosbucaramanga.com/str-app-shell.html | si: aviso: «No se pudo conectar Google Drive. Inténtalo de nuevo; si se repite, avisa al soporte del STR.»"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: pedidos a /api/drive desde el portal: ninguno | si: respuestas JSON con secretos: ninguna (20 leídas)"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura aviso-sin-permiso a 390 px: dentro de la tarjeta «☁ Copia en Google Drive», debajo del texto «Cada 15 minutos…», un recuadro de borde y texto rojos con «Google no dio permiso sobre Drive. Marca la casilla de Google Drive cuando Google la muestre y vuelve a conectar.» en tres líneas, legible y sin desborde (la tarjeta y sus botones caben en el ancho; nada cortado a la derecha). Debajo, el recuadro verde de la conexión con el correo de la cuenta y «Copia: 0 en Drive · 0 pendientes · aún sin pasadas (cada 15 min)»."
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK (cubre tests/drive-copia.test.js A2 y tests/drive.test.js roles)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [
+     {
+      "c": "h",
+      "que": "Carlos, con una cuenta de Google de prueba, toca Configuración › Conectar Google Drive: Google pide solo el permiso de los archivos que use la app (sin casilla, o con ella si Google la muestra: se anota); al aceptar, «✓ Google Drive conectado»; captura de la pantalla de Google para Diseño."
+     },
+     {
+      "c": "i",
+      "que": "Con la tarea programada de hPanel creada y la app de Google publicada: tras la primera pasada real, la tarjeta muestra «última pasada …» y en Drive aparecen las fotos nuevas en STR Manager/<negocio>/<propiedad>/<AAAA-MM>/ (los datos de prueba no)."
+     },
+     {
+      "c": "j",
+      "que": "Reportar un incidente con un video real desde HK; tras la pasada siguiente el video está en la carpeta del mes en Drive, con el mismo tamaño, y se reproduce."
+     }
+    ],
+    "incs": [],
+    "herramienta": "Los 21 casos en rojo de REQ-INV2-4-2 y REQ-INV2-4-2-dif vienen del entorno: la precondición «sin turnos de otra corrida hoy» falla porque quedaron en zz-verif-Propiedad cuatro turnos zz de una corrida anterior (05:00–08:00, completados de madrugada), el resto es cascada «no se creó en a» y dos casos cayeron por net::ERR_CONNECTION_CLOSED en page.goto.",
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Los criterios propios del lote (N1 a y g, N2 b–e, N3 f) están todos en verde; el resultado es «no aceptado» solo porque la regresión trae 22 casos en rojo, y ninguno se atribuye a L-116. (1) REQ-INV2-4-2.spec.js a y REQ-INV2-4-2-dif.spec.js a: la precondición de L-107/L-114 detecta turnos zz de otra corrida hoy en zz-verif-Propiedad antes de las 08:30/10:30 (las capturas muestran cuatro turnos zz-verif ya completados a las 05:00, 06:00, 07:00 y 08:00); b–n y b–i son cascada («turno … no se creó en a», timeouts de waitForSelector esperando esos turnos, diferencias null). REQ-INV2-4-2 c y g: net::ERR_CONNECTION_CLOSED en page.goto (la captura c muestra la página de error de Chrome). Ninguna captura muestra la pantalla de login: las sesiones llegaron bien. L-116 no toca HK, turnos ni inventario. Para repetir: limpiar o mover los turnos zz de hoy en zz-verif-Propiedad antes de correr esos guiones. (2) REQ-K3b-aviso.spec.js d (guion de L-117, ya desplegado: schema 12, p5c96): «miniatura de la foto del turno en el registro del admin: no». En su captura el turno de la corrida (11:00–15:00) sigue «⏳ Pendiente» con «▶ Iniciar turno»: el caso d (admin) corrió antes que el caso c (colab), que es el que inicia el turno y sube la foto (orden de perfiles de la cola: b, d, e, c, e2). Es el orden del guion y de la cola, no el lote, y además es alcance de L-117: no abro INC; conviene que el guion o la cola corran c antes de d. (3) Producción ya está en schema_version 12 (lotes posteriores desplegados); b exige ≥ 11 y queda cumplido. (4) horaBogota aproximada: la corrida terminó a las 15:37 UTC (10:37 Bogotá)."
    }
   },
   {

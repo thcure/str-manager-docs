@@ -53,6 +53,9 @@ const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 // v0.4.5 (LM-20): sondeo sin token a /modelo/api/cargar, solo con cuerpo vacío «{}» (espera 403).
 // v0.5.0 (LM-27b): también /modelo/api/credenciales, con las mismas condiciones.
 const SONDEO_SIN_TOKEN = [/^\/modelo\/api\/cargar$/, /^\/modelo\/api\/credenciales$/];
+// v0.5.25 (M-433): el inicio de sesión del STR (POST /api/login: la página cambia el token de Google por su sesión) no
+// escribe datos de negocio; sin él, cuando la sesión del perfil vence a mitad de corrida, todo cae en cascada.
+const SESION = [/^\/api\/login$/];
 
 // v0.4.2 (N2 con camara simulada): true = video sintetico de Chrome; '<ruta>.y4m' = ese video (p. ej. un QR).
 // Sin dialogo de permiso: --use-fake-ui-for-media-stream lo acepta solo.
@@ -123,6 +126,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   if (u.hostname !== HOST_STR && u.hostname !== HOST_MODELO) return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
   // v0.5.12 (M-390): cada escritura que pasa lleva su porqué en nota (queda en la bitácora y en «escrituras» del caso)
   if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true, nota: 'ruta de eco permitida' };
+  if (u.hostname === HOST_STR && String(metodo).toUpperCase() === 'POST' && SESION.some(r => r.test(u.pathname))) return { ok: true, nota: 'inicio de sesión (identidad; sin datos de negocio)' };   // v0.5.25
   if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true, nota: 'sondeo sin datos ({})' } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
   if (u.hostname === HOST_MODELO) return { ok: false, motivo: 'escritura a la fábrica: solo el Arquitecto por la cola' };
   // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion

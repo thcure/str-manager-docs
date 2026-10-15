@@ -158,3 +158,15 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   assert.strictEqual(dec(B + '/api/col/inv-movimientos', 'PUT', '{"items":[{"id":"m","data":{"nombre":"zz-verif-x","grupoId":"gr-real-1"}}],"deleted":[]}', ids, leid).ok, true, 'v53 solo mira inv-pendientes');
   console.log('guardia.test.js: v53 (pendientes con texto zz pero juego real): 4 OK');
 }
+
+// v0.5.25 (M-433): el inicio de sesión del STR pasa; nada parecido pasa por arrastre
+{
+  const dl = decidir(B + '/api/login', 'POST', '{"idToken":"x"}');
+  assert.strictEqual(dl.ok, true, 'POST /api/login pasa');
+  assert.ok(/inicio de sesión/.test(dl.nota), 'con su nota');
+  assert.strictEqual(decidir(B + '/api/login', 'PUT', '{}').ok, false, 'PUT /api/login no');
+  assert.strictEqual(decidir(B + '/api/login2', 'POST', '{}').ok, false, 'POST /api/login2 no');
+  assert.strictEqual(decidir(B + '/api/logout', 'POST', '{}').ok, false, 'POST /api/logout no (no hace falta)');
+  assert.strictEqual(decidir(BASE_MODELO + '/api/login', 'POST', '{}').ok, false, 'POST /api/login al modelo no');
+  console.log('guardia.test.js: sesión (POST /api/login): 6 OK');
+}

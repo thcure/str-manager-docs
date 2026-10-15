@@ -15,3 +15,10 @@ Carpeta de instalación: `C:\Users\ktcol\Downloads\str-instr-cola\pw\` (fuente: 
 - **Juez local (LM-19)**: los casos N3 del guion guardan `log\capturas\L-n\<letra>-<nombre>.png/.txt` con `h.captura()`; la cola v7 lanza después `claude -p` con `juez\texto-juez.md` (sin navegador, red ni comandos; solo escribe `log\L-n-veredicto.json`). Con el archivo `SIN-JUEZ` en la cola no corre.
 
 Instalación (una vez, PowerShell): `cd $HOME\Downloads\str-instr-cola\pw ; npm install --no-audit --no-fund ; npx playwright install chromium ; node guardia.test.js`
+
+
+## Instalar una versión nueva de pw en LENOVO (M-435, 14-oct)
+1. Antes de copiar, los tres archivos anteriores (comun.js, guion.js, package.json) van a `pw\anterior\` (vuelta atrás).
+2. Se copian los nuevos y se verifica el md5 de lo que quedó en LENOVO.
+3. Se deja `correr\humo-pw.txt` (humo-pw.spec.js: sesión de admin, oper y colab + una escritura zz-verif- de ida y vuelta) y, si hace falta, `correr\sesiones.txt`. Mientras no salga verde en `log\HUMO-PW-guion.json`, no se reencola ningún lote; si sale rojo, se vuelve a `pw\anterior\` y se avisa por el buzón.
+4. Solo entonces se avisa a Desarrollo para que deje `reprobar\L-n.txt`.

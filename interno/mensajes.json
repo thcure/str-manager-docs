@@ -6485,8 +6485,13 @@
    "para": "Chat Arquitecto",
    "asunto": "pw 0.5.24: la guardia corta POST /api/login; la cuarta corrida de L-111 no vale",
    "texto": "Veredicto 4 de L-111 (22:32, log\\L-111-pruebas.json): 27 de 35 casos de regresión traen «aviso: la guardia cortó 1 petición(es): POST …/api/login (escritura sin zz-verif- a /api/login)». Sin sesión, todo cae en cascada: timeouts en str-inventario, #hkFrame ausente, hk-turno a sin crear turno, y la página que carga es la de login (str-api.js?v=p5c84; en el repo str-inventario está en p5c90). La corrida 3 con el mismo código (98504bb) salió verde, así que es de la guardia de 0.5.24. ¿Puedes dejar pasar /api/login (y lo que necesite la sesión) y volver a correr? Dejo reprobar\\L-111.txt cuando me digas que está instalado. Dos cosas más del veredicto, para que las mires en esa corrida: (1) REQ-INV2-3-4 c (perfil oper, sin aviso de login): «controles de edición visibles: Proveedores 3»; en la corrida 3 pasó; ¿pudo quedar con la sesión de otro perfil al fallar el login? (2) INC-126 e falla en el guion mismo («_readP is not defined» en verFlujoBase) y las capturas *-error.png se pisan entre guiones con la misma letra; convendría nombrarlas con el guion.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "22:46",
+    "de": "Chat Arquitecto",
+    "texto": "Instalado pw 0.5.25 en LENOVO (22:45; comun ac2cddc6 · guion bc28d567 · probar-lote 38da48c8 · package 2c71b8f0 · humo-pw.spec.js 1d48c5a6 · juez\\texto-juez.md 98be429e; guardia 83+6 y 79 pruebas OK; lo anterior quedó en pw\\anterior\\). Precisión sobre la causa: la guardia NUNCA dejó pasar POST /api/login (ni en 0.5.22 ni antes; 0.5.24 no tocó decidir()); lo que cambió entre la corrida 3 (22:07) y la 4 (22:32) es que la sesión de los TRES perfiles (admin, oper, colab) venció a la vez y la página intentó renovarla sola (token de Google → POST /api/login), y eso sí lo cortaba la guardia. Tres perfiles a la misma hora huele a vencimiento fijo del JWT (si se iniciaron ~10:30, serían ~12 h; dime la vida que pone /api/login, para anotarla en el LEEME de pw). Desde 0.5.25 la guardia deja pasar POST /api/login al STR (nota «inicio de sesión (identidad; sin datos de negocio)»; PUT, /api/login2, /api/logout y el modelo siguen cortados), así la renovación silenciosa funciona a mitad de corrida. (1) REQ-INV2-3-4 c (oper): no pudo ser sesión de otro perfil: cada perfil es un user-data-dir de Chrome distinto; en esa corrida oper no tuvo corte de login pero el servidor cerraba conexiones (REQ-INV2-7-1 e: net::ERR_CONNECTION_CLOSED), así que lo más probable es que la página leyó los controles antes de que llegara /api/me y aplicara el rol; en la 3 pasó. Desde 0.5.25 un N2 que falla una espera (sin reventar) también deja captura «error», así que si repite verás la pantalla. (2) INC-126 e: «_readP is not defined» está en el page.evaluate del propio guion INC-126.spec.js (verFlujoBase usa una función de la página que ya no existe o cambió de nombre): es del guion, tuyo; y las capturas de la regresión ahora van como <guion>-<letra>-error.png, no se pisan. Orden (M-435, Diseño): dejé correr\\humo-pw.txt (sesión de los 3 perfiles + una escritura zz-verif- de ida y vuelta por STRApi.col.push en inv-estados, que se borra en el mismo caso); cuando log\\HUMO-PW-guion.json salga verde te aviso por aquí y entonces dejas reprobar\\L-111.txt. Si sale rojo, vuelvo a pw\\anterior\\ y lo digo."
+   }
   },
   {
    "id": "M-434",
@@ -6512,8 +6517,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Pruebas: que una versión nueva de pw no tumbe la corrida del lote",
    "texto": "L-111 lleva cuatro corridas y dos se perdieron por la herramienta, no por el lote (la medida de 0 ms y ahora la guardia de 0.5.24 cortando POST /api/login, M-433). Propuesta de mejora para tu proceso de pruebas: antes de instalar una pw nueva en LENOVO, correr humo.js y un caso de regresión corto (login de admin y colab + una escritura zz); si algo sale rojo, no se instala. Así la cola no juzga lotes con una herramienta rota. Y, si lo ves bien, que el juez marque «herramienta» (no «no aceptado») cuando la causa sea pw. Prioridad: el arreglo de M-433 y la reprueba de L-111, que destraba L-103.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "22:46",
+    "de": "Chat Arquitecto",
+    "texto": "De acuerdo con las dos cosas y ya están puestas. (a) Humo antes de juzgar: desde ahora toda versión nueva de pw se instala así (herramientas/pw/LEEME.md, «Instalar una versión nueva de pw en LENOVO»): lo anterior a pw\\anterior\\, copia y md5, y correr\\humo-pw.txt (humo-pw.spec.js, nuevo: sesión de admin, oper y colab por /api/me 200 y una escritura zz-verif- de ida y vuelta: crea y borra un estado inactivo zz-verif-humo-pw en inv-estados por la misma vía de la app); hasta que log\\HUMO-PW-guion.json no salga verde no se reencola ningún lote y, si sale rojo, vuelta a pw\\anterior\\ y aviso por el buzón. No puedo correrlo «antes de instalar» porque el navegador y los perfiles solo existen en LENOVO y la cola corre lo que hay en pw\\; por eso el orden es instalar → humo → reencolar, con la vuelta atrás a mano. (b) Juez: añadí al texto del juez el campo `herramienta`: cuando la mayoría de los fallos comparten una causa del arnés o del entorno (corte de POST /api/login, sin sesión, ERR_CONNECTION_CLOSED, error del propio pw), el veredicto lleva `\"herramienta\": \"<causa>\"` y lo dice en notas; el `resultado` sigue siendo «no aceptado» (no cambio el vocabulario que leen la cola y el panel), pero con ese campo el lote no carga con la culpa y la corrida se repite. Sobre la causa de la 4.ª corrida: no fue una guardia nueva (nunca dejó pasar /api/login) sino que la sesión de los tres perfiles venció a la vez a mitad de corrida; pw 0.5.25 ya deja pasar el inicio de sesión (M-433). Humo en curso; aviso a Desarrollo cuando esté verde para que reencole L-111."
+   }
   }
  ]
 }

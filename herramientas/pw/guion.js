@@ -86,7 +86,7 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = [])
   const r = { c: caso.c, nivel: n3 ? 'N3' : 'N2', perfil: caso.perfil, pagina: caso.pagina, que: caso.que || '', ok, observado: partes.join(' | ').slice(0, 900) };
   if (bloqueos.length) r.escriturasCortadas = bloqueos.length;
   if (n3) r.capturas = capturas;
-  else if (error && capturas.length) r.capturas = capturas;   // v0.5.23: la captura «error» de un N2 que reventó
+  else if (capturas.length && (error || fallan.length)) r.capturas = capturas;   // v0.5.23/25: la captura «error» de un N2 que falló
   r.escrituras = resumirEscrituras(pasaron);   // v0.5.12: [] = el caso no escribió nada
   // v0.5.22 (INC-128): cronología de las escrituras al STR/modelo: +ms desde la primera, método, ruta, estado y duración
   const cron = (pasaron || []).filter(b => b.t && !b.resp && !/googleapis|identitytoolkit|securetoken/.test(b.url));
@@ -135,7 +135,8 @@ async function correrGuion(spec, opciones = {}) {
             fs.mkdirSync(dirCapt, { recursive: true });
             if (op.ancho) await page.setViewportSize({ width: op.ancho, height: op.alto || 900 });
             await page.waitForTimeout(op.esperaMs || 600);
-            const base = String(caso.c) + '-' + String(nombre).replace(/[^A-Za-z0-9_-]/g, '_');
+            // v0.5.25 (M-433): en la regresión, el nombre del guion delante para que dos guiones con la misma letra no se pisen
+            const base = (opciones.nombreGuion ? String(opciones.nombreGuion).replace(/[^A-Za-z0-9_.-]/g, '_') + '-' : '') + String(caso.c) + '-' + String(nombre).replace(/[^A-Za-z0-9_-]/g, '_');
             const png = path.join(dirCapt, base + '.png');
             await page.screenshot({ path: png, fullPage: op.completa !== false });
             let texto = ''; try { texto = await page.innerText('body'); } catch (e) { }
@@ -159,7 +160,8 @@ async function correrGuion(spec, opciones = {}) {
           await Promise.race([caso.prueba(h), new Promise((_, no) => setTimeout(() => no(new Error('el caso paso de 90 s')), 90000))]);
         } catch (e) { error = (e && e.message ? e.message : String(e)).split('\n')[0]; }
         // v0.5.23 (M-427): si el caso revienta (timeout, excepción), deja la pantalla y su texto como captura «error»
-        if (error && caso.nivel !== 'N3') { try { await h.captura('error', { esperaMs: 0, completa: false }); } catch (e2) { } }
+        // v0.5.25 (M-433): también cuando falla una espera sin reventar (p. ej. un control visible que no debía)
+        if ((error || esperas.some(e => !e.ok)) && caso.nivel !== 'N3') { try { await h.captura('error', { esperaMs: 0, completa: false }); } catch (e2) { } }
         const tramo = a.bitacora.slice(marca);
         resultados.push(cerrarCaso(caso, esperas, error, tramo.filter(b => !b.paso), capturas, tramo.filter(b => b.paso)));
         await page.close().catch(() => { });

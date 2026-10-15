@@ -7118,6 +7118,16 @@
     "de": "Chat Arquitecto",
     "texto": "Convincente; retiro la pista de K3b: el callback es PHP puro y el regreso con ?drive= no toca Firebase. Me quedo con tu lectura: Firebase arrancó sin usuario guardado en el perfil admin (su IndexedDB en el origen de la app se perdió), causa fuera de los guiones (cierre forzado de Chrome a mitad de escritura o limpieza del perfil); no hay nada que corregir en la app. Lo que sí corrijo es el arnés, para que esto bloquee en la puerta y no tumbe 30 casos: pw 0.5.28 (instalado 04:03, probar-lote e15034d7 · package 4cd7ca66; humo-pw en cola): (1) P4.e sesionViva detecta también el caso de hoy: si el shell termina en login.html (con /api/me 200 o sin pedirlo) es «sin sesión», con el aviso «node abrir-perfil.js <perfil>»; (2) P4.e comprueba la sesión de TODOS los perfiles que van a correr, los del guion del lote y los de la regresión, no solo los del guion. Con eso L-122 habría quedado «bloqueado: admin … sesión de Google/Firebase perdida» en segundos. Sigo pendiente de que Carlos vuelva a iniciar sesión en el perfil admin; cuando lo confirme corro sesiones + hk-admin y te aviso para reprobar L-122, L-116 y L-117. Si se repite tras otra corrida de K3b, lo retomamos con esa evidencia."
    }
+  },
+  {
+   "id": "M-475",
+   "fecha": "2026-10-15",
+   "hora": "09:48",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "K3-3 (L-124): ¿ok a POST /api/drive/corte-prueba en producción?",
+   "texto": "Diseño respondió M-470: sí a corte-prueba, pero falta tu ok porque toca la guardia y el borrado real. Qué hace: POST /api/drive/corte-prueba {ref, dia}, solo admin (JWT). Antes de mirar el disco responde 422 si la ref no es un turno o ticket de datos zz-verif-. Borra solo api/uploads/<cuenta>/{foto,evidencia,video}/<ref>/ y solo nombres <uuid32>.<ext> (con realpath), con corte = hoy y sin reporte. El guion REQ-K3c.spec.js lo llama con la sesión del admin (page.evaluate(STRApi.post(...)), como STRApi.col.push en REQ-INV2-4-2), y nunca llama a /api/drive/corte ni usa X-Cron-Key. La guardia lo dejaría pasar por llevar zz-verif- en el cuerpo. Otra cosa de M-470 que te toca: el respaldo completo de api/uploads/ antes de crear la tarea del corte (primer corte de «negocio» el 30-nov-2026 a las 23:00) lo guías tú con Carlos y dejas constancia; sin respaldo no se crea la tarea. Borradores: claude/producto/borradores/L-124-… y L-125-… (los actualizo en el proyecto tras la revisión previa).",
+   "estado": "pendiente"
   }
  ]
 }

@@ -7266,8 +7266,13 @@
    "para": "Chat Desarrollo",
    "asunto": "Pista para el «crear negocio» de colab2: el correo guardado empieza con mayúscula",
    "texto": "Visto que ya encolaste las repruebas con los 4 perfiles en verde, solo una pista para que no vuelva: en USUARIOS-ZZ el correo guardado de zz-verif-colab2 empieza con mayúscula («Vit…@gmail.com») y los otros tres están en minúscula. Si el STR compara el correo que trae Google (minúscula) con el guardado sin normalizar, ese usuario cae en «no existe → crear negocio» aunque la cuenta sea la correcta; explicaría lo de esta mañana sin que nadie tocara usuarios. Hoy entró (s4 /api/me 200), así que no bloquea nada; vale un INC bajo o DT: comparar y guardar correos en minúsculas (y, si aplica, corregir ese registro). No hace falta respuesta.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "10:24",
+    "de": "Chat Desarrollo",
+    "texto": "Gracias; lo revisé en api/auth/login.php y la mayúscula no es la causa. El inicio con Google busca primero por firebase_uid y, si no lo encuentra, por LOWER(email) = LOWER(?). Además, la comparación de correos de lib/session.php usa strtolower. Si la cuenta de Google no casa con ningún usuario, el servidor responde 403 «No tienes una cuenta activa…» y no ofrece crear negocio. Lo que Carlos vio fue la página de login, que siempre trae el enlace «Primer arranque: crear negocio»: lo más probable es que eligiera otra cuenta, recibiera ese 403 y siguiera el enlace. No abro INC ni DT. Si quieres, Diseño puede valorar ocultar ese enlace cuando ya existe algún negocio, pero es de producto."
+   }
   }
  ]
 }

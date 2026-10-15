@@ -7049,6 +7049,16 @@
    "texto": "K3c no cabe en una sesión: L-124 (servidor: migración 13, api/lib/corte.php, POST /api/drive/corte con X-Cron-Key cada 15 min desde las 23:00 del día de corte hasta el 3.er día; con Drive: última pasada y borra «con copia» lo confirmado por tamaño y md5, lo demás se aplaza y se borra el día 3; sin Drive: guarda la huella y borra; nunca guías, documentos ni planos; reporte por corte) y L-125 (/api/archivo trae de Drive lo borrado o responde 410 «Eliminado en el corte del <fecha>»; expediente; cartel en HK; avisos 7/3/1 día y «N archivos aún no están en Drive»; reporte en Configuración). Borradores: claude/producto/borradores/L-124-instr-k3c-corte-mensual.md y L-125-instr-k3c-vista.md. Dudas: (1) Carlos: S2.1 decía que la evidencia de incidentes no se borra; DA-32 dice todas las fotos y videos. El borrador borra también evidencia, incluso de incidentes abiertos. ¿Se excluye la evidencia (o la de incidentes abiertos)? (2) Arquitecto/Diseño: ¿aprueban un POST /api/drive/corte-prueba solo admin en producción, que responde 422 si la ref no es zz-verif-, para el N2? (3) El criterio 4 en N2 («ver la foto desde Drive») no se puede con zz-verif- (nunca van a Drive): N1 + N4 de Carlos en el primer corte real. (4) Carlos: ¿confirma el primer corte de «negocio» el 30-nov-2026 23:00 y un respaldo de api/uploads/ antes de crear su tarea programada (que se crea solo tras aceptar L-124 y L-125)? (5) Lo borrado se muestra trayéndolo de Drive desde el servidor (gasta banda del hosting; un video no se puede adelantar) en vez de enlazar a Drive (solo lo abre quien tenga esa cuenta). ¿De acuerdo? (6) ¿Bastan los recordatorios en el aviso fijo, sin notificación hasta M6? ¿El aviso de pendientes lo ve también el operador con config.drive?",
    "estado": "pendiente",
    "respuesta": null
+  },
+  {
+   "id": "M-471",
+   "fecha": "2026-10-15",
+   "hora": "03:51",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-122 en rojo por el entorno: el perfil admin sale sin sesión en HK",
+   "texto": "La regresión de L-122 (08:27–08:47Z) falla en 31 casos, todos con la misma causa: cada caso que abre HK como admin ve la pantalla de login (log\\capturas\\L-122\\INC-126-e-error.png; «_readP is not defined», «str-api.js en HK: str-api.js?v=p5c84», que es la página de login). Sin admin en HK no se crea el turno de la corrida y caen en cadena hk-turno a–d, REQ-INV2-3-4-hk, REQ-INV2-4-2-dif, INC-131 b/c y REQ-K3b-aviso b–e. Los casos de admin en Inventario y Shell pasan (48 en verde), y hubo además un ERR_CONNECTION_CLOSED suelto en REQ-INV2-3-4-hk h. El guion de L-122 no cambia nada de eso. ¿Puedes revisar la sesión del perfil admin en HK (vencida o cortada por la guardia) y decirme cuándo reprobar? En cuanto me avises repruebo L-122, L-116 y L-117.",
+   "estado": "abierto"
   }
  ]
 }

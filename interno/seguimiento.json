@@ -10320,8 +10320,55 @@
    "req": "DT-41",
    "categoria": "normal",
    "resumen": "GET /api/diagnostico solo admin",
-   "estado": "registrado",
-   "observacion": "Encolado 01:36 (ok de Diseño M-455; revisión previa 12/14 corregida)."
+   "estado": "no aceptado",
+   "observacion": "Encolado 01:36 (ok de Diseño M-455; revisión previa 12/14 corregida). · 01:57 no aceptado: a–c en verde (diagnóstico: persistente, 11 conexiones, 10 dormidas, máx 75; 403 al operador); único rojo: regresión REQ-INV2-3-4 b por carrera del guion con el foco a 30 ms del diálogo (L-120)",
+   "hash": "a8944cc",
+   "aceptacion": {
+    "lote": "L-119",
+    "hash": "a8944cc",
+    "fecha": "2026-10-15",
+    "horaBogota": "01:57",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 69/69 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "/api/diagnostico: 200 | persistente: true | conexiones 11 · dormidas 10 · maxUsuario 75 | claves: conexiones,dormidas,hora,maxUsuario,persistente"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "/api/diagnostico como operador: 403"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "regresión de la zona inventario: REQ-INV2-3-4.spec.js caso b (Proveedores: crear, editar y desactivar) en rojo — error: locator.click: Timeout 30000ms exceeded.; el resto de los guiones de regresión de la cola en verde"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Regresión roja en Proveedores: editar/desactivar no completa (timeout de clic)",
+      "nivel": "medio",
+      "causa": "REQ-INV2-3-4.spec.js (caso b) crea el proveedor zz-verif-L-119-r-Lavanderia-6mf60 sin problema (PUT /api/col/inv-proveedores 200; la captura lo muestra ya listado, activo, con el aviso «Proveedor creado»), pero el guion se queda esperando un clic posterior (editar, guardar o desactivar) que no llega a tiempo. La captura es de después de crear y no alcanza a mostrar cuál paso concreto falla, así que no se puede precisar si es un elemento que no se pinta, un modal que no abre o un selector desalineado con la UI actual. Fuera del alcance de DT-41 (api/diagnostico no toca proveedores).",
+      "observado": "error: locator.click: Timeout 30000ms exceeded. (tras crear el proveedor con éxito, según log\\capturas\\L-119\\REQ-INV2-3-4-b-error.png)"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "El punto «e» de la instrucción (medición en hora de uso, conexiones < 75) queda fuera de esta cola: lo hace el Arquitecto con Carlos al desplegar; no se juzga aquí. La instrucción no declara letras N3 para este lote (n3Preparados vacío coincide), así que no hay capturas que decidir en ese nivel."
+   }
   },
   {
    "lote": "L-114",
@@ -12127,15 +12174,31 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "GET /api/diagnostico (solo admin, solo lectura): persistente, conexiones y dormidas del usuario de la app",
-   "estado": "encolado",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "construcción (después de L-107)",
+   "esperaA": "Arquitecto",
+   "espera": "aceptación con nota (rojo = guion, L-120)",
    "orden": 121.1125,
-   "desde": "2026-10-15 01:36",
+   "desde": "2026-10-15 02:01",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Orden Diseño M-455: L-107 → DT-41 → L-114 → L-116 → L-117 → K3-3."
+  },
+  {
+   "lote": "L-120",
+   "req": "guion REQ-INV2-3-4 (regresión)",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Guion de Proveedores espera el foco en «Nombre» antes de escribir (carrera con setTimeout 30 ms)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "ok",
+   "orden": 121.1127,
+   "desde": "2026-10-15 02:01",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Rojo intermitente en L-103, L-111 (1.ª) y L-119."
   }
  ],
  "riesgos": [

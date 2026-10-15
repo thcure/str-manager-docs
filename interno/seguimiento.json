@@ -10631,8 +10631,178 @@
    "req": "REQ-K3-2 (2/2)",
    "categoria": "crítico",
    "resumen": "Aviso fijo del corte y estado de copia en el registro; migración 12",
-   "estado": "registrado",
-   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida)."
+   "estado": "no aceptado",
+   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida). · 02:50 no aceptado: a, b, e, e2 en verde (migración 12, retención, aviso del operador); rojos de guion: c/d (foto en la tarea de conteo, que L-107 reemplazó) y 12 regresiones con schema_version === 10 fijo → L-121",
+   "hash": "6e4de8f",
+   "aceptacion": {
+    "lote": "L-117",
+    "hash": "6e4de8f",
+    "fecha": "2026-10-15",
+    "horaBogota": "02:50",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "herramienta": "los guiones de regresión antiguos exigen /api/health con schema_version 10 exacto y el esquema sube a 12 por diseño (migraciones 11 de L-116 y 12 de este lote)",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 73/73 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado: 6 turnos | si: turno sh-m-1792049886448: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno de la corrida: sh-m-1792049886448 | NO: subida de la foto: sin respuesta | si: pedidos a /api/drive desde el portal: ninguno"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno de la corrida: sh-m-1792049886448 | NO: GET /api/drive/copias: sin respuesta · sin secretos: sí | NO: insignia: null · servidor: null | NO: estado del dato de prueba (Drive no conectado): — · esperado: sin-drive | error: el caso paso de 90 s"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /api/health schema_version: 12 | si: estado: conectado true · avisoCorte true · retención {\"inicio\":\"2026-10-15\",\"origen\":\"despliegue\",\"proximoCorte\":\"2026-11-30\",\"proximoCorteTexto\":\"30 de noviembre de 2026\"} | si: con Drive conectado el aviso no se ve"
+     },
+     {
+      "c": "e2",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado: conectado true · avisoCorte false | si: sin avisoCorte o con Drive conectado el aviso no se ve"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "f-aviso-corte.png (390 px): el shell muestra la barra superior y debajo, sin aviso, el Dashboard; nada desborda. El negocio tiene Drive conectado (caso e: conectado true), así que no hay aviso que leer; queda anotado según la precondición de f."
+     },
+     {
+      "c": "g",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "g-insignia-drive.png: HK con el turno zz-verif-Propiedad de la corrida abierto a la derecha (Pendiente, sin iniciar); en lo visible y en el texto no hay ninguna miniatura de foto ni insignia ☁: el turno no tiene foto porque falló c."
+     },
+     {
+      "c": "i",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "regresión: 11 casos con ok false, todos con «NO: api/health 200 · schema_version 12» frente a «esquema 10» (DT-35 b, DT-40 b, INC-121 c, INC-126 c, INC-128-b c, INC-128 b, L-108 b, REQ-INV2-3-4 j, REQ-INV2-4-1-interfaz e, REQ-INV2-4-1 g, REQ-INV2-7-1-hk h, REQ-INV2-7-1 j); el resto de cada uno de esos casos y los demás casos de regresión, en verde"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "f",
+      "motivo": "el negocio tiene Drive conectado: la captura a 390 px muestra el shell sin aviso (es lo correcto con Drive) y no se puede juzgar la legibilidad del aviso con la fecha y «Conectar Drive»"
+     },
+     {
+      "c": "g",
+      "motivo": "no hay foto en el turno de la corrida (c falló): la captura no muestra ninguna miniatura, así que no se puede ver la insignia ✓/☁"
+     }
+    ],
+    "dispositivo": [
+     {
+      "c": "h",
+      "que": "Carlos, con una cuenta de Google de prueba en un negocio sin Drive: en str-app-shell.html ver el aviso fijo con la fecha del corte, tocar «Conectar Drive» › ⚙️ Configuración › Conectar Google Drive; tras «✓ Google Drive conectado» el aviso ya no está. Captura de la pantalla de permisos de Google. Revisar también que la fecha del aviso sea la esperada (fecha base = despliegue de L-117)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "c: el guion no sube la foto de tarea en el portal",
+      "nivel": "medio",
+      "causa": "el guion del lote busca el botón de foto (.hk-foto-btn) en la tarea «zz-verif-Conteo de cierre», que desde L-107/L-114 la reemplaza la entrega de zona («Lo cuenta la entrega de zona (arriba)») y no tiene botón de foto; además el turno sigue «Pendiente» sin iniciar, así que no hay selector de archivo ni POST /api/upload. Hay que elegir otra tarea con foto (p. ej. zz-verif-Limpieza480) e iniciar el turno antes",
+      "observado": "NO: subida de la foto: sin respuesta; captura c-error: portal con el turno de la corrida «Pendiente», botón «Iniciar turno», y la tarea de conteo con «Lo cuenta la entrega de zona (arriba)»"
+     },
+     {
+      "titulo": "d: no se pudo comprobar la insignia ☁ en el registro del turno",
+      "nivel": "medio",
+      "causa": "consecuencia de c: sin foto en el turno no hay img.hk-foto-thumb, _hkResolverDrive no pide /api/drive/copias y el caso agota los 90 s; no hay evidencia de fallo del código de la insignia, pero el criterio 1 (parte visible) y el 10 quedan sin verificar",
+      "observado": "NO: GET /api/drive/copias: sin respuesta | NO: insignia: null · servidor: null | error: el caso paso de 90 s; captura d-error: HK con el turno de la corrida abierto y sin miniaturas"
+     },
+     {
+      "titulo": "Regresión DT-35 b: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12"
+     },
+     {
+      "titulo": "Regresión DT-40 b: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 · db true | si: lecturas a la vez: 12 · con error: ninguna"
+     },
+     {
+      "titulo": "Regresión INC-121 c: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión INC-126 c: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: iframe de HK v=p5c96"
+     },
+     {
+      "titulo": "Regresión INC-128-b c: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 · db true | el resto en si"
+     },
+     {
+      "titulo": "Regresión INC-128 b: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 · db true"
+     },
+     {
+      "titulo": "Regresión L-108 b: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: iframe de HK v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-3-4 j: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-4-1-interfaz e: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-4-1 g: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-7-1-hk h: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "si: inv-sububicaciones 200 · HK v=p5c96 · sin errores de página | NO: api/health 200 · schema_version 12"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-7-1 j: esquema 10 fijo",
+      "nivel": "bajo",
+      "causa": "el guion exige schema_version 10 exacto; el lote lo sube a 12 por diseño",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Hora: la del fin de la corrida (07:50 UTC). N1 en verde (73/73). De los 13 ok false, 11 son regresión y tienen la misma causa ajena al lote: guiones viejos que exigen schema_version 10 exacto (campo herramienta); hay que pasarlos a «≥ 10», como ya hacen con ?v=, y repetir la regresión. Los otros 2 (c y d) sí son del lote: su propio guion intenta subir la foto en la tarea de conteo, que ya no tiene botón de foto, y con el turno sin iniciar; d y la captura g dependen de esa foto. El negocio de prueba tiene Drive conectado, así que e y e2 verificaron solo la rama «aviso oculto» y f no se puede juzgar; la rama sin Drive queda para N4 (h) o para un negocio de prueba sin Drive. En las capturas aparecen nombres de personas reales y códigos de reservas (no se copian aquí)."
+   }
   }
  ],
  "esquema": {
@@ -12413,12 +12583,12 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Aviso fijo del corte y estado de copia en el registro (migración 12)",
-   "estado": "encolado",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "construcción",
+   "esperaA": "CD",
+   "espera": "L-121 (guiones); luego reprueba de L-116 y L-117",
    "orden": 121.41000000000001,
-   "desde": "2026-10-15 02:32",
+   "desde": "2026-10-15 02:57",
    "planTrabajo": "PT-1",
    "grupo": "K3",
    "nota": "DA-32; cruce 10-oct; después de L-114."
@@ -12454,6 +12624,22 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Rojo intermitente en L-103, L-111 (1.ª) y L-119. · Pendiente para un lote siguiente de guiones: que limpiar() borre por id lo que creó (M-458)."
+  },
+  {
+   "lote": "L-121",
+   "req": "guiones de regresión y de K3b",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Guiones: schema_version ≥ 10 (12 guiones) y foto de la recepción en el guion de K3b; test estático",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "ok (M-465)",
+   "orden": 121.41,
+   "desde": "2026-10-15 02:57",
+   "planTrabajo": "PT-1",
+   "grupo": "K3",
+   "nota": "Destraba L-116 (reprueba) y L-117."
   }
  ],
  "riesgos": [

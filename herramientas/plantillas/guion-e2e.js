@@ -12,6 +12,9 @@
 //   cualquier otra escritura y el caso falla. Se borra en limpiar(). Nunca datos reales.
 // - h.espera(condición, 'lo observado') registra cada comprobación; un caso sin esperas no pasa.
 // - Sin contraseñas, sin tokens, sin JavaScript sobre la sesión ni localStorage (page.evaluate solo para leer el DOM).
+//   Excepciones aceptadas por el Arquitecto, caso por caso: `alinear` (M-372) y quitar de la cola local de subida
+//   (IndexedDB str-cola-subida) SOLO los ítems que el mismo guion metió, por id o por ref zz de la corrida, también en
+//   limpiar() (M-496, INC-132). Nunca la sesión, nunca «vaciar». Se cita el M-n en el comentario del caso.
 // - Selectores estables (id o data-*); si la página no los tiene, el lote los añade y lo dice en Alcance.
 // - N3 (LM-19): caso con nivel: 'N3' que deja la pantalla lista y llama h.captura('nombre', { ancho: 390 }); no lleva
 //   h.espera obligatoria: lo juzga el juez local mirando la captura y su texto. Un caso N3 por criterio N3.

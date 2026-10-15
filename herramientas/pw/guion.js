@@ -70,6 +70,15 @@ function resumirEscrituras(pasaron) {
 function horaBogota(d = new Date()) {
   return new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(d).replace(/^24/, '00');
 }
+// v0.5.33 (M-502): el .txt de una captura guarda el texto visible entero de la página y el operador ve datos de personas
+// reales (turnos, huéspedes). Antes de escribirlo se enmascaran teléfonos y correos; los nombres no se pueden distinguir
+// de los rótulos, así que las capturas siguen sin salir nunca de LENOVO (ni al repo ni al buzón). Puro, con pruebas.
+function enmascararTexto(texto) {
+  return String(texto || '')
+    .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '[correo]')
+    .replace(/(?<![\w-])(\+?\d[\d .-]{6,}\d)(?![\w-])/g, (m) => (/\d{4}-\d{2}-\d{2}/.test(m) ? m : (m.replace(/\D/g, '').length >= 7 && m.replace(/\D/g, '').length <= 15 ? '[tel]' : m)));
+}
+
 // v0.5.31 (M-499): cierre suave de un contexto persistente: primero las páginas, una pausa corta para que Chrome
 // termine de escribir IndexedDB/LevelDB (sesión de Firebase) y después el contexto. Devuelve la hora de cierre.
 async function cerrarSuave(ctx) {
@@ -164,7 +173,7 @@ async function correrGuion(spec, opciones = {}) {
                 if (t && t.trim()) texto += '\n\n--- iframe ' + (id ? '#' + id : f.url().split('?')[0].split('/').pop()) + ' ---\n' + t;
               } catch (e) { }
             }
-            texto = texto.slice(0, 12000);
+            texto = enmascararTexto(texto).slice(0, 12000);   // v0.5.33 (M-502): sin teléfonos ni correos
             fs.writeFileSync(path.join(dirCapt, base + '.txt'), texto);
             capturas.push({ nombre, png: path.relative(COLA, png), ancho: page.viewportSize().width });
             return png;
@@ -222,7 +231,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, correrGuion, cargar, MARCA };
+module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

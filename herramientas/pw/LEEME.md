@@ -24,3 +24,7 @@ Instalación (una vez, PowerShell): `cd $HOME\Downloads\str-instr-cola\pw ; npm 
 4. Solo entonces se avisa a Desarrollo para que deje `reprobar\L-n.txt`.
 
 Sesiones de los perfiles (M-436, 14-oct): el JWT del STR dura 24 h (api/config/jwt.php) y la página lo renueva sola con el token de Google (1 h) por POST /api/login; desde pw 0.5.25 la guardia deja pasar ese POST (nota «inicio de sesión»), así que una sesión vencida a mitad de corrida ya no tumba la regresión. Si los perfiles se iniciaron a la vez, vencen a la vez.
+
+
+## Capturas (LM-19) y datos de personas (M-502, pw 0.5.33)
+Los `.png` y `.txt` de `log\capturas\` muestran lo que ve el perfil de prueba, y el operador ve turnos y huéspedes reales. El `.txt` se escribe enmascarado (teléfonos → `[tel]`, correos → `[correo]`); los nombres no se pueden distinguir de los rótulos. Por eso las capturas **nunca salen de LENOVO**: ni al repositorio, ni al buzón, ni a un chat. El juez local las lee allí mismo.

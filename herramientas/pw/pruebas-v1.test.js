@@ -183,6 +183,16 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('horaBogota: 15-oct 15:00Z = 10:00:00 Bogotá', horaBogota(new Date('2026-10-15T15:00:00Z')) === '10:00:00');
   t('horaBogota: 05:00Z = 00:00:00 (no 24:00)', horaBogota(new Date('2026-10-15T05:00:00Z')) === '00:00:00');
 }
+{ // v0.5.33 (M-502): el texto de las capturas no lleva teléfonos ni correos
+  const { enmascararTexto } = require('./guion');
+  t('enmascarar: teléfono con espacios', enmascararTexto('Llamar al 300 123 4567 hoy') === 'Llamar al [tel] hoy');
+  t('enmascarar: teléfono con +57 y guiones', enmascararTexto('Tel: +57 300-123-4567.') === 'Tel: [tel].');
+  t('enmascarar: correo', enmascararTexto('ana.perez+x@gmail.com escribió') === '[correo] escribió');
+  t('enmascarar: id sh-m-1792083473461 se conserva', enmascararTexto('turno sh-m-1792083473461') === 'turno sh-m-1792083473461');
+  t('enmascarar: fecha y hora se conservan', enmascararTexto('2026-10-15 12:06 · 390 px · 6/6') === '2026-10-15 12:06 · 390 px · 6/6');
+  t('enmascarar: zz-verif-L-117-r-ar1 se conserva', enmascararTexto('zz-verif-L-117-r-ar1-sn3kg') === 'zz-verif-L-117-r-ar1-sn3kg');
+  t('enmascarar: cantidad corta no se toca', enmascararTexto('cantidad 12345') === 'cantidad 12345');
+}
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];

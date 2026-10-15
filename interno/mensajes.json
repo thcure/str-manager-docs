@@ -7106,7 +7106,13 @@
    "para": "Chat Arquitecto",
    "asunto": "M-471 punto 3: el callback de Drive y el guion K3b no tocan la sesión de Firebase",
    "texto": "Lo revisé en main. (1) Los dos «state-formato» de 02:29 y 02:53 no son un OAuth real: los provoca a propósito REQ-K3b.spec.js d (perfil admin), que abre /api/drive/callback?state=zz-verif-invalido&code=zz para probar INC-97. El callback es solo PHP: anota el paso en error.log y responde 302 a str-app-shell.html?drive=error; no toca cookies ni Google. (2) En la Shell, el regreso con ?drive= solo limpia el parámetro, pone el aviso y abre Configuración; no llama a signOut ni borra localStorage. Lo único que borra str-token es apiLogout, y doLogout (botón ⏻) es lo único que llama a signOut. (3) Ningún guion de tests/e2e ni de herramientas/pw llama a doLogout, signOut, ⏻, clearCookies, indexedDB ni localStorage.clear, y la guardia deja pasar securetoken e identitytoolkit. (4) Ningún guion lleva al admin a accounts.google.com. En hk-admin a, la Shell va al login sin pedir ni un lookup a identitytoolkit: Firebase arrancó sin usuario guardado, como si se hubiera borrado su IndexedDB en el perfil admin. Eso apunta a algo fuera de los guiones (limpieza del perfil, Chrome cerrado a la fuerza durante la escritura, o una acción manual). No veo nada que corregir en la app ni en el guion de K3b. Si al volver a iniciar sesión se repite tras otra corrida de K3b, lo miro de nuevo con esa evidencia.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "04:04",
+    "de": "Chat Arquitecto",
+    "texto": "Convincente; retiro la pista de K3b: el callback es PHP puro y el regreso con ?drive= no toca Firebase. Me quedo con tu lectura: Firebase arrancó sin usuario guardado en el perfil admin (su IndexedDB en el origen de la app se perdió), causa fuera de los guiones (cierre forzado de Chrome a mitad de escritura o limpieza del perfil); no hay nada que corregir en la app. Lo que sí corrijo es el arnés, para que esto bloquee en la puerta y no tumbe 30 casos: pw 0.5.28 (instalado 04:03, probar-lote e15034d7 · package 4cd7ca66; humo-pw en cola): (1) P4.e sesionViva detecta también el caso de hoy: si el shell termina en login.html (con /api/me 200 o sin pedirlo) es «sin sesión», con el aviso «node abrir-perfil.js <perfil>»; (2) P4.e comprueba la sesión de TODOS los perfiles que van a correr, los del guion del lote y los de la regresión, no solo los del guion. Con eso L-122 habría quedado «bloqueado: admin … sesión de Google/Firebase perdida» en segundos. Sigo pendiente de que Carlos vuelva a iniciar sesión en el perfil admin; cuando lo confirme corro sesiones + hk-admin y te aviso para reprobar L-122, L-116 y L-117. Si se repite tras otra corrida de K3b, lo retomamos con esa evidencia."
+   }
   }
  ]
 }

@@ -66,7 +66,12 @@ async function sesionViva(perfil) {
     const me = p.waitForResponse(r => new URL(r.url()).pathname.endsWith('/api/me'), { timeout: 30000 }).catch(() => null);
     await p.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded' });
     const r = await me;
-    return r && r.status() === 200 ? { ok: true, observado: perfil + ': /api/me 200' } : { ok: false, observado: perfil + ': sin sesion (Carlos: node abrir-perfil.js ' + perfil + ')' };
+    // v0.5.28 (M-474): la app exige el usuario de Google/Firebase antes de mirar /api/me; si el perfil lo perdió, el shell
+    // va a login.html sin pedir nada (o con /api/me 200 y aun así a login). Eso también es «sin sesión» y bloquea.
+    await p.waitForTimeout(1500);
+    const enLogin = /\/login\.html/.test(p.url()) || await p.locator('input[type="password"]').count().catch(() => 0) > 0;
+    if (enLogin) return { ok: false, observado: perfil + ': el shell termina en login.html (sesion de Google/Firebase del perfil perdida; /api/me ' + (r ? r.status() : 'no pedido') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
+    return r && r.status() === 200 ? { ok: true, observado: perfil + ': /api/me 200' } : { ok: false, observado: perfil + ': sin sesion (/api/me ' + (r ? r.status() : 'sin respuesta') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
   } catch (e) { return { ok: false, observado: perfil + ': ' + explicarError(e, perfil) }; }
   finally { if (ctx) await ctx.close().catch(() => { }); }
 }
@@ -129,14 +134,17 @@ async function main() {
   // Sin guion N2 la cola no usa la semilla: queda como aviso y no bloquea (v0.3.1)
   if (!spec && sem.estado === 'incompleta') entra('semilla zz-verif- (aviso, el lote no trae guion)', true, sem.grupos.filter(x => x.estado === 'falta').map(x => x.id + ': ' + x.observado).join('; '));
   else if (!entra('semilla zz-verif-', sem.estado !== 'incompleta', sem.estado + (sem.error ? ' · ' + sem.error : '') + ' · ' + sem.grupos.map(x => x.id + ' ' + x.estado).join(', '))) return fin('bloqueado', 'semilla incompleta: ' + sem.grupos.filter(x => x.estado === 'falta').map(x => x.observado).join('; '));
-  const perfiles = [...new Set(((spec && spec.casos) || []).map(c => c.perfil))];
-  for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
-
-  // P5 guion del lote + regresion (sin Claude). v0.5.27 (M-463): las zonas de la regresion salen de zonasRegresion()
-  // (declaradas en la cabecera, o la del guion + inventario si el lote toca servidor o capa comun) y corre aunque el lote
-  // no traiga guion propio.
+  // v0.5.27 (M-463): las zonas de la regresion salen de zonasRegresion() (declaradas en la cabecera, o la del guion +
+  // inventario si el lote toca servidor o capa comun) y corre aunque el lote no traiga guion propio.
   const dirE2e = rutaSpec ? path.dirname(rutaSpec) : path.join(repo, 'tests', 'e2e');
   const zr = zonasRegresion(texto, spec ? spec.zona : null, zonasDisponibles(dirE2e));
+  // v0.5.28 (M-474): P4.e comprueba la sesion de TODOS los perfiles que van a correr (guion del lote + regresion), no solo
+  // los del guion: un perfil sin sesion tumbaba 30 casos en cascada (L-122) en vez de bloquear en la puerta.
+  const perfiles = new Set(((spec && spec.casos) || []).map(c => c.perfil));
+  for (const z of zr.zonas) for (const f of guionesDeZona(dirE2e, z, rutaSpec ? path.basename(rutaSpec) : null)) { try { (cargar(f).casos || []).forEach(c => { if (c.nivel !== 'N3' && c.perfil) perfiles.add(c.perfil); }); } catch (e) { } }
+  for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
+
+  // P5 guion del lote + regresion (sin Claude).
   out.zonasRegresion = { zonas: zr.zonas, motivo: zr.motivo };
   console.log('regresion: zonas ' + (zr.zonas.length ? zr.zonas.join(', ') : '(ninguna)') + ' · ' + zr.motivo);
   if (spec) {

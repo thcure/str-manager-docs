@@ -703,6 +703,19 @@
    "pendiente": "Revisar contra e0c7b9d cuando se resuelva INC-128.",
    "estado": "abierto",
    "origen": "Veredicto de L-108 (19:24)."
+  },
+  {
+   "id": "INC-130",
+   "tipo": "INC",
+   "modulo": "HK · pull de turnos",
+   "etapa": "🔍",
+   "fecha": "2026-10-14",
+   "severidad": "alto",
+   "titulo": "La marca recién hecha de una tarea se pierde en pantalla si un pull de turnos pedido antes del clic llega después",
+   "causa": "Los cuatro pulls de turnos de HK (carga del colaborador ~6295, carga ~6455, sondeo ~6525, puente del portal ~6556) unen con _m1MergeById(_readS(), res), que reemplaza el turno local entero por el del servidor. Si la respuesta se pidió antes del clic, trae el turno sin la marca y la borra de localStorage y de la pantalla (el servidor sí la guardó). Si el colaborador vuelve a tocar la casilla, la desmarca de verdad (remove explícito). La respuesta tardía de _hkInvPull reenvía los conteos nuevos (L3159): por eso el PUT de inv-movimientos a +21 ms. Previo a L-111: lo destapa el tiempo de la corrida.",
+   "pendiente": "L-113: no pisar con un pull un turno guardado localmente después de pedir ese pull.",
+   "estado": "abierto",
+   "origen": "Veredicto 6 de L-111 (23:06), REQ-INV2-7-1-hk-turno d + captura."
   }
  ],
  "dts": [
@@ -9322,7 +9335,7 @@
    "categoria": "normal",
    "resumen": "Subidas en serie por colección; sin doble PUT de turnos en HK; reintentos de conexión con espera aleatoria; p5c90.",
    "estado": "no aceptado",
-   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433) · 22:52 quinta corrida: d verde (turnos en serie, conteos después, enVuelo 1); solo rojos REQ-INV2-4-1-interfaz b y c por la zona de prueba zz-verif-L-111-r-ficha duplicada (limpieza de la corrida 4 falló sin sesión); se pide limpiarla y reprobar (M-437)",
+   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433) · 22:52 quinta corrida: d verde (turnos en serie, conteos después, enVuelo 1); solo rojos REQ-INV2-4-1-interfaz b y c por la zona de prueba zz-verif-L-111-r-ficha duplicada (limpieza de la corrida 4 falló sin sesión); se pide limpiarla y reprobar (M-437) · 23:06 sexta corrida: 34/35; d rojo «tarea marcada: no» con turnos 200: un pull de turnos pedido al abrir (antes del clic) llega después y _m1MergeById reemplaza el turno local marcado → INC-130 (previo a L-111); fix L-113",
    "hash": "98504bb",
    "aceptacion": {
     "lote": "L-111",
@@ -9632,6 +9645,63 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "a y b (N1) y c (N2) del propio INC-128 salen verdes: la cola por colección y el reintento con esperas al azar quedan cubiertos, y el despliegue p5c90 llegó a HK. El criterio d falla no por la cola en sí —la cronología de REQ-INV2-7-1-hk-turno.spec.js d es correcta y serializada— sino porque la regresión completa no está toda en verde: dos casos de REQ-INV2-4-1-interfaz.spec.js (zonas) quedan en rojo por una zona de prueba 'ficha' duplicada entre corridas (arrastre de limpieza fallida), ajena al alcance de este lote (str-api.js/HK/database.php) pero igual cuenta como regresión del lote según la regla del juez. e no aplica porque d salió verde. No se detectó causa de arnés/entorno de las listadas en M-435 (guardia de login, sin sesión, ERR_CONNECTION_CLOSED, error de pw), así que no se agrega el campo herramienta."
+   },
+   "aceptacion6": {
+    "lote": "L-111",
+    "hash": "98504bb",
+    "fecha": "2026-10-14",
+    "horaBogota": "23:06",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. Una subida en vuelo por colección; un error o un throw no traban la cola",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 64/64 archivos OK"
+     },
+     {
+      "c": "b. Servidor: 3 intentos con esperas al azar y crecientes; mensaje solo si es reintentable y con el usuario enmascarado",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 64/64 archivos OK"
+     },
+     {
+      "c": "c. Despliegue p5c90",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 · db true | si: iframe de HK cargado: sí | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c90 | si: str-api.js en HK: p5c90 · STRApi.col.enVuelo: function"
+     },
+     {
+      "c": "d. Regresión de la zona inventario, en especial REQ-INV2-7-1-hk-turno.spec.js d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: turno de la corrida sh-m-1792037119276 · tarea «zz-verif-Conteo de cierre» visible · NO: tarea marcada: no · turnos 200 | si: conteos (inv-movimientos): 200 | con las 5 fotos ya subidas, la casilla queda sin marcar (0/2 tareas, 0% completado). Resto de la regresión de inventario en verde: DT-35, INC-121, INC-125, INC-126, INC-127, INC-128, L-108, REQ-INV2-3-4, REQ-INV2-4-1, REQ-INV2-4-1-interfaz, REQ-INV2-7-1, REQ-INV2-7-1-hk."
+     },
+     {
+      "c": "e. Excepción de d",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "sin captura preparada para esta letra (n3Preparados vacío); además la precondición no se cumple: d no falló por «turnos 500» con tarea marcada sí, sino por «tarea marcada: no» con turnos 200, así que esta excepción no aplica y no rescata a d"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "e. Excepción de d",
+      "motivo": "el guion no preparó la captura"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Con las 5 fotos subidas, la tarea de conteo de cierre no queda marcada pese a que turnos e inv-movimientos responden 200",
+      "nivel": "crítico",
+      "causa": "El cambio de este lote en `_toggleTask`/`_actualizarEtapasEstado` (ahora el disparo de los conteos espera `Promise.all([_pTurno, _pEtapas])`) deja el marcado de la tarea sin confirmarse en el cliente aunque el servidor ya guardó ambos PUT; en la captura, «zz-verif-Limpieza480» y «zz-verif-Conteo de cierre» muestran aviso ⚠ y el checklist sigue en 0/2 tareas · 0% completado, bloqueando al colaborador para cerrar el turno.",
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: turno sh-m-1792037119276 · tarea «zz-verif-Conteo de cierre» visible en el turno · NO: tarea marcada: no · turnos 200 | si: conteos (inv-movimientos): 200 | captura REQ-INV2-7-1-hk-turno-d-error.png: casillas de «zz-verif-Limpieza480» y «zz-verif-Conteo de cierre» con aviso ⚠, 0/2 tareas, 0% completado"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "N4 no aplica: la instrucción no tiene letra N4 en sus pruebas derivadas. La letra e (N3) no tiene captura en n3Preparados (vacío) y su precondición (d en rojo solo por «turnos 500» con tarea marcada sí) no se cumple, así que no rescata a d: la falla de d queda como real del lote. Se revisó además la captura REQ-INV2-7-1-hk-turno-d-error.png, adjunta por el propio guion de regresión (fuera de n3Preparados), para documentar el INC sin reinterpretar el resultado N2. No aplica `herramienta` (M-435): la única falla no comparte causa de arnés o entorno (sin «sin sesión», sin ERR_CONNECTION_CLOSED, sin corte de login; turnos respondió 200)."
    }
   }
  ],
@@ -11188,11 +11258,11 @@
    "req": "REQ-INV2-3-4 (2/2)",
    "categoria": "crítico",
    "riesgo": "R-2",
-   "resumen": "Servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c91",
+   "resumen": "Servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c92",
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "Arquitecto",
-   "espera": "aceptación de L-111 (M-431: tolerancia ±5 ms del juez y reprueba); luego se encola",
+   "espera": "aceptación de L-111 y L-113 (INC-130); versión pasa a p5c92",
    "orden": 121.11,
    "desde": "2026-10-14 22:16",
    "planTrabajo": "PT-1",
@@ -11303,10 +11373,10 @@
    "resumen": "str-api: una subida en vuelo por colección (serie); HK: sin doble PUT de turnos al marcar el conteo; servidor: reintentos con espera aleatoria (80–250, 160–500 ms) y log con el mensaje del sistema; p5c90",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "sexta corrida tras borrar 36 zonas zz-verif-L-111-r- (M-437)",
+   "esperaA": "CD",
+   "espera": "L-113 (INC-130); luego reprueba de L-111 y L-113",
    "orden": 121.118,
-   "desde": "2026-10-14 23:02",
+   "desde": "2026-10-14 23:13",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23. · Tercera corrida (pw 0.5.23, 22:07): cola VERDE; PUT turnos en serie (+0→+160, +160→+325) y movimientos a +324: el juez marca d por 1 ms (orden de eventos del navegador, como explicó el Arquitecto en M-427)."
@@ -11326,6 +11396,22 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Orden de Diseño (M-429): tras L-103, antes de K3-2."
+  },
+  {
+   "lote": "L-113",
+   "req": "INC-130",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "HK: un pull de turnos no pisa un turno guardado localmente después de pedirlo (marca de tarea que se pierde); p5c91",
+   "estado": "en redacción",
+   "vista": "siguiente",
+   "esperaA": "CD",
+   "espera": "borrador y revisor previo; categoría a confirmar con Diseño (M-438)",
+   "orden": 121.112,
+   "desde": "2026-10-14 23:13",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Destraba L-111 (INC-128) y L-103."
   }
  ],
  "riesgos": [

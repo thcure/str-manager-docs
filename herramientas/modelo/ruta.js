@@ -134,10 +134,18 @@ function cobertura(mapa, guiones) {
 function leerCabecera(texto) {
   const lineas = String(texto || '').split(/\r?\n/).slice(0, 40);
   const linea = (re) => { const l = lineas.find((x) => re.test(x)); return l ? l.replace(re, '').trim() : ''; };
-  const alcance = linea(/^Alcance:\s*/);
+  // Alcance: solo lo que cambia (M-521). Se corta en «no toques / no tocar / sin tocar» y se descartan los tramos que solo
+  // hablan de versión (`?v=`, STR_API_VERSION, schema_version: RT-20, de fábrica) o van marcados «salvo/solo `?v=`».
+  let alcance = linea(/^Alcance:\s*/);
+  alcance = alcance.split(/\b(?:no toques|no tocar|sin tocar|no cambies)\b/i)[0];
+  const tramos = alcance.split(/\s[·;]\s|\s·|·\s/).filter((t) => !/\?v=|STR_API_VERSION|schema_version|migraci[oó]n/i.test(t));
   const archivos = [];
-  for (const m of alcance.matchAll(/`?([A-Za-z0-9_./\\-]+\.(?:js|php|html|json|md|ps1|css|sql))`?/g)) archivos.push(m[1]);
-  for (const m of alcance.matchAll(/(?:^|[`\s(])((?:api|modelo|tests|herramientas)\/(?:[A-Za-z0-9_./-]*\/)?)(?=[`\s·,;)]|$)/g)) archivos.push(m[1]);
+  for (const t of tramos) {
+    for (const m of t.matchAll(/`?([A-Za-z0-9_./\\-]+\.(?:js|php|html|json|md|ps1|css|sql))`?/g)) archivos.push(m[1]);
+    for (const m of t.matchAll(/(?:^|[`\s(])((?:api|modelo|tests|herramientas)\/(?:[A-Za-z0-9_./-]*\/)?)(?=[`\s·,;)]|$)/g)) archivos.push(m[1]);
+  }
+  // Líneas aparte, si el borrador las trae: «Cambia:» suma; «No toques:» y «Versión:» no cuentan.
+  for (const m of (linea(/^Cambia:\s*/) || '').matchAll(/`?([A-Za-z0-9_./\\-]+\.(?:js|php|html|json|md|ps1|css|sql))`?/g)) archivos.push(m[1]);
   const titulo = (lineas.find((x) => /^#\s*instr/i.test(x)) || '');
   const reqs = [...new Set([...(titulo.match(/(?:REQ|INC|DT|R)-[A-Z0-9][A-Z0-9.-]*/g) || []), ...((linea(/^Origen:.*?Requerimiento:\s*/) || '').match(/REQ-[A-Z0-9][A-Z0-9.-]*/g) || [])])];
   return { archivos: [...new Set(archivos)], mapaLinea: linea(/^Mapa:[^:]*:\s*/) || linea(/^Mapa:\s*/), regresionLinea: linea(/^Regresi[oó]n:\s*/), req: reqs.join(' ') };
@@ -151,7 +159,7 @@ function markdown(r) {
   L.push(`- Reglas que cruza: ${r.reglas.filter((x) => x.prueba !== 'proceso').map((x) => x.id).join(', ') || '—'} (de proceso, las garantiza la fábrica: ${r.reglasFabrica.join(', ') || '—'})`);
   L.push(`- Corren (regresión por ruta): ${r.guionesCorren.map((g) => `${g.archivo.replace('.spec.js', '')} (${g.casos}/${g.de})`).join(', ') || '—'}`);
   L.push(`- No corren: ${r.noCorren.length} guiones fuera de la ruta`);
-  L.push(`- Huecos (nadie pasa; el guion del lote los cubre con un caso con \`cubre\`): relaciones ${r.huecos.relaciones.map((x) => `${x.id} (${x.origen}→${x.destino})`).join(', ') || 'ninguna'}; reglas ${r.huecos.reglas.map((x) => `${x.id} ${x.titulo}`).join(', ') || 'ninguna'} — un caso negativo por regla (quien no puede, intenta)`);
+  L.push(`- Huecos de la ruta (nadie pasa): el guion cubre con un caso con \`cubre\` los que SU CAMBIO ejerce; los demás quedan aquí como deuda de cobertura (una línea de por qué no aplica basta al revisor previo). Relaciones ${r.huecos.relaciones.map((x) => `${x.id} (${x.origen}→${x.destino})`).join(', ') || 'ninguna'}; reglas ${r.huecos.reglas.map((x) => `${x.id} ${x.titulo}`).join(', ') || 'ninguna'} — un caso negativo por regla (quien no puede, intenta)`);
   L.push(`- A declarar (algún guion pasa por sus módulos, ningún caso lo dice en \`cubre\`): ${r.aDeclarar.join(', ') || 'ninguna'}`);
   return L.join('\n');
 }

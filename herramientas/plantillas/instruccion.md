@@ -28,7 +28,7 @@ Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién lo
 ## `CLAUDE.md` — filas que cambian; INC-37 con la versión nueva.
 
 ## Ruta de pruebas (LM-41: `python3 -I herramientas/modelo/mapa.py . --ruta <este borrador>` o la vista «Ruta de un lote» del mapa del STR)
-Pega aquí el bloque que devuelve la herramienta, sin editarlo: módulos tocados (por archivo del Alcance, línea «Mapa:» y REQ), relaciones por las que pasa, reglas que cruza, guiones que corren como regresión y **huecos**. Regla: el guion N2 de abajo trae **un caso por hueco** (una relación sin caso; un caso negativo por regla de tipo «caso»), y cada caso declara lo que prueba en `cubre: ['REL-n', 'RT-n', 'HK', 'REQ-…']`. Un criterio N2 que no toque ningún nodo de la ruta no va en este lote (sobra). Si la ruta sale vacía, el Alcance o la línea «Mapa:» están mal.
+Pega aquí el bloque que devuelve la herramienta, sin editarlo: módulos tocados (por archivo del Alcance, línea «Mapa:» y REQ), relaciones por las que pasa, reglas que cruza, guiones que corren como regresión y **huecos**. Regla (M-521): el guion N2 de abajo cubre con un caso, declarado en `cubre: ['REL-n', 'RT-n', 'HK', 'REQ-…']`, los huecos que **su cambio ejerce** (la relación o regla que el código nuevo toca); los demás huecos quedan listados aquí como **deuda de cobertura** con una línea de por qué no aplican (los cierra el lote de `cubre` o uno de cobertura). Un criterio N2 que no toque ningún nodo de la ruta no va en este lote (sobra). Si la ruta sale vacía o enorme, el Alcance está mal: en Alcance va solo lo que cambia; «no toques …» y lo de `?v=` la herramienta los descarta.
 ```
 <bloque de mapa.py --ruta>
 ```

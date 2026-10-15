@@ -63,6 +63,11 @@ test('cobertura: solo cuenta lo declarado en cubre; módulos por anclaje', () =>
   assert.deepStrictEqual(c.modulos.HK, ['REQ-K3b.spec.js', 'INC-130.spec.js']);
 });
 
+test('leerCabecera: el Alcance se corta en «no toques» y no cuenta los tramos de versión (M-521)', () => {
+  const l = leerCabecera('# instr — INC-133: cola de subida\nAlcance: `str-cola-subida.js` · `tests/e2e/INC-132.spec.js` · `str-m1-housekeeping.html` (solo `?v=`) · `?v=p5c95` → `p5c96` en 18 HTML y `str-api.js` (STR_API_VERSION) · `schema_version` igual; no toques `api/` ni `modelo/` ni `str-api.js`\nMapa: módulos y relaciones que cambia: HK');
+  assert.deepStrictEqual(l.archivos, ['str-cola-subida.js', 'tests/e2e/INC-132.spec.js']);
+});
+
 test('leerCabecera: archivos, Mapa, Regresión y REQ de una instrucción', () => {
   const l = leerCabecera('# instr — REQ-K3-2: copia a Drive\nCategoría: **normal**\nAlcance: `str-cola-subida.js` · `api/lib/drive-copia.php` · `tests/e2e/REQ-K3b.spec.js` · `?v=p5c96` → `p5c97`\nRegresión: ninguna (solo guiones)\nReglas transversales que toca: RT-8\nMapa: módulos y relaciones que cambia: HK, K3; REL-16\nOrigen: M-1. Requerimiento: `claude/producto/x.md` (criterios 1–3).');
   assert.deepStrictEqual(l.archivos, ['str-cola-subida.js', 'api/lib/drive-copia.php', 'tests/e2e/REQ-K3b.spec.js']);

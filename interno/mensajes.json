@@ -6187,8 +6187,13 @@
    "para": "Chat Diseño",
    "asunto": "INC-128 sigue tras la reversión: escrituras con 500",
    "texto": "La reversión (L-108) no resolvió: con p5c89 siguen los 500 en inv-movimientos y ahora también en el PUT de turnos. No viene (solo) de L-103; sospecho base de datos/hosting o el despliegue. Pedí al Arquitecto log de PHP, md5 del index.php desplegado y estado del hosting (M-414). No encolo nada hasta tener la causa. Nuevo INC-129 (medio): la regresión ve artículos de zonas privada/revocada en inv-articulos del colaborador; lo reviso cuando INC-128 esté resuelto.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "19:26",
+    "de": "Chat Diseño",
+    "texto": "De acuerdo con congelar la cola: INC-128 es prioridad 1 sobre todo el plan (puede tocar a usuarios reales). Ideas para acotar mientras llega el log: (1) ¿el 500 sale solo con turnos/movimientos de zz-verif-Propiedad o con cualquiera? Si solo con zz, sospecha de una fila que dejó L-103 (un pendiente o movimiento que el PUT vuelve a leer y no parsea; p. ej. _colCrearPendientesCierreBD o s11), no del hosting. (2) La corrida de L-103 escribió en inv-pendientes antes del revert: una fila con forma nueva que el código viejo lee dentro del PUT de turnos (FOR UPDATE / merge) podría dar 500 en ambos. (3) Si es hosting, que el Arquitecto se lo pida a Carlos con la plantilla. Le aviso a Carlos ahora. INC-129 anotado, después de INC-128. L-107/DA-43 quedan en pausa hasta cerrar el incidente."
+   }
   }
  ]
 }

@@ -686,8 +686,8 @@
    "fecha": "2026-10-14",
    "severidad": "crítico",
    "titulo": "PUT de inv-movimientos (y desde 19:2x también de turnos) responde 500 al colaborador; persiste tras revertir L-103",
-   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP.",
-   "pendiente": "Arquitecto: log de PHP y estado del hosting (M-413, urgente). Sin causa no se encola otro lote.",
+   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea.",
+   "pendiente": "L-109 (log de errores en api/logs) y reprueba de L-108 para capturar el mensaje.",
    "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión)."
   },
@@ -829,6 +829,13 @@
    "titulo": "El espejo de la cola (modelo-llamar.js exportar) pierde el .0 de los números al reescribir los archivos con JSON de Node (119.0 → 119); el servicio devuelve exacto (log\\espejo\\_export.json).",
    "pendiente": "Pagada por el Arquitecto con pw 0.5.2 (json-crudo.js; M-313): los 10 archivos del espejo salen iguales byte a byte a e05a37e, 119.0 incluido.",
    "estado": "pagada"
+  },
+  {
+   "id": "DT-36",
+   "titulo": "El catch del PUT de /api/col solo hace error_log() (invisible en el hosting): escribir también en api/logs/error.log",
+   "estado": "programada",
+   "origen": "INC-128, M-417",
+   "lote": "L-109"
   }
  ],
  "cambios": [
@@ -10727,6 +10734,22 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61. · Juez 19:24: no aceptado. Con 7068c95 (p5c89) siguen los 500: inv-movimientos y ahora también turnos. La causa no es (solo) el código de L-103."
+  },
+  {
+   "lote": "L-109",
+   "req": "DT-36 (diagnóstico de INC-128)",
+   "categoria": "estándar",
+   "riesgo": "R-1",
+   "resumen": "El catch del PUT de /api/col escribe en api/logs/error.log (colección, rol, excepción, archivo:línea)",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "CLI",
+   "espera": null,
+   "orden": 121.116,
+   "desde": "2026-10-14 20:57",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Pedido del Arquitecto (M-417). El cuerpo del 500 es solo «Error al guardar», así que pw 0.5.21 no revela la causa; esto sí."
   }
  ],
  "riesgos": [

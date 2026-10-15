@@ -751,10 +751,10 @@
    "modulo": "HK · cola de subida",
    "etapa": "🔍",
    "fecha": "2026-10-15",
-   "severidad": "medio",
-   "titulo": "Una foto de la entrega no sale de la cola en 30 s y queda «fallida» (REQ-INV2-4-2 c, colab2)",
-   "causa": "Sin causa confirmada: en la cronología no sale ningún POST /api/upload entre +1,4 s y +31,5 s; el siguiente da 200. L-117 no toca la subida. Puede ser la cola del cliente o un corte de red; si se repite, se mira junto con INC-132.",
-   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno."
+   "severidad": "alto",
+   "titulo": "Cola de subida: una foto agregada mientras se remata la anterior se sube antes de guardarse en el teléfono, se borra y queda «fallida» sin remedio",
+   "causa": "str-cola-subida.js: agregar() pone el ítem en _items al instante (L255) y guarda el blob después (L258); _candidatos() (L133) no excluye los ítems de _sinPersistir; si _ciclo (L204) lo toma, _subirUno (L172-173) llama a _guardar sin blob, que escribe blob=null (L82) sobre el que guardaba agregar; agregar luego borra _blobs (L260) y _leerBlob devuelve null: «el archivo ya no está en el teléfono» (L177), sin fetch. Los reintentos fallan igual. Evidencia: L-126-pruebas regresion[49]: 5 de 6 POST /api/upload, hueco de 30 s = espera del guion; la bitácora de pw no ve el POST de B1.",
+   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno. · 14:32 diagnóstico (subagente, solo lectura): causa en la app, no en el arnés ni el servidor. Afecta a usuarios reales (pierden la foto). Arreglo propuesto: excluir _sinPersistir en _candidatos, re-procesar al terminar si llegó algo durante _procesando, y _guardar no escribe null si el blob sigue en memoria; prueba unitaria de la carrera. Lote fix pedido a Diseño."
   }
  ],
  "dts": [

@@ -687,7 +687,7 @@
    "severidad": "crítico",
    "titulo": "PUT de turnos e inv-movimientos del colaborador al marcar el conteo: 500 «Base de datos no disponible» (MySQL 2002)",
    "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea. Con pw 0.5.21 (20:59): el cuerpo es {\"error\":\"Base de datos no disponible\",\"detalle\":2002}: el PHP no logra conectar a MySQL en esas dos peticiones (las demás de la corrida sí). Sospecha: ráfaga de peticiones simultáneas de HK al marcar la tarea, que supera el límite de conexiones o procesos del hosting compartido. Arquitecto (M-419, 21:08): no es tope de MySQL (max_user_connections 75, contadores en 0); la capa de conexión local del hosting (127.0.0.1) rechaza conexiones de forma intermitente con varias escrituras seguidas (también 2 de 5 PUT de fotos). Sí puede tocar a colaboradores reales. M-423: 74 líneas «db connect · intento n falló · 2002» en 21:12–21:18, siempre en pares: fallan las conexiones que se abren a la vez desde el mismo cliente; en serie pasan; reintentos de espera fija vuelven a coincidir. HK manda dos PUT del mismo turno en 1 ms al marcar la tarea (bug aparte). M-426: el mensaje exacto es «SQLSTATE[HY000] [2002] Operation not permitted» (EPERM): el cortafuegos del hosting limita conexiones nuevas a MySQL (127.0.0.1:3306) por usuario; visible desde el 14-oct ~17:00. Con L-111 la regresión hk-turno d sale verde (un solo rechazo en la corrida, absorbido por el reintento). Hostinger (M-428, 21:54): límite de 20 conexiones NUEVAS a MySQL por segundo en el alojamiento compartido (no cortafuegos); las que exceden se rechazan con 2002 «Operation not permitted». No se amplía en compartido; recomiendan PDO::ATTR_PERSISTENT.",
-   "pendiente": "Reabierto 15-oct 00:47 del lado del alojamiento (M-449/M-451): 54 «intento 3» el 15-oct (20 con L-111), ráfagas de lecturas en paralelo. L-118 (DT-40: conexión persistente + 3.er intento ≥1 s) encolado; medición antes/después con el Arquitecto y Carlos; lectura agrupada por página = DT aparte tras medir.",
+   "pendiente": "Reabierto 15-oct 00:47 del lado del alojamiento (M-449/M-451): 54 «intento 3» el 15-oct (20 con L-111), ráfagas de lecturas en paralelo. L-118 (DT-40: conexión persistente + 3.er intento ≥1 s) encolado; medición antes/después con el Arquitecto y Carlos; lectura agrupada por página = DT aparte tras medir. · 15-oct 01:21: L-118 aceptado; 0 rechazos en la corrida siguiente (M-453). Falta: conteo acumulado del día y conexiones simultáneas en hora de uso (diagnóstico pedido por el Arquitecto, M-455).",
    "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión).",
    "cierre": "14-oct 23:49: causa = límite del hosting de 20 conexiones nuevas/s a MySQL; corrección = L-110 (absorbido) + L-111 (aceptado 23:25); seguimiento = DT-40 pospuesto con disparador; DT-39 fuera (deuda baja opcional)."
@@ -877,9 +877,9 @@
   {
    "id": "DT-40",
    "titulo": "Evaluar PDO::ATTR_PERSISTENT en api/config/database.php (recomendación de Hostinger por el límite de 20 conexiones nuevas/s); cuidar wait_timeout 20 s (2006, ya reintentado) y max_user_connections 75 frente a 60 workers PHP",
-   "estado": "programada",
+   "estado": "pagada",
    "origen": "INC-128, M-428. Necesita decisión de diseño y cruce con Carlos antes de tocar el servidor.",
-   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3». · 23:21: pospuesto con disparador: en una semana de error.log, un «intento 3» o un 500 por 2002 visto por un usuario real (M-441) · 15-oct 01:10: disparador cumplido (M-449); L-118 encolado (M-452)"
+   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3». · 23:21: pospuesto con disparador: en una semana de error.log, un «intento 3» o un 500 por 2002 visto por un usuario real (M-441) · 15-oct 01:10: disparador cumplido (M-449); L-118 encolado (M-452) · 01:18 L-118 aceptado; medición: 0 rechazos tras el despliegue (M-453)"
   }
  ],
  "cambios": [
@@ -8942,8 +8942,8 @@
    "req": "REQ-INV2-3-4 (2/2)",
    "categoria": "crítico",
    "resumen": "El servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c88.",
-   "estado": "no aceptado",
-   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; M-375, M-383, M-395, M-397; revisión previa 11/14 corregida; ok de Diseño 18:22 (M-403). Encolado 18:24. Reprueba 19:08–19:13: no aceptado (INC-128). · 23:49: reencolado en p5c92 sobre main (L-111 y L-113 aceptados; DA-33, cruce 12-oct 19:07, ok de Diseño M-403 vigente) · 23:58 veredicto 2 no aceptado: lo central funciona (c pendientes creados, d/e bandeja, k/l HK); rojos: c por el guion (min recorta el espacio) y g/h/j porque en el portal el panel del turno (z-index 999) tapa el diálogo de «Cerrar limpieza» (INC-131) → L-115; regresiones ajenas: REQ-INV2-3-4 b (Proveedores, intermitente) y hk-turno d (un 500 por 2002 tras 3 intentos)",
+   "estado": "aceptado",
+   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; M-375, M-383, M-395, M-397; revisión previa 11/14 corregida; ok de Diseño 18:22 (M-403). Encolado 18:24. Reprueba 19:08–19:13: no aceptado (INC-128). · 23:49: reencolado en p5c92 sobre main (L-111 y L-113 aceptados; DA-33, cruce 12-oct 19:07, ok de Diseño M-403 vigente) · 23:58 veredicto 2 no aceptado: lo central funciona (c pendientes creados, d/e bandeja, k/l HK); rojos: c por el guion (min recorta el espacio) y g/h/j porque en el portal el panel del turno (z-index 999) tapa el diálogo de «Cerrar limpieza» (INC-131) → L-115; regresiones ajenas: REQ-INV2-3-4 b (Proveedores, intermitente) y hk-turno d (un 500 por 2002 tras 3 intentos) · 01:24 reprueba aceptada por el juez (16/16 criterios, regresión 40/40)",
    "hash": "6fc5dff",
    "aceptacion": {
     "lote": "L-103",
@@ -9247,6 +9247,117 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Lo central del lote funciona en producción. El servidor crea los pendientes al cerrar t0, J4 y J5 para el operador, con id determinista, creadoPor y creadoEn del servidor (c). La bandeja los muestra y los reasigna (d, e). HK muestra «Pendientes del turno anterior» y el titular cierra «Llevar a…» y «Lavar» con su movimiento (k, l). Lo que falla parte casi todo de g: el colaborador no cerró t1 y eso deja sin J2 a h, i y j. c falla en el aviso, con el observado truncado. Las dos regresiones en rojo no son de este lote: un guion de Proveedores previo y un 500 momentáneo de la base. No se pone `herramienta`: la causa de g no está probada como del arnés. Antes de repetir: ver el texto completo del aviso de c y el paso de cierre del colaborador en g (el diálogo de nota de «Cerrar limpieza» dentro de #hkFrame). Criterio 8 (recepción) es N1 de L-102 y no se juzga. Pide ok de Diseño para el criterio 2 partido en c+g. horaBogota es el fin de la corrida (04:58Z): el juez no ejecuta comandos para leer la hora."
+   },
+   "aceptacion3": {
+    "lote": "L-103",
+    "hash": "9bb14e9",
+    "fecha": "2026-10-15",
+    "horaBogota": "01:24",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: str-api.js en HK: str-api.js?v=p5c93 (≥ p5c92) | si: lastpush alineado: 6 turnos | si: turno t0 sh-m-1792045140770: 200 | si: turno t1 sh-m-1792045141404: 200 | si: turno t2 sh-m-1792045142036: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: marcas Secando/Sucia/Lista: turno, operador, nada | si: juegos: zz-verif-J2 ok · zz-verif-J4 ok · zz-verif-J5 ok | si: ids de la semilla: {\"j2\":\"gr_mv8pgux1yrx1k\",\"j4\":\"gr_mv8pgv4wijj0f\",\"j5\":\"gr_mv8pgvcredos9\",\"sec\":\"es_mv4fivhzr34yy\",\"sucia\":\"es_mv8oeuhz13qtz\",\"lista\":\"es_mv4fih04awyau\",\"prin\":\"dp_muyum184g3ozd\",\"tend\":\"dp_mv5i84f7ae9j9\",\"pv\":\"pv_mv8nfuyjrofoe\"} | si: pendientes abiertos de J2/J4/J5 antes de empezar: ninguno | si: J2 lista; J4 y J5 sucias: sin errores | si: J2 lista; J4 y J5 sucias: zz-verif-J4 → zz-verif-Sucia en zz-verif-Principal (estado) · zz-verif-J5 → zz-verif-Sucia en zz-verif-Principal (estado) → 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t0 de la corrida: sh-m-1792045140770 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 9 turnos | si: turno t0 cerrado: sí · Iniciar turno 200 · Cerrar limpieza 200 [nota] · Cerrar turno 200 [nota] | si: pendiente del cierre pe_sh-m-1792045140770_gr_mv8pgv4wijj0f: 200 {\"estado\":\"abierto\",\"para\":\"operador\",\"tarea\":\"Decidir: lavar o lavandería externa\",\"creadoPor\":\"7\",\"creadoEn\":\"2026-10-15T06:19:10.000Z\"} | si: pendiente del cierre pe_sh-m-1792045140770_gr_mv8pgvcredos9: 200 {\"estado\":\"abierto\",\"para\":\"operador\",\"tarea\":\"Decidir: lavar o lavandería externa\",\"creadoPor\":\"7\",\"creadoEn\":\"2026-10-15T06:19:10.000Z\"} | si: aviso después del cierre: «✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J4 · zz-verif-Sucia · zz-verif-Principal · Decidir: lavar o lavandería externa (para el operador) zz-verif-J5 · zz-verif-Sucia · zz-verif-Principal · Decidir"
+     },
+     {
+      "c": "d",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura d-bandeja (390 px), pestaña Pendientes de Inventario: «2 pendientes abiertos»; dos tarjetas, zz-verif-J4 y zz-verif-J5, cada una con propiedad zz-verif-Propiedad, juego, estado zz-verif-Sucia (etiqueta), sitio zz-verif-Principal, tarea «Decidir: lavar o lavandería externa», para Operador, origen «turno del 2026-10-15 · 15 oct 01:19» y los dos botones «Lavar en el siguiente turno» y «Trasladar a lavandería externa» en una sola línea dentro del ancho. Texto legible, nada cortado, sin desplazamiento horizontal (cola: scrollWidth 390 · clientWidth 390)."
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: fila pe_sh-m-1792045140770_gr_mv8pgv4wijj0f: «zz-verif-Propiedadzz-verif-J4zz-verif-Suciazz-verif-PrincipalDecidir: lavar o lavandería externaOperadorturno del 2026-10-15 · 15 oct 01:19Lavar en el siguiente» · botones 2 | si: fila pe_sh-m-1792045140770_gr_mv8pgvcredos9: «zz-verif-Propiedadzz-verif-J5zz-verif-Suciazz-verif-PrincipalDecidir: lavar o lavandería externaOperadorturno del 2026-10-15 · 15 oct 01:19Lavar en el siguiente» · botones 2 | si: zz-verif-Lavandería en #peProveedor | si: J4 → 200 {\"para\":\"turno\",\"tarea\":{\"tipo\":\"llevar\",\"proveedorId\":\"pv_mv8nfuyjrofoe\",\"texto\":\"Llevar a lavandería externa: zz-verif-Lavandería\"}} | si: J5 → 200 {\"para\":\"turno\",\"tarea\":{\"tipo\":\"lavar\",\"texto\":\"Lavar\"},\"reasignadoEn\":\"2026-10-15T06:19:16.000Z\"} | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: J2 a secar en el tendedero: sin errores | si: J2 a secar en el tendedero: zz-verif-J2 → zz-verif-Secando en zz-verif-Tendedero (traslado) → 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t1 de la corrida: sh-m-1792045141404 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: turno t1 cerrado: sí · Iniciar turno 200 · Cerrar limpieza 200 [nota] · Cerrar turno 200 [nota] | si: pendiente del cierre pe_sh-m-1792045141404_gr_mv8pgux1yrx1k: 200 {\"estado\":\"abierto\",\"para\":\"turno\",\"tarea\":\"Recoger y organizar\",\"creadoPor\":\"5\",\"creadoEn\":\"2026-10-15T06:19:26.000Z\"} | si: J4 y J5 (con pendiente abierto) no se repiten: no se repiten | si: aviso después del cierre: «✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J2 · zz-verif-Secando · zz-verif-Tendedero · Recoger y organizar No bloquean nada: los verá el siguiente turno de esta propiedad o el operador. Entendido» | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "h",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t2 de la corrida: sh-m-1792045142036 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: título: «Pendientes del turno anterior» | si: pe_sh-m-1792045141404_gr_mv8pgux1yrx1k: «zz-verif-Secando · zz-verif-Tendedero · Recoger y organizar» · selectores 2 · botón 1 | si: pe_sh-m-1792045140770_gr_mv8pgv4wijj0f: «zz-verif-Sucia · zz-verif-Principal · Llevar a lavandería externa: zz-verif-Lavandería» · selectores 0 · botón 1 | si: pe_sh-m-1792045140770_gr_mv8pgvcredos9: «zz-verif-Sucia · zz-verif-Principal · Lavar» · selectores 2 · botón 1"
+     },
+     {
+      "c": "i",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura i-pendientes (390 px, detalle del turno t2 en HK dentro del portal): arriba, bajo la cabecera, el título «PENDIENTES DEL TURNO ANTERIOR» y tres tarjetas. zz-verif-J4: «zz-verif-Sucia · zz-verif-Principal · Llevar a lavandería externa: zz-verif-Lavandería» completa (parte en dos líneas), la línea de dirección y «Hecho», sin selectores. zz-verif-J5: «zz-verif-Sucia · zz-verif-Principal · Lavar», dos selectores (zz-verif-Lista, zz-verif-Principal) lado a lado y «Hecho». zz-verif-J2: «zz-verif-Secando · zz-verif-Tendedero · Recoger y organizar», dos selectores (zz-verif-Lista, zz-verif-Principal) y «Hecho». Todo dentro del ancho, sin cortes ni desplazamiento horizontal (cola: portal y HK scrollWidth 390 · clientWidth 390)."
+     },
+     {
+      "c": "j",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t2 de la corrida: sh-m-1792045142036 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: movimiento: 200 {\"tipo\":\"traslado\",\"depositoOrigenId\":\"dp_mv5i84f7ae9j9\",\"depositoId\":\"dp_muyum184g3ozd\",\"estadoId\":\"es_mv4fih04awyau\"} | si: pendiente: 200 {\"estado\":\"hecho\",\"cerradoEn\":\"2026-10-15T06:19:37.000Z\",\"cerradoTurnoId\":\"sh-m-1792045142036\",\"movimientoId\":\"mv_mv95fh2qdnsmv\"} | si: J2 sigue en la lista: no | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "k",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t2 de la corrida: sh-m-1792045142036 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: movimiento: 200 {\"tipo\":\"lavanderia\",\"depositoOrigenId\":\"dp_muyum184g3ozd\",\"proveedorId\":\"pv_mv8nfuyjrofoe\"} | si: pendiente: 200 {\"estado\":\"hecho\",\"cerradoEn\":\"2026-10-15T06:19:42.000Z\",\"cerradoTurnoId\":\"sh-m-1792045142036\",\"movimientoId\":\"mv_mv95fkfjj3t4z\"} | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "l",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t2 de la corrida: sh-m-1792045142036 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: movimiento: 200 {\"tipo\":\"estado\",\"depositoId\":\"dp_muyum184g3ozd\",\"estadoId\":\"es_mv4fih04awyau\"} | si: pendiente: 200 {\"estado\":\"hecho\",\"cerradoEn\":\"2026-10-15T06:19:46.000Z\",\"cerradoTurnoId\":\"sh-m-1792045142036\",\"movimientoId\":\"mv_mv95fnqz4ha94\"} | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "m",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 67/67 archivos OK"
+     },
+     {
+      "c": "n",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 67/67 archivos OK"
+     },
+     {
+      "c": "o",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 67/67 archivos OK"
+     },
+     {
+      "c": "p",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 67/67 archivos OK; regresión: 40 casos de 17 guiones, todos ok: true"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Entrada P4 en verde (despliegue /api/health 200, 67/67 tests, guion igual a la instrucción, semilla completa, sesiones admin y colab 200). N1 en verde (m, n, o, p). N2: los 10 casos (a–c, e–h, j–l) ok: true, todos con escrituras en serie (enVuelo 1) y sin aviso de la guardia. N3: d e i cumplidos sobre sus capturas. Regresión: 40 casos ok, ninguno false (REQ-INV2-7-1-hk-turno c registra enVuelo 2 entre upload y PUT de turnos, informativo; el caso es ok). Siguen pidiendo ok de Diseño, según la instrucción: el criterio 2 partido en c+g con J4 en la principal, la regla del préstamo abierto y el criterio 8 (recepción), que queda en N1 de L-102 y no se juzga aquí. Sin criterios N4 en la instrucción. La versión desplegada es p5c93 (≥ p5c92, la entrada dice que el lote no cambia ?v=: hay un lote posterior encima). En la carpeta de capturas hay además archivos *-error y *-medida (b, c, g, h, j, REQ-INV2-3-4-b, REQ-INV2-7-1-hk-turno-d, INC-125-b) que no corresponden a ningún N3 ni a casos fallidos de este pruebas.json; no se juzgan (posibles restos de una corrida anterior). horaBogota tomada del fin de la corrida (06:24Z), sin reloj propio."
    }
   },
   {
@@ -10025,8 +10136,45 @@
    "req": "DT-40",
    "categoria": "normal",
    "resumen": "Conexión persistente con prueba de vida; 3.er intento ≥1 s",
+   "estado": "aceptado",
+   "observacion": "Encolado 01:10 (ok de Diseño M-452; revisión previa 13/14 corregida). · Construido 9bb14e9; 01:18 aceptado (67/67; 12 lecturas a la vez sin 500). Medición del Arquitecto: de ~100 rechazos 2002 por corrida a 0; cero líneas nuevas en error.log",
+   "hash": "9bb14e9",
+   "aceptacion": {
+    "lote": "L-118",
+    "hash": "9bb14e9",
+    "fecha": "2026-10-15",
+    "horaBogota": "01:17",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 67/67 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 · db true | si: lecturas a la vez: 12 · con error: ninguna"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "c (regresión de la zona inventario, no es criterio propio): todos los casos de `regresion` en verde, incluidos REQ-INV2-7-1-hk-turno.spec.js (caso d, ok true) y REQ-INV2-3-4-hk.spec.js (todos sus casos, ok true), sin ninguna «Base de datos no disponible». d (medición antes/después en api/logs/error.log y SHOW PROCESSLIST): fuera de la cola, no es criterio de aceptación, la hacen el Arquitecto y Carlos en hPanel (marcada «Seguir»). Esta instrucción no declara criterios N3; `n3Preparados` viene vacío, consistente con las capturas de `log\\capturas\\L-118`, que pertenecen al guion de regresión INC-125 y no a un N3 propio de L-118."
+   }
+  },
+  {
+   "lote": "L-107",
+   "fecha": "2026-10-15",
+   "req": "REQ-INV2-4-2 (1/2)",
+   "categoria": "normal",
+   "resumen": "Entrega y recepción de zona en todo turno con titular (servidor + HK); p5c93 → p5c94",
    "estado": "registrado",
-   "observacion": "Encolado 01:10 (ok de Diseño M-452; revisión previa 13/14 corregida)."
+   "observacion": "Encolado 01:29 (v3; ok de Diseño M-450; revisión previa 12/14 corregida)."
   }
  ],
  "esquema": {
@@ -11583,12 +11731,12 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c92",
-   "estado": "no aceptado",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "reprueba (la 1.ª se bloqueó: guion de la instrucción distinto del commit tras L-115; igualado en hechas\\)",
+   "esperaA": "—",
+   "espera": "",
    "orden": 121.11,
-   "desde": "2026-10-15 01:10",
+   "desde": "2026-10-15 01:29",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 11/14 → corregida. Pendientes creados por el servidor (M-395/M-397). · ok de Diseño 18:22 (M-403) con 2 ajustes aplicados (s11 para pendientes huérfanos; admin cierra sin movimientoId, confirmado en index.php ~806). Guardia v5.2 cruzada con Carlos 18:22 y encendida (pw 0.5.18, M-404). Encolado 18:24. · CLI terminó OK; puerta de pruebas bloqueada (sin gastar verificación): faltan zz-verif-Secando/Lista con nombre exacto (la app los tenía en minúscula) y zz-verif-Tendedero no sirve a zz-verif-Propiedad. s8 renombra y s12 crea/corrige la zona. · Semilla 12/12 a las 19:05 (s8 renombró Secando/Lista; s12 Tendedero). Reprueba puesta 19:06. · Juez 19:13: no aceptado. Regresión crítica: PUT de inv-movimientos 500 en los conteos del colaborador (hk-turno d); g/h/i/j en cadena. Crea bien los pendientes (c, d, e, k, l verdes). Reversión L-108 encolada 19:17. · Diseño (M-412): la corrección vuelve con revisión previa nueva; la regresión hk-turno d debe correr antes de encolar. · 22:16: reencolado preparado en p5c90→p5c91 (dependencia L-111, aplicar sobre main actual, sin revert del revert); se encola cuando L-111 quede aceptado (Diseño, M-432)"
@@ -11631,12 +11779,12 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "REQ-INV2-4-2 v2 (DA-43): entrega y recepción de zona en todo turno con titular; diferencias al operador; normal",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
    "esperaA": "CLI",
-   "espera": "ok de Diseño (M-450); se encola tras L-118 y la reprueba de L-103",
+   "espera": "construcción",
    "orden": 121.12,
-   "desde": "2026-10-15 00:42",
+   "desde": "2026-10-15 01:29",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Borrador listo; la ficha decía «Normal», pero cambia lo que lee el colaborador (crítico, como lote 66). Cabecera sin DA a propósito hasta el cruce. · Diseño: crítico, DA-43 abierta (M-409); supuestos ok; zz-verif-colab2 como segundo titular y apoyo (N2 del criterio 8). · DA-43 decidida por Carlos 21:03: c) entrega y recepción en todos los turnos; sin lectura nueva; INV2-4-2 queda normal (M-420)."
@@ -11775,12 +11923,12 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "database.php: conexión persistente con prueba de vida (conVida) y 3.er intento con espera 1–1,5 s; sin ?v=",
-   "estado": "encolado",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "construcción",
+   "esperaA": "—",
+   "espera": "",
    "orden": 121.114,
-   "desde": "2026-10-15 01:10",
+   "desde": "2026-10-15 01:29",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Delante de L-107 (M-452). Medición antes/después: Arquitecto con Carlos."
@@ -11794,9 +11942,9 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "Diseño",
-   "espera": "dudas de producto (M-454) antes de la revisión previa",
+   "espera": "ok de Diseño (revisión previa corregida: 12/14 y 10/14) — M-455",
    "orden": 121.4,
-   "desde": "2026-10-15 01:10",
+   "desde": "2026-10-15 01:29",
    "planTrabajo": "PT-1",
    "grupo": "K3",
    "nota": "DA-32; cruce 10-oct; después de L-114."
@@ -11810,9 +11958,9 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "Diseño",
-   "espera": "dudas de producto (M-454) antes de la revisión previa",
+   "espera": "ok de Diseño (revisión previa corregida: 12/14 y 10/14) — M-455",
    "orden": 121.41000000000001,
-   "desde": "2026-10-15 01:10",
+   "desde": "2026-10-15 01:29",
    "planTrabajo": "PT-1",
    "grupo": "K3",
    "nota": "DA-32; cruce 10-oct; después de L-114."

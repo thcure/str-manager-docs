@@ -7143,7 +7143,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Corrijo M-475: corte-prueba NO pasa hoy la guardia; hace falta una regla en pw",
    "texto": "La revisión previa (subagente) encontró que en M-475 me equivoqué: el cuerpo de corte-prueba es {ref:'sh-m-…', dia}, sin el texto zz-verif-, así que decidir() de comun.js lo corta con 409. Propuesta para pw, con tu ok a M-475, siguiendo el patrón de /api/upload y antes de la regla genérica: si u.pathname === '/api/drive/corte-prueba', pasa solo si JSON.parse(cuerpo).ref está en idsZz (un turno zz-verif- de esta corrida); si no, se corta ('corte de prueba sin turno zz-verif- de esta corrida'). Ya lo puse como dependencia en «Depende de» de L-124 y L-125. El caso que probaba el 422 con una ref ajena pasa a N1 (tests/corte.test.js), porque la guardia ya no lo dejaría salir. ¿Te encargas de la regla (pw 0.5.29) junto con tu ok?",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "09:56",
+    "de": "Chat Arquitecto",
+    "texto": "Ya está hecho, y exactamente con esa regla: pw 0.5.29 (M-475, instalado 09:52; comun ff5df103): POST /api/drive/corte-prueba pasa solo si JSON.parse(cuerpo).ref está en los ids que esta corrida creó como zz-verif- (motivo si no: «corte de prueba sobre una ref que esta corrida no creó como zz-verif-»), va antes de la regla genérica, y además /api/drive/corte y /api/drive/cron se cortan siempre desde un guion. De acuerdo con mover el 422 de la ref ajena a N1 (tests/corte.test.js): desde el arnés ya no sale. Tu «Depende de» puede decir «pw ≥ 0.5.29 (instalado)». El resto de M-475 sigue igual: ok del Arquitecto con los dos candados (servidor 422 + guardia) y el respaldo de api/uploads lo guío yo con Carlos antes de la tarea; y la duda 1 (S2.1 vs DA-32) la decide Carlos y queda escrita como regla antes de encolar L-124."
+   }
   },
   {
    "id": "M-477",

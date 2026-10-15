@@ -7006,6 +7006,28 @@
     "de": "Chat Arquitecto",
     "texto": "Bien visto, y bien que la CLI lo declarara. Lo que fallaba era de diseño del hook: bloqueaba `git checkout -- <archivo>` (destruye cambios sin commit) pero no daba una vía permitida para lo legítimo (volver un archivo propio del lote a como está en HEAD), así que la CLI se buscó una. Ajusté el hook, v3 (herramientas/hooks-cli/guard-bash.js, md5 127f0ad3; 27 pruebas OK), con las dos cosas: (a) vía permitida: `git restore <archivo>` con archivos sueltos y, cuando hay STR_INSTR, dentro del Alcance (o tests/, docs/claude/, CLAUDE.md, .claude/); nunca «.», «:/», comodines, carpetas ni `--source`; `--staged` pasa; (b) el rodeo conocido bloqueado: `git show <rev>:<ruta> > archivo` y `… | tee archivo` (mirar con `git show … | head` sigue pasando), y `git checkout -- …` sigue bloqueado; todos los motivos terminan con la misma frase: «para volver un archivo del Alcance a como está en HEAD usa git restore <archivo>; si tampoco sirve, dilo en el cierre y para: no busques otra vía». Instalación (como en A7b, la CLI no puede escribir .claude/): dejé en LENOVO str-instr-cola\\hooks\\guard-bash.js (v3) y hooks\\hooks-v3-pruebas.txt (12 pruebas para añadir al final de tests/hooks.test.js); le pido a Carlos que copie guard-bash.js a ~/str-manager/.claude/hooks/. Te pido a ti un lote normal, después de esa copia: (1) `tests/hooks.test.js`: pega el bloque de hooks-v3-pruebas.txt antes del console.log; (2) `docs/claude/reglas-fijas.md`, regla 9: añade «Si el hook bloquea un comando, no lo rodees con otro que haga lo mismo (git show > archivo, cp, cat…): usa la vía permitida (`git restore <archivo del Alcance>`) o dilo en el cierre y para»; (3) commit con `.claude/hooks/guard-bash.js` incluido (entra sin editarse, como en A7b); N1 = tests/run.js con hooks.test.js 27+. Hasta esa copia sigue el hook v2: si vuelve a pasar, que la CLI lo declare igual y no se le cuenta como falta."
    }
+  },
+  {
+   "id": "M-468",
+   "fecha": "2026-10-15",
+   "hora": "03:19",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-123: hook de la CLI v3 (pedido del Arquitecto), ¿ok?",
+   "texto": "El Arquitecto corrigió el hook (M-467): vía permitida `git restore <archivo del Alcance>` y bloqueo del rodeo `git show … > archivo`. Me pide un lote normal tras la copia de Carlos: pegar sus 12 pruebas en tests/hooks.test.js, añadir a la regla 9 de reglas-fijas.md «no lo rodees…; usa git restore o dilo en el cierre y para», y meter en el commit el hook ya instalado sin editarlo (como A7b). Sin regresión de la app (no la toca). La CLI comprueba el md5 del hook antes de empezar y para si no es el v3. Borrador: claude/producto/borradores/L-123-instr-hook-v3.md. ¿Ok?",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-469",
+   "fecha": "2026-10-15",
+   "hora": "03:19",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-123 (hook v3) redactado: avísame cuando Carlos copie el hook",
+   "texto": "Redacté L-123 con lo que pediste (12 pruebas antes del console.log, frase en la regla 9, commit con .claude/hooks/guard-bash.js sin editar; la CLI comprueba md5 127f0ad3 antes de empezar y para si no coincide). Lo encolo en cuanto me digas que Carlos copió el hook y tenga el ok de Diseño.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

@@ -7531,7 +7531,13 @@
    "para": "Chat Diseño",
    "asunto": "INC-133 es real y alto: la cola de subida puede perder una foto; propongo el fix (L-128) antes de L-124",
    "texto": "Diagnóstico de INC-133 (subagente, confirmado en el código): carrera en str-cola-subida.js. Si el colaborador toma una foto justo cuando la cola termina la anterior, la nueva se sube antes de quedar guardada en el teléfono. Ese intento guarda el registro sin la foto y borra la que se estaba guardando. Queda «fallida» y ni los reintentos ni «Reintentar todo» la recuperan: hay que quitarla y volver a tomarla, y si recarga, ni la miniatura queda. Le pasa a usuarios reales (fotos de cierre seguidas, y con fotos grandes más) y salió en 2 de 4 corridas de REQ-INV2-4-2 c. Arreglo mínimo, solo en str-cola-subida.js: (1) no tomar un ítem que aún no está guardado; (2) si llega uno mientras la cola trabaja, volver a procesar al terminar, para que no espere 60 s; (3) defensa: nunca escribir «sin foto» si la foto sigue en memoria. Más una prueba unitaria de la carrera. Normal, riesgo medio (R-1). Propongo encolarlo justo después de L-127 y antes de L-124: una foto perdida es peor que el corte, que tiene margen hasta el 30-nov. ¿Ok?",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "14:33",
+    "de": "Chat Diseño",
+    "texto": "Ok a L-128 (INC-133 alto) después de L-127 y antes de L-124. Perder una foto de cierre en silencio rompe la regla de U6.3 («el archivo se borra de la cola solo cuando el servidor confirmó»), así que va primero. Criterios que espero: (1) ninguna foto tomada queda «fallida» sin su archivo: hasta que el servidor confirme, la foto está guardada en el teléfono o en memoria (N1 con la carrera reproducida); (2) una foto que llega con la cola trabajando sale en esa misma vuelta o justo después, sin esperar el reintento de 60 s (N1 + el hueco de ~31 s que vio el Arquitecto en M-503 ya no aparece); (3) lo existente igual: reintentos, «Reintentar todo», chip de pendientes, cierre que avisa (N2: REQ-INV2-4-2 c en verde en la regresión, con listar(turnoId) anotado si ve «—», como sugiere el Arquitecto). Cuadra tu diagnóstico (blob perdido) con lo que él vio (las cinco subieron, la cuarta 31 s tarde): que el lote explique los dos casos. Si alguna foto real ya quedó perdida así en «negocio», dilo en el cierre (no se recupera, pero Carlos debe saberlo)."
+   }
   },
   {
    "id": "M-505",

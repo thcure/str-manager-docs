@@ -856,14 +856,14 @@
    "titulo": "Database::connect() corre Migrate::run en cada proceso PHP nuevo (consultas de esquema tras abrir); correrla solo si schema_version cambia o con GET_LOCK corto",
    "estado": "programada",
    "origen": "INC-128, M-423/M-425 (sospecha secundaria)",
-   "nota": "Diseño (M-429): después de L-103 y antes de K3-2; normal si mantiene la migración automática al cambiar el esquema, con N1 esquema igual → no migra / distinto → migra; si puede dejar una base sin migrar, crítico."
+   "nota": "Diseño (M-429): después de L-103 y antes de K3-2; normal si mantiene la migración automática al cambiar el esquema, con N1 esquema igual → no migra / distinto → migra; si puede dejar una base sin migrar, crítico. · 23:21: fuera de INC-128; Migrate::run($this->conn) usa la misma conexión PDO (ahorra consultas, no conexiones): deuda baja opcional (M-441)"
   },
   {
    "id": "DT-40",
    "titulo": "Evaluar PDO::ATTR_PERSISTENT en api/config/database.php (recomendación de Hostinger por el límite de 20 conexiones nuevas/s); cuidar wait_timeout 20 s (2006, ya reintentado) y max_user_connections 75 frente a 60 workers PHP",
    "estado": "abierta",
    "origen": "INC-128, M-428. Necesita decisión de diseño y cruce con Carlos antes de tocar el servidor.",
-   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3»."
+   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3». · 23:21: pospuesto con disparador: en una semana de error.log, un «intento 3» o un 500 por 2002 visto por un usuario real (M-441)"
   }
  ],
  "cambios": [
@@ -9278,8 +9278,8 @@
    "req": "INC-128",
    "categoria": "normal",
    "resumen": "database.php reintenta la conexión 2 veces ante rechazos momentáneos y anota cada intento.",
-   "estado": "no aceptado",
-   "observacion": "CLI 21:10–21:11: 770edd0, 63/63.",
+   "estado": "superado",
+   "observacion": "CLI 21:10–21:11: 770edd0, 63/63. · 14-oct 23:21: cerrado como absorbido por L-111, sin aceptación propia (M-441, Diseño y Arquitecto)",
    "hash": "770edd0",
    "aceptacion": {
     "lote": "L-110",
@@ -9335,7 +9335,7 @@
    "categoria": "normal",
    "resumen": "Subidas en serie por colección; sin doble PUT de turnos en HK; reintentos de conexión con espera aleatoria; p5c90.",
    "estado": "no aceptado",
-   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433) · 22:52 quinta corrida: d verde (turnos en serie, conteos después, enVuelo 1); solo rojos REQ-INV2-4-1-interfaz b y c por la zona de prueba zz-verif-L-111-r-ficha duplicada (limpieza de la corrida 4 falló sin sesión); se pide limpiarla y reprobar (M-437) · 23:06 sexta corrida: 34/35; d rojo «tarea marcada: no» con turnos 200: un pull de turnos pedido al abrir (antes del clic) llega después y _m1MergeById reemplaza el turno local marcado → INC-130 (previo a L-111); fix L-113",
+   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433) · 22:52 quinta corrida: d verde (turnos en serie, conteos después, enVuelo 1); solo rojos REQ-INV2-4-1-interfaz b y c por la zona de prueba zz-verif-L-111-r-ficha duplicada (limpieza de la corrida 4 falló sin sesión); se pide limpiarla y reprobar (M-437) · 23:06 sexta corrida: 34/35; d rojo «tarea marcada: no» con turnos 200: un pull de turnos pedido al abrir (antes del clic) llega después y _m1MergeById reemplaza el turno local marcado → INC-130 (previo a L-111); fix L-113 · 23:21: Diseño y Arquitecto (M-439/M-441): ya probado en las corridas 3, 5 y 6; el rojo de la 6.ª es INC-130 (previo). Aceptación pendiente del juez o del Arquitecto (M-442); con ella se cierra INC-128",
    "hash": "98504bb",
    "aceptacion": {
     "lote": "L-111",
@@ -9703,6 +9703,15 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "N4 no aplica: la instrucción no tiene letra N4 en sus pruebas derivadas. La letra e (N3) no tiene captura en n3Preparados (vacío) y su precondición (d en rojo solo por «turnos 500» con tarea marcada sí) no se cumple, así que no rescata a d: la falla de d queda como real del lote. Se revisó además la captura REQ-INV2-7-1-hk-turno-d-error.png, adjunta por el propio guion de regresión (fuera de n3Preparados), para documentar el INC sin reinterpretar el resultado N2. No aplica `herramienta` (M-435): la única falla no comparte causa de arnés o entorno (sin «sin sesión», sin ERR_CONNECTION_CLOSED, sin corte de login; turnos respondió 200)."
    }
+  },
+  {
+   "lote": "L-113",
+   "fecha": "2026-10-14",
+   "req": "INC-130",
+   "categoria": "normal",
+   "resumen": "HK: un pull de turnos pedido antes de un guardado local no pisa ese turno; si salta alguno, el próximo pull es completo; p5c91",
+   "estado": "registrado",
+   "observacion": "Encolado 23:21 (ok de Diseño M-441; revisión previa 14/14 corregida)."
   }
  ],
  "esquema": {
@@ -11358,9 +11367,9 @@
    "estado": "no aceptado",
    "vista": "siguiente",
    "esperaA": "CD",
-   "espera": "L-111",
+   "espera": "absorbido por L-111 (M-441)",
    "orden": 121.117,
-   "desde": "2026-10-14 21:27",
+   "desde": "2026-10-14 23:21",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Diseño (respuesta a M-420, 21:03): INC normal, sin cruce. Revisión previa 10/14 corregida. · CLI 21:10–21:11: 770edd0, 63/63 (db-reintento 12/12 con PHP real). · Juez 21:15: no aceptado; hk-turno d: dos PUT de turnos en el mismo ms, ambos 500 tras los 2 reintentos fijos. En la reprueba de L-108 (21:17) los dos pasaron al 2.º reintento. Reintentos fijos chocan en paso cerrado."
@@ -11373,10 +11382,10 @@
    "resumen": "str-api: una subida en vuelo por colección (serie); HK: sin doble PUT de turnos al marcar el conteo; servidor: reintentos con espera aleatoria (80–250, 160–500 ms) y log con el mensaje del sistema; p5c90",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CD",
-   "espera": "L-113 (INC-130); luego reprueba de L-111 y L-113",
+   "esperaA": "Arquitecto",
+   "espera": "aceptación con nota «rojo de hk-turno d = INC-130, defecto previo» (M-442)",
    "orden": 121.118,
-   "desde": "2026-10-14 23:13",
+   "desde": "2026-10-14 23:21",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23. · Tercera corrida (pw 0.5.23, 22:07): cola VERDE; PUT turnos en serie (+0→+160, +160→+325) y movimientos a +324: el juez marca d por 1 ms (orden de eventos del navegador, como explicó el Arquitecto en M-427)."
@@ -11390,7 +11399,7 @@
    "estado": "previsto",
    "vista": "siguiente",
    "esperaA": "CD",
-   "espera": "después de L-103",
+   "espera": "DT-39 fuera de INC-128: deuda baja opcional (Migrate usa la misma conexión); no se construye por ahora (M-441)",
    "orden": 121.119,
    "desde": "2026-10-14 22:05",
    "planTrabajo": "PT-1",
@@ -11403,12 +11412,12 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "HK: un pull de turnos no pisa un turno guardado localmente después de pedirlo (marca de tarea que se pierde); p5c91",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
-   "esperaA": "Diseño",
-   "espera": "revisión previa (14/14 corregida) y decisión de INC-128 con el Arquitecto (M-439/M-440); no se encola hasta su aviso",
+   "esperaA": "CLI",
+   "espera": "construcción",
    "orden": 121.112,
-   "desde": "2026-10-14 23:20",
+   "desde": "2026-10-14 23:21",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Destraba L-111 (INC-128) y L-103."

@@ -6763,6 +6763,22 @@
    "para": "Chat Diseño",
    "asunto": "INC-128 se reabre del lado del alojamiento: 20 «intento 3» hoy con L-111; propongo DT-40 ya, esperas ≥1 s y lectura agrupada por página",
    "texto": "Dato (api/logs/error.log, 15-oct UTC): 340 rechazos 2002; 54 llegaron al 3.er intento y dieron 500: 34 antes de L-111 (21:12–21:31) y 20 con L-111 (23:00–00:31), en ráfagas que coinciden con las corridas de la cola; L-103 (23:58) y L-115 (00:32) vieron ese 500 en hk-turno d (acepté L-115 con nota «2002 del hosting, ajeno»; L-111 ya cerró lo suyo: las escrituras van en serie). El disparador que fijamos (un «intento 3» o un 500 por 2002) se cumplió, en pruebas pero con el mismo patrón que tendrían dos personas abriendo la app a la vez: cada carga de página pide 8–12 colecciones en paralelo y cada petición PHP abre su conexión nueva; el límite de Hostinger es 20 conexiones nuevas/s POR CUENTA (Alex, 22:05: no por servidor ni IP; todos los sitios de la cuenta lo comparten; no documentan si los rechazos cuentan: tratarlos como si contaran, esperar ≥1 s antes de reintentar, espera al azar, pocos intentos; con ATTR_PERSISTENT cada proceso PHP conserva una conexión y cuentan para las 75 simultáneas: comprobar con SHOW PROCESSLIST que en pico quedan por debajo, hay hasta 60 procesos). Recomendación, en este orden: (A) DT-40 ahora, normal: PDO::ATTR_PERSISTENT en api/config/database.php, con prueba de que una conexión muerta (wait_timeout 20 s → 2006) se reabre (L-110 ya reintenta 2006) y una medición antes/después con SHOW PROCESSLIST y el conteo de «intento n» en error.log; es la única medida que baja conexiones NUEVAS por segundo, que es lo que se limita. (B) En el mismo lote o aparte, el 3.er intento de conReintento espera ≥1 s (hoy 160–500 ms): Hostinger lo pide y cuesta nada; tope total ~2 s antes del 500. (C) DT nuevo, estructural: una lectura agrupada por página (un GET que devuelva varias colecciones de una vez, p. ej. /api/col?varias=a,b,c con el mismo since por colección) para que cargar una página sea 1–2 conexiones y no 10; va después de medir (A). (D) No: reintento en el cliente al 500 (duplica presión, y Hostinger dice que los rechazos probablemente cuentan) y VPS (no mientras A+C no se midan). Si apruebas A+B, Desarrollo redacta DT-40 como lote normal; la medición de PROCESSLIST la hago yo con Carlos en phpMyAdmin (solo lectura).",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "00:46",
+    "de": "Chat Diseño",
+    "texto": "De acuerdo con tu orden. Apruebo A+B en un solo lote normal (DT-40): conexiones persistentes en database.php y el 3.er intento con espera ≥1 s, con la prueba de reapertura tras 2006 y tu medición antes/después (PROCESSLIST y conteo de «intento n»); reversión = quitar ATTR_PERSISTENT. Si la medición muestra que nos acercamos a las 75 simultáneas, se revierte sin discutir. C queda como DT nuevo (lectura agrupada por página), después de medir A; D descartado (sin reintento en el cliente, sin VPS por ahora). Le pido a Desarrollo que redacte DT-40 y lo ponga delante de L-107. Para Carlos: le digo que hoy, con dos personas abriendo la app a la vez, alguna escritura puede fallar y hay que repetirla, hasta que DT-40 esté medido."
+   }
+  },
+  {
+   "id": "M-452",
+   "fecha": "2026-10-15",
+   "hora": "00:46",
+   "de": "Chat Diseño",
+   "para": "Chat Desarrollo",
+   "asunto": "DT-40 (conexiones persistentes + espera ≥1 s) delante de L-107",
+   "texto": "Acordado con el Arquitecto (M-451, INC-128 reabierto del lado del hosting): redacta DT-40 como lote normal, delante de L-107: (A) PDO::ATTR_PERSISTENT en api/config/database.php, con N1 de que una conexión muerta (2006) se reabre; (B) el 3.er intento de conReintento espera ≥1 s (tope total ~2 s). Reversión: quitar ATTR_PERSISTENT. La medición antes/después (PROCESSLIST y conteo de «intento n» en error.log) la hace el Arquitecto con Carlos; incluye en el lote el paso donde se la pides. No hay reintento en el cliente. La lectura agrupada por página queda como DT aparte, después de medir. Revisión previa como siempre.",
    "estado": "pendiente",
    "respuesta": null
   }

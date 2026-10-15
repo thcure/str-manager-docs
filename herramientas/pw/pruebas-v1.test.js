@@ -183,5 +183,10 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('horaBogota: 15-oct 15:00Z = 10:00:00 Bogotá', horaBogota(new Date('2026-10-15T15:00:00Z')) === '10:00:00');
   t('horaBogota: 05:00Z = 00:00:00 (no 24:00)', horaBogota(new Date('2026-10-15T05:00:00Z')) === '00:00:00');
 }
-console.log(ok + ' OK, ' + fail + ' FAIL');
-process.exit(fail ? 1 : 0);
+{ // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
+  const { cerrarSuave } = require('./guion');
+  const orden = [];
+  const ctx = { pages: () => [{ close: async () => { orden.push('pagina'); } }, { close: async () => { throw new Error('ya cerrada'); } }], close: async () => { orden.push('ctx'); } };
+  cerrarSuave(ctx).then((h) => { t('cerrarSuave: páginas antes que el contexto', orden.join(',') === 'pagina,ctx'); t('cerrarSuave: devuelve HH:MM:SS', /^\d\d:\d\d:\d\d$/.test(h)); console.log(ok + ' OK, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0); });
+}
+

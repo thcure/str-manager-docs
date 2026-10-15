@@ -70,6 +70,14 @@ function resumirEscrituras(pasaron) {
 function horaBogota(d = new Date()) {
   return new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(d).replace(/^24/, '00');
 }
+// v0.5.31 (M-499): cierre suave de un contexto persistente: primero las páginas, una pausa corta para que Chrome
+// termine de escribir IndexedDB/LevelDB (sesión de Firebase) y después el contexto. Devuelve la hora de cierre.
+async function cerrarSuave(ctx) {
+  try { for (const pg of ctx.pages()) await pg.close().catch(() => { }); } catch (e) { }
+  await new Promise(r => setTimeout(r, 400));
+  await ctx.close().catch(() => { });
+  return horaBogota();
+}
 function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = []) {
   const n3 = caso.nivel === 'N3';
   const fallan = esperas.filter(e => !e.ok);
@@ -110,6 +118,7 @@ async function correrGuion(spec, opciones = {}) {
   const lote = opciones.lote || 'L-0';
   const prefijo = opciones.prefijo || ('zz-verif-' + lote + '-');
   const resultados = [];
+  const perfiles = [];   // v0.5.31 (M-499): cada apertura de un perfil (grupo o limpiar): abierto, cerrado, casos
   const casos = (spec && Array.isArray(spec.casos)) ? spec.casos : [];
   // Grupos por perfil y camara, en el orden en que aparecen (un perfil persistente no se abre dos veces a la vez).
   const porPerfil = {};
@@ -119,9 +128,11 @@ async function correrGuion(spec, opciones = {}) {
     const camara = porPerfil[clave][0].camara || null;
     if (!PERFILES[perfil]) { porPerfil[clave].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'perfil desconocido: ' + perfil })); continue; }
     let ctx, a;
+    const reg = { perfil, abierto: null, cerrado: null, casos: porPerfil[clave].map(c => c.c) };
+    perfiles.push(reg);
     try {
       a = await abrir(perfil, { headless: opciones.headless, camara: camara === true || camara === 'si' ? true : (camara ? path.resolve(opciones.dirGuion || process.cwd(), camara) : null) });
-      ctx = a.ctx;
+      ctx = a.ctx; reg.abierto = horaBogota();
       for (const caso of porPerfil[clave]) {
         const esperas = []; const capturas = []; let error = null; const marca = a.bitacora.length;
         const page = await ctx.newPage();
@@ -175,15 +186,18 @@ async function correrGuion(spec, opciones = {}) {
         await page.close().catch(() => { });
       }
     } catch (e) {
+      reg.error = String(e && e.message || e).slice(0, 200);
       porPerfil[clave].forEach(c => resultados.push({ c: c.c, nivel: c.nivel === 'N3' ? 'N3' : 'N2', perfil, ok: false, observado: 'no se pudo abrir el perfil: ' + e.message }));
-    } finally { if (ctx) await ctx.close().catch(() => { }); }
+    } finally { if (ctx) reg.cerrado = await cerrarSuave(ctx); }
   }
   // limpieza de los datos del lote (se intenta siempre; lo que quede se lista)
   let limpieza = 'sin limpiar() en el guion';
   if (spec && typeof spec.limpiar === 'function') {
     let ctx;
+    const regL = { perfil: 'admin', abierto: null, cerrado: null, casos: ['limpiar'] };
+    perfiles.push(regL);
     try {
-      const a = await abrir('admin', { headless: opciones.headless }); ctx = a.ctx;
+      const a = await abrir('admin', { headless: opciones.headless }); ctx = a.ctx; regL.abierto = horaBogota();
       const page = await ctx.newPage();
       await page.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded' });
       // v0.4.9 (M-288): limpiar recibe el mismo h que los casos (respuesta y espera); espera solo avisa, nunca lanza
@@ -201,14 +215,14 @@ async function correrGuion(spec, opciones = {}) {
       await spec.limpiar(hL);
       limpieza = avisos.length ? ('limpiar() corrio con avisos: ' + avisos.join(' | ').slice(0, 600)) : 'limpiar() corrio sin error';
     } catch (e) { limpieza = 'limpiar() fallo: ' + e.message + ' (borrar a mano lo que empiece por ' + prefijo + ')'; }
-    finally { if (ctx) await ctx.close().catch(() => { }); }
+    finally { if (ctx) regL.cerrado = await cerrarSuave(ctx); }
   }
-  return { req: spec && spec.req, zona: spec && spec.zona, casos: resultados, limpieza };
+  return { req: spec && spec.req, zona: spec && spec.zona, casos: resultados, limpieza, perfiles };
 }
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, correrGuion, cargar, MARCA };
+module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

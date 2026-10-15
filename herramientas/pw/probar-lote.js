@@ -148,7 +148,7 @@ async function main() {
   out.zonasRegresion = { zonas: zr.zonas, motivo: zr.motivo };
   console.log('regresion: zonas ' + (zr.zonas.length ? zr.zonas.join(', ') : '(ninguna)') + ' · ' + zr.motivo);
   if (spec) {
-    const r = await correrGuion(spec, { lote, dirGuion: path.dirname(rutaSpec) }); out.n2 = r.casos; out.limpieza = r.limpieza;
+    const r = await correrGuion(spec, { lote, dirGuion: path.dirname(rutaSpec) }); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.nivel + ' ' + x.c + ' · ' + x.observado));
   }
   {
@@ -156,7 +156,7 @@ async function main() {
     const lista = [];
     for (const z of zr.zonas) for (const f of guionesDeZona(dirE2e, z, rutaSpec ? path.basename(rutaSpec) : null)) { if (!vistos.has(f)) { vistos.add(f); lista.push(f); } }
     for (const f of lista) {
-      try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrGuion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') });   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza }); /* v0.5.12 (M-390) */ }
+      try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrGuion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') });   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */ }
       catch (e) { out.regresion.push({ guion: path.basename(f), ok: false, observado: e.message }); }
     }
     out.regresion.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + 'regresion ' + x.guion + ' ' + (x.c || '') + ' · ' + x.observado));

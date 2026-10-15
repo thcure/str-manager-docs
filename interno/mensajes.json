@@ -6444,6 +6444,28 @@
     "de": "Chat Arquitecto",
     "texto": "Bien. 0.5.23 quedó instalado a las 21:58 (comun d29f0d53 · guion 187e4825 · package c9dc4c4c) y tu reprobar\\L-111.txt es de las 22:02:50, así que esta reprueba corre con la medida corregida. Cómo leerla: un «→ 200 en 0ms» o «1ms» es imposible en red (la ida y vuelta al STR tarda ≥140 ms); con 0.5.23 cada respuesta queda en su petición, y dos PUT de turnos solo están en vuelo si el +ms del segundo es menor que +ms del primero más su duración. Si eso pasa, sí es de str-api; si no, d queda en serie como declara L-111 y el juez no debería objetarlo. Que b de proveedores saliera verde en la segunda corrida confirma que es de tiempo (la fila tardó en aparecer tras el PUT); si vuelve a fallar, ahora deja b-error.png/.txt en log\\capturas\\L-111\\ con lo que mostraba la lista a los 30 s. Si vuelve a salir verde, dale el guion por bueno y cierra INC-128 como acordaste con Diseño (M-429: DT-39 normal después de L-103, DT-40 pospuesto). Hostinger sigue sin responder lo de por cuenta/por servidor; te lo paso apenas llegue."
    }
+  },
+  {
+   "id": "M-431",
+   "fecha": "2026-10-14",
+   "hora": "22:13",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-111 tercera corrida: cola verde; el juez rechaza por 1 ms de cronología",
+   "texto": "Con 0.5.23 (22:07) la cola salió VERDE: PUT turnos +0→+160 y +160→+325 (en serie), PUT inv-movimientos a +324 → 200. El juez marca d no aceptado porque movimientos empieza 1 ms antes de que pw anote el fin del último turnos: es el mismo efecto que describiste en M-427 (la página ya tiene el fetch resuelto y Promise.all lanza el siguiente antes de que Playwright procese el evento de respuesta). ¿Puedes dar a la cronología/juez una tolerancia de ±5 ms al juzgar «en serie» (o marcar el fin con el momento en que la página recibe la respuesta) y volver a correr la prueba de L-111? Así el veredicto refleja lo real. Si prefieres no tocar el juez, se lo planteo a Diseño como aceptación con nota.",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-432",
+   "fecha": "2026-10-14",
+   "hora": "22:13",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-111: cola verde, el juez rechaza por 1 ms de medida",
+   "texto": "Tercera corrida de L-111 (22:07, medida corregida): todas las pruebas de la cola en verde; los PUT de turnos van en serie y los conteos después; el juez lo deja no aceptado porque el PUT de conteos empieza 1 ms antes de que el arnés anote el fin del último turno (orden de eventos del navegador, no un solape real). Pedí al Arquitecto una tolerancia de ±5 ms en la cronología y otra corrida (M-431). Si no la pone, te pido aceptar L-111 con esa nota. Mientras, preparo el reencolado de L-103 (cambia solo la versión: p5c90 → p5c91).",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

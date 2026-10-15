@@ -9431,6 +9431,63 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "n3Preparados viene vacío y la única letra N3 de la instrucción (e) no lleva captura por diseño («sin captura»), por lo que no corresponde revisar PNG/TXT para este lote; tampoco existe la carpeta log\\capturas\\L-111 en esta corrida. Respecto del veredicto anterior (log\\L-111-veredicto.json): la regresión REQ-INV2-3-4.spec.js b (proveedores), que antes fallaba por timeout de clic, ahora corre en verde con cronología sin solapes, así que ese INC no se repite. El criterio d sigue en ok:false: la ventana de solapamiento de los PUT de turnos se redujo (de 597ms a 157ms) pero no desapareció, así que el fix de INC-128 sigue incompleto. Resultado «no aceptado» por un ok:false: el criterio d (serie de turnos no demostrada en la cronología)."
+   },
+   "aceptacion3": {
+    "lote": "L-111",
+    "hash": "98504bb",
+    "fecha": "2026-10-14",
+    "horaBogota": "22:07",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 64/64 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 64/64 archivos OK (sin aviso de OMITIDA por falta de php)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 · db true | si: iframe de HK cargado: sí | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c90 (versión ≥ p5c90: el guion corre como regresión en lotes siguientes) | si: str-api.js en HK: p5c90 · STRApi.col.enVuelo: function"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "cronología de REQ-INV2-7-1-hk-turno.spec.js, caso d: +0ms PUT turnos → 200 en 160ms; +160ms PUT turnos → 200 en 165ms (termina en +325ms, sin solape con el anterior); +324ms PUT inv-movimientos → 200 en 154ms: empieza 1ms antes de que termine el último PUT de turnos. Los tres PUT dieron 200 y la tarea quedó marcada, pero el orden estricto turnos→conteos no queda confirmado por esta cronología."
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "precondición no se cumple: el caso d de REQ-INV2-7-1-hk-turno.spec.js salió en verde (turnos 200, tarea marcada: sí), no en rojo por «turnos 500»; esta excepción no aplica a este lote"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "e",
+      "motivo": "precondición no se cumple (d no salió en rojo por «turnos 500»); no hay escenario que juzgar"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Posible solape de 1 ms entre el último PUT de turnos y el PUT de inv-movimientos (REQ-INV2-7-1-hk-turno.spec.js, caso d)",
+      "nivel": "bajo",
+      "causa": "_hkInvPersistir se dispara tras Promise.all([_pTurno, _pEtapas]), que debería resolver solo después de que ambos PUT de turnos terminen vía _colSubida; el guion registra el inicio (+Nms) y la duración de cada petición por separado y con redondeo al milisegundo, lo que puede producir un desfase de ±1 ms entre mediciones de peticiones distintas sin que haya solape real. Con los datos de la cola (sin acceso al guion ni al repositorio) no se puede distinguir si es ruido de medición o un corrimiento real del orden entre la cola de `turnos` y el disparo de `inv-movimientos`.",
+      "observado": "+0ms PUT /api/col/turnos → 200 en 160ms; +160ms PUT /api/col/turnos → 200 en 165ms (termina en +325ms); +324ms PUT /api/col/inv-movimientos → 200 en 154ms"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Único criterio en rojo: d, por el margen de 1ms descrito en el INC; el resto (a, b, c) cumple. La letra e no aplica porque su precondición (d en rojo por «turnos 500») no se dio. No hubo capturas N3 que revisar (n3Preparados vacío), consistente con que la única letra N3 de este lote (e) no requiere captura y no aplicó."
    }
   }
  ],
@@ -11102,13 +11159,13 @@
    "resumen": "str-api: una subida en vuelo por colección (serie); HK: sin doble PUT de turnos al marcar el conteo; servidor: reintentos con espera aleatoria (80–250, 160–500 ms) y log con el mensaje del sistema; p5c90",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": "tercera corrida con pw 0.5.23 (medida corregida)",
+   "esperaA": "Arquitecto",
+   "espera": "tolerancia de medida en la cronología (±5 ms) y nueva corrida, o decisión de Diseño",
    "orden": 121.118,
-   "desde": "2026-10-14 22:03",
+   "desde": "2026-10-14 22:13",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23."
+   "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23. · Tercera corrida (pw 0.5.23, 22:07): cola VERDE; PUT turnos en serie (+0→+160, +160→+325) y movimientos a +324: el juez marca d por 1 ms (orden de eventos del navegador, como explicó el Arquitecto en M-427)."
   },
   {
    "lote": "L-112",

@@ -733,6 +733,17 @@
    "estado": "cerrado",
    "origen": "Veredicto 2 de L-103 (23:58), caso g + g-error.png/txt; igual en el veredicto 1 (19:13).",
    "cierre": "15-oct 00:45: L-115 (b73701d) aceptado."
+  },
+  {
+   "id": "INC-132",
+   "tipo": "INC",
+   "modulo": "HK · cola de subida",
+   "etapa": "🔍",
+   "fecha": "2026-10-15",
+   "severidad": "medio",
+   "titulo": "El aviso fijo «1 foto no se pudo subir → abrir turno» tapa los botones del pie del panel del turno y no deja cerrar el turno",
+   "causa": "Por confirmar en el código: el aviso de la cola de subida queda fijo abajo, a todo lo ancho, sobre el panel; el clic al botón de cierre no llega (Timeout). Se disparó porque una foto de la entrega no subió (en g0: fotos 200/200/200/—/200/200), probablemente por un corte de conexión.",
+   "nota": "Origen: L-122-veredicto-2 (11:22), regresión REQ-INV2-3-4-hk g; h y j en cascada (pendiente de J2 no creado). Captura log\\capturas\\L-122\\REQ-INV2-3-4-hk-g-error.png. Pide lote fix tras K3-2."
   }
  ],
  "dts": [
@@ -11213,8 +11224,8 @@
    "req": "guion K3b",
    "categoria": "normal",
    "resumen": "Guion de K3b con foto de recepción y sus comprobaciones",
-   "estado": "no aceptado",
-   "observacion": "Encolado 03:14 (ok de Diseño M-466). · Construido 8903b67 (74/74). · 03:47 juez: no aceptado por la regresión (31 casos en rojo); causa de entorno: el perfil admin sale con la pantalla de login en HK y caen en cascada los turnos de la corrida (también el «ficha» de REQ-INV2-4-1-interfaz c, porque b no llegó a quitar el acceso). Pedido al Arquitecto (M-471, M-472); se reprueba tras su arreglo · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20)",
+   "estado": "superado",
+   "observacion": "Encolado 03:14 (ok de Diseño M-466). · Construido 8903b67 (74/74). · 03:47 juez: no aceptado por la regresión (31 casos en rojo); causa de entorno: el perfil admin sale con la pantalla de login en HK y caen en cascada los turnos de la corrida (también el «ficha» de REQ-INV2-4-1-interfaz c, porque b no llegó a quitar el acceso). Pedido al Arquitecto (M-471, M-472); se reprueba tras su arreglo · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20) · 11:27 reprueba (juez 11:22): no aceptado; el lote pasa N1 y b, c, e, e2; d por el orden de perfiles (lo corrige L-126, que reemplaza este guion entero); regresión: turnos residuales y ERR_CONNECTION_CLOSED (herramienta) + INC-132 real (aviso de subida fallida tapa el cierre). Superado por L-126: su guion lo reemplaza y se prueba ahí",
    "hash": "8903b67",
    "aceptacion": {
     "lote": "L-122",
@@ -11313,6 +11324,52 @@
     ],
     "datosDePrueba": "El guion de K3b (REQ-K3b-aviso.spec.js) no llegó a crear el turno de prueba zz-verif- (falló en b); limpiar() corrió sin error porque no había nada que borrar.",
     "notas": "17 de los 31 casos en rojo son cascada de solo dos bloqueos puntuales: el clic en «Crear turno y enviar link» sin responder y un ReferenceError _readP is not defined pre-existente de la app. Ninguno de los dos coincide con las causas que M-435 reserva para el campo herramienta (guardia cortando POST /api/login, «sin sesión», net::ERR_CONNECTION_CLOSED como mayoría, o un error del propio pw), así que no se puso ese campo y el lote carga con el resultado. El bloque propio de K3b (§1 y §2 de la instrucción) no se tocó; el juicio se apoyó solo en lo que midió la cola y, para g, no hubo captura que mirar."
+   },
+   "aceptacion2": {
+    "lote": "L-122",
+    "hash": "8903b67",
+    "fecha": "2026-10-15",
+    "horaBogota": "11:16",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK (incluye las comprobaciones de K3b de tests/e2e-esquema.test.js y A8 de tests/drive-copia.test.js)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "no: 25 casos de la regresión de inventario en rojo. 22 son de entorno, no del lote: 21 (REQ-INV2-4-2-dif a,b,c,e,f,g,i y REQ-INV2-4-2 a,b,c,d,e,g,i,j,k,l,m,n) son cascada de que quedaron turnos de otra corrida sin limpiar en zz-verif-Propiedad antes de las 08:30/10:30 (la preparación 'a' de cada guion los encuentra y no crea los turnos de prueba); 2 más (REQ-INV2-4-2-dif:d y REQ-INV2-4-2:h) son net::ERR_CONNECTION_CLOSED al navegar. Van a «herramienta», sin INC. Los otros 3 (REQ-INV2-3-4-hk.spec.js g, h, j) sí son un hallazgo real: un aviso «1 foto no se pudo subir → abrir turno» queda fijo en pantalla y el guion no logra cerrar el turno ni crear el pendiente de J2 (ver INC)."
+     },
+     {
+      "c": "c",
+      "nivel": "N2/N3",
+      "ok": false,
+      "observado": "Reprueba de L-117 tras L-122 — letra c (foto de la recepción): ok, 200 · 1/1, sin pedidos a /api/drive. Letra d (miniatura ☁ en el registro del admin): no, pero porque la cola corrió d (admin) antes que c (colab, quien sube la foto) por el orden de perfiles del guion (M-487: admin agrupado antes que colab); va a «herramienta», sin INC. Letra g (captura de la insignia): sin captura preparada, queda pendiente."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c (L-117 g: captura de la insignia ☁ en la miniatura)",
+      "motivo": "el guion no preparó la captura (no aparece en n3Preparados ni en la regresión de REQ-K3b-aviso.spec.js)"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Al cerrar el turno del titular con una foto que no subió, HK no crea ni avisa el pendiente de J2 (REQ-INV2-3-4-hk g/h/j)",
+      "nivel": "medio",
+      "causa": "un aviso rojo «1 foto no se pudo subir → abrir turno» queda fijo en la parte baja de la pantalla tras un intento de subida fallido (visible y sin cerrar en la captura de g) y parece bloquear el cierre del turno; por eso no se crea el pendiente de J2 «secando · tendedero · recoger y organizar» y las comprobaciones siguientes fallan en cascada",
+      "observado": "g: error locator.click: Timeout 30000ms exceeded, con el banner «1 foto no se pudo subir» fijo en la captura. h: el pendiente de J2 aparece vacío («» · selectores 0 · botón 0) entre «Pendientes del turno anterior». j: error locator.evaluate: Timeout 30000ms exceeded al intentar marcarlo hecho."
+     }
+    ],
+    "datosDePrueba": "limpiezaRegresion: REQ-K3b-aviso.spec.js, REQ-INV2-3-4-hk, REQ-INV2-4-2[-dif] y la mayoría de los demás «limpiar() corrio sin error»; DT-35, INC-121, INC-126, INC-127, L-108 y REQ-INV2-4-1 son «sin limpiar() en el guion» (no tienen limpiar()). Semilla zz-verif- completa, todos los grupos ok.",
+    "notas": "El lote en sí (guion K3b y sus comprobaciones) pasa N1 y su propio N2 (b, c, e, e2 ok); d solo falla por el orden de perfiles de la cola, no por el cambio de L-122. La regresión de inventario trae dos causas de entorno (turnos de otra corrida sin limpiar en zz-verif-Propiedad antes de las franjas horarias que necesitan REQ-INV2-4-2[-dif]; cortes net::ERR_CONNECTION_CLOSED) que explican 22 de los 25 rojos — se repite la corrida con la herramienta arreglada. Los 3 rojos restantes (REQ-INV2-3-4-hk g/h/j) sí son un hallazgo real; queda un INC abierto. Falta además la captura N3 de la insignia (letra g de L-117).",
+    "herramienta": "turnos de otra corrida sin limpiar en zz-verif-Propiedad antes de las franjas horarias de REQ-INV2-4-2[-dif] (su preparación 'a' los encuentra y no crea los turnos de prueba) y dos cortes net::ERR_CONNECTION_CLOSED al navegar (REQ-INV2-4-2-dif:d, REQ-INV2-4-2:h); todos los casos que dependen de esos turnos no creados son cascada"
    }
   },
   {
@@ -11322,7 +11379,8 @@
    "categoria": "normal",
    "resumen": "Guion K3b: d y g con perfil oper (la cola agrupa por perfil y corría d antes que c)",
    "estado": "registrado",
-   "observacion": "Encolado 10:45 (ok de Diseño M-486). Origen: L-116-veredicto-3, nota 2."
+   "observacion": "Encolado 10:45 (ok de Diseño M-486). Origen: L-116-veredicto-3, nota 2. · Construido 3df5fb3 (74/74, e2e-esquema 11/11).",
+   "hash": "3df5fb3"
   },
   {
    "lote": "LM-36",

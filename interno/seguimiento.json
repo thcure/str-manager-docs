@@ -10859,7 +10859,7 @@
    "categoria": "crítico",
    "resumen": "Aviso fijo del corte y estado de copia en el registro; migración 12",
    "estado": "no aceptado",
-   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida). · 02:50 no aceptado: a, b, e, e2 en verde (migración 12, retención, aviso del operador); rojos de guion: c/d (foto en la tarea de conteo, que L-107 reemplazó) y 12 regresiones con schema_version === 10 fijo → L-121 · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20)",
+   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida). · 02:50 no aceptado: a, b, e, e2 en verde (migración 12, retención, aviso del operador); rojos de guion: c/d (foto en la tarea de conteo, que L-107 reemplazó) y 12 regresiones con schema_version === 10 fijo → L-121 · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20) · 11:00 reprueba (juez 10:5x): no aceptado; b, c, e, e2 y N1 en verde; d rojo y g sin juzgar por el orden de la cola (capturas: d 10:40:17 y g 10:41:36 con admin, antes del caso c de colab), no por HK: el INC medio del juez no se abre, lo corrige L-126; f sin juzgar con Drive conectado (N4); regresión en rojo por los turnos zz residuales (herramienta, limpiar-zz v3 del Arquitecto, M-485). Se reprueba tras aceptar L-126, con hechas\\L-117 actualizado",
    "hash": "6e4de8f",
    "aceptacion": {
     "lote": "L-117",
@@ -11029,6 +11029,103 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Hora: la del fin de la corrida (07:50 UTC). N1 en verde (73/73). De los 13 ok false, 11 son regresión y tienen la misma causa ajena al lote: guiones viejos que exigen schema_version 10 exacto (campo herramienta); hay que pasarlos a «≥ 10», como ya hacen con ?v=, y repetir la regresión. Los otros 2 (c y d) sí son del lote: su propio guion intenta subir la foto en la tarea de conteo, que ya no tiene botón de foto, y con el turno sin iniciar; d y la captura g dependen de esa foto. El negocio de prueba tiene Drive conectado, así que e y e2 verificaron solo la rama «aviso oculto» y f no se puede juzgar; la rama sin Drive queda para N4 (h) o para un negocio de prueba sin Drive. En las capturas aparecen nombres de personas reales y códigos de reservas (no se copian aquí)."
+   },
+   "aceptacion2": {
+    "lote": "L-117",
+    "hash": "8903b67",
+    "fecha": "2026-10-15",
+    "horaBogota": "10:58",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado: 10 turnos | si: turno sh-m-1792078793705: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792078793705 | si: HK al día (inventario y pendientes): sí | si: lastpush alineado: 5 turnos | si: turno: iniciado 200 | si: recepción de zz-verif-Principal: [{\"id\":\"dp_muyum184g3ozd\",\"tit\":\"Recepción de zona: zz-verif-Principal\"}] | si: foto general de la recepción: 200 · 1/1 | si: pedidos a /api/drive desde el portal: ninguno | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno de la corrida: sh-m-1792078793705 | NO: miniatura de la foto del turno en el registro del admin: no"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /api/health schema_version: 12 | si: estado: conectado true · avisoCorte true · retención {\"inicio\":\"2026-10-15\",\"origen\":\"despliegue\",\"proximoCorte\":\"2026-11-30\",\"proximoCorteTexto\":\"30 de noviembre de 2026\"} | si: con Drive conectado el aviso no se ve"
+     },
+     {
+      "c": "e2",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado: conectado true · avisoCorte false | si: sin avisoCorte o con Drive conectado el aviso no se ve"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "f-aviso-corte.png (390 px): barra superior y debajo el Dashboard, sin #corteAviso; nada desborda. Es lo esperado con Drive conectado (e: conectado true), pero no muestra el aviso, así que su legibilidad a 390 px no se puede juzgar."
+     },
+     {
+      "c": "g",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "g-insignia-drive.png (1366 px): HK con el panel del turno zz-verif-Propiedad 11:00–15:00 «Pendiente», botón «Iniciar turno», «Al iniciar el turno: recepción de zz-verif-Principal…», checklist 0/2; no hay miniatura de foto ni ☁ ni ✓ en la parte visible ni en el texto."
+     },
+     {
+      "c": "i",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "regresión: 21 casos en rojo, todos de REQ-INV2-4-2-dif.spec.js (a, b, c, d, e, f, g, i) y REQ-INV2-4-2.spec.js (a, b, c, d, e, g, h, i, j, k, l, m, n). En los dos casos «a»: «NO: turnos de hoy (2026-10-15) en zz-verif-Propiedad antes de las 10:30 / 08:30: sh-m-1792053676517 05:00, sh-m-1792053677149 06:00, sh-m-1792053677783 07:00, sh-m-1792053678416 08:00 | error: hay turnos de otra corrida hoy en zz-verif-Propiedad». Los siguientes: «turno … no se creó en a» + timeout de waitForSelector; dif-e: «page.goto: net::ERR_CONNECTION_CLOSED». Los demás casos de regresión (DT-35, DT-40, DT-41, INC-121…131, L-108, REQ-INV2-3-4*, REQ-INV2-4-1*, REQ-INV2-7-1*): en verde."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "f",
+      "motivo": "El negocio tiene Drive conectado (e: conectado true), así que el aviso no se pinta y la captura muestra el shell sin aviso (lo prevé la precondición de f). Para juzgar la legibilidad a 390 px hace falta una corrida con un negocio sin Drive, o verlo en N4."
+     },
+     {
+      "c": "g",
+      "motivo": "Su precondición d falló: en la captura el turno de la corrida sale sin iniciar y sin la foto de la recepción, así que no hay miniatura sobre la cual juzgar la insignia ☁ ni su posición."
+     }
+    ],
+    "dispositivo": [
+     {
+      "c": "h",
+      "que": "Carlos, con una cuenta de Google de prueba en el celular: en str-app-shell.html con un negocio sin Drive, ver el aviso fijo con la fecha del corte (fecha base = despliegue de L-117), tocar «Conectar Drive» › ⚙️ Configuración › Conectar Google Drive, capturar la pantalla de permisos de Google y comprobar que, tras «✓ Google Drive conectado», el aviso ya no está."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "L-117 d: el admin no ve la foto del turno de la corrida y la insignia ☁ no llega a evaluarse",
+      "nivel": "medio",
+      "causa": "El HK del admin (perfil que creó el turno en b) muestra ese turno «Pendiente», sin iniciar y sin la foto de la recepción, aunque en c el colaborador lo inició (PUT turnos 200) y subió la foto (upload 200). Causa probable: el registro del admin no toma del servidor el estado del turno iniciado por el colaborador (la copia local creada en b no se reemplaza; el caso d no alinea ni vuelve a pedir los turnos antes de buscar la miniatura). L-117 no toca la sincronización de turnos, así que hay que confirmar si es del guion (d/g) o de HK antes de corregir. Mientras tanto, la parte visible de los criterios 1 y 10 (insignia con el estado de la copia) queda sin verificar.",
+      "observado": "d: «NO: miniatura de la foto del turno en el registro del admin: no». d-error.png: panel del turno zz-verif-Propiedad 11:00–15:00 «Pendiente», «Iniciar turno» visible, recepción aún no hecha, checklist 0/2, sin miniaturas. No es la pantalla de login."
+     },
+     {
+      "titulo": "Regresión REQ-INV2-4-2 y REQ-INV2-4-2-dif en rojo por turnos residuales de otra corrida",
+      "nivel": "bajo",
+      "causa": "Entorno, no el lote: en zz-verif-Propiedad quedaron cuatro turnos zz-verif- de una corrida anterior (05:00–08:00, completados) que no se borraron. La preparación «a» de los dos guiones se niega a correr con ellos (precondiciones de L-107/L-114) y el resto de los casos cae en cascada («no se creó en a»). Además, en dif-e el servidor cerró la conexión (ERR_CONNECTION_CLOSED). Ningún caso muestra la pantalla de login.",
+      "observado": "REQ-INV2-4-2-dif-a-error.png y REQ-INV2-4-2-b-error.png: los cuatro turnos zz-verif-Propiedad 05:00–09:00 «Completado» en la lista de hoy. REQ-INV2-4-2-dif-e-error.png: página del navegador «No se puede acceder a este sitio web … ERR_CONNECTION_CLOSED»."
+     }
+    ],
+    "herramienta": "Entorno: cuatro turnos zz-verif- de una corrida anterior siguen en zz-verif-Propiedad (sh-m-1792053676517…678416) y bloquean la preparación de REQ-INV2-4-2 y REQ-INV2-4-2-dif (21 de los 22 casos en rojo, en cascada); además hubo un ERR_CONNECTION_CLOSED en page.goto.",
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "N1 en verde (74/74). N2 del lote: b, c, e y e2 en verde. «negocio» tiene Drive conectado: e comprueba que el aviso no se ve y que el servidor da retencion (inicio 2026-10-15 por despliegue, próximo corte 30 de noviembre de 2026); e2 da avisoCorte false para el operador, así que no se ejercitó la rama visible del aviso ni su texto «Solo el administrador…» en pantalla (los cubre N1). d está en rojo: el admin no ve el turno iniciado ni su foto (INC medio; revisar si es el guion o HK antes de tocar código) y g depende de d. f queda en null porque, con Drive conectado, el aviso no aparece. Regresión: 21 de 22 rojos comparten una causa de entorno (turnos residuales de otra corrida en zz-verif-Propiedad, más un ERR_CONNECTION_CLOSED); por eso va el campo herramienta y el lote no carga con esa culpa. Antes de repetir la corrida hay que borrar esos cuatro turnos. horaBogota es aproximada, tomada del fin de la corrida (15:56Z) más el tiempo del juicio."
    }
   },
   {

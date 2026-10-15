@@ -348,16 +348,16 @@
    "id": "REQ-K3-3",
    "titulo": "Corte mensual único de almacenamiento (día 30) con avisos",
    "documento": "claude/producto/requerimientos-k3-drive-retencion-2026-10.md › REQ-K3c",
-   "estado": "entregado",
+   "estado": "aceptado",
    "prioridad": 5,
    "das": [
     "DA-32"
    ],
    "entregadoEn": "M-154",
-   "nota": "Crítico. Carlos 10-oct: corte el 30 de cada mes para todos; borra lo subido hasta el corte, con o sin Drive; primer corte el 30 del mes siguiente al registro (existentes: desde el despliegue); avisos 7/3/1 días y fijo. Se entrega tras K3b. · 14-oct: nivel y página completa por criterio (100 % N1/N2). · 15-oct 09:47: partido en L-124 (corte) y L-125 (vista y avisos); decisiones M-470: S2.1 sin efecto (se borra toda la evidencia), primer corte 30-nov con respaldo, criterio 4 N1+N4, endpoint de prueba solo admin y solo zz (sujeto al ok del Arquitecto), lo borrado se muestra trayéndolo de Drive por el servidor, avisos en el aviso fijo hasta M6 y el operador con config.drive ve el de pendientes. · 15-oct 09:56: ok de Diseño a L-124 y L-125 (M-477); regla de S2.1 escrita (DA-32 punto 7). Falta encolar (Desarrollo), verificación y N4 de Carlos en el primer corte. · 15-oct 16:03: L-124 aceptado (16:00; regresión 84/84). L-125 en cola. Después: respaldo de api/uploads/ (Arquitecto con Carlos) y tarea programada del corte; N4 de Carlos en el primer corte (30-nov-2026 23:00).",
+   "nota": "Crítico. Carlos 10-oct: corte el 30 de cada mes para todos; borra lo subido hasta el corte, con o sin Drive; primer corte el 30 del mes siguiente al registro (existentes: desde el despliegue); avisos 7/3/1 días y fijo. Se entrega tras K3b. · 14-oct: nivel y página completa por criterio (100 % N1/N2). · 15-oct 09:47: partido en L-124 (corte) y L-125 (vista y avisos); decisiones M-470: S2.1 sin efecto (se borra toda la evidencia), primer corte 30-nov con respaldo, criterio 4 N1+N4, endpoint de prueba solo admin y solo zz (sujeto al ok del Arquitecto), lo borrado se muestra trayéndolo de Drive por el servidor, avisos en el aviso fijo hasta M6 y el operador con config.drive ve el de pendientes. · 15-oct 09:56: ok de Diseño a L-124 y L-125 (M-477); regla de S2.1 escrita (DA-32 punto 7). Falta encolar (Desarrollo), verificación y N4 de Carlos en el primer corte. · 15-oct 16:03: L-124 aceptado (16:00; regresión 84/84). L-125 en cola. Después: respaldo de api/uploads/ (Arquitecto con Carlos) y tarea programada del corte; N4 de Carlos en el primer corte (30-nov-2026 23:00). · 15-oct 17:00: ACEPTADO (L-124 16:00 + L-125 16:27, regresión 123/123; M-516). Queda N4 de Carlos en el primer corte (30-nov-2026 23:00), tras el respaldo de api/uploads/ y la tarea programada del corte (procedimiento del Arquitecto).",
    "planTrabajo": "PT-1",
    "desde": "2026-10-11 15:15",
-   "esperaA": "Chat Desarrollo",
+   "esperaA": "Carlos (N4)",
    "antes": "REQ-K3c"
   },
   {
@@ -1601,6 +1601,30 @@
    ],
    "fechaDecision": "2026-10-14 21:03",
    "decision": "c) Siempre, en todos los turnos (Carlos, 14-oct 21:03: «seria mejor siempre… la idea es que el inventario permanezca actualizado, y se sepa donde quedaron las cosas»). Sin lectura nueva del colaborador: REQ-INV2-4-2 sigue normal, sin cruce. Cambian reglas 1, 3, 6 y criterios 1, 7, 9, 13."
+  },
+  {
+   "id": "DA-44",
+   "fecha": "2026-10-15",
+   "pregunta": "DT-42 / MJ-6: ensayo de restauración del respaldo diario antes del primer corte (30-nov). ¿De dónde salen los datos que se restauran en la cuenta de prueba?",
+   "opciones": [
+    {
+     "opcion": "a) Export real de «negocio» → cuenta zz-verif- nueva, temporal",
+     "consecuencias": "Prueba real (volumen y forma de los datos de verdad). Copia temporal de datos de huéspedes y colaboradores en otra cuenta de la misma base: solo zz-verif-admin la ve, sin archivos (solo base), se borra al terminar con constancia. «negocio» no se toca."
+    },
+    {
+     "opcion": "b) Export de una cuenta zz-verif- armada con la semilla",
+     "consecuencias": "Sin datos reales en ningún lado; prueba que el importador funciona, pero no que el respaldo real se restaura (volumen, casos raros)."
+    },
+    {
+     "opcion": "c) Esperar al ambiente de pruebas (MJ-5)",
+     "consecuencias": "Sin datos reales en producción; el primer corte llega sin restauración probada (los respaldos siguen sin ensayo)."
+    }
+   ],
+   "recomendacion": "a, con las salvaguardas de Desarrollo (M-514): solo cuenta zz-verif- nueva, nunca «negocio»; solo admin desde la cola; constancia con conteos por tabla y huellas contra el export; la cuenta se borra al terminar.",
+   "estado": "abierta",
+   "reqs": [],
+   "modulo": "Respaldo y restauración",
+   "origen": "M-514 (Desarrollo), MJ-6 (Arquitecto, LM-38)"
   }
  ],
  "prioridades": [

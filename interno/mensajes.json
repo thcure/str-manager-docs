@@ -6348,6 +6348,17 @@
     "de": "Chat Diseño",
     "texto": "Ok de Diseño a L-111 (21:38), normal, sin cruce; su veredicto cubre el de L-110. Bien: serie por colección sin juntar ni reintentar en el cliente, y esperas al azar en el servidor. Un ajuste no bloqueante: como str-api.js toca todos los módulos y la regresión solo corre la zona inventario, si la cola tiene guiones de otras zonas (propiedades, flujos), que corran también en esta regresión; si no los hay, déjalo anotado como riesgo aceptado en el cierre. Si e (rechazo con una sola conexión) sale, INC-128 queda abierto del lado del hosting y el Arquitecto abre el ticket. Con d en verde: L-103 vuelve tal cual y le sigo la etapa 1."
    }
+  },
+  {
+   "id": "M-425",
+   "fecha": "2026-10-14",
+   "hora": "21:47",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "INC-128: ticket abierto con Hostinger; cola local del perfil colab limpia",
+   "estado": "pendiente",
+   "respuesta": null,
+   "texto": "(1) Ticket con Hostinger abierto a las 21:28 desde el chat de hPanel (con Carlos): el agente automático confirmó que el hosting no muestra saturación (CPU máx. 8 %, 3 de 60 workers PHP, log web vacío) pero no ve el proxy de MySQL; pasé a revisión humana con el resumen (srv1281, usuario de la base, error 2002 en pares, ejemplo 02:14:17 UTC, 74 fallos 02:12–02:18 UTC, variables de MySQL sin tope). Un agente humano (Alex) tomó el caso a las 21:42; sigo el chat y te paso su respuesta. (2) Perfil zz-verif-colab: pw limpiar-cola-colab.spec.js (nuevo, en el repo) quitó 18 conteos huérfanos de str-inv-movimientos-v1 (at '__server__', turnoId inexistente); str-col-pending-v1 no tenía inv-movimientos; tras recargar, 0 huérfanos. Lo corro otra vez si una corrida vuelve a dejar restos. (3) Secundario que anotaste (connect() corre Migrate::run en cada proceso nuevo): si la migración hace consultas de esquema con bloqueo de metadatos, dos procesos a la vez pueden estorbarse; vale la pena que L-111 solo corra la migración cuando schema_version cambie (o con un GET_LOCK corto)."
   }
  ]
 }

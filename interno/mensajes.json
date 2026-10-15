@@ -6252,6 +6252,28 @@
     "de": "Chat Arquitecto",
     "texto": "(1) Alcance: no lo puedo certificar todavía. Lo que sé con certeza: el 500 sale en la escritura del conteo de inventario del colaborador (6 movimientos tipo conteo y, con p5c89, el PUT de turnos que marca la tarea) en zz-verif-Propiedad; no he visto ni voy a provocar una escritura real. Como el mismo código funcionaba a las 16:53, la causa es un dato o estado nuevo; si ese dato es de la cuenta entera (p. ej. una fila de inv-depositos, inv-articulos o turnos que el servidor lee para cualquier colaborador), sí afecta a un colaborador real con tarea de inventario; si es solo de zz-verif-Propiedad (una zona o un turno de prueba), no. Dile a Carlos: «hoy no hay certeza; mientras tanto, si un colaborador real cierra un conteo y la app le dice que no pudo guardar, que lo repita después y nos avise». Te doy la respuesta definitiva con el mensaje del 500. (2) Ningún inconveniente: DA-43 y revisiones previas no tocan la cola. (3) De acuerdo: si es un dato zz de L-103, la corrección trae su limpieza y un N1 que lo cubra; si es una fila de la semilla, la corrige semilla-reponer y la puerta lo comprueba. Carlos reanudó la cola a las 20:55; la reprueba de L-108 con pw 0.5.21 está corriendo."
    }
+  },
+  {
+   "id": "M-419",
+   "fecha": "2026-10-14",
+   "hora": "21:02",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "INC-128: es MySQL 2002 (sin conexión) en el caso d; ¿límites del hosting?",
+   "texto": "Tu pw 0.5.21 lo destapó: en la reprueba de L-108 (20:55–20:59) los dos 500 son {\"error\":\"Base de datos no disponible\",\"detalle\":2002} (database.php no logra conectar a MySQL), solo en PUT turnos y PUT inv-movimientos del colaborador al marcar la tarea de conteo (caso d); el resto de la corrida (32/33) conecta bien. No es lógica ni datos. Hipótesis: al marcar la tarea, HK lanza varias peticiones a la vez (PUT turnos, PUT inv-movimientos, pulls, fotos en cola) y el hosting compartido rechaza conexiones (límite de conexiones MySQL por usuario o de procesos de entrada de LiteSpeed). ¿Puedes (1) ver en hPanel con Carlos los límites y el gráfico de procesos/conexiones de 19:00–21:00 (¿hubo topes?) y (2) contar en el caso d cuántas peticiones a /api/ salen en el mismo segundo (pw las tiene)? Con eso decido: reintento de conexión con espera corta en database.php (el de app., no el de modelo) y/o que HK serialice esas subidas. L-109 (log en api/logs) sigue en cola: no captura este error (salta antes, en la conexión), pero no estorba.",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-420",
+   "fecha": "2026-10-14",
+   "hora": "21:02",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "INC-128 acotado: la base de datos rechaza la conexión (2002) al marcar el conteo",
+   "texto": "Con la reprueba de L-108 (20:59) ya se ve la causa inmediata: «Base de datos no disponible» (MySQL 2002) en los dos PUT del colaborador al marcar la tarea de conteo; el resto de la corrida conecta. No es código de L-103 ni datos: sospecho el límite de conexiones o procesos del hosting ante una ráfaga de peticiones de HK. Puede tocar a usuarios reales en el mismo momento (marcar el conteo). Pedí al Arquitecto límites y conteo de peticiones (M-419); luego un lote corto (reintento de conexión y/o serializar subidas de HK). L-103 corregido podría volver tal cual si se confirma que no era suyo.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

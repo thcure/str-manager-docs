@@ -685,9 +685,9 @@
    "etapa": "🔧",
    "fecha": "2026-10-14",
    "severidad": "crítico",
-   "titulo": "PUT de inv-movimientos (y desde 19:2x también de turnos) responde 500 al colaborador; persiste tras revertir L-103",
-   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea.",
-   "pendiente": "L-109 (log de errores en api/logs) y reprueba de L-108 para capturar el mensaje.",
+   "titulo": "PUT de turnos e inv-movimientos del colaborador al marcar el conteo: 500 «Base de datos no disponible» (MySQL 2002)",
+   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea. Con pw 0.5.21 (20:59): el cuerpo es {\"error\":\"Base de datos no disponible\",\"detalle\":2002}: el PHP no logra conectar a MySQL en esas dos peticiones (las demás de la corrida sí). Sospecha: ráfaga de peticiones simultáneas de HK al marcar la tarea, que supera el límite de conexiones o procesos del hosting compartido.",
+   "pendiente": "Arquitecto: límites del hosting (conexiones MySQL/procesos de entrada) y cuántas peticiones simultáneas lanza HK en el caso d. Desarrollo: reintento de conexión en database.php y/o serializar las subidas de HK, según lo que salga.",
    "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión)."
   },
@@ -9058,7 +9058,7 @@
    "categoria": "crítico",
    "resumen": "git revert 387625f + p5c89.",
    "estado": "no aceptado",
-   "observacion": "Encolado 19:17; CLI 19:19: 7068c95, 61/61.",
+   "observacion": "Encolado 19:17; CLI 19:19: 7068c95, 61/61. Reprueba 20:55–20:59 (pw 0.5.21): no aceptado; el 500 es {\"error\":\"Base de datos no disponible\",\"detalle\":2002} en PUT turnos e inv-movimientos del colaborador (caso d); 32/33 en verde.",
    "hash": "7068c95",
    "aceptacion": {
     "lote": "L-108",
@@ -9105,6 +9105,46 @@
     ],
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "La instrucción no tiene criterios N3 ni N4: n3Preparados vacío. La única captura (b-medida.png/.txt) es una vista a 390 px de Lugares de una zona zz-verif-L-108-r-…, de la regresión INC-125; solo muestra datos zz-verif-, no aporta a ningún criterio. El despliegue sí está (b en verde, str-api.js y HK en p5c89), aunque la puerta de entrada dice «el lote no cambia ?v=», lo que no cuadra con el Alcance (p5c87→p5c89); no afecta al resultado. Lo grave: el objetivo del lote (volver a conteos 200 como en L-102) no se cumple, el colaborador sigue bloqueado al cerrar el turno. La guardia cortó en varios casos PUT de inv-movimientos con 6 filas sin zz-verif- (probablemente reintentos de la cola local de HK del colaborador): conviene revisar que no queden pendientes reales en esa cola del navegador de pruebas. horaBogota tomada del fin de la corrida (00:24 UTC del 15-oct = 19:24 del 14-oct)."
+   },
+   "aceptacion2": {
+    "lote": "L-108",
+    "hash": "7068c95",
+    "fecha": "2026-10-14",
+    "horaBogota": "20:59",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 61/61 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c89 (versión ≥ p5c89: el guion corre como regresión en lotes siguientes) | aviso: la guardia corto 1 peticion(es): PUT https://app.apartamentosbucaramanga.com/api/col/inv-movimientos (12 fila(s) sin zz-verif- en /api/col/inv-movimientos)"
+     },
+     {
+      "c": "c",
+      "nivel": "regresión",
+      "ok": false,
+      "observado": "33 casos de regresión: 32 en verde, 1 en rojo: REQ-INV2-7-1-hk-turno.spec.js d «NO: tarea marcada: sí · turnos 500 | NO: conteos (inv-movimientos): 500 | PUT /api/col/turnos y PUT /api/col/inv-movimientos → 500 {\"error\":\"Base de datos no disponible\",\"detalle\":2002}». REQ-INV2-3-4.spec.js (L-102) en verde (a, b, c, j)."
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Regresión REQ-INV2-7-1-hk-turno d sigue en rojo tras revertir L-103: PUT de turnos e inv-movimientos responde 500 «Base de datos no disponible» (2002)",
+      "nivel": "crítico",
+      "causa": "El servidor no logró conectar con la base de datos durante la corrida (código 2002 = sin conexión al servidor MySQL), no un fallo de lógica del endpoint: el mismo 500 aparece también en PUT /api/col/turnos (casos c y d de hk-turno), que L-103 no rompía. Por eso la reversión no queda demostrada: el caso d no llegó a ejercer el código revertido. Hay que comprobar la disponibilidad de la base en producción (conexiones, límite de conexiones o caída del servicio) y repetir la regresión; si la base responde y d sigue en 500, la causa es otra y se reabre INC-128.",
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d (colab, /portal.html): «NO: tarea marcada: sí · turnos 500 | NO: conteos (inv-movimientos): 500 | error del servidor: PUT /api/col/turnos → 500 {\"error\":\"Base de datos no disponible\",\"detalle\":2002} || PUT /api/col/inv-movimientos → 500 {\"error\":\"Base de datos no disponible\",\"detalle\":2002}». En el caso c del mismo guion: «PUT app /api/col/turnos · respuesta 500: {\"error\":\"Base de datos no disponible\",\"detalle\":2002} (x2)»."
+     }
+    ],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "La instrucción no tiene criterios N3 ni N4; n3Preparados vacío. La única captura de la carpeta (b-medida.png/.txt) muestra la ficha de lugares de una zona zz-verif-L-108-r- en Inventario (de la regresión INC-125), no corresponde a ningún N3 y no cambia el veredicto. El 500 de d no es el mismo síntoma de L-103 (error de código) sino «Base de datos no disponible» (2002) también en turnos: probablemente la base cayó o rechazó conexiones al final de la corrida; conviene repetir la cola de L-108 con la base disponible antes de decidir otra reversión o fix. horaBogota = fin de la corrida (01:59Z del 15-oct = 20:59 del 14-oct en Bogotá); el juez no consulta el reloj."
    }
   }
  ],
@@ -10734,7 +10774,7 @@
    "desde": "2026-10-14 19:26",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61. · Juez 19:24: no aceptado. Con 7068c95 (p5c89) siguen los 500: inv-movimientos y ahora también turnos. La causa no es (solo) el código de L-103."
+   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61. · Juez 19:24: no aceptado. Con 7068c95 (p5c89) siguen los 500: inv-movimientos y ahora también turnos. La causa no es (solo) el código de L-103. · Reprueba 20:59: la causa visible es conexión a MySQL (2002) en el caso d, no lógica."
   },
   {
    "lote": "L-109",

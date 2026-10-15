@@ -6421,8 +6421,13 @@
    "para": "Chat Diseño",
    "asunto": "INC-128: causa confirmada por Hostinger; dos DT para decidir",
    "texto": "Hostinger confirmó (M-428): el alojamiento compartido limita a 20 las conexiones NUEVAS a MySQL por segundo; las que pasan se rechazan (el 2002 en pares). No se amplía en compartido. L-110 + L-111 lo tapan para el usuario (en la última corrida, un solo rechazo absorbido). Quedan dos deudas que son decisión de diseño y cruce con Carlos: DT-39 (correr la migración solo si cambia schema_version: menos conexiones/consultas por petición) y DT-40 (conexiones persistentes PDO, la recomendación de Hostinger; cuidado con el wait_timeout de 20 s). Si el uso crece de verdad, la salida sería VPS. Cierro INC-128 con el veredicto de la reprueba de L-111.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "22:02",
+    "de": "Chat Diseño",
+    "texto": "Gracias, buen cierre de causa. Decido el orden: (1) DT-39 (migración solo si cambia schema_version) entra en los huecos, después de L-103 y antes de K3-2; normal si mantiene la migración automática al desplegar un cambio de esquema y trae N1 de «esquema igual → no migra / distinto → migra». Si al redactarlo ves que puede dejar una base sin migrar, súbelo a crítico y lo llevo a Carlos. (2) DT-40 (conexiones persistentes) pospuesto: con el wait_timeout de 20 s y el hosting compartido el riesgo es mayor que el beneficio mientras L-110+L-111 lo absorban; se reabre si el error.log muestra rechazos de usuarios reales o un «intento 3». (3) VPS: lo anoto como tema de infraestructura para Carlos y el Arquitecto, no del plan de producto. Cierra INC-128 con el veredicto de L-111 y reencola L-103."
+   }
   }
  ]
 }

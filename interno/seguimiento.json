@@ -744,6 +744,17 @@
    "titulo": "El aviso fijo «1 foto no se pudo subir → abrir turno» tapa los botones del pie del panel del turno y no deja cerrar el turno",
    "causa": "Por confirmar en el código: el aviso de la cola de subida queda fijo abajo, a todo lo ancho, sobre el panel; el clic al botón de cierre no llega (Timeout). Se disparó porque una foto de la entrega no subió (en g0: fotos 200/200/200/—/200/200), probablemente por un corte de conexión.",
    "nota": "Origen: L-122-veredicto-2 (11:22), regresión REQ-INV2-3-4-hk g; h y j en cascada (pendiente de J2 no creado). Captura log\\capturas\\L-122\\REQ-INV2-3-4-hk-g-error.png. Pide lote fix tras K3-2."
+  },
+  {
+   "id": "INC-133",
+   "tipo": "INC",
+   "modulo": "HK · cola de subida",
+   "etapa": "🔍",
+   "fecha": "2026-10-15",
+   "severidad": "medio",
+   "titulo": "Una foto de la entrega no sale de la cola en 30 s y queda «fallida» (REQ-INV2-4-2 c, colab2)",
+   "causa": "Sin causa confirmada: en la cronología no sale ningún POST /api/upload entre +1,4 s y +31,5 s; el siguiente da 200. L-117 no toca la subida. Puede ser la cola del cliente o un corte de red; si se repite, se mira junto con INC-132.",
+   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde."
   }
  ],
  "dts": [
@@ -10894,7 +10905,7 @@
    "categoria": "crítico",
    "resumen": "Aviso fijo del corte y estado de copia en el registro; migración 12",
    "estado": "no aceptado",
-   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida). · 02:50 no aceptado: a, b, e, e2 en verde (migración 12, retención, aviso del operador); rojos de guion: c/d (foto en la tarea de conteo, que L-107 reemplazó) y 12 regresiones con schema_version === 10 fijo → L-121 · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20) · 11:00 reprueba (juez 10:5x): no aceptado; b, c, e, e2 y N1 en verde; d rojo y g sin juzgar por el orden de la cola (capturas: d 10:40:17 y g 10:41:36 con admin, antes del caso c de colab), no por HK: el INC medio del juez no se abre, lo corrige L-126; f sin juzgar con Drive conectado (N4); regresión en rojo por los turnos zz residuales (herramienta, limpiar-zz v3 del Arquitecto, M-485). Se reprueba tras aceptar L-126, con hechas\\L-117 actualizado · 11:49 reprueba encolada (limpiar-zz va primero en el ciclo, M-494)",
+   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida). · 02:50 no aceptado: a, b, e, e2 en verde (migración 12, retención, aviso del operador); rojos de guion: c/d (foto en la tarea de conteo, que L-107 reemplazó) y 12 regresiones con schema_version === 10 fijo → L-121 · 10:21 reprueba encolada tras arreglar la sesión del perfil admin (hk-admin, sesiones y usuarios-zz en verde 10:19-10:20) · 11:00 reprueba (juez 10:5x): no aceptado; b, c, e, e2 y N1 en verde; d rojo y g sin juzgar por el orden de la cola (capturas: d 10:40:17 y g 10:41:36 con admin, antes del caso c de colab), no por HK: el INC medio del juez no se abre, lo corrige L-126; f sin juzgar con Drive conectado (N4); regresión en rojo por los turnos zz residuales (herramienta, limpiar-zz v3 del Arquitecto, M-485). Se reprueba tras aceptar L-126, con hechas\\L-117 actualizado · 11:49 reprueba encolada (limpiar-zz va primero en el ciclo, M-494) · 12:10 reprueba 3 (juez): no aceptado solo por la regresión; a, b, c, d (oper), e, e2 y g en verde; f sin juzgar con Drive conectado (N4 h). Rojo: hk-turno a–d (perfil admin en login a las 12:07:32; herramienta) y REQ-INV2-4-2 c (una foto de entrega sin subir en 30 s: INC-133). Se reprueba con la sesión del admin arreglada",
    "hash": "6e4de8f",
    "aceptacion": {
     "lote": "L-117",
@@ -11161,6 +11172,93 @@
     "herramienta": "Entorno: cuatro turnos zz-verif- de una corrida anterior siguen en zz-verif-Propiedad (sh-m-1792053676517…678416) y bloquean la preparación de REQ-INV2-4-2 y REQ-INV2-4-2-dif (21 de los 22 casos en rojo, en cascada); además hubo un ERR_CONNECTION_CLOSED en page.goto.",
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "N1 en verde (74/74). N2 del lote: b, c, e y e2 en verde. «negocio» tiene Drive conectado: e comprueba que el aviso no se ve y que el servidor da retencion (inicio 2026-10-15 por despliegue, próximo corte 30 de noviembre de 2026); e2 da avisoCorte false para el operador, así que no se ejercitó la rama visible del aviso ni su texto «Solo el administrador…» en pantalla (los cubre N1). d está en rojo: el admin no ve el turno iniciado ni su foto (INC medio; revisar si es el guion o HK antes de tocar código) y g depende de d. f queda en null porque, con Drive conectado, el aviso no aparece. Regresión: 21 de 22 rojos comparten una causa de entorno (turnos residuales de otra corrida en zz-verif-Propiedad, más un ERR_CONNECTION_CLOSED); por eso va el campo herramienta y el lote no carga con esa culpa. Antes de repetir la corrida hay que borrar esos cuatro turnos. horaBogota es aproximada, tomada del fin de la corrida (15:56Z) más el tiempo del juicio."
+   },
+   "aceptacion3": {
+    "lote": "L-117",
+    "hash": "3df5fb3",
+    "fecha": "2026-10-15",
+    "horaBogota": "12:10",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado: 6 turnos | si: turno sh-m-1792083473461: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792083473461 | si: HK al día (inventario y pendientes): sí | si: lastpush alineado: 2 turnos | si: turno: iniciado 200 | si: recepción de zz-verif-Principal: [{\"id\":\"dp_muyum184g3ozd\",\"tit\":\"Recepción de zona: zz-verif-Principal\"}] | si: foto general de la recepción: 200 · 1/1 | si: pedidos a /api/drive desde el portal: ninguno | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792083473461 | si: miniatura de la foto del turno en el registro del operador: sí (#hkTraspaso) | si: GET /api/drive/copias: 200 · sin secretos: sí | si: insignia: {\"estado\":\"en-espera\",\"tit\":\"Pendiente de copia en Drive\",\"url\":\"/api/archivo/1/foto/sh-m-1792083473461/9113d4fff42e6274fee69bb6f0129de7.jpg\"} · servidor: {… \"estado\":\"en-espera\",\"motivo\":null,\"driveId\":null,\"enlace\":null,\"copiadoEn\":null,\"intentos\":0,\"ultimoError\":null} | si: estado del dato de prueba (Drive conectado): en-espera · esperado: en-espera o omitido"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /api/health schema_version: 12 | si: estado: conectado true · avisoCorte true · retención {\"inicio\":\"2026-10-15\",\"origen\":\"despliegue\",\"proximoCorte\":\"2026-11-30\",\"proximoCorteTexto\":\"30 de noviembre de 2026\"} | si: con Drive conectado el aviso no se ve"
+     },
+     {
+      "c": "e2",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado: conectado true · avisoCorte false | si: sin avisoCorte o con Drive conectado el aviso no se ve"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "Captura f-aviso-corte (390 px): shell en el Dashboard, sin #corteAviso entre la barra superior y el contenido; el texto visible no contiene «Tu próximo corte» ni «Conectar Drive». Coherente con e (negocio con Drive conectado: el aviso no debe verse), pero no muestra el aviso, así que su legibilidad a 390 px no se puede juzgar."
+     },
+     {
+      "c": "g",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura g-insignia-drive (1366 px, operador): en el panel del turno zz-verif-Propiedad › Recepción de zona: zz-verif-Principal, la miniatura de la foto general muestra ✓ verde abajo a la izquierda y ☁ (fondo naranja, estado en espera) abajo a la derecha, ambos pequeños en las esquinas sin tapar la foto; la ✕ queda arriba a la derecha y el contador «1/1» junto a «Tomar foto». El texto visible lista ✕, ✓, ☁ en ese bloque."
+     },
+     {
+      "c": "i",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "Regresión: 90 de 95 casos en verde. En rojo: REQ-INV2-7-1-hk-turno a (admin, 12:07:32: «page.click: Timeout 30000ms exceeded»; su captura de error es la pantalla de login «Acceso interno» con «CORREO ELECTRÓNICO» y «Continuar con Google»: perfil sin sesión) y b, c, d en cascada («turno de la corrida: no se creó en a»); REQ-INV2-4-2 c (colab2, 12:05:36): «NO: entrega de tA … fotos de lugar o artículo «Foto al cierre»: … inv::su_mv8jpjk5l5qfu::ar_mv8jph2d2k6tm —»; la captura muestra la miniatura de zz-verif-Inv B2 con «!» y la barra «1 foto no se pudo subir → abrir turno» («📷 1 fallida»)."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "f",
+      "motivo": "El negocio tiene Drive conectado (caso e: conectado true), así que el aviso no se pinta y la captura aviso-corte muestra el shell sin aviso: no permite juzgar si el aviso se lee completo a 390 px. Queda para una corrida con un negocio sin Drive o para la prueba en dispositivo (h)."
+     }
+    ],
+    "dispositivo": [
+     {
+      "c": "h",
+      "que": "Carlos, con una cuenta de Google de prueba, en un negocio sin Drive: ver el aviso fijo con la fecha del corte (y que la fecha base sea la del despliegue), tocar «Conectar Drive» → ⚙️ Configuración → «Conectar Google Drive»; tras «✓ Google Drive conectado» el aviso ya no está. Capturar la pantalla de permisos de Google. Aprovechar para revisar a 390 px que el aviso se lee completo (pendiente de f)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Regresión REQ-INV2-4-2 c: una foto «Foto al cierre» de la entrega no se subió (queda «1 fallida»)",
+      "nivel": "medio",
+      "causa": "No atribuible al lote con lo que hay: la subida de la foto del artículo zz-verif-Inv B2 no tuvo respuesta en 30 s (en la cronología no sale ningún POST /api/upload entre +1414 ms y +31509 ms; el que sale después da 200) y la cola del portal la marcó fallida. L-117 no toca api/upload, str-cola-subida.js ni el portal salvo ?v=, y su cambio en HK (_hkResolverDrive) sale en la primera línea en modo-colab; la causa probable es la cola de subida del cliente o una intermitencia del entorno. Hay que repetir el caso: si vuelve a fallar, investigar la cola de subida, no este lote.",
+      "observado": "REQ-INV2-4-2 c: «NO: entrega de tA a nombre de zz-verif-colab2 · fotos de lugar o artículo «Foto al cierre»: inv::su_mv8jpj9j24ipa 200, inv::su_mv8jpj9j24ipa::ar_mv8jpg2a620f7 200, inv::su_mv8jpjk5l5qfu::ar_mv8jpguytag40 200, inv::su_mv8jpjk5l5qfu::ar_mv8jph2d2k6tm —, inv::-::ar_mv8jphaps5fs3 200»; captura: miniatura de zz-verif-Inv B2 con «!», barra «1 foto no se pudo subir → abrir turno», «📷 1 fallida · Reintentar todo»."
+     }
+    ],
+    "herramienta": "El perfil admin llegó sin sesión a REQ-INV2-7-1-hk-turno a (captura de error = pantalla de login del STR), y b, c y d de ese guion fallan en cascada porque el turno no se creó: 4 de los 5 casos en rojo son del arnés, no del lote.",
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "N1 en verde (74/74) y los seis N2 del guion en verde (b, c, d, e, e2). En esta corrida el negocio tiene Drive conectado: e y e2 solo comprueban que el aviso esté oculto, y f no se puede juzgar (null). g se cumple. No aceptado por la regresión: 4 de los 5 casos en rojo (REQ-INV2-7-1-hk-turno a–d) son del arnés (perfil admin sin sesión, a; b–d en cascada) y van en «herramienta», sin INC; el quinto (REQ-INV2-4-2 c, una foto de entrega fallida) queda como INC medio con causa probable ajena al lote. Hay que repetir la corrida con la sesión arreglada; si REQ-INV2-4-2 c vuelve a quedar en verde, el INC se cierra. h es N4 para Carlos. horaBogota tomada del fin de la corrida (17:10 UTC): el juez no tiene reloj."
    }
   },
   {

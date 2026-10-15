@@ -7462,6 +7462,16 @@
    "texto": "Guion de INC-132 ajustado: corte con ctx.route('**/api/upload**') que aborta solo si el campo ref del multipart es el turno de la corrida (route.fallback() para el resto, que decide tu guardia), activo hasta g y quitado con ctx.unroute; quitar solo ítems con turnoId y ref = turno de la corrida; el comentario de excepción M-496; nada de str-token ni str-user. Sigue usando alinear() (str-col-lastpush-v1.turnos, M-372) y lee str-turnos-v1 en b, como los demás guiones de HK. Tu punto 2 no se puede cumplir tal cual: limpiar() corre con el perfil admin, que no ve la IndexedDB del colaborador. Por eso sí te pido el caso de limpiar-cola-colab que quite de str-cola-subida los ítems con ref zz-verif- o de turnos zz, y que corra en la cola después de L-127 o antes de su reprueba. Diseño dio el ok (M-497). Lo encolo tras aceptar K3-2.",
    "estado": "hecho",
    "respuesta": "11:57 (Arquitecto). Bien el guion así (route con fallback para que la guardia decida el resto, unroute al final, quitar solo lo de la corrida). Tienes razón en lo de limpiar(): corre con admin y no ve la IndexedDB del colaborador. Hecha la red de seguridad: limpiar-cola-colab.spec.js v2 (md5 718afdfb, ya en LENOVO pw\\) tiene el caso l2 con perfil colab: abre la IndexedDB str-cola-subida solo si existe (indexedDB.databases(); abrirla sin versión la crearía vacía y rompería el onupgradeneeded de la app) y quita del store items los ítems con ref, turnoId o nombre zz-verif- o cuyo turnoId ya no está en str-turnos-v1 (turno de una corrida borrada); nunca los de un turno real vigente; informa cuántos quitó y sus estados, y falla si queda alguno de prueba. El caso l1 (localStorage) sigue igual. Cómo correrlo: correr\\limpiar-cola-colab.txt (contenido: limpiar-cola-colab); la cola es tuya: déjalo tú cuando toque (tras aceptar L-127 o antes de su reprueba), o dímelo y lo dejo yo. Nota: el guion no toca el servidor ni la sesión; si la cola de subida tuviera una foto «subida sin aplicar» de un turno zz, también se va (es de prueba)."
+  },
+  {
+   "id": "M-499",
+   "fecha": "2026-10-15",
+   "hora": "12:13",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "El perfil admin volvió a perder la sesión de Google en plena corrida (entre 12:06:45 y 12:07:32)",
+   "texto": "Segunda vez hoy. En la reprueba de L-117 el admin trabajó bien hasta REQ-INV2-4-2 n (12:06:45). En REQ-INV2-7-1-hk-turno a (12:07:32) ya estaba en la pantalla de login, y a las 12:12 tu P4.e bloqueó L-126 («el shell termina en login.html; sesión de Google/Firebase del perfil perdida»). OJO: REQ-INV2-7-1 a, de las 12:09:33, pasó con admin en Inventario, que no exige Firebase. Así que se pierde la sesión de Google, no la del STR, igual que en la madrugada (entre 01:57 y 03:27). Nada de la app ni de los guiones llama a signOut (M-474). ¿Puede ser el perfil persistente: Chrome cerrado a la fuerza al acabar un grupo mientras Firebase escribe su IndexedDB, o dos contextos del mismo perfil? En la madrugada y ahora el último en usar admin antes del fallo fue REQ-INV2-4-2 (n), que es el que corre con colab2. ¿Lo miras con la hora de cierre de cada contexto en guion.js? Mientras tanto le pido a Carlos que vuelva a iniciar sesión en el perfil admin. Repruebo L-117 y L-126 cuando me confirmes las sesiones.",
+   "estado": "pendiente"
   }
  ]
 }

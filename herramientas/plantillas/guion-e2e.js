@@ -4,6 +4,9 @@
 //
 // Reglas:
 // - Un caso por criterio N2, con la misma letra de «Pruebas derivadas». Perfil: admin | oper | colab | colab2.
+// - Orden real (pw 0.5.30, M-487/M-488): los casos corren AGRUPADOS POR PERFIL, en el orden en que cada perfil aparece por
+//   primera vez en el guion, no por letra. Un caso que necesita lo que produce otro perfil (el colaborador inicia el turno,
+//   sube la foto; el admin la ve) va en un perfil que aparezca DESPUÉS. El informe trae orden y hora por caso.
 // - pagina: ruta del STR sin dominio ('/str-calendario.html'); nunca la raíz. «Desde el menú» → '/str-app-shell.html'.
 // - Todo dato que el caso cree se nombra con h.dato('<nombre>') (queda zz-verif-L<n>-<nombre>); la guardia corta
 //   cualquier otra escritura y el caso falla. Se borra en limpiar(). Nunca datos reales.

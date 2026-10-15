@@ -170,3 +170,16 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   assert.strictEqual(decidir(BASE_MODELO + '/api/login', 'POST', '{}').ok, false, 'POST /api/login al modelo no');
   console.log('guardia.test.js: sesión (POST /api/login): 6 OK');
 }
+
+// v0.5.29 (M-475): corte de prueba de Drive
+{
+  const ids = new Set(['sh-m-zz1']);
+  const d = (url, cuerpo) => decidir(B + url, 'POST', cuerpo, ids, new Set());
+  assert.strictEqual(d('/api/drive/corte-prueba', '{"ref":"sh-m-zz1","dia":0}').ok, true, 'ref creada como zz en la corrida: pasa');
+  assert.strictEqual(d('/api/drive/corte-prueba', '{"ref":"sh-m-real9","dia":0}').ok, false, 'ref ajena: no');
+  assert.strictEqual(d('/api/drive/corte-prueba', '{"ref":"sh-m-real9","dia":0,"nota":"zz-verif-x"}').ok, false, 'zz-verif- en el cuerpo no basta');
+  assert.strictEqual(d('/api/drive/corte-prueba', '{"ref":"zz-verif-otra"}').ok, false, 'ref con texto zz pero no de la corrida: no');
+  assert.strictEqual(d('/api/drive/corte', '{}').ok, false, 'pasada programada del corte: nunca');
+  assert.strictEqual(d('/api/drive/cron', '{"zz-verif-":1}').ok, false, 'pasada programada de la copia: nunca');
+  console.log('guardia.test.js: corte de prueba de Drive: 6 OK');
+}

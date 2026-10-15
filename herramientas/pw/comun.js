@@ -185,6 +185,17 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     if (m && idsZz.has(m[1].trim())) return { ok: true, nota: 'foto con ref de un turno zz de la corrida' };
     return { ok: false, motivo: 'subida de archivo sin turno zz-verif- de esta corrida' };
   }
+  // v0.5.29 (M-475, L-124): borrados de prueba del servidor. POST /api/drive/corte-prueba pasa SOLO si su `ref` es un id que
+  // esta corrida creó como zz-verif- (el turno de la corrida); el texto zz-verif- en el cuerpo no basta, y la pasada
+  // programada (/api/drive/corte, /api/drive/cron) nunca pasa. Defensa en profundidad: aunque el servidor falle su 422,
+  // un guion no puede pedirle borrar archivos de una ref real.
+  if (/^\/api\/drive\/(corte|cron)\/?$/.test(u.pathname)) return { ok: false, motivo: 'pasada programada de Drive (' + u.pathname + '): solo la tarea de hPanel' };
+  if (/^\/api\/drive\/corte-prueba\/?$/.test(u.pathname)) {
+    let j = null; try { j = JSON.parse(cuerpo || ''); } catch (e) { }
+    const ref = j && typeof j.ref === 'string' ? j.ref.trim() : '';
+    if (ref && idsZz.has(ref)) return { ok: true, nota: 'corte de prueba sobre un turno zz de la corrida (' + ref + ')' };
+    return { ok: false, motivo: 'corte de prueba sobre una ref que esta corrida no creó como zz-verif-' + (ref ? ' (' + ref + ')' : '') };
+  }
   if (String(cuerpo || '').includes('zz-verif-') || u.href.includes('zz-verif-')) return { ok: true, nota: 'zz-verif- en ' + (String(cuerpo || '').includes('zz-verif-') ? 'el cuerpo' : 'la url') };
   return { ok: false, motivo: 'escritura sin zz-verif- a ' + u.pathname };
 }

@@ -677,6 +677,19 @@
    "estado": "cerrado",
    "origen": "Veredicto de L-101 (juez, casos c, d, e, 14-oct 15:28).",
    "cierre": "Cerrado por L-105 (9367c8a), aceptado 14-oct 16:07: c y d de REQ-INV2-7-1-hk-turno en verde."
+  },
+  {
+   "id": "INC-128",
+   "tipo": "INC",
+   "modulo": "Servidor · inventario",
+   "etapa": "🔧",
+   "fecha": "2026-10-14",
+   "severidad": "crítico",
+   "titulo": "Con L-103 (387625f) el PUT de inv-movimientos responde 500 a los conteos de cierre del colaborador",
+   "causa": "Por ubicar (sin log de PHP): con e0c7b9d el mismo PUT (6 conteos de REQ-INV2-7-1-hk-turno d) daba 200. L-103 tocó [PEND], el PUT de turnos y el contexto de inv-movimientos.",
+   "pendiente": "Reversión L-108 (encolada 19:17); luego el log de PHP y un fix antes de volver a encolar L-103.",
+   "estado": "abierto",
+   "origen": "Veredicto de L-103 (juez 19:13, regresión)."
   }
  ],
  "dts": [
@@ -8865,8 +8878,157 @@
    "req": "REQ-INV2-3-4 (2/2)",
    "categoria": "crítico",
    "resumen": "El servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c88.",
-   "estado": "registrado",
-   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; M-375, M-383, M-395, M-397; revisión previa 11/14 corregida; ok de Diseño 18:22 (M-403). Encolado 18:24."
+   "estado": "no aceptado",
+   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; M-375, M-383, M-395, M-397; revisión previa 11/14 corregida; ok de Diseño 18:22 (M-403). Encolado 18:24. Reprueba 19:08–19:13: no aceptado (INC-128).",
+   "hash": "387625f",
+   "aceptacion": {
+    "lote": "L-103",
+    "hash": "387625f",
+    "fecha": "2026-10-14",
+    "horaBogota": "19:13",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: str-api.js en HK: str-api.js?v=p5c88 (≥ p5c88) | si: lastpush alineado: 6 turnos | si: turno t0 sh-m-1792022882251: 200 | si: turno t1 sh-m-1792022882868: 200 | si: turno t2 sh-m-1792022883517: 200"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: marcas Secando/Sucia/Lista: turno, operador, nada | si: juegos: zz-verif-J2 ok · zz-verif-J4 ok · zz-verif-J5 ok | si: ids de la semilla: {\"j2\":\"gr_mv8pgux1yrx1k\",\"j4\":\"gr_mv8pgv4wijj0f\",\"j5\":\"gr_mv8pgvcredos9\",\"sec\":\"es_mv4fivhzr34yy\",\"sucia\":\"es_mv8oeuhz13qtz\",\"lista\":\"es_mv4fih04awyau\",\"prin\":\"dp_muyum184g3ozd\",\"tend\":\"dp_mv5i84f7ae9j9\",\"pv\":\"pv_mv8nfuyjrofoe\"} | si: pendientes abiertos de J2/J4/J5 antes de empezar: ninguno | si: J2 lista; J4 y J5 sucias: sin errores | si: J2 lista; J4 y J5 sucias: zz-verif-J2 → zz-verif-Lista en zz-verif-Principal (estado) · zz-verif-J4 → zz-verif-Sucia en zz-verif-Principal (estado) · zz-verif-J5 → zz-verif-Sucia en zz-verif-Principal (estado) → 200"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t0 de la corrida: sh-m-1792022882251 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 9 turnos | si: turno t0 cerrado: sí · Iniciar turno 200 · Cerrar limpieza 200 [nota] · Cerrar turno 200 [nota] | si: pendiente del cierre pe_sh-m-1792022882251_gr_mv8pgv4wijj0f: 200 {\"estado\":\"abierto\",\"para\":\"operador\",\"tarea\":\"Decidir: lavar o lavandería externa\",\"creadoPor\":\"7\",\"creadoEn\":\"2026-10-15T00:08:12.000Z\"} | si: pendiente del cierre pe_sh-m-1792022882251_gr_mv8pgvcredos9: 200 {\"estado\":\"abierto\",\"para\":\"operador\",\"tarea\":\"Decidir: lavar o lavandería externa\",\"creadoPor\":\"7\",\"creadoEn\":\"2026-10-15T00:08:12.000Z\"} | NO: aviso después del cierre: «✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J4 · zz-verif-Sucia · zz-verif-Principal · Decidir: lavar o lavandería externa (para el operador) zz-verif-J5 · zz-verif-Sucia · zz-verif-Principal · Decidir"
+     },
+     {
+      "c": "d",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura d-bandeja (390 px): pestaña Pendientes con «2 pendientes abiertos»; dos tarjetas, zz-verif-J4 y zz-verif-J5, cada una con propiedad zz-verif-Propiedad, juego, estado zz-verif-Sucia (etiqueta), sitio zz-verif-Principal, tarea «Decidir: lavar o lavandería externa», para Operador, origen del turno, y los dos botones «Lavar en el siguiente turno» y «Trasladar a lavandería externa» dentro del ancho. Texto legible, sin cortes ni desplazamiento horizontal (la cola midió scrollWidth 390 · clientWidth 390)."
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: fila pe_sh-m-1792022882251_gr_mv8pgv4wijj0f: «zz-verif-Propiedadzz-verif-J4zz-verif-Suciazz-verif-PrincipalDecidir: lavar o lavandería externaOperadorturno del 2026-10-14 · 14 oct 19:08Lavar en el siguiente» · botones 2 | si: fila pe_sh-m-1792022882251_gr_mv8pgvcredos9: «zz-verif-Propiedadzz-verif-J5zz-verif-Suciazz-verif-PrincipalDecidir: lavar o lavandería externaOperadorturno del 2026-10-14 · 14 oct 19:08Lavar en el siguiente» · botones 2 | si: zz-verif-Lavandería en #peProveedor | si: J4 → 200 {\"para\":\"turno\",\"tarea\":{\"tipo\":\"llevar\",\"proveedorId\":\"pv_mv8nfuyjrofoe\",\"texto\":\"Llevar a lavandería externa: zz-verif-Lavandería\"}} | si: J5 → 200 {\"para\":\"turno\",\"tarea\":{\"tipo\":\"lavar\",\"texto\":\"Lavar\"},\"reasignadoEn\":\"2026-10-15T00:08:18.000Z\"}"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: J2 a secar en el tendedero: sin errores | si: J2 a secar en el tendedero: zz-verif-J2 → zz-verif-Secando en zz-verif-Tendedero (estado) → 200"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t1 de la corrida: sh-m-1792022882868 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | error: locator.click: Timeout 30000ms exceeded."
+     },
+     {
+      "c": "h",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t2 de la corrida: sh-m-1792022883517 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: título: «Pendientes del turno anterior» | NO: pe_sh-m-1792022882868_gr_mv8pgux1yrx1k: «» · selectores 0 · botón 0 | si: pe_sh-m-1792022882251_gr_mv8pgv4wijj0f: «zz-verif-Sucia · zz-verif-Principal · Llevar a lavandería externa: zz-verif-Lavandería» · selectores 0 · botón 1 | si: pe_sh-m-1792022882251_gr_mv8pgvcredos9: «zz-verif-Sucia · zz-verif-Principal · Lavar» · selectores 2 · botón 1"
+     },
+     {
+      "c": "i",
+      "nivel": "N3",
+      "ok": false,
+      "observado": "Captura i-pendientes (390 px), HK del turno t2 dentro del portal: título «PENDIENTES DEL TURNO ANTERIOR» arriba (top 53 px) y solo DOS tarjetas, no tres: zz-verif-J4 «zz-verif-Sucia · zz-verif-Principal · Llevar a lavandería externa: zz-verif-Lavandería» con «Dirección:» y botón «Hecho»; zz-verif-J5 «zz-verif-Sucia · zz-verif-Principal · Lavar» con dos selectores (zz-verif-Lista / zz-verif-Principal) y «Hecho». Falta la tarjeta de zz-verif-J2 (no nació porque g no cerró t1). Lo que sí se ve está dentro del ancho, legible, sin cortes ni desplazamiento horizontal (el texto largo de J4 parte en dos líneas; portal y HK 390/390)."
+     },
+     {
+      "c": "j",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t2 de la corrida: sh-m-1792022883517 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | error: locator.evaluate: Timeout 30000ms exceeded."
+     },
+     {
+      "c": "k",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t2 de la corrida: sh-m-1792022883517 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: movimiento: 200 {\"tipo\":\"lavanderia\",\"depositoOrigenId\":\"dp_muyum184g3ozd\",\"proveedorId\":\"pv_mv8nfuyjrofoe\"} | si: pendiente: 200 {\"estado\":\"hecho\",\"cerradoEn\":\"2026-10-15T00:09:41.000Z\",\"cerradoTurnoId\":\"sh-m-1792022883517\",\"movimientoId\":\"mv_mv8s7q4rqid8v\"}"
+     },
+     {
+      "c": "l",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno t2 de la corrida: sh-m-1792022883517 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | si: movimiento: 200 {\"tipo\":\"estado\",\"depositoId\":\"dp_muyum184g3ozd\",\"estadoId\":\"es_mv4fih04awyau\"} | si: pendiente: 200 {\"estado\":\"hecho\",\"cerradoEn\":\"2026-10-15T00:09:45.000Z\",\"cerradoTurnoId\":\"sh-m-1792022883517\",\"movimientoId\":\"mv_mv8s7t2r9m6r7\"}"
+     },
+     {
+      "c": "m",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 62/62 archivos OK"
+     },
+     {
+      "c": "n",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 62/62 archivos OK"
+     },
+     {
+      "c": "o",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 62/62 archivos OK"
+     },
+     {
+      "c": "p",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 62/62 archivos OK (la parte de regresión de este criterio NO está en verde: REQ-INV2-7-1-hk-turno.spec.js d en rojo, ver INC)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Regresión: el conteo de cierre del colaborador no sube (PUT de inv-movimientos responde 500)",
+      "nivel": "crítico",
+      "causa": "Con 387625f el servidor responde 500 al PUT de inv-movimientos con los 6 movimientos de conteo del turno (REQ-INV2-7-1); el lote tocó api/col/index.php (bloque [PEND] y funciones nuevas junto a _colInvMovSanear) y el caso pasaba antes. Deja al colaborador sin poder marcar la tarea de conteo, es decir, sin poder completar el cierre del turno (bloqueo). Origen exacto a ubicar en el log de PHP.",
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: «NO: tarea marcada: no · turnos 200 | NO: conteos (inv-movimientos): 500»"
+     },
+     {
+      "titulo": "c: el aviso tras el cierre de t0 no coincide con lo esperado",
+      "nivel": "medio",
+      "causa": "Los dos pendientes de J4 y J5 sí se crearon en el servidor con los datos esperados; lo que falla es el texto del modal #_hkPendCierreModal frente a la espera del guion. El observado viene truncado en pruebas.json y no deja ver la diferencia exacta (hay que revisar el texto completo del aviso: orden, separadores entre <li> o líneas extra).",
+      "observado": "«NO: aviso después del cierre: «✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J4 · zz-verif-Sucia · zz-verif-Principal · Decidir: lavar o lavandería externa (para el operador) zz-verif-J5 · zz-verif-Sucia · zz-verif-Principal · Decidir» (truncado)"
+     },
+     {
+      "titulo": "g: el titular no logra cerrar t1 y no nace el pendiente de J2",
+      "nivel": "crítico",
+      "causa": "El turno t1 se inició (en el portal queda «En curso») pero el clic de cierre no llegó a ser posible en 30 s. Lo más probable, por el INC de regresión anterior, es que la tarea de conteo de cierre del colaborador no se pueda completar (inv-movimientos 500) y el cierre quede bloqueado; no confirmado desde los datos de la cola. Sin cierre, el servidor no crea el pendiente de J2.",
+      "observado": "error: locator.click: Timeout 30000ms exceeded."
+     },
+     {
+      "titulo": "h: falta la fila de J2 en «Pendientes del turno anterior»",
+      "nivel": "medio",
+      "causa": "Consecuencia de g: t1 no se cerró y el pendiente pe_<t1>_J2 no existe. Las filas de J4 y J5 sí salen exactas.",
+      "observado": "NO: pe_sh-m-1792022882868_gr_mv8pgux1yrx1k: «» · selectores 0 · botón 0"
+     },
+     {
+      "titulo": "i: la sección a 390 px muestra 2 de las 3 filas esperadas",
+      "nivel": "bajo",
+      "causa": "Consecuencia de g (no hay pendiente de J2). El diseño a 390 px de lo que sí aparece es correcto.",
+      "observado": "Captura i-pendientes: solo tarjetas de zz-verif-J4 y zz-verif-J5; falta zz-verif-J2."
+     },
+     {
+      "titulo": "j: no se pudo marcar Hecho el pendiente de J2",
+      "nivel": "medio",
+      "causa": "Consecuencia de g: no existe la fila de J2 sobre la que actuar, por eso el locator no aparece.",
+      "observado": "error: locator.evaluate: Timeout 30000ms exceeded."
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Resultado de la cola: rojo (fallan c, g, h, i, j y la regresión REQ-INV2-7-1-hk-turno.spec.js d). El servidor sí crea los pendientes al cerrar (c, con J4/J5 correctos) y el titular cierra «Llevar a…» y «Lavar» (k, l) y la bandeja de Inventario funciona (d, e). Lo bloqueante es la regresión del conteo (inv-movimientos 500), que probablemente explica g y en cadena h, i y j: arreglarla y volver a correr. i se juzgó sobre su captura aunque pruebas.json la deja fuera de n3Preparados; la captura b-medida no corresponde a un criterio N3 y no se juzgó. Criterio 8 no se juzga (lo dice la instrucción). Sin criterios N4. horaBogota = fin de la corrida (00:13Z); el juez no tiene reloj."
+   }
   }
  ],
  "esquema": {
@@ -10423,15 +10585,15 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c88",
-   "estado": "construido",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": "reprueba (reprobar\\L-103.txt)",
+   "esperaA": "CLI",
+   "espera": "reversión L-108; luego fix de INC-128",
    "orden": 121.11,
-   "desde": "2026-10-14 19:06",
+   "desde": "2026-10-14 19:17",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 11/14 → corregida. Pendientes creados por el servidor (M-395/M-397). · ok de Diseño 18:22 (M-403) con 2 ajustes aplicados (s11 para pendientes huérfanos; admin cierra sin movimientoId, confirmado en index.php ~806). Guardia v5.2 cruzada con Carlos 18:22 y encendida (pw 0.5.18, M-404). Encolado 18:24. · CLI terminó OK; puerta de pruebas bloqueada (sin gastar verificación): faltan zz-verif-Secando/Lista con nombre exacto (la app los tenía en minúscula) y zz-verif-Tendedero no sirve a zz-verif-Propiedad. s8 renombra y s12 crea/corrige la zona. · Semilla 12/12 a las 19:05 (s8 renombró Secando/Lista; s12 Tendedero). Reprueba puesta 19:06."
+   "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 11/14 → corregida. Pendientes creados por el servidor (M-395/M-397). · ok de Diseño 18:22 (M-403) con 2 ajustes aplicados (s11 para pendientes huérfanos; admin cierra sin movimientoId, confirmado en index.php ~806). Guardia v5.2 cruzada con Carlos 18:22 y encendida (pw 0.5.18, M-404). Encolado 18:24. · CLI terminó OK; puerta de pruebas bloqueada (sin gastar verificación): faltan zz-verif-Secando/Lista con nombre exacto (la app los tenía en minúscula) y zz-verif-Tendedero no sirve a zz-verif-Propiedad. s8 renombra y s12 crea/corrige la zona. · Semilla 12/12 a las 19:05 (s8 renombró Secando/Lista; s12 Tendedero). Reprueba puesta 19:06. · Juez 19:13: no aceptado. Regresión crítica: PUT de inv-movimientos 500 en los conteos del colaborador (hk-turno d); g/h/i/j en cadena. Crea bien los pendientes (c, d, e, k, l verdes). Reversión L-108 encolada 19:17."
   },
   {
    "lote": "L-105",
@@ -10480,6 +10642,22 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Borrador listo; la ficha decía «Normal», pero cambia lo que lee el colaborador (crítico, como lote 66). Cabecera sin DA a propósito hasta el cruce."
+  },
+  {
+   "lote": "L-108",
+   "req": "INC-128 (reversión de L-103)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "git revert 387625f + p5c89",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "CLI",
+   "espera": null,
+   "orden": 121.115,
+   "desde": "2026-10-14 19:17",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88."
   }
  ],
  "riesgos": [

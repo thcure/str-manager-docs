@@ -213,6 +213,16 @@ async function abrir(usuario, opciones = {}) {
   ctx.on('response', async (resp) => {
     try {
       const u = new URL(resp.url());
+      // v0.5.22 (INC-128): estado y duración de cada escritura, para ver cuántas van a la vez y cuál falla.
+      // v0.5.26: va ANTES de cualquier await: si el caso cierra mientras se lee el cuerpo, el estado ya quedó anotado.
+      if ([HOST_STR, HOST_MODELO].includes(u.hostname) && !LECTURA.includes(resp.request().method())) {
+        const mE0 = resp.request().method(), uE = resp.url().split('?')[0].slice(0, 200);
+        // v0.5.23 (M-427): cada respuesta va a SU petición (WeakMap); antes se le daba a la última sin estado y, con dos en
+        // vuelo, la primera respuesta quedaba en la segunda petición («→ 200 en 1ms») y la segunda en la primera.
+        let b = porPeticion.get(resp.request()) || null;
+        if (!b) for (let i = bitacora.length - 1; i >= 0; i--) { const x = bitacora[i]; if (x.paso === true && x.status == null && x.metodo === mE0 && x.url === uE) { b = x; break; } }
+        if (b && b.status == null) { b.status = resp.status(); if (b.ms == null) b.ms = Date.now() - (b.t || Date.now()); }
+      }
       if (u.hostname === HOST_STR && /^\/api\/col(\/|$)/.test(u.pathname) && resp.ok()) {
         const m = resp.request().method();
         if (m === 'GET' || (GUARDIA.v51 && m === 'PUT')) {
@@ -224,15 +234,6 @@ async function abrir(usuario, opciones = {}) {
       // v0.5.21 (INC-128): una escritura al STR o al modelo que responde 5xx deja en la bitácora el inicio del cuerpo
       // (el mensaje de error del servidor); el hosting no guarda error_log al alcance. Solo corridas zz-verif-.
       const mE = resp.request().method();
-      // v0.5.22 (INC-128): estado y duración de cada escritura, para ver cuántas van a la vez y cuál falla
-      if ([HOST_STR, HOST_MODELO].includes(u.hostname) && !LECTURA.includes(mE)) {
-        const uE = resp.url().split('?')[0].slice(0, 200);
-        // v0.5.23 (M-427): cada respuesta va a SU petición (WeakMap); antes se le daba a la última sin estado y, con dos en
-        // vuelo, la primera respuesta quedaba en la segunda petición («→ 200 en 1ms») y la segunda en la primera.
-        let b = porPeticion.get(resp.request()) || null;
-        if (!b) for (let i = bitacora.length - 1; i >= 0; i--) { const x = bitacora[i]; if (x.paso === true && x.status == null && x.metodo === mE && x.url === uE) { b = x; break; } }
-        if (b && b.status == null) { b.status = resp.status(); b.ms = Date.now() - (b.t || Date.now()); }
-      }
       if ([HOST_STR, HOST_MODELO].includes(u.hostname) && resp.status() >= 500 && !LECTURA.includes(mE)) {
         let t = ''; try { t = (await resp.text()).replace(/\s+/g, ' ').slice(0, 400); } catch (e) { }
         bitacora.push({ metodo: mE, url: resp.url().split('?')[0].slice(0, 200), paso: true, status: resp.status(), resp: true, motivo: 'respuesta ' + resp.status() + ': ' + (t || '(sin cuerpo)') });

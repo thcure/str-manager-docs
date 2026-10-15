@@ -2,7 +2,7 @@
 'use strict';
 const { extraerGuion, igual, loteDe, cerrarCaso } = require('./guion');
 const { nombresZz, evaluar, evaluarRelacion, alcanceRelacion, registros } = require('./semilla');
-const { versionNueva } = require('./probar-lote');
+const { versionNueva, zonasRegresion } = require('./probar-lote');
 const { argsCamara, explicarError } = require('./comun');
 let ok = 0, fail = 0;
 const t = (n, c) => { if (c) { ok++; console.log('OK   ' + n); } else { fail++; console.log('FAIL ' + n); } };
@@ -138,6 +138,22 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
     { metodo: 'PUT', url: 'https://app.x/api/col/inv-movimientos', paso: true, status: 500, resp: true, motivo: 'respuesta 500: x' },
     { metodo: 'POST', url: 'https://identitytoolkit.googleapis.com/v1/accounts:lookup', paso: true, motivo: 'g', t: 1030, status: 200 }]);
   t('cronología: +ms, estado y duración', Array.isArray(r.cronologia) && r.cronologia.length === 2 && r.cronologia[0] === '+0ms PUT /api/col/turnos → 200 en 180ms' && r.cronologia[1] === '+20ms PUT /api/col/inv-movimientos → 500 en 90ms');
+  // v0.5.27 (M-463): zonas de la regresion
+  const cabA = '# instr — x\nCategoría: normal\nAlcance: `api/drive.php`, `str-app-shell.html` (subida)\nImpacto: y\n';
+  let z = zonasRegresion(cabA, null, ['inventario', 'sesiones']);
+  t('regresión: sin guion pero toca api/ y shell → inventario', z.zonas.join(',') === 'inventario' && /capa comun/.test(z.motivo));
+  z = zonasRegresion('# instr\nAlcance: `tests/e2e/REQ-INV2-3-4.spec.js` (foco)\n', 'pruebas', ['inventario']);
+  t('regresión: zona del guion sola cuando el Alcance no toca servidor', z.zonas.join(',') === 'pruebas');
+  z = zonasRegresion('# instr\nAlcance: `str-api.js` ×1\n', 'inventario', ['inventario']);
+  t('regresión: guion de inventario + str-api.js → inventario una sola vez', z.zonas.join(',') === 'inventario');
+  z = zonasRegresion('# instr\nRegresión: inventario, sesiones\nAlcance: `docs/x.md`\n', null, ['inventario', 'sesiones', 'drive']);
+  t('regresión declarada: lista', z.zonas.join(',') === 'inventario,sesiones' && /declara/.test(z.motivo));
+  z = zonasRegresion('# instr\nRegresion: todas\n', 'drive', ['inventario', 'drive']);
+  t('regresión declarada: todas', z.zonas.join(',') === 'inventario,drive');
+  z = zonasRegresion('# instr\nRegresión: ninguna (solo documentación)\nAlcance: `api/x.php`\n', 'inventario', ['inventario']);
+  t('regresión declarada: ninguna manda sobre lo inferido', z.zonas.length === 0 && /ninguna/.test(z.motivo));
+  z = zonasRegresion('# instr\nAlcance: `docs/claude/x.md`\n', null, ['inventario']);
+  t('regresión: sin guion ni servidor → ninguna, con motivo', z.zonas.length === 0 && /puede declarar/.test(z.motivo));
   // v0.5.24 (M-431): escrituras en serie o a la vez, con tolerancia de 5 ms entre relojes
   const { maxEnVuelo } = require('./guion.js');
   const T = 1000;

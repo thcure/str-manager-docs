@@ -28,6 +28,36 @@ function guionesDeZona(dirE2e, zona, excluir) {
     .filter(f => { try { return cargar(f).zona === zona; } catch (e) { return false; } });
 }
 
+// Puro (v0.5.27, M-463): zonas cuya regresion corre el lote, y por que.
+//  1. Si la cabecera trae «Regresión: a, b» (o «Regresion:»), esas; «Regresión: todas» = todas las zonas de tests/e2e;
+//     «Regresión: ninguna» = ninguna (lo declara Desarrollo y lo ve el juez).
+//  2. Si no, la zona del guion del lote y, ademas, «inventario» cuando el Alcance toca servidor o capa comun
+//     (api/, database.php, str-api.js, str-app-shell, portal.html, str-cola-subida, secrets): es la regresion mas completa.
+//  3. Sin guion y sin nada de eso: ninguna, con el motivo escrito en el informe.
+const TOCA_COMUN = /(^|[\s`(,])(api\/|database\.php|str-api\.js|str-app-shell|portal\.html|str-cola-subida|secrets\.php|\.htaccess)/i;
+function zonasRegresion(texto, zonaGuion, zonasDisponibles = []) {
+  const cab = String(texto).replace(/\r\n/g, '\n').split('\n').slice(0, 20).join('\n');
+  const dec = cab.match(/^Regresi[oó]n:\s*(.+)$/mi);
+  if (dec) {
+    const v = dec[1].trim();
+    if (/^ninguna\b/i.test(v)) return { zonas: [], motivo: 'la instruccion declara «Regresión: ninguna»' };
+    if (/^todas\b/i.test(v)) return { zonas: [...zonasDisponibles], motivo: 'la instruccion declara «Regresión: todas»' };
+    const zs = v.split(/[,;]| y /).map(x => x.trim().replace(/^zonas?\s+/i, '').replace(/[.`]+$/, '')).filter(Boolean);
+    return { zonas: [...new Set(zs)], motivo: 'la instruccion declara «Regresión: ' + v + '»' };
+  }
+  const zonas = []; const por = [];
+  if (zonaGuion) { zonas.push(zonaGuion); por.push('zona del guion del lote (' + zonaGuion + ')'); }
+  const al = (cab.match(/^Alcance:.*$/m) || [''])[0];
+  if (TOCA_COMUN.test(al) && !zonas.includes('inventario')) { zonas.push('inventario'); por.push('el Alcance toca servidor o capa comun: regresion de inventario'); }
+  return { zonas, motivo: zonas.length ? por.join(' + ') : 'sin guion y el Alcance no toca servidor ni capa comun; la instruccion puede declarar «Regresión: <zonas>»' };
+}
+function zonasDisponibles(dirE2e) {
+  if (!fs.existsSync(dirE2e)) return [];
+  const z = new Set();
+  fs.readdirSync(dirE2e).filter(f => f.endsWith('.spec.js')).forEach(f => { try { const s = cargar(path.join(dirE2e, f)); if (s && s.zona) z.add(s.zona); } catch (e) { } });
+  return [...z];
+}
+
 async function sesionViva(perfil) {
   let ctx;
   try {
@@ -102,11 +132,22 @@ async function main() {
   const perfiles = [...new Set(((spec && spec.casos) || []).map(c => c.perfil))];
   for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
 
-  // P5 guion del lote + regresion de su zona (sin Claude)
+  // P5 guion del lote + regresion (sin Claude). v0.5.27 (M-463): las zonas de la regresion salen de zonasRegresion()
+  // (declaradas en la cabecera, o la del guion + inventario si el lote toca servidor o capa comun) y corre aunque el lote
+  // no traiga guion propio.
+  const dirE2e = rutaSpec ? path.dirname(rutaSpec) : path.join(repo, 'tests', 'e2e');
+  const zr = zonasRegresion(texto, spec ? spec.zona : null, zonasDisponibles(dirE2e));
+  out.zonasRegresion = { zonas: zr.zonas, motivo: zr.motivo };
+  console.log('regresion: zonas ' + (zr.zonas.length ? zr.zonas.join(', ') : '(ninguna)') + ' · ' + zr.motivo);
   if (spec) {
     const r = await correrGuion(spec, { lote, dirGuion: path.dirname(rutaSpec) }); out.n2 = r.casos; out.limpieza = r.limpieza;
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.nivel + ' ' + x.c + ' · ' + x.observado));
-    for (const f of guionesDeZona(path.dirname(rutaSpec), spec.zona, path.basename(rutaSpec))) {
+  }
+  {
+    const vistos = new Set();
+    const lista = [];
+    for (const z of zr.zonas) for (const f of guionesDeZona(dirE2e, z, rutaSpec ? path.basename(rutaSpec) : null)) { if (!vistos.has(f)) { vistos.add(f); lista.push(f); } }
+    for (const f of lista) {
       try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrGuion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') });   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza }); /* v0.5.12 (M-390) */ }
       catch (e) { out.regresion.push({ guion: path.basename(f), ok: false, observado: e.message }); }
     }
@@ -118,5 +159,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { versionNueva, guionesDeZona };
+module.exports = { versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

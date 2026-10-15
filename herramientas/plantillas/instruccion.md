@@ -7,6 +7,7 @@ Reglas de uso: el borrador va **sin número** (el número se asigna al encolar);
 Categoría: **<estándar | normal | crítico>** (<por qué; para crítico: DA-n y «cruce previo con Carlos: fecha hora, dónde»>)
 Alcance: <archivos y rutas exactos> · `?v=<actual>` → `<nuevo>` en <dónde> · `schema_version` <igual | n → m> · <sin cambios de base de datos | migración: …>
 Impacto: <qué cambia para el usuario; qué INC/DT cierra>
+Regresión: <opcional (pw 0.5.27, M-463): zonas de `tests/e2e` que corre la cola además del guion, p. ej. `inventario, sesiones`; `todas`; o `ninguna` con el porqué. Sin esta línea: la zona del guion y, si el Alcance toca `api/`, `database.php`, `str-api.js`, `str-app-shell`, `portal.html`, `str-cola-subida` o `secrets.php`, también `inventario`>
 Riesgo: <bajo | medio | alto> (<R-n>). Mitigación: <una frase>.
 ¿Datos personales o dinero?: <no | sí: …> · ¿Normativa?: <no | sí: …> · ¿Toca el modelo (capa Marco)?: <no | sí> (sí = la CLI no lo ejecuta y termina sin commit; un lote del modelo LM-n que solo toque archivos de str-manager lleva «no (lote del modelo LM-n, DA-n y cruce de Carlos)»)
 Reversión: <git revert <hash> + despliegue | script | …>

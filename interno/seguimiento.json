@@ -9322,7 +9322,7 @@
    "categoria": "normal",
    "resumen": "Subidas en serie por colección; sin doble PUT de turnos en HK; reintentos de conexión con espera aleatoria; p5c90.",
    "estado": "no aceptado",
-   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433)",
+   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433) · 22:52 quinta corrida: d verde (turnos en serie, conteos después, enVuelo 1); solo rojos REQ-INV2-4-1-interfaz b y c por la zona de prueba zz-verif-L-111-r-ficha duplicada (limpieza de la corrida 4 falló sin sesión); se pide limpiarla y reprobar (M-437)",
    "hash": "98504bb",
    "aceptacion": {
     "lote": "L-111",
@@ -9575,6 +9575,63 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Las capturas de log\\capturas\\L-111 solo se nombran por letra+nombre (a-error.png, b-error.png, ...) y se pisan entre guiones distintos que comparten letra de caso (p.ej. REQ-INV2-3-4.spec.js a, REQ-INV2-7-1-hk-turno.spec.js a y REQ-INV2-7-1.spec.js a escriben todas en 'a-error.png'); no se usaron para este veredicto porque el único criterio N3 del lote (e) viene marcado 'sin captura' en la instrucción y n3Preparados está vacío. Hallazgo adicional fuera de los criterios formales: varias regresiones que pasan (REQ-INV2-4-1-interfaz.spec.js e, REQ-INV2-4-1.spec.js g, REQ-INV2-7-1.spec.js j, REQ-INV2-3-4.spec.js j) muestran str-inventario.html todavía servido con 'str-api.js?v=p5c84', no p5c90; el Alcance de L-111 pide el bump p5c89→p5c90 en 12 sitios, uno de ellos str-inventario.html. Ningún criterio de este lote lo exige en ≥p5c90 directamente, pero es evidencia de que ese sitio no quedó desplegado con la versión nueva."
+   },
+   "aceptacion5": {
+    "lote": "L-111",
+    "hash": "98504bb",
+    "fecha": "2026-10-14",
+    "horaBogota": "22:52",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1: node tests/run.js: 64/64 archivos OK (incluye tests/col-cola-subida.test.js)"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1: node tests/run.js: 64/64 archivos OK (incluye tests/db-reintento.test.js con PHP real)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 · db true | si: iframe de HK cargado: sí | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c90 (versión ≥ p5c90: el guion corre como regresión en lotes siguientes) | si: str-api.js en HK: p5c90 · STRApi.col.enVuelo: function"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: verde — PUT /api/col/turnos en serie (+0ms 153ms, +154ms 410ms, el segundo empieza después de terminar el primero), PUT /api/col/inv-movimientos a +568ms (después de terminar el último turno), todos 200, 'escrituras en serie (máx. 1 en vuelo)', enVuelo 1. Pero la regresión completa no queda toda en verde: REQ-INV2-4-1-interfaz.spec.js b y c en rojo (ver incs)."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "e",
+      "motivo": "no aplica: la precondición exige que REQ-INV2-7-1-hk-turno.spec.js d esté en rojo solo por «turnos 500» con «tarea marcada: sí»; d salió verde, así que la excepción no se activa."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Zona de prueba 'ficha' duplicada: el selector de acceso encuentra 2 elementos y bloquea la revocación desde la ficha",
+      "nivel": "medio",
+      "causa": "quedan dos elementos de zona con el mismo nombre zz-verif-L-111-r-ficha en la lista (la limpieza de una corrida anterior del mismo guion falló por el mismo motivo, según limpiezaRegresion: 'borrar a mano lo que empiece por zz-verif-L-111-r-'), así que el locator de data-inv-acceso-zona filtrado por ese nombre ya no es único y Playwright corta en strict mode.",
+      "observado": "error: locator.uncheck: Error: strict mode violation: locator('[data-inv-zona]').filter({ hasText: 'zz-verif-L-111-r-ficha' }).locator('[data-inv-acceso-zona]') resolved to 2 elements (REQ-INV2-4-1-interfaz.spec.js, caso b); PUTs previos a inv-depositos salieron en serie (máx. 1 en vuelo), así que la cola de subidas no es la causa."
+     },
+     {
+      "titulo": "El colaborador recibe una zona que debía quedar revocada (zz-verif-L-111-r-ficha)",
+      "nivel": "crítico",
+      "causa": "acceso indebido: una de las dos copias de la zona 'ficha' (ver inc anterior) no quedó revocada y por eso STRApi.col.pull la entrega al colaborador pese a que el guion la había revocado desde la ficha.",
+      "observado": "si: zonas recibidas por el colaborador: 5 | si: llega «base»: sí | NO: zonas que no debían llegar: zz-verif-L-111-r-ficha (REQ-INV2-4-1-interfaz.spec.js, caso c)"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "a y b (N1) y c (N2) del propio INC-128 salen verdes: la cola por colección y el reintento con esperas al azar quedan cubiertos, y el despliegue p5c90 llegó a HK. El criterio d falla no por la cola en sí —la cronología de REQ-INV2-7-1-hk-turno.spec.js d es correcta y serializada— sino porque la regresión completa no está toda en verde: dos casos de REQ-INV2-4-1-interfaz.spec.js (zonas) quedan en rojo por una zona de prueba 'ficha' duplicada entre corridas (arrastre de limpieza fallida), ajena al alcance de este lote (str-api.js/HK/database.php) pero igual cuenta como regresión del lote según la regla del juez. e no aplica porque d salió verde. No se detectó causa de arnés/entorno de las listadas en M-435 (guardia de login, sin sesión, ERR_CONNECTION_CLOSED, error de pw), así que no se agrega el campo herramienta."
    }
   }
  ],
@@ -11246,10 +11303,10 @@
    "resumen": "str-api: una subida en vuelo por colección (serie); HK: sin doble PUT de turnos al marcar el conteo; servidor: reintentos con espera aleatoria (80–250, 160–500 ms) y log con el mensaje del sistema; p5c90",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "quinta corrida con pw 0.5.25 (login permitido; humo verde)",
+   "esperaA": "Arquitecto",
+   "espera": "borrar zonas zz-verif-L-111-r-* duplicadas y reprueba (M-437)",
    "orden": 121.118,
-   "desde": "2026-10-14 22:47",
+   "desde": "2026-10-14 22:56",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23. · Tercera corrida (pw 0.5.23, 22:07): cola VERDE; PUT turnos en serie (+0→+160, +160→+325) y movimientos a +324: el juez marca d por 1 ms (orden de eventos del navegador, como explicó el Arquitecto en M-427)."

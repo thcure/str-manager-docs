@@ -63,6 +63,20 @@ test('cobertura: solo cuenta lo declarado en cubre; módulos por anclaje', () =>
   assert.deepStrictEqual(c.modulos.HK, ['REQ-K3b.spec.js', 'INC-130.spec.js']);
 });
 
+test('ruta: un lote de solo guiones corre su guion y el humo, sin huecos (M-522)', () => {
+  const gs = guiones.concat([{ archivo: 'herramientas/pw/humo-pw.spec.js', req: null, zona: 'sesiones', modulos: ['SH'], casos: [] }]);
+  const r = ruta(mapa, gs, { archivos: ['tests/e2e/INC-130.spec.js', 'tests/e2e/REQ-K3b.spec.js'], mapaLinea: 'ninguna', req: 'INC-130' });
+  assert.strictEqual(r.soloGuiones, true);
+  assert.deepStrictEqual(r.guionesCorren.map((g) => g.archivo), ['INC-130.spec.js', 'herramientas/pw/humo-pw.spec.js']);
+  assert.deepStrictEqual(r.huecos, { relaciones: [], reglas: [] });
+});
+
+test('ruta: equivalencia de REQ (REQ-K3-2 ↔ REQ-K3b) hace propio al guion del lote', () => {
+  const m2 = { ...mapa, anclajeGuiones: { ...mapa.anclajeGuiones, reqEquivale: { 'REQ-K3b': 'REQ-K3-2' } } };
+  const r = ruta(m2, guiones, { archivos: [], mapaLinea: 'K3', req: 'REQ-K3-2', regresionLinea: 'ninguna' });
+  assert.deepStrictEqual(r.guionesCorren.map((g) => g.archivo), ['REQ-K3b.spec.js']);
+});
+
 test('leerCabecera: el Alcance se corta en «no toques» y no cuenta los tramos de versión (M-521)', () => {
   const l = leerCabecera('# instr — INC-133: cola de subida\nAlcance: `str-cola-subida.js` · `tests/e2e/INC-132.spec.js` · `str-m1-housekeeping.html` (solo `?v=`) · `?v=p5c95` → `p5c96` en 18 HTML y `str-api.js` (STR_API_VERSION) · `schema_version` igual; no toques `api/` ni `modelo/` ni `str-api.js`\nMapa: módulos y relaciones que cambia: HK');
   assert.deepStrictEqual(l.archivos, ['str-cola-subida.js', 'tests/e2e/INC-132.spec.js']);

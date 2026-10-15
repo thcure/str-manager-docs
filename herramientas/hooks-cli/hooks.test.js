@@ -14,6 +14,7 @@ t('commit fuera de alcance bloqueado', () => { const r = g.evaluar('git commit -
 t('commit fuera de alcance declarado pasa', () => assert.equal(g.evaluar('git commit -m "x\n\nFuera de alcance: str-calendario.html - comparte la función de fechas"', ['str-calendario.html', 'CLAUDE.md'], alcance, true).ok, true));
 t('carpeta api/usuarios/ cubre sus archivos', () => assert.equal(g.evaluar('git commit -m "x"', ['api/usuarios/index.php', 'CLAUDE.md'], alcance, true).ok, true));
 t('tests rojos bloquean el commit', () => assert.equal(g.evaluar('git commit -m "x"', ['str-api.js', 'CLAUDE.md'], alcance, false).ok, false));
+t('v4: «no toques api/» no habilita api/ (LM-42)', () => { const a = g.cortarNoToques(' `str-cola-subida.js` · `?v=p5c95` → `p5c96`; no toques `api/` ni `modelo/`'); assert.equal(g.evaluar('git commit -m "x"', ['api/index.php', 'CLAUDE.md'], a, true).ok, false); assert.equal(g.evaluar('git commit -m "x"', ['str-cola-subida.js', 'CLAUDE.md'], a, true).ok, true); });
 t('sin alcance (fuera de la cola) no bloquea por archivos', () => assert.equal(g.evaluar('git commit -m "x"', ['loquesea.html', 'CLAUDE.md'], null, true).ok, true));
 t('stop: tests rojos bloquea', () => assert.equal(s.evaluar(false, { sucio: [], testsOk: false, detalle: '' }).ok, false));
 t('stop: cambios sin commit bloquea', () => assert.equal(s.evaluar(false, { sucio: [' M str-api.js'], testsOk: true }).ok, false));

@@ -70,12 +70,21 @@ function nodosDelCaso(g, c) {
 }
 
 function ruta(mapa, guiones, lote) {
-  const porQue = modulosDelLote(mapa, lote);
+  let porQue = modulosDelLote(mapa, lote);
+  // Lote de solo guiones o herramientas (tests/, herramientas/, docs/): no toca el producto → su guion (si trae) + humo; sin huecos (M-522).
+  // Cuenta como tal si todos sus archivos son de esas carpetas y ningún módulo viene de la línea «Mapa:» (el REQ no lo convierte en lote de producto).
+  const archivos = (lote.archivos || []).map((a) => String(a).replace(/\\/g, '/'));
+  const soloGuiones = archivos.length > 0 && archivos.every((a) => /^(tests\/|herramientas\/|docs\/|\.claude\/|CLAUDE\.md$)/.test(a)) && !Object.values(porQue).some((ms) => ms.some((x) => /Mapa:/.test(x)));
+  if (soloGuiones) porQue = {};
   const modulos = Object.keys(porQue).sort();
+  // Equivalencias de REQ (anclajeGuiones.reqEquivale: REQ-K3b ↔ REQ-K3-2, R-3 ↔ REQ-MOD-6) para que el guion del lote y `cubre` casen
+  const equiv = (mapa.anclajeGuiones && mapa.anclajeGuiones.reqEquivale) || {};
+  const reqsLote = new Set((lote.req || '').split(/[\s,;·]+/).filter(Boolean));
+  for (const r of [...reqsLote]) { if (equiv[r]) reqsLote.add(equiv[r]); for (const [k, v] of Object.entries(equiv)) if (v === r) reqsLote.add(k); }
   const relaciones = relacionesDeRuta(mapa, modulos, lote.mapaLinea);
   const reglas = reglasDeRuta(mapa, modulos);
   const nodos = new Set([...modulos, ...relaciones.map((r) => r.id), ...reglas.map((r) => r.id)]);
-  for (const r of (lote.req || '').split(/[\s,;·]+/).filter(Boolean)) nodos.add(r);
+  for (const r of reqsLote) nodos.add(r);
   const reg = normaliza(lote.regresionLinea).toLowerCase();
   const guionesCorren = [], casosCorren = [], noCorren = [];
   const cubierto = { relaciones: {}, reglas: {} };
@@ -85,10 +94,11 @@ function ruta(mapa, guiones, lote) {
     for (const c of casos) {
       const n = nodosDelCaso(g, c);
       const hit = [...n].filter((x) => nodos.has(x));
-      const esPropio = g.req && lote.req && String(lote.req).includes(g.req);
-      if (reg === 'ninguna' && !esPropio) continue;
-      if (reg === 'todas' || esPropio || hit.length) {
-        corren.push({ c: c.c, por: esPropio ? ['guion del lote'] : (reg === 'todas' ? ['Regresión: todas'] : hit) });
+      const esPropio = g.req && reqsLote.has(g.req);
+      const esHumo = /humo-pw/.test(g.archivo);
+      if ((reg === 'ninguna' || soloGuiones) && !esPropio && !esHumo) continue;
+      if (reg === 'todas' || esPropio || esHumo || hit.length) {
+        corren.push({ c: c.c, por: esPropio ? ['guion del lote'] : (reg === 'todas' ? ['Regresión: todas'] : (hit.length ? hit : ['humo'])) });
         for (const x of hit) {
           if (/^REL-/.test(x)) (cubierto.relaciones[x] = cubierto.relaciones[x] || []).push(g.archivo + ' ' + (c.c || ''));
           if (/^RT-/.test(x)) (cubierto.reglas[x] = cubierto.reglas[x] || []).push(g.archivo + ' ' + (c.c || ''));
@@ -109,8 +119,9 @@ function ruta(mapa, guiones, lote) {
   };
   const aDeclarar = relNoGen.filter((r) => !cubierto.relaciones[r.id] && pasaPorModulos(r)).map((r) => r.id);
   const reglasFabrica = reglas.filter((r) => r.prueba === 'proceso').map((r) => r.id);
-  return { modulos, porQue, relaciones, reglas, guionesCorren, casosCorren, noCorren, huecos, aDeclarar, reglasFabrica,
-    resumen: `${modulos.length} módulos · ${relaciones.length} relaciones · ${reglas.length} reglas · corren ${guionesCorren.length} guiones (${casosCorren.length} casos) · no corren ${noCorren.length} · huecos: ${huecos.relaciones.length} relaciones, ${huecos.reglas.length} reglas` };
+  if (soloGuiones) { huecos.relaciones = []; huecos.reglas = []; }
+  return { modulos, porQue, relaciones, reglas, guionesCorren, casosCorren, noCorren, huecos, aDeclarar, reglasFabrica, soloGuiones,
+    resumen: soloGuiones ? `lote de solo guiones o herramientas (no toca el producto): corre su guion y el humo; sin ruta ni huecos` : `${modulos.length} módulos · ${relaciones.length} relaciones · ${reglas.length} reglas · corren ${guionesCorren.length} guiones (${casosCorren.length} casos) · no corren ${noCorren.length} · huecos: ${huecos.relaciones.length} relaciones, ${huecos.reglas.length} reglas` };
 }
 
 // Cobertura global por nodo (para el mapa): solo lo declarado con `cubre`; por módulo cuenta también el anclaje del guion.
@@ -154,6 +165,7 @@ function leerCabecera(texto) {
 function markdown(r) {
   const L = [];
   L.push(`## Ruta de pruebas (mapa.py --ruta) · ${r.resumen}`);
+  if (r.soloGuiones) { L.push(`- Lote de solo guiones o herramientas: corren ${r.guionesCorren.map((g) => g.archivo.replace('.spec.js', '')).join(', ') || 'solo el humo'}; nada más.`); return L.join('\n'); }
   L.push(`- Módulos: ${r.modulos.map((m) => `**${m}** (${[...new Set(r.porQue[m])].join('; ')})`).join(' · ') || 'ninguno: revisa Alcance y «Mapa:»'}`);
   L.push(`- Relaciones por las que pasa: ${r.relaciones.map((x) => `${x.id} ${x.origen}→${x.destino}`).join(', ') || '—'}`);
   L.push(`- Reglas que cruza: ${r.reglas.filter((x) => x.prueba !== 'proceso').map((x) => x.id).join(', ') || '—'} (de proceso, las garantiza la fábrica: ${r.reglasFabrica.join(', ') || '—'})`);

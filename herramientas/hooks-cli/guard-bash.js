@@ -1,4 +1,4 @@
-// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; v3 M-467 15-oct-2026; lo mantiene el Arquitecto, lo instala Carlos).
+// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; v3 M-467 15-oct-2026; v4 LM-42: el Alcance se corta en «no toques»; lo mantiene el Arquitecto, lo instala Carlos).
 // Bloquea (exit 2 + motivo en stderr) tres cosas, de forma determinista:
 //  1. Comandos destructivos de git (reset --hard, push --force, checkout -- <archivo>, clean -f, branch -D).
 //  2. `git commit` con archivos fuera del Alcance de la instrucción del lote (env STR_INSTR), salvo que el mensaje
@@ -18,7 +18,13 @@ function leerAlcance(rutaInstr) {
   const lineas = fs.readFileSync(rutaInstr, 'utf8').split(/\r?\n/).slice(0, 15);
   const l = lineas.find(x => /^alcance\s*:/i.test(x));
   if (!l) return null;
-  return l.replace(/^alcance\s*:/i, '');
+  return cortarNoToques(l.replace(/^alcance\s*:/i, ''));
+}
+
+// v4 (LM-42, M-522): lo que va después de «no toques / no tocar / sin tocar / no cambies» en la línea de Alcance NO habilita
+// archivos para el commit (igual que ruta.js de str-manager-docs): «… ; no toques api/ ni modelo/» dejaba abiertas esas carpetas.
+function cortarNoToques(texto) {
+  return String(texto || '').split(/\b(?:no toques|no tocar|sin tocar|no cambies)\b/i)[0];
 }
 
 // Convierte el texto de Alcance en patrones: archivos exactos y carpetas (terminadas en /).
@@ -113,4 +119,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { evaluar, patronesAlcance, leerAlcance, cubierto, restaurarPermitido };
+module.exports = { cortarNoToques, evaluar, patronesAlcance, leerAlcance, cubierto, restaurarPermitido };

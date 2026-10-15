@@ -687,7 +687,7 @@
    "severidad": "crítico",
    "titulo": "PUT de turnos e inv-movimientos del colaborador al marcar el conteo: 500 «Base de datos no disponible» (MySQL 2002)",
    "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea. Con pw 0.5.21 (20:59): el cuerpo es {\"error\":\"Base de datos no disponible\",\"detalle\":2002}: el PHP no logra conectar a MySQL en esas dos peticiones (las demás de la corrida sí). Sospecha: ráfaga de peticiones simultáneas de HK al marcar la tarea, que supera el límite de conexiones o procesos del hosting compartido. Arquitecto (M-419, 21:08): no es tope de MySQL (max_user_connections 75, contadores en 0); la capa de conexión local del hosting (127.0.0.1) rechaza conexiones de forma intermitente con varias escrituras seguidas (también 2 de 5 PUT de fotos). Sí puede tocar a colaboradores reales. M-423: 74 líneas «db connect · intento n falló · 2002» en 21:12–21:18, siempre en pares: fallan las conexiones que se abren a la vez desde el mismo cliente; en serie pasan; reintentos de espera fija vuelven a coincidir. HK manda dos PUT del mismo turno en 1 ms al marcar la tarea (bug aparte).",
-   "pendiente": "L-110 (reintento en database.php). Siguiente: L-111 = cliente (str-api/HK) trata «Base de datos no disponible» como reintentable y serializa las subidas del conteo y de fotos; log con el mensaje completo de la PDOException (errno 111/110/99) para el ticket a Hostinger.",
+   "pendiente": "L-110 (reintento en database.php). Siguiente: L-111 = cliente (str-api/HK) trata «Base de datos no disponible» como reintentable y serializa las subidas del conteo y de fotos; log con el mensaje completo de la PDOException (errno 111/110/99) para el ticket a Hostinger. Ticket a Hostinger abierto 21:28 (M-425, agente humano desde 21:42). Cola local del perfil colab limpia (pw limpiar-cola-colab.spec.js).",
    "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión)."
   },
@@ -837,6 +837,12 @@
    "origen": "INC-128, M-417",
    "lote": "L-109",
    "nota": "En la instrucción de L-109 figura como «DT-36» por error de numeración (DT-36 ya era otra deuda)."
+  },
+  {
+   "id": "DT-39",
+   "titulo": "Database::connect() corre Migrate::run en cada proceso PHP nuevo (consultas de esquema tras abrir); correrla solo si schema_version cambia o con GET_LOCK corto",
+   "estado": "abierta",
+   "origen": "INC-128, M-423/M-425 (sospecha secundaria)"
   }
  ],
  "cambios": [

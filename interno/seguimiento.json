@@ -718,6 +718,19 @@
    "estado": "cerrado",
    "origen": "Veredicto 6 de L-111 (23:06), REQ-INV2-7-1-hk-turno d + captura.",
    "cierre": "14-oct 23:49: L-113 (a2896e2) aceptado 23:28."
+  },
+  {
+   "id": "INC-131",
+   "tipo": "INC",
+   "modulo": "HK · portal del colaborador",
+   "etapa": "🔍",
+   "fecha": "2026-10-15",
+   "severidad": "alto",
+   "titulo": "En el portal, los diálogos de HK (Cerrar limpieza con nota, fotos pendientes, préstamos, omitir, guías, aviso de pendientes) quedan detrás del panel del turno",
+   "causa": "body.modo-colab .detail-panel.open usa z-index 999; los diálogos se agregan al body con 500/600 y el menú de la cola con 700. El colaborador toca «Cerrar limpieza» con tareas pendientes y no ve el diálogo.",
+   "pendiente": "L-115: panel a 400.",
+   "estado": "abierto",
+   "origen": "Veredicto 2 de L-103 (23:58), caso g + g-error.png/txt; igual en el veredicto 1 (19:13)."
   }
  ],
  "dts": [
@@ -8929,8 +8942,8 @@
    "categoria": "crítico",
    "resumen": "El servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c88.",
    "estado": "no aceptado",
-   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; M-375, M-383, M-395, M-397; revisión previa 11/14 corregida; ok de Diseño 18:22 (M-403). Encolado 18:24. Reprueba 19:08–19:13: no aceptado (INC-128). · 23:49: reencolado en p5c92 sobre main (L-111 y L-113 aceptados; DA-33, cruce 12-oct 19:07, ok de Diseño M-403 vigente)",
-   "hash": "387625f",
+   "observacion": "DA-33 (a), cruce con Carlos 12-oct 19:07; M-375, M-383, M-395, M-397; revisión previa 11/14 corregida; ok de Diseño 18:22 (M-403). Encolado 18:24. Reprueba 19:08–19:13: no aceptado (INC-128). · 23:49: reencolado en p5c92 sobre main (L-111 y L-113 aceptados; DA-33, cruce 12-oct 19:07, ok de Diseño M-403 vigente) · 23:58 veredicto 2 no aceptado: lo central funciona (c pendientes creados, d/e bandeja, k/l HK); rojos: c por el guion (min recorta el espacio) y g/h/j porque en el portal el panel del turno (z-index 999) tapa el diálogo de «Cerrar limpieza» (INC-131) → L-115; regresiones ajenas: REQ-INV2-3-4 b (Proveedores, intermitente) y hk-turno d (un 500 por 2002 tras 3 intentos)",
+   "hash": "6fc5dff",
    "aceptacion": {
     "lote": "L-103",
     "hash": "387625f",
@@ -9078,6 +9091,161 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Resultado de la cola: rojo (fallan c, g, h, i, j y la regresión REQ-INV2-7-1-hk-turno.spec.js d). El servidor sí crea los pendientes al cerrar (c, con J4/J5 correctos) y el titular cierra «Llevar a…» y «Lavar» (k, l) y la bandeja de Inventario funciona (d, e). Lo bloqueante es la regresión del conteo (inv-movimientos 500), que probablemente explica g y en cadena h, i y j: arreglarla y volver a correr. i se juzgó sobre su captura aunque pruebas.json la deja fuera de n3Preparados; la captura b-medida no corresponde a un criterio N3 y no se juzgó. Criterio 8 no se juzga (lo dice la instrucción). Sin criterios N4. horaBogota = fin de la corrida (00:13Z); el juez no tiene reloj."
+   },
+   "aceptacion2": {
+    "lote": "L-103",
+    "hash": "6fc5dff",
+    "fecha": "2026-10-14",
+    "horaBogota": "23:58",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: str-api.js en HK: str-api.js?v=p5c92 (≥ p5c92) | si: lastpush alineado: 6 turnos | si: turno t0 sh-m-1792039933203: 200 | si: turno t1 sh-m-1792039933820: 200 | si: turno t2 sh-m-1792039934454: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: marcas Secando/Sucia/Lista: turno, operador, nada | si: juegos: zz-verif-J2 ok · zz-verif-J4 ok · zz-verif-J5 ok | si: ids de la semilla completos | si: pendientes abiertos de J2/J4/J5 antes de empezar: ninguno | si: J2 lista; J4 y J5 sucias: zz-verif-J4 → zz-verif-Sucia en zz-verif-Principal (estado) · zz-verif-J5 → zz-verif-Sucia en zz-verif-Principal (estado) → 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t0 cerrado: sí · Iniciar turno 200 · Cerrar limpieza 200 [nota] · Cerrar turno 200 [nota] | si: pendiente del cierre pe_sh-m-1792039933203_gr_mv8pgv4wijj0f: 200 {estado abierto, para operador, tarea «Decidir: lavar o lavandería externa», creadoPor 7, creadoEn 2026-10-15T04:52:23.000Z} | si: pendiente del cierre pe_sh-m-1792039933203_gr_mv8pgvcredos9: 200 (igual) | NO: aviso después del cierre: «✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J4 · zz-verif-Sucia · zz-verif-Principal · Decidir: lavar o lavandería externa (para el operador) zz-verif-J5 · zz-verif-Sucia · zz-verif-Principal · Decidir» (observado truncado por la cola)"
+     },
+     {
+      "c": "d",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura d-bandeja (390 px): pestaña Pendientes, «2 pendientes abiertos»; dos tarjetas, zz-verif-J4 y zz-verif-J5, cada una con propiedad zz-verif-Propiedad, juego, estado zz-verif-Sucia (etiqueta), sitio zz-verif-Principal, tarea «Decidir: lavar o lavandería externa», Para Operador, origen «turno del 2026-10-14 · 14 oct 23:52» y los dos botones «Lavar en el siguiente turno» y «Trasladar a lavandería externa» dentro del ancho. Texto legible, sin cortes ni desplazamiento horizontal (la cola mide scrollWidth 390 · clientWidth 390)."
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: filas de J4 y J5 con zz-verif-Sucia, zz-verif-Principal, «Decidir: lavar o lavandería externa» · botones 2 | si: zz-verif-Lavandería en #peProveedor | si: J4 → 200 {para turno, tarea llevar, proveedor pv_mv8nfuyjrofoe, «Llevar a lavandería externa: zz-verif-Lavandería»} | si: J5 → 200 {para turno, tarea lavar, «Lavar»} | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: J2 a secar en el tendedero: zz-verif-J2 → zz-verif-Secando en zz-verif-Tendedero (estado) → 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t1 de la corrida: sh-m-1792039933820 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | error: locator.click: Timeout 30000ms exceeded. | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "h",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t2 de la corrida: sh-m-1792039934454 | si: título: «Pendientes del turno anterior» | NO: pe_sh-m-1792039933820_gr_mv8pgux1yrx1k: «» · selectores 0 · botón 0 | si: pe_sh-m-1792039933203_gr_mv8pgv4wijj0f: «zz-verif-Sucia · zz-verif-Principal · Llevar a lavandería externa: zz-verif-Lavandería» · selectores 0 · botón 1 | si: pe_sh-m-1792039933203_gr_mv8pgvcredos9: «zz-verif-Sucia · zz-verif-Principal · Lavar» · selectores 2 · botón 1"
+     },
+     {
+      "c": "i",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "Captura i-pendientes (390 px): título «Pendientes del turno anterior» y dos filas, zz-verif-J4 («zz-verif-Sucia · zz-verif-Principal · Llevar a lavandería externa: zz-verif-Lavandería», dirección y «Hecho») y zz-verif-J5 («zz-verif-Sucia · zz-verif-Principal · Lavar», selectores zz-verif-Lista y zz-verif-Principal y «Hecho»), legibles, con el texto partido en dos líneas, sin cortes y sin desplazamiento horizontal. No sale la fila de zz-verif-J2 (la cola: «filas 2»). El criterio pide los tres juegos."
+     },
+     {
+      "c": "j",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: turno t2 de la corrida: sh-m-1792039934454 | si: HK al día (movimientos y pendientes): sí | si: lastpush alineado: 4 turnos | error: locator.evaluate: Timeout 30000ms exceeded."
+     },
+     {
+      "c": "k",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: movimiento: 200 {tipo lavanderia, depositoOrigenId dp_muyum184g3ozd, proveedorId pv_mv8nfuyjrofoe} | si: pendiente: 200 {estado hecho, cerradoEn 2026-10-15T04:53:58.000Z, cerradoTurnoId sh-m-1792039934454, movimientoId mv_mv92dban3agcz} | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "l",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: movimiento: 200 {tipo estado, depositoId dp_muyum184g3ozd, estadoId es_mv4fih04awyau} | si: pendiente: 200 {estado hecho, cerradoEn 2026-10-15T04:54:02.000Z, cerradoTurnoId sh-m-1792039934454, movimientoId mv_mv92dedczl4b2} | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "m",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 66/66 archivos OK"
+     },
+     {
+      "c": "n",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 66/66 archivos OK"
+     },
+     {
+      "c": "o",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 66/66 archivos OK"
+     },
+     {
+      "c": "p",
+      "nivel": "N1",
+      "ok": false,
+      "observado": "N1: node tests/run.js: 66/66 archivos OK; pero el criterio pide también la regresión de la zona inventario en verde y falla en 2 casos: REQ-INV2-3-4.spec.js b y REQ-INV2-7-1-hk-turno.spec.js d (ver incs)"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "i",
+      "motivo": "La captura solo tiene 2 de las 3 filas: falta la de zz-verif-J2 porque g no cerró t1 y su pendiente no nació. Lo que se ve (J4, J5) cumple, pero no se puede juzgar la fila de J2 (la más cargada: tendedero y 2 selectores). Se decide en la siguiente corrida con g verde."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "g: el colaborador no logra cerrar t1 desde el portal (clic sin respuesta en 30 s); arrastra h y j",
+      "criterios": [
+       "g",
+       "h",
+       "j"
+      ],
+      "nivel": "medio",
+      "causa": "El cierre del turno del titular dentro de #hkFrame se queda en el paso de «Cerrar limpieza»: el texto de g-error muestra el diálogo «Pendientes obligatorias… agrega una nota: Cancelar / Confirmar igualmente», que no se ve en el PNG. El clic del guion no lo alcanza. Con los datos no se distingue entre el paso del guion (nota del diálogo en el iframe del portal) y la app. El lote no cambia _cerrarTurno ni el diálogo. Sin cierre de t1 no nace el pendiente de J2, así que h no tiene su fila y j no la encuentra.",
+      "observado": "g: «error: locator.click: Timeout 30000ms exceeded.»; la captura g-error muestra t1 en curso, con J4 y J5 en «Pendientes del turno anterior» y el botón «Cerrar limpieza». h: fila pe_…820_…J2 «» · selectores 0 · botón 0. j: «error: locator.evaluate: Timeout 30000ms exceeded.» (h-error y j-error: t2 solo con J4 y J5)."
+     },
+     {
+      "titulo": "c: el aviso tras cerrar t0 no da lo esperado",
+      "criterios": [
+       "c"
+      ],
+      "nivel": "medio",
+      "causa": "No se puede determinar. El servidor sí creó los dos pendientes correctos y el aviso empieza bien (J4 con el texto literal esperado), pero el observado de la cola está truncado en la línea de J5 y la captura c-error ya no muestra el modal, solo el toast «Turno cerrado ✅». Falta ver el texto completo del aviso (¿fila de J5 incompleta?, ¿algo de más?).",
+      "observado": "NO: aviso después del cierre: «✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J4 · zz-verif-Sucia · zz-verif-Principal · Decidir: lavar o lavandería externa (para el operador) zz-verif-J5 · zz-verif-Sucia · zz-verif-Principal · Decidir» (truncado)"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-3-4.spec.js b: Proveedores, el clic de editar o desactivar no responde",
+      "criterios": [
+       "p"
+      ],
+      "nivel": "bajo",
+      "causa": "No es de este lote: L-103 no toca str-inventario.html (solo su ?v=). En la captura, el proveedor de la corrida quedó con la dirección pegada al nombre («zz-verif-L-103-r-Lavanderia-…Calle de prueba 1», dirección «—»), y en la lista ya hay otro igual de una corrida de L-111. El guion de L-95/L-102 escribe la dirección en el campo del nombre y después no encuentra la fila. Es deuda del guion o del formulario, previa a este lote.",
+      "observado": "error: locator.click: Timeout 30000ms exceeded.; PUT inv-proveedores → 200; captura REQ-INV2-3-4-b-error: tabla de Proveedores con los dos proveedores de prueba mal nombrados y zz-verif-Lavandería."
+     },
+     {
+      "titulo": "Regresión REQ-INV2-7-1-hk-turno.spec.js d: PUT de turnos 500 «Base de datos no disponible»",
+      "criterios": [
+       "p"
+      ],
+      "nivel": "bajo",
+      "causa": "Entorno. La base no estuvo disponible por un momento (detalle 2002, conexión a MySQL) y el reintento siguiente dio 200. El lote no toca la conexión.",
+      "observado": "NO: tarea marcada: sí · turnos 500 | PUT /api/col/turnos → respuesta 500: {\"error\":\"Base de datos no disponible\",\"detalle\":2002}; cronología: +0ms PUT turnos → 500, +672ms PUT turnos → 200"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Lo central del lote funciona en producción. El servidor crea los pendientes al cerrar t0, J4 y J5 para el operador, con id determinista, creadoPor y creadoEn del servidor (c). La bandeja los muestra y los reasigna (d, e). HK muestra «Pendientes del turno anterior» y el titular cierra «Llevar a…» y «Lavar» con su movimiento (k, l). Lo que falla parte casi todo de g: el colaborador no cerró t1 y eso deja sin J2 a h, i y j. c falla en el aviso, con el observado truncado. Las dos regresiones en rojo no son de este lote: un guion de Proveedores previo y un 500 momentáneo de la base. No se pone `herramienta`: la causa de g no está probada como del arnés. Antes de repetir: ver el texto completo del aviso de c y el paso de cierre del colaborador en g (el diálogo de nota de «Cerrar limpieza» dentro de #hkFrame). Criterio 8 (recepción) es N1 de L-102 y no se juzga. Pide ok de Diseño para el criterio 2 partido en c+g. horaBogota es el fin de la corrida (04:58Z): el juez no ejecuta comandos para leer la hora."
    }
   },
   {
@@ -11343,12 +11511,12 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c92",
-   "estado": "encolado",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "construcción (reencolado en p5c92)",
+   "esperaA": "CD",
+   "espera": "L-115 (INC-131 + guion c); luego reprueba",
    "orden": 121.11,
-   "desde": "2026-10-14 23:49",
+   "desde": "2026-10-15 00:20",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 11/14 → corregida. Pendientes creados por el servidor (M-395/M-397). · ok de Diseño 18:22 (M-403) con 2 ajustes aplicados (s11 para pendientes huérfanos; admin cierra sin movimientoId, confirmado en index.php ~806). Guardia v5.2 cruzada con Carlos 18:22 y encendida (pw 0.5.18, M-404). Encolado 18:24. · CLI terminó OK; puerta de pruebas bloqueada (sin gastar verificación): faltan zz-verif-Secando/Lista con nombre exacto (la app los tenía en minúscula) y zz-verif-Tendedero no sirve a zz-verif-Propiedad. s8 renombra y s12 crea/corrige la zona. · Semilla 12/12 a las 19:05 (s8 renombró Secando/Lista; s12 Tendedero). Reprueba puesta 19:06. · Juez 19:13: no aceptado. Regresión crítica: PUT de inv-movimientos 500 en los conteos del colaborador (hk-turno d); g/h/i/j en cadena. Crea bien los pendientes (c, d, e, k, l verdes). Reversión L-108 encolada 19:17. · Diseño (M-412): la corrección vuelve con revisión previa nueva; la regresión hk-turno d debe correr antes de encolar. · 22:16: reencolado preparado en p5c90→p5c91 (dependencia L-111, aplicar sobre main actual, sin revert del revert); se encola cuando L-111 quede aceptado (Diseño, M-432)"
@@ -11394,7 +11562,7 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "Diseño",
-   "espera": "v2 sobre REQ v2: 7 dudas de producto (M-446); revisión previa 11/14 en corrección",
+   "espera": "partido en L-107 (servidor+HK) y L-114 (Inventario) por decisión de Diseño (M-446); revisión previa de cada uno; depende de L-115 y L-103",
    "orden": 121.12,
    "desde": "2026-10-14 23:59",
    "planTrabajo": "PT-1",
@@ -11496,6 +11664,38 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Destraba L-111 (INC-128) y L-103."
+  },
+  {
+   "lote": "L-115",
+   "req": "INC-131",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Portal: el panel del turno de HK baja a z-index 400 para no tapar sus diálogos; arreglo del caso c del guion de L-103; p5c93",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "ok (M-447) y revisión previa",
+   "orden": 121.113,
+   "desde": "2026-10-15 00:20",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Destraba L-103."
+  },
+  {
+   "lote": "L-114",
+   "req": "REQ-INV2-4-2 (2/2)",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Inventario: diferencias de entrega y recepción, resolución del operador (criterios 5, 6, 9)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "CD",
+   "espera": "revisión previa; va después de L-107",
+   "orden": 121.131,
+   "desde": "2026-10-15 00:20",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Partido de L-107 (M-446)."
   }
  ],
  "riesgos": [

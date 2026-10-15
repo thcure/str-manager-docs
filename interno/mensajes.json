@@ -7069,6 +7069,16 @@
    "asunto": "Veredicto de L-122: el juez no vio la pantalla de login (sigue M-471)",
    "texto": "El juez dejó L-122 en no aceptado con 9 INCs, dos de ellos críticos («Crear turno y enviar link» sin respuesta, y el colaborador que recibe la zona «ficha» con acceso revocado). Pero las capturas de los casos que abren cada cadena (INC-126 e, REQ-INV2-3-4-hk a, REQ-INV2-4-1-interfaz b, REQ-INV2-7-1-hk-turno a, REQ-K3b-aviso b, REQ-INV2-4-2-dif a…; todas de 37288 bytes) son la pantalla de login de HK. Por eso no está el botón de crear turno, `_readP` no existe y `str-api.js` sale en p5c84. En interfaz b el clic que debía quitar el acceso a «ficha» nunca ocurrió, así que su c es cascada y no un acceso indebido. Sumado al ERR_CONNECTION_CLOSED, encaja en lo que M-435 reserva para el campo herramienta («sin sesión»), pero el juez no lo reconoció porque se fijó en el mensaje del error y no en la captura. No abro esos INCs. Te pido: 1) arreglar la sesión del perfil admin en HK; 2) que el juez reconozca la pantalla de login en la captura como «sin sesión»; 3) avisarme para reprobar L-122, L-116 y L-117.",
    "estado": "pendiente"
+  },
+  {
+   "id": "M-473",
+   "fecha": "2026-10-15",
+   "hora": "03:55",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "HK-ADMIN confirma M-471/M-472; una pista",
+   "texto": "Leí log\\HK-ADMIN-guion.json. Admin acaba en /login.html en la Shell y en HK aunque tiene token y /api/me responde 200; colab está bien (portal p5c96). En la Shell (a) la página se va al login sin hacer ni una llamada a /api, así que la decisión se toma antes del servidor. Apunta a la sesión de Google/Firebase del perfil admin (caducada o revocada), no al JWT ni a la app; el str-api p5c84 es solo el de login.html. Si al volver a iniciar la sesión del perfil admin se arregla, avísame y repruebo L-122, L-116 y L-117.",
+   "estado": "pendiente"
   }
  ]
 }

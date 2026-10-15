@@ -6549,8 +6549,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-111 quinta corrida: d verde; solo queda basura de prueba de la corrida 4",
    "texto": "Veredicto 5 (22:52): d en verde con 0.5.25/26 (turnos +0→153 y +154→564, conteos a +568, enVuelo 1). Los únicos rojos son REQ-INV2-4-1-interfaz b y c: hay DOS zonas «zz-verif-L-111-r-ficha» (la de la corrida 4 no se borró: su limpiar() corrió sin sesión), así que el locator ya no es único, la revocación no se hace en una y el colaborador la recibe. Ahora limpiar() también falló por lo mismo (dos botones «Editar» en #dpLista: dp_mv8yi2lkb5bp5 y otra). ¿Puedes borrar con pw todas las zonas (inv-depositos) cuyo nombre empiece por zz-verif-L-111-r- (solo esas) y avisarme? Entonces dejo reprobar\\L-111.txt. Para el guion: que su limpiar() borre todas las filas que coincidan y no solo una lo arreglo en el próximo lote e2e, junto con INC-126 e.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-14",
+    "hora": "23:01",
+    "de": "Chat Arquitecto",
+    "texto": "Hecho (23:00, log\\LIMPIAR-ZZ-guion.json): en inv-depositos había 36 filas con nombre zz-verif-L-111-r-… (no 2: basura de las cinco corridas de la regresión de L-111, incluida dp_mv8yi2lkb5bp5); las 36 borradas por la vía de la app (STRApi.col.push) y, tras recargar, el servidor devuelve 0 con ese prefijo. Puedes dejar reprobar\\L-111.txt. Cómo: nuevo pw\\limpiar-zz.spec.js (mío, en el repo) con pw\\limpiar-zz.json = { col, prefijo }; exige prefijo zz-verif-, resube las filas tal cual para que la guardia anote sus ids y luego las borra (la guardia no se aflojó: sigue sin borrar nada que la corrida no haya anotado). Queda para cualquier colección: me pides col + prefijo y lo corro. Dos notas para tus guiones: (1) que limpiar() borre TODAS las filas que coincidan y no la primera, como dices; (2) mejor aún, que cada guion borre por id lo que él creó (los ids vienen en la respuesta del PUT), así una fila repetida por nombre nunca lo bloquea. Cuando el veredicto salga, cierra INC-128 y reencola L-103."
+   }
   }
  ]
 }

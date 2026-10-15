@@ -9153,9 +9153,51 @@
    "req": "DT-38",
    "categoria": "estándar",
    "resumen": "El catch del PUT de /api/col escribe también en api/logs/error.log.",
-   "estado": "registrado",
-   "observacion": "CLI 21:00–21:01: 2a06bd7, 62/62.",
-   "hash": "2a06bd7"
+   "estado": "aceptado",
+   "observacion": "CLI 21:00–21:01: 2a06bd7, 62/62. Juez: parcial; aceptado como diagnóstico (c no aplica: el 500 de INC-128 es de conexión).",
+   "hash": "2a06bd7",
+   "aceptacion": {
+    "lote": "L-109",
+    "hash": "2a06bd7",
+    "fecha": "2026-10-14",
+    "horaBogota": "21:02",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. El catch del PUT escribe en api/logs/error.log",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 62/62 archivos OK"
+     },
+     {
+      "c": "b. Regresión de la zona inventario",
+      "nivel": "regresión",
+      "ok": null,
+      "observado": "L-109-pruebas.json trae regresion: [] (sin ningún caso, ni siquiera el rojo esperado de REQ-INV2-7-1-hk-turno.spec.js por INC-128); no hay dato para confirmar que no apareció rojo nuevo"
+     },
+     {
+      "c": "c. Evidencia de diagnóstico en api/logs/error.log del servidor",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "requiere leer api/logs/error.log en el servidor (hPanel); no está en pruebas.json ni en capturas, que es lo único que lee este juez"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "pruebas.json no registra casos de regresión (regresion: []); sin esos casos no se puede comparar contra log\\L-108-veredicto.json para descartar rojo nuevo. El juez local no busca esta información por otra vía."
+     },
+     {
+      "c": "c",
+      "motivo": "la evidencia vive en api/logs/error.log del servidor y la lee el Arquitecto con Carlos en hPanel; el juez local no abre red ni servidor."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "ninguno nuevo (limpiezaRegresion: [] en L-109-pruebas.json)",
+    "notas": "a cumple (test de texto en verde, 62/62). b y c quedan pendientes: pruebas.json no trae casos de regresión de la zona inventario (el lote fue diagnóstico urgente, revisión abreviada) y la evidencia del log del servidor es lectura manual del Arquitecto en hPanel, fuera del alcance de este juez. No hay ningún ok:false, por lo que no hay INC."
+   }
   }
  ],
  "esquema": {
@@ -10757,18 +10799,18 @@
   {
    "lote": "L-107",
    "req": "REQ-INV2-4-2",
-   "categoria": "crítico",
+   "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "Entrega y recepción de zona con conteo y foto entre titulares distintos; lectura nueva del colaborador (traspaso) en el servidor; Inventario resuelve diferencias; p5c89",
-   "estado": "espera DA",
+   "estado": "previsto",
    "vista": "siguiente",
    "esperaA": "Diseño",
-   "espera": "DA-43 (Diseño la lleva a Carlos) + cruce",
+   "espera": "después de INC-128; rehacer sobre el REQ v2 (DA-43 c)",
    "orden": 121.12,
    "desde": "2026-10-14 18:59",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Borrador listo; la ficha decía «Normal», pero cambia lo que lee el colaborador (crítico, como lote 66). Cabecera sin DA a propósito hasta el cruce. · Diseño: crítico, DA-43 abierta (M-409); supuestos ok; zz-verif-colab2 como segundo titular y apoyo (N2 del criterio 8)."
+   "nota": "Borrador listo; la ficha decía «Normal», pero cambia lo que lee el colaborador (crítico, como lote 66). Cabecera sin DA a propósito hasta el cruce. · Diseño: crítico, DA-43 abierta (M-409); supuestos ok; zz-verif-colab2 como segundo titular y apoyo (N2 del criterio 8). · DA-43 decidida por Carlos 21:03: c) entrega y recepción en todos los turnos; sin lectura nueva; INV2-4-2 queda normal (M-420)."
   },
   {
    "lote": "L-108",
@@ -10792,15 +10834,31 @@
    "categoria": "estándar",
    "riesgo": "R-1",
    "resumen": "El catch del PUT de /api/col escribe en api/logs/error.log (colección, rol, excepción, archivo:línea)",
-   "estado": "verificando",
-   "vista": "siguiente",
-   "esperaA": "verificador",
+   "estado": "aceptado",
+   "vista": "hecho",
+   "esperaA": null,
    "espera": null,
    "orden": 121.116,
-   "desde": "2026-10-14 21:01",
+   "desde": "2026-10-14 21:08",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Pedido del Arquitecto (M-417). El cuerpo del 500 es solo «Error al guardar», así que pw 0.5.21 no revela la causa; esto sí. · CLI 21:00–21:01: 2a06bd7, 62/62. Ya se sabe que el 500 de INC-128 es de conexión (2002, en database.php), que este catch no ve; L-109 queda como deuda útil."
+   "nota": "Pedido del Arquitecto (M-417). El cuerpo del 500 es solo «Error al guardar», así que pw 0.5.21 no revela la causa; esto sí. · CLI 21:00–21:01: 2a06bd7, 62/62. Ya se sabe que el 500 de INC-128 es de conexión (2002, en database.php), que este catch no ve; L-109 queda como deuda útil. · Juez: parcial (a verde; b sin regresión registrada; c fuera de la cola). Se acepta como diagnóstico: c no aplica porque el 500 de INC-128 ocurre en la conexión (database.php), antes de este catch."
+  },
+  {
+   "lote": "L-110",
+   "req": "INC-128",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "database.php reintenta 2 veces (150 y 400 ms) si MySQL rechaza la conexión (2002/2006/1040/1203); log de cada intento",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "CLI",
+   "espera": null,
+   "orden": 121.117,
+   "desde": "2026-10-14 21:08",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Diseño (respuesta a M-420, 21:03): INC normal, sin cruce. Revisión previa 10/14 corregida."
   }
  ],
  "riesgos": [

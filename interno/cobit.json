@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-12",
+ "actualizadoEn": "2026-10-15",
  "fuente": "ISACA, COBIT® 2019 Framework: Governance and Management Objectives (2018), capítulo 4. Traducción propia para uso interno; nombre original en inglés junto a cada objetivo.",
  "estadoProyecto": "2026-09-23 (adopciones parciales acordadas con el dueño); detalle oficial de los 40 objetivos completado el 2026-09-27.",
  "dominios": {
@@ -347,6 +347,12 @@
      "t": "Gestionar la mejora continua del sistema de gestión",
      "estado": "ok",
      "nuestra": "Cada lección (INC, posimplementación) entra como ajuste al marco con fecha; ajustes vigentes listados en marco-trabajo.json."
+    },
+    {
+     "c": "APO01.09",
+     "t": "Definir y comunicar políticas y procedimientos (producto)",
+     "estado": "ok",
+     "nuestra": "Registro de reglas transversales del producto (claude/arquitectura/reglas-transversales.md, RT-1…RT-24) con origen, dueño, módulos, excepciones y estado (vigente / con excepción / parcialmente derogada / en conflicto / derogada) y su historial; una regla cambia solo con DA-n o LM-n (LM-36)."
     }
    ],
    "detalle": {
@@ -574,13 +580,19 @@
    "estado": "par",
    "interes": true,
    "resumen": "Arquitectura que soporte necesidades actuales y futuras.",
-   "posicion": "Adoptado parcialmente (2026-10-08): solo APO03.02, la vista de la arquitectura actual como 'mapa de funcionamiento' (actores, mecanismos, lugares y flujos) en interno/conocimiento.json. Sin arquitectura objetivo ni plan de migración formal a esta escala.",
+   "posicion": "Adoptado parcialmente (2026-10-15, LM-36): arquitectura de referencia del STR en claude/arquitectura/ (mapa-str.md: sistema, módulos, funcionalidades por REQ, relaciones; infraestructura-configuracion.md; datos-ciclo-vida.md; reglas-transversales.md) y revisión de cada lote contra ella (APO03.05: dos líneas de cabecera y puntos 15–16 del revisor previo). El mapa de funcionamiento de la fábrica sigue en conocimiento.json. Sin arquitectura objetivo ni plan de migración formal a esta escala (03.01, 03.03, 03.04 fuera).",
    "practicasStr": [
     {
      "c": "APO03.02",
      "t": "Definir la arquitectura de referencia",
      "estado": "ok",
-     "nuestra": "Mapa de funcionamiento (arquitectura actual) en conocimiento.json → página Conocimiento; usa los mismos ids que elementos.json."
+     "nuestra": "Producto: claude/arquitectura/mapa-str.md (vista 0 sistema, 1 módulos, 2 funcionalidades por REQ, 3 relaciones; índice ADR/DA; línea base fechada) + infraestructura-configuracion.md + datos-ciclo-vida.md. Fábrica: mapa de funcionamiento en conocimiento.json (mismos ids que elementos.json). Lo mantiene el Arquitecto; Diseño corrige hechos por el buzón (LM-36)."
+    },
+    {
+     "c": "APO03.05",
+     "t": "Proporcionar servicios de arquitectura empresarial",
+     "estado": "ok",
+     "nuestra": "Cada instrucción de lote declara «Reglas transversales que toca: RT-n» y «Mapa: módulos y relaciones que cambia»; el revisor previo (puntos 15 y 16) las comprueba contra reglas-transversales.md y mapa-str.md; una RT «en conflicto» bloquea el encolado hasta que Carlos decida; al aceptarse el lote, el Arquitecto actualiza el mapa (LM-36)."
     }
    ],
    "detalle": {
@@ -1505,25 +1517,25 @@
    "estado": "rel",
    "interes": false,
    "resumen": "Gestionar los datos del negocio a lo largo de su ciclo de vida.",
-   "posicion": "Exigencia sobre los requerimientos que manejan datos personales o de dinero: documentos del huésped (M2.1), tarifas y movimientos del colaborador (PG1), migración al servidor (D1). Reglas: solo en MySQL, nunca en localStorage; historial que no se borra; respaldo diario.",
+   "posicion": "Relacionado (2026-10-15, LM-36): ciclo de vida escrito por clase de dato en claude/arquitectura/datos-ciclo-vida.md (dónde vive, quién escribe, retención, borrado, respaldo y restauración, base legal, regla RT-n). Retenciones decididas por Carlos: corte mensual único (DA-32, RT-8) que incluye la evidencia de incidentes (DA-32 p. 7). Vacíos abiertos: restauración nunca probada (export sin importador); api/uploads/ sin respaldo propio; guías, documentos y planos sin copia.",
    "practicasStr": [
     {
      "c": "APO14.08",
      "t": "Gestionar el ciclo de vida de los datos",
-     "estado": "rel",
-     "nuestra": "Historial nunca se borra: tombstones, reservas canceladas, tarifas por vigencia, movimientos anulados con inverso."
+     "estado": "ok",
+     "nuestra": "datos-ciclo-vida.md: una fila por clase de dato (estructurados, binarios, secretos y sesiones, datos que no son del negocio). Lo estructurado nunca se borra (RT-5: desactivar, cancelar, anular, tombstones); inv-movimientos inmutable; evidencia anulada, no borrada."
     },
     {
      "c": "APO14.09",
      "t": "Archivo y retención",
-     "estado": "rel",
-     "nuestra": "Reservas pasadas → finalizadas; 30 respaldos diarios."
+     "estado": "ok",
+     "nuestra": "Binarios: corte mensual único el día 30 (RT-8, DA-32), con copia previa al Drive del negocio (RT-9); evidencia de incidentes incluida (DA-32 p. 7). Reservas pasadas → finalizadas; ical_sync_log 200 por cuenta; error.log rota a 1 MB; respaldos 30 días."
     },
     {
      "c": "APO14.10",
      "t": "Respaldo y restauración",
-     "estado": "rel",
-     "nuestra": "/api/export/cron diario; exportación manual del admin; restauración por documentar."
+     "estado": "par",
+     "nuestra": "Base: POST /api/export/cron diario (30 copias) y exportación manual del admin. Archivos: solo la copia en Drive por negocio; api/uploads/ sin respaldo propio (RT-12: respaldo completo antes de activar el corte). Pendiente: importador y ensayo de restauración (propuesta de DT en datos-ciclo-vida.md § vacíos)."
     }
    ],
    "detalle": {
@@ -2704,13 +2716,13 @@
      "c": "BAI10.01",
      "t": "Establecer un modelo de configuración",
      "estado": "ok",
-     "nuestra": "elementos.json (elementos de configuración con capa, rol, relaciones) y el mapa de funcionamiento de conocimiento.json, con los mismos ids."
+     "nuestra": "Fábrica: elementos.json y el mapa de funcionamiento de conocimiento.json. Producto (LM-36): claude/arquitectura/infraestructura-configuracion.md § 2 (hosting, bases, secretos por nombre, despliegue, tareas programadas, servicios externos, equipos) y § 3 (qué se rompe si cambia cada elemento)."
     },
     {
      "c": "BAI10.02",
      "t": "Repositorio de configuración y línea base",
      "estado": "ok",
-     "nuestra": "CLAUDE.md para la CLI; ?v= y schema_version como versión desplegada; líneas base de configuración por equipo y por tarea en conocimiento.json (desde 2026-10-08, lección de INC-87)."
+     "nuestra": "CLAUDE.md para la CLI; ?v= y schema_version como versión desplegada; líneas base por equipo, tarea y hosting en conocimiento.json (lb-lenovo, lb-asus, lb-sesiones, lb-hosting; desde 2026-10-08, lección de INC-87), explicadas y relacionadas en infraestructura-configuracion.md (LM-36)."
     },
     {
      "c": "BAI10.03",

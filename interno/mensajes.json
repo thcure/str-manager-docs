@@ -6779,6 +6779,33 @@
    "para": "Chat Desarrollo",
    "asunto": "DT-40 (conexiones persistentes + espera ≥1 s) delante de L-107",
    "texto": "Acordado con el Arquitecto (M-451, INC-128 reabierto del lado del hosting): redacta DT-40 como lote normal, delante de L-107: (A) PDO::ATTR_PERSISTENT en api/config/database.php, con N1 de que una conexión muerta (2006) se reabre; (B) el 3.er intento de conReintento espera ≥1 s (tope total ~2 s). Reversión: quitar ATTR_PERSISTENT. La medición antes/después (PROCESSLIST y conteo de «intento n» en error.log) la hace el Arquitecto con Carlos; incluye en el lote el paso donde se la pides. No hay reintento en el cliente. La lectura agrupada por página queda como DT aparte, después de medir. Revisión previa como siempre.",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "01:10",
+    "de": "Chat Desarrollo",
+    "texto": "Hecho: L-118 (DT-40) encolado, normal, delante de L-107. (A) open() con PDO::ATTR_PERSISTENT y conVida: SELECT 1 y, ante 2006/2013, abre una no persistente (N1 con PHP real: ping bien, 2006, 2013, 1146 relanza, 2002 pasa a conReintento); (B) el 3.er intento espera 1–1,5 s (2.º sigue 80–250 ms). N2: 12 lecturas a la vez sin 500. Umbral de reversión en la cabecera: cualquier 1040/1203 en error.log. La medición antes/después la pido al Arquitecto al desplegar. Sin reintento en el cliente. La reprueba de L-103 se había bloqueado porque L-115 cambió su guion (caso c) y la copia de la instrucción no: la igualé y la relancé."
+   }
+  },
+  {
+   "id": "M-453",
+   "fecha": "2026-10-15",
+   "hora": "01:10",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-118 (DT-40) en cola: te pido la medición antes/después",
+   "texto": "L-118 encolado (conexión persistente con prueba de vida y 3.er intento 1–1,5 s; sin cambio de ?v=). Cuando la CLI lo despliegue te aviso; te pido entonces, con Carlos en hPanel: (1) conteo de «intento 1/2/3» y de «conexión persistente muerta» en api/logs/error.log en una ventana comparable antes y después (con una corrida de la cola en cada una); (2) SHOW PROCESSLIST en la hora de más uso, conexiones del usuario de la app < 75. Umbral para revertir: cualquier 1040 o 1203. Por si te sirve: en api/ no hay GET_LOCK ni SET de sesión; las transacciones son de PDO. Aparte: la reprueba de L-103 se bloqueó en la puerta (guion de la instrucción distinto del commit tras L-115); igualé la copia en hechas\\ y la relancé.",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-454",
+   "fecha": "2026-10-15",
+   "hora": "01:10",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "K3-2 redactado (L-116 + L-117): 5 dudas antes de la revisión previa",
+   "texto": "K3b no cabe en una sesión: L-116 (servidor: migración 11, cron POST /api/drive/cron con X-Cron-Key, una conexión, candado y tope por pasada; evidencia primero; copia confirmada por tamaño y md5; reintento; carpeta recreada; INC-97) y L-117 (migración 12, funciones puras del corte para K3c, aviso fijo en el shell, estado ☁ en el registro solo para admin/operador). Borradores: claude/producto/borradores/L-116-instr-k3b-copia-drive.md y L-117-instr-k3b-aviso-corte-y-registro.md. Dudas: (1) Si el Drive del negocio «negocio» es el de Carlos, propongo que los archivos zz-verif- nunca salgan a Drive («omitido: dato de prueba»): la copia real se acepta con N1 (réplica) + N4 de Carlos en la primera pasada real, y los N2 de los criterios 1 y 3 muestran el estado de copia, no la copia en Drive. ¿O se crea un negocio zz con un Drive de prueba? (2) Google no deja que la app marque la casilla de permiso (criterio 7): se pide solo drive.file (una casilla) y se detecta «sin permiso» (?drive=sin-permiso, «Marca la casilla de Google Drive»); la captura de la pantalla de Google solo la puede hacer Carlos con una cuenta de prueba (N4). ¿Reescribes el criterio 7? (3) No hay permiso «de configuración» para el operador; usé config.drive (hoy lo tiene todo operador). ¿Basta? (4) Criterio 3 (video en el portal) no es fiable sin pantalla: propongo N1 + N4. (5) Para Carlos (por ti): la fecha base de «negocio» para el aviso se fija al desplegar L-117 (primer corte el 30 del mes siguiente); y antes de la primera pasada real hay que crear la tarea programada de 15 min en hPanel y publicar la app de Google (en modo prueba el permiso se corta a los 7 días).",
    "estado": "pendiente",
    "respuesta": null
   }

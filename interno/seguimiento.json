@@ -682,13 +682,13 @@
    "id": "INC-128",
    "tipo": "INC",
    "modulo": "Servidor · inventario",
-   "etapa": "🔧",
+   "etapa": "🔍",
    "fecha": "2026-10-14",
    "severidad": "crítico",
    "titulo": "PUT de turnos e inv-movimientos del colaborador al marcar el conteo: 500 «Base de datos no disponible» (MySQL 2002)",
    "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea. Con pw 0.5.21 (20:59): el cuerpo es {\"error\":\"Base de datos no disponible\",\"detalle\":2002}: el PHP no logra conectar a MySQL en esas dos peticiones (las demás de la corrida sí). Sospecha: ráfaga de peticiones simultáneas de HK al marcar la tarea, que supera el límite de conexiones o procesos del hosting compartido. Arquitecto (M-419, 21:08): no es tope de MySQL (max_user_connections 75, contadores en 0); la capa de conexión local del hosting (127.0.0.1) rechaza conexiones de forma intermitente con varias escrituras seguidas (también 2 de 5 PUT de fotos). Sí puede tocar a colaboradores reales. M-423: 74 líneas «db connect · intento n falló · 2002» en 21:12–21:18, siempre en pares: fallan las conexiones que se abren a la vez desde el mismo cliente; en serie pasan; reintentos de espera fija vuelven a coincidir. HK manda dos PUT del mismo turno en 1 ms al marcar la tarea (bug aparte). M-426: el mensaje exacto es «SQLSTATE[HY000] [2002] Operation not permitted» (EPERM): el cortafuegos del hosting limita conexiones nuevas a MySQL (127.0.0.1:3306) por usuario; visible desde el 14-oct ~17:00. Con L-111 la regresión hk-turno d sale verde (un solo rechazo en la corrida, absorbido por el reintento). Hostinger (M-428, 21:54): límite de 20 conexiones NUEVAS a MySQL por segundo en el alojamiento compartido (no cortafuegos); las que exceden se rechazan con 2002 «Operation not permitted». No se amplía en compartido; recomiendan PDO::ATTR_PERSISTENT.",
-   "pendiente": "Veredicto de L-111 (su único rojo, REQ-INV2-3-4 b, no tiene 500 ni 2002: regresión aparte). Seguimiento: valor del límite (ticket Hostinger) y DT-39.",
-   "estado": "cerrado",
+   "pendiente": "Reabierto 15-oct 00:47 del lado del alojamiento (M-449/M-451): 54 «intento 3» el 15-oct (20 con L-111), ráfagas de lecturas en paralelo. L-118 (DT-40: conexión persistente + 3.er intento ≥1 s) encolado; medición antes/después con el Arquitecto y Carlos; lectura agrupada por página = DT aparte tras medir.",
+   "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión).",
    "cierre": "14-oct 23:49: causa = límite del hosting de 20 conexiones nuevas/s a MySQL; corrección = L-110 (absorbido) + L-111 (aceptado 23:25); seguimiento = DT-40 pospuesto con disparador; DT-39 fuera (deuda baja opcional)."
   },
@@ -729,8 +729,9 @@
    "titulo": "En el portal, los diálogos de HK (Cerrar limpieza con nota, fotos pendientes, préstamos, omitir, guías, aviso de pendientes) quedan detrás del panel del turno",
    "causa": "body.modo-colab .detail-panel.open usa z-index 999; los diálogos se agregan al body con 500/600 y el menú de la cola con 700. El colaborador toca «Cerrar limpieza» con tareas pendientes y no ve el diálogo.",
    "pendiente": "L-115 (b73701d) construido; sus criterios en verde (00:32); aceptación pendiente por un rojo ajeno (2002).",
-   "estado": "abierto",
-   "origen": "Veredicto 2 de L-103 (23:58), caso g + g-error.png/txt; igual en el veredicto 1 (19:13)."
+   "estado": "cerrado",
+   "origen": "Veredicto 2 de L-103 (23:58), caso g + g-error.png/txt; igual en el veredicto 1 (19:13).",
+   "cierre": "15-oct 00:45: L-115 (b73701d) aceptado."
   }
  ],
  "dts": [
@@ -876,9 +877,9 @@
   {
    "id": "DT-40",
    "titulo": "Evaluar PDO::ATTR_PERSISTENT en api/config/database.php (recomendación de Hostinger por el límite de 20 conexiones nuevas/s); cuidar wait_timeout 20 s (2006, ya reintentado) y max_user_connections 75 frente a 60 workers PHP",
-   "estado": "abierta",
+   "estado": "en curso",
    "origen": "INC-128, M-428. Necesita decisión de diseño y cruce con Carlos antes de tocar el servidor.",
-   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3». · 23:21: pospuesto con disparador: en una semana de error.log, un «intento 3» o un 500 por 2002 visto por un usuario real (M-441)"
+   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3». · 23:21: pospuesto con disparador: en una semana de error.log, un «intento 3» o un 500 por 2002 visto por un usuario real (M-441) · 15-oct 01:10: disparador cumplido (M-449); L-118 encolado (M-452)"
   }
  ],
  "cambios": [
@@ -9962,8 +9963,8 @@
    "req": "INC-131",
    "categoria": "normal",
    "resumen": "Portal: panel del turno de HK a z-index 400 (sus diálogos quedan encima); arreglo del caso c del guion de L-103; p5c93",
-   "estado": "no aceptado",
-   "observacion": "Encolado 00:24 (ok de Diseño M-447 con N2/N3 del diálogo a 390 px; revisión previa 13/14 corregida). · 00:32 no aceptado: a–d en verde (panel 400, diálogo visible a 390 px, captura N3); único rojo: regresión hk-turno d con PUT turnos 500 por 2002 tras los 3 intentos (el siguiente PUT 200, tarea marcada)",
+   "estado": "aceptado",
+   "observacion": "Encolado 00:24 (ok de Diseño M-447 con N2/N3 del diálogo a 390 px; revisión previa 13/14 corregida). · 00:32 no aceptado: a–d en verde (panel 400, diálogo visible a 390 px, captura N3); único rojo: regresión hk-turno d con PUT turnos 500 por 2002 tras los 3 intentos (el siguiente PUT 200, tarea marcada) · 00:45 aceptado por el Arquitecto como dueño del juez (nota: rojo de hk-turno d = 2002 del hosting; herramienta = entorno)",
    "hash": "b73701d",
    "aceptacion": {
     "lote": "L-115",
@@ -10017,6 +10018,15 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "N1 y N2 propios de INC-131 (a, b, c) en verde; N3 (d) confirmado por captura: el diálogo «Cerrar limpieza» queda legible y completo encima del panel del turno a 390 px, sin desborde. El único ok:false de todo el lote es una regresión de REQ-INV2-7-1-hk-turno.spec.js (zona inventario, subida de fotos), ajena al cambio de z-index de este lote; no se marca «herramienta» porque la causa (500 del servidor por DB no disponible) no es un corte de sesión ni un error del propio pw, sino un error del backend bajo escritura concurrente."
    }
+  },
+  {
+   "lote": "L-118",
+   "fecha": "2026-10-15",
+   "req": "DT-40",
+   "categoria": "normal",
+   "resumen": "Conexión persistente con prueba de vida; 3.er intento ≥1 s",
+   "estado": "registrado",
+   "observacion": "Encolado 01:10 (ok de Diseño M-452; revisión previa 13/14 corregida)."
   }
  ],
  "esquema": {
@@ -11576,9 +11586,9 @@
    "estado": "no aceptado",
    "vista": "siguiente",
    "esperaA": "CLI",
-   "espera": "reprueba tras L-115",
+   "espera": "reprueba (la 1.ª se bloqueó: guion de la instrucción distinto del commit tras L-115; igualado en hechas\\)",
    "orden": 121.11,
-   "desde": "2026-10-15 00:41",
+   "desde": "2026-10-15 01:10",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 11/14 → corregida. Pendientes creados por el servidor (M-395/M-397). · ok de Diseño 18:22 (M-403) con 2 ajustes aplicados (s11 para pendientes huérfanos; admin cierra sin movimientoId, confirmado en index.php ~806). Guardia v5.2 cruzada con Carlos 18:22 y encendida (pw 0.5.18, M-404). Encolado 18:24. · CLI terminó OK; puerta de pruebas bloqueada (sin gastar verificación): faltan zz-verif-Secando/Lista con nombre exacto (la app los tenía en minúscula) y zz-verif-Tendedero no sirve a zz-verif-Propiedad. s8 renombra y s12 crea/corrige la zona. · Semilla 12/12 a las 19:05 (s8 renombró Secando/Lista; s12 Tendedero). Reprueba puesta 19:06. · Juez 19:13: no aceptado. Regresión crítica: PUT de inv-movimientos 500 en los conteos del colaborador (hk-turno d); g/h/i/j en cadena. Crea bien los pendientes (c, d, e, k, l verdes). Reversión L-108 encolada 19:17. · Diseño (M-412): la corrección vuelve con revisión previa nueva; la regresión hk-turno d debe correr antes de encolar. · 22:16: reencolado preparado en p5c90→p5c91 (dependencia L-111, aplicar sobre main actual, sin revert del revert); se encola cuando L-111 quede aceptado (Diseño, M-432)"
@@ -11624,7 +11634,7 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "CLI",
-   "espera": "ok de Diseño 00:41 (M-450); se encola tras la reprueba de L-103 (si cae solo por un 2002 aislado, decide el Arquitecto con nota)",
+   "espera": "ok de Diseño (M-450); se encola tras L-118 y la reprueba de L-103",
    "orden": 121.12,
    "desde": "2026-10-15 00:42",
    "planTrabajo": "PT-1",
@@ -11733,12 +11743,12 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Portal: el panel del turno de HK baja a z-index 400 para no tapar sus diálogos; arreglo del caso c del guion de L-103; p5c93",
-   "estado": "no aceptado",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "Arquitecto",
-   "espera": "decisión sobre el rojo por 2002 (M-449)",
+   "esperaA": "—",
+   "espera": "",
    "orden": 121.113,
-   "desde": "2026-10-15 00:41",
+   "desde": "2026-10-15 01:10",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Destraba L-103."
@@ -11758,6 +11768,54 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Partido de L-107 (M-446)."
+  },
+  {
+   "lote": "L-118",
+   "req": "DT-40 (INC-128)",
+   "categoria": "normal",
+   "riesgo": "R-2",
+   "resumen": "database.php: conexión persistente con prueba de vida (conVida) y 3.er intento con espera 1–1,5 s; sin ?v=",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "CLI",
+   "espera": "construcción",
+   "orden": 121.114,
+   "desde": "2026-10-15 01:10",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Delante de L-107 (M-452). Medición antes/después: Arquitecto con Carlos."
+  },
+  {
+   "lote": "L-116",
+   "req": "REQ-K3-2 (1/2)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "Copia a Drive: cron, cola de copia, INC-97 (migración 11)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "dudas de producto (M-454) antes de la revisión previa",
+   "orden": 121.4,
+   "desde": "2026-10-15 01:10",
+   "planTrabajo": "PT-1",
+   "grupo": "K3",
+   "nota": "DA-32; cruce 10-oct; después de L-114."
+  },
+  {
+   "lote": "L-117",
+   "req": "REQ-K3-2 (2/2)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "Aviso fijo del corte y estado de copia en el registro (migración 12)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "dudas de producto (M-454) antes de la revisión previa",
+   "orden": 121.41000000000001,
+   "desde": "2026-10-15 01:10",
+   "planTrabajo": "PT-1",
+   "grupo": "K3",
+   "nota": "DA-32; cruce 10-oct; después de L-114."
   }
  ],
  "riesgos": [

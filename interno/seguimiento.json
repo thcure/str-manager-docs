@@ -886,8 +886,8 @@
    "tipo": "DT",
    "fecha": "2026-10-15",
    "titulo": "Diagnóstico de conexiones MySQL (solo admin, solo lectura) para medir el tope de 75 simultáneas",
-   "estado": "programada",
-   "nota": "Pedido del Arquitecto (M-453); Diseño M-455: normal, tras L-107. Lote L-119."
+   "estado": "pagada",
+   "nota": "Pedido del Arquitecto (M-453); Diseño M-455: normal, tras L-107. Lote L-119. · 02:04 L-119 aceptado; medición en marcha (Arquitecto, pw diagnostico.spec.js)"
   }
  ],
  "cambios": [
@@ -10320,8 +10320,8 @@
    "req": "DT-41",
    "categoria": "normal",
    "resumen": "GET /api/diagnostico solo admin",
-   "estado": "no aceptado",
-   "observacion": "Encolado 01:36 (ok de Diseño M-455; revisión previa 12/14 corregida). · 01:57 no aceptado: a–c en verde (diagnóstico: persistente, 11 conexiones, 10 dormidas, máx 75; 403 al operador); único rojo: regresión REQ-INV2-3-4 b por carrera del guion con el foco a 30 ms del diálogo (L-120)",
+   "estado": "aceptado",
+   "observacion": "Encolado 01:36 (ok de Diseño M-455; revisión previa 12/14 corregida). · 01:57 no aceptado: a–c en verde (diagnóstico: persistente, 11 conexiones, 10 dormidas, máx 75; 403 al operador); único rojo: regresión REQ-INV2-3-4 b por carrera del guion con el foco a 30 ms del diálogo (L-120) · 02:04 aceptado por el Arquitecto con nota (rojo = carrera del guion, L-120)",
    "hash": "a8944cc",
    "aceptacion": {
     "lote": "L-119",
@@ -10368,6 +10368,46 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "El punto «e» de la instrucción (medición en hora de uso, conexiones < 75) queda fuera de esta cola: lo hace el Arquitecto con Carlos al desplegar; no se juzga aquí. La instrucción no declara letras N3 para este lote (n3Preparados vacío coincide), así que no hay capturas que decidir en ese nivel."
+   },
+   "aceptacionFinal": {
+    "lote": "L-119",
+    "hash": "a8944cc",
+    "fecha": "2026-10-15",
+    "horaBogota": "02:04",
+    "resultado": "aceptado",
+    "modoVerificacion": "aceptación del Arquitecto como dueño del juez (M-458) sobre el veredicto del juez local de las 01:57: N1 y N2 del lote verdes; el único rojo de la regresión es una carrera del propio guion, ajena al lote",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 69/69 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "/api/diagnostico: 200 | persistente: true | conexiones 11 · dormidas 10 · maxUsuario 75 | claves: conexiones,dormidas,hora,maxUsuario,persistente"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "/api/diagnostico como operador: 403"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "Regresión de inventario verde (64 casos, 0 respuestas 5xx) salvo REQ-INV2-3-4.spec.js b: el guion crea el proveedor (PUT 200) pero abrirProveedor enfoca «Nombre» con setTimeout 30 ms y el fill de «Dirección» cae en «Nombre» (queda «…-Lavanderia-6mf60Calle de prueba 1»), el localizador exacto no lo encuentra y «Editar» se agota en 30 s (captura REQ-INV2-3-4-b-error.png). Mismo rojo en L-103 (23:58) y en la 1.ª corrida de L-111: carrera del guion, no de DT-41 (api/diagnostico no toca proveedores). Lo corrige L-120."
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Aceptado con nota: rojo de REQ-INV2-3-4 b = carrera del guion, L-120. Punto e (medición en hora de uso): la hace el Arquitecto con el propio /api/diagnostico (pw\\diagnostico.spec.js, correr\\diagnostico.txt → log\\DIAGNOSTICO-guion.json) y queda en claude/marco/inc-128-conexiones-mysql-2026-10.md; primer dato, durante la corrida del lote: persistente true, 11 conexiones (10 dormidas), tope 75.",
+    "herramienta": "guion de regresión: carrera de foco en REQ-INV2-3-4.spec.js b (L-120), no del lote ni del arnés"
    }
   },
   {
@@ -12183,12 +12223,12 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "GET /api/diagnostico (solo admin, solo lectura): persistente, conexiones y dormidas del usuario de la app",
-   "estado": "no aceptado",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "Arquitecto",
-   "espera": "aceptación con nota (rojo = guion, L-120)",
+   "esperaA": "—",
+   "espera": "",
    "orden": 121.1125,
-   "desde": "2026-10-15 02:01",
+   "desde": "2026-10-15 02:04",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Orden Diseño M-455: L-107 → DT-41 → L-114 → L-116 → L-117 → K3-3."

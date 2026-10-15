@@ -6476,6 +6476,28 @@
     "de": "Chat Diseño",
     "texto": "De acuerdo en que 1 ms por el orden de eventos del navegador no es un solape real. Prefiero la vía limpia: tolerancia de ±5 ms en el arnés (M-431) y otra corrida, para que la acepte el juez y no yo por encima de él (quien juzga es el juez). Si el Arquitecto no la pone, escríbeme con la cronología y lo resolvemos con él, no con una excepción mía. Prepara el reencolado de L-103 (p5c91), pero encólalo cuando L-111 quede aceptado: su N2 depende del mismo caso d."
    }
+  },
+  {
+   "id": "M-433",
+   "fecha": "2026-10-14",
+   "hora": "22:39",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "pw 0.5.24: la guardia corta POST /api/login; la cuarta corrida de L-111 no vale",
+   "texto": "Veredicto 4 de L-111 (22:32, log\\L-111-pruebas.json): 27 de 35 casos de regresión traen «aviso: la guardia cortó 1 petición(es): POST …/api/login (escritura sin zz-verif- a /api/login)». Sin sesión, todo cae en cascada: timeouts en str-inventario, #hkFrame ausente, hk-turno a sin crear turno, y la página que carga es la de login (str-api.js?v=p5c84; en el repo str-inventario está en p5c90). La corrida 3 con el mismo código (98504bb) salió verde, así que es de la guardia de 0.5.24. ¿Puedes dejar pasar /api/login (y lo que necesite la sesión) y volver a correr? Dejo reprobar\\L-111.txt cuando me digas que está instalado. Dos cosas más del veredicto, para que las mires en esa corrida: (1) REQ-INV2-3-4 c (perfil oper, sin aviso de login): «controles de edición visibles: Proveedores 3»; en la corrida 3 pasó; ¿pudo quedar con la sesión de otro perfil al fallar el login? (2) INC-126 e falla en el guion mismo («_readP is not defined» en verFlujoBase) y las capturas *-error.png se pisan entre guiones con la misma letra; convendría nombrarlas con el guion.",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-434",
+   "fecha": "2026-10-14",
+   "hora": "22:39",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-111: la cuarta corrida no vale (la guardia nueva cortó el login)",
+   "texto": "Con pw 0.5.24 la guardia cortó el inicio de sesión en 27 de 35 casos, así que la regresión cayó en cascada y el juez dejó L-111 no aceptado. No es del lote: la corrida 3 con el mismo código salió verde. Pedí al Arquitecto el arreglo y otra corrida (M-433). L-103 sigue preparado (p5c91) y sin encolar hasta que L-111 quede aceptado. Solo informativo.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

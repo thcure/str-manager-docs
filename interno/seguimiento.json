@@ -9322,7 +9322,7 @@
    "categoria": "normal",
    "resumen": "Subidas en serie por colección; sin doble PUT de turnos en HK; reintentos de conexión con espera aleatoria; p5c90.",
    "estado": "no aceptado",
-   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64.",
+   "observacion": "ok de Diseño 21:38 (M-424). Encolado 21:39. CLI: 98504bb, 64/64. · 22:32 cuarta corrida (pw 0.5.24) inválida: la guardia cortó POST /api/login en 27 de 35 casos de regresión (sin sesión: timeouts, #hkFrame vacío, página de login p5c84); se pide arreglo y reprueba (M-433)",
    "hash": "98504bb",
    "aceptacion": {
     "lote": "L-111",
@@ -9488,6 +9488,93 @@
     ],
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Único criterio en rojo: d, por el margen de 1ms descrito en el INC; el resto (a, b, c) cumple. La letra e no aplica porque su precondición (d en rojo por «turnos 500») no se dio. No hubo capturas N3 que revisar (n3Preparados vacío), consistente con que la única letra N3 de este lote (e) no requiere captura y no aplicó."
+   },
+   "aceptacion4": {
+    "lote": "L-111",
+    "hash": "98504bb",
+    "fecha": "2026-10-14",
+    "horaBogota": "22:32",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1.observado: node tests/run.js: 64/64 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1.observado: node tests/run.js: 64/64 archivos OK (sin aviso de OMITIDA por falta de php)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 · db true | si: iframe de HK cargado: sí | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c90 (versión ≥ p5c90: el guion corre como regresión en lotes siguientes) | si: str-api.js en HK: p5c90 · STRApi.col.enVuelo: function"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: NO: turno de la corrida: no se creó en a | error: page.waitForSelector: Timeout 30000ms exceeded. (cascada: a falló con 'error: page.click: Timeout 30000ms exceeded.' tras 'si: lastpush alineado: 6 turnos'; b y c de ese mismo guion fallan por la misma causa: turno no creado en a)"
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "No aplica: la precondición de e exige que d esté en rojo 'solo por turnos 500 con tarea marcada: sí'. El observado real de d es 'turno de la corrida: no se creó en a' + timeout de click en a, no un 500 de turnos. No hay campo cronologia en el registro de d para juzgar la excepción de todas formas."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "e",
+      "motivo": "precondición no verificada en los datos (d no falló por 'turnos 500'); además el registro de pruebas.json no trae 'cronologia' para d, que es lo que el criterio e pide juzgar"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "REQ-INV2-7-1-hk-turno.spec.js (a, b, c, d): no se pudo verificar el flujo de cierre de turno del colaborador; la regresión que cierra INC-128 sale en rojo",
+      "nivel": "crítico",
+      "causa": "En el caso a, los turnos de la semilla llegan bien ('lastpush alineado: 6 turnos') pero un click sobre la UI de HK no encuentra su objetivo en 30 s; al no crearse el turno de la corrida, b, c y d (fotos, conteos, marca de tarea) fallan en cascada por dependencia del mismo turno. No hay evidencia en los datos disponibles de si el click timeout lo causó el cambio de este lote en _toggleTask/_actualizarEtapasEstado o algo externo (sesión, carga de HK); pero es precisamente el escenario que debía demostrar que turnos y conteos quedan en serie, y no se pudo observar.",
+      "observado": "a: 'si: lastpush alineado: 6 turnos | error: page.click: Timeout 30000ms exceeded.' · b: 'NO: turno de la corrida: no se creó en a | error: page.waitForSelector: Timeout 30000ms exceeded.' · c: igual que b · d: igual que b"
+     },
+     {
+      "titulo": "El iframe de HK no carga (o llega vacío) para el colaborador en varios guiones de regresión",
+      "nivel": "crítico",
+      "causa": "En varios guiones con perfil colab/admin sobre portal.html, el elemento #hkFrame no aparece o su contenido no trae lo esperado (cero zonas/lugares recibidos, STRApi no listo). Con los datos disponibles no se puede aislar si lo rompió el cambio de este lote en str-m1-housekeeping.html o es un problema de despliegue/sesión del entorno de prueba; de cualquier modo bloquea al colaborador en los flujos afectados.",
+      "observado": "INC-126.spec.js c: 'error: page.evaluate: TypeError: Cannot read properties of null (reading getAttribute)' · INC-126.spec.js d: 'NO: iframe de HK cargado: no' · INC-127.spec.js b: 'NO: iframe de HK cargado: no' · L-108.spec.js b: 'TypeError: Cannot read properties of null (reading getAttribute)' · REQ-INV2-7-1-hk.spec.js h: 'NO: HK pidió /api/col/inv-sububicaciones: sin respuesta | Failed to find element matching selector #hkFrame' · REQ-INV2-4-1-interfaz.spec.js c: 'NO: zonas recibidas por el colaborador: 0 | NO: llega base: no' · REQ-INV2-7-1.spec.js f: 'NO: HK pidió /api/col/inv-sububicaciones al cargar | NO: llegan los lugares de base'"
+     },
+     {
+      "titulo": "str-inventario.html (perfil admin/oper) no responde en múltiples guiones: timeout esperando selector, y en un caso la conexión se cerró",
+      "nivel": "medio",
+      "causa": "14 casos distintos sobre /str-inventario.html fallan con 'page.waitForSelector: Timeout 30000ms exceeded' (uno con 'net::ERR_CONNECTION_CLOSED'), todos ajenos a lo que tocó este lote (str-inventario.html no está en su Alcance). Con los tres archivos disponibles no se puede determinar si es una caída puntual del entorno/servidor durante la corrida o algo que arrastra el despliegue; no hay evidencia que lo vincule al cambio de _colCola o a conReintento.",
+      "observado": "INC-125.spec.js b, d · REQ-INV2-3-4.spec.js a, b, j · REQ-INV2-4-1-interfaz.spec.js b, d · REQ-INV2-7-1.spec.js a, b, c, d, e (ERR_CONNECTION_CLOSED), g, l — todos con el mismo patrón de timeout o de conexión cerrada"
+     },
+     {
+      "titulo": "REQ-INV2-3-4.spec.js c: el operador sin inventario.editar ve controles de edición en Proveedores",
+      "nivel": "crítico",
+      "causa": "El observado es explícito: 'controles de edición visibles: Pendientes 0 · Proveedores 3' — un perfil sin el permiso inventario.editar ve 3 controles de edición en Proveedores que no debería ver (acceso indebido a funciones de edición).",
+      "observado": "NO: controles de edición visibles: Pendientes 0 · Proveedores 3"
+     },
+     {
+      "titulo": "INC-127.spec.js c: el Calendario no recibe los turnos del HK oculto",
+      "nivel": "medio",
+      "causa": "El evento hk:turnos no llega al Calendario dentro de los 30 s de espera; no hay datos para saber si lo afectó el cambio de este lote en str-m1-housekeeping.html.",
+      "observado": "NO: hk:turnos en el Calendario: no llegó en 30 s"
+     },
+     {
+      "titulo": "INC-126.spec.js e: el guion de prueba falla por un error propio, no se pudo evaluar la app",
+      "nivel": "bajo",
+      "causa": "ReferenceError: _readP is not defined dentro del page.evaluate del propio guion — es un defecto del script de prueba (función auxiliar no definida), no una observación sobre la aplicación.",
+      "observado": "NO: HK admin · error: page.evaluate: ReferenceError: _readP is not defined at verFlujoBase"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Las capturas de log\\capturas\\L-111 solo se nombran por letra+nombre (a-error.png, b-error.png, ...) y se pisan entre guiones distintos que comparten letra de caso (p.ej. REQ-INV2-3-4.spec.js a, REQ-INV2-7-1-hk-turno.spec.js a y REQ-INV2-7-1.spec.js a escriben todas en 'a-error.png'); no se usaron para este veredicto porque el único criterio N3 del lote (e) viene marcado 'sin captura' en la instrucción y n3Preparados está vacío. Hallazgo adicional fuera de los criterios formales: varias regresiones que pasan (REQ-INV2-4-1-interfaz.spec.js e, REQ-INV2-4-1.spec.js g, REQ-INV2-7-1.spec.js j, REQ-INV2-3-4.spec.js j) muestran str-inventario.html todavía servido con 'str-api.js?v=p5c84', no p5c90; el Alcance de L-111 pide el bump p5c89→p5c90 en 12 sitios, uno de ellos str-inventario.html. Ningún criterio de este lote lo exige en ≥p5c90 directamente, pero es evidencia de que ese sitio no quedó desplegado con la versión nueva."
    }
   }
  ],
@@ -11159,10 +11246,10 @@
    "resumen": "str-api: una subida en vuelo por colección (serie); HK: sin doble PUT de turnos al marcar el conteo; servidor: reintentos con espera aleatoria (80–250, 160–500 ms) y log con el mensaje del sistema; p5c90",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "cuarta corrida con pw 0.5.24 (enVuelo, tolerancia 5 ms; M-431)",
+   "esperaA": "Arquitecto",
+   "espera": "guardia de pw 0.5.24 deja pasar /api/login y reprueba (M-433)",
    "orden": 121.118,
-   "desde": "2026-10-14 22:17",
+   "desde": "2026-10-14 22:39",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23. · Tercera corrida (pw 0.5.23, 22:07): cola VERDE; PUT turnos en serie (+0→+160, +160→+325) y movimientos a +324: el juez marca d por 1 ms (orden de eventos del navegador, como explicó el Arquitecto en M-427)."

@@ -11021,8 +11021,107 @@
    "req": "guion K3b",
    "categoria": "normal",
    "resumen": "Guion de K3b con foto de recepción y sus comprobaciones",
-   "estado": "registrado",
-   "observacion": "Encolado 03:14 (ok de Diseño M-466)."
+   "estado": "no aceptado",
+   "observacion": "Encolado 03:14 (ok de Diseño M-466). · Construido 8903b67 (74/74). · 03:47 juez: no aceptado por la regresión (31 casos en rojo); causa de entorno: el perfil admin sale con la pantalla de login en HK y caen en cascada los turnos de la corrida (también el «ficha» de REQ-INV2-4-1-interfaz c, porque b no llegó a quitar el acceso). Pedido al Arquitecto (M-471, M-472); se reprueba tras su arreglo",
+   "hash": "8903b67",
+   "aceptacion": {
+    "lote": "L-122",
+    "hash": "8903b67",
+    "fecha": "2026-10-15",
+    "horaBogota": "03:47",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK (incluye las comprobaciones de K3b en tests/e2e-esquema.test.js y A8 de tests/drive-copia.test.js)."
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "Regresión de la zona inventario: 31 casos en rojo entre los guiones de esa zona, no está en verde (detalle en incs)."
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "Reprueba de L-117 sobre REQ-K3b-aviso.spec.js: c (foto de la recepción 200 y 1/1) y d (miniatura con su ☁ en #hkTraspaso) en NO porque el turno de la corrida no se creó en b (clic en «Crear turno y enviar link»: Timeout 30000ms). g (N3, captura de la insignia) queda en criteriosPendientes por falta de captura. f queda fuera de este juicio (Drive conectado) y pasa a dispositivo para el N4 h de Carlos."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "g (REQ-K3b-aviso.spec.js, N3: insignia ☁ en la miniatura de la foto, sin tapar la foto)",
+      "motivo": "el guion no preparó la captura: no hay insignia-drive.png en log\\capturas\\L-122 y n3Preparados viene vacío."
+     }
+    ],
+    "dispositivo": [
+     {
+      "c": "f (REQ-K3b-aviso.spec.js, N3: aviso fijo legible a 390 px)",
+      "que": "con «negocio» con Drive conectado el aviso no se pinta y f no se puede juzgar aquí; pruébalo en el celular sin Drive conectado (N4 h de Carlos)."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "El clic en «Crear turno y enviar link» no responde (Timeout 30000ms) en /str-m1-housekeeping.html",
+      "nivel": "crítico",
+      "causa": "el botón de crear turno no completa su acción en 30 s en varios guiones de la misma corrida, bloqueando la preparación de turnos de prueba.",
+      "observado": "INC-131.spec.js b: lastpush alineado 6 turnos | Timeout en el clic. REQ-INV2-3-4-hk.spec.js a: str-api.js p5c84 (<p5c92) | Timeout en el clic. REQ-K3b-aviso.spec.js b: lastpush alineado 10 turnos | Timeout en el clic. REQ-INV2-7-1-hk-turno.spec.js a: lastpush alineado 10 turnos | Timeout en el clic."
+     },
+     {
+      "titulo": "Casos sin turno propio por la cascada del INC anterior",
+      "nivel": "medio",
+      "causa": "cascada del bloqueo de «Crear turno»: sin turno creado en el primer caso de cada guion, los casos siguientes no tienen con qué trabajar.",
+      "observado": "INC-131.spec.js c; REQ-INV2-3-4-hk.spec.js c, e, g0, g, j, k, l; REQ-K3b-aviso.spec.js c, d; REQ-INV2-7-1-hk-turno.spec.js b, c, d: todos «turno de la corrida: no se creó» o Timeout a la espera de ese turno."
+     },
+     {
+      "titulo": "net::ERR_CONNECTION_CLOSED al navegar a portal.html",
+      "nivel": "medio",
+      "causa": "el servidor cerró la conexión (o se perdió la red) justo al navegar; no se repitió el caso aparte para saber si es puntual.",
+      "observado": "REQ-INV2-3-4-hk.spec.js h: error: page.goto: net::ERR_CONNECTION_CLOSED at https://app.apartamentosbucaramanga.com/portal.html"
+     },
+     {
+      "titulo": "Estado de Drive no se obtuvo en REQ-K3b-aviso e",
+      "nivel": "medio",
+      "causa": "cascada de los dos INCs de «Crear turno»: sin el turno de b, el estado de Drive tampoco llegó al navegar a str-app-shell.html.",
+      "observado": "REQ-K3b-aviso.spec.js e: si /api/health schema_version 12 | NO: estado conectado null · avisoCorte null · retención null."
+     },
+     {
+      "titulo": "ReferenceError: _readP is not defined al leer el flujo base en HK",
+      "nivel": "medio",
+      "causa": "falta la función _readP en el contexto que evalúa verFlujoBase desde /str-m1-housekeeping.html; bug de la app, no de este lote (L-122 no toca HTML/JS de la app).",
+      "observado": "INC-126.spec.js e: page.evaluate: ReferenceError: _readP is not defined at verFlujoBase. REQ-INV2-4-2-dif.spec.js a: «HK con la entrega y recepción de L-107: no» | el mismo ReferenceError."
+     },
+     {
+      "titulo": "Turnos tA–tF de REQ-INV2-4-2-dif sin preparar",
+      "nivel": "medio",
+      "causa": "cascada del ReferenceError de 'a': sin esa preparación, los turnos y diferencias de b a i no se pudieron crear ni evaluar.",
+      "observado": "REQ-INV2-4-2-dif.spec.js b, c, d, e, f, g, i: turnos tA–tF no creados, diferencia preparada null, fotos del aviso en 0, zona a cargo vacía."
+     },
+     {
+      "titulo": "El colaborador recibe una zona con acceso revocado («ficha»)",
+      "nivel": "crítico",
+      "causa": "el filtro de zonas servidas al colaborador no excluye una zona cuyo acceso fue revocado: acceso indebido.",
+      "observado": "REQ-INV2-4-1-interfaz.spec.js c: si llega «base»; NO: zonas que no debían llegar: zz-verif-L-122-r-ficha."
+     },
+     {
+      "titulo": "Clic sin respuesta en la ficha de Zonas tras crear 5 zonas",
+      "nivel": "medio",
+      "causa": "mismo patrón de clic sin respuesta (Timeout 30000ms) que el INC de «Crear turno», aquí en la interfaz de Zonas.",
+      "observado": "REQ-INV2-4-1-interfaz.spec.js b: 5 zonas creadas, ninguna faltante | error: locator.click: Timeout 30000ms exceeded."
+     },
+     {
+      "titulo": "Contexto destruido al evaluar el calendario durante una navegación",
+      "nivel": "bajo",
+      "causa": "el guion evalúa la página justo cuando ésta navega a otra; parece una carrera del guion, no un bug de la app.",
+      "observado": "INC-127.spec.js c: error: page.evaluate: Execution context was destroyed, most likely because of a navigation."
+     }
+    ],
+    "datosDePrueba": "El guion de K3b (REQ-K3b-aviso.spec.js) no llegó a crear el turno de prueba zz-verif- (falló en b); limpiar() corrió sin error porque no había nada que borrar.",
+    "notas": "17 de los 31 casos en rojo son cascada de solo dos bloqueos puntuales: el clic en «Crear turno y enviar link» sin responder y un ReferenceError _readP is not defined pre-existente de la app. Ninguno de los dos coincide con las causas que M-435 reserva para el campo herramienta (guardia cortando POST /api/login, «sin sesión», net::ERR_CONNECTION_CLOSED como mayoría, o un error del propio pw), así que no se puso ese campo y el lote carga con el resultado. El bloque propio de K3b (§1 y §2 de la instrucción) no se tocó; el juicio se apoyó solo en lo que midió la cola y, para g, no hubo captura que mirar."
+   }
   }
  ],
  "esquema": {

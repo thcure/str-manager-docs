@@ -1,4 +1,4 @@
-// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; lo mantiene el Arquitecto, lo instala Carlos).
+// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; v3 M-467 15-oct-2026; lo mantiene el Arquitecto, lo instala Carlos).
 // Bloquea (exit 2 + motivo en stderr) tres cosas, de forma determinista:
 //  1. Comandos destructivos de git (reset --hard, push --force, checkout -- <archivo>, clean -f, branch -D).
 //  2. `git commit` con archivos fuera del Alcance de la instrucción del lote (env STR_INSTR), salvo que el mensaje
@@ -45,11 +45,35 @@ function cubierto(archivo, pats) {
   return SIEMPRE.some(r => r.test(a)) || pats.some(r => r.test(a));
 }
 
+// v3 (M-467, 15-oct-2026): la única forma permitida de volver un archivo a como está en HEAD es
+// `git restore <archivo>` (archivos sueltos, dentro del Alcance cuando hay STR_INSTR; nunca «.», «:/», comodines ni
+// carpetas). `git checkout -- …` sigue bloqueado, y también los rodeos conocidos (`git show HEAD:x > x`, `git show … | tee`).
+const VIA_RESTAURAR = 'para volver un archivo del Alcance a como está en HEAD usa «git restore <archivo>» (uno o varios archivos sueltos; no «.», comodines ni carpetas); si tampoco sirve, dilo en el cierre y para: no busques otra vía.';
+function restaurarPermitido(cmd, alcanceTexto) {
+  const m = cmd.match(/git\s+restore\s+(.*)$/m);
+  if (!m) return null;
+  const args = m[1].split(/\s+/).filter(Boolean);
+  if (args.some(a => /^--source\b|^-s$/.test(a))) return { ok: false, motivo: 'git restore --source trae otra versión: ' + VIA_RESTAURAR };
+  const archivos = args.filter(a => !a.startsWith('-'));
+  if (!archivos.length || archivos.some(a => a === '.' || a === ':/' || /[*?[]/.test(a) || a.endsWith('/'))) return { ok: false, motivo: 'git restore solo con archivos sueltos: ' + VIA_RESTAURAR };
+  if (alcanceTexto) {
+    const pats = patronesAlcance(alcanceTexto);
+    const fuera = archivos.filter(a => !cubierto(a.replace(/^\.?\//, ''), pats));
+    if (fuera.length) return { ok: false, motivo: 'git restore de archivos fuera del Alcance (' + fuera.join(', ') + '): ' + VIA_RESTAURAR };
+  }
+  return { ok: true };
+}
+
 // Función pura, con test en tests/hooks.test.js.
 function evaluar(cmd, staged, alcanceTexto, testsOk) {
   if (/git\s+(reset\s+--hard|push\s+[^\n]*--force|push\s+-f\b|checkout\s+--\s|clean\s+-f|branch\s+-D)/.test(cmd)) {
-    return { ok: false, motivo: 'Comando destructivo de git bloqueado por el hook del proyecto: usa git revert, git stash o una rama nueva (ficha APO01.10-k).' };
+    return { ok: false, motivo: 'Comando destructivo de git bloqueado por el hook del proyecto: usa git revert, git stash o una rama nueva (ficha APO01.10-k); ' + VIA_RESTAURAR };
   }
+  if (/git\s+(show|cat-file)\s+[^\n|>]*:[^\s|>]+[^\n]*(>|\|\s*tee\b)/.test(cmd)) {
+    return { ok: false, motivo: 'Escribir un archivo desde «git show <rev>:<ruta>» rodea el hook (M-467): ' + VIA_RESTAURAR };
+  }
+  const rr = restaurarPermitido(cmd, alcanceTexto);
+  if (rr && !rr.ok) return rr;
   if (!/git\s+commit\b/.test(cmd)) return { ok: true };
   if (testsOk === false) return { ok: false, motivo: 'tests en rojo: corre node tests/run.js y corrige antes del commit.' };
   const pats = patronesAlcance(alcanceTexto);
@@ -89,4 +113,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { evaluar, patronesAlcance, leerAlcance, cubierto };
+module.exports = { evaluar, patronesAlcance, leerAlcance, cubierto, restaurarPermitido };

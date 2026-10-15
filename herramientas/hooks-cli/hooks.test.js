@@ -19,4 +19,17 @@ t('stop: tests rojos bloquea', () => assert.equal(s.evaluar(false, { sucio: [], 
 t('stop: cambios sin commit bloquea', () => assert.equal(s.evaluar(false, { sucio: [' M str-api.js'], testsOk: true }).ok, false));
 t('stop: limpio y verde pasa', () => assert.equal(s.evaluar(false, { sucio: [], testsOk: true }).ok, true));
 t('stop: segunda vez deja terminar', () => assert.equal(s.evaluar(true, { sucio: ['x'], testsOk: false }).ok, true));
+// v3 (M-467): restaurar un archivo propio sin commit
+t('checkout -- sigue bloqueado y apunta a git restore', () => { const r = g.evaluar('git checkout -- str-api.js', [], alcance, null); assert.equal(r.ok, false); assert.ok(/git restore/.test(r.motivo)); });
+t('git show HEAD:x > x bloqueado (rodeo)', () => assert.equal(g.evaluar('git show HEAD:tests/e2e/K3b.spec.js > tests/e2e/K3b.spec.js', [], alcance, null).ok, false));
+t('git show HEAD:x | tee x bloqueado (rodeo)', () => assert.equal(g.evaluar('git show HEAD:str-api.js | tee str-api.js', [], alcance, null).ok, false));
+t('git show HEAD:x sin redirigir pasa (solo mirar)', () => assert.equal(g.evaluar('git show HEAD:str-api.js | head -20', [], alcance, null).ok, true));
+t('git restore <archivo del Alcance> pasa', () => assert.equal(g.evaluar('git restore str-api.js', [], alcance, null).ok, true));
+t('git restore tests/… (SIEMPRE) pasa', () => assert.equal(g.evaluar('git restore tests/e2e/K3b.spec.js', [], alcance, null).ok, true));
+t('git restore fuera del Alcance bloqueado', () => { const r = g.evaluar('git restore str-calendario.html', [], alcance, null); assert.equal(r.ok, false); assert.ok(/fuera del Alcance/.test(r.motivo)); });
+t('git restore . bloqueado', () => assert.equal(g.evaluar('git restore .', [], alcance, null).ok, false));
+t('git restore con comodín bloqueado', () => assert.equal(g.evaluar('git restore *.html', [], alcance, null).ok, false));
+t('git restore --source bloqueado', () => assert.equal(g.evaluar('git restore --source HEAD~1 str-api.js', [], alcance, null).ok, false));
+t('git restore --staged archivo pasa', () => assert.equal(g.evaluar('git restore --staged str-api.js', [], alcance, null).ok, true));
+t('sin alcance: git restore archivo suelto pasa, «.» no', () => { assert.equal(g.evaluar('git restore loquesea.html', [], null, null).ok, true); assert.equal(g.evaluar('git restore .', [], null, null).ok, false); });
 console.log('hooks.test.js: ' + n + ' pruebas OK');

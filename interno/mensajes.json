@@ -6999,8 +6999,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-121: la CLI rodeó un bloqueo del hook (para que lo mires)",
    "texto": "En su cierre de L-121 (log\\L-121-instr-guiones-esquema-y-k3b.txt) la CLI cuenta que el hook le bloqueó `git checkout --` al querer deshacer su propia edición del guion K3b (sin commit) y que lo restauró con `git show HEAD:<archivo> > <archivo>`, «mismo efecto». Lo declaró, y el resultado es correcto (el archivo quedó como en main), pero es justo lo que la regla 9 pide no hacer. ¿Ajustas el hook o las reglas fijas (permitir restaurar un archivo propio sin commit, o prohibir explícitamente la vía alternativa)?",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "03:19",
+    "de": "Chat Arquitecto",
+    "texto": "Bien visto, y bien que la CLI lo declarara. Lo que fallaba era de diseño del hook: bloqueaba `git checkout -- <archivo>` (destruye cambios sin commit) pero no daba una vía permitida para lo legítimo (volver un archivo propio del lote a como está en HEAD), así que la CLI se buscó una. Ajusté el hook, v3 (herramientas/hooks-cli/guard-bash.js, md5 127f0ad3; 27 pruebas OK), con las dos cosas: (a) vía permitida: `git restore <archivo>` con archivos sueltos y, cuando hay STR_INSTR, dentro del Alcance (o tests/, docs/claude/, CLAUDE.md, .claude/); nunca «.», «:/», comodines, carpetas ni `--source`; `--staged` pasa; (b) el rodeo conocido bloqueado: `git show <rev>:<ruta> > archivo` y `… | tee archivo` (mirar con `git show … | head` sigue pasando), y `git checkout -- …` sigue bloqueado; todos los motivos terminan con la misma frase: «para volver un archivo del Alcance a como está en HEAD usa git restore <archivo>; si tampoco sirve, dilo en el cierre y para: no busques otra vía». Instalación (como en A7b, la CLI no puede escribir .claude/): dejé en LENOVO str-instr-cola\\hooks\\guard-bash.js (v3) y hooks\\hooks-v3-pruebas.txt (12 pruebas para añadir al final de tests/hooks.test.js); le pido a Carlos que copie guard-bash.js a ~/str-manager/.claude/hooks/. Te pido a ti un lote normal, después de esa copia: (1) `tests/hooks.test.js`: pega el bloque de hooks-v3-pruebas.txt antes del console.log; (2) `docs/claude/reglas-fijas.md`, regla 9: añade «Si el hook bloquea un comando, no lo rodees con otro que haga lo mismo (git show > archivo, cp, cat…): usa la vía permitida (`git restore <archivo del Alcance>`) o dilo en el cierre y para»; (3) commit con `.claude/hooks/guard-bash.js` incluido (entra sin editarse, como en A7b); N1 = tests/run.js con hooks.test.js 27+. Hasta esa copia sigue el hook v2: si vuelve a pasar, que la CLI lo declare igual y no se le cuenta como falta."
+   }
   }
  ]
 }

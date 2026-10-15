@@ -183,3 +183,21 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   assert.strictEqual(d('/api/drive/cron', '{"zz-verif-":1}').ok, false, 'pasada programada de la copia: nunca');
   console.log('guardia.test.js: corte de prueba de Drive: 6 OK');
 }
+
+// v0.5.32 (recuperar sesión con «Continuar con Google»): la ventana de Google solo pasa mientras RECUPERANDO.activo
+{
+  const { RECUPERANDO } = require('./comun');
+  const g = (url, metodo) => decidir(url, metodo || 'GET', null, new Set(), new Set());
+  assert.strictEqual(g('https://accounts.google.com/o/oauth2/auth?x=1').ok, false, 'fuera de la recuperación: accounts.google.com no pasa');
+  RECUPERANDO.activo = true;
+  try {
+    assert.strictEqual(g('https://accounts.google.com/o/oauth2/auth?x=1').ok, true, 'durante la recuperación: accounts.google.com pasa');
+    assert.strictEqual(g('https://str-hospedaje.firebaseapp.com/__/auth/handler').ok, true, 'durante la recuperación: el manejador de Firebase pasa');
+    assert.strictEqual(g('https://accounts.google.com/signin/x', 'POST').ok, true, 'durante la recuperación: POST a Google pasa');
+    assert.strictEqual(g(B + '/api/login', 'POST').ok, true, 'durante la recuperación: POST /api/login pasa (como siempre)');
+    assert.strictEqual(g(B + '/api/col/turnos', 'PUT').ok, false, 'durante la recuperación: una escritura al STR sin zz sigue cortada');
+    assert.strictEqual(g('https://evil.example.com/x').ok, false, 'durante la recuperación: otro host sigue fuera');
+  } finally { RECUPERANDO.activo = false; }
+  assert.strictEqual(g('https://accounts.google.com/o/oauth2/auth').ok, false, 'después: accounts.google.com vuelve a no pasar');
+  console.log('guardia.test.js: recuperación de sesión: 8 OK');
+}

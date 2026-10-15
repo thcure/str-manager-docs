@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { BASE, COLA, abrir, explicarError } = require('./comun');
+const { BASE, COLA, abrir, explicarError, recuperarSesion } = require('./comun');   // v0.5.32: recuperarSesion
 const { extraerGuion, igual, loteDe, correrGuion, cargar } = require('./guion');
 const { comprobarSemilla } = require('./semilla');
 
@@ -69,8 +69,10 @@ async function sesionViva(perfil) {
     // v0.5.28 (M-474): la app exige el usuario de Google/Firebase antes de mirar /api/me; si el perfil lo perdió, el shell
     // va a login.html sin pedir nada (o con /api/me 200 y aun así a login). Eso también es «sin sesión» y bloquea.
     await p.waitForTimeout(1500);
-    const enLogin = /\/login\.html/.test(p.url()) || await p.locator('input[type="password"]').count().catch(() => 0) > 0;
-    if (enLogin) return { ok: false, observado: perfil + ': el shell termina en login.html (sesion de Google/Firebase del perfil perdida; /api/me ' + (r ? r.status() : 'no pedido') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
+    let enLogin = /\/login\.html/.test(p.url()) || await p.locator('input[type="password"]').count().catch(() => 0) > 0;
+    // v0.5.32: antes de bloquear, intenta recuperarla como lo hace Carlos (Continuar con Google, sin contraseña)
+    if (enLogin) { const rec = await recuperarSesion(ctx, p, perfil); if (rec.ok) return { ok: true, observado: rec.observado, recuperada: true }; enLogin = true; var motivoRec = rec.observado; }
+    if (enLogin) return { ok: false, observado: perfil + ': el shell termina en login.html (sesion de Google/Firebase del perfil perdida; /api/me ' + (r ? r.status() : 'no pedido') + '; recuperación automática: ' + (motivoRec || '—') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
     return r && r.status() === 200 ? { ok: true, observado: perfil + ': /api/me 200' } : { ok: false, observado: perfil + ': sin sesion (/api/me ' + (r ? r.status() : 'sin respuesta') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
   } catch (e) { return { ok: false, observado: perfil + ': ' + explicarError(e, perfil) }; }
   finally { if (ctx) await ctx.close().catch(() => { }); }

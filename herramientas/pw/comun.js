@@ -47,6 +47,11 @@ const PERFILES = { admin: 'zz-verif-admin', oper: 'zz-verif-oper', colab: 'zz-ve
 const HOSTS_OK = [HOST_STR, HOST_MODELO, 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
   'firestore.googleapis.com', 'www.googleapis.com', 'apis.google.com', 'www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
+// v0.5.32: hosts de la ventana de «Continuar con Google»; la guardia solo los deja pasar mientras recuperarSesion()
+// está en curso (RECUPERANDO.activo). Ninguno lleva datos del negocio; al STR solo pasa POST /api/login, como siempre.
+const HOSTS_IDENTIDAD = ['accounts.google.com', 'accounts.youtube.com', 'ssl.gstatic.com', 'www.google.com', 'play.google.com',
+  'content-autofill.googleapis.com', 'lh3.googleusercontent.com', 'str-hospedaje.firebaseapp.com', 'str-hospedaje.web.app'];
+const RECUPERANDO = { activo: false };
 // v0.4.3 (INC-119): el grupo Proyecto lee str-manager-docs de GitHub (raw y la API de commits). Solo lectura.
 const HOSTS_SOLO_LECTURA = ['raw.githubusercontent.com', 'api.github.com'];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
@@ -121,6 +126,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   try { u = new URL(url); } catch (e) { return { ok: false, motivo: 'url invalida' }; }
   if (u.protocol === 'data:' || u.protocol === 'blob:') return { ok: true };
   if (HOSTS_SOLO_LECTURA.includes(u.hostname)) return LECTURA.includes(String(metodo).toUpperCase()) ? { ok: true } : { ok: false, motivo: 'escritura a ' + u.hostname + ' (solo lectura)' };
+  if (RECUPERANDO.activo && (HOSTS_IDENTIDAD.includes(u.hostname) || /\.firebaseapp\.com$/.test(u.hostname))) return { ok: true, nota: 'ventana de Google durante la recuperación de sesión' };   // v0.5.32
   if (!HOSTS_OK.includes(u.hostname)) return { ok: false, motivo: 'host fuera de la lista: ' + u.hostname };
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
   if (u.hostname !== HOST_STR && u.hostname !== HOST_MODELO) return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
@@ -285,4 +291,43 @@ async function abrir(usuario, opciones = {}) {
   return { ctx, bitacora };
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError };
+// v0.5.32 (Carlos, 15-oct: «solo le dije Continuar con Google y se logeó automáticamente»): si un perfil de prueba perdió
+// la sesión de Firebase pero su Chrome sigue con la cuenta de Google abierta, pw la recupera igual que él: pulsa
+// «Continuar con Google» en login.html, en la ventana emergente de Google elige la cuenta ya abierta (o «Continuar») y
+// espera el /api/me 200. NUNCA escribe correo ni contraseña: si Google pide alguno, se rinde y lo dice (ahí sí hace falta
+// Carlos con abrir-perfil.js). Devuelve { ok, observado }.
+async function recuperarSesion(ctx, page, perfil) {
+  const paso = [];
+  RECUPERANDO.activo = true;
+  try {
+    if (!/\/login\.html/.test(page.url())) { await page.goto(BASE + '/login.html', { waitUntil: 'domcontentloaded' }); }
+    const boton = page.locator('button:has-text("Continuar con Google"), a:has-text("Continuar con Google")').first();
+    if (!(await boton.count())) return { ok: false, observado: (perfil || '') + ': login.html sin botón «Continuar con Google»' };
+    const emergente = ctx.waitForEvent('page', { timeout: 15000 }).catch(() => null);
+    await boton.click(); paso.push('clic en Continuar con Google');
+    const pop = await emergente;
+    if (pop) {
+      paso.push('ventana de Google abierta');
+      const fin = Date.now() + 25000;
+      while (Date.now() < fin && !pop.isClosed()) {
+        const pide = await pop.locator('input[type="password"], input[type="email"], input[name="identifier"]').count().catch(() => 0);
+        if (pide) { await pop.close().catch(() => { }); return { ok: false, observado: (perfil || '') + ': Google pide correo o contraseña (la sesión de Google del perfil también se perdió): Carlos con abrir-perfil.js ' + (perfil || '') , paso }; }
+        const cuenta = pop.locator('[data-identifier], [data-email], li[role="link"], div[role="link"][data-authuser]').first();
+        if (await cuenta.count().catch(() => 0)) { await cuenta.click().catch(() => { }); paso.push('cuenta elegida'); await pop.waitForTimeout(1500); continue; }
+        const continuar = pop.locator('button:has-text("Continuar"), button:has-text("Continue"), button:has-text("Permitir"), button:has-text("Allow")').first();
+        if (await continuar.count().catch(() => 0)) { await continuar.click().catch(() => { }); paso.push('Continuar'); await pop.waitForTimeout(1500); continue; }
+        await pop.waitForTimeout(500);
+      }
+      if (!pop.isClosed()) { await pop.close().catch(() => { }); return { ok: false, observado: (perfil || '') + ': la ventana de Google no terminó sola en 25 s', paso }; }
+    }
+    // la página de login hace POST /api/login y navega al shell o al portal
+    const me = await page.waitForResponse(r => /\/api\/me$/.test(new URL(r.url()).pathname) && r.status() === 200, { timeout: 30000 }).catch(() => null);
+    await page.waitForTimeout(1000);
+    const enLogin = /\/login\.html/.test(page.url());
+    if (me && !enLogin) return { ok: true, observado: (perfil || '') + ': sesión recuperada con «Continuar con Google» (sin contraseña); /api/me 200', paso };
+    return { ok: false, observado: (perfil || '') + ': tras Continuar con Google sigue en ' + page.url().replace(BASE, '') + (me ? '' : ' (sin /api/me 200)'), paso };
+  } catch (e) { return { ok: false, observado: (perfil || '') + ': recuperar sesión falló: ' + String(e && e.message || e).split('\n')[0].slice(0, 200), paso }; }
+  finally { RECUPERANDO.activo = false; }
+}
+
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError, recuperarSesion, RECUPERANDO, HOSTS_IDENTIDAD };

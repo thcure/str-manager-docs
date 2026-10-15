@@ -66,6 +66,10 @@ function resumirEscrituras(pasaron) {
   }
   return [...g].map(([k, n]) => n > 1 ? k + ' (x' + n + ')' : k);
 }
+// v0.5.30: hora de Bogotá HH:MM:SS, para que el juez compare con las capturas.
+function horaBogota(d = new Date()) {
+  return new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(d).replace(/^24/, '00');
+}
 function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = []) {
   const n3 = caso.nivel === 'N3';
   const fallan = esperas.filter(e => !e.ok);
@@ -163,7 +167,11 @@ async function correrGuion(spec, opciones = {}) {
         // v0.5.25 (M-433): también cuando falla una espera sin reventar (p. ej. un control visible que no debía)
         if ((error || esperas.some(e => !e.ok)) && caso.nivel !== 'N3') { try { await h.captura('error', { esperaMs: 0, completa: false }); } catch (e2) { } }
         const tramo = a.bitacora.slice(marca);
-        resultados.push(cerrarCaso(caso, esperas, error, tramo.filter(b => !b.paso), capturas, tramo.filter(b => b.paso)));
+        const rc = cerrarCaso(caso, esperas, error, tramo.filter(b => !b.paso), capturas, tramo.filter(b => b.paso));
+        // v0.5.30 (M-487): orden real de ejecución y hora de cierre (Bogotá), porque los casos corren agrupados por perfil
+        // y un caso que depende de otro de un perfil posterior corre ANTES de él: el juez lo ve aquí sin deducirlo.
+        rc.orden = resultados.length + 1; rc.hora = horaBogota();
+        resultados.push(rc);
         await page.close().catch(() => { });
       }
     } catch (e) {
@@ -200,7 +208,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, correrGuion, cargar, MARCA };
+module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

@@ -177,5 +177,11 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   const rP = cerrarCaso({ c: 'a', perfil: 'admin' }, [{ ok: true, observado: 'x' }], null, [], [], []);
   t('N2 que pasa: sin capturas', rP.ok === true && rP.capturas === undefined);
 }
+{ // v0.5.30 (M-487): hora de Bogotá con segundos, para que el juez compare el orden real con las capturas
+  const { horaBogota } = require('./guion');
+  t('horaBogota: HH:MM:SS', /^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(horaBogota()));
+  t('horaBogota: 15-oct 15:00Z = 10:00:00 Bogotá', horaBogota(new Date('2026-10-15T15:00:00Z')) === '10:00:00');
+  t('horaBogota: 05:00Z = 00:00:00 (no 24:00)', horaBogota(new Date('2026-10-15T05:00:00Z')) === '00:00:00');
+}
 console.log(ok + ' OK, ' + fail + ' FAIL');
 process.exit(fail ? 1 : 0);

@@ -8,7 +8,7 @@ Riesgo: bajo.
 Reversión: `git revert` y volver a pw anterior (pw\anterior\: package.json y LEEME); metricas.js deja de correr.
 Origen: Carlos 15-oct-2026; LM-38. Requerimiento: interno/mejoras.json › MJ-8. Revisión previa: Desarrollo, M-515.
 Depende de: nada; va primero (orden 39c → 39a → 39b → 39d).
-Estado: instalado (15-oct 18:20; aprobación: Carlos «dale», 18:00, tras la propuesta de orden 39c → 39b/39d → 39a). Pendiente: prueba b (la cola corre correr\metricas.txt y fija la línea base) y c. Las columnas de cuarentena y de no corridos salen «n.a.» hasta que existan 39a y 39b.
+Estado: instalado (15-oct 18:20; aprobación: Carlos «dale», 18:00). Prueba b hecha: la cola corrió correr\metricas.txt a las 18:10 y dejó log\METRICAS.json; **línea base semana del 12-oct (LENOVO, todos los logs): 52 lotes con actividad, 80 corridas, 33 repruebas, 43 verdes / 26 rojos (73 % ajenos al lote) / 10 bloqueadas, cola 5,2 min y pw 4,7 min por corrida, 31 veredictos aceptados, 0,7 h construido → aceptado, 0 casos en alerta**. Prueba c: humo-pw verde 18:27. Las columnas de cuarentena y de no corridos salen «n.a.» hasta que existan 39a y 39b.
 ¿Quién más depende?: la revisión semanal; Seg. Proyecto si Diseño lo pide (REQ aparte).
 
 ## Qué hace

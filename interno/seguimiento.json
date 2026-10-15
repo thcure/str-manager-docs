@@ -749,12 +749,12 @@
    "id": "INC-133",
    "tipo": "INC",
    "modulo": "HK · cola de subida",
-   "etapa": "✅",
+   "etapa": "🔍",
    "fecha": "2026-10-15",
    "severidad": "medio",
    "titulo": "Una foto de la entrega no sale de la cola en 30 s y queda «fallida» (REQ-INV2-4-2 c, colab2)",
    "causa": "Sin causa confirmada: en la cronología no sale ningún POST /api/upload entre +1,4 s y +31,5 s; el siguiente da 200. L-117 no toca la subida. Puede ser la cola del cliente o un corte de red; si se repite, se mira junto con INC-132.",
-   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió)."
+   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno."
   }
  ],
  "dts": [
@@ -11387,7 +11387,7 @@
    "categoria": "normal",
    "resumen": "Guion K3b: d y g con perfil oper (la cola agrupa por perfil y corría d antes que c)",
    "estado": "no aceptado",
-   "observacion": "Encolado 10:45 (ok de Diseño M-486). Origen: L-116-veredicto-3, nota 2. · Construido 3df5fb3 (74/74, e2e-esquema 11/11). · 11:49 reprueba encolada (limpiar-zz va primero en el ciclo, M-494) · 11:41 juez: no aceptado solo por la regresión (turnos zz residuales; herramienta); su caso d con oper en verde (miniatura e insignia ☁ «en-espera» = servidor). 11:42 limpiar-zz borró los 4 turnos; reprueba en la cola · 13:59 reprueba encolada tras reponer la sesión del admin (12:35); correr: sesiones + limpiar-zz antes",
+   "observacion": "Encolado 10:45 (ok de Diseño M-486). Origen: L-116-veredicto-3, nota 2. · Construido 3df5fb3 (74/74, e2e-esquema 11/11). · 11:49 reprueba encolada (limpiar-zz va primero en el ciclo, M-494) · 11:41 juez: no aceptado solo por la regresión (turnos zz residuales; herramienta); su caso d con oper en verde (miniatura e insignia ☁ «en-espera» = servidor). 11:42 limpiar-zz borró los 4 turnos; reprueba en la cola · 13:59 reprueba encolada tras reponer la sesión del admin (12:35); correr: sesiones + limpiar-zz antes · 14:24 reprueba (juez): no aceptado; su caso d (oper) en verde; rojo: REQ-INV2-4-2 c (INC-133 de nuevo); captura g no generada en esta corrida (sí en L-117-veredicto-4, mismo guion, g ok). Consulta al Arquitecto sobre usar L-117-v4 como evidencia (M-503)",
    "hash": "3df5fb3",
    "aceptacion": {
     "lote": "L-126",
@@ -11427,6 +11427,51 @@
     "datosDePrueba": "REQ-K3b-aviso.spec.js: limpiar() corrió sin error (borra el turno zz-verif- de la corrida por id)",
     "notas": "Resultado «no aceptado» por el criterio b: la regresión de inventario no quedó toda en verde. La causa de las letras en rojo (REQ-INV2-4-2-dif.spec.js y REQ-INV2-4-2.spec.js) no es del cambio de este lote: las capturas REQ-INV2-4-2-dif-a-error y REQ-INV2-4-2-dif-b-error muestran la app con sesión normal (no es pantalla de login) pero con turnos de hoy en zz-verif-Propiedad ya creados desde las 05:00 a las 08:00, de una corrida anterior sin limpiar (viola la precondición de L-114/L-107 de no tener turnos zz de otra corrida hoy); eso dejó sin crear los turnos tA–tF y en cascada todos los casos que dependían de ellos (\"no se creó en a\", timeouts). Más adelante la conexión al servidor se cerró (net::ERR_CONNECTION_CLOSED en REQ-INV2-4-2-dif f y en REQ-INV2-4-2 i y k), que por regla del juez también es causa de herramienta/entorno. Por eso se marca herramienta y no se abren INC: la corrida se debe repetir con el entorno limpio (sin turnos zz de una corrida previa) y con la conexión estable. El criterio c (N3, captura g) queda pendiente porque el guion no la preparó.",
     "herramienta": "turnos zz de una corrida anterior sin limpiar en zz-verif-Propiedad antes de las 08:30/10:30 de hoy (viola la precondición) más una caída de conexión (net::ERR_CONNECTION_CLOSED) durante la corrida; afecta solo a REQ-INV2-4-2-dif.spec.js y REQ-INV2-4-2.spec.js, no al guion de este lote"
+   },
+   "aceptacion2": {
+    "lote": "L-126",
+    "hash": "3df5fb3",
+    "fecha": "2026-10-15",
+    "horaBogota": "14:24",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "REQ-K3b-aviso.spec.js d (el caso propio del lote) en verde: miniatura de la foto en el registro del operador sí (#hkTraspaso), insignia del cliente igual a la del servidor (en-espera), GET /api/drive/copias 200 sin secretos. Pero la regresión declarada (zona inventario) no queda toda en verde: REQ-INV2-4-2.spec.js c (perfil colab2, entrega de zona de zz-verif-Principal) dio ok:false — 1 foto no se pudo subir, no es caso de este lote pero sí de su zona de regresión"
+     },
+     {
+      "c": "c",
+      "nivel": "N3",
+      "ok": null,
+      "observado": "Captura g (insignia ☁ sobre la miniatura) no está disponible: n3Preparados viene vacío en log\\L-126-pruebas.json y no existe ningún log\\capturas\\L-126\\g-*.png ni f-*.png; el guion no preparó las capturas de este lote"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c",
+      "motivo": "el guion no preparó la captura (n3Preparados vacío; sin PNG/TXT de la letra g en log\\capturas\\L-126)"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Entrega de zona (inventario): una foto del conteo de cierre no confirma su subida (⚠ en la miniatura, banner «1 foto no se pudo subir»)",
+      "nivel": "medio",
+      "causa": "el POST /api/upload de una de las cinco fotos de «Foto al cierre» de la entrega de zona (sububicación su_mv8jpjk5l5qfu, artículo ar_mv8jpguytag40) no devolvió respuesta dentro del tiempo del guion (queda «—» en el detalle, frente a 200 de las otras cuatro); el portal deja esa miniatura con ⚠ en vez de ✓ y muestra el banner rojo «1 foto no se pudo subir → abrir turno», aun cuando el resto de la entrega (6/6 movimientos) terminó en 200",
+      "observado": "captura log\\capturas\\L-126\\REQ-INV2-4-2-c-error.png: dentro de #hkFrame, en «Entrega de zona: zz-verif-Principal», la miniatura de zz-verif-Inv B1 muestra ⚠ en una esquina en vez de ✓; fuera del iframe, banner inferior rojo «1 foto no se pudo subir → abrir turno». No es pantalla de login ni error de red del arnés (no aplica M-472/herramienta)"
+     }
+    ],
+    "datosDePrueba": "REQ-K3b-aviso.spec.js: limpiar() corrió sin error (el turno de hoy zz-verif- de la corrida quedó borrado)",
+    "notas": "La regresión de zona inventario trae un solo caso en rojo en todo log\\L-126-pruebas.json (REQ-INV2-4-2.spec.js c); no comparte perfil, orden ni causa con los casos propios del lote (b/c/d/e/e2 de REQ-K3b-aviso.spec.js, todos en verde), así que no aplica el campo herramienta: es un INC de la regresión, no del arnés. El criterio N3 (captura g) queda pendiente porque la cola no generó capturas en esta corrida; sin eso no se puede juzgar la insignia ☁ sobre la miniatura."
    }
   },
   {

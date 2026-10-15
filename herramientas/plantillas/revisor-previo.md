@@ -1,4 +1,4 @@
-# Revisor previo al encolado · lista de 14 puntos
+# Revisor previo al encolado · lista de 16 puntos
 
 Quién: el Chat Desarrollo la pasa **siempre** antes de copiar la instrucción a la cola, en un subagente (Writer/Reviewer: quien redactó no revisa) o, si no tiene subagentes, en una segunda lectura con la lista a la vista. Para **críticos**, además la pasa el Chat Diseño por el buzón (asunto «Revisión previa: <lote>») y responde «ok» o los puntos que fallan; sin ese «ok» no se encola. Cuesta 2–3 min; cada punto viene de una situación real (G-n en `interno/situaciones/_consolidado.json`).
 
@@ -18,5 +18,7 @@ Quién: el Chat Desarrollo la pasa **siempre** antes de copiar la instrucción a
 | 12 | ¿Cabe en una sesión de la CLI (≤ 8 archivos grandes o ≤ 45 min estimados) y tiene un solo objetivo? | Partir en dos lotes | G-16 |
 | 13 | ¿Cada prueba derivada lleva **nivel** (N1 / N2 / N3)? ¿Los N2 tienen su caso con la misma letra en «### Guion N2 → `tests/e2e/<REQ-o-INC>.spec.js`» (bloque ```js, `zona`, `h.espera` en cada caso, datos con `h.dato()` y `limpiar()`)? ¿Los N3 dicen qué mirar? ¿`tests/e2e/` está en Alcance? | Completar con `plantillas/guion-e2e.js`; sin nivel no se encola (PRUEBAS-v1) | LM-18, B6 |
 | 14 | ¿El lote trae **al menos un guion N2 con su `zona`** (aunque sea mínimo, de salud), también si es del modelo o de herramientas? La cola elige la regresión por la zona del guion: sin guion, la regresión no corre | Añadir un guion mínimo con la zona del área que toca | S-cd-31, LM-33 |
+| 15 | ¿La cabecera trae **«Reglas transversales que toca: RT-n…»** y cada RT citada existe en `claude/arquitectura/reglas-transversales.md`, el lote no la contradice y ninguna está «en conflicto»? ¿Si el lote toca datos, permisos, archivos, retención o conexiones, cita al menos una (RT-1…RT-24)? | Completar o pedir la decisión a Carlos por Diseño (DA-n); con una RT «en conflicto» no se encola | LM-36, K3-3 (S2.1 vs DA-32) |
+| 16 | ¿La cabecera trae **«Mapa: módulos y relaciones que cambia»** coherente con `claude/arquitectura/mapa-str.md` (módulo de la vista 1, relación de la vista 3; colección, evento o ruta nueva)? Si crea una colección, ruta o evento que otro módulo lee, ¿lo dice ahí y en «¿Quién más depende…?»? | Completar; al aceptarse el lote, el Arquitecto actualiza el mapa con esa línea | LM-36 |
 
-Resultado: en el mensaje de encolado (o en el log del chat) una línea «Revisión previa: 14/14» o «Revisión previa: fallan 5 y 9, corregidos». Diseño, para críticos, deja su «ok» en la respuesta del buzón; Desarrollo lo cita en la cabecera junto al cruce.
+Resultado: en el mensaje de encolado (o en el log del chat) una línea «Revisión previa: 16/16» o «Revisión previa: fallan 5 y 9, corregidos». Diseño, para críticos, deja su «ok» en la respuesta del buzón; Desarrollo lo cita en la cabecera junto al cruce.

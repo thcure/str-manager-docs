@@ -10552,7 +10552,7 @@
    "categoria": "crítico",
    "resumen": "Copia a Drive: cron, cola de copia, INC-97; migración 11",
    "estado": "aceptado",
-   "observacion": "Encolado 02:19 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 12/14 corregida). · Construido 477e6b1 (migración 11, 71/71). 02:30 aceptado: a–g en verde (estado sin secretos; ?drive=sin-permiso con «Marca la casilla de Google Drive»; portal sin pedidos a /api/drive; captura a 390 px). Regresión sin casos (zona del guion). · 02:35: reprueba pedida para correr la regresión de inventario (pw 0.5.27, M-463)",
+   "observacion": "Encolado 02:19 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 12/14 corregida). · Construido 477e6b1 (migración 11, 71/71). 02:30 aceptado: a–g en verde (estado sin secretos; ?drive=sin-permiso con «Marca la casilla de Google Drive»; portal sin pedidos a /api/drive; captura a 390 px). Regresión sin casos (zona del guion). · 02:35: reprueba pedida para correr la regresión de inventario (pw 0.5.27, M-463) · 03:05 reprueba con regresión: criterios propios en verde; no aceptado solo por la regresión (12 guiones con esquema 10 fijo y el guion de K3b de L-117), que corrige L-121; se repite tras L-121",
    "hash": "477e6b1",
    "aceptacion": {
     "lote": "L-116",
@@ -10623,6 +10623,162 @@
     "incs": [],
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "Entrada P4 en verde (despliegue, 71/71, guion igual a la instrucción, semilla completa, sesiones admin y colab). Regresión sin casos. N3 f decidido sobre la única captura preparada. Observación informativa, no criterio: en la captura el aviso rojo «sin permiso» convive con el recuadro verde «✓ Conectado como <correo de la cuenta>» porque la cuenta de prueba ya tenía Drive conectado y el regreso ?drive=sin-permiso es simulado; además la franja superior (texto visible) muestra el aviso breve «✗ Falta el permiso de Drive…». Hora de Bogotá estimada a partir del fin de la corrida (07:29Z)."
+   },
+   "aceptacion2": {
+    "lote": "L-116",
+    "hash": "6e4de8f",
+    "fecha": "2026-10-15",
+    "horaBogota": "03:05",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "herramienta": "12 de los 14 fallos de regresión son guiones viejos que exigen /api/health con schema_version 10 exacto; producción ya está en 12 (p5c96), así que fallan por la aserción fija del guion, no por este lote",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 73/73 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /api/health schema_version: 12 | si: GET /api/drive/estado: 200 | si: estado sin secretos: sí · claves: configurado,conectado,google_email,carpeta,conectado_en,estado,ultimo_error,copia,retencion,avisoCorte | si: conectado: true · copia: {\"pendientes\":0,\"copiados\":0,\"omitidos\":0,\"ultimaPasada\":null} | si: tarjeta: «☁ Copia en Google Drive Cada 15 minutos el STR copia a tu Drive las fotos y videos de tareas e incidentes (primero la evidencia de incidentes), en la carpeta \"STR Manager\" › negocio › propiedad › mes. El STR solo puede ver y crear los archi»"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: aviso: «Google no dio permiso sobre Drive. Marca la casilla de Google Drive cuando Google la muestre y vuelve a conectar.» | si: URL sin ?drive=: https://app.apartamentosbucaramanga.com/str-app-shell.html | si: panel Configuración abierto: sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: destino: https://app.apartamentosbucaramanga.com/str-app-shell.html | si: aviso: «No se pudo conectar Google Drive. Inténtalo de nuevo; si se repite, avisa al soporte del STR.»"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: pedidos a /api/drive desde el portal: ninguno | si: respuestas JSON con secretos: ninguna (20 leídas)"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura aviso-sin-permiso a 390 px: dentro de la tarjeta «☁ Copia en Google Drive», debajo del texto «Cada 15 minutos…», un recuadro de borde rojo con texto rojo legible «Google no dio permiso sobre Drive. Marca la casilla de Google Drive cuando Google la muestre y vuelve a conectar.»; el recuadro y la tarjeta caben en el ancho, sin desborde horizontal ni texto cortado. Debajo sigue el recuadro verde de la conexión (correo de la cuenta conectada) y los botones Probar conexión / Desconectar."
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 73/73 archivos OK (tests/drive-copia.test.js y tests/drive.test.js incluidos)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [
+     {
+      "c": "h",
+      "que": "Carlos, con una cuenta de Google de prueba: Configuración › Conectar Google Drive; Google pide solo el permiso de archivos de Drive usados con la app (anotar si aparece casilla); al aceptar, «✓ Google Drive conectado»; captura de la pantalla de Google para Diseño."
+     },
+     {
+      "c": "i",
+      "que": "Con la tarea programada de hPanel creada, la app de Google publicada y Drive conectado: tras una pasada, la tarjeta muestra «última pasada …» y en Drive aparece STR Manager/<negocio>/<propiedad>/<AAAA-MM>/ con las fotos nuevas (sin datos zz-verif-)."
+     },
+     {
+      "c": "j",
+      "que": "Tras i: reportar un incidente con un video real desde HK; después de la pasada siguiente el video está en la carpeta del mes con el mismo tamaño y se reproduce en Drive."
+     }
+    ],
+    "incs": [
+     {
+      "titulo": "Regresión DT-35 b: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "El guion de regresión compara schema_version con 10 exacto; producción ya está en 12 (este lote sube a 11 y hay un lote posterior desplegado). Aserción del guion desactualizada, no una rotura del servidor.",
+      "observado": "NO: api/health 200 · schema_version 12"
+     },
+     {
+      "titulo": "Regresión DT-40 b: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Misma aserción fija de schema_version 10 en el guion; las 12 lecturas a la vez salieron sin error.",
+      "observado": "NO: api/health 200 · schema_version 12 · db true | si: lecturas a la vez: 12 · con error: ninguna"
+     },
+     {
+      "titulo": "Regresión INC-121 c: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión INC-126 c: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: iframe de HK con v=p5c96"
+     },
+     {
+      "titulo": "Regresión INC-128-b c: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 · db true | si: HK p5c96 · STRApi.col.enVuelo: function"
+     },
+     {
+      "titulo": "Regresión INC-128 b: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion.",
+      "observado": "NO: api/health 200 · schema_version 12 · db true"
+     },
+     {
+      "titulo": "Regresión L-108 b: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: iframe de HK con v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-3-4 j: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-4-1-interfaz e: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-4-1 g: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-7-1-hk h: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion; el resto del caso (lugares pedidos, versión, sin errores de página) pasó.",
+      "observado": "si: HK pidió /api/col/inv-sububicaciones: 200 | si: errores de página: ninguno | NO: api/health 200 · schema_version 12"
+     },
+     {
+      "titulo": "Regresión REQ-INV2-7-1 j: health exige esquema 10",
+      "nivel": "bajo",
+      "causa": "Aserción fija de schema_version 10 en el guion de despliegue.",
+      "observado": "NO: api/health 200 · schema_version 12 | si: str-api.js?v=p5c96"
+     },
+     {
+      "titulo": "Regresión REQ-K3b-aviso d: sin GET /api/drive/copias ni insignia ☁ en el registro del turno",
+      "nivel": "medio",
+      "causa": "El caso d (admin) corrió antes que el caso c (colab) que sube la foto, por el orden de perfiles de la cola; el turno de la corrida no tenía foto y HK no pidió /api/drive/copias. Además la foto de c tampoco llegó a subirse. No se puede atribuir a L-116 con lo que hay: hay que reordenar o separar la preparación de la foto y repetir.",
+      "observado": "NO: GET /api/drive/copias: sin respuesta · sin secretos: sí | NO: insignia: null · servidor: null | NO: estado del dato de prueba (Drive no conectado): — · esperado: sin-drive | error: el caso paso de 90 s. La captura muestra el panel del turno zz-verif-Propiedad en «⏳ Pendiente», checklist 0/2, sin fotos."
+     },
+     {
+      "titulo": "Regresión REQ-K3b-aviso c: la subida de la foto de tarea no responde",
+      "nivel": "medio",
+      "causa": "El guion no obtuvo respuesta de la subida; la captura muestra el turno de la corrida aún «Pendiente» con «▶ Iniciar turno» en el HK del portal, es decir, el flujo no llegó a la tarea con foto (el turno no quedó iniciado). api/upload no está en el alcance de L-116; causa por confirmar repitiendo el caso.",
+      "observado": "si: turno de la corrida: sh-m-1792051324428 | NO: subida de la foto: sin respuesta | si: pedidos a /api/drive desde el portal: ninguno"
+     }
+    ],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Los criterios del lote pasan: N1 a y g (73/73), N2 b, c, d, e en verde, N3 f cumplido en la captura. El «no aceptado» viene solo de la regresión (14 casos con ok false). 12 de ellos comparten una causa de herramienta: guiones viejos con /api/health schema_version 10 exacto, mientras producción está en 12 y p5c96 (hay un lote posterior a L-116 desplegado: el entorno no es L-116 solo); se arreglan cambiando esas aserciones a «≥». Los otros 2 (REQ-K3b-aviso c y d, guion de L-117) no se pueden atribuir a L-116 con lo leído: d corrió antes que c por el orden de perfiles y c no llegó a subir la foto; hay que repetirlos. Repetir la corrida con los guiones corregidos. En la captura f el aviso rojo convive con el recuadro verde de conexión (el regreso ?drive=sin-permiso es simulado con Drive ya conectado). horaBogota tomada de pruebas.json › fin (08:05Z), el juez no lee el reloj."
    }
   },
   {

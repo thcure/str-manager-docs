@@ -74,6 +74,7 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = [])
   const r = { c: caso.c, nivel: n3 ? 'N3' : 'N2', perfil: caso.perfil, pagina: caso.pagina, que: caso.que || '', ok, observado: partes.join(' | ').slice(0, 900) };
   if (bloqueos.length) r.escriturasCortadas = bloqueos.length;
   if (n3) r.capturas = capturas;
+  else if (error && capturas.length) r.capturas = capturas;   // v0.5.23: la captura «error» de un N2 que reventó
   r.escrituras = resumirEscrituras(pasaron);   // v0.5.12: [] = el caso no escribió nada
   // v0.5.22 (INC-128): cronología de las escrituras al STR/modelo: +ms desde la primera, método, ruta, estado y duración
   const cron = (pasaron || []).filter(b => b.t && !b.resp && !/googleapis|identitytoolkit|securetoken/.test(b.url));
@@ -138,6 +139,8 @@ async function correrGuion(spec, opciones = {}) {
           await page.goto(BASE + caso.pagina, { waitUntil: 'domcontentloaded', timeout: 45000 });
           await Promise.race([caso.prueba(h), new Promise((_, no) => setTimeout(() => no(new Error('el caso paso de 90 s')), 90000))]);
         } catch (e) { error = (e && e.message ? e.message : String(e)).split('\n')[0]; }
+        // v0.5.23 (M-427): si el caso revienta (timeout, excepción), deja la pantalla y su texto como captura «error»
+        if (error && caso.nivel !== 'N3') { try { await h.captura('error', { esperaMs: 0, completa: false }); } catch (e2) { } }
         const tramo = a.bitacora.slice(marca);
         resultados.push(cerrarCaso(caso, esperas, error, tramo.filter(b => !b.paso), capturas, tramo.filter(b => b.paso)));
         await page.close().catch(() => { });

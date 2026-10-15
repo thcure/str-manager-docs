@@ -130,5 +130,14 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   const r = cerrarCaso(caso, [{ ok: false, observado: 'turnos 500' }], null, [], [], [{ metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, status: 500, motivo: 'respuesta 500: {"error":"SQLSTATE[HY000]: 1205 Lock wait timeout"}' }]);
   t('5xx en observado con el mensaje', /error del servidor: PUT \/api\/col\/turnos → respuesta 500: .*1205/.test(r.observado));
 }
+// v0.5.22 (INC-128): cronología de escrituras
+{
+  const r = cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, [], [], [
+    { metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, motivo: 'a', t: 1000, status: 200, ms: 180 },
+    { metodo: 'PUT', url: 'https://app.x/api/col/inv-movimientos', paso: true, motivo: 'b', t: 1020, status: 500, ms: 90 },
+    { metodo: 'PUT', url: 'https://app.x/api/col/inv-movimientos', paso: true, status: 500, resp: true, motivo: 'respuesta 500: x' },
+    { metodo: 'POST', url: 'https://identitytoolkit.googleapis.com/v1/accounts:lookup', paso: true, motivo: 'g', t: 1030, status: 200 }]);
+  t('cronología: +ms, estado y duración', Array.isArray(r.cronologia) && r.cronologia.length === 2 && r.cronologia[0] === '+0ms PUT /api/col/turnos → 200 en 180ms' && r.cronologia[1] === '+20ms PUT /api/col/inv-movimientos → 500 en 90ms');
+}
 console.log(ok + ' OK, ' + fail + ' FAIL');
 process.exit(fail ? 1 : 0);

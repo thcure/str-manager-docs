@@ -219,9 +219,14 @@ async function abrir(usuario, opciones = {}) {
       // v0.5.21 (INC-128): una escritura al STR o al modelo que responde 5xx deja en la bitácora el inicio del cuerpo
       // (el mensaje de error del servidor); el hosting no guarda error_log al alcance. Solo corridas zz-verif-.
       const mE = resp.request().method();
+      // v0.5.22 (INC-128): estado y duración de cada escritura, para ver cuántas van a la vez y cuál falla
+      if ([HOST_STR, HOST_MODELO].includes(u.hostname) && !LECTURA.includes(mE)) {
+        const uE = resp.url().split('?')[0].slice(0, 200);
+        for (let i = bitacora.length - 1; i >= 0; i--) { const b = bitacora[i]; if (b.paso === true && b.status == null && b.metodo === mE && b.url === uE) { b.status = resp.status(); b.ms = Date.now() - (b.t || Date.now()); break; } }
+      }
       if ([HOST_STR, HOST_MODELO].includes(u.hostname) && resp.status() >= 500 && !LECTURA.includes(mE)) {
         let t = ''; try { t = (await resp.text()).replace(/\s+/g, ' ').slice(0, 400); } catch (e) { }
-        bitacora.push({ metodo: mE, url: resp.url().split('?')[0].slice(0, 200), paso: true, status: resp.status(), motivo: 'respuesta ' + resp.status() + ': ' + (t || '(sin cuerpo)') });
+        bitacora.push({ metodo: mE, url: resp.url().split('?')[0].slice(0, 200), paso: true, status: resp.status(), resp: true, motivo: 'respuesta ' + resp.status() + ': ' + (t || '(sin cuerpo)') });
       }
     } catch (e) { }
   });
@@ -231,7 +236,7 @@ async function abrir(usuario, opciones = {}) {
       let cuerpo = null; try { cuerpo = r.postData(); } catch (e) { }
       if (cuerpo == null) { try { const b = r.postDataBuffer(); if (b) cuerpo = b.toString('latin1'); } catch (e) { } }   // v0.5.6: multipart
       const d = decidir(r.url(), r.method(), cuerpo);
-      if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().split('?')[0].slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '' });
+      if (!LECTURA.includes(r.method()) || !d.ok) bitacora.push({ metodo: r.method(), url: r.url().split('?')[0].slice(0, 200), paso: d.ok, motivo: d.motivo || d.nota || '', t: Date.now() });   // v0.5.22: t (cronología)
       if (!d.ok) {
         // v0.4.1: al STR se le responde 409 en vez de cortar la conexion. Asi str-api.js lo trata como rechazo del
         // servidor (no lo guarda en su cola de reintentos) y vacia los reintentos que ya tuviera guardados.

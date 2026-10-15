@@ -75,6 +75,9 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = [])
   if (bloqueos.length) r.escriturasCortadas = bloqueos.length;
   if (n3) r.capturas = capturas;
   r.escrituras = resumirEscrituras(pasaron);   // v0.5.12: [] = el caso no escribió nada
+  // v0.5.22 (INC-128): cronología de las escrituras al STR/modelo: +ms desde la primera, método, ruta, estado y duración
+  const cron = (pasaron || []).filter(b => b.t && !b.resp && !/googleapis|identitytoolkit|securetoken/.test(b.url));
+  if (cron.length) { const t0 = cron[0].t; r.cronologia = cron.map(b => '+' + (b.t - t0) + 'ms ' + b.metodo + ' ' + b.url.replace(/^https?:\/\/[^/]+/, '') + ' → ' + (b.status == null ? 'sin respuesta' : b.status) + (b.ms != null ? ' en ' + b.ms + 'ms' : '')); }
   return r;
 }
 

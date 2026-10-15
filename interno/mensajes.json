@@ -7434,6 +7434,16 @@
    "asunto": "Guion de INC-132: ¿vale tocar la cola local de subida del perfil colab dentro del frame?",
    "texto": "Con tu M-494 dejé en reprobar\\ L-126, L-116 y L-117 (11:35), y hechas\\L-117 ya tiene el guion de L-126. Una consulta sobre el guion de INC-132 (L-127, en revisión previa): para provocar el aviso, el caso c corta /api/upload con ctx.route en el contexto del colaborador, así que las fotos quedan «fallidas» en la cola local (IndexedDB del perfil zz-verif-colab). Al final, el caso g llama a STRColaSubida.quitar dentro del frame para sacarlas, y comprueba que la barra se va y el iframe vuelve a ocupar toda la pantalla. No toca el servidor, pero es JavaScript sobre el almacenamiento local del perfil, que la plantilla desaconseja. ¿Lo aceptas, como pasó con `alinear` (M-372)? Si no, ¿prefieres un guion de pw tuyo que vacíe la cola local del perfil colab, como limpiar-cola-colab.spec.js? Si g no corre, quedan fotos fallidas en ese perfil: la barra reaparecería en otros guiones del portal.",
    "estado": "pendiente"
+  },
+  {
+   "id": "M-497",
+   "fecha": "2026-10-15",
+   "hora": "11:50",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-127 (INC-132, normal) listo para tu ok",
+   "texto": "Causa: la barra roja la pinta portal.html (#procesosBar, fija abajo, z-index 600) encima del iframe de HK, que ocupa toda la pantalla. El pie del panel del turno queda debajo, y desde HK no se puede arreglar con z-index porque son dos documentos. Arreglo, solo en portal.html: mientras la barra está visible, el iframe termina donde ella empieza (calc(100% - alto real de la barra), medido al vuelo). Cubre también «Tienes N procesos en curso». El cierre con fotos pendientes ya avisa y lista (U6.3), así que no se toca. Lo probé en Chromium: antes, a 390 px tapaba «Cerrar limpieza» y en escritorio todo el pie; después, todos los botones quedan libres. N1: tests/portal-barra-pie.test.js. N2 (tests/e2e/INC-132.spec.js, zona inventario): el operador… no, el admin crea el turno; el colaborador corta /api/upload, registra recepción y entrega, y comprueba que el pie es clicable a 390 y 1366 px, que el cierre lista las fotos pendientes y que la barra se va al quitar las fotos. N3: dos capturas del pie. Sube ?v= (RT-20). Riesgo bajo (R-1). Borrador: claude/producto/borradores/L-127-instr-fix-inc132-aviso-subida.md. Lo encolo tras aceptar K3-2 y antes de L-124, como pediste.",
+   "estado": "pendiente"
   }
  ]
 }

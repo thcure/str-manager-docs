@@ -22,6 +22,10 @@
 //   sin galería); camara: 'fixtures/<archivo>.y4m' (relativo al guion) muestra ese video, p. ej. un QR. Los casos se
 //   agrupan por perfil y cámara en el orden en que aparecen.
 // - Cada caso tiene 90 s. Para esperar una respuesta del servidor: await h.respuesta('/api/col/reservas', () => clic).
+// - cubre (LM-41): cada caso declara los nodos del mapa del STR que prueba, por id de interno/mapa-modulos.json: módulo
+//   ('HK'), relación ('REL-16'), regla ('RT-8') o REQ ('REQ-K3-2'). Con eso la cola corre el caso solo cuando un lote pasa por
+//   ese nodo (ruta de pruebas) y el mapa muestra la cobertura. Un caso sin cubre vale por los módulos del guion (grueso).
+//   Una regla se cubre con un caso NEGATIVO: el perfil que no puede, intenta, y se comprueba el 403 o el aviso.
 
 module.exports = {
   req: 'REQ-X-n',            // REQ o INC del lote
@@ -30,6 +34,7 @@ module.exports = {
     {
       c: 'c', perfil: 'admin', pagina: '/str-calendario.html',
       que: '<criterio, en una línea>',
+      cubre: ['CAL', 'REL-03'],   // nodos del mapa que este caso prueba (LM-41)
       async prueba(h) {
         await h.page.waitForSelector('#calendario');
         const nombre = h.dato('reserva');
@@ -41,6 +46,7 @@ module.exports = {
     {
       c: 'f', nivel: 'N3', perfil: 'oper', pagina: '/str-calendario.html',
       que: '<criterio visual: se entiende, se ve bien a 390 px, el aviso está junto al turno>',
+      cubre: ['CAL'],
       async prueba(h) {
         await h.page.waitForSelector('#calendario');
         await h.captura('movil', { ancho: 390 });   // log\capturas\L-<n>\f-movil.png + f-movil.txt

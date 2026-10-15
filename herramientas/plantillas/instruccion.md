@@ -27,6 +27,12 @@ Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién lo
 
 ## `CLAUDE.md` — filas que cambian; INC-37 con la versión nueva.
 
+## Ruta de pruebas (LM-41: `python3 -I herramientas/modelo/mapa.py . --ruta <este borrador>` o la vista «Ruta de un lote» del mapa del STR)
+Pega aquí el bloque que devuelve la herramienta, sin editarlo: módulos tocados (por archivo del Alcance, línea «Mapa:» y REQ), relaciones por las que pasa, reglas que cruza, guiones que corren como regresión y **huecos**. Regla: el guion N2 de abajo trae **un caso por hueco** (una relación sin caso; un caso negativo por regla de tipo «caso»), y cada caso declara lo que prueba en `cubre: ['REL-n', 'RT-n', 'HK', 'REQ-…']`. Un criterio N2 que no toque ningún nodo de la ruta no va en este lote (sobra). Si la ruta sale vacía, el Alcance o la línea «Mapa:» están mal.
+```
+<bloque de mapa.py --ruta>
+```
+
 ## Pruebas derivadas (criterios del REQ; verificador <estándar | crítico>; perfiles de prueba, nunca el de Carlos)
 Plan de pruebas del lote (PRUEBAS-v1, paso P2). Cada criterio lleva el **nivel** que le puso Diseño en el REQ: **N1** lógica en `tests/` (la escribe la CLI), **N2** guion de Playwright (lo escribes tú abajo), **N3** juicio del verificador (solo lo visual o nuevo que un guion no puede ver), **N4** dispositivo real (cámara física, GPS, notificaciones: prueba corta de usuario en un celular, fuera de la cola). Si el REQ no trae niveles, los pones tú y Diseño los confirma por el buzón.
 ```
@@ -37,7 +43,7 @@ N1 → «cubierto por tests/<archivo>» (la cola corre `node tests/run.js` en la
 
 ### Guion N2 → `tests/e2e/<REQ-o-INC>.spec.js` (la CLI lo copia tal cual, sin cambiar un byte; plantilla: `herramientas/plantillas/guion-e2e.js`)
 ```js
-module.exports = { req: '<REQ-X-n>', zona: '<área de CLAUDE.md § 2>', casos: [ /* un caso por criterio N2 */ ], async limpiar(h) { } };
+module.exports = { req: '<REQ-X-n>', zona: '<área de CLAUDE.md § 2>', casos: [ /* un caso por criterio N2 y por hueco de la ruta; cada uno con cubre: ['REL-n', 'RT-n', '<módulo>'] */ ], async limpiar(h) { } };
 ```
 Sin criterios N2: borra esta subsección (la cola lo anota y sigue). La cola comprueba que el archivo del commit es igual a este bloque: si la CLI lo cambia, el lote queda «bloqueado» sin gastar verificación.
 Los criterios de permisos y 403 van «cubierto por tests/<archivo>»: el verificador lee el resultado, no los prueba en el navegador. Lo mismo los criterios de **ancho o móvil** (390 px, media queries): el verificador no puede cambiar el tamaño de la ventana; se prueban con un test que lea el CSS (lote 69, 11-oct). Si un criterio exige llegar «desde el menú», la prueba lo dice y empieza en `str-app-shell.html`.

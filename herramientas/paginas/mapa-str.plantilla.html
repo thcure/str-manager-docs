@@ -130,6 +130,7 @@ table.tabla tr:hover td{background:var(--surface-2)}
     <button role="tab" aria-selected="false" data-v="reglas">Reglas × módulos</button>
     <button role="tab" aria-selected="false" data-v="relaciones">Relaciones</button>
     <button role="tab" aria-selected="false" data-v="guiones">Guiones</button>
+    <button role="tab" aria-selected="false" data-v="ruta">Ruta de un lote</button>
   </div>
   <div class="buscar"><input id="buscar" type="search" placeholder="Buscar módulo, REQ, RT-n, REL-n, guion, EC…" autocomplete="off" aria-label="Buscar"><div id="sugerencias" hidden></div></div>
 </header>
@@ -140,6 +141,7 @@ table.tabla tr:hover td{background:var(--surface-2)}
 
 <script>
 const D = /*__DATOS__*/null;
+/*__RUTA_JS__*/
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const REPO_DOCS = 'https://github.com/thcure/str-manager-docs/blob/main/';
@@ -198,8 +200,10 @@ function render() {
   else if (vista === 'cobertura') v.innerHTML = htmlCobertura();
   else if (vista === 'reglas') v.innerHTML = htmlReglas();
   else if (vista === 'relaciones') v.innerHTML = htmlRelaciones();
+  else if (vista === 'ruta') v.innerHTML = htmlRuta();
   else v.innerHTML = htmlGuiones();
   if (vista === 'mapa') montarMapa();
+  if (vista === 'ruta') montarRuta();
 }
 
 // ---------- vista Mapa ----------
@@ -278,7 +282,7 @@ function htmlCobertura() {
   return `<div class="resumen">
     <div><b>${D.modulos.length}</b><span>módulos</span></div><div><b>${D.reqs.filter((r) => !r.historico && r.estado !== 'descartado').length}</b><span>REQ vigentes</span></div>
     <div><b>${D.guiones.length}</b><span>guiones e2e</span></div><div><b>${tot('casos') ? D.guiones.reduce((s, g) => s + g.nCasos, 0) : 0}</b><span>casos</span></div>
-    <div><b>${D.modulos.filter((m) => COB[m.id].riesgo === 'alto').length}</b><span>módulos de riesgo alto</span></div><div><b>${sinG.length}</b><span>construidos sin guion</span></div></div>
+    <div><b>${D.modulos.filter((m) => COB[m.id].riesgo === 'alto').length}</b><span>módulos de riesgo alto</span></div><div><b>${sinG.length}</b><span>construidos sin guion</span></div><div><b>${D.coberturaNodos ? D.coberturaNodos.casos - D.coberturaNodos.casosSinCubre : 0}</b><span>casos con cubre</span></div></div>
   <p class="nota">Orden por <b>hotspot</b> = riesgo (probabilidad × impacto, 1–9) × (1 + lotes de los últimos 30 días): dónde conviene concentrar la regresión (Tornhill; ISTQB 5.2). El riesgo es propuesta del Arquitecto hasta que Carlos y Diseño lo confirmen. «REQ con guion» cuenta los aceptados de octubre que algún guion nombra.</p>
   <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Módulo</th><th>Estado</th><th>Riesgo</th><th class="n">P×I</th><th class="n">Lotes 30 d</th><th class="n">Hotspot</th><th class="n">REQ vig.</th><th class="n">Aceptados</th><th>Con guion</th><th class="n">Guiones</th><th class="n">Casos</th><th>Perfiles</th><th class="n">INC abiertos</th><th>Zona pw</th></tr></thead><tbody>
   ${ms.map((m) => { const c = COB[m.id]; const pct = c.reqAceptados ? Math.round(100 * c.reqAceptadosConGuion / c.reqAceptados) : 0; return `<tr><td><a class="ref" href="#${m.id}">${m.id}</a> ${esc(m.nombre.split(/[:(]/)[0])}</td><td><span class="badge b-${m.estado}">${m.estado}</span></td><td><span class="badge b-${c.riesgo}">${c.riesgo}</span></td><td class="n">${c.puntajeRiesgo}</td><td class="n">${c.lotes30d}</td><td class="n"><b>${c.hotspot}</b></td><td class="n">${c.reqVigentes}</td><td class="n">${c.reqAceptados}</td><td><div class="barra" title="${pct}%"><i style="width:${pct}%"></i></div><span class="nota">${c.reqAceptadosConGuion}/${c.reqAceptados}</span></td><td class="n">${c.guiones}</td><td class="n">${c.casos}</td><td>${c.perfiles.join(', ') || '—'}</td><td class="n">${c.incidentesAbiertos}</td><td class="mono">${esc(m.zonaPw || '—')}</td></tr>`; }).join('')}
@@ -317,6 +321,46 @@ function htmlGuiones() {
   ${gs.map((g) => `<tr><td><a class="ref" href="#${g.archivo}">${esc(g.archivo.replace('.spec.js', ''))}</a></td><td>${g.req ? refId(g.req) : '—'}</td><td class="mono">${esc(g.zona || '—')}</td><td>${g.modulos.map((m) => `<a class="ref" href="#${m}">${m}</a>`).join('')} <span class="nota">(${esc(g.anclaje)})</span></td><td class="n">${g.nCasos || '—'}</td><td class="mono">${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(' ')}</td><td>${Object.keys(g.perfiles).join(', ')}</td><td class="nota">${Object.keys(g.paginas).map((p) => p.replace(/^\/|\.html$/g, '')).join(', ')}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
+
+// ---------- vista Ruta de un lote ----------
+let rutaLote = {archivos: '', mapaLinea: '', req: '', regresion: ''};
+function htmlRuta() {
+  return `<p class="nota">Pega la cabecera del lote (Alcance, «Mapa:», REQ) o escribe los datos: el mapa deriva la ruta de pruebas con la misma función que usa <span class="mono">mapa.py --ruta</span> (y pw en LM-39b): módulos tocados → relaciones por las que pasa → reglas que cruza → guiones que corren → huecos que el guion del lote debe cubrir.</p>
+  <div class="tabla-wrap" style="padding:12px;display:grid;gap:8px;grid-template-columns:1fr 1fr">
+    <label style="grid-column:1/-1">Cabecera de la instrucción (opcional)<br><textarea id="rCab" rows="4" style="width:100%;font:12px var(--font-mono);background:var(--surface-2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px" placeholder="# instr — REQ-…: …&#10;Alcance: str-cola-subida.js · api/lib/drive-copia.php …&#10;Mapa: módulos y relaciones que cambia: HK, K3; REL-16"></textarea></label>
+    <label>Archivos del Alcance<br><input id="rArch" style="width:100%" value="${esc(rutaLote.archivos)}" placeholder="str-cola-subida.js, api/lib/drive-copia.php"></label>
+    <label>Línea «Mapa:»<br><input id="rMapa" style="width:100%" value="${esc(rutaLote.mapaLinea)}" placeholder="HK, K3; REL-16"></label>
+    <label>REQ / INC del lote<br><input id="rReq" style="width:100%" value="${esc(rutaLote.req)}" placeholder="REQ-K3-2"></label>
+    <label>Línea «Regresión:» (opcional)<br><input id="rReg" style="width:100%" value="${esc(rutaLote.regresion)}" placeholder="vacío = por ruta · todas · ninguna"></label>
+    <div style="grid-column:1/-1"><button class="chip" id="rCalc" aria-pressed="true">Calcular la ruta</button> <button class="chip" id="rCopiar">Copiar bloque para la instrucción</button></div>
+  </div>
+  <div id="rSalida" style="margin-top:12px"></div>`;
+}
+function montarRuta() {
+  const calc = () => {
+    const cab = $('#rCab').value.trim();
+    let lote = {archivos: $('#rArch').value.split(/[,;\s]+/).filter(Boolean), mapaLinea: $('#rMapa').value, req: $('#rReq').value, regresionLinea: $('#rReg').value};
+    if (cab) { const l = leerCabecera(cab); lote = {archivos: [...new Set([...l.archivos, ...lote.archivos])], mapaLinea: lote.mapaLinea || l.mapaLinea, req: lote.req || l.req, regresionLinea: lote.regresionLinea || l.regresionLinea}; }
+    rutaLote = {archivos: lote.archivos.join(', '), mapaLinea: lote.mapaLinea, req: lote.req, regresion: lote.regresionLinea};
+    const r = ruta(D, D.guiones, lote);
+    sel = null; rutaActual = r;
+    $('#rSalida').innerHTML = `<div class="resumen"><div><b>${r.modulos.length}</b><span>módulos</span></div><div><b>${r.relaciones.filter((x) => !x.generica).length}</b><span>relaciones</span></div><div><b>${r.reglas.filter((x) => x.prueba !== 'proceso').length}</b><span>reglas de caso</span></div><div><b>${r.guionesCorren.length}</b><span>guiones corren</span></div><div><b>${r.casosCorren.length}</b><span>casos</span></div><div><b>${r.noCorren.length}</b><span>no corren</span></div><div><b>${r.huecos.relaciones.length + r.huecos.reglas.length}</b><span>huecos</span></div></div>
+    <h3 style="font:700 15px var(--font-display);margin:10px 0 4px">Módulos tocados</h3><p>${r.modulos.map((m) => `${refId(m)} <span class="nota">${[...new Set(r.porQue[m])].join('; ')}</span><br>`).join('') || '<span class="nota">ninguno: revisa Alcance y «Mapa:»</span>'}</p>
+    <h3 style="font:700 15px var(--font-display);margin:10px 0 4px">Relaciones por las que pasa</h3><p>${r.relaciones.filter((x) => !x.generica).map((x) => `${refId(x.id)} ${nodoRef(x.origen)}→${nodoRef(x.destino)}`).join(' · ') || '—'}</p>
+    <h3 style="font:700 15px var(--font-display);margin:10px 0 4px">Reglas que cruza</h3><p>${r.reglas.filter((x) => x.prueba !== 'proceso').map((x) => refId(x.id)).join(' ') || '—'} <span class="nota">· de proceso (las garantiza la fábrica): ${r.reglasFabrica.join(', ')}</span></p>
+    <h3 style="font:700 15px var(--font-display);margin:10px 0 4px">Corren (${r.guionesCorren.length})</h3><p>${r.guionesCorren.map((g) => `${refId(g.archivo.replace('.spec.js', ''))} <span class="nota">${g.casos}/${g.de}</span>`).join(' · ') || '—'}</p>
+    <details><summary class="nota">No corren (${r.noCorren.length})</summary><p class="nota">${r.noCorren.map((g) => g.archivo.replace('.spec.js', '')).join(', ')}</p></details>
+    <h3 style="font:700 15px var(--font-display);margin:10px 0 4px">Huecos (el guion del lote los cubre con un caso con <span class="mono">cubre</span>)</h3>
+    <p>Relaciones: ${r.huecos.relaciones.map((x) => `${refId(x.id)} <span class="nota">${x.origen}→${x.destino}</span>`).join(' · ') || '<span class="badge b-vigente">ninguna</span>'}</p>
+    <p>Reglas (un caso negativo por regla): ${r.huecos.reglas.map((x) => `${refId(x.id)} <span class="nota">${esc(x.titulo)}</span>`).join(' · ') || '<span class="badge b-vigente">ninguna</span>'}</p>
+    <p class="nota">A declarar (algún guion pasa por sus módulos, ningún caso lo dice en <span class="mono">cubre</span>): ${r.aDeclarar.map((x) => refId(x)).join(' ') || 'ninguna'}</p>`;
+    if (vista === 'mapa') aplicarResalte();
+  };
+  $('#rCalc').addEventListener('click', calc);
+  $('#rCopiar').addEventListener('click', () => { if (!rutaActual) calc(); copiar(markdown(rutaActual), $('#rCopiar')); });
+  if (rutaLote.archivos || rutaLote.mapaLinea || rutaLote.req) calc();
+}
+let rutaActual = null;
 
 // ---------- fichas ----------
 function refId(id) {
@@ -402,7 +446,8 @@ function fichaRelacion(r) {
   return `<div class="tipo">Relación · ${esc(r.estado)}</div><h2><span class="mono">${r.id}</span> ${nodoRef(r.origen)} → ${nodoRef(r.destino)}</h2>
   <dl class="kv"><dt>Mecanismo</dt><dd>${md(r.mecanismo)}</dd><dt>Dato o evento</dt><dd>${md(r.dato)}</dd><dt>Regla</dt><dd>${enlazarIds(r.regla || '—')}</dd><dt>RT</dt><dd>${refs(r.rt)}</dd></dl>
   <h3>Qué probar (condición de integración)</h3><p class="nota">Caso de integración: el dato sale de ${nodoRef(r.origen)} por «${md(r.mecanismo)}» y ${nodoRef(r.destino)} lo recibe y respeta la regla. Perfiles: los de los dos módulos.</p>
-  <h3>Guiones que tocan los dos módulos (${gs.length})</h3>${lista(gs, (g) => `${refId(g.archivo.replace('.spec.js', ''))} <span class="nota">${g.nCasos} casos</span>`)}
+  <h3>Casos que la declaran en <span class="mono">cubre</span> (${(D.coberturaNodos?.relaciones?.[r.id] || []).length})</h3>${lista(D.coberturaNodos?.relaciones?.[r.id] || [], (x) => `<span class="mono">${esc(x)}</span>`)}
+  <h3>Guiones que pasan por los dos módulos (${gs.length})</h3>${lista(gs, (g) => `${refId(g.archivo.replace('.spec.js', ''))} <span class="nota">${g.nCasos} casos</span>`)}
   <h3>Especificación</h3><p>${rutaDoc('claude/arquitectura/mapa-str.md')} <span class="nota">§ Vista 3</span></p>`;
 }
 function fichaRegla(r) {
@@ -412,7 +457,8 @@ function fichaRegla(r) {
   <h3>Módulos que cruza</h3><p>${r.modulos.map((m) => nodoRef(m)).join(' ')}</p>
   <h3>Relaciones que la aplican</h3>${lista(rels, (x) => `${refId(x.id)} ${nodoRef(x.origen)} → ${nodoRef(x.destino)}`)}
   <h3>Actores</h3><p>${acts.map((a) => refId(a.id)).join(' ') || '—'}</p>
-  <h3>Qué probar (condición de prueba)</h3><p class="nota">Cada RT es una condición de prueba (29119-1): el guion que toque uno de estos módulos debería incluir al menos un caso negativo que intente violarla con el perfil que no puede.</p>
+  <p><span class="badge b-sin">prueba: ${esc(r.prueba || 'caso')}</span> <span class="nota">${r.prueba === 'proceso' ? 'la garantizan la guardia, la cola o el revisor previo; no pide caso en los guiones' : 'condición de prueba (29119-1): un caso negativo que intente violarla con el perfil que no puede, declarado con cubre'}</span></p>
+  <h3>Casos que la declaran en <span class="mono">cubre</span> (${(D.coberturaNodos?.reglas?.[r.id] || []).length})</h3>${lista(D.coberturaNodos?.reglas?.[r.id] || [], (x) => `<span class="mono">${esc(x)}</span>`)}
   <h3>Registro</h3><p>${rutaDoc('claude/arquitectura/reglas-transversales.md')} <span class="nota">› ${r.id}</span></p>`;
 }
 function fichaEC(e) {
@@ -433,7 +479,7 @@ function fichaReq(r) {
 function fichaGuion(g) {
   return `<div class="tipo">Guion ${esc(g.origen)} · zona ${esc(g.zona || '—')} · anclado por ${esc(g.anclaje)}</div><h2><span class="mono">${esc(g.archivo)}</span></h2>
   <dl class="kv"><dt>REQ / origen</dt><dd>${g.req ? refId(g.req) : '—'}</dd><dt>Módulos</dt><dd>${g.modulos.map((m) => nodoRef(m)).join(' ')}</dd><dt>Perfiles</dt><dd>${Object.entries(g.perfiles).map(([k, v]) => `${k}×${v}`).join(', ')}</dd><dt>Niveles</dt><dd>${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(', ')}</dd></dl>
-  ${g.nota ? `<p class="nota">${esc(g.nota)}</p>` : ''}<h3>Casos (${g.nCasos})</h3>${g.casos.map((c) => `<div class="caso"><span class="mono">${esc(c.c || '')} · ${esc(c.perfil || '')}${c.camara ? ' · cámara' : ''} · ${esc(c.nivel || 'N2')} · ${esc((c.pagina || '').replace(/^\/|\.html$/g, ''))}</span><br>${esc(c.que)}</div>`).join('')}
+  ${g.nota ? `<p class="nota">${esc(g.nota)}</p>` : ''}<h3>Casos (${g.nCasos})</h3>${g.casos.map((c) => `<div class="caso"><span class="mono">${esc(c.c || '')} · ${esc(c.perfil || '')}${c.camara ? ' · cámara' : ''} · ${esc(c.nivel || 'N2')} · ${esc((c.pagina || '').replace(/^\/|\.html$/g, ''))}</span><br>${esc(c.que)}${c.cubre && c.cubre.length ? `<br><span class="nota">cubre: ${c.cubre.map((x) => refId(x)).join(' ')}</span>` : ''}</div>`).join('')}
   <h3>Archivo</h3><p>${rutaDoc(g.origen === 'tests/e2e' ? 'tests/e2e/' + g.archivo : g.archivo)}</p>`;
 }
 

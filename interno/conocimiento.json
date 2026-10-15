@@ -924,7 +924,7 @@
   },
   {
    "codigo": "APO03.02-m",
-   "nombre": "Mapa del STR legible por máquina y mapa gráfico con fichas al clic",
+   "nombre": "Mapa del STR legible por máquina, mapa gráfico con fichas al clic y ruta de pruebas por lote",
    "dueno": "Arquitecto (mapa, cobertura, riesgo propuesto) · Diseño (hechos de producto) · Desarrollo (anclaje de guiones) · Carlos (confirma riesgo)",
    "estado": "vigente",
    "vigenciaDesde": "2026-10-15",
@@ -940,9 +940,12 @@
     "interno/arquitectura/guiones-e2e.json (foto de tests/e2e; herramientas/modelo/guiones-e2e.js la toma en LENOVO)",
     "interno/arquitectura/mapa-str.html (página interactiva) y mapa-str.datos.json; artefacto «Mapa del STR» en Claude",
     "herramientas/paginas/mapa-str.plantilla.html",
-    "claude/arquitectura/mapa-str.md (vista para leer), reglas-transversales.md, infraestructura-configuracion.md (fichas a las que lleva el clic)"
+    "claude/arquitectura/mapa-str.md (vista para leer), reglas-transversales.md, infraestructura-configuracion.md (fichas a las que lleva el clic)",
+    "herramientas/modelo/ruta.js (+ ruta.test.js): ruta de pruebas de un lote (módulos → relaciones → reglas → guiones que corren → huecos); una sola implementación para mapa.py --ruta, la vista «Ruta de un lote» del mapa y pw (LM-39b)",
+    "Plantillas: instruccion.md § Ruta de pruebas; guion-e2e.js `cubre` por caso; revisor-previo.md punto 17"
    ],
    "flujo": [
+    "Desarrollo redacta el borrador → mapa.py --ruta (o la vista del mapa) → pega el bloque en «Ruta de pruebas» → el guion N2 cubre los huecos con `cubre` → revisor previo 17 → encolar. La cola corre solo los casos cuyo `cubre` (o módulos) cae en la ruta (LM-39b).",
     "Lote aceptado con «Mapa:» → Arquitecto edita mapa-modulos.json → python3 -I herramientas/modelo/mapa.py . → commit «modelo:» → vuelve a publicar el artefacto.",
     "REQ nuevo → aviso M3 en validar.py → anclar. Guion nuevo → guiones-e2e.js → aviso M4 → anclar.",
     "Revisión semanal: avisos M3/M4/M5 y módulos de riesgo alto sin regresión."
@@ -950,7 +953,8 @@
    "reglas": [
     "Un dato, una fuente: el mapa enlaza estados, lotes y textos; no los copia.",
     "El riesgo por módulo es propuesta hasta que Carlos lo confirme; no decide nada solo.",
-    "Referencia de pruebas adoptada: ISO/IEC/IEEE 29119 + ISTQB CTFL 4.0 (COBIT BAI07/BAI03 no cita estándar de diseño de pruebas); módulo = feature set, REQ = test item, RT = test condition, REL = condición de integración, guion = test procedure."
+    "Referencia de pruebas adoptada: ISO/IEC/IEEE 29119 + ISTQB CTFL 4.0 (COBIT BAI07/BAI03 no cita estándar de diseño de pruebas); módulo = feature set, REQ = test item, RT = test condition, REL = condición de integración, guion = test procedure.",
+    "Ninguna prueba fuera de la ruta: un caso que no toca un nodo de la ruta del lote no corre en ese lote; un caso que no cubre nada va a cuarentena (LM-39a)."
    ],
    "instalacion": "LM-40 (15-oct-2026)"
   }

@@ -4,12 +4,15 @@
 # (lotes e incidentes por módulo) e interno/arquitectura/guiones-e2e.json (foto de tests/e2e) y escribe:
 #   interno/arquitectura/mapa-str.datos.json  (todo junto, para páginas y agentes)
 #   interno/arquitectura/mapa-str.html         (mapa interactivo: herramientas/paginas/mapa-str.plantilla.html + datos)
-# Uso: python3 herramientas/modelo/mapa.py [raiz-del-repo] [--solo-validar] [--json]
+# Uso: python3 herramientas/modelo/mapa.py [raiz-del-repo] [--solo-validar] [--json] [--ruta <instruccion.md>]
+#   --ruta: imprime la ruta de pruebas del lote (módulos, relaciones, reglas, guiones que corren, huecos) con herramientas/modelo/ruta.js (LM-41)
 # Salida 1 si hay errores de integridad (ids repetidos, referencias rotas, REQ sin módulo, guion sin módulo), 0 si no.
 import json, os, re, sys, datetime
 from collections import defaultdict, Counter
 
-RAIZ = next((a for a in sys.argv[1:] if not a.startswith('--')), '.')
+ARGS = sys.argv[1:]
+RUTA_INSTR = ARGS[ARGS.index('--ruta') + 1] if '--ruta' in ARGS and ARGS.index('--ruta') + 1 < len(ARGS) else None
+RAIZ = next((a for i, a in enumerate(ARGS) if not a.startswith('--') and (i == 0 or ARGS[i - 1] != '--ruta')), '.')
 SOLO_VALIDAR = '--solo-validar' in sys.argv
 COMO_JSON = '--json' in sys.argv
 ERR, AVI = [], []
@@ -178,11 +181,30 @@ def imprimir():
 if ERR or SOLO_VALIDAR:
     imprimir(); sys.exit(1 if ERR else 0)
 
+# Cobertura por relación y regla (lo que los casos declaran en `cubre`), con la misma implementación que usará pw: ruta.js
+import subprocess, tempfile
+def nodo(args, entrada):
+    try:
+        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as tf: json.dump(entrada, tf, ensure_ascii=False); tmp = tf.name
+        r = subprocess.run(['node', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ruta.js'), '--mapa', os.path.join(RAIZ, 'interno/mapa-modulos.json'), '--guiones', tmp] + args, capture_output=True, text=True, timeout=60)
+        os.unlink(tmp)
+        if r.returncode != 0: avi('M7 ruta.js', 'node', (r.stderr or '')[:200]); return None
+        return r.stdout
+    except Exception as ex: avi('M7 ruta.js', 'node', f'no se pudo correr: {ex}'); return None
+COB_NODOS = None
+_sal = nodo(['--cobertura'], dict(guiones=GUI))
+if _sal:
+    try: COB_NODOS = json.loads(_sal)
+    except Exception as ex: avi('M7 ruta.js', 'node', f'salida ilegible: {ex}')
+if RUTA_INSTR:
+    _sal = nodo(['--instr', RUTA_INSTR] + (['--json'] if COMO_JSON else []), dict(guiones=GUI))
+    print(_sal or ''); sys.exit(0)
+
 # Datos juntos
 datos = dict(generadoEn=res['fecha'], lineaBase=mapa.get('lineaBase'), codigo=mapa.get('codigo'), que=mapa.get('que'), marcoPruebas=mapa.get('marcoPruebas'),
              actores=actores, modulos=modulos, relaciones=relaciones, reglas=reglas, infraestructura=infra, fichas=mapa.get('fichas'),
              reqs=sorted(REQS.values(), key=lambda r: r['id']), guiones=GUI, cambios={k: v for k, v in CAMBIOS.items()}, incidentes={k: v for k, v in INCS.items()},
-             cobertura=COB, zonasPw=ag.get('zonasPw'), historial=mapa.get('historial', []), avisos=AVI)
+             cobertura=COB, coberturaNodos=COB_NODOS, zonasPw=ag.get('zonasPw'), anclajeReq=ancla, anclajeGuiones=ag, historial=mapa.get('historial', []), avisos=AVI)
 os.makedirs(os.path.join(RAIZ, 'interno/arquitectura'), exist_ok=True)
 with open(os.path.join(RAIZ, 'interno/arquitectura/mapa-str.datos.json'), 'w', encoding='utf-8') as f:
     json.dump(datos, f, ensure_ascii=False, indent=1); f.write('\n')
@@ -192,6 +214,8 @@ if os.path.exists(plantilla):
     js = json.dumps(datos, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
     if '/*__DATOS__*/' not in html: err('M6 plantilla', plantilla, 'falta la marca /*__DATOS__*/')
     html = html.replace('/*__DATOS__*/null', js, 1)
+    rjs = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ruta.js'), encoding='utf-8').read().split('\nmodule.exports')[0].replace('</', '<\\/')
+    html = html.replace('/*__RUTA_JS__*/', rjs, 1)
     with open(os.path.join(RAIZ, 'interno/arquitectura/mapa-str.html'), 'w', encoding='utf-8') as f: f.write(html)
 else: avi('M6 plantilla', plantilla, 'no existe; solo se escribió mapa-str.datos.json')
 imprimir()

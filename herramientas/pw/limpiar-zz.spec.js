@@ -1,16 +1,18 @@
 // limpiar-zz.spec.js - borra la basura de prueba que un limpiar() no alcanzó (M-437): en UNA colección, las filas cuyo
 // nombre empieza por un prefijo zz-verif- dado. Lo mantiene el Arquitecto. Qué y dónde lo dice pw\limpiar-zz.json:
-//   { "col": "inv-depositos", "prefijo": "zz-verif-L-111-r-" }
+//   { "col": "inv-depositos", "prefijo": "zz-verif-L-111-r-" }  o  { "col": "inv-proveedores", "prefijos": ["zz-verif-L-103-r-", "zz-verif-L-111-r-"] }
 // La cola lo corre con correr\limpiar-zz.txt -> log\LIMPIAR-ZZ-guion.json. Cómo pasa la guardia sin aflojarla: primero
 // vuelve a subir esas mismas filas tal cual (filas con zz-verif-: la guardia las deja pasar y anota sus ids como de la
 // corrida) y después las borra (solo se borran ids anotados). Una fila sin zz-verif- en el nombre nunca entra.
 const fs = require('fs');
 const path = require('path');
+// v2 (M-458): acepta "prefijo" (uno) o "prefijos" (lista); todos deben empezar por zz-verif-.
 function config() {
   const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'limpiar-zz.json'), 'utf8'));
   if (!/^[a-z0-9-]+$/.test(String(c.col || ''))) throw new Error('limpiar-zz.json: col inválida');
-  if (!/^zz-verif-/.test(String(c.prefijo || ''))) throw new Error('limpiar-zz.json: el prefijo debe empezar por zz-verif-');
-  return c;
+  const prefijos = (Array.isArray(c.prefijos) ? c.prefijos : [c.prefijo]).map((x) => String(x || ''));
+  if (!prefijos.length || prefijos.some((x) => !/^zz-verif-/.test(x))) throw new Error('limpiar-zz.json: cada prefijo debe empezar por zz-verif-');
+  return { col: c.col, prefijos };
 }
 const filas = (j) => (j && Array.isArray(j.items) ? j.items : []).filter((x) => x && !x.deleted && x.data && typeof x.data === 'object');
 module.exports = {
@@ -18,10 +20,11 @@ module.exports = {
   zona: 'sesiones',
   casos: [{
     c: 'z', perfil: 'admin', pagina: '/str-inventario.html',
-    que: 'no queda ninguna fila cuyo nombre empiece por el prefijo zz-verif- de limpiar-zz.json en su colección',
+    que: 'no queda ninguna fila cuyo nombre empiece por alguno de los prefijos zz-verif- de limpiar-zz.json en su colección',
     async prueba(h) {
       const p = h.page;
-      const { col, prefijo } = config();
+      const { col, prefijos } = config();
+      const conPrefijo = (x) => prefijos.some((pf) => String((x.data || {}).nombre || '').startsWith(pf));
       // Dos fuentes, por si la página pide la colección por diferencias: la respuesta del servidor al recargar y la copia
       // local de la app (str-<col sin inv->-v1 o str-<col>-v1), unidas por id.
       const leer = async (soloServidor) => {
@@ -36,10 +39,10 @@ module.exports = {
           return [];
         }, col);
         loc.forEach((x) => { if (x && x.id != null && !x.deleted && !porId.has(String(x.id))) { const d = Object.assign({}, x); delete d.id; porId.set(String(x.id), { id: x.id, data: d }); } });
-        return [...porId.values()].filter((x) => String((x.data || {}).nombre || '').startsWith(prefijo));
+        return [...porId.values()].filter(conPrefijo);
       };
       const antes = await leer();
-      h.espera(true, col + ' · con prefijo ' + prefijo + ': ' + antes.length + ' fila(s)' + (antes.length ? ' (' + antes.map((x) => x.id).join(', ') + ')' : ''));
+      h.espera(true, col + ' · con prefijo ' + prefijos.join(' | ') + ': ' + antes.length + ' fila(s)' + (antes.length ? ' (' + antes.map((x) => x.id).join(', ') + ')' : ''));
       if (!antes.length) return;
       await p.waitForFunction(() => window.STRApi && STRApi.col && typeof STRApi.col.push === 'function', null, { timeout: 30000 });
       const ids = antes.map((x) => String(x.id));

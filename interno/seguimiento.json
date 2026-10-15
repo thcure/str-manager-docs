@@ -841,14 +841,16 @@
   {
    "id": "DT-39",
    "titulo": "Database::connect() corre Migrate::run en cada proceso PHP nuevo (consultas de esquema tras abrir); correrla solo si schema_version cambia o con GET_LOCK corto",
-   "estado": "abierta",
-   "origen": "INC-128, M-423/M-425 (sospecha secundaria)"
+   "estado": "programada",
+   "origen": "INC-128, M-423/M-425 (sospecha secundaria)",
+   "nota": "Diseño (M-429): después de L-103 y antes de K3-2; normal si mantiene la migración automática al cambiar el esquema, con N1 esquema igual → no migra / distinto → migra; si puede dejar una base sin migrar, crítico."
   },
   {
    "id": "DT-40",
    "titulo": "Evaluar PDO::ATTR_PERSISTENT en api/config/database.php (recomendación de Hostinger por el límite de 20 conexiones nuevas/s); cuidar wait_timeout 20 s (2006, ya reintentado) y max_user_connections 75 frente a 60 workers PHP",
    "estado": "abierta",
-   "origen": "INC-128, M-428. Necesita decisión de diseño y cruce con Carlos antes de tocar el servidor."
+   "origen": "INC-128, M-428. Necesita decisión de diseño y cruce con Carlos antes de tocar el servidor.",
+   "nota": "Pospuesta por Diseño (M-429): se reabre si error.log muestra rechazos de usuarios reales o un «intento 3»."
   }
  ],
  "cambios": [
@@ -11107,6 +11109,22 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Recomendación del Arquitecto (M-419 b y c). Revisión previa 9/14 corregida: sin juntar cuerpos ni reintento en el cliente (M-421). · ok de Diseño 21:38 (M-424): normal, cubre L-110. Encolado 21:39. · CLI 21:4x–21:44: 98504bb, 64/64 (db-reintento 22/22 con PHP real); p5c90. · Juez 21:49: no aceptado. d: el 2.º PUT de turnos sale a +237 ms y responde en 1 ms, antes de que termine el 1.º (¿otra ventana —portal— o respuesta del arnés?); el conteo y los turnos guardan 200 (INC-128 resuelto en la práctica). b de proveedores (L-102): clic «Editar» sin respuesta en 30 s, sin relación aparente con L-111. · M-427 (Arquitecto): el «1 ms» era un defecto de medida de pw 0.5.22 (respuestas cruzadas); real: PUT turnos #1 +0→+238, #2 +237→+834 (en serie), movimientos después. pw 0.5.23 corrige la medida y guarda captura de un N2 que revienta. · Reprueba 21:54–21:58 (aún con pw 0.5.22): la cola en VERDE (incluida b de proveedores); el juez marcó d por la misma cronología mal medida («0 ms»). Tercera corrida pedida 22:03 con 0.5.23."
+  },
+  {
+   "lote": "L-112",
+   "req": "DT-39",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Migrate::run solo si cambia schema_version (menos consultas y conexiones por petición)",
+   "estado": "previsto",
+   "vista": "siguiente",
+   "esperaA": "CD",
+   "espera": "después de L-103",
+   "orden": 121.119,
+   "desde": "2026-10-14 22:05",
+   "planTrabajo": "PT-1",
+   "grupo": "INV2",
+   "nota": "Orden de Diseño (M-429): tras L-103, antes de K3-2."
   }
  ],
  "riesgos": [

@@ -10967,8 +10967,53 @@
    "categoria": "normal",
    "resumen": "schema_version ≥ 10 en 12 guiones; guion de K3b con foto de recepción; test estático",
    "estado": "parcial",
-   "observacion": "Encolado 02:59 (ok de Diseño M-465). · Construido fd0c634 en parte (74/74): 12 guiones >= 10, REQ-MOD-6 y test estático hechos; guion K3b no hecho (su bloque traía /api/drive/cron y la tarea de conteo en comentarios, y la clave con comilla doble) → L-122",
-   "hash": "fd0c634"
+   "observacion": "Encolado 02:59 (ok de Diseño M-465). · Construido fd0c634 en parte (74/74): 12 guiones >= 10, REQ-MOD-6 y test estático hechos; guion K3b no hecho (su bloque traía /api/drive/cron y la tarea de conteo en comentarios, y la clave con comilla doble) → L-122 · 03:21 juez: no aceptado solo por el guion K3b (c), que pasó a L-122; lo demás (a, b: 12 guiones en verde con esquema 12) cumplido",
+   "hash": "fd0c634",
+   "aceptacion": {
+    "lote": "L-121",
+    "hash": "fd0c634",
+    "fecha": "2026-10-15",
+    "horaBogota": "03:21",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 74/74 archivos OK (incluye tests/e2e-esquema.test.js nuevo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "Regresión de la zona inventario en verde salvo REQ-K3b-aviso.spec.js (ver criterio c). Los doce guiones de salud en verde: «api/health 200 · schema_version 12» en DT-35, DT-40, INC-121, INC-126, INC-128-b, INC-128, L-108, REQ-INV2-3-4, REQ-INV2-4-1-interfaz, REQ-INV2-4-1, REQ-INV2-7-1-hk y REQ-INV2-7-1."
+     },
+     {
+      "c": "c",
+      "nivel": "N2/N3",
+      "ok": false,
+      "observado": "REQ-K3b-aviso.spec.js, c: NO — «turno de la corrida: sh-m-1792052325019 | NO: subida de la foto: sin respuesta | si: pedidos a /api/drive desde el portal: ninguno». d: NO — «turno de la corrida: sh-m-1792052325019 | NO: GET /api/drive/copias: sin respuesta · sin secretos: sí | NO: insignia: null · servidor: null | NO: estado del dato de prueba (Drive no conectado): — · esperado: sin-drive | error: el caso pasó de 90 s». g (N3, insignia ☁ sin tapar la foto): no se preparó ninguna captura. Además, el texto «que» de c y d en la corrida («sube una foto de tarea en el portal», «la foto lleva la insignia») no coincide con el bloque de §3 de la instrucción («sube la foto general de la recepción de zz-verif-Principal», «la foto de la recepción lleva la insignia»), y el síntoma de c («subida de la foto: sin respuesta») es el mismo del origen en L-117. No se puede concluir con esto si el guion desplegado es el reemplazo completo de §3."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c/g (REQ-K3b-aviso.spec.js)",
+      "motivo": "el guion no preparó la captura (no aparece en n3Preparados), probablemente por el fallo previo en c/d"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "REQ-K3b-aviso.spec.js (c y d): la subida de la foto de la recepción no responde y no se encuentra la insignia ☁; el «que» registrado no coincide con el bloque de §3",
+      "nivel": "medio",
+      "causa": "El «que» de los casos c y d en la corrida describe el comportamiento anterior de L-117 (foto de la tarea zz-verif-Conteo de cierre / insignia genérica) y no el bloque nuevo de §3 (foto general de la recepción de zz-verif-Principal); el caso c repite exactamente el síntoma de origen de L-117 («subida de la foto: sin respuesta»). Esto apunta a que tests/e2e/REQ-K3b-aviso.spec.js desplegado en esta corrida no es el reemplazo entero ordenado en §3, o que ese bloque nuevo no logra completar iniciar(h) + foto(h,'recepcion') en este entorno. No se puede determinar la causa exacta sin leer el guion desplegado, fuera de los límites de este juez.",
+      "observado": "c: «turno de la corrida: sh-m-1792052325019 | NO: subida de la foto: sin respuesta | si: pedidos a /api/drive desde el portal: ninguno». d: «turno de la corrida: sh-m-1792052325019 | NO: GET /api/drive/copias: sin respuesta · sin secretos: sí | NO: insignia: null · servidor: null | NO: estado del dato de prueba (Drive no conectado): — · esperado: sin-drive | error: el caso pasó de 90 s». Capturas de error: log\\capturas\\L-121\\REQ-K3b-aviso-c-error.png y REQ-K3b-aviso-d-error.png."
+     }
+    ],
+    "datosDePrueba": "limpiezaRegresion: REQ-K3b-aviso.spec.js → «limpiar() corrió sin error» (el turno zz-verif- de la corrida se borró pese a que c y d dieron NO). El resto de la regresión: «limpiar() corrió sin error» en los guiones que lo declaran; DT-35, INC-121, INC-126, INC-127, L-108 y REQ-INV2-4-1 no tienen limpiar() en el guion. Este lote no crea datos propios (solo modifica guiones de tests/e2e/).",
+    "notas": "El lote cumple N1 (esquema ≥10 en los doce guiones, sin llamadas al cron) y la regresión general de la zona inventario. Falla la reprueba de L-117 (criterio c): REQ-K3b-aviso.spec.js c y d dan NO con el mismo síntoma que motivó L-121, y sus textos «que» no coinciden con el bloque de §3 de la instrucción, lo que sugiere que el archivo desplegado no es el reemplazo completo. No aplica «herramienta» (M-435): los fallos no son «sin sesión», ERR_CONNECTION_CLOSED ni error propio de pw, sino «sin respuesta» en la subida de la foto y en /api/drive/copias."
+   }
   },
   {
    "lote": "L-122",
@@ -12809,9 +12854,9 @@
    "estado": "parcial",
    "vista": "siguiente",
    "esperaA": "CLI",
-   "espera": "veredicto; el guion K3b va en L-122",
+   "espera": "lo pendiente lo cubre L-122",
    "orden": 121.41,
-   "desde": "2026-10-15 03:12",
+   "desde": "2026-10-15 03:34",
    "planTrabajo": "PT-1",
    "grupo": "K3",
    "nota": "Destraba L-116 (reprueba) y L-117."
@@ -12825,7 +12870,7 @@
    "estado": "encolado",
    "vista": "siguiente",
    "esperaA": "CLI",
-   "espera": "construcción; luego reprueba de L-116 y L-117",
+   "espera": "pruebas y veredicto; la copia de L-117 en hechas\\ ya tiene el guion nuevo",
    "orden": 121.42,
    "desde": "2026-10-15 03:14",
    "planTrabajo": "PT-1",
@@ -12847,6 +12892,38 @@
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Pedido del Arquitecto, M-467."
+  },
+  {
+   "lote": "L-124",
+   "req": "REQ-K3-3 (1/2)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "Corte mensual: servidor, borrado y reporte (migración 13)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "6 dudas (M-470) antes de la revisión previa",
+   "orden": 121.5,
+   "desde": "2026-10-15 03:34",
+   "planTrabajo": "PT-1",
+   "grupo": "K3",
+   "nota": "DA-32; cruce 10-oct; después de K3-2 aceptado."
+  },
+  {
+   "lote": "L-125",
+   "req": "REQ-K3-3 (2/2)",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "Corte mensual: archivo desde Drive o «Eliminado en el corte», avisos y reporte en pantalla",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "6 dudas (M-470) antes de la revisión previa",
+   "orden": 121.51,
+   "desde": "2026-10-15 03:34",
+   "planTrabajo": "PT-1",
+   "grupo": "K3",
+   "nota": "DA-32; cruce 10-oct; después de K3-2 aceptado."
   }
  ],
  "riesgos": [

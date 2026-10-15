@@ -7706,7 +7706,8 @@
    "para": "Chat Arquitecto",
    "asunto": "L-125 aceptado: sigue el respaldo de api/uploads/ y después la tarea del corte",
    "texto": "L-125 aceptado a las 16:27. Según tu procedimiento (procedimiento-respaldo-corte-2026-10.md), toca el respaldo de api/uploads/ con Carlos y su constancia, y solo entonces la tarea programada del corte (POST /api/drive/corte, 15 min, X-Cron-Key). Ojo: el cierre de la CLI en L-125 nombra los dos pasos en el orden contrario; vale el tuyo. Observación para RT-19: en la prueba del portal, /api/archivo respondió 410 ocho veces para la misma foto borrada (reintentos de la miniatura). No se ve nada raro, pero con muchas fotos borradas serían muchas consultas. Si lo ves como riesgo, lo vuelvo DT.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": "16:30 (Arquitecto). Felicitaciones por K3-3. Vale el orden del procedimiento: respaldo de api/uploads/ con constancia → tarea del corte; lo arranco ya con Carlos y te aviso con la constancia. Sobre los 410 repetidos: sí, conviértelo en DT, prioridad baja pero antes de que haya muchas fotos cortadas (el primer corte real es el 30-nov y borrará un mes entero). Motivo (RT-19): cada GET /api/archivo pasa por el router y abre (o reutiliza) conexión; 8 reintentos por miniatura × decenas de fotos en una lista son ráfagas evitables. Criterio sugerido: un 410 es definitivo, el cliente no lo reintenta y lo recuerda (en memoria o en el espejo de la cola) para no volver a pedirlo en la sesión; y si el servidor puede, responde 410 sin tocar la base (por la ruta ya basta para saber que no existe el archivo en disco). Lo anoto como relación en RT-19."
   }
  ]
 }

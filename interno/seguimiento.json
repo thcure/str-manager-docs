@@ -285,8 +285,9 @@
    "severidad": "bajo",
    "titulo": "Conectar Drive sin marcar la casilla de permiso de Google (desmarcada por defecto) vuelve con ?drive=error sin motivo; el callback no anota ultimo_error ni log en ninguna rama de error.",
    "pendiente": "Deuda: comprobar el scope concedido, redirigir con motivo (p. ej. ?drive=sin-permiso con texto 'Marca la casilla de Google Drive') y registrar el paso que falló en api/logs/error.log. Candidato a incluir en K3b.",
-   "estado": "abierto",
-   "origen": "49-veredicto-3."
+   "estado": "cerrado",
+   "origen": "49-veredicto-3.",
+   "cierre": "15-oct 02:30: L-116 (477e6b1) aceptado: el callback detecta la falta del permiso drive.file, redirige con ?drive=sin-permiso y registra el paso en error.log. Queda N4 de Carlos con cuenta de prueba."
   },
   {
    "id": "INC-98",
@@ -10550,8 +10551,88 @@
    "req": "REQ-K3-2 (1/2)",
    "categoria": "crítico",
    "resumen": "Copia a Drive: cron, cola de copia, INC-97; migración 11",
+   "estado": "aceptado",
+   "observacion": "Encolado 02:19 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 12/14 corregida). · Construido 477e6b1 (migración 11, 71/71). 02:30 aceptado: a–g en verde (estado sin secretos; ?drive=sin-permiso con «Marca la casilla de Google Drive»; portal sin pedidos a /api/drive; captura a 390 px). Regresión sin casos (zona del guion).",
+   "hash": "477e6b1",
+   "aceptacion": {
+    "lote": "L-116",
+    "hash": "477e6b1",
+    "fecha": "2026-10-15",
+    "horaBogota": "02:30",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 71/71 archivos OK"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 71/71 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /api/health schema_version: 11 | si: GET /api/drive/estado: 200 | si: estado sin secretos: sí · claves: configurado,conectado,google_email,carpeta,conectado_en,estado,ultimo_error,copia | si: conectado: true · copia: {\"pendientes\":0,\"copiados\":0,\"omitidos\":0,\"ultimaPasada\":null} | si: tarjeta: «☁ Copia en Google Drive Cada 15 minutos el STR copia a tu Drive las fotos y videos de tareas e incidentes (primero la evidencia de incidentes), en la carpeta \"STR Manager\" › negocio › propiedad › mes. El STR solo puede ver y crear los archi»"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: aviso: «Google no dio permiso sobre Drive. Marca la casilla de Google Drive cuando Google la muestre y vuelve a conectar.» | si: URL sin ?drive=: https://app.apartamentosbucaramanga.com/str-app-shell.html | si: panel Configuración abierto: sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: destino: https://app.apartamentosbucaramanga.com/str-app-shell.html | si: aviso: «No se pudo conectar Google Drive. Inténtalo de nuevo; si se repite, avisa al soporte del STR.»"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: pedidos a /api/drive desde el portal: ninguno | si: respuestas JSON con secretos: ninguna (20 leídas)"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura f-aviso-sin-permiso (390 px): dentro de la tarjeta «☁ Copia en Google Drive», debajo del texto «Cada 15 minutos…», un recuadro rojo con borde rojo dice «Google no dio permiso sobre Drive. Marca la casilla de Google Drive cuando Google la muestre y vuelve a conectar.»; el texto se parte en tres líneas dentro del recuadro, sin desborde ni corte horizontal; la tarjeta y los botones caben en el ancho."
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [
+     {
+      "c": "h",
+      "que": "Con una cuenta de Google de prueba, › Configuración › Conectar Google Drive: Google pide solo el permiso de archivos de Drive usados con la app (sin casilla, o con ella: anotarlo); al aceptar, «✓ Google Drive conectado»; captura de la pantalla de Google para Diseño."
+     },
+     {
+      "c": "i",
+      "que": "Con la tarea programada de hPanel creada, la app de Google publicada y Drive conectado: tras una pasada, la tarjeta muestra «última pasada …» y en Drive aparecen las fotos nuevas en STR Manager/<negocio>/<propiedad>/<AAAA-MM>/ (los datos de prueba no)."
+     },
+     {
+      "c": "j",
+      "que": "Reportar un incidente con un video real desde housekeeping; tras la pasada siguiente el video está en STR Manager/<negocio>/<propiedad>/<AAAA-MM>/ con el mismo tamaño y se reproduce en Drive."
+     }
+    ],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Entrada P4 en verde (despliegue, 71/71, guion igual a la instrucción, semilla completa, sesiones admin y colab). Regresión sin casos. N3 f decidido sobre la única captura preparada. Observación informativa, no criterio: en la captura el aviso rojo «sin permiso» convive con el recuadro verde «✓ Conectado como <correo de la cuenta>» porque la cuenta de prueba ya tenía Drive conectado y el regreso ?drive=sin-permiso es simulado; además la franja superior (texto visible) muestra el aviso breve «✗ Falta el permiso de Drive…». Hora de Bogotá estimada a partir del fin de la corrida (07:29Z)."
+   }
+  },
+  {
+   "lote": "L-117",
+   "fecha": "2026-10-15",
+   "req": "REQ-K3-2 (2/2)",
+   "categoria": "crítico",
+   "resumen": "Aviso fijo del corte y estado de copia en el registro; migración 12",
    "estado": "registrado",
-   "observacion": "Encolado 02:19 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 12/14 corregida)."
+   "observacion": "Encolado 02:32 (DA-32, cruce 10-oct; ok de Diseño M-455; revisión previa 10/14 corregida)."
   }
  ],
  "esquema": {
@@ -12316,12 +12397,12 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Copia a Drive: cron, cola de copia, INC-97 (migración 11)",
-   "estado": "encolado",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "construcción",
+   "esperaA": "Carlos",
+   "espera": "N4 y precondiciones de Carlos: tarea programada de 15 min en hPanel (POST /api/drive/cron con X-Cron-Key) y publicar la app de Google; luego primera pasada real",
    "orden": 121.4,
-   "desde": "2026-10-15 02:19",
+   "desde": "2026-10-15 02:32",
    "planTrabajo": "PT-1",
    "grupo": "K3",
    "nota": "DA-32; cruce 10-oct; después de L-114."
@@ -12332,12 +12413,12 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "Aviso fijo del corte y estado de copia en el registro (migración 12)",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
-   "esperaA": "CD",
-   "espera": "ok de Diseño 01:30 (M-455); se encola tras L-114 aceptado (L-117 tras L-116)",
+   "esperaA": "CLI",
+   "espera": "construcción",
    "orden": 121.41000000000001,
-   "desde": "2026-10-15 01:36",
+   "desde": "2026-10-15 02:32",
    "planTrabajo": "PT-1",
    "grupo": "K3",
    "nota": "DA-32; cruce 10-oct; después de L-114."

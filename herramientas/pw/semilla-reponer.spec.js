@@ -331,7 +331,7 @@ module.exports = {
           // El nombre exacto (la puerta compara con mayúsculas): si la fila dice «zz-verif-secando», se renombra.
           const nom = ((await f.locator('strong').first().textContent().catch(() => '')) || '').trim();
           if (nom && nom !== n) {
-            await f.getByRole('button', { name: 'Editar', exact: true }).click();
+            await f.getByRole('button', { name: 'Renombrar', exact: true }).click(); // la fila de estados dice «Renombrar», no «Editar»
             await p.waitForSelector('#esModal #esNombre', { state: 'visible' });
             await p.fill('#esNombre', n);
             await p.selectOption('#esModal select#esPendiente', pend);

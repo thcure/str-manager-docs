@@ -98,7 +98,7 @@
     "id": "hostinger",
     "nombre": "Hostinger (producción)",
     "tipo": "lugar",
-    "lineaBase": "lb-hostinger"
+    "lineaBase": "lb-hosting"
    },
    {
     "id": "nube-claude",
@@ -1011,34 +1011,10 @@
    "nota": "Al abrir un chat que reemplaza a otro se cambia su sesión allí el mismo día."
   },
   {
-   "id": "lb-hostinger",
-   "nombre": "Hostinger (producción)",
-   "fecha": "2026-10-08",
-   "aprobadaPor": "Carlos",
-   "items": [
-    {
-     "que": "Plan",
-     "valor": "Premium, vence 2026-11-03 (migración a un plan nuevo en estudio)"
-    },
-    {
-     "que": "Despliegue",
-     "valor": "automático desde main de str-manager; versión desplegada en seguimiento.json → cambios[] (último lote)"
-    },
-    {
-     "que": "Cron",
-     "valor": "POST /api/sync-ical cada 15 min con X-Cron-Key; POST /api/export/cron diario 03:00 (30 respaldos en api/backups/)"
-    },
-    {
-     "que": "Claves",
-     "valor": "api/config/secrets.php solo en el servidor (las maneja Carlos)"
-    }
-   ]
-  },
-  {
    "id": "lb-hosting",
    "nombre": "Hosting Unlimited (tres sitios) — desde la migración del 13-oct",
-   "fecha": "2026-10-13",
-   "aprobadaPor": "Carlos (migración M1–M8, 13-oct-2026)",
+   "fecha": "2026-10-15",
+   "aprobadaPor": "Carlos (migración M1–M8, 13-oct-2026); ampliada por el Arquitecto el 15-oct (LM-36) con hechos medidos o confirmados",
    "items": [
     {
      "que": "Plan",
@@ -1067,8 +1043,48 @@
     {
      "que": "Secretos",
      "valor": "JWT_SECRET y CRON_KEY de producción rotados el 13-oct; pendientes: secreto del cliente de Google y claves temporales de pruebas"
+    },
+    {
+     "que": "Versión desplegada",
+     "valor": "?v= / STR_API_VERSION p5c96 (shell p5c84); schema_version 12; /api/health → ok, db, secrets, gd, exif, zip, uploadMaxMB 100, drive true, dbConfig secrets (15-oct)",
+     "comprobar": "curl -s https://app.apartamentosbucaramanga.com/api/health"
+    },
+    {
+     "que": "Servicio del modelo",
+     "valor": "fabrica.apartamentosbucaramanga.com/modelo/api · versión 0.1 · esquema 3 · PHP 8.3.35",
+     "comprobar": "curl -s https://fabrica.apartamentosbucaramanga.com/modelo/api/salud"
+    },
+    {
+     "que": "Límites de MySQL (INC-128, confirmados por Hostinger)",
+     "valor": "20 conexiones nuevas/s por cuenta de hosting y 75 simultáneas (max_user_connections); wait_timeout ≈ 20 s; sin my.cnf. Respuesta del código: PDO persistente (L-118), escrituras en serie (L-111), candados por tabla; umbral de reversión: cualquier 1040/1203",
+     "comprobar": "GET /api/diagnostico (admin) → persistente true, conexiones < 60"
+    },
+    {
+     "que": "PHP que exige el STR",
+     "valor": "gd, exif, ZipArchive, sodium u OpenSSL, cURL, PDO; upload_max_filesize/post_max_size → uploadMaxMB 100"
+    },
+    {
+     "que": "Secretos (solo nombres)",
+     "valor": "api/config/secrets.php: DB_HOST, DB_NAME, DB_USER, DB_PASS, JWT_SECRET, CRON_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DRIVE_TOKEN_KEY, GOOGLE_REDIRECT_URI (opcional) · modelo/secrets.php: MODELO_DB_HOST, MODELO_DB_NAME, MODELO_DB_USER, MODELO_DB_PASS, MODELO_TOKEN_ARQ. Los pone Carlos; nunca valores en repo, cola ni chats"
+    },
+    {
+     "que": "Cron por crear",
+     "valor": "*/15 POST /api/drive/cron (Carlos, antes de la primera pasada real de K3b y tras publicar la app de Google) · */15 POST /api/drive/corte (después de aceptar L-124 y L-125 y del respaldo completo de api/uploads/); ambos con la X-Cron-Key leída de secrets.php al correr"
+    },
+    {
+     "que": "Respaldos",
+     "valor": "Base: POST /api/export/cron diario 03:00 → api/backups/<cuenta>/<fecha>.json, 30 por cuenta, sin importador (restauración manual, nunca probada). Archivos: api/uploads/ sin respaldo propio; copia a Drive por negocio solo de foto/evidencia/video (guías, docs y planos sin copia)"
+    },
+    {
+     "que": "Google Cloud y Firebase",
+     "valor": "Proyecto de Google Cloud «STR Manager» (app OAuth drive.file, en modo prueba hasta publicarla: el permiso vence a los 7 días); Firebase str-hospedaje (dominios app. y pruebas.); cuenta de Google dedicada del STR (DA-26)"
+    },
+    {
+     "que": "Por confirmar en hPanel (⟂ Carlos, 15-oct)",
+     "valor": "versión del motor MySQL/MariaDB; uso de disco y cuota; estado de publicación de la app de Google; registrador y vencimiento del dominio; si ya existe la tarea drive/cron"
     }
-   ]
+   ],
+   "documento": "claude/arquitectura/infraestructura-configuracion.md (EC, relaciones y lo que Carlos confirma en hPanel)"
   }
  ],
  "catalogo": {

@@ -686,7 +686,7 @@
    "fecha": "2026-10-14",
    "severidad": "crítico",
    "titulo": "PUT de turnos e inv-movimientos del colaborador al marcar el conteo: 500 «Base de datos no disponible» (MySQL 2002)",
-   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea. Con pw 0.5.21 (20:59): el cuerpo es {\"error\":\"Base de datos no disponible\",\"detalle\":2002}: el PHP no logra conectar a MySQL en esas dos peticiones (las demás de la corrida sí). Sospecha: ráfaga de peticiones simultáneas de HK al marcar la tarea, que supera el límite de conexiones o procesos del hosting compartido. Arquitecto (M-419, 21:08): no es tope de MySQL (max_user_connections 75, contadores en 0); la capa de conexión local del hosting (127.0.0.1) rechaza conexiones de forma intermitente con varias escrituras seguidas (también 2 de 5 PUT de fotos). Sí puede tocar a colaboradores reales.",
+   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP. Arquitecto (M-417): desplegado = 7068c95 (104010 bytes = e0c7b9d), disco/CPU bien, sin log legible; mismo código que a las 16:53 en verde → datos o estado, no código. Solo falla el colaborador: PUT de 6 conteos y PUT de turnos que marca la tarea. Con pw 0.5.21 (20:59): el cuerpo es {\"error\":\"Base de datos no disponible\",\"detalle\":2002}: el PHP no logra conectar a MySQL en esas dos peticiones (las demás de la corrida sí). Sospecha: ráfaga de peticiones simultáneas de HK al marcar la tarea, que supera el límite de conexiones o procesos del hosting compartido. Arquitecto (M-419, 21:08): no es tope de MySQL (max_user_connections 75, contadores en 0); la capa de conexión local del hosting (127.0.0.1) rechaza conexiones de forma intermitente con varias escrituras seguidas (también 2 de 5 PUT de fotos). Sí puede tocar a colaboradores reales. M-423: 74 líneas «db connect · intento n falló · 2002» en 21:12–21:18, siempre en pares: fallan las conexiones que se abren a la vez desde el mismo cliente; en serie pasan; reintentos de espera fija vuelven a coincidir. HK manda dos PUT del mismo turno en 1 ms al marcar la tarea (bug aparte).",
    "pendiente": "L-110 (reintento en database.php). Siguiente: L-111 = cliente (str-api/HK) trata «Base de datos no disponible» como reintentable y serializa las subidas del conteo y de fotos; log con el mensaje completo de la PDOException (errno 111/110/99) para el ticket a Hostinger.",
    "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión)."
@@ -9145,6 +9145,52 @@
     ],
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "La instrucción no tiene criterios N3 ni N4; n3Preparados vacío. La única captura de la carpeta (b-medida.png/.txt) muestra la ficha de lugares de una zona zz-verif-L-108-r- en Inventario (de la regresión INC-125), no corresponde a ningún N3 y no cambia el veredicto. El 500 de d no es el mismo síntoma de L-103 (error de código) sino «Base de datos no disponible» (2002) también en turnos: probablemente la base cayó o rechazó conexiones al final de la corrida; conviene repetir la cola de L-108 con la base disponible antes de decidir otra reversión o fix. horaBogota = fin de la corrida (01:59Z del 15-oct = 20:59 del 14-oct en Bogotá); el juez no consulta el reloj."
+   },
+   "aceptacion3": {
+    "lote": "L-108",
+    "hash": "770edd0",
+    "fecha": "2026-10-14",
+    "horaBogota": "21:21",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 63/63 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c89 (versión ≥ p5c89: el guion corre como regresión en lotes siguientes) | aviso: la guardia corto 3 peticion(es): PUT https://app.apartamentosbucaramanga.com/api/col/inv-movimientos (18 fila(s) sin zz-verif- en /api/col/inv-movimientos)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "Regresión de la zona inventario en rojo: fallan REQ-INV2-7-1-hk-turno.spec.js d (conteos inv-movimientos: 409) y REQ-INV2-7-1.spec.js f (ids de arPriv y arRev hallados en inv-articulos: 4). El resto de casos de regresión (DT-35, INC-121, INC-125, INC-126, INC-127, INC-128, REQ-INV2-3-4, REQ-INV2-4-1, REQ-INV2-4-1-interfaz, REQ-INV2-7-1-hk) en verde."
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Tras revertir L-103, el PUT de inv-movimientos del colaborador sigue fallando (409 en vez de 200) al cerrar el conteo",
+      "nivel": "crítico",
+      "causa": "La reversión no devuelve el comportamiento aceptado de L-102: el servidor rechaza con conflicto (409) el PUT de conteos de cierre del colaborador. Causa probable: el estado que dejó L-103 en la base (movimientos/pendientes creados con la lógica de L-103, y 18 filas sin zz-verif- que el HK del colaborador intenta reenviar en cada carga y la guardia corta) choca con la validación de L-102 restaurada; el revert de código no limpia ni migra esos datos. Hay que confirmarlo en el servidor (motivo del 409) antes de un fix.",
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: tarea marcada: sí · turnos 200 | NO: conteos (inv-movimientos): 409 | la guardia cortó 2 PUT de /api/col/inv-movimientos (18 filas sin zz-verif-). Antes (L-103) era 500; en L-102 era 200. El colaborador sigue sin poder registrar los conteos de cierre."
+     },
+     {
+      "titulo": "El colaborador recibe en inv-articulos artículos de zonas privada y revocada",
+      "nivel": "crítico",
+      "causa": "El filtro por zona de /api/col/inv-articulos para el colaborador no excluye los artículos asignados solo a zonas privadas o revocadas (en el estado revertido a L-102 + L-104..L-106); el filtro de lugares sí funciona (no llegan lugares indebidos), el de artículos no.",
+      "observado": "REQ-INV2-7-1.spec.js f: lugares que no debían llegar: ninguno | NO: ids de arPriv y arRev hallados en inv-articulos: 4 | articuloIds recibidos: 10 · de zonas privada o revocada: ninguno. Además los lugares de base que llegan son de la corrida L-95 (zz-verif-L-95-...), no de la de este lote."
+     }
+    ],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "La instrucción no tiene criterios N3 ni N4 (n3Preparados vacío); la captura b-medida corresponde al caso N2 b y no se juzga. La regresión c la marca la cola en rojo (fallan REQ-INV2-7-1-hk-turno.spec.js d y REQ-INV2-7-1.spec.js f): justo el caso que la reversión debía devolver a verde (d) sigue fallando, ahora con 409. Aviso repetido en casi todos los casos del colaborador: el HK intenta un PUT de inv-movimientos con 18 filas sin zz-verif- (posibles datos reales) y la guardia lo corta; revisar de dónde salen antes de volver a probar. horaBogota tomada del fin de la corrida (02:21Z). Semilla completa; resultado de la cola: rojo, commit 770edd0."
    }
   },
   {
@@ -9205,9 +9251,55 @@
    "req": "INC-128",
    "categoria": "normal",
    "resumen": "database.php reintenta la conexión 2 veces ante rechazos momentáneos y anota cada intento.",
-   "estado": "registrado",
+   "estado": "no aceptado",
    "observacion": "CLI 21:10–21:11: 770edd0, 63/63.",
-   "hash": "770edd0"
+   "hash": "770edd0",
+   "aceptacion": {
+    "lote": "L-110",
+    "hash": "770edd0",
+    "fecha": "2026-10-14",
+    "horaBogota": "21:15",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 63/63 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 · db true"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "regresión de la zona inventario en rojo en dos guiones: REQ-INV2-7-1-hk-turno.spec.js d (con las 5 fotos subidas, PUT /api/col/turnos → 500 {\"error\":\"Base de datos no disponible\",\"detalle\":2002} dos veces casi a la vez (+0ms y +1ms, ~700ms cada una); la tarea de conteo no queda marcada; los conteos (inv-movimientos) sí suben con 200) y REQ-INV2-7-1.spec.js f (al pedir inv-articulos aparecen 4 ids de artículos de las zonas privada y revocada, aunque los articuloIds que de hecho recibe el colaborador en el HK no incluyen ninguno de esas zonas)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "INC-128 sigue abierto bajo concurrencia: PUT /api/col/turnos responde 500 (2002) tras agotar los 2 reintentos cuando llegan dos peticiones casi simultáneas",
+      "nivel": "crítico",
+      "causa": "El guion reproduce dos PUT /api/col/turnos casi simultáneos (0ms y 1ms de diferencia) que compiten por abrir conexión a la vez; el rechazo 2002 golpea a ambas en el mismo instante, así que los reintentos (150+400 ms) de las dos peticiones vencen juntos y ninguna llega a liberar la conexión a tiempo para que la otra tenga éxito. El reintento que añadió este lote cubre un rechazo aislado, no una colisión de dos peticiones del mismo origen a la vez, que es justo el patrón que dispara INC-128 (turno + conteos casi a la vez).",
+      "observado": "si: turno de la corrida: sh-m-1792030444746 | si: tarea zz-verif-Conteo de cierre visible en el turno | NO: tarea marcada: no · turnos 500 | si: conteos (inv-movimientos): 200 | error del servidor: PUT /api/col/turnos → respuesta 500: {\"error\":\"Base de datos no disponible\",\"detalle\":2002} (x2) | cronología: +0ms PUT /api/col/turnos → 500 en 714ms, +1ms PUT /api/col/turnos → 500 en 702ms, +706ms PUT /api/col/inv-movimientos → 200 en 299ms"
+     },
+     {
+      "titulo": "REQ-INV2-7-1.spec.js f: inv-articulos devuelve ids de artículos de zonas privada y revocada",
+      "nivel": "medio",
+      "causa": "El filtro por zona de /api/col/inv-articulos (no tocado por este lote, que solo cambia la conexión a BD en database.php) deja pasar artículos de las zonas «privada» y «revocada» cuando se lista el catálogo completo; la entrega real al colaborador (articuloIds que llegan al HK) sí queda limpia por otra vía de filtrado, por lo que el riesgo hoy es de higiene de datos en ese endpoint, no una fuga ya explotada por el colaborador.",
+      "observado": "si: llegan los lugares de base: zz-verif-L-95-vacio-fizl0, zz-verif-L-95-Repisa 01-fizl0, zz-verif-L-95-Contenedor A-fizl0 (x2 cada uno) | si: lugares que no debían llegar: ninguno | NO: ids de arPriv y arRev hallados en inv-articulos: 4 | si: articuloIds recibidos: 20 · de zonas privada o revocada: ninguno"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "El criterio «d» de la instrucción (evidencia en api/logs/error.log) está marcado como fuera de la cola y no lo juzga el juez; lo revisa el Arquitecto con Carlos en hPanel, por lo que no aparece en «criterios» ni en «dispositivo» (no es N4). No hay letras N3 en esta instrucción (n3Preparados viene vacío), así que no hay capturas que revisar. El propio guion de regresión que la instrucción señala como la prueba fuerte de este lote (REQ-INV2-7-1-hk-turno.spec.js d) es el que falla, con el mismo código 2002 que el lote debía absorber."
+   }
   }
  ],
  "esquema": {
@@ -10836,7 +10928,7 @@
    "desde": "2026-10-14 19:26",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61. · Juez 19:24: no aceptado. Con 7068c95 (p5c89) siguen los 500: inv-movimientos y ahora también turnos. La causa no es (solo) el código de L-103. · Reprueba 20:59: la causa visible es conexión a MySQL (2002) en el caso d, no lógica."
+   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61. · Juez 19:24: no aceptado. Con 7068c95 (p5c89) siguen los 500: inv-movimientos y ahora también turnos. La causa no es (solo) el código de L-103. · Reprueba 20:59: la causa visible es conexión a MySQL (2002) en el caso d, no lógica. · Reprueba 21:21 (con L-110): turnos 200; d «conteos 409» por la cola local del perfil colab (12–18 filas de turnos de corridas fallidas), no por el servidor; f (INC-129) sigue."
   },
   {
    "lote": "L-109",
@@ -10860,15 +10952,15 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "database.php reintenta 2 veces (150 y 400 ms) si MySQL rechaza la conexión (2002/2006/1040/1203); log de cada intento",
-   "estado": "verificando",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": null,
+   "esperaA": "CD",
+   "espera": "L-111",
    "orden": 121.117,
-   "desde": "2026-10-14 21:11",
+   "desde": "2026-10-14 21:27",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Diseño (respuesta a M-420, 21:03): INC normal, sin cruce. Revisión previa 10/14 corregida. · CLI 21:10–21:11: 770edd0, 63/63 (db-reintento 12/12 con PHP real)."
+   "nota": "Diseño (respuesta a M-420, 21:03): INC normal, sin cruce. Revisión previa 10/14 corregida. · CLI 21:10–21:11: 770edd0, 63/63 (db-reintento 12/12 con PHP real). · Juez 21:15: no aceptado; hk-turno d: dos PUT de turnos en el mismo ms, ambos 500 tras los 2 reintentos fijos. En la reprueba de L-108 (21:17) los dos pasaron al 2.º reintento. Reintentos fijos chocan en paso cerrado."
   },
   {
    "lote": "L-111",
@@ -10876,12 +10968,12 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Cliente: 500 «Base de datos no disponible» reintentable con espera; subidas en serie (conteo turnos+movimientos, fotos); log del mensaje completo de la conexión",
-   "estado": "previsto",
+   "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "CD",
-   "espera": "veredicto de L-110",
+   "espera": "ajustes de M-423 y revisión previa",
    "orden": 121.118,
-   "desde": "2026-10-14 21:09",
+   "desde": "2026-10-14 21:27",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Recomendación del Arquitecto (M-419 b y c)."

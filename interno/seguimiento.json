@@ -685,11 +685,24 @@
    "etapa": "🔧",
    "fecha": "2026-10-14",
    "severidad": "crítico",
-   "titulo": "Con L-103 (387625f) el PUT de inv-movimientos responde 500 a los conteos de cierre del colaborador",
-   "causa": "Por ubicar (sin log de PHP): con e0c7b9d el mismo PUT (6 conteos de REQ-INV2-7-1-hk-turno d) daba 200. L-103 tocó [PEND], el PUT de turnos y el contexto de inv-movimientos.",
-   "pendiente": "Reversión L-108 (encolada 19:17); luego el log de PHP y un fix antes de volver a encolar L-103.",
+   "titulo": "PUT de inv-movimientos (y desde 19:2x también de turnos) responde 500 al colaborador; persiste tras revertir L-103",
+   "causa": "No es (solo) el código de L-103: con la reversión (7068c95, p5c89) sigue el 500 y aparece en turnos. Sospecha: base de datos o hosting (escrituras), o datos que dejó L-103 que el código de L-102 no tolera. Falta el log de PHP.",
+   "pendiente": "Arquitecto: log de PHP y estado del hosting (M-413, urgente). Sin causa no se encola otro lote.",
    "estado": "abierto",
    "origen": "Veredicto de L-103 (juez 19:13, regresión)."
+  },
+  {
+   "id": "INC-129",
+   "tipo": "INC",
+   "modulo": "Servidor · lectura del colaborador",
+   "etapa": "🔍",
+   "fecha": "2026-10-14",
+   "severidad": "medio",
+   "titulo": "inv-articulos del colaborador trae artículos de zonas privada y revocada (REQ-INV2-7-1.spec.js f)",
+   "causa": "Por confirmar: filtro del servidor o restos de semilla con los mismos ids. Visto en la regresión de L-108.",
+   "pendiente": "Revisar contra e0c7b9d cuando se resuelva INC-128.",
+   "estado": "abierto",
+   "origen": "Veredicto de L-108 (19:24)."
   }
  ],
  "dts": [
@@ -9036,9 +9049,55 @@
    "req": "INC-128 (reversión de L-103)",
    "categoria": "crítico",
    "resumen": "git revert 387625f + p5c89.",
-   "estado": "registrado",
+   "estado": "no aceptado",
    "observacion": "Encolado 19:17; CLI 19:19: 7068c95, 61/61.",
-   "hash": "7068c95"
+   "hash": "7068c95",
+   "aceptacion": {
+    "lote": "L-108",
+    "hash": "7068c95",
+    "fecha": "2026-10-14",
+    "horaBogota": "19:24",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 61/61 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: api/health 200 · schema_version 10 | si: iframe de HK: str-m1-housekeeping.html?modo=colaborador&v=p5c89 (versión ≥ p5c89: el guion corre como regresión en lotes siguientes) | aviso: la guardia corto 3 peticion(es): PUT https://app.apartamentosbucaramanga.com/api/col/inv-movimientos (6 fila(s) sin zz-verif- en /api/col/inv-movimientos)"
+     },
+     {
+      "c": "c (regresión zona inventario)",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "33 casos de regresión, 31 en verde y 2 en rojo: REQ-INV2-7-1-hk-turno.spec.js d y REQ-INV2-7-1.spec.js f. REQ-INV2-3-4.spec.js (L-102) a, b, c y j en verde."
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Tras revertir L-103 (p5c89) el colaborador sigue sin poder registrar los conteos de cierre: PUT de inv-movimientos y de turnos responden 500",
+      "nivel": "crítico",
+      "causa": "La reversión no quita la causa de INC-128: con 7068c95 desplegado (p5c89 confirmado en health y en el iframe de HK) el PUT de inv-movimientos sigue en 500, así que el fallo no venía (solo) del código de L-103, o el backend desplegado (index.php) no quedó en el estado de e0c7b9d. Además ahora también responde 500 el PUT de turnos al marcar la tarea. Hay que diagnosticar el 500 en el servidor (log de PHP / respuesta del endpoint) antes de otro lote; revertir más no está justificado sin esa causa.",
+      "observado": "REQ-INV2-7-1-hk-turno.spec.js d: si: turno de la corrida: sh-m-1792023763042 | si: tarea zz-verif-Conteo de cierre visible en el turno | NO: tarea marcada: sí · turnos 500 | NO: conteos (inv-movimientos): 500"
+     },
+     {
+      "titulo": "Los artículos de zonas privada y revocada aparecen en inv-articulos que recibe el colaborador",
+      "nivel": "medio",
+      "causa": "El listado inv-articulos del colaborador no filtra por las zonas que le corresponden (o arrastra artículos de prueba de corridas anteriores con los mismos ids/nombres): los lugares y los articuloIds de las asignaciones sí se filtran bien, pero el catálogo de artículos incluye 4 de arPriv/arRev. Es exposición de nombres de artículo, no de existencias ni de datos personales; si se confirma que es filtrado del servidor y no restos de semilla, sube a crítico (acceso indebido). Este caso no aparece en el veredicto de L-103 que motivó el lote, así que puede ser una regresión del revert o un fallo previo no detectado: verificarlo contra e0c7b9d.",
+      "observado": "REQ-INV2-7-1.spec.js f: si: llegan los lugares de base | si: lugares que no debían llegar: ninguno | NO: ids de arPriv y arRev hallados en inv-articulos: 4 | si: articuloIds recibidos: 10 · de zonas privada o revocada: ninguno"
+     }
+    ],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "La instrucción no tiene criterios N3 ni N4: n3Preparados vacío. La única captura (b-medida.png/.txt) es una vista a 390 px de Lugares de una zona zz-verif-L-108-r-…, de la regresión INC-125; solo muestra datos zz-verif-, no aporta a ningún criterio. El despliegue sí está (b en verde, str-api.js y HK en p5c89), aunque la puerta de entrada dice «el lote no cambia ?v=», lo que no cuadra con el Alcance (p5c87→p5c89); no afecta al resultado. Lo grave: el objetivo del lote (volver a conteos 200 como en L-102) no se cumple, el colaborador sigue bloqueado al cerrar el turno. La guardia cortó en varios casos PUT de inv-movimientos con 6 filas sin zz-verif- (probablemente reintentos de la cola local de HK del colaborador): conviene revisar que no queden pendientes reales en esa cola del navegador de pruebas. horaBogota tomada del fin de la corrida (00:24 UTC del 15-oct = 19:24 del 14-oct)."
+   }
   }
  ],
  "esquema": {
@@ -10659,15 +10718,15 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "git revert 387625f + p5c89",
-   "estado": "verificando",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "verificador",
-   "espera": null,
+   "esperaA": "Arquitecto",
+   "espera": "log de PHP / estado del hosting (INC-128)",
    "orden": 121.115,
-   "desde": "2026-10-14 19:19",
+   "desde": "2026-10-14 19:26",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
-   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61."
+   "nota": "Reversión declarada en L-103 (DA-33, cruce 12-oct 19:07). Urgente: el colaborador real no puede marcar conteos ni cerrar turnos con tarea de inventario desde p5c88. · ok de Diseño a posteriori 19:18 (M-412). CLI 19:19: 7068c95, revert sin conflictos, p5c89, 61/61. · Juez 19:24: no aceptado. Con 7068c95 (p5c89) siguen los 500: inv-movimientos y ahora también turnos. La causa no es (solo) el código de L-103."
   }
  ],
  "riesgos": [

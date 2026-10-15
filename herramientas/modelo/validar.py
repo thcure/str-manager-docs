@@ -186,6 +186,16 @@ for base, _, nombres in os.walk(os.path.join(RAIZ, 'interno')):
         if not b.endswith(b'\n'): avi('FIN-LINEA', 'archivo', rel, 'no termina con salto de línea')
         elif b.endswith(b'\n\n') or b.endswith(b'\r\n'): avi('FIN-LINEA', 'archivo', rel, 'termina con más de un salto o con \\r\\n')
 
+# LM-40: el mapa del STR (interno/mapa-modulos.json) se valida con mapa.py; M1/M2/M6 son errores, M3/M4/M5 avisos
+try:
+    import subprocess
+    _m = subprocess.run([sys.executable, '-I', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mapa.py'), RAIZ, '--solo-validar', '--json'], capture_output=True, text=True, timeout=60)
+    _r = json.loads(_m.stdout or '{}')
+    for x in _r.get('errores', []):
+        (err if x['regla'][:2] in ('M1', 'M2', 'M6', 'M0') else avi)(x['regla'], 'mapa', x['id'], x['detalle'])
+    for x in _r.get('avisos', []): avi(x['regla'], 'mapa', x['id'], x['detalle'])
+except Exception as ex: avi('M0 mapa', 'archivo', 'herramientas/modelo/mapa.py', f'no se pudo correr: {ex}')
+
 # Informe
 res = {'fecha': ahora.strftime('%Y-%m-%d %H:%M'), 'errores': ERR, 'avisos': AVI,
        'conteos': {'requisitos': len(reqs), 'decisiones': len(das), 'pedidos': len(pedidos), 'planes': len(planes), 'lotes': len(lotes), 'cambios': len(cambios), 'items': len(items), 'mensajes': len(mensajes), 'encargos': len(encargos)}}

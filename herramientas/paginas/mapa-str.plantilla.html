@@ -1,0 +1,469 @@
+<title>Mapa del STR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mapa del STR Manager · tablero de operación: cabecera fija, lienzo SVG con los módulos por bandas (quién lo usa → operación → transversal → interno y externos → infraestructura) y una ficha lateral que se abre al clic. */
+:root{
+  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f7f9fa; --fg:#182230; --muted:#5b6b7a; --line:#d3dbe2; --line-strong:#a9b6c1;
+  --accent:#0f766e; --accent-ink:#0b5a54; --accent-soft:#d9efec; --amber:#b45309;
+  --ok:#2f8f5b; --warn:#c7861a; --crit:#c0392b; --ok-soft:#e1f2e8; --warn-soft:#fbeedb; --crit-soft:#f9e1de;
+  --op:#1d4ed8; --tr:#0f766e; --in:#6b7280; --ac:#7c3aed; --ex:#b45309;
+  --font-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --shadow:0 10px 30px rgba(24,34,48,.14);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1519; --surface:#171f26; --surface-2:#1d2730; --fg:#e6ebef; --muted:#93a1ad; --line:#2a3640; --line-strong:#3f4f5c;
+  --accent:#2dd4bf; --accent-ink:#8ff0e3; --accent-soft:#123b38; --amber:#f0a44a;
+  --ok:#4ade80; --warn:#f2b35a; --crit:#f87171; --ok-soft:#133224; --warn-soft:#3a2a12; --crit-soft:#3d1a18;
+  --op:#7ea2ff; --tr:#2dd4bf; --in:#9aa5b1; --ac:#c4a5ff; --ex:#f0a44a; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1519; --surface:#171f26; --surface-2:#1d2730; --fg:#e6ebef; --muted:#93a1ad; --line:#2a3640; --line-strong:#3f4f5c;
+  --accent:#2dd4bf; --accent-ink:#8ff0e3; --accent-soft:#123b38; --amber:#f0a44a;
+  --ok:#4ade80; --warn:#f2b35a; --crit:#f87171; --ok-soft:#133224; --warn-soft:#3a2a12; --crit-soft:#3d1a18;
+  --op:#7ea2ff; --tr:#2dd4bf; --in:#9aa5b1; --ac:#c4a5ff; --ex:#f0a44a; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-body);display:flex;flex-direction:column;min-height:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--accent-ink)}
+button{font:inherit;color:inherit}
+.mono{font-family:var(--font-mono);font-size:.92em}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+h1{font:700 22px/1.1 var(--font-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font:500 12px/1.3 var(--font-body);color:var(--muted);letter-spacing:0;margin-top:2px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{border:1px solid transparent;background:transparent;border-radius:999px;padding:6px 12px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.tabs button:focus-visible,.chip:focus-visible,.node:focus-visible,.drawer button:focus-visible,#buscar:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.buscar{margin-left:auto;position:relative;flex:1 1 220px;max-width:380px;min-width:0}
+#buscar{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--surface-2);color:var(--fg);font:inherit}
+#sugerencias{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:320px;overflow:auto;z-index:20;margin-top:4px}
+#sugerencias button{display:flex;gap:8px;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;cursor:pointer;align-items:baseline}
+#sugerencias button:hover,#sugerencias button:focus{background:var(--surface-2)}
+#sugerencias .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;min-width:72px}
+main{flex:1;display:flex;min-height:0;position:relative}
+.vista{flex:1;min-width:0;overflow:auto;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;color:var(--muted);margin:0 0 8px}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--fg)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.lienzo{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:auto}
+svg.mapa{display:block;width:100%;min-width:900px;height:auto;font-family:var(--font-body);user-select:none}
+.banda-l{font:700 11px var(--font-display);letter-spacing:.12em;text-transform:uppercase;fill:var(--muted)}
+.banda-r{fill:var(--surface-2);stroke:var(--line)}
+.node{cursor:pointer}
+.node rect.caja{fill:var(--surface);stroke:var(--line-strong);stroke-width:1.2;rx:8}
+.node.parcial rect.caja{stroke-dasharray:6 3}
+.node.definido rect.caja{stroke-dasharray:3 3;fill:var(--surface-2)}
+.node.no-existe rect.caja{stroke-dasharray:1 3;fill:var(--surface-2);opacity:.75}
+.node:hover rect.caja,.node.sel rect.caja{stroke:var(--accent);stroke-width:2}
+.node.apagado{opacity:.22}
+.node text{fill:var(--fg)}
+.node .id{font:500 11px var(--font-mono);fill:var(--muted)}
+.node .nom{font:600 12.5px var(--font-body)}
+.node .dat{font:400 10px var(--font-mono);fill:var(--muted)}
+.node .fam{font:500 9.5px var(--font-body);letter-spacing:.08em;text-transform:uppercase}
+.actor rect.caja{rx:18}
+.ec rect.caja{rx:4;fill:var(--surface-2)}
+.ec .nom{font-size:10px;font-weight:500}
+.edge{fill:none;stroke:var(--line-strong);stroke-width:1.4;cursor:pointer;transition:opacity .15s}
+.edge.por{stroke-dasharray:5 4;stroke:var(--muted)}
+.edge:hover,.edge.sel{stroke:var(--accent);stroke-width:2.6}
+.edge.apagado{opacity:.07}
+.edge-hit{fill:none;stroke:transparent;stroke-width:12;cursor:pointer}
+.flecha{fill:var(--line-strong)}
+.riesgo-alto{fill:var(--crit)} .riesgo-medio{fill:var(--warn)} .riesgo-bajo{fill:var(--ok)}
+.drawer{width:min(440px,100%);flex:0 0 auto;background:var(--surface);border-left:1px solid var(--line);overflow:auto;padding-block:14px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));display:none}
+.drawer.abierto{display:block}
+.drawer .cerrar{float:right;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:4px 9px;cursor:pointer}
+.drawer .tipo{font:500 11px var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.drawer h2{font:700 20px/1.15 var(--font-display);margin:2px 0 6px;text-wrap:balance}
+.drawer h3{font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px;border-top:1px solid var(--line);padding-top:10px}
+.drawer p{margin:4px 0}
+.drawer ul{margin:4px 0;padding-left:18px}
+.drawer li{margin:2px 0}
+.ref{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 6px;font:500 11.5px var(--font-mono);background:var(--surface-2);cursor:pointer;color:var(--fg);margin:1px 2px 1px 0;text-decoration:none}
+.ref:hover{border-color:var(--accent);color:var(--accent-ink)}
+.badge{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600;vertical-align:1px}
+.b-aceptado,.b-construido,.b-vigente{background:var(--ok-soft);color:var(--ok)}
+.b-entregado,.b-parcial,.b-por{background:var(--warn-soft);color:var(--warn)}
+.b-definido,.b-borrador,.b-no-existe,.b-descartado,.b-sin{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.b-alto{background:var(--crit-soft);color:var(--crit)} .b-medio{background:var(--warn-soft);color:var(--warn)} .b-bajo{background:var(--ok-soft);color:var(--ok)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.ruta{font:12px var(--font-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;overflow-wrap:anywhere}
+.copiar{border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:1px 7px;font-size:11px;cursor:pointer;margin-left:4px}
+table.tabla{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+table.tabla th,table.tabla td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+table.tabla th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);position:sticky;top:0;background:var(--surface)}
+table.tabla td.n{text-align:right}
+table.tabla tr:hover td{background:var(--surface-2)}
+.tabla-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.matriz td{text-align:center;font-family:var(--font-mono);font-size:12px}
+.matriz td.si{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.resumen{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 10px}
+.resumen div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:120px}
+.resumen b{display:block;font:700 20px/1 var(--font-display)}
+.resumen span{font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.nota{font-size:12px;color:var(--muted)}
+.barra{height:6px;background:var(--line);border-radius:3px;overflow:hidden;min-width:60px}
+.barra i{display:block;height:100%;background:var(--accent)}
+.caso{border-left:3px solid var(--line);padding:2px 8px;margin:4px 0;font-size:12.5px}
+.caso .mono{color:var(--muted)}
+@media (max-width:760px){
+  main{flex-direction:column}
+  .drawer{position:fixed;left:0;right:0;bottom:0;width:auto;max-height:72%;border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:var(--shadow);padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));z-index:8}
+  h1{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <h1>Mapa del STR <small id="sub">módulos · funcionalidades · relaciones · reglas · infraestructura · guiones</small></h1>
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" aria-selected="true" data-v="mapa">Mapa</button>
+    <button role="tab" aria-selected="false" data-v="cobertura">Cobertura y riesgo</button>
+    <button role="tab" aria-selected="false" data-v="reglas">Reglas × módulos</button>
+    <button role="tab" aria-selected="false" data-v="relaciones">Relaciones</button>
+    <button role="tab" aria-selected="false" data-v="guiones">Guiones</button>
+  </div>
+  <div class="buscar"><input id="buscar" type="search" placeholder="Buscar módulo, REQ, RT-n, REL-n, guion, EC…" autocomplete="off" aria-label="Buscar"><div id="sugerencias" hidden></div></div>
+</header>
+<main>
+  <section class="vista" id="vista"></section>
+  <aside class="drawer" id="drawer" aria-live="polite"></aside>
+</main>
+
+<script>
+const D = /*__DATOS__*/null;
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const REPO_DOCS = 'https://github.com/thcure/str-manager-docs/blob/main/';
+const REPO_CODE = 'https://github.com/thcure/str-manager/blob/main/';
+const MOD = Object.fromEntries(D.modulos.map((m) => [m.id, m]));
+const ACT = Object.fromEntries(D.actores.map((a) => [a.id, a]));
+const REL = Object.fromEntries(D.relaciones.map((r) => [r.id, r]));
+const RT = Object.fromEntries(D.reglas.map((r) => [r.id, r]));
+const EC = Object.fromEntries(D.infraestructura.map((e) => [e.id, e]));
+const REQ = Object.fromEntries(D.reqs.map((r) => [r.id, r]));
+const GUI = Object.fromEntries(D.guiones.map((g) => [g.archivo, g]));
+const COB = D.cobertura;
+const FAM = {operativo: ['Operación', 'var(--op)'], transversal: ['Transversal', 'var(--tr)'], interno: ['Interno', 'var(--in)']};
+const equiv = {'REQ-K3b': 'REQ-K3-2', 'REQ-K3c': 'REQ-K3-3'};
+
+// ---------- posiciones del mapa (bandas) ----------
+const W = 1240, NW = 150, NH = 70, GX = 20;
+const BANDAS = [
+  {y: 36, h: 70, titulo: 'Quién lo usa', items: ['admin', 'operador', 'colaborador', 'invitado', 'huesped', 'propietario', 'porteria'], tipo: 'actor'},
+  {y: 136, h: 96, titulo: 'Operación', items: ['U', 'PR', 'CAL', 'FL', 'KN', 'INV'], tipo: 'mod'},
+  {y: 252, h: 96, titulo: '', items: ['HK', 'POR', 'INC1', 'PG', 'M2', 'CMP', 'M6'], tipo: 'mod'},
+  {y: 370, h: 96, titulo: 'Transversal', items: ['SH', 'API', 'SRV', 'K3'], tipo: 'mod'},
+  {y: 488, h: 96, titulo: 'Interno · externos', items: ['PRJ', 'MOD', 'google-drive', 'airbnb', 'github', 'cron', 'cola-arquitecto'], tipo: 'mixto'},
+  {y: 606, h: 150, titulo: 'Infraestructura', items: D.infraestructura.map((e) => e.id), tipo: 'ec'},
+];
+const POS = {};
+for (const b of BANDAS) {
+  if (b.tipo === 'ec') {
+    const cols = 6, w = (W - 60 - GX * (cols - 1)) / cols, h = 34;
+    b.items.forEach((id, i) => { const c = i % cols, r = Math.floor(i / cols); POS[id] = {x: 50 + c * (w + GX), y: b.y + 24 + r * (h + 8), w, h, tipo: 'ec'}; });
+    continue;
+  }
+  const n = b.items.length, w = b.tipo === 'actor' ? 136 : NW, h = b.tipo === 'actor' ? 40 : NH;
+  const total = n * w + (n - 1) * GX, x0 = 50 + (W - 60 - total) / 2;
+  b.items.forEach((id, i) => { POS[id] = {x: x0 + i * (w + GX), y: b.y + (b.h - h) / 2 + 6, w, h, tipo: MOD[id] ? 'mod' : 'actor'}; });
+}
+const H = 606 + 150 + 16;
+
+function centro(id) { const p = POS[id]; return p ? {x: p.x + p.w / 2, y: p.y + p.h / 2, p} : null; }
+function curva(a, b) {
+  const A = centro(a), B = centro(b); if (!A || !B) return null;
+  const abajo = B.y > A.y;
+  const y1 = abajo ? A.p.y + A.p.h : A.p.y, y2 = abajo ? B.p.y : B.p.y + B.p.h;
+  if (Math.abs(A.y - B.y) < 10) { const y = A.p.y + A.p.h; return `M${A.x},${y} C${A.x},${y + 40} ${B.x},${y + 40} ${B.x},${y}`; }
+  const dy = (y2 - y1) / 2;
+  return `M${A.x},${y1} C${A.x},${y1 + dy} ${B.x},${y2 - dy} ${B.x},${y2}`;
+}
+
+// ---------- estado ----------
+let vista = 'mapa', sel = null, filtroFam = new Set(['operativo', 'transversal', 'interno']), verEdges = true;
+
+function render() {
+  const v = $('#vista');
+  document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === vista)));
+  if (vista === 'mapa') v.innerHTML = htmlMapa();
+  else if (vista === 'cobertura') v.innerHTML = htmlCobertura();
+  else if (vista === 'reglas') v.innerHTML = htmlReglas();
+  else if (vista === 'relaciones') v.innerHTML = htmlRelaciones();
+  else v.innerHTML = htmlGuiones();
+  if (vista === 'mapa') montarMapa();
+}
+
+// ---------- vista Mapa ----------
+function htmlMapa() {
+  const chips = Object.entries(FAM).map(([k, [n]]) => `<button class="chip" data-fam="${k}" aria-pressed="${filtroFam.has(k)}">${n}</button>`).join('');
+  return `<div class="leyenda">
+    <span><i style="background:var(--crit)"></i>riesgo alto</span><span><i style="background:var(--warn)"></i>medio</span><span><i style="background:var(--ok)"></i>bajo</span>
+    <span>borde continuo = construido · trazos = parcial · punteado = definido / no existe</span>
+    <span style="margin-left:auto">${chips}<button class="chip" id="chipEdges" aria-pressed="${verEdges}">Relaciones</button></span>
+  </div>
+  <div class="lienzo"><svg class="mapa" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mapa de módulos del STR">
+    <defs><marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="flecha"/></marker></defs>
+    ${BANDAS.map((b) => `<rect class="banda-r" x="8" y="${b.y}" width="${W - 16}" height="${b.h}" rx="10"/>${b.titulo ? `<text class="banda-l" x="22" y="${b.y + 16}">${b.titulo}</text>` : ''}`).join('')}
+    <g id="edges">${D.relaciones.filter((r) => r.origen !== '*' && r.destino !== '*').map((r) => { const d = curva(r.origen, r.destino); return d ? `<g data-rel="${r.id}"><path class="edge-hit" d="${d}"/><path class="edge ${r.estado !== 'vigente' ? 'por' : ''}" d="${d}" marker-end="url(#f)"><title>${esc(r.id)} · ${esc(r.origen)} → ${esc(r.destino)}: ${esc(r.mecanismo)}</title></path></g>` : ''; }).join('')}</g>
+    <g id="nodes">${Object.keys(POS).map(svgNodo).join('')}</g>
+  </svg></div>
+  <p class="nota">Clic en un módulo, actor, relación (línea) o elemento de infraestructura para abrir su ficha. Enlace directo: añade <span class="mono">#HK</span>, <span class="mono">#REL-05</span>, <span class="mono">#RT-8</span> o <span class="mono">#REQ-INV2-4-2</span> a la dirección.</p>`;
+}
+function svgNodo(id) {
+  const p = POS[id];
+  if (p.tipo === 'ec') { const e = EC[id]; return `<g class="node ec" data-id="${id}" tabindex="0" role="button" transform="translate(${p.x},${p.y})"><rect class="caja" width="${p.w}" height="${p.h}"/><text class="id" x="8" y="14">${esc(e.id)}</text><text class="nom" x="8" y="27">${esc(recortar(e.nombre, 34))}</text><title>${esc(e.nombre)}</title></g>`; }
+  if (p.tipo === 'actor') { const a = ACT[id]; const col = a.tipo === 'rol' ? 'var(--ac)' : 'var(--ex)'; return `<g class="node actor" data-id="${id}" tabindex="0" role="button" transform="translate(${p.x},${p.y})"><rect class="caja" width="${p.w}" height="${p.h}"/><circle cx="16" cy="20" r="6" fill="${col}"/><text class="nom" x="30" y="24">${esc(a.corto || recortar(a.nombre, 16))}</text><title>${esc(a.nombre)} · ${esc(a.tipo)}</title></g>`; }
+  const m = MOD[id], c = COB[id] || {}, fam = FAM[m.familia];
+  const reqTxt = c.reqVigentes ? `REQ ${c.reqAceptados}/${c.reqVigentes}` : `REQ hist. ${c.reqHistoricos || 0}`;
+  return `<g class="node mod ${m.estado} fam-${m.familia}" data-id="${id}" tabindex="0" role="button" transform="translate(${p.x},${p.y})">
+    <rect class="caja" width="${p.w}" height="${p.h}"/>
+    <rect x="0" y="8" width="4" height="${p.h - 16}" rx="2" class="riesgo-${c.riesgo || 'bajo'}"/>
+    <text class="id" x="12" y="15">${esc(m.id)}</text>
+    <text class="fam" x="${p.w - 8}" y="15" text-anchor="end" fill="${fam[1]}">${fam[0]}</text>
+    <text class="nom" x="12" y="33">${esc(recortar(m.nombre.split(/[:(]/)[0], 20))}</text>
+    <text class="dat" x="12" y="50">${reqTxt} · ${c.guiones || 0} guiones</text>
+    <text class="dat" x="12" y="62">${c.casos || 0} casos · ${c.lotes30d || 0} lotes/30 d</text>
+    <title>${esc(m.nombre)} · ${esc(m.estado)} · riesgo ${esc(c.riesgo)}</title></g>`;
+}
+function recortar(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+function montarMapa() {
+  const svg = $('svg.mapa');
+  svg.addEventListener('click', (e) => {
+    const n = e.target.closest('.node'); if (n) return abrir(n.dataset.id);
+    const g = e.target.closest('[data-rel]'); if (g) return abrir(g.dataset.rel);
+  });
+  svg.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { const n = e.target.closest('.node'); if (n) { e.preventDefault(); abrir(n.dataset.id); } } });
+  document.querySelectorAll('.chip[data-fam]').forEach((b) => b.addEventListener('click', () => { const k = b.dataset.fam; filtroFam.has(k) ? filtroFam.delete(k) : filtroFam.add(k); render(); }));
+  $('#chipEdges').addEventListener('click', () => { verEdges = !verEdges; render(); });
+  aplicarResalte();
+}
+function aplicarResalte() {
+  const svg = $('svg.mapa'); if (!svg) return;
+  const nodos = svg.querySelectorAll('.node'), edges = svg.querySelectorAll('[data-rel]');
+  let vecinos = null, relSel = null;
+  if (sel && MOD[sel]) { vecinos = new Set([sel]); for (const r of D.relaciones) { if (r.origen === sel && r.destino !== '*') vecinos.add(r.destino); if (r.destino === sel && r.origen !== '*') vecinos.add(r.origen); } }
+  if (sel && ACT[sel]) { vecinos = new Set([sel]); for (const r of D.relaciones) { if (r.origen === sel) vecinos.add(r.destino); if (r.destino === sel) vecinos.add(r.origen); } for (const m of D.modulos) if ((m.actores || []).includes(sel)) vecinos.add(m.id); }
+  if (sel && EC[sel]) { vecinos = new Set([sel]); for (const m of EC[sel].modulos) if (m === '*') D.modulos.forEach((x) => vecinos.add(x.id)); else vecinos.add(m); }
+  if (sel && REL[sel]) { relSel = REL[sel]; vecinos = new Set([relSel.origen, relSel.destino, sel]); }
+  nodos.forEach((n) => {
+    const id = n.dataset.id, m = MOD[id];
+    const famOk = !m || filtroFam.has(m.familia);
+    n.classList.toggle('apagado', !famOk || (vecinos && !vecinos.has(id)));
+    n.classList.toggle('sel', id === sel);
+  });
+  edges.forEach((g) => {
+    const r = REL[g.dataset.rel];
+    const famOk = (!MOD[r.origen] || filtroFam.has(MOD[r.origen].familia)) && (!MOD[r.destino] || filtroFam.has(MOD[r.destino].familia));
+    const toca = !vecinos || (relSel ? r.id === sel : (vecinos.has(r.origen) && vecinos.has(r.destino) && (r.origen === sel || r.destino === sel || ACT[sel] || EC[sel])));
+    g.style.display = verEdges && famOk ? '' : 'none';
+    g.querySelector('.edge').classList.toggle('apagado', !toca);
+    g.querySelector('.edge').classList.toggle('sel', r.id === sel);
+  });
+}
+
+// ---------- vista Cobertura ----------
+function htmlCobertura() {
+  const ms = [...D.modulos].sort((a, b) => COB[b.id].hotspot - COB[a.id].hotspot);
+  const tot = (k) => D.modulos.reduce((s, m) => s + (COB[m.id][k] || 0), 0);
+  const sinG = D.modulos.filter((m) => m.estado === 'construido' && !COB[m.id].guiones).map((m) => m.id);
+  return `<div class="resumen">
+    <div><b>${D.modulos.length}</b><span>módulos</span></div><div><b>${D.reqs.filter((r) => !r.historico && r.estado !== 'descartado').length}</b><span>REQ vigentes</span></div>
+    <div><b>${D.guiones.length}</b><span>guiones e2e</span></div><div><b>${tot('casos') ? D.guiones.reduce((s, g) => s + g.nCasos, 0) : 0}</b><span>casos</span></div>
+    <div><b>${D.modulos.filter((m) => COB[m.id].riesgo === 'alto').length}</b><span>módulos de riesgo alto</span></div><div><b>${sinG.length}</b><span>construidos sin guion</span></div></div>
+  <p class="nota">Orden por <b>hotspot</b> = riesgo (probabilidad × impacto, 1–9) × (1 + lotes de los últimos 30 días): dónde conviene concentrar la regresión (Tornhill; ISTQB 5.2). El riesgo es propuesta del Arquitecto hasta que Carlos y Diseño lo confirmen. «REQ con guion» cuenta los aceptados de octubre que algún guion nombra.</p>
+  <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Módulo</th><th>Estado</th><th>Riesgo</th><th class="n">P×I</th><th class="n">Lotes 30 d</th><th class="n">Hotspot</th><th class="n">REQ vig.</th><th class="n">Aceptados</th><th>Con guion</th><th class="n">Guiones</th><th class="n">Casos</th><th>Perfiles</th><th class="n">INC abiertos</th><th>Zona pw</th></tr></thead><tbody>
+  ${ms.map((m) => { const c = COB[m.id]; const pct = c.reqAceptados ? Math.round(100 * c.reqAceptadosConGuion / c.reqAceptados) : 0; return `<tr><td><a class="ref" href="#${m.id}">${m.id}</a> ${esc(m.nombre.split(/[:(]/)[0])}</td><td><span class="badge b-${m.estado}">${m.estado}</span></td><td><span class="badge b-${c.riesgo}">${c.riesgo}</span></td><td class="n">${c.puntajeRiesgo}</td><td class="n">${c.lotes30d}</td><td class="n"><b>${c.hotspot}</b></td><td class="n">${c.reqVigentes}</td><td class="n">${c.reqAceptados}</td><td><div class="barra" title="${pct}%"><i style="width:${pct}%"></i></div><span class="nota">${c.reqAceptadosConGuion}/${c.reqAceptados}</span></td><td class="n">${c.guiones}</td><td class="n">${c.casos}</td><td>${c.perfiles.join(', ') || '—'}</td><td class="n">${c.incidentesAbiertos}</td><td class="mono">${esc(m.zonaPw || '—')}</td></tr>`; }).join('')}
+  </tbody></table></div>
+  <h3 style="font:700 15px var(--font-display);margin:18px 0 6px">Zonas de regresión hoy vs módulos</h3>
+  <p class="nota">${esc(D.zonasPw?.que || '')}</p>
+  <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Zona pw</th><th>Guiones</th><th>Módulos que tocan sus casos</th></tr></thead><tbody>
+  ${(D.zonasPw?.zonas || []).map((z) => { const gs = D.guiones.filter((g) => g.zona === z); const mods = [...new Set(gs.flatMap((g) => g.modulos))]; return `<tr><td class="mono">${esc(z)}</td><td>${gs.length}</td><td>${mods.map((m) => `<a class="ref" href="#${m}">${m}</a>`).join(' ')}</td></tr>`; }).join('')}
+  </tbody></table></div>`;
+}
+
+// ---------- vista Reglas ----------
+function htmlReglas() {
+  const ms = D.modulos.filter((m) => m.estado !== 'no-existe');
+  return `<p class="nota">Cada regla transversal (RT-n) y los módulos que cruza; el texto completo vive en <span class="ruta">claude/arquitectura/reglas-transversales.md</span>. Una regla con «*» aplica a todos. Clic en RT-n o en el módulo abre su ficha.</p>
+  <div class="tabla-wrap"><table class="tabla matriz"><thead><tr><th>Regla</th><th style="text-align:left">Título</th>${ms.map((m) => `<th><a class="ref" href="#${m.id}">${m.id}</a></th>`).join('')}</tr></thead><tbody>
+  ${D.reglas.map((r) => `<tr><td><a class="ref" href="#${r.id}">${r.id}</a></td><td style="text-align:left;font-family:var(--font-body)">${esc(r.titulo)}</td>${ms.map((m) => { const si = r.modulos.includes('*') || r.modulos.includes(m.id); return `<td class="${si ? 'si' : ''}">${si ? '●' : ''}</td>`; }).join('')}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+// ---------- vista Relaciones ----------
+function htmlRelaciones() {
+  return `<p class="nota">${D.relaciones.length} relaciones entre módulos, actores y externos (vista 3 del mapa). Las que están «por construir» o «por crear» van en trazos en el mapa.</p>
+  <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Id</th><th>Origen → destino</th><th>Mecanismo</th><th>Dato o evento</th><th>Regla</th><th>RT</th><th>Estado</th><th>Guiones que la tocan</th></tr></thead><tbody>
+  ${D.relaciones.map((r) => `<tr><td><a class="ref" href="#${r.id}">${r.id}</a></td><td>${nodoRef(r.origen)} → ${nodoRef(r.destino)}</td><td>${md(r.mecanismo)}</td><td>${md(r.dato)}</td><td>${esc(r.regla || '')}</td><td>${r.rt.map((t) => `<a class="ref" href="#${t}">${t}</a>`).join('')}</td><td><span class="badge b-${r.estado === 'vigente' ? 'vigente' : 'por'}">${r.estado}</span></td><td>${guionesDeRel(r).map((g) => `<a class="ref" href="#${g.archivo}">${esc(g.archivo.replace('.spec.js', ''))}</a>`).join(' ') || '<span class="nota">ninguno</span>'}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function guionesDeRel(r) { if (r.origen === '*' || r.destino === '*') return []; return D.guiones.filter((g) => g.modulos.includes(r.origen) && g.modulos.includes(r.destino)); }
+function nodoRef(id) { if (id === '*') return '<span class="badge b-sin">todos</span>'; return `<a class="ref" href="#${id}">${esc(id)}</a>`; }
+
+// ---------- vista Guiones ----------
+function htmlGuiones() {
+  const gs = [...D.guiones].sort((a, b) => a.archivo.localeCompare(b.archivo));
+  return `<p class="nota">${gs.length} guiones en <span class="ruta">str-manager/tests/e2e/</span> (foto tomada por el Arquitecto; la refresca <span class="mono">herramientas/modelo/mapa.py</span> desde <span class="mono">interno/arquitectura/guiones-e2e.json</span>). Módulos = páginas de sus casos + REQ.</p>
+  <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Guion</th><th>REQ / origen</th><th>Zona</th><th>Módulos</th><th class="n">Casos</th><th>Niveles</th><th>Perfiles</th><th>Páginas</th></tr></thead><tbody>
+  ${gs.map((g) => `<tr><td><a class="ref" href="#${g.archivo}">${esc(g.archivo.replace('.spec.js', ''))}</a></td><td>${g.req ? refId(g.req) : '—'}</td><td class="mono">${esc(g.zona || '—')}</td><td>${g.modulos.map((m) => `<a class="ref" href="#${m}">${m}</a>`).join('')}</td><td class="n">${g.nCasos}</td><td class="mono">${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(' ')}</td><td>${Object.keys(g.perfiles).join(', ')}</td><td class="nota">${Object.keys(g.paginas).map((p) => p.replace(/^\/|\.html$/g, '')).join(', ')}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+// ---------- fichas ----------
+function refId(id) {
+  id = String(id);
+  const base = id.replace(/\s.*$/, '');
+  if (MOD[base] || ACT[base] || REL[base] || RT[base] || EC[base] || REQ[base] || REQ[equiv[base]] || GUI[base] || GUI[base + '.spec.js']) return `<a class="ref" href="#${GUI[base + '.spec.js'] ? base + '.spec.js' : (REQ[equiv[base]] && !REQ[base] ? equiv[base] : base)}">${esc(id)}</a>`;
+  return `<span class="ref" style="cursor:default">${esc(id)}</span>`;
+}
+function md(s) { return esc(s).replace(/`([^`]+)`/g, '<span class="mono">$1</span>'); }
+function enlazarIds(s) { return md(s).replace(/\b(RT-\d+|REL-\d+|DA-\d+|ADR-\d+|REQ-[A-Z0-9][A-Z0-9.-]*|INC-\d+|DT-\d+|L-\d+|EC-\d+)\b/g, (m) => (MOD[m] || REL[m] || RT[m] || EC[m] || REQ[m]) ? `<a class="ref" href="#${m}">${m}</a>` : m); }
+function rutaDoc(p) {
+  if (!p) return '';
+  const esRepo = /^(interno|herramientas|claude\/gobierno)\//.test(p);
+  const esCodigo = /^(tests|docs\/claude|api|modelo)\//.test(p) || /\.(html|js)$/.test(p) && !p.includes('/');
+  if (esRepo) return `<a class="ruta" href="${REPO_DOCS}${p}" target="_blank" rel="noopener">${esc(p)}</a>`;
+  if (esCodigo) return `<a class="ruta" href="${REPO_CODE}${p}" target="_blank" rel="noopener">${esc(p)}</a>`;
+  return `<span class="ruta">${esc(p)}</span><button class="copiar" data-copiar="${esc(p)}">copiar</button> <span class="nota">(proyecto «Diseño y Desarrollo»)</span>`;
+}
+function abrir(id, empujar = true) {
+  if (!id) return;
+  sel = id;
+  let html = '';
+  if (MOD[id]) html = fichaModulo(MOD[id]);
+  else if (ACT[id]) html = fichaActor(ACT[id]);
+  else if (REL[id]) html = fichaRelacion(REL[id]);
+  else if (RT[id]) html = fichaRegla(RT[id]);
+  else if (EC[id]) html = fichaEC(EC[id]);
+  else if (REQ[id]) html = fichaReq(REQ[id]);
+  else if (GUI[id]) html = fichaGuion(GUI[id]);
+  else if (GUI[id + '.spec.js']) return abrir(id + '.spec.js', empujar);
+  else { sel = null; return; }
+  const dr = $('#drawer');
+  dr.innerHTML = `<button class="cerrar" id="cerrar" aria-label="Cerrar ficha">✕</button>` + html;
+  dr.classList.add('abierto'); dr.scrollTop = 0;
+  $('#cerrar').addEventListener('click', cerrar);
+  dr.querySelectorAll('[data-copiar]').forEach((b) => b.addEventListener('click', () => copiar(b.dataset.copiar, b)));
+  if (empujar) { try { history.replaceState(null, '', '#' + id); } catch (e) {} }
+  aplicarResalte();
+}
+function cerrar() { sel = null; $('#drawer').classList.remove('abierto'); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} aplicarResalte(); }
+function copiar(t, b) { const ok = () => { b.textContent = 'copiado'; setTimeout(() => (b.textContent = 'copiar'), 1200); }; if (navigator.clipboard?.writeText) navigator.clipboard.writeText(t).then(ok).catch(() => seleccionar(b)); else seleccionar(b); }
+function seleccionar(b) { const r = document.createRange(); r.selectNodeContents(b.previousElementSibling); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+function lista(arr, f = (x) => esc(x)) { return arr && arr.length ? `<ul>${arr.map((x) => `<li>${f(x)}</li>`).join('')}</ul>` : '<p class="nota">—</p>'; }
+function refs(arr) { return arr && arr.length ? arr.map((x) => refId(x)).join(' ') : '<span class="nota">—</span>'; }
+
+function fichaModulo(m) {
+  const c = COB[m.id], reqs = D.reqs.filter((r) => r.modulos.includes(m.id));
+  const vig = reqs.filter((r) => !r.historico), hist = reqs.filter((r) => r.historico);
+  const gs = D.guiones.filter((g) => g.modulos.includes(m.id));
+  const sal = D.relaciones.filter((r) => r.origen === m.id), ent = D.relaciones.filter((r) => r.destino === m.id), todos = D.relaciones.filter((r) => r.origen === '*' || r.destino === '*');
+  const rts = D.reglas.filter((r) => r.modulos.includes(m.id)), rtsTodos = D.reglas.filter((r) => r.modulos.includes('*'));
+  const ecs = D.infraestructura.filter((e) => e.modulos.includes(m.id));
+  const cambios = (D.cambios[m.id] || []).slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0, 8);
+  const incs = (D.incidentes[m.id] || []).slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0, 8);
+  const ordenEstado = {aceptado: 0, entregado: 1, definido: 2, borrador: 3, descartado: 9};
+  vig.sort((a, b) => (ordenEstado[a.estado] ?? 5) - (ordenEstado[b.estado] ?? 5) || a.id.localeCompare(b.id));
+  return `<div class="tipo">Módulo · ${esc(FAM[m.familia][0])}</div><h2><span class="mono">${m.id}</span> ${esc(m.nombre)}</h2>
+  <p><span class="badge b-${m.estado}">${m.estado}</span> <span class="badge b-${c.riesgo}">riesgo ${c.riesgo} (${m.riesgo.probabilidad}×${m.riesgo.impacto})</span> <span class="badge b-sin">hotspot ${c.hotspot}</span></p>
+  <p>${md(m.que)}</p>
+  <h3>Riesgo (propuesta del Arquitecto)</h3><p>${md(m.riesgo.motivo)}</p>
+  <h3>Actores</h3><p>${m.actores.map((a) => refId(a)).join(' ')}</p>
+  <h3>Páginas y rutas</h3><dl class="kv"><dt>Páginas</dt><dd>${(m.paginas || []).map((p) => `<span class="mono">${esc(p)}</span>`).join(', ') || '—'}</dd><dt>Rutas API</dt><dd>${(m.rutas || []).map((p) => `<span class="mono">${esc(p)}</span>`).join(', ') || '—'}</dd><dt>Escribe</dt><dd>${(m.colecciones?.escribe || []).map((p) => `<span class="mono">${esc(p)}</span>`).join(', ') || '—'}</dd><dt>Lee</dt><dd>${(m.colecciones?.lee || []).map((p) => `<span class="mono">${esc(p)}</span>`).join(', ') || '—'}</dd><dt>Mapa técnico</dt><dd>${m.mapaTecnico ? m.mapaTecnico.split(',').map((x) => rutaDoc('docs/claude/' + x.trim() + '.md')).join(' ') : '—'}</dd><dt>Zona pw</dt><dd class="mono">${esc(m.zonaPw || '—')}</dd></dl>
+  <h3>Funcionalidades (REQ vigentes: ${vig.length})</h3>${lista(vig, (r) => `${refId(r.id)} <span class="badge b-${r.estado}">${esc(r.estado)}</span> ${esc(r.titulo || '')} ${r.modulos.length > 1 ? `<span class="nota">con ${r.modulos.filter((x) => x !== m.id).join(', ')}</span>` : ''}`)}
+  <details><summary class="nota">Históricos construidos antes de octubre: ${hist.length}</summary>${lista(hist, (r) => `${refId(r.id)} ${esc(r.titulo || '')}`)}</details>
+  <h3>Relaciones</h3><p class="nota">Salen (${sal.length})</p>${lista(sal, (r) => `${refId(r.id)} → ${nodoRef(r.destino)} · ${md(r.mecanismo)}`)}<p class="nota">Llegan (${ent.length})</p>${lista(ent, (r) => `${refId(r.id)} ← ${nodoRef(r.origen)} · ${md(r.mecanismo)}`)}<p class="nota">Con todos los módulos</p><p>${todos.map((r) => refId(r.id)).join(' ')}</p>
+  <h3>Reglas transversales que lo cruzan (${rts.length} propias + ${rtsTodos.length} generales)</h3><p>${rts.map((r) => `${refId(r.id)} <span class="nota">${esc(r.titulo)}</span><br>`).join('')}</p><p class="nota">Generales: ${rtsTodos.map((r) => refId(r.id)).join(' ')}</p>
+  <h3>Guiones e2e (${gs.length}, ${c.casos} casos)</h3>${lista(gs, (g) => `${refId(g.archivo.replace('.spec.js', ''))} <span class="nota">${g.nCasos} casos · ${Object.keys(g.perfiles).join('/')} · zona ${esc(g.zona)}</span>`)}
+  <h3>Cambios recientes (${c.lotesTotal} lotes registrados, ${c.lotes30d} en 30 días)</h3>${lista(cambios, (x) => `<span class="mono">${esc(x.lote)}</span> <span class="nota">${esc(x.fecha)}</span> ${esc(x.resumen)}`)}
+  <h3>Incidentes (${c.incidentes}, ${c.incidentesAbiertos} abiertos)</h3>${lista(incs, (x) => `<span class="mono">${esc(x.id)}</span> ${x.etapa ? esc(x.etapa) : ''} <span class="nota">${esc(x.fecha)} · ${esc(x.severidad || '')}</span> ${esc(x.titulo)}`)}
+  <h3>Infraestructura</h3><p>${ecs.map((e) => `${refId(e.id)} <span class="nota">${esc(e.nombre)}</span><br>`).join('') || '—'}</p>
+  <h3>Decisiones</h3><p>ADR: ${(m.adr || []).join(', ') || '—'} · DA: ${(m.da || []).join(', ') || '—'}</p>
+  <h3>Dónde está la especificación</h3><p>${rutaDoc('claude/arquitectura/mapa-str.md')} <span class="nota">§ Vista 1, fila ${m.id}</span></p><p>REQ raíz: ${refs(m.reqRaiz)}</p>`;
+}
+function fichaActor(a) {
+  const usa = D.modulos.filter((m) => (m.actores || []).includes(a.id)), rels = D.relaciones.filter((r) => r.origen === a.id || r.destino === a.id);
+  return `<div class="tipo">Actor · ${esc(a.tipo)}</div><h2>${esc(a.nombre)}</h2><p>${md(a.que)}</p>
+  <h3>Módulos que usa o toca</h3><p>${usa.map((m) => refId(m.id)).join(' ') || '—'}</p>
+  <h3>Relaciones</h3>${lista(rels, (r) => `${refId(r.id)} ${nodoRef(r.origen)} → ${nodoRef(r.destino)} · ${md(r.mecanismo)}`)}
+  <h3>Reglas</h3><p>${refs(a.rt)}</p>`;
+}
+function fichaRelacion(r) {
+  const gs = guionesDeRel(r);
+  return `<div class="tipo">Relación · ${esc(r.estado)}</div><h2><span class="mono">${r.id}</span> ${nodoRef(r.origen)} → ${nodoRef(r.destino)}</h2>
+  <dl class="kv"><dt>Mecanismo</dt><dd>${md(r.mecanismo)}</dd><dt>Dato o evento</dt><dd>${md(r.dato)}</dd><dt>Regla</dt><dd>${enlazarIds(r.regla || '—')}</dd><dt>RT</dt><dd>${refs(r.rt)}</dd></dl>
+  <h3>Qué probar (condición de integración)</h3><p class="nota">Caso de integración: el dato sale de ${nodoRef(r.origen)} por «${md(r.mecanismo)}» y ${nodoRef(r.destino)} lo recibe y respeta la regla. Perfiles: los de los dos módulos.</p>
+  <h3>Guiones que tocan los dos módulos (${gs.length})</h3>${lista(gs, (g) => `${refId(g.archivo.replace('.spec.js', ''))} <span class="nota">${g.nCasos} casos</span>`)}
+  <h3>Especificación</h3><p>${rutaDoc('claude/arquitectura/mapa-str.md')} <span class="nota">§ Vista 3</span></p>`;
+}
+function fichaRegla(r) {
+  const rels = D.relaciones.filter((x) => x.rt.includes(r.id)), acts = D.actores.filter((a) => a.rt.includes(r.id));
+  return `<div class="tipo">Regla transversal</div><h2><span class="mono">${r.id}</span> ${esc(r.titulo)}</h2>
+  <p class="nota">El texto completo, origen, dueño, excepciones y estado viven en el registro (un dato, una fuente).</p>
+  <h3>Módulos que cruza</h3><p>${r.modulos.map((m) => nodoRef(m)).join(' ')}</p>
+  <h3>Relaciones que la aplican</h3>${lista(rels, (x) => `${refId(x.id)} ${nodoRef(x.origen)} → ${nodoRef(x.destino)}`)}
+  <h3>Actores</h3><p>${acts.map((a) => refId(a.id)).join(' ') || '—'}</p>
+  <h3>Qué probar (condición de prueba)</h3><p class="nota">Cada RT es una condición de prueba (29119-1): el guion que toque uno de estos módulos debería incluir al menos un caso negativo que intente violarla con el perfil que no puede.</p>
+  <h3>Registro</h3><p>${rutaDoc('claude/arquitectura/reglas-transversales.md')} <span class="nota">› ${r.id}</span></p>`;
+}
+function fichaEC(e) {
+  return `<div class="tipo">Elemento de configuración · ${esc(e.tipo)}</div><h2><span class="mono">${e.id}</span> ${esc(e.nombre)}</h2><p>${md(e.detalle)}</p>
+  <h3>Módulos que dependen de él</h3><p>${e.modulos.map((m) => nodoRef(m)).join(' ')}</p>
+  <h3>Ficha</h3><p>${rutaDoc('claude/arquitectura/' + e.ficha.split(' ')[0])} <span class="nota">${esc(e.ficha.replace(/^\S+\s?/, ''))}</span></p>`;
+}
+function fichaReq(r) {
+  const gs = D.guiones.filter((g) => g.req === r.id || equiv[g.req] === r.id);
+  const cambios = Object.values(D.cambios).flat().filter((c) => String(c.req || '').includes(r.id)).reduce((acc, c) => (acc.some((x) => x.lote === c.lote) ? acc : acc.concat(c)), []);
+  return `<div class="tipo">Funcionalidad (REQ) · ${esc(r.origen)}</div><h2><span class="mono">${r.id}</span> ${esc(r.titulo || '')}</h2>
+  <p><span class="badge b-${r.estado}">${esc(r.estado)}</span> ${r.prioridad != null ? `<span class="badge b-sin">prioridad ${r.prioridad}</span>` : ''}</p>
+  <dl class="kv"><dt>Módulos</dt><dd>${r.modulos.map((m) => nodoRef(m)).join(' ') || '—'}</dd><dt>DA</dt><dd>${(r.das || []).join(', ') || '—'}</dd><dt>Nota</dt><dd>${esc(r.nota || '—')}</dd></dl>
+  <h3>Lotes</h3>${lista(cambios, (c) => `<span class="mono">${esc(c.lote)}</span> <span class="nota">${esc(c.fecha)}</span> ${esc(c.resumen)}`)}
+  <h3>Guiones (${gs.length})</h3>${lista(gs, (g) => `${refId(g.archivo.replace('.spec.js', ''))} <span class="nota">${g.nCasos} casos</span>`)}
+  <h3>Documento</h3><p>${r.documento ? r.documento.split(/;|›/).map((p) => rutaDoc(p.trim().split(' ')[0])).join(' ') : '—'}</p>`;
+}
+function fichaGuion(g) {
+  return `<div class="tipo">Guion e2e · zona ${esc(g.zona || '—')}</div><h2><span class="mono">${esc(g.archivo)}</span></h2>
+  <dl class="kv"><dt>REQ / origen</dt><dd>${g.req ? refId(g.req) : '—'}</dd><dt>Módulos</dt><dd>${g.modulos.map((m) => nodoRef(m)).join(' ')}</dd><dt>Perfiles</dt><dd>${Object.entries(g.perfiles).map(([k, v]) => `${k}×${v}`).join(', ')}</dd><dt>Niveles</dt><dd>${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(', ')}</dd></dl>
+  <h3>Casos (${g.nCasos})</h3>${g.casos.map((c) => `<div class="caso"><span class="mono">${esc(c.c || '')} · ${esc(c.perfil || '')}${c.camara ? ' · cámara' : ''} · ${esc(c.nivel || 'N2')} · ${esc((c.pagina || '').replace(/^\/|\.html$/g, ''))}</span><br>${esc(c.que)}</div>`).join('')}
+  <h3>Archivo</h3><p>${rutaDoc('tests/e2e/' + g.archivo)}</p>`;
+}
+
+// ---------- búsqueda ----------
+const INDICE = [
+  ...D.modulos.map((m) => ({id: m.id, t: 'módulo', n: m.nombre})),
+  ...D.actores.map((a) => ({id: a.id, t: 'actor', n: a.nombre})),
+  ...D.relaciones.map((r) => ({id: r.id, t: 'relación', n: `${r.origen} → ${r.destino} · ${r.mecanismo}`})),
+  ...D.reglas.map((r) => ({id: r.id, t: 'regla', n: r.titulo})),
+  ...D.infraestructura.map((e) => ({id: e.id, t: 'infra', n: e.nombre})),
+  ...D.reqs.map((r) => ({id: r.id, t: 'REQ', n: `${r.titulo || ''} · ${r.estado}`})),
+  ...D.guiones.map((g) => ({id: g.archivo, t: 'guion', n: `${g.req || ''} · ${g.modulos.join(' ')}`})),
+];
+const inp = $('#buscar'), sug = $('#sugerencias');
+inp.addEventListener('input', () => {
+  const q = inp.value.trim().toLowerCase();
+  if (q.length < 2) { sug.hidden = true; return; }
+  const hits = INDICE.filter((x) => (x.id + ' ' + x.n).toLowerCase().includes(q)).slice(0, 14);
+  sug.innerHTML = hits.map((h) => `<button data-id="${esc(h.id)}"><span class="t">${h.t}</span><span class="mono">${esc(h.id)}</span><span class="nota">${esc(recortar(h.n, 70))}</span></button>`).join('') || '<div class="nota" style="padding:8px 10px">Sin resultados</div>';
+  sug.hidden = false;
+});
+sug.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { abrir(b.dataset.id); sug.hidden = true; inp.value = ''; } });
+inp.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sug.hidden = true; } if (e.key === 'Enter') { const b = sug.querySelector('button'); if (b) b.click(); } });
+document.addEventListener('click', (e) => { if (!e.target.closest('.buscar')) sug.hidden = true; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && sel) cerrar(); });
+$('#tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { vista = b.dataset.v; render(); } });
+document.addEventListener('click', (e) => { const a = e.target.closest('a.ref[href^="#"]'); if (a) { e.preventDefault(); abrir(a.getAttribute('href').slice(1)); } });
+window.addEventListener('hashchange', () => { const h = decodeURIComponent(location.hash.slice(1)); if (h && h !== sel) abrir(h, false); });
+
+$('#sub').textContent = `línea base ${D.lineaBase} · código ${D.codigo?.version} · esquema ${D.codigo?.schema} · generado ${D.generadoEn}`;
+render();
+const h0 = decodeURIComponent(location.hash.slice(1)); if (h0) abrir(h0, false);
+</script>

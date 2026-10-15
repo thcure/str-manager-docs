@@ -1,0 +1,2412 @@
+{
+ "version": 1,
+ "lineaBase": "2026-10-15",
+ "codigo": {
+  "version": "p5c96",
+  "schema": 12,
+  "rama": "main"
+ },
+ "escritor": "rol-arquitecto (LM-40, MJ-14); Diseño corrige hechos de producto por el buzón; Desarrollo propone anclajes de guiones por el buzón",
+ "que": "Mapa del STR legible por máquina: módulos, actores, relaciones, reglas que los cruzan, infraestructura y externos, y el anclaje de cada REQ y de cada guion e2e a sus módulos. Es la fuente del mapa gráfico (interno/arquitectura/mapa-str.html) y la columna vertebral del diseño de pruebas (OM-1). El estado de cada REQ se lee de diseno.json / reqs-historial.json; los lotes e INC de seguimiento.json; las reglas completas de claude/arquitectura/reglas-transversales.md (un dato, una fuente).",
+ "marcoPruebas": {
+  "referencia": "COBIT 2019 BAI07.03/.04/.05 y BAI03.07/.08 dicen qué (plan por riesgo, ambiente separado, datos de prueba, aprobación independiente) pero no citan un estándar de diseño de pruebas (comprobado 15-oct: sus «Related Guidance» son ITIL, PMBOK, CMMI Cybermaturity, ISF, NIST). Adoptamos como referencia de facto ISO/IEC/IEEE 29119 (-1 conceptos, -2 procesos, -3 documentación, -4 técnicas) e ISTQB CTFL 4.0 (análisis, diseño, trazabilidad, riesgo); ISO/IEC 25010:2023 para etiquetar la calidad; ISO/IEC/IEEE 42010 y C4 para la forma del mapa.",
+  "equivalencias": {
+   "modulo": "feature set (29119-2 TD1): agrupa condiciones; cobertura por módulo",
+   "funcionalidad (REQ)": "test item (29119-1): unidad de riesgo y de aceptación",
+   "regla RT-n / criterio del REQ": "test condition (29119-1; ISTQB 1.4.1): qué probar",
+   "relacion REL-n": "condición de integración (nivel de integración, ISTQB 2.2.1)",
+   "guion e2e": "test procedure (29119-3 8.4); zona = conjunto de regresión",
+   "caso del guion": "test case (N1/N2/N3 = nivel de ejecución del proyecto)",
+   "riesgo del modulo": "product risk = probabilidad × impacto (ISTQB 5.2; TMMi Test Planning SG1)",
+   "frecuenciaCambio": "hotspot = riesgo × cambio (Tornhill): foco de la regresión",
+   "rt / da / adr": "trazabilidad base de pruebas ↔ condición ↔ caso (ISTQB 1.4.4)"
+  },
+  "atributos25010": [
+   "functional suitability",
+   "performance efficiency",
+   "compatibility",
+   "interaction capability",
+   "reliability",
+   "security",
+   "maintainability",
+   "flexibility",
+   "safety"
+  ],
+  "nota": "El riesgo por módulo es propuesta del Arquitecto (15-oct) hasta que Carlos y Diseño lo confirmen; no decide nada por sí solo: ordena la regresión y la profundidad de las pruebas (LM-39b)."
+ },
+ "actores": [
+  {
+   "id": "admin",
+   "corto": "Admin",
+   "nombre": "Admin (dueño del negocio)",
+   "tipo": "rol",
+   "que": "Todo; único que conecta Drive, descarga el respaldo, ve el grupo Proyecto y el valor de activos.",
+   "rt": [
+    "RT-13",
+    "RT-14"
+   ]
+  },
+  {
+   "id": "operador",
+   "corto": "Operador",
+   "nombre": "Operador",
+   "tipo": "rol",
+   "que": "Coordina la operación; permisos que el admin le delega (`usuario.permisos`: equipo.*, dinero.*, inventario.editar, config.drive).",
+   "rt": [
+    "RT-13",
+    "RT-14"
+   ]
+  },
+  {
+   "id": "colaborador",
+   "corto": "Colaborador",
+   "nombre": "Colaborador (limpieza / mantenimiento)",
+   "tipo": "rol",
+   "que": "Usa el portal en el celular; solo sus turnos; nunca dinero ni datos privados del huésped; escribe solo turnos, tickets, inv-movimientos (conteo/nivel) e inv-pendientes.",
+   "rt": [
+    "RT-6",
+    "RT-14",
+    "RT-17"
+   ]
+  },
+  {
+   "id": "invitado",
+   "corto": "Invitado",
+   "nombre": "Invitado (cualquier rol, antes de activar)",
+   "tipo": "rol",
+   "que": "Entra una sola vez por `invitacion.html?t=` y queda activado (DA-10).",
+   "rt": [
+    "RT-15",
+    "RT-16"
+   ]
+  },
+  {
+   "id": "huesped",
+   "corto": "Huésped",
+   "nombre": "Huésped",
+   "tipo": "externo",
+   "que": "Sin cuenta: formulario o enlace por reserva (M2, por construir). Sus datos personales solo en MySQL.",
+   "rt": [
+    "RT-6"
+   ]
+  },
+  {
+   "id": "propietario",
+   "corto": "Propietario",
+   "nombre": "Propietario de terceros",
+   "tipo": "externo",
+   "que": "Contacto, no usuario; recibirá un informe (PP-1, borrador).",
+   "rt": [
+    "RT-15"
+   ]
+  },
+  {
+   "id": "porteria",
+   "corto": "Portería",
+   "nombre": "Portería",
+   "tipo": "externo",
+   "que": "Recibe datos del check-in (M2); no es rol.",
+   "rt": [
+    "RT-6"
+   ]
+  },
+  {
+   "id": "cron",
+   "corto": "Cron (hPanel)",
+   "nombre": "Tareas programadas de hPanel",
+   "tipo": "sistema",
+   "que": "Llaman `/sync-ical`, `/export/cron`, `/drive/cron`, `/drive/corte` con `X-Cron-Key`; nadie más puede llamarlas.",
+   "rt": [
+    "RT-18",
+    "RT-22"
+   ]
+  },
+  {
+   "id": "google-drive",
+   "corto": "Google / Drive",
+   "nombre": "Google Drive / Google Identity",
+   "tipo": "externo",
+   "que": "Identidad (Firebase) y copia de archivos (OAuth `drive.file` por negocio).",
+   "rt": [
+    "RT-9",
+    "RT-16"
+   ]
+  },
+  {
+   "id": "airbnb",
+   "corto": "Airbnb (iCal)",
+   "nombre": "Airbnb / Booking / Vrbo (iCal)",
+   "tipo": "externo",
+   "que": "Feeds que se importan cada 15 min; leen el `.ics` público del STR por propiedad.",
+   "rt": []
+  },
+  {
+   "id": "github",
+   "corto": "GitHub",
+   "nombre": "GitHub",
+   "tipo": "externo",
+   "que": "Despliegue (push a main = producción) y lectura de `str-manager-docs` desde el grupo Proyecto.",
+   "rt": [
+    "RT-18",
+    "RT-20"
+   ]
+  },
+  {
+   "id": "cola-arquitecto",
+   "corto": "Cola / fábrica",
+   "nombre": "Cola y chats de la fábrica",
+   "tipo": "sistema",
+   "que": "Cargan el modelo en `/modelo/api`; verifican lotes en producción solo con perfiles zz-verif-.",
+   "rt": [
+    "RT-2",
+    "RT-24"
+   ]
+  }
+ ],
+ "modulos": [
+  {
+   "id": "SH",
+   "nombre": "Shell y menú",
+   "familia": "transversal",
+   "estado": "construido",
+   "que": "Marco de la aplicación: abre cada módulo en un iframe, aplica el rol al menú, panel Configuración (Copia en Google Drive), aviso fijo del corte, aviso «Subir mis datos», respaldo ⬇.",
+   "paginas": [
+    "str-app-shell.html"
+   ],
+   "rutas": [
+    "/me",
+    "/export",
+    "/drive/estado",
+    "/drive/conectar",
+    "/drive/prueba",
+    "/drive/desconectar"
+   ],
+   "colecciones": {
+    "escribe": [
+     "(las no migradas que sube _uploadMisDatos)"
+    ],
+    "lee": [
+     "todas las de COL_KEYS"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-S1",
+    "REQ-SH1"
+   ],
+   "mapaTecnico": "shell-y-api",
+   "zonaPw": "shell-y-api",
+   "alias": [
+    "Shell",
+    "Shell / roles",
+    "shell"
+   ],
+   "adr": [
+    "ADR-001",
+    "ADR-002"
+   ],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Todo pasa por él (sesión, menú por rol, aviso de corte); cambia con cada lote que toca `?v=` (RT-20)."
+   }
+  },
+  {
+   "id": "API",
+   "nombre": "Cliente compartido (str-api.js)",
+   "familia": "transversal",
+   "estado": "construido",
+   "que": "`window.STRApi`: get/post/put/del con JWT, renovación de sesión ante 401, `col.pull/push` con una cola de un PUT en vuelo por colección, copia local `str-<col>-v1`, funciones puras (`horas.*`, `reservas.*`, `turnos.*`, `fechas.ymdLocal`), `upload`, `archivoUrl`, `docs.*`.",
+   "paginas": [
+    "str-api.js"
+   ],
+   "rutas": [
+    "/col/*",
+    "/me",
+    "/upload",
+    "/archivo/*",
+    "/usuarios/{id}/invitar",
+    "/usuarios/{id}/tarifas/anular",
+    "/invitacion/*",
+    "/ical-export/*"
+   ],
+   "colecciones": {
+    "escribe": [
+     "cualquiera (genérico)"
+    ],
+    "lee": [
+     "cualquiera (genérico)"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "reqRaiz": [
+    "REQ-D1"
+   ],
+   "mapaTecnico": "shell-y-api",
+   "zonaPw": "shell-y-api",
+   "alias": [
+    "Permisos (str-api.js)",
+    "Fundación y datos",
+    "API /api/col (lectura)"
+   ],
+   "adr": [
+    "ADR-001"
+   ],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Capa común: un error aquí rompe todas las páginas (RT-24: tocarlo dispara la regresión de inventario)."
+   }
+  },
+  {
+   "id": "SRV",
+   "nombre": "Servidor PHP (str-api) y almacén /api/col",
+   "familia": "transversal",
+   "estado": "construido",
+   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos.",
+   "paginas": [
+    "api/index.php",
+    "api/lib/*",
+    "api/config/*"
+   ],
+   "rutas": [
+    "GET/PUT /col/{col}",
+    "/upload",
+    "/archivo/*",
+    "/health",
+    "/diagnostico",
+    "/export",
+    "/export/cron"
+   ],
+   "colecciones": {
+    "escribe": [
+     "col_item (todas las colecciones)",
+     "schema_version",
+     "inv-pendientes (al cerrar turno)"
+    ],
+    "lee": [
+     "todas"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "colaborador",
+    "cron"
+   ],
+   "reqRaiz": [
+    "REQ-D1",
+    "REQ-S1",
+    "REQ-U5"
+   ],
+   "mapaTecnico": "servidor-php",
+   "zonaPw": "api",
+   "alias": [
+    "api/",
+    "Servidor (api/col)",
+    "Servidor · inventario",
+    "Servidor · lectura del colaborador",
+    "Inventario / api/col",
+    "Respaldo"
+   ],
+   "adr": [
+    "ADR-001",
+    "ADR-002"
+   ],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Aislamiento por cuenta (RT-1), permisos (RT-14) y límites de conexiones del hosting (RT-19) viven aquí; INC-128 nació aquí."
+   }
+  },
+  {
+   "id": "U",
+   "nombre": "Identidad, equipo y permisos",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Login con Google/Firebase → JWT del STR; primer arranque («Crear negocio»); equipo: colaboradores, invitación de un solo uso, permisos del operador, capacidades.",
+   "paginas": [
+    "login.html",
+    "invitacion.html",
+    "str-usuarios.html"
+   ],
+   "rutas": [
+    "/login",
+    "/setup",
+    "/me",
+    "/usuarios[/{id}]",
+    "/usuarios/{id}/invitar",
+    "/invitacion/*",
+    "/capacidades"
+   ],
+   "colecciones": {
+    "escribe": [
+     "MySQL usuario",
+     "cuenta",
+     "capacidad"
+    ],
+    "lee": [
+     "turnos (saldo de horas)"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "colaborador",
+    "invitado"
+   ],
+   "reqRaiz": [
+    "REQ-U4",
+    "REQ-U6",
+    "REQ-U7",
+    "REQ-U-8"
+   ],
+   "mapaTecnico": "usuarios-y-roles",
+   "zonaPw": "shell-y-api",
+   "alias": [
+    "Equipo y pagos",
+    "Usuarios / roles (shell, Equipo, login)",
+    "Usuarios",
+    "Equipo"
+   ],
+   "adr": [
+    "ADR-002"
+   ],
+   "da": [
+    "DA-6",
+    "DA-8",
+    "DA-10",
+    "DA-14",
+    "DA-24"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 3,
+    "motivo": "Roles y accesos son críticos (RT-13, RT-14, RT-16, RT-23); cambia poco."
+   }
+  },
+  {
+   "id": "PR",
+   "nombre": "Propiedades y ubicaciones",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Ficha de la propiedad (horarios, ingreso 24/7, torre/apto, zonas, plano, depósito, zona principal de inventario, flujo base, colaborador base), ubicaciones y tipos, exportación iCal a Airbnb.",
+   "paginas": [
+    "str-propiedades.html"
+   ],
+   "rutas": [
+    "/ical-export/{propId}",
+    "/ical-export/{propId}/regenerar",
+    "/ical-export/{propId}/colchon",
+    "/upload (plano)"
+   ],
+   "colecciones": {
+    "escribe": [
+     "propiedades",
+     "prop-tipos",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-depositos (una zona)"
+    ],
+    "lee": [
+     "flujos",
+     "flujo-categorias",
+     "hk-config",
+     "str-usuarios-v1"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-P0",
+    "REQ-P1",
+    "REQ-P2",
+    "REQ-P3",
+    "REQ-P4",
+    "REQ-PR1-1"
+   ],
+   "mapaTecnico": "propiedades",
+   "zonaPw": "propiedades",
+   "alias": [
+    "Propiedades"
+   ],
+   "adr": [],
+   "da": [
+    "DA-16",
+    "DA-17"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 2,
+    "motivo": "Datos maestros que leen HK, CAL e INV; cambia poco; la exportación iCal es pública (token)."
+   }
+  },
+  {
+   "id": "CAL",
+   "nombre": "Calendario y reservas",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Línea de tiempo por propiedad, reservas y bloqueos, importación iCal (Airbnb/Booking) manual y por cron, carril de turnos (vía HK `?modo=datos`), cancelar/reactivar reservas.",
+   "paginas": [
+    "str-calendario.html"
+   ],
+   "rutas": [
+    "POST /sync-ical",
+    "GET /sync-ical/ultimo",
+    "GET /ical?url="
+   ],
+   "colecciones": {
+    "escribe": [
+     "reservas",
+     "propiedades (horarios)"
+    ],
+    "lee": [
+     "prop-tipos",
+     "ubicaciones",
+     "hk-config",
+     "turnos (solo por hk:turnos)"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "cron"
+   ],
+   "reqRaiz": [
+    "REQ-C0",
+    "REQ-RD1"
+   ],
+   "mapaTecnico": "calendario",
+   "zonaPw": "calendario",
+   "alias": [
+    "Calendario"
+   ],
+   "adr": [],
+   "da": [
+    "DA-27",
+    "DA-28"
+   ],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Fuente de los turnos automáticos (CAL → HK); el sync iCal corre solo cada 15 min; 5 INC recientes."
+   }
+  },
+  {
+   "id": "FL",
+   "nombre": "Flujos de trabajo",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Editor de flujos (generales, copias por propiedad, compuestos), categorías, zonas, fotos exigidas, tiempos, tarea de inventario, importar/exportar Excel; las guías se enlazan desde el popover.",
+   "paginas": [
+    "str-flujos.html"
+   ],
+   "rutas": [],
+   "colecciones": {
+    "escribe": [
+     "flujos",
+     "flujo-categorias",
+     "guias (crear desde popover)"
+    ],
+    "lee": [
+     "inv-articulos",
+     "propiedades",
+     "guias"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-F1",
+    "REQ-F11"
+   ],
+   "mapaTecnico": "flujos",
+   "zonaPw": "flujos",
+   "alias": [
+    "Flujos de trabajo",
+    "Flujos"
+   ],
+   "adr": [],
+   "da": [
+    "DA-20"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 2,
+    "motivo": "Plantillas del checklist de HK; editar la plantilla no cambia las copias; cambia poco."
+   }
+  },
+  {
+   "id": "HK",
+   "nombre": "Housekeeping (M1): turnos, checklist, fotos, incidentes, inventario del turno",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Arma los turnos automáticos desde las reservas, checklist desde el flujo base, horas y pago, fotos de tarea (cola local de subida), incidentes con evidencia y expediente, pendientes de cierre, entrega y recepción de zona, lugares y foto al cierre.",
+   "paginas": [
+    "str-m1-housekeeping.html",
+    "str-cola-subida.js",
+    "str-guia-visor.js"
+   ],
+   "rutas": [
+    "/upload (foto, evidencia, video)",
+    "/archivo/*",
+    "/expediente/{ticketId}",
+    "/health",
+    "/drive/copias?ref="
+   ],
+   "colecciones": {
+    "escribe": [
+     "turnos",
+     "tickets",
+     "hk-config",
+     "inv-movimientos (nuevos)",
+     "inv-pendientes (hecho)"
+    ],
+    "lee": [
+     "reservas",
+     "propiedades",
+     "guias",
+     "inv-*",
+     "str-usuarios-v1"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "reqRaiz": [
+    "REQ-T1",
+    "REQ-F4",
+    "REQ-F7",
+    "REQ-S2",
+    "REQ-U6.3"
+   ],
+   "mapaTecnico": "housekeeping, housekeeping-2",
+   "zonaPw": "inventario",
+   "alias": [
+    "Housekeeping",
+    "HK (turnos)",
+    "HK · cola de subida",
+    "HK (inventario)",
+    "HK / portal colaborador",
+    "HK · pull de turnos",
+    "HK · portal del colaborador",
+    "Limpieza & HK",
+    "HK"
+   ],
+   "adr": [],
+   "da": [
+    "DA-21",
+    "DA-25",
+    "DA-30",
+    "DA-33",
+    "DA-34",
+    "DA-43"
+   ],
+   "riesgo": {
+    "probabilidad": 3,
+    "impacto": 3,
+    "motivo": "El módulo más grande y el que más cambia (INV2-3-4, 4-2, 7-1, K3b, INC-125…133 en dos semanas); lo usa el colaborador en el celular, sin conexión a ratos."
+   }
+  },
+  {
+   "id": "POR",
+   "nombre": "Portal del colaborador",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Vista móvil del colaborador: Hoy / Atrasados / Próximos / Recientes, «Mi dinero», procesos y fotos pendientes; todo sale del iframe de HK (`?modo=colaborador`), nunca reimplementa turnos.",
+   "paginas": [
+    "portal.html"
+   ],
+   "rutas": [
+    "GET /usuarios",
+    "GET /usuarios/{id}"
+   ],
+   "colecciones": {
+    "escribe": [],
+    "lee": [
+     "(hk:turnos del iframe)"
+    ]
+   },
+   "actores": [
+    "colaborador",
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-U6",
+    "REQ-U6.1",
+    "REQ-U6.2"
+   ],
+   "mapaTecnico": "shell-y-api",
+   "zonaPw": "inventario",
+   "alias": [
+    "Portal del colaborador",
+    "Portal",
+    "Incidentes (portal colaborador)"
+   ],
+   "adr": [],
+   "da": [
+    "DA-27",
+    "DA-40"
+   ],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Es la cara del sistema para el colaborador; depende de HK por postMessage (INC-126, INC-131)."
+   }
+  },
+  {
+   "id": "INV",
+   "nombre": "Inventario (INV1/INV2)",
+   "familia": "operativo",
+   "estado": "parcial",
+   "que": "Artículos, juegos y kits, zonas y lugares, existencias, circuito de la ropa, proveedores, pendientes, movimientos inmutables, accesos por zona, entrega y recepción con diferencias. Definido por construir: activos (INV2-6), actividad de inventario en Flujos (INV2-5), plantillas de arranque (INV2-8).",
+   "paginas": [
+    "str-inventario.html"
+   ],
+   "rutas": [
+    "GET /usuarios (prestar)",
+    "/archivo/*"
+   ],
+   "colecciones": {
+    "escribe": [
+     "inv-articulos",
+     "inv-depositos",
+     "inv-grupos",
+     "inv-estados",
+     "inv-sububicaciones",
+     "inv-proveedores",
+     "inv-movimientos (at __server__)",
+     "inv-pendientes (reasignar)"
+    ],
+    "lee": [
+     "propiedades",
+     "turnos"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-INV1",
+    "REQ-INV2"
+   ],
+   "mapaTecnico": "inventario",
+   "zonaPw": "inventario",
+   "alias": [
+    "Inventario"
+   ],
+   "adr": [],
+   "da": [
+    "DA-22",
+    "DA-29",
+    "DA-30",
+    "DA-33",
+    "DA-34",
+    "DA-38",
+    "DA-42",
+    "DA-43"
+   ],
+   "riesgo": {
+    "probabilidad": 3,
+    "impacto": 2,
+    "motivo": "Diez REQ INV2 entregados o aceptados en octubre; reglas finas (un responsable por turno, movimientos inmutables); 6 INC recientes."
+   }
+  },
+  {
+   "id": "KN",
+   "nombre": "Conocimiento (guías)",
+   "familia": "operativo",
+   "estado": "construido",
+   "que": "Biblioteca de guías (texto, adjuntos, enlaces) con «¿Dónde se usa?»; visor compartido con HK.",
+   "paginas": [
+    "str-conocimiento.html",
+    "str-guia-visor.js"
+   ],
+   "rutas": [
+    "/upload (guia)",
+    "/archivo/*"
+   ],
+   "colecciones": {
+    "escribe": [
+     "guias"
+    ],
+    "lee": [
+     "flujos"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "reqRaiz": [
+    "REQ-K2"
+   ],
+   "mapaTecnico": "proyecto",
+   "zonaPw": "flujos",
+   "alias": [
+    "Conocimiento"
+   ],
+   "adr": [],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 1,
+    "motivo": "Estable; las guías no se borran en el corte."
+   }
+  },
+  {
+   "id": "K3",
+   "nombre": "Copia a Drive y retención (corte mensual)",
+   "familia": "transversal",
+   "estado": "parcial",
+   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3b construido en reprueba; K3c (L-124, L-125) aceptado; tareas de hPanel por crear.",
+   "paginas": [
+    "(tarjeta en el shell; insignia en HK; aviso de corte)",
+    "api/lib/drive.php",
+    "api/lib/drive-copia.php",
+    "api/lib/retencion.php"
+   ],
+   "rutas": [
+    "/drive/conectar",
+    "/drive/callback",
+    "/drive/estado",
+    "/drive/desconectar",
+    "/drive/prueba",
+    "/drive/copias",
+    "POST /drive/cron",
+    "POST /drive/corte"
+   ],
+   "colecciones": {
+    "escribe": [
+     "drive_conexion",
+     "drive_oauth_state",
+     "drive_copia",
+     "drive_carpeta",
+     "drive_evento",
+     "drive_pasada",
+     "cuenta_retencion"
+    ],
+    "lee": [
+     "api/uploads/"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "cron",
+    "google-drive"
+   ],
+   "reqRaiz": [
+    "REQ-K3",
+    "REQ-K3-2",
+    "REQ-K3-3"
+   ],
+   "mapaTecnico": "servidor-php",
+   "zonaPw": "inventario",
+   "alias": [
+    "Drive",
+    "K3",
+    "K3b",
+    "K3c"
+   ],
+   "adr": [],
+   "da": [
+    "DA-25",
+    "DA-26",
+    "DA-32"
+   ],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Borra datos de verdad (RT-8, RT-12): el único borrado físico del sistema; corre solo; primer corte 30-nov-2026."
+   }
+  },
+  {
+   "id": "INC1",
+   "nombre": "Incidentes, reclamos y mantenimiento (M3)",
+   "familia": "operativo",
+   "estado": "parcial",
+   "que": "Construido dentro de HK: tickets con evidencia (original, SHA-256, EXIF) y expediente ZIP. Definido por construir: incidentes internos (INC1-1), reclamos al huésped y a la plataforma (INC1-2), eventos de mantenimiento en el calendario (MI1-2…4).",
+   "paginas": [
+    "(dentro de str-m1-housekeeping.html)"
+   ],
+   "rutas": [
+    "/expediente/{ticketId}"
+   ],
+   "colecciones": {
+    "escribe": [
+     "tickets"
+    ],
+    "lee": [
+     "turnos",
+     "reservas",
+     "propiedades"
+    ]
+   },
+   "actores": [
+    "operador",
+    "colaborador",
+    "admin"
+   ],
+   "reqRaiz": [
+    "REQ-S2",
+    "REQ-S2.1",
+    "REQ-S3",
+    "REQ-INC1-1",
+    "REQ-INC1-2"
+   ],
+   "mapaTecnico": "housekeeping, servidor-php",
+   "zonaPw": "inventario",
+   "alias": [
+    "Soporte (M3)",
+    "Soporte",
+    "M3"
+   ],
+   "adr": [],
+   "da": [
+    "DA-21",
+    "DA-35"
+   ],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 3,
+    "motivo": "Evidencia con valor probatorio (RT-10) y datos del huésped (RT-6); el corte la borra del hosting (RT-8)."
+   }
+  },
+  {
+   "id": "PG",
+   "nombre": "Pagos del colaborador",
+   "familia": "operativo",
+   "estado": "parcial",
+   "que": "Construido: tarifas, horas y saldo (B1) en Equipo, HK y portal («Mi dinero»). Definido por construir: adelantos, compras, legalización y liquidación (B2, PG1-2), pago por sub-flujo (F11-5-2).",
+   "paginas": [
+    "(en str-usuarios.html, HK y portal.html)"
+   ],
+   "rutas": [
+    "/usuarios/{id}/tarifas/anular"
+   ],
+   "colecciones": {
+    "escribe": [
+     "usuario.perfil_pago",
+     "turnos.horas",
+     "turnos.apoyos"
+    ],
+    "lee": [
+     "turnos"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "reqRaiz": [
+    "REQ-PG1",
+    "REQ-PG1-2"
+   ],
+   "mapaTecnico": "usuarios-y-roles, housekeeping",
+   "zonaPw": "shell-y-api",
+   "alias": [
+    "Pagos del colaborador",
+    "Mi dinero"
+   ],
+   "adr": [],
+   "da": [
+    "DA-12",
+    "DA-20",
+    "DA-37",
+    "DA-41"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 3,
+    "motivo": "Dinero: crítico por definición (RT-23); un solo cálculo de horas; cambia poco hasta B2."
+   }
+  },
+  {
+   "id": "M2",
+   "nombre": "Check-in / check-out, TRA/SIRE, portería",
+   "familia": "operativo",
+   "estado": "definido",
+   "que": "Campos definidos en `reservas.huespedes[]`; sin construir. Datos personales del huésped solo en MySQL (RT-6).",
+   "paginas": [],
+   "rutas": [],
+   "colecciones": {
+    "escribe": [
+     "reservas.huespedes[] (definido)"
+    ],
+    "lee": []
+   },
+   "actores": [
+    "operador",
+    "huesped",
+    "porteria"
+   ],
+   "reqRaiz": [
+    "REQ-M2.1",
+    "REQ-F5.1"
+   ],
+   "mapaTecnico": null,
+   "zonaPw": null,
+   "alias": [
+    "Check-in M2"
+   ],
+   "adr": [],
+   "da": [
+    "DA-27"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 3,
+    "motivo": "Datos personales y obligación legal (TRA/SIRE); todavía no existe en el código."
+   }
+  },
+  {
+   "id": "CMP",
+   "nombre": "Compras, reposición y puntos de control (QR)",
+   "familia": "operativo",
+   "estado": "definido",
+   "que": "Compras y alertas de reposición (CMP-1); actividades guiadas por cámara y puntos de control con QR (PC1-1, PC1-2). Definidos, sin construir.",
+   "paginas": [],
+   "rutas": [],
+   "colecciones": {
+    "escribe": [],
+    "lee": []
+   },
+   "actores": [
+    "operador",
+    "colaborador"
+   ],
+   "reqRaiz": [
+    "REQ-CMP-1",
+    "REQ-PC1-1",
+    "REQ-PC1-2"
+   ],
+   "mapaTecnico": null,
+   "zonaPw": null,
+   "alias": [
+    "Compras",
+    "PC1",
+    "CMP"
+   ],
+   "adr": [],
+   "da": [
+    "DA-36",
+    "DA-38"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 2,
+    "motivo": "Sin código; el riesgo aparece cuando se construya (toca inventario y dinero)."
+   }
+  },
+  {
+   "id": "M6",
+   "nombre": "Comunicaciones (WhatsApp / correo)",
+   "familia": "operativo",
+   "estado": "no-existe",
+   "que": "No existe como módulo: hoy enlaces manuales a WhatsApp desde Equipo (invitación) y Calendario.",
+   "paginas": [],
+   "rutas": [],
+   "colecciones": {
+    "escribe": [],
+    "lee": []
+   },
+   "actores": [
+    "operador",
+    "huesped"
+   ],
+   "reqRaiz": [
+    "REQ-F5"
+   ],
+   "mapaTecnico": null,
+   "zonaPw": null,
+   "alias": [
+    "Comunicaciones M6"
+   ],
+   "adr": [],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 1,
+    "motivo": "No existe."
+   }
+  },
+  {
+   "id": "PRJ",
+   "nombre": "Grupo Proyecto (interno)",
+   "familia": "interno",
+   "estado": "construido",
+   "que": "Seg. Proyecto, Marco, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura: leen los JSON de `str-manager-docs/interno/` por GitHub raw; no escriben en la base del STR. B8 (proxy al servicio del modelo) pendiente.",
+   "paginas": [
+    "str-seg-proyecto.html",
+    "str-marco-trabajo.html",
+    "str-instrucciones.html",
+    "str-cobit.html",
+    "str-elementos.html",
+    "str-base-conocimiento.html",
+    "str-nomenclatura.html"
+   ],
+   "rutas": [
+    "(ninguna del STR; GitHub raw)"
+   ],
+   "colecciones": {
+    "escribe": [],
+    "lee": [
+     "interno/*.json del repo de documentos"
+    ]
+   },
+   "actores": [
+    "admin",
+    "github"
+   ],
+   "reqRaiz": [
+    "REQ-SP1",
+    "REQ-TB-1",
+    "REQ-BC-1"
+   ],
+   "mapaTecnico": "proyecto",
+   "zonaPw": "proyecto",
+   "alias": [
+    "Seg. Proyecto (interno)",
+    "Seg. Proyecto",
+    "Base de conocimiento (interno)",
+    "Proyecto"
+   ],
+   "adr": [
+    "ADR-006"
+   ],
+   "da": [
+    "DA-31",
+    "DA-39"
+   ],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 1,
+    "motivo": "Solo lo ve el admin; no toca datos del negocio; cambia con cada tablero."
+   }
+  },
+  {
+   "id": "MOD",
+   "nombre": "Servicio del modelo (/modelo/api)",
+   "familia": "interno",
+   "estado": "construido",
+   "que": "API aparte en `fabrica.` con base propia (esquema 3): salud, eco, migrar, cargar (reemplazo por tabla), credenciales por rol, lectura por tabla y export. Lo usan la cola del Arquitecto y el flujo de GitHub; ningún usuario del STR.",
+   "paginas": [
+    "modelo/api/index.php"
+   ],
+   "rutas": [
+    "/modelo/api/salud",
+    "eco",
+    "migrar",
+    "cargar",
+    "credenciales",
+    "GET <tabla>|estado|export"
+   ],
+   "colecciones": {
+    "escribe": [
+     "base del modelo (u…_modelo)"
+    ],
+    "lee": []
+   },
+   "actores": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "reqRaiz": [
+    "REQ-MOD-1",
+    "REQ-MOD-6"
+   ],
+   "mapaTecnico": "tests-y-despliegue",
+   "zonaPw": "modelo",
+   "alias": [
+    "Servicio del modelo",
+    "modelo / infraestructura",
+    "modelo / verificación",
+    "Servicio del modelo (hosting Premium)"
+   ],
+   "adr": [
+    "ADR-006"
+   ],
+   "da": [
+    "DA-39"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 1,
+    "motivo": "Aislado del producto (base y sitio aparte); solo la fábrica lo usa."
+   }
+  }
+ ],
+ "relaciones": [
+  {
+   "id": "REL-01",
+   "origen": "SH",
+   "destino": "*",
+   "mecanismo": "iframe `openModule`",
+   "dato": "URL del módulo, tema",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-02",
+   "origen": "*",
+   "destino": "SH",
+   "mecanismo": "`postMessage str:sin-sesion`; `window.top.navSub`",
+   "dato": "sin sesión; navegar a otro módulo",
+   "regla": "",
+   "rt": [
+    "RT-16"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-03",
+   "origen": "CAL",
+   "destino": "HK",
+   "mecanismo": "colección `reservas`",
+   "dato": "reserva saliente → HK arma el turno automático (ventana de check-out/in, hora acordada)",
+   "regla": "El Calendario no crea ni calcula turnos (INC-71)",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-04",
+   "origen": "HK",
+   "destino": "CAL",
+   "mecanismo": "iframe oculto `?modo=datos` + `postMessage hk:turnos`",
+   "dato": "todos los turnos (carril de operación, panel de la reserva)",
+   "regla": "",
+   "rt": [
+    "RT-4"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-05",
+   "origen": "HK",
+   "destino": "POR",
+   "mecanismo": "iframe `#hkFrame` + `postMessage` (hk:turnos, hk:cerrar, portal:abrir, portal:refrescar)",
+   "dato": "turnos míos con horas, procesos, fotos pendientes, alertas, pago",
+   "regla": "El portal nunca reimplementa HK",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-06",
+   "origen": "PR",
+   "destino": "HK",
+   "mecanismo": "colección `propiedades`",
+   "dato": "flujoBaseId, colaboradorBaseId, horasTurno, toleranciaSalidaMin, horarios, invPrincipalId, zonas",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-07",
+   "origen": "FL",
+   "destino": "HK",
+   "mecanismo": "colección `flujos` (+ `flujo-categorias`)",
+   "dato": "actividades, tareas, subflujos, zonas, fotos exigidas, tiempos, tarea de inventario",
+   "regla": "Editar la plantilla no cambia las copias",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-08",
+   "origen": "FL",
+   "destino": "KN",
+   "mecanismo": "`guias` referenciadas por `tarea.guias`; `?edit=`",
+   "dato": "guías en el checklist (visor compartido)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-09",
+   "origen": "INV",
+   "destino": "HK",
+   "mecanismo": "colecciones `inv-*`",
+   "dato": "catálogo, zona principal/apto, lugares, estados, proveedores, pendientes",
+   "regla": "",
+   "rt": [
+    "RT-17"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-10",
+   "origen": "HK",
+   "destino": "INV",
+   "mecanismo": "colección `inv-movimientos`",
+   "dato": "conteo/nivel al marcar tarea; traspaso de entrega/recepción en todos los turnos (DA-43); cierre de pendientes",
+   "regla": "Inmutable; se corrige con `anulaA`",
+   "rt": [
+    "RT-5"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-11",
+   "origen": "HK",
+   "destino": "SRV",
+   "mecanismo": "`PUT /col/turnos` (cierre de turno, misma transacción)",
+   "dato": "el servidor sella `primerCierreAt` y crea `inv-pendientes` del circuito de la ropa",
+   "regla": "Solo el servidor los crea; nunca se borran",
+   "rt": [
+    "RT-7"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-12",
+   "origen": "INV",
+   "destino": "HK",
+   "mecanismo": "`PUT inv-pendientes` (reasignar)",
+   "dato": "tarea lavar/llevar + proveedor al siguiente turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-13",
+   "origen": "PR",
+   "destino": "INV",
+   "mecanismo": "`col.push(inv-depositos)` + `str-inv-tab`",
+   "dato": "zona con propIds, revocados",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-14",
+   "origen": "U",
+   "destino": "HK",
+   "mecanismo": "`/api/usuarios` + caché `str-usuarios-v1`",
+   "dato": "ids, nombres, colores, perfilPago, permisos (también a POR, PR, FL, INV)",
+   "regla": "",
+   "rt": [
+    "RT-14"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-15",
+   "origen": "U",
+   "destino": "PG",
+   "mecanismo": "`GET /col/turnos?desde=` + `STRApi.horas.saldo`",
+   "dato": "saldo de horas del colaborador",
+   "regla": "Un solo cálculo de horas",
+   "rt": [
+    "RT-4"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-16",
+   "origen": "HK",
+   "destino": "K3",
+   "mecanismo": "`POST /upload` → `api/uploads/` → `POST /drive/cron`",
+   "dato": "fotos, evidencia, video → Drive; insignia ☁ por `drive/copias`",
+   "regla": "",
+   "rt": [
+    "RT-8",
+    "RT-9",
+    "RT-11"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-17",
+   "origen": "K3",
+   "destino": "HK",
+   "mecanismo": "corte mensual (L-124) + vista (L-125)",
+   "dato": "borra binarios (también *.min.jpg); el registro conserva fecha, huella, corte y enlace; la app muestra el archivo desde Drive",
+   "regla": "",
+   "rt": [
+    "RT-8",
+    "RT-10"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-18",
+   "origen": "K3",
+   "destino": "SH",
+   "mecanismo": "`GET /drive/estado` → `avisoCorte`",
+   "dato": "aviso fijo del próximo corte; recordatorios 7/3/1 días (admin y operador con config.drive)",
+   "regla": "",
+   "rt": [
+    "RT-8",
+    "RT-11"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-19",
+   "origen": "K3",
+   "destino": "INC1",
+   "mecanismo": "`GET /expediente/{ticketId}` (desde L-125)",
+   "dato": "la evidencia borrada en el corte aparece como «Eliminado en el corte del <fecha>»",
+   "regla": "",
+   "rt": [
+    "RT-8",
+    "RT-10"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-20",
+   "origen": "HK",
+   "destino": "INC1",
+   "mecanismo": "`GET /expediente/{ticketId}`",
+   "dato": "ZIP con originales, SHA256SUMS, línea de tiempo; anota `ticket.expedientes[]`",
+   "regla": "",
+   "rt": [
+    "RT-6",
+    "RT-10"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-21",
+   "origen": "PR",
+   "destino": "airbnb",
+   "mecanismo": "`/ical-export` + `/api/ical/salida/<prop>/<token>.ics` (pública)",
+   "dato": "«No disponible (STR Manager)» + día de limpieza",
+   "regla": "Token aleatorio por propiedad; regenerar lo invalida",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-22",
+   "origen": "cron",
+   "destino": "CAL",
+   "mecanismo": "`POST /sync-ical` cada 15 min",
+   "dato": "reservas nuevas, canceladas, finalizadas; bloqueos de feed",
+   "regla": "El historial nunca se borra",
+   "rt": [
+    "RT-22"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-23",
+   "origen": "*",
+   "destino": "google-drive",
+   "mecanismo": "SDK de Firebase en la página → `POST /api/login`",
+   "dato": "identidad; renovación ante 401",
+   "regla": "",
+   "rt": [
+    "RT-16"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-24",
+   "origen": "PRJ",
+   "destino": "github",
+   "mecanismo": "`STRApi.docs` (raw `<sha>/interno/*.json`; `commit()`)",
+   "dato": "seguimiento, diseño, mensajes, marco, instrucciones, cobit, elementos, conocimiento",
+   "regla": "No escribe en el STR",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-25",
+   "origen": "PRJ",
+   "destino": "MOD",
+   "mecanismo": "proxy B8 (REQ-TB-6)",
+   "dato": "tablas del modelo",
+   "regla": "ADR-006",
+   "rt": [],
+   "estado": "por construir"
+  },
+  {
+   "id": "REL-26",
+   "origen": "*",
+   "destino": "SRV",
+   "mecanismo": "`STRApi.col.pull/push` + `str-<col>-v1`",
+   "dato": "diff contra lastpush, cursor, tombstones explícitos",
+   "regla": "El servidor manda si conoce la colección",
+   "rt": [
+    "RT-4",
+    "RT-21"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-27",
+   "origen": "SRV",
+   "destino": "U",
+   "mecanismo": "`_puede()` en cada petición",
+   "dato": "permisos efectivos por rol y `usuario.permisos`",
+   "regla": "El servidor decide; el front solo oculta",
+   "rt": [
+    "RT-14"
+   ],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-28",
+   "origen": "cron",
+   "destino": "K3",
+   "mecanismo": "`POST /drive/cron` y `POST /drive/corte` cada 15 min (por crear)",
+   "dato": "pasada de copia; corte solo en la ventana del día 30",
+   "regla": "Sin respaldo de api/uploads/ no se crea la tarea del corte",
+   "rt": [
+    "RT-12",
+    "RT-22"
+   ],
+   "estado": "por crear"
+  },
+  {
+   "id": "REL-29",
+   "origen": "cola-arquitecto",
+   "destino": "MOD",
+   "mecanismo": "`POST /modelo/api/cargar` con `X-Modelo-Token`",
+   "dato": "carga completa del modelo por tabla",
+   "regla": "ADR-006",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-30",
+   "origen": "HK",
+   "destino": "KN",
+   "mecanismo": "`str-guia-visor.js`",
+   "dato": "la guía de la tarea se abre en el checklist",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente"
+  },
+  {
+   "id": "REL-31",
+   "origen": "CAL",
+   "destino": "INC1",
+   "mecanismo": "eventos de mantenimiento en el calendario (MI1-2…4)",
+   "dato": "evento → turno del colaborador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir"
+  },
+  {
+   "id": "REL-32",
+   "origen": "M2",
+   "destino": "CAL",
+   "mecanismo": "`reservas.huespedes[]`",
+   "dato": "datos del huésped por reserva (TRA/SIRE)",
+   "regla": "",
+   "rt": [
+    "RT-6"
+   ],
+   "estado": "por construir"
+  }
+ ],
+ "reglas": [
+  {
+   "id": "RT-1",
+   "titulo": "Aislamiento por cuenta",
+   "modulos": [
+    "SRV",
+    "API"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-2",
+   "titulo": "Datos reales: ni escribir ni borrar (R11)",
+   "modulos": [
+    "*"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-3",
+   "titulo": "Los datos de prueba no salen del STR",
+   "modulos": [
+    "K3",
+    "SRV"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-4",
+   "titulo": "Un dato, una fuente",
+   "modulos": [
+    "*"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-5",
+   "titulo": "No se borra, se desactiva o se anula",
+   "modulos": [
+    "SRV",
+    "U",
+    "CAL",
+    "INC1",
+    "INV"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-6",
+   "titulo": "Datos personales del huésped",
+   "modulos": [
+    "SRV",
+    "HK",
+    "POR",
+    "M2",
+    "INC1",
+    "CAL"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-7",
+   "titulo": "La hora del servidor manda",
+   "modulos": [
+    "SRV",
+    "HK",
+    "INC1",
+    "K3"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-8",
+   "titulo": "Corte mensual único",
+   "modulos": [
+    "K3",
+    "HK",
+    "INC1",
+    "SH"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-9",
+   "titulo": "Drive es copia, no destino",
+   "modulos": [
+    "K3",
+    "HK"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-10",
+   "titulo": "Evidencia de incidentes",
+   "modulos": [
+    "INC1",
+    "HK",
+    "K3"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-11",
+   "titulo": "Fotos de tarea",
+   "modulos": [
+    "HK",
+    "K3",
+    "SH"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-12",
+   "titulo": "Respaldo antes de borrar",
+   "modulos": [
+    "K3"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-13",
+   "titulo": "Un usuario, un rol",
+   "modulos": [
+    "U",
+    "SH",
+    "SRV"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-14",
+   "titulo": "El servidor decide los permisos; el front solo oculta",
+   "modulos": [
+    "SRV",
+    "U",
+    "API",
+    "INV",
+    "PG",
+    "HK",
+    "POR"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-15",
+   "titulo": "Todo participante operativo tiene cuenta",
+   "modulos": [
+    "U",
+    "POR"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-16",
+   "titulo": "Identidad = cuenta de Google (Firebase)",
+   "modulos": [
+    "U",
+    "API",
+    "SH",
+    "SRV"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-17",
+   "titulo": "Un solo responsable por turno",
+   "modulos": [
+    "HK",
+    "INV",
+    "POR"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-18",
+   "titulo": "Secretos solo en el servidor",
+   "modulos": [
+    "SRV",
+    "K3",
+    "MOD"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-19",
+   "titulo": "Hosting compartido: conexiones con cuidado",
+   "modulos": [
+    "SRV",
+    "API"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-20",
+   "titulo": "Versionado y despliegue",
+   "modulos": [
+    "*"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-21",
+   "titulo": "Colecciones /api/col/<col>",
+   "modulos": [
+    "SRV",
+    "API"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-22",
+   "titulo": "Rutas programadas solo desde hPanel",
+   "modulos": [
+    "SRV",
+    "CAL",
+    "K3"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-23",
+   "titulo": "Crítico = DA-n + cruce con Carlos",
+   "modulos": [
+    "*"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  },
+  {
+   "id": "RT-24",
+   "titulo": "Verificación en producción solo con perfiles zz-verif-",
+   "modulos": [
+    "*"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md"
+  }
+ ],
+ "infraestructura": [
+  {
+   "id": "EC-1",
+   "nombre": "Hostinger · plan Unlimited (hasta 2030-10-13), servidor EE. UU.",
+   "tipo": "hosting",
+   "modulos": [
+    "*"
+   ],
+   "detalle": "3 sitios: app., pruebas., fabrica.; PHP 8.3; 60 workers; 50 GB",
+   "ficha": "infraestructura-configuracion.md § 2.1"
+  },
+  {
+   "id": "EC-2",
+   "nombre": "Sitio producción app.apartamentosbucaramanga.com",
+   "tipo": "sitio",
+   "modulos": [
+    "SH",
+    "API",
+    "SRV",
+    "U",
+    "PR",
+    "CAL",
+    "FL",
+    "HK",
+    "POR",
+    "INV",
+    "KN",
+    "K3",
+    "INC1",
+    "PG",
+    "PRJ"
+   ],
+   "detalle": "public_html/app/; despliegue automático desde main; ?v= p5c96; schema 12",
+   "ficha": "infraestructura-configuracion.md § 2.1"
+  },
+  {
+   "id": "EC-3",
+   "nombre": "Sitio pruebas.apartamentosbucaramanga.com",
+   "tipo": "sitio",
+   "modulos": [
+    "*"
+   ],
+   "detalle": "sin datos reales; rama pruebas con la cola v8 (BAI07.04)",
+   "ficha": "infraestructura-configuracion.md § 2.1"
+  },
+  {
+   "id": "EC-4",
+   "nombre": "Sitio fabrica.apartamentosbucaramanga.com/modelo/api",
+   "tipo": "sitio",
+   "modulos": [
+    "MOD"
+   ],
+   "detalle": "servicio del modelo (ADR-006)",
+   "ficha": "infraestructura-configuracion.md § 2.1"
+  },
+  {
+   "id": "EC-5",
+   "nombre": "MariaDB 11.8.9 · base …_hospedaje (schema 12)",
+   "tipo": "base",
+   "modulos": [
+    "SRV",
+    "U",
+    "K3"
+   ],
+   "detalle": "col_item + usuario, cuenta, capacidad, ical_*, drive_*, cuenta_retencion; max_user_connections 75; 20 conexiones nuevas/s",
+   "ficha": "infraestructura-configuracion.md § 2.2"
+  },
+  {
+   "id": "EC-6",
+   "nombre": "Base …_modelo (esquema 3)",
+   "tipo": "base",
+   "modulos": [
+    "MOD"
+   ],
+   "detalle": "se reemplaza por tabla en cada carga",
+   "ficha": "infraestructura-configuracion.md § 2.2"
+  },
+  {
+   "id": "EC-7",
+   "nombre": "api/config/secrets.php",
+   "tipo": "secreto",
+   "modulos": [
+    "SRV",
+    "U",
+    "K3",
+    "CAL"
+   ],
+   "detalle": "DB_*, JWT_SECRET, CRON_KEY, GOOGLE_CLIENT_*, DRIVE_TOKEN_KEY (solo nombres; los pone Carlos)",
+   "ficha": "infraestructura-configuracion.md § 2.3"
+  },
+  {
+   "id": "EC-8",
+   "nombre": "api/uploads/<cuenta>/<tipo>/<ref>/",
+   "tipo": "archivos",
+   "modulos": [
+    "HK",
+    "INC1",
+    "KN",
+    "PR",
+    "K3"
+   ],
+   "detalle": "foto, evidencia, video, guía, doc, plano; servidos solo por /api/archivo; copia diaria de Hostinger; el corte borra foto/evidencia/video",
+   "ficha": "datos-ciclo-vida.md"
+  },
+  {
+   "id": "EC-9",
+   "nombre": "Cron: POST /api/sync-ical (*/15)",
+   "tipo": "cron",
+   "modulos": [
+    "CAL"
+   ],
+   "detalle": "activa",
+   "ficha": "infraestructura-configuracion.md § 2.5"
+  },
+  {
+   "id": "EC-10",
+   "nombre": "Cron: POST /api/export/cron (0 3 * * *)",
+   "tipo": "cron",
+   "modulos": [
+    "SRV"
+   ],
+   "detalle": "activa; respaldo JSON 30 por cuenta",
+   "ficha": "infraestructura-configuracion.md § 2.5"
+  },
+  {
+   "id": "EC-11",
+   "nombre": "Cron: POST /api/drive/cron (*/15)",
+   "tipo": "cron",
+   "modulos": [
+    "K3"
+   ],
+   "detalle": "por crear (Carlos, antes de la primera pasada real)",
+   "ficha": "infraestructura-configuracion.md § 2.5"
+  },
+  {
+   "id": "EC-12",
+   "nombre": "Cron: POST /api/drive/corte (*/15, ventana del día 30)",
+   "tipo": "cron",
+   "modulos": [
+    "K3"
+   ],
+   "detalle": "por crear, después del respaldo de api/uploads/ (RT-12)",
+   "ficha": "infraestructura-configuracion.md § 2.5"
+  },
+  {
+   "id": "EC-13",
+   "nombre": "Firebase · proyecto str-hospedaje",
+   "tipo": "externo",
+   "modulos": [
+    "U",
+    "SH",
+    "API"
+   ],
+   "detalle": "identidad; dominios autorizados app. y pruebas.",
+   "ficha": "infraestructura-configuracion.md § 2.6"
+  },
+  {
+   "id": "EC-14",
+   "nombre": "Google Cloud · app OAuth «STR Manager»",
+   "tipo": "externo",
+   "modulos": [
+    "K3"
+   ],
+   "detalle": "scope drive.file; publicada (en producción); cuenta dedicada del STR",
+   "ficha": "infraestructura-configuracion.md § 2.6"
+  },
+  {
+   "id": "EC-15",
+   "nombre": "GitHub thcure/str-manager (privado) y thcure/str-manager-docs (público)",
+   "tipo": "externo",
+   "modulos": [
+    "*",
+    "PRJ"
+   ],
+   "detalle": "main = producción (Git automático de Hostinger); hooks de la CLI",
+   "ficha": "infraestructura-configuracion.md § 2.4"
+  },
+  {
+   "id": "EC-16",
+   "nombre": "LENOVO · cola v7.9, pw, juez, perfiles zz-verif-",
+   "tipo": "fabrica",
+   "modulos": [
+    "*"
+   ],
+   "detalle": "verificación de lotes en producción con perfiles de prueba",
+   "ficha": "infraestructura-configuracion.md § 2.7"
+  },
+  {
+   "id": "EC-17",
+   "nombre": "Respaldos: copias diarias de Hostinger + export/cron + Drive",
+   "tipo": "respaldo",
+   "modulos": [
+    "SRV",
+    "K3"
+   ],
+   "detalle": "archivos y base por separado; restauración no ensayada (DT-42, MJ-6)",
+   "ficha": "infraestructura-configuracion.md § 2.8"
+  },
+  {
+   "id": "EC-18",
+   "nombre": "CDN cdnjs (SheetJS, ExcelJS) y Google Fonts",
+   "tipo": "externo",
+   "modulos": [
+    "FL",
+    "PRJ"
+   ],
+   "detalle": "importar/exportar Excel; fuente de Nomenclatura",
+   "ficha": "mapa-str.md § Integraciones"
+  }
+ ],
+ "anclajeReq": {
+  "REQ-U-8": [
+   "U"
+  ],
+  "REQ-PR1-1": [
+   "PR"
+  ],
+  "REQ-PR1-2": [
+   "PR"
+  ],
+  "REQ-PR1-4": [
+   "PR",
+   "CAL"
+  ],
+  "REQ-PR1-5": [
+   "CAL",
+   "HK"
+  ],
+  "REQ-INV2-1": [
+   "INV"
+  ],
+  "REQ-INV2-2": [
+   "INV"
+  ],
+  "REQ-INV2-3-1": [
+   "INV"
+  ],
+  "REQ-INV2-3-3": [
+   "INV"
+  ],
+  "REQ-INV2-3-4": [
+   "INV",
+   "HK"
+  ],
+  "REQ-INV2-4-1": [
+   "INV",
+   "HK",
+   "SRV"
+  ],
+  "REQ-INV2-4-2": [
+   "INV",
+   "HK"
+  ],
+  "REQ-INV2-5": [
+   "INV",
+   "FL"
+  ],
+  "REQ-INV2-6-1": [
+   "INV"
+  ],
+  "REQ-INV2-6-2": [
+   "INV"
+  ],
+  "REQ-INV2-6-3": [
+   "INV"
+  ],
+  "REQ-INV2-7-1": [
+   "INV",
+   "HK"
+  ],
+  "REQ-INV2-7-2": [
+   "INV"
+  ],
+  "REQ-INV2-8-1": [
+   "INV"
+  ],
+  "REQ-INV2-8-2": [
+   "INV"
+  ],
+  "REQ-INV2-9": [
+   "INV"
+  ],
+  "REQ-K3-2": [
+   "K3",
+   "HK",
+   "SH"
+  ],
+  "REQ-K3-3": [
+   "K3",
+   "HK",
+   "SH",
+   "INC1"
+  ],
+  "REQ-MI1-1": [
+   "FL"
+  ],
+  "REQ-MI1-2": [
+   "CAL",
+   "INC1"
+  ],
+  "REQ-MI1-3": [
+   "HK",
+   "INC1"
+  ],
+  "REQ-MI1-4": [
+   "POR",
+   "INC1"
+  ],
+  "REQ-PC1-1": [
+   "HK",
+   "CMP"
+  ],
+  "REQ-PC1-2": [
+   "HK",
+   "CMP"
+  ],
+  "REQ-INC1-1": [
+   "INC1"
+  ],
+  "REQ-INC1-2": [
+   "INC1"
+  ],
+  "REQ-CMP-1": [
+   "CMP",
+   "INV"
+  ],
+  "REQ-PG1-2": [
+   "PG"
+  ],
+  "REQ-F11-5-2": [
+   "PG",
+   "FL"
+  ],
+  "REQ-F11-6": [
+   "POR",
+   "FL"
+  ],
+  "REQ-TB-1": [
+   "PRJ"
+  ],
+  "REQ-TB-2": [
+   "PRJ"
+  ],
+  "REQ-TB-3": [
+   "PRJ"
+  ],
+  "REQ-TB-4": [
+   "PRJ"
+  ],
+  "REQ-TB-5": [
+   "PRJ"
+  ],
+  "REQ-TB-6": [
+   "PRJ",
+   "MOD"
+  ],
+  "REQ-BC-1": [
+   "PRJ"
+  ],
+  "REQ-BC-2": [
+   "PRJ"
+  ],
+  "REQ-SP-3": [
+   "PRJ"
+  ],
+  "REQ-PP-1": [
+   "PR"
+  ],
+  "REQ-INV2-3-2": [],
+  "REQ-INV2-6": [],
+  "REQ-INV2-7": [],
+  "REQ-INV2-8": [],
+  "REQ-F11-7": [],
+  "REQ-BT-1": [],
+  "REQ-MOD-1": [
+   "MOD"
+  ],
+  "REQ-MOD-2": [
+   "MOD"
+  ],
+  "REQ-MOD-3": [
+   "MOD"
+  ],
+  "REQ-MOD-4": [
+   "MOD"
+  ],
+  "REQ-MOD-5": [
+   "MOD"
+  ],
+  "REQ-MOD-6": [
+   "MOD"
+  ],
+  "REQ-MOD-7": [
+   "MOD"
+  ],
+  "REQ-MOD-8": [
+   "MOD"
+  ],
+  "REQ-MOD-9": [
+   "MOD"
+  ],
+  "REQ-MOD-10": [
+   "MOD"
+  ]
+ },
+ "anclajeHistorico": {
+  "porModulo": {
+   "Housekeeping": "HK",
+   "Propiedades": "PR",
+   "Flujos de trabajo": "FL",
+   "Calendario": "CAL",
+   "Fundación y datos": "SRV",
+   "Portal del colaborador": "POR",
+   "Seg. Proyecto (interno)": "PRJ",
+   "Equipo y pagos": "U",
+   "Soporte (M3)": "INC1",
+   "Soporte": "INC1",
+   "Conocimiento": "KN",
+   "Check-in M2": "M2",
+   "Comunicaciones M6": "M6",
+   "Limpieza & HK": "HK"
+  },
+  "porId": {
+   "REQ-S1": [
+    "SH",
+    "SRV"
+   ],
+   "REQ-SH1": [
+    "SH"
+   ],
+   "REQ-D1": [
+    "API",
+    "SRV"
+   ],
+   "REQ-U5": [
+    "SRV"
+   ],
+   "REQ-INV1": [
+    "INV"
+   ],
+   "REQ-INV2": [
+    "INV"
+   ],
+   "REQ-PG1": [
+    "PG",
+    "U"
+   ],
+   "REQ-U6": [
+    "POR",
+    "U"
+   ],
+   "REQ-U6.1": [
+    "POR"
+   ],
+   "REQ-U6.2": [
+    "POR"
+   ],
+   "REQ-U6.3": [
+    "HK",
+    "POR"
+   ],
+   "REQ-PG2": [
+    "POR",
+    "PG"
+   ],
+   "REQ-K3": [
+    "K3"
+   ],
+   "REQ-K2": [
+    "KN"
+   ],
+   "REQ-K1": [
+    "KN"
+   ],
+   "REQ-S2": [
+    "INC1",
+    "HK"
+   ],
+   "REQ-S2.1": [
+    "INC1",
+    "HK"
+   ],
+   "REQ-S3": [
+    "INC1"
+   ],
+   "REQ-F5": [
+    "M6"
+   ],
+   "REQ-F5.1": [
+    "M2"
+   ],
+   "REQ-M2.1": [
+    "M2"
+   ],
+   "REQ-C5": [
+    "HK"
+   ],
+   "REQ-U3": [
+    "HK"
+   ],
+   "REQ-U1": [
+    "PR"
+   ],
+   "REQ-S4": [
+    "FL"
+   ],
+   "REQ-F2": [
+    "PR"
+   ],
+   "REQ-F3.1": [
+    "PR"
+   ],
+   "REQ-P1.2": [
+    "HK"
+   ],
+   "REQ-P3.1": [
+    "HK"
+   ],
+   "REQ-T9.2": [
+    "HK"
+   ],
+   "REQ-F10": [
+    "HK"
+   ],
+   "REQ-F4": [
+    "HK"
+   ],
+   "REQ-F4.1": [
+    "HK"
+   ],
+   "REQ-F7": [
+    "HK"
+   ]
+  }
+ },
+ "anclajeGuiones": {
+  "que": "Cada guion de tests/e2e se ancla a módulos por las páginas de sus casos (paginaModulo) y por su REQ (anclajeReq); el generador lo calcula desde interno/arquitectura/guiones-e2e.json (foto de tests/e2e que deja la cola o el Arquitecto).",
+  "paginaModulo": {
+   "/str-app-shell.html": "SH",
+   "/portal.html": "POR",
+   "/str-m1-housekeeping.html": "HK",
+   "/str-inventario.html": "INV",
+   "/str-propiedades.html": "PR",
+   "/str-calendario.html": "CAL",
+   "/str-flujos.html": "FL",
+   "/str-usuarios.html": "U",
+   "/login.html": "U",
+   "/str-conocimiento.html": "KN",
+   "/str-seg-proyecto.html": "PRJ",
+   "/str-cobit.html": "PRJ",
+   "/str-nomenclatura.html": "PRJ",
+   "/str-base-conocimiento.html": "PRJ",
+   "/modelo/api/salud": "MOD"
+  },
+  "reqEquivale": {
+   "REQ-K3b": "REQ-K3-2",
+   "REQ-K3c": "REQ-K3-3",
+   "R-3": "REQ-MOD-6"
+  },
+  "reqModulo": {
+   "DT-35": [
+    "SRV"
+   ],
+   "DT-40": [
+    "SRV"
+   ],
+   "DT-41": [
+    "SRV"
+   ],
+   "INC-117": [
+    "PR"
+   ],
+   "INC-121": [
+    "INV"
+   ],
+   "INC-125": [
+    "INV",
+    "HK"
+   ],
+   "INC-126": [
+    "POR",
+    "HK"
+   ],
+   "INC-127": [
+    "HK",
+    "POR"
+   ],
+   "INC-128": [
+    "SRV",
+    "HK"
+   ],
+   "INC-130": [
+    "HK"
+   ],
+   "INC-131": [
+    "POR",
+    "HK"
+   ],
+   "INC-132": [
+    "HK",
+    "K3"
+   ],
+   "L-108": [
+    "HK"
+   ],
+   "R-3": [
+    "SRV"
+   ],
+   "REQ-K3b": [
+    "K3",
+    "HK",
+    "SH"
+   ],
+   "REQ-K3c": [
+    "K3",
+    "HK",
+    "SH",
+    "INC1"
+   ]
+  },
+  "zonasPw": {
+   "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»); LM-39b propone zonas = módulos.",
+   "zonas": [
+    "inventario",
+    "shell-y-api",
+    "propiedades",
+    "calendario",
+    "flujos",
+    "proyecto",
+    "modelo",
+    "api"
+   ]
+  }
+ },
+ "fichas": {
+  "que": "Adónde lleva cada clic del mapa gráfico",
+  "modulo": "claude/arquitectura/mapa-str.md § Vista 1 (fila del módulo) + mapa técnico docs/claude/<mapaTecnico>.md del código + REQ raíz",
+  "funcionalidad": "diseno.json › reqs[id].documento (requerimientos-*.md) o archivo/reqs-historial.json",
+  "relacion": "claude/arquitectura/mapa-str.md § Vista 3",
+  "regla": "claude/arquitectura/reglas-transversales.md › RT-n",
+  "infraestructura": "claude/arquitectura/infraestructura-configuracion.md § 2",
+  "guion": "str-manager/tests/e2e/<archivo>"
+ },
+ "historial": [
+  {
+   "fecha": "2026-10-15",
+   "cambio": "Línea base del mapa legible por máquina: 19 módulos, 12 actores, 32 relaciones, 24 reglas, 18 elementos de configuración, anclaje de 58 REQ vigentes + 85 históricos y 37 guiones",
+   "lote": "LM-40"
+  }
+ ]
+}

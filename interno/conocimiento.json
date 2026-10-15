@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-14",
+ "actualizadoEn": "2026-10-15",
  "titulo": "Base de conocimiento del modelo de operación",
  "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
  "cobit": {
@@ -921,6 +921,38 @@
     "Lo obsoleto se marca «retirada», no se borra."
    ],
    "instalacion": "LM-38 (15-oct-2026)"
+  },
+  {
+   "codigo": "APO03.02-m",
+   "nombre": "Mapa del STR legible por máquina y mapa gráfico con fichas al clic",
+   "dueno": "Arquitecto (mapa, cobertura, riesgo propuesto) · Diseño (hechos de producto) · Desarrollo (anclaje de guiones) · Carlos (confirma riesgo)",
+   "estado": "vigente",
+   "vigenciaDesde": "2026-10-15",
+   "para": "Que cualquiera —Carlos, un chat o un agente— vea en segundos los módulos del STR, qué funcionalidades, actores, relaciones, reglas e infraestructura tiene cada uno, qué guiones los prueban y qué queda sin probar; y que las pruebas se diseñen con esa ruta (OM-1, MJ-14).",
+   "quien": {
+    "mantiene": "Arquitecto",
+    "corrigen": "Diseño (REQ, estados) y Desarrollo (guiones) por el buzón",
+    "confirma": "Carlos (riesgo por módulo)"
+   },
+   "piezas": [
+    "interno/mapa-modulos.json (fuente: módulos, actores, relaciones REL-n, reglas RT-n por id, EC-n, anclajes REQ y guiones, riesgo)",
+    "herramientas/modelo/mapa.py (valida M1–M6, cruza con diseno.json, reqs-historial.json, seguimiento.json y guiones-e2e.json; calcula cobertura, riesgo, hotspot; genera)",
+    "interno/arquitectura/guiones-e2e.json (foto de tests/e2e; herramientas/modelo/guiones-e2e.js la toma en LENOVO)",
+    "interno/arquitectura/mapa-str.html (página interactiva) y mapa-str.datos.json; artefacto «Mapa del STR» en Claude",
+    "herramientas/paginas/mapa-str.plantilla.html",
+    "claude/arquitectura/mapa-str.md (vista para leer), reglas-transversales.md, infraestructura-configuracion.md (fichas a las que lleva el clic)"
+   ],
+   "flujo": [
+    "Lote aceptado con «Mapa:» → Arquitecto edita mapa-modulos.json → python3 -I herramientas/modelo/mapa.py . → commit «modelo:» → vuelve a publicar el artefacto.",
+    "REQ nuevo → aviso M3 en validar.py → anclar. Guion nuevo → guiones-e2e.js → aviso M4 → anclar.",
+    "Revisión semanal: avisos M3/M4/M5 y módulos de riesgo alto sin regresión."
+   ],
+   "reglas": [
+    "Un dato, una fuente: el mapa enlaza estados, lotes y textos; no los copia.",
+    "El riesgo por módulo es propuesta hasta que Carlos lo confirme; no decide nada solo.",
+    "Referencia de pruebas adoptada: ISO/IEC/IEEE 29119 + ISTQB CTFL 4.0 (COBIT BAI07/BAI03 no cita estándar de diseño de pruebas); módulo = feature set, REQ = test item, RT = test condition, REL = condición de integración, guion = test procedure."
+   ],
+   "instalacion": "LM-40 (15-oct-2026)"
   }
  ],
  "lineasBase": [

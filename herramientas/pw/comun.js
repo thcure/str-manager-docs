@@ -235,6 +235,15 @@ async function abrir(usuario, opciones = {}) {
       }
     } catch (e) { }
   });
+  // v0.5.24 (M-431): tiempos del propio navegador (request.timing: startTime y responseEnd) en vez del reloj de pw; así el
+  // inicio de la petición siguiente y el fin de la anterior salen del mismo reloj y «en serie» se ve en serie.
+  ctx.on('requestfinished', (req) => {
+    try {
+      const b = porPeticion.get(req); if (!b) return;
+      const tm = req.timing ? req.timing() : null;
+      if (tm && tm.startTime > 0 && tm.responseEnd >= 0) { b.t = Math.round(tm.startTime); b.ms = Math.round(tm.responseEnd); }
+    } catch (e) { }
+  });
   await ctx.route('**/*', async (route) => {
     const r = route.request();
     if (guardia) {

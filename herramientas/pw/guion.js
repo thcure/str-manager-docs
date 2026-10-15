@@ -42,6 +42,18 @@ function igual(a, b) { return normalizar(a) === normalizar(b); }
 // Puro: id de lote desde el nombre del archivo de la cola (L-80-instr-x.md o 80-instr-x.md).
 function loteDe(nombre) { const m = String(nombre).split(/[\\/]/).pop().match(/^(?:L-)?(\d+)-/); return m ? 'L-' + m[1] : null; }
 
+// Puro (v0.5.24, M-431): máximo de escrituras en vuelo a la vez. Una petición que empieza menos de 5 ms antes de que
+// termine la anterior cuenta como «después» (el fetch de la página se resuelve 1-2 ms antes de que pw anote la respuesta).
+// Sin respuesta (ms null) se toma como terminada al instante: no se sabe cuánto duró.
+const TOLERANCIA_MS = 5;
+function maxEnVuelo(cron) {
+  const ev = [];
+  for (const b of cron) { if (!(b && b.t)) continue; const fin = b.t + (b.ms != null ? b.ms : 0) - TOLERANCIA_MS; ev.push([b.t, 1]); ev.push([Math.max(fin, b.t), -1]); }
+  ev.sort((a, b) => a[0] - b[0] || a[1] - b[1]);   // a igual tiempo, primero los fines
+  let n = 0, max = 0; for (const [, d] of ev) { n += d; if (n > max) max = n; }
+  return max;
+}
+
 // Puro: decide el resultado de un caso. N2: ok true/false. N3 (LM-19): ok null si quedo preparado (capturas
 // y sin fallos) para que lo juzgue el juez local; false si no se pudo preparar.
 // v0.5.12 (M-390): resumen de las escrituras que la guardia dejó pasar en el caso, con su porqué (nota de decidir)
@@ -78,7 +90,14 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = [])
   r.escrituras = resumirEscrituras(pasaron);   // v0.5.12: [] = el caso no escribió nada
   // v0.5.22 (INC-128): cronología de las escrituras al STR/modelo: +ms desde la primera, método, ruta, estado y duración
   const cron = (pasaron || []).filter(b => b.t && !b.resp && !/googleapis|identitytoolkit|securetoken/.test(b.url));
-  if (cron.length) { const t0 = cron[0].t; r.cronologia = cron.map(b => '+' + (b.t - t0) + 'ms ' + b.metodo + ' ' + b.url.replace(/^https?:\/\/[^/]+/, '') + ' → ' + (b.status == null ? 'sin respuesta' : b.status) + (b.ms != null ? ' en ' + b.ms + 'ms' : '')); }
+  if (cron.length) {
+    cron.sort((a, b) => a.t - b.t);
+    const t0 = cron[0].t; r.cronologia = cron.map(b => '+' + (b.t - t0) + 'ms ' + b.metodo + ' ' + b.url.replace(/^https?:\/\/[^/]+/, '') + ' → ' + (b.status == null ? 'sin respuesta' : b.status) + (b.ms != null ? ' en ' + b.ms + 'ms' : ''));
+    // v0.5.24 (M-431): pw dice cuántas escrituras hubo a la vez (tolerancia 5 ms entre relojes), para que el juez lo copie y no lo recalcule
+    r.enVuelo = maxEnVuelo(cron);
+    partes.push(r.enVuelo <= 1 ? 'escrituras en serie (máx. 1 en vuelo)' : 'hasta ' + r.enVuelo + ' escrituras a la vez');
+    r.observado = partes.join(' | ').slice(0, 900);
+  }
   return r;
 }
 
@@ -179,7 +198,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, correrGuion, cargar, MARCA };
+module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

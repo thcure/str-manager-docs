@@ -138,6 +138,23 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
     { metodo: 'PUT', url: 'https://app.x/api/col/inv-movimientos', paso: true, status: 500, resp: true, motivo: 'respuesta 500: x' },
     { metodo: 'POST', url: 'https://identitytoolkit.googleapis.com/v1/accounts:lookup', paso: true, motivo: 'g', t: 1030, status: 200 }]);
   t('cronología: +ms, estado y duración', Array.isArray(r.cronologia) && r.cronologia.length === 2 && r.cronologia[0] === '+0ms PUT /api/col/turnos → 200 en 180ms' && r.cronologia[1] === '+20ms PUT /api/col/inv-movimientos → 500 en 90ms');
+  // v0.5.24 (M-431): escrituras en serie o a la vez, con tolerancia de 5 ms entre relojes
+  const { maxEnVuelo } = require('./guion.js');
+  const T = 1000;
+  t('en vuelo: serie exacta (L-111 tercera corrida: +0→160, +160→325, +324→…)', maxEnVuelo([{ t: T, ms: 160 }, { t: T + 160, ms: 165 }, { t: T + 324, ms: 100 }]) === 1);
+  t('en vuelo: la siguiente empieza 1 ms antes del fin anotado → sigue siendo serie', maxEnVuelo([{ t: T, ms: 238 }, { t: T + 237, ms: 597 }]) === 1);
+  t('en vuelo: dos a la vez de verdad (segunda a +50 de una de 238)', maxEnVuelo([{ t: T, ms: 238 }, { t: T + 50, ms: 200 }]) === 2);
+  t('en vuelo: tres a la vez', maxEnVuelo([{ t: T, ms: 500 }, { t: T + 10, ms: 500 }, { t: T + 20, ms: 500 }, { t: T + 600, ms: 10 }]) === 3);
+  t('en vuelo: sin respuesta no cuenta como abierta', maxEnVuelo([{ t: T, ms: null }, { t: T + 1, ms: 100 }]) === 1);
+  const rS = cerrarCaso({ c: 'd', perfil: 'colab' }, [{ ok: true, observado: 'x' }], null, [], [], [
+    { metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, t: T, ms: 160, status: 200 },
+    { metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, t: T + 160, ms: 165, status: 200 },
+    { metodo: 'PUT', url: 'https://app.x/api/col/inv-movimientos', paso: true, t: T + 324, ms: 100, status: 200 }]);
+  t('observado dice «escrituras en serie» y enVuelo 1', rS.enVuelo === 1 && /escrituras en serie \(máx\. 1 en vuelo\)/.test(rS.observado));
+  const rP2 = cerrarCaso({ c: 'd', perfil: 'colab' }, [{ ok: true, observado: 'x' }], null, [], [], [
+    { metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, t: T + 50, ms: 200, status: 200 },
+    { metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, t: T, ms: 238, status: 200 }]);
+  t('observado dice «hasta 2 escrituras a la vez» y la cronología queda ordenada por inicio', rP2.enVuelo === 2 && /hasta 2 escrituras a la vez/.test(rP2.observado) && rP2.cronologia[0].startsWith('+0ms') && rP2.cronologia[1].startsWith('+50ms'));
   // v0.5.23 (M-427): un N2 que revienta conserva su captura «error»; uno que pasa no lleva capturas
   const rE = cerrarCaso({ c: 'b', perfil: 'admin' }, [], 'locator.click: Timeout 30000ms exceeded.', [], [{ nombre: 'error', png: 'log/capturas/L-1/b-error.png', ancho: 1280 }], []);
   t('N2 con error: ok false y captura «error» en el informe', rE.ok === false && Array.isArray(rE.capturas) && rE.capturas[0].nombre === 'error');

@@ -1,0 +1,287 @@
+{
+ "version": 1,
+ "actualizadoEn": "2026-10-15",
+ "escritor": "Arquitecto (capa Marco, LM-38)",
+ "descripcion": "Registro de mejoras del modelo y del producto (APO01.11, APO11.05): qué se propuso, qué se decidió y qué asumimos mientras no se hace. Un dato, una fuente: los problemas viven en situaciones/ (G-n), las lecciones en BAI08-l; aquí solo la mejora y su decisión.",
+ "proceso": {
+  "pasos": [
+   "1 Registrar: cualquiera propone (Carlos en el chat; los chats por el buzón con asunto «Mejora: <tema>»); el Arquitecto la anota como MJ-n en estado «propuesta».",
+   "2 Priorizar: en la revisión semanal, beneficio y costo (alto/medio/bajo).",
+   "3 Decidir: adoptar · parcial · posponer · descartar. Siempre con «asumimos» (qué se hace o se tolera mientras tanto) y, si no se hace ya, «revisarCuando» (una condición, no una fecha). Carlos decide lo que cambia la forma de trabajar; el Arquitecto, el resto.",
+   "4 Ejecutar: como LM-n (modelo) o lote L-n (producto) en «ejecuta».",
+   "5 Verificar o retirar: con la métrica; lo que quedó obsoleto pasa a «retirada» (APO01.11 act. 6)."
+  ],
+  "decisiones": [
+   "adoptar",
+   "parcial",
+   "posponer",
+   "descartar"
+  ],
+  "estados": [
+   "propuesta",
+   "decidida",
+   "en curso",
+   "hecha",
+   "verificada",
+   "pospuesta",
+   "descartada",
+   "retirada"
+  ],
+  "revision": "En la revisión semanal (proceso.json › revisionSemanal): las propuestas nuevas se priorizan; las pospuestas cuya condición se cumplió vuelven a decidirse; las hechas se verifican con su métrica."
+ },
+ "mejoras": [
+  {
+   "id": "MJ-1",
+   "fecha": "2026-10-15",
+   "origen": "Carlos 15-oct (agilidad en pruebas); M-503 (L-126 rechazado por INC-133 ajeno)",
+   "problema": "Un rojo de la regresión por un INC ya abierto y ajeno al lote rechaza el lote y obliga a repruebas",
+   "propuesta": "Cuarentena: un caso de regresión que falla por un INC abierto queda «conocido» (INC, dueño, vencimiento) y no rechaza el lote",
+   "cobit": "BAI07.05 act. 1 (errores remediados o aceptados formalmente); BAI03.08 act. 4",
+   "beneficio": null,
+   "costo": null,
+   "decision": "adoptar",
+   "asumimos": "—",
+   "revisarCuando": "—",
+   "metrica": "repruebas por lote; % de rechazos por rojos ajenos",
+   "dueno": "Arquitecto (pw y juez)",
+   "estado": "decidida",
+   "ejecuta": "LM-39",
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-2",
+   "fecha": "2026-10-15",
+   "origen": "Carlos 15-oct",
+   "problema": "La regresión es la zona entera en cada lote (~75 casos, 11–13 min) aunque el lote no toque esa zona",
+   "propuesta": "Regresión según el riesgo y el mapa: la línea «Mapa: módulos y relaciones que cambia» elige los guiones; regresión completa una vez al día",
+   "cobit": "BAI07.03 act. 2 (plan basado en el riesgo)",
+   "beneficio": null,
+   "costo": null,
+   "decision": "adoptar",
+   "asumimos": "—",
+   "revisarCuando": "—",
+   "metrica": "minutos de cola por lote; rojos que la regresión completa diaria encuentre y la selectiva no",
+   "dueno": "Arquitecto (pw, cola con Desarrollo)",
+   "estado": "decidida",
+   "ejecuta": "LM-39",
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-3",
+   "fecha": "2026-10-15",
+   "origen": "Carlos 15-oct",
+   "problema": "Guiones por REQ repiten los mismos pasos (crear turno, entregar zona, subir fotos), dejan basura y se mantienen por separado",
+   "propuesta": "Catálogo criterio → guion y recorridos de negocio consolidados; biblioteca de pasos comunes en pw",
+   "cobit": "BAI03.07 act. 4 (conservar casos para pruebas futuras)",
+   "beneficio": null,
+   "costo": null,
+   "decision": "adoptar",
+   "asumimos": "Guiones por REQ mientras se arma el catálogo",
+   "revisarCuando": "—",
+   "metrica": "guiones activos; duplicados detectados; datos residuales por corrida",
+   "dueno": "Desarrollo (guiones) · Arquitecto (pw)",
+   "estado": "decidida",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-4",
+   "fecha": "2026-10-15",
+   "origen": "Carlos 15-oct",
+   "problema": "Cada lote se prueba y acepta por separado",
+   "propuesta": "Entregas agrupadas por módulo o relación, con una regresión y una aceptación por entrega",
+   "cobit": "BAI03.12 (metodología); BAI07.06",
+   "beneficio": null,
+   "costo": null,
+   "decision": "posponer",
+   "asumimos": "Lote a lote, directo a producción",
+   "revisarCuando": "Exista el ambiente de pruebas (MJ-5) con promoción",
+   "metrica": "—",
+   "dueno": "Diseño (agrupar REQ) · Arquitecto (cola)",
+   "estado": "pospuesta",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-5",
+   "fecha": "2026-10-15",
+   "origen": "Análisis COBIT 15-oct; ADR-007",
+   "problema": "Se prueba en producción: datos reales en capturas (M-502), 480 ítems de prueba acumulados, turnos residuales, sesiones perdidas",
+   "propuesta": "Ambiente de pruebas separado (pruebas. con rama y base propias) y promoción a producción",
+   "cobit": "BAI07.04; BAI07.05 act. 4; BAI03.07",
+   "beneficio": null,
+   "costo": null,
+   "decision": "adoptar",
+   "asumimos": "Probar en producción con zz-verif- y la guardia de pw (BAI07.04 parcial); riesgo aceptado: datos reales visibles a los perfiles de prueba, basura de prueba",
+   "revisarCuando": "—",
+   "metrica": "rojos por datos residuales; tiempo de repruebas",
+   "dueno": "Arquitecto (plan) · Desarrollo (cola v8) · Carlos (base y secretos)",
+   "estado": "decidida",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-6",
+   "fecha": "2026-10-15",
+   "origen": "Análisis COBIT 15-oct; datos-ciclo-vida.md",
+   "problema": "Nunca se ha restaurado un respaldo; el export JSON no tiene importador",
+   "propuesta": "Importador del export a una cuenta zz y ensayo de restauración con constancia, antes del primer corte",
+   "cobit": "BAI07.03 act. 5 (respaldo y recuperación); APO14.10",
+   "beneficio": null,
+   "costo": null,
+   "decision": "adoptar",
+   "asumimos": "Respaldos sin restauración probada (diario de Hostinger y export JSON)",
+   "revisarCuando": "—",
+   "metrica": "una restauración ensayada con constancia antes del 30-nov",
+   "dueno": "Desarrollo (DT-42)",
+   "estado": "decidida",
+   "ejecuta": "DT-42",
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-7",
+   "fecha": "2026-10-15",
+   "origen": "Análisis COBIT 15-oct; INC-128",
+   "problema": "El desempeño se midió a mano durante un incidente",
+   "propuesta": "Medición periódica de conexiones y tiempos (diagnostico.spec.js) con umbral",
+   "cobit": "BAI07.05 (desempeño); BAI04",
+   "beneficio": null,
+   "costo": null,
+   "decision": "parcial",
+   "asumimos": "/api/diagnostico a mano cuando hace falta",
+   "revisarCuando": "Aparezca un 1040/1203 o crezca el uso real",
+   "metrica": "conexiones máximas; tiempos de respuesta",
+   "dueno": "Arquitecto",
+   "estado": "decidida",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-8",
+   "fecha": "2026-10-15",
+   "origen": "Carlos 15-oct",
+   "problema": "No medimos el retrabajo de las pruebas",
+   "propuesta": "Métricas de calidad: repruebas por lote, minutos de cola, % de rojos ajenos al lote, en la revisión semanal y en Seg. Proyecto",
+   "cobit": "APO11.04; BAI03.06 act. 4",
+   "beneficio": null,
+   "costo": null,
+   "decision": "adoptar",
+   "asumimos": "—",
+   "revisarCuando": "—",
+   "metrica": "las tres métricas con línea base de la semana del 13-oct",
+   "dueno": "Arquitecto",
+   "estado": "decidida",
+   "ejecuta": "LM-39",
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-9",
+   "fecha": "2026-10-15",
+   "origen": "Carlos 15-oct (subdominios)",
+   "problema": "fabrica. cuelga del dominio de un cliente",
+   "propuesta": "Dominio propio y neutro de la fábrica, con una sola mudanza en F3 del ADR-008",
+   "cobit": "ADR-008; BAI10",
+   "beneficio": null,
+   "costo": null,
+   "decision": "posponer",
+   "asumimos": "fabrica.apartamentosbucaramanga.com",
+   "revisarCuando": "Haya un segundo proyecto real (F3)",
+   "metrica": "—",
+   "dueno": "Arquitecto · Carlos (compra del dominio)",
+   "estado": "pospuesta",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-10",
+   "fecha": "2026-10-15",
+   "origen": "M-498, M-507 (480 ítems de prueba en la cola local del colab)",
+   "problema": "Los guiones dejan fotos de prueba en la cola local de los perfiles",
+   "propuesta": "Barrido de la cola local de prueba (limpiar-cola-colab l2) tras cada lote que toque la cola de subida",
+   "cobit": "BAI07.04 act. 2",
+   "beneficio": null,
+   "costo": null,
+   "decision": "parcial",
+   "asumimos": "Lo encola el Arquitecto a mano tras esos lotes",
+   "revisarCuando": "Exista el ambiente de pruebas (MJ-5)",
+   "metrica": "ítems de prueba encontrados por barrido",
+   "dueno": "Arquitecto",
+   "estado": "decidida",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  },
+  {
+   "id": "MJ-11",
+   "fecha": "2026-10-15",
+   "origen": "M-499 (sesión de Google perdida dos veces)",
+   "problema": "El perfil admin pierde la sesión de Firebase durante las corridas",
+   "propuesta": "Respaldo de la sesión del perfil que P4.e restaure antes de bloquear",
+   "cobit": "BAI07.04",
+   "beneficio": null,
+   "costo": null,
+   "decision": "posponer",
+   "asumimos": "LM-37: recuperar con «Continuar con Google»",
+   "revisarCuando": "LM-37 no logre recuperar una sesión",
+   "metrica": "sesiones perdidas por semana; recuperadas solas",
+   "dueno": "Arquitecto",
+   "estado": "pospuesta",
+   "ejecuta": null,
+   "historial": [
+    {
+     "fecha": "2026-10-15",
+     "que": "registrada (LM-38) con la decisión aprobada por Carlos en el chat del Arquitecto («dale»)"
+    }
+   ]
+  }
+ ]
+}

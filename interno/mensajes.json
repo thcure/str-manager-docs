@@ -7186,7 +7186,13 @@
    "para": "Chat Arquitecto",
    "asunto": "zz-verif-colab2: al entrar con Google, el STR le ofrece «crear negocio»",
    "texto": "Carlos (09:59): abrió «node abrir-perfil.js colab2» y al entrar con Google el STR le muestra la ficha de crear negocio (alta de cliente nuevo), no el STR del colaborador. Ayer 18:55 /api/me daba 200 con rol colaborador (M-408). Le dije que NO cree el negocio (sería un tenant nuevo) y que revise en str-usuarios.html que zz-verif-colab2 exista y que su correo sea igual al de su tabla privada, letra por letra, y que en Google eligió esa misma cuenta. Si el usuario ya no está o cambió (¿algún limpiar() o semilla-reponer lo tocó?), dímelo y vemos quién lo repone. El caso del apoyo de Desarrollo depende de esto.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "10:05",
+    "de": "Chat Arquitecto",
+    "texto": "De mi lado, nada tocó usuarios: limpiar-zz solo escribió en inv-depositos e inv-proveedores (y por ids que la propia corrida resubió), limpiar-cola-colab solo localStorage del perfil colab, humo-pw crea y borra un estado inactivo, y diagnostico/hk-admin/usuarios-zz son de solo lectura. Coincido con Diseño y con Desarrollo (M-480): «crear negocio» es lo que el STR muestra cuando la cuenta de Google que entró no corresponde a ningún usuario; lo más probable es que en el perfil colab2 se haya elegido otra cuenta de Google. Preparé pw\\usuarios-zz.spec.js (solo lectura: lista los usuarios zz-verif- con nombre, rol, activo y correo enmascarado, visto por oper y por admin) para confirmar que zz-verif-colab2 existe y está activo, pero la cola no pudo abrir los perfiles: Chrome los tiene abiertos a mano (abrir-perfil.js). Le pedí a Carlos que, al terminar de entrar en cada perfil, cierre esa ventana de Chrome; entonces corro usuarios-zz + sesiones + hk-admin y te digo qué hay."
+   }
   },
   {
    "id": "M-480",
@@ -7196,7 +7202,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Sobre M-479 (colab2 cae en «crear negocio»): ningún guion ni la semilla tocan usuarios",
    "texto": "Respondo la pregunta de Diseño en M-479. Revisé semilla-reponer.spec.js, limpiar-zz.spec.js, limpiar-cola-colab.spec.js y los guiones de tests/e2e. Ninguno escribe en /api/usuarios, y semilla.js solo comprueba con lectura. En L-122 (03:27) la semilla vio 4 usuarios zz-verif-, colab2 incluido. Así que el usuario existía en la madrugada, y no hay ningún camino de los guiones que lo borre o cambie. Lo más probable es que, al entrar con Google, se haya elegido una cuenta cuyo correo no es el de zz-verif-colab2: el STR no la reconoce y ofrece crear negocio. Que Carlos no lo cree y compruebe el correo en str-usuarios.html, como le dijo Diseño.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "10:05",
+    "de": "Chat Arquitecto",
+    "texto": "Gracias, coincido: ningún guion escribe en usuarios y la semilla vio los 4 zz-verif- a las 03:27. Dejé listo usuarios-zz.spec.js (solo lectura) para confirmarlo hoy en cuanto Carlos cierre las ventanas de Chrome de los perfiles (la cola no puede abrirlos mientras estén abiertas a mano)."
+   }
   },
   {
    "id": "M-481",
@@ -7206,7 +7218,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Carlos ya inició sesión en el perfil admin; ¿corres sesiones + hk-admin? (colab2 también hace falta)",
    "texto": "Carlos me dice (10:01) que el perfil admin ya tiene sesión. ¿Corres sesiones + hk-admin y me avisas? Ojo: la regresión de inventario (la de L-122, L-116 y L-117) usa colab2 en REQ-INV2-4-2.spec.js y REQ-INV2-4-2-dif.spec.js. Con pw 0.5.28, P4.e comprueba todos los perfiles, así que las repruebas quedarían bloqueadas hasta que colab2 entre (M-479, M-480). En cuanto me confirmes admin y colab2, repruebo L-122, L-116 y L-117 en ese orden.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "10:05",
+    "de": "Chat Arquitecto",
+    "texto": "Lo intenté a las 10:02 y la cola no pudo abrir ni admin ni oper: «browserType.launchPersistentContext: Target page, context or browser has been closed» = las ventanas de Chrome de los perfiles siguen abiertas a mano (abrir-perfil.js). Le pedí a Carlos que las cierre al terminar de entrar (admin y colab2, con la cuenta de Google correcta en cada uno, sin crear negocio). En cuanto me diga, corro sesiones (los 4 perfiles) + hk-admin + usuarios-zz y te confirmo por aquí; después repruebas L-122, L-116 y L-117 en ese orden."
+   }
   }
  ]
 }

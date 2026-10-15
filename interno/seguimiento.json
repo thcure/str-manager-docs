@@ -728,7 +728,7 @@
    "severidad": "alto",
    "titulo": "En el portal, los diálogos de HK (Cerrar limpieza con nota, fotos pendientes, préstamos, omitir, guías, aviso de pendientes) quedan detrás del panel del turno",
    "causa": "body.modo-colab .detail-panel.open usa z-index 999; los diálogos se agregan al body con 500/600 y el menú de la cola con 700. El colaborador toca «Cerrar limpieza» con tareas pendientes y no ve el diálogo.",
-   "pendiente": "L-115: panel a 400.",
+   "pendiente": "L-115 (b73701d) construido; sus criterios en verde (00:32); aceptación pendiente por un rojo ajeno (2002).",
    "estado": "abierto",
    "origen": "Veredicto 2 de L-103 (23:58), caso g + g-error.png/txt; igual en el veredicto 1 (19:13)."
   }
@@ -9962,8 +9962,61 @@
    "req": "INC-131",
    "categoria": "normal",
    "resumen": "Portal: panel del turno de HK a z-index 400 (sus diálogos quedan encima); arreglo del caso c del guion de L-103; p5c93",
-   "estado": "registrado",
-   "observacion": "Encolado 00:24 (ok de Diseño M-447 con N2/N3 del diálogo a 390 px; revisión previa 13/14 corregida)."
+   "estado": "no aceptado",
+   "observacion": "Encolado 00:24 (ok de Diseño M-447 con N2/N3 del diálogo a 390 px; revisión previa 13/14 corregida). · 00:32 no aceptado: a–d en verde (panel 400, diálogo visible a 390 px, captura N3); único rojo: regresión hk-turno d con PUT turnos 500 por 2002 tras los 3 intentos (el siguiente PUT 200, tarea marcada)",
+   "hash": "b73701d",
+   "aceptacion": {
+    "lote": "L-115",
+    "hash": "b73701d",
+    "fecha": "2026-10-15",
+    "horaBogota": "00:32",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. El panel queda debajo de los diálogos",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 67/67 archivos OK"
+     },
+     {
+      "c": "b. Preparación: turno de hoy de zz-verif-colab en zz-verif-Propiedad",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado: 6 turnos | si: turno sh-m-1792042066090: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c. En el portal a 390 px, «Cerrar limpieza» con tareas pendientes muestra su diálogo encima del panel",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792042066090 | si: iframe de HK: https://app.apartamentosbucaramanga.com/str-m1-housekeeping.html?modo=colaborador&v=p5c93 (versión ≥ p5c93: el guion corre como regresión en lotes siguientes) | si: z-index del panel del turno: 400 | si: menú de la cola (700) encima del panel (400) | si: iniciar turno: 200 | si: diálogo «Cerrar limpieza» en el DOM: sí | si: diálogo encima del panel: caja sí · «Confirmar igualmente» sí · «🧹 Cerrar limpieza Pendientes obligatorias: zz-verif-Limpieza480 zz-verif-Conteo de cierre · sin foto Para marcar la propiedad lista de todas formas, agrega una» | si: «Cancelar» cierra el diálogo: sí | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "d. Captura del diálogo a 390 px",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "en cierre-limpieza se ve el diálogo «🧹 Cerrar limpieza» con «Pendientes obligatorias:», los dos ítems zz-verif- en rojo, el campo de nota «Motivo o nota...» y los botones «Cancelar» / «Confirmar igualmente», todo por encima de la tarjeta del turno (reserva, colaborador, progreso), legible y sin desborde ni recorte en los 390 px de ancho"
+     },
+     {
+      "c": "e. Regresión de la zona inventario (REQ-INV2-3-4-hk c y g, y el resto de la cola)",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "falla REQ-INV2-7-1-hk-turno.spec.js caso d: NO: tarea marcada: sí · turnos 500 | error del servidor: PUT /api/col/turnos → 500 {\"error\":\"Base de datos no disponible\",\"detalle\":2002}; el resto de la regresión (incluyendo REQ-INV2-3-4-hk c y g) quedó en verde"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Regresión: 500 «Base de datos no disponible» al guardar el turno durante la subida concurrente de fotos del conteo de cierre",
+      "nivel": "medio",
+      "causa": "PUT /api/col/turnos devuelve 500 (detalle 2002, DB no disponible) cuando hay varias escrituras en vuelo durante la subida de las 5 fotos del conteo de cierre (REQ-INV2-7-1-hk-turno.spec.js, caso d); no es del alcance de INC-131 (CSS de modales en modo colaborador), es una regresión de la zona inventario ajena al cambio de este lote",
+      "observado": "NO: tarea marcada: sí · turnos 500 | PUT /api/col/turnos → 500 en 691ms con {\"error\":\"Base de datos no disponible\",\"detalle\":2002}; el guion reintenta (PUT /api/col/turnos → 200 en 264ms) y la tarea termina marcada (ver captura REQ-INV2-7-1-hk-turno-d-error: «zz-verif-Conteo de cierre» con ✓ y 50% · 1/2)"
+     }
+    ],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "N1 y N2 propios de INC-131 (a, b, c) en verde; N3 (d) confirmado por captura: el diálogo «Cerrar limpieza» queda legible y completo encima del panel del turno a 390 px, sin desborde. El único ok:false de todo el lote es una regresión de REQ-INV2-7-1-hk-turno.spec.js (zona inventario, subida de fotos), ajena al cambio de z-index de este lote; no se marca «herramienta» porque la causa (500 del servidor por DB no disponible) no es un corte de sesión ni un error del propio pw, sino un error del backend bajo escritura concurrente."
+   }
   }
  ],
  "esquema": {
@@ -11522,10 +11575,10 @@
    "resumen": "Servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por PUT → 403; p5c92",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CD",
-   "espera": "L-115 (INC-131 + guion c); luego reprueba",
+   "esperaA": "CLI",
+   "espera": "reprueba tras L-115",
    "orden": 121.11,
-   "desde": "2026-10-15 00:20",
+   "desde": "2026-10-15 00:41",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "DA-33 (a), cruce con Carlos 12-oct-2026 19:07 (chat de Diseño); decisiones M-375. Revisión previa 11/14 → corregida. Pendientes creados por el servidor (M-395/M-397). · ok de Diseño 18:22 (M-403) con 2 ajustes aplicados (s11 para pendientes huérfanos; admin cierra sin movimientoId, confirmado en index.php ~806). Guardia v5.2 cruzada con Carlos 18:22 y encendida (pw 0.5.18, M-404). Encolado 18:24. · CLI terminó OK; puerta de pruebas bloqueada (sin gastar verificación): faltan zz-verif-Secando/Lista con nombre exacto (la app los tenía en minúscula) y zz-verif-Tendedero no sirve a zz-verif-Propiedad. s8 renombra y s12 crea/corrige la zona. · Semilla 12/12 a las 19:05 (s8 renombró Secando/Lista; s12 Tendedero). Reprueba puesta 19:06. · Juez 19:13: no aceptado. Regresión crítica: PUT de inv-movimientos 500 en los conteos del colaborador (hk-turno d); g/h/i/j en cadena. Crea bien los pendientes (c, d, e, k, l verdes). Reversión L-108 encolada 19:17. · Diseño (M-412): la corrección vuelve con revisión previa nueva; la regresión hk-turno d debe correr antes de encolar. · 22:16: reencolado preparado en p5c90→p5c91 (dependencia L-111, aplicar sobre main actual, sin revert del revert); se encola cuando L-111 quede aceptado (Diseño, M-432)"
@@ -11571,9 +11624,9 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "Diseño",
-   "espera": "partido en L-107 (servidor+HK) y L-114 (Inventario) por decisión de Diseño (M-446); revisión previa de cada uno; depende de L-115 y L-103",
+   "espera": "revisión de Diseño (M-450); L-107 después de L-115 aceptado y L-103 en verde",
    "orden": 121.12,
-   "desde": "2026-10-14 23:59",
+   "desde": "2026-10-15 00:41",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Borrador listo; la ficha decía «Normal», pero cambia lo que lee el colaborador (crítico, como lote 66). Cabecera sin DA a propósito hasta el cruce. · Diseño: crítico, DA-43 abierta (M-409); supuestos ok; zz-verif-colab2 como segundo titular y apoyo (N2 del criterio 8). · DA-43 decidida por Carlos 21:03: c) entrega y recepción en todos los turnos; sin lectura nueva; INV2-4-2 queda normal (M-420)."
@@ -11680,12 +11733,12 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Portal: el panel del turno de HK baja a z-index 400 para no tapar sus diálogos; arreglo del caso c del guion de L-103; p5c93",
-   "estado": "encolado",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "esperaA": "CLI",
-   "espera": "construcción",
+   "esperaA": "Arquitecto",
+   "espera": "decisión sobre el rojo por 2002 (M-449)",
    "orden": 121.113,
-   "desde": "2026-10-15 00:24",
+   "desde": "2026-10-15 00:41",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Destraba L-103."
@@ -11698,10 +11751,10 @@
    "resumen": "Inventario: diferencias de entrega y recepción, resolución del operador (criterios 5, 6, 9)",
    "estado": "redactado",
    "vista": "siguiente",
-   "esperaA": "CD",
-   "espera": "revisión previa; va después de L-107",
+   "esperaA": "Diseño",
+   "espera": "revisión de Diseño (M-450); L-107 después de L-115 aceptado y L-103 en verde",
    "orden": 121.131,
-   "desde": "2026-10-15 00:20",
+   "desde": "2026-10-15 00:41",
    "planTrabajo": "PT-1",
    "grupo": "INV2",
    "nota": "Partido de L-107 (M-446)."

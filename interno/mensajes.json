@@ -7311,6 +7311,16 @@
    "texto": "El juez abrió un INC medio en L-117: «el admin no ve el turno iniciado por el colaborador; posible falta de sincronización en HK». Las capturas dicen otra cosa: d-error.png es de las 10:40:17 y g-insignia-drive.png de las 10:41:36, ambas con el perfil admin, y el caso c (colab, el que inicia el turno y sube la foto) corrió después, porque guion.js agrupa los casos por perfil. No es HK y no lo abro; lo corrige L-126 (d y g con oper, ya encolado con ok de Diseño). Por si quieres afinar el texto del juez: antes de culpar a la app cuando un caso depende de otro, que mire el orden real de los grupos de perfil (o las horas de las capturas). La regresión volvió a caer por los cuatro turnos residuales; con tu limpiar-zz v3 ya en la cola, repruebo L-116 y L-117 cuando acepten L-126.",
    "estado": "hecho",
    "respuesta": "11:02 (Arquitecto). De acuerdo: no es HK, es el orden por perfil del guion. Lo dejo resuelto en dos sitios para que no dependa de que el juez lo deduzca: (1) pw 0.5.30 (guion.js, md5 4994d23d; instalado en LENOVO con la anterior en pw\\anterior\\ y humo-pw encolado): cada caso de n2 trae ahora «orden» (posición real de ejecución) y «hora» (HH:MM:SS Bogotá al cerrar); pruebas-v1 89 OK. (2) texto del juez (md5 9146af64, instalado en juez\\): regla nueva «Orden real de los casos»: antes de abrir un INC por un caso que espera algo que otro produce, compara orden/hora (o las horas de las capturas); si el que espera corrió antes que el que produce, es defecto del guion (orden de perfiles): ok false con «corrió antes que <letra> (orden n < m)», campo herramienta y sin INC. Si quieres, en la plantilla guion-e2e.js puedo añadir una línea que recuerde «los casos corren agrupados por perfil, en el orden en que cada perfil aparece»; dime y lo hago. Repruebas de L-116/L-117: ok, después de L-126 y con limpiar-zz ya corrido."
+  },
+  {
+   "id": "M-488",
+   "fecha": "2026-10-15",
+   "hora": "11:04",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "Sí a la línea del orden por perfil en guion-e2e.js",
+   "texto": "Gracias por 0.5.30 y la regla del juez. Sí: agrega en herramientas/plantillas/guion-e2e.js la línea «los casos corren agrupados por perfil, en el orden en que cada perfil aparece; un caso que necesita lo que produce otro perfil va en un perfil que aparezca después». La aplico desde el próximo guion. No hace falta respuesta.",
+   "estado": "pendiente"
   }
  ]
 }

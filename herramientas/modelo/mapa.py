@@ -93,23 +93,31 @@ for r in hist:
 for rid, mods in ancla.items():
     if rid not in REQS and mods: REQS[rid] = dict(id=rid, titulo=None, estado='sin registro', documento=None, das=[], prioridad=None, nota='solo en el anclaje (REQ-MOD-n: claude/marco)', modulos=mods, origen='mapa', historico=False)
 
-# M4 guiones → módulos (por página de sus casos y por su REQ); cada guion termina con ≥ 1 módulo
+# M4 guiones → módulos (M-520): `modulos` del caso gana; si no, el REQ (reqModulo / anclajeReq) y no se suman páginas; si no, las páginas
 GUI = []
 pagmod = ag.get('paginaModulo', {}); reqmod = ag.get('reqModulo', {})
 for arch, g in sorted(guiones.items()):
     if g.get('error'): avi('M4 guion', arch, f'no se pudo leer: {g["error"]}'); continue
-    mods = set(); paginas = Counter(); perfiles = Counter(); niveles = Counter()
+    req = g.get('req'); porReq = set(reqmod.get(req) or ancla.get(req) or [])
+    mods = set(); paginas = Counter(); perfiles = Counter(); niveles = Counter(); porPagina = set()
     for c in g.get('casos', []):
-        p = c.get('pagina');
+        p = c.get('pagina')
         if p: paginas[p] += 1
-        if p in pagmod: mods.add(pagmod[p])
+        if c.get('modulos'):
+            for mm in c['modulos']:
+                if mm in MID: mods.add(mm)
+                else: err('M4 guion', arch, f'caso {c.get("c")}: módulo «{mm}» no existe')
+        elif p in pagmod: porPagina.add(pagmod[p])
         elif p: avi('M4 página sin módulo', arch, f'página «{p}» no está en anclajeGuiones.paginaModulo')
         if c.get('perfil'): perfiles[c['perfil']] += 1
         niveles[c.get('nivel') or 'N2'] += 1
-    req = g.get('req')
-    for mm in (reqmod.get(req) or ancla.get(req) or []): mods.add(mm)
+    mods |= porReq if porReq else porPagina
     if not mods: err('M4 guion sin módulo', arch, f'req {req}, páginas {sorted(paginas)}: añadir a anclajeGuiones.reqModulo')
-    GUI.append(dict(archivo=arch, req=req, zona=g.get('zona'), modulos=sorted(mods), casos=g.get('casos', []), nCasos=len(g.get('casos', [])), paginas=dict(paginas), perfiles=dict(perfiles), niveles=dict(niveles)))
+    GUI.append(dict(archivo=arch, req=req, zona=g.get('zona'), modulos=sorted(mods), casos=g.get('casos', []), nCasos=len(g.get('casos', [])), paginas=dict(paginas), perfiles=dict(perfiles), niveles=dict(niveles), origen='tests/e2e', anclaje='caso' if any(c.get('modulos') for c in g.get('casos', [])) else ('req' if porReq else 'pagina')))
+for g in ag.get('guionesPw', []):
+    for mm in g.get('modulos', []):
+        if mm not in MID: err('M2 anclaje', g.get('archivo'), f'módulo «{mm}» no existe')
+    GUI.append(dict(archivo=g['archivo'], req=None, zona=g.get('zona'), modulos=sorted(g.get('modulos', [])), casos=[], nCasos=0, paginas={}, perfiles={}, niveles={}, origen='herramientas/pw', anclaje='pw', nota=g.get('nota')))
 
 # Cambios e incidentes por módulo (frecuencia de cambio = hotspot)
 cambios = [c for c in seg.get('cambios', []) if c.get('tipo') != 'modelo']
@@ -155,7 +163,7 @@ for m in modulos:
                     guiones=len(gs), casos=sum(g['nCasos'] for g in gs), perfiles=sorted({pf for g in gs for pf in g['perfiles']}),
                     lotes30d=len(rec), lotesTotal=len(CAMBIOS[mid]), incidentes=len(INCS[mid]), incidentesAbiertos=sum(1 for x in INCS[mid] if x.get('etapa') not in ('✅', '✔', 'cerrado')),
                     riesgo=nivel_riesgo(p, i), puntajeRiesgo=p * i, hotspot=p * i * (1 + len(rec)))
-    if m['estado'] == 'construido' and not gs: avi('M5 cobertura', mid, 'módulo construido sin ningún guion e2e')
+    if m['estado'] == 'construido' and not [g for g in gs if g['origen'] == 'tests/e2e']: avi('M5 cobertura', mid, 'módulo construido sin ningún guion e2e' + (' (lo cubre ' + ', '.join(g['archivo'] for g in gs) + ')' if gs else ''))
     if m['estado'] == 'construido' and aceptados and not con_guion: avi('M5 cobertura', mid, 'REQ aceptados en octubre sin guion que los nombre')
 
 # Informe

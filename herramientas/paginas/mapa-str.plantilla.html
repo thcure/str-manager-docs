@@ -312,9 +312,9 @@ function nodoRef(id) { if (id === '*') return '<span class="badge b-sin">todos</
 // ---------- vista Guiones ----------
 function htmlGuiones() {
   const gs = [...D.guiones].sort((a, b) => a.archivo.localeCompare(b.archivo));
-  return `<p class="nota">${gs.length} guiones en <span class="ruta">str-manager/tests/e2e/</span> (foto tomada por el Arquitecto; la refresca <span class="mono">herramientas/modelo/mapa.py</span> desde <span class="mono">interno/arquitectura/guiones-e2e.json</span>). Módulos = páginas de sus casos + REQ.</p>
+  return `<p class="nota">${gs.filter((g) => g.origen === 'tests/e2e').length} guiones en <span class="ruta">str-manager/tests/e2e/</span> y ${gs.filter((g) => g.origen !== 'tests/e2e').length} de la fábrica (<span class="mono">herramientas/pw</span>) (foto tomada por el Arquitecto; la refresca <span class="mono">herramientas/modelo/mapa.py</span> desde <span class="mono">interno/arquitectura/guiones-e2e.json</span>). Módulos = páginas de sus casos + REQ.</p>
   <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Guion</th><th>REQ / origen</th><th>Zona</th><th>Módulos</th><th class="n">Casos</th><th>Niveles</th><th>Perfiles</th><th>Páginas</th></tr></thead><tbody>
-  ${gs.map((g) => `<tr><td><a class="ref" href="#${g.archivo}">${esc(g.archivo.replace('.spec.js', ''))}</a></td><td>${g.req ? refId(g.req) : '—'}</td><td class="mono">${esc(g.zona || '—')}</td><td>${g.modulos.map((m) => `<a class="ref" href="#${m}">${m}</a>`).join('')}</td><td class="n">${g.nCasos}</td><td class="mono">${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(' ')}</td><td>${Object.keys(g.perfiles).join(', ')}</td><td class="nota">${Object.keys(g.paginas).map((p) => p.replace(/^\/|\.html$/g, '')).join(', ')}</td></tr>`).join('')}
+  ${gs.map((g) => `<tr><td><a class="ref" href="#${g.archivo}">${esc(g.archivo.replace('.spec.js', ''))}</a></td><td>${g.req ? refId(g.req) : '—'}</td><td class="mono">${esc(g.zona || '—')}</td><td>${g.modulos.map((m) => `<a class="ref" href="#${m}">${m}</a>`).join('')} <span class="nota">(${esc(g.anclaje)})</span></td><td class="n">${g.nCasos || '—'}</td><td class="mono">${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(' ')}</td><td>${Object.keys(g.perfiles).join(', ')}</td><td class="nota">${Object.keys(g.paginas).map((p) => p.replace(/^\/|\.html$/g, '')).join(', ')}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
 
@@ -431,10 +431,10 @@ function fichaReq(r) {
   <h3>Documento</h3><p>${r.documento ? r.documento.split(/;|›/).map((p) => rutaDoc(p.trim().split(' ')[0])).join(' ') : '—'}</p>`;
 }
 function fichaGuion(g) {
-  return `<div class="tipo">Guion e2e · zona ${esc(g.zona || '—')}</div><h2><span class="mono">${esc(g.archivo)}</span></h2>
+  return `<div class="tipo">Guion ${esc(g.origen)} · zona ${esc(g.zona || '—')} · anclado por ${esc(g.anclaje)}</div><h2><span class="mono">${esc(g.archivo)}</span></h2>
   <dl class="kv"><dt>REQ / origen</dt><dd>${g.req ? refId(g.req) : '—'}</dd><dt>Módulos</dt><dd>${g.modulos.map((m) => nodoRef(m)).join(' ')}</dd><dt>Perfiles</dt><dd>${Object.entries(g.perfiles).map(([k, v]) => `${k}×${v}`).join(', ')}</dd><dt>Niveles</dt><dd>${Object.entries(g.niveles).map(([k, v]) => `${k}×${v}`).join(', ')}</dd></dl>
-  <h3>Casos (${g.nCasos})</h3>${g.casos.map((c) => `<div class="caso"><span class="mono">${esc(c.c || '')} · ${esc(c.perfil || '')}${c.camara ? ' · cámara' : ''} · ${esc(c.nivel || 'N2')} · ${esc((c.pagina || '').replace(/^\/|\.html$/g, ''))}</span><br>${esc(c.que)}</div>`).join('')}
-  <h3>Archivo</h3><p>${rutaDoc('tests/e2e/' + g.archivo)}</p>`;
+  ${g.nota ? `<p class="nota">${esc(g.nota)}</p>` : ''}<h3>Casos (${g.nCasos})</h3>${g.casos.map((c) => `<div class="caso"><span class="mono">${esc(c.c || '')} · ${esc(c.perfil || '')}${c.camara ? ' · cámara' : ''} · ${esc(c.nivel || 'N2')} · ${esc((c.pagina || '').replace(/^\/|\.html$/g, ''))}</span><br>${esc(c.que)}</div>`).join('')}
+  <h3>Archivo</h3><p>${rutaDoc(g.origen === 'tests/e2e' ? 'tests/e2e/' + g.archivo : g.archivo)}</p>`;
 }
 
 // ---------- búsqueda ----------

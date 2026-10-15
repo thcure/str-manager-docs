@@ -427,7 +427,9 @@
    },
    "actores": [
     "admin",
-    "operador"
+    "operador",
+    "airbnb",
+    "propietario"
    ],
    "reqRaiz": [
     "REQ-P0",
@@ -482,7 +484,8 @@
    "actores": [
     "admin",
     "operador",
-    "cron"
+    "cron",
+    "airbnb"
    ],
    "reqRaiz": [
     "REQ-C0",
@@ -726,8 +729,8 @@
    ],
    "riesgo": {
     "probabilidad": 3,
-    "impacto": 2,
-    "motivo": "Diez REQ INV2 entregados o aceptados en octubre; reglas finas (un responsable por turno, movimientos inmutables); 6 INC recientes."
+    "impacto": 3,
+    "motivo": "Diez REQ INV2 entregados o aceptados en octubre; reglas finas (un responsable por turno, movimientos inmutables); 6 INC recientes. Impacto 3: Carlos pidió que el inventario quede siempre al día y se sepa dónde quedaron las cosas (DA-43; Diseño M-519)."
    }
   },
   {
@@ -777,8 +780,8 @@
    "id": "K3",
    "nombre": "Copia a Drive y retención (corte mensual)",
    "familia": "transversal",
-   "estado": "parcial",
-   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3b construido en reprueba; K3c (L-124, L-125) aceptado; tareas de hPanel por crear.",
+   "estado": "construido",
+   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3-2 y K3-3 aceptados (15-oct). Sin activar: faltan las tareas programadas de hPanel y el respaldo de api/uploads/ (RT-12).",
    "paginas": [
     "(tarjeta en el shell; insignia en HK; aviso de corte)",
     "api/lib/drive.php",
@@ -813,7 +816,8 @@
     "admin",
     "operador",
     "cron",
-    "google-drive"
+    "google-drive",
+    "colaborador"
    ],
    "reqRaiz": [
     "REQ-K3",
@@ -865,7 +869,9 @@
    "actores": [
     "operador",
     "colaborador",
-    "admin"
+    "admin",
+    "huesped",
+    "airbnb"
    ],
    "reqRaiz": [
     "REQ-S2",
@@ -982,10 +988,10 @@
   },
   {
    "id": "CMP",
-   "nombre": "Compras, reposición y puntos de control (QR)",
+   "nombre": "Compras y reposición",
    "familia": "operativo",
    "estado": "definido",
-   "que": "Compras y alertas de reposición (CMP-1); actividades guiadas por cámara y puntos de control con QR (PC1-1, PC1-2). Definidos, sin construir.",
+   "que": "Compras y alertas de reposición (CMP-1): anticipo y legalización (PG), encargo como actividad del turno (HK), la compra entra al inventario (INV). Definido, sin construir.",
    "paginas": [],
    "rutas": [],
    "colecciones": {
@@ -997,26 +1003,58 @@
     "colaborador"
    ],
    "reqRaiz": [
-    "REQ-CMP-1",
+    "REQ-CMP-1"
+   ],
+   "mapaTecnico": null,
+   "zonaPw": null,
+   "alias": [
+    "Compras",
+    "CMP"
+   ],
+   "adr": [],
+   "da": [
+    "DA-38"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 2,
+    "motivo": "Sin código; cuando se construya sube a 2×3 (dinero y stock, Diseño M-519)."
+   }
+  },
+  {
+   "id": "PC1",
+   "nombre": "Puntos de control (QR) y actividades guiadas por cámara",
+   "familia": "operativo",
+   "estado": "definido",
+   "que": "Actividades guiadas por cámara (PC1-1) y puntos de control con QR y respaldo (PC1-2); nace en HK con QR y respaldo; el colaborador lo hace en el portal. Definido, sin construir.",
+   "paginas": [],
+   "rutas": [],
+   "colecciones": {
+    "escribe": [],
+    "lee": []
+   },
+   "actores": [
+    "colaborador",
+    "operador"
+   ],
+   "reqRaiz": [
     "REQ-PC1-1",
     "REQ-PC1-2"
    ],
    "mapaTecnico": null,
    "zonaPw": null,
    "alias": [
-    "Compras",
     "PC1",
-    "CMP"
+    "puntos de control"
    ],
    "adr": [],
    "da": [
-    "DA-36",
-    "DA-38"
+    "DA-36"
    ],
    "riesgo": {
     "probabilidad": 1,
     "impacto": 2,
-    "motivo": "Sin código; el riesgo aparece cuando se construya (toca inventario y dinero)."
+    "motivo": "Sin código; cuando se construya toca HK y el portal (fotos, QR)."
    }
   },
   {
@@ -1977,7 +2015,8 @@
    "PR"
   ],
   "REQ-PR1-2": [
-   "PR"
+   "PR",
+   "CAL"
   ],
   "REQ-PR1-4": [
    "PR",
@@ -2001,7 +2040,8 @@
   ],
   "REQ-INV2-3-4": [
    "INV",
-   "HK"
+   "HK",
+   "POR"
   ],
   "REQ-INV2-4-1": [
    "INV",
@@ -2010,11 +2050,13 @@
   ],
   "REQ-INV2-4-2": [
    "INV",
-   "HK"
+   "HK",
+   "POR"
   ],
   "REQ-INV2-5": [
    "INV",
-   "FL"
+   "FL",
+   "HK"
   ],
   "REQ-INV2-6-1": [
    "INV"
@@ -2027,16 +2069,21 @@
   ],
   "REQ-INV2-7-1": [
    "INV",
-   "HK"
+   "HK",
+   "POR"
   ],
   "REQ-INV2-7-2": [
    "INV"
   ],
   "REQ-INV2-8-1": [
-   "INV"
+   "INV",
+   "FL",
+   "PR"
   ],
   "REQ-INV2-8-2": [
-   "INV"
+   "INV",
+   "FL",
+   "PR"
   ],
   "REQ-INV2-9": [
    "INV"
@@ -2044,16 +2091,20 @@
   "REQ-K3-2": [
    "K3",
    "HK",
-   "SH"
+   "SH",
+   "SRV"
   ],
   "REQ-K3-3": [
    "K3",
    "HK",
    "SH",
-   "INC1"
+   "INC1",
+   "SRV",
+   "POR"
   ],
   "REQ-MI1-1": [
-   "FL"
+   "FL",
+   "INV"
   ],
   "REQ-MI1-2": [
    "CAL",
@@ -2061,7 +2112,9 @@
   ],
   "REQ-MI1-3": [
    "HK",
-   "INC1"
+   "INC1",
+   "FL",
+   "CAL"
   ],
   "REQ-MI1-4": [
    "POR",
@@ -2069,24 +2122,35 @@
   ],
   "REQ-PC1-1": [
    "HK",
-   "CMP"
+   "PC1",
+   "POR",
+   "FL"
   ],
   "REQ-PC1-2": [
    "HK",
-   "CMP"
+   "PC1"
   ],
   "REQ-INC1-1": [
-   "INC1"
+   "INC1",
+   "INV",
+   "HK",
+   "POR"
   ],
   "REQ-INC1-2": [
-   "INC1"
+   "INC1",
+   "INV",
+   "CAL"
   ],
   "REQ-CMP-1": [
    "CMP",
-   "INV"
+   "INV",
+   "PG",
+   "HK"
   ],
   "REQ-PG1-2": [
-   "PG"
+   "PG",
+   "POR",
+   "INV"
   ],
   "REQ-F11-5-2": [
    "PG",
@@ -2125,7 +2189,9 @@
    "PRJ"
   ],
   "REQ-PP-1": [
-   "PR"
+   "PR",
+   "CAL",
+   "PG"
   ],
   "REQ-INV2-3-2": [],
   "REQ-INV2-6": [],
@@ -2295,7 +2361,7 @@
   }
  },
  "anclajeGuiones": {
-  "que": "Cada guion de tests/e2e se ancla a módulos por las páginas de sus casos (paginaModulo) y por su REQ (anclajeReq); el generador lo calcula desde interno/arquitectura/guiones-e2e.json (foto de tests/e2e que deja la cola o el Arquitecto).",
+  "que": "Cada guion de tests/e2e se ancla a módulos así (M-520): (a) si un caso trae `modulos`, gana; (b) si no, y el REQ u origen del guion está en reqModulo o anclajeReq, se usan esos módulos y NO se suman las páginas (una página puede ser solo la sesión para llamar la API); (c) si no, las páginas de sus casos por paginaModulo. Nota: los casos en /portal.html que ejercen HK dentro del iframe #hkFrame (INC-130, L-108, REQ-INV2-7-1-hk) quedan bien por su REQ. El generador lo calcula desde interno/arquitectura/guiones-e2e.json.",
   "paginaModulo": {
    "/str-app-shell.html": "SH",
    "/portal.html": "POR",
@@ -2320,13 +2386,16 @@
   },
   "reqModulo": {
    "DT-35": [
-    "SRV"
+    "SRV",
+    "API"
    ],
    "DT-40": [
-    "SRV"
+    "SRV",
+    "API"
    ],
    "DT-41": [
-    "SRV"
+    "SRV",
+    "API"
    ],
    "INC-117": [
     "PR"
@@ -2344,14 +2413,16 @@
    ],
    "INC-127": [
     "HK",
-    "POR"
+    "POR",
+    "CAL"
    ],
    "INC-128": [
     "SRV",
     "HK"
    ],
    "INC-130": [
-    "HK"
+    "HK",
+    "POR"
    ],
    "INC-131": [
     "POR",
@@ -2362,7 +2433,8 @@
     "K3"
    ],
    "L-108": [
-    "HK"
+    "HK",
+    "POR"
    ],
    "R-3": [
     "SRV"
@@ -2377,10 +2449,13 @@
     "HK",
     "SH",
     "INC1"
+   ],
+   "REQ-MOD-6": [
+    "MOD"
    ]
   },
   "zonasPw": {
-   "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»); LM-39b propone zonas = módulos.",
+   "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»). LM-39b: zona = id de módulo o lista de ids; «sesiones» sigue como zona especial (no es módulo); cambio de las 37 cabeceras y de plantillas/guion-e2e.js en el mismo lote (Desarrollo M-520).",
    "zonas": [
     "inventario",
     "shell-y-api",
@@ -2391,6 +2466,99 @@
     "modelo",
     "api"
    ]
+  },
+  "guionesPw": [
+   {
+    "archivo": "herramientas/pw/humo-pw.spec.js",
+    "zona": "sesiones",
+    "modulos": [
+     "U",
+     "SH"
+    ],
+    "nota": "Inicio de sesión de los tres perfiles en cada corrida de la cola (Desarrollo M-520): cubre U aunque tests/e2e no tenga guion de U"
+   },
+   {
+    "archivo": "herramientas/pw/sesiones.spec.js",
+    "zona": "sesiones",
+    "modulos": [
+     "U"
+    ],
+    "nota": "correr\\sesiones.txt: comprueba y recupera la sesión de cada perfil (LM-37)"
+   }
+  ],
+  "archivoModulo": {
+   "que": "Archivos compartidos → módulos cuya regresión corre un lote que los toca, aunque su línea «Mapa:» nombre uno solo (Desarrollo M-520; insumo de LM-39b).",
+   "mapa": {
+    "str-api.js": [
+     "API",
+     "SH",
+     "HK",
+     "POR",
+     "INV",
+     "PR",
+     "CAL",
+     "FL",
+     "KN",
+     "U"
+    ],
+    "str-cola-subida.js": [
+     "HK",
+     "POR",
+     "INV",
+     "K3"
+    ],
+    "str-guia-visor.js": [
+     "HK",
+     "KN"
+    ],
+    "str-app-shell.html": [
+     "SH",
+     "K3"
+    ],
+    "portal.html": [
+     "POR",
+     "HK"
+    ],
+    "api/index.php": [
+     "SRV"
+    ],
+    "api/lib/session.php": [
+     "SRV",
+     "U"
+    ],
+    "api/config/database.php": [
+     "SRV"
+    ],
+    "api/config/secrets.php": [
+     "SRV",
+     "K3",
+     "CAL"
+    ],
+    "api/config/migrate.php": [
+     "SRV"
+    ],
+    "api/lib/drive.php": [
+     "K3"
+    ],
+    "api/lib/drive-copia.php": [
+     "K3"
+    ],
+    "api/lib/retencion.php": [
+     "K3",
+     "SH"
+    ],
+    "api/lib/ical.php": [
+     "CAL"
+    ],
+    "api/lib/ical-export.php": [
+     "PR"
+    ],
+    "api/lib/upload-limites.php": [
+     "HK",
+     "KN",
+     "PR"
+    ]
+   }
   }
  },
  "fichas": {
@@ -2406,6 +2574,11 @@
   {
    "fecha": "2026-10-15",
    "cambio": "Línea base del mapa legible por máquina: 19 módulos, 12 actores, 32 relaciones, 24 reglas, 18 elementos de configuración, anclaje de 58 REQ vigentes + 85 históricos y 37 guiones",
+   "lote": "LM-40"
+  },
+  {
+   "fecha": "2026-10-15",
+   "cambio": "Revisión de Diseño (M-519): 17 anclajes REQ ampliados; PC1 separado de CMP; K3 construido (sin activar); actores K3, INC1, CAL, PR; INV 3×3. Revisión de Desarrollo (M-520): anclaje de guiones REQ antes que página, `modulos` por caso, guiones de pw (humo, sesiones) para U, archivoModulo para la regresión, zona como lista en LM-39b",
    "lote": "LM-40"
   }
  ]

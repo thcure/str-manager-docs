@@ -1,5 +1,5 @@
 {
- "generadoEn": "2026-10-15 17:24",
+ "generadoEn": "2026-10-15 17:32",
  "lineaBase": "2026-10-15",
  "codigo": {
   "version": "p5c96",
@@ -426,7 +426,9 @@
    },
    "actores": [
     "admin",
-    "operador"
+    "operador",
+    "airbnb",
+    "propietario"
    ],
    "reqRaiz": [
     "REQ-P0",
@@ -481,7 +483,8 @@
    "actores": [
     "admin",
     "operador",
-    "cron"
+    "cron",
+    "airbnb"
    ],
    "reqRaiz": [
     "REQ-C0",
@@ -725,8 +728,8 @@
    ],
    "riesgo": {
     "probabilidad": 3,
-    "impacto": 2,
-    "motivo": "Diez REQ INV2 entregados o aceptados en octubre; reglas finas (un responsable por turno, movimientos inmutables); 6 INC recientes."
+    "impacto": 3,
+    "motivo": "Diez REQ INV2 entregados o aceptados en octubre; reglas finas (un responsable por turno, movimientos inmutables); 6 INC recientes. Impacto 3: Carlos pidió que el inventario quede siempre al día y se sepa dónde quedaron las cosas (DA-43; Diseño M-519)."
    }
   },
   {
@@ -776,8 +779,8 @@
    "id": "K3",
    "nombre": "Copia a Drive y retención (corte mensual)",
    "familia": "transversal",
-   "estado": "parcial",
-   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3b construido en reprueba; K3c (L-124, L-125) aceptado; tareas de hPanel por crear.",
+   "estado": "construido",
+   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3-2 y K3-3 aceptados (15-oct). Sin activar: faltan las tareas programadas de hPanel y el respaldo de api/uploads/ (RT-12).",
    "paginas": [
     "(tarjeta en el shell; insignia en HK; aviso de corte)",
     "api/lib/drive.php",
@@ -812,7 +815,8 @@
     "admin",
     "operador",
     "cron",
-    "google-drive"
+    "google-drive",
+    "colaborador"
    ],
    "reqRaiz": [
     "REQ-K3",
@@ -864,7 +868,9 @@
    "actores": [
     "operador",
     "colaborador",
-    "admin"
+    "admin",
+    "huesped",
+    "airbnb"
    ],
    "reqRaiz": [
     "REQ-S2",
@@ -981,10 +987,10 @@
   },
   {
    "id": "CMP",
-   "nombre": "Compras, reposición y puntos de control (QR)",
+   "nombre": "Compras y reposición",
    "familia": "operativo",
    "estado": "definido",
-   "que": "Compras y alertas de reposición (CMP-1); actividades guiadas por cámara y puntos de control con QR (PC1-1, PC1-2). Definidos, sin construir.",
+   "que": "Compras y alertas de reposición (CMP-1): anticipo y legalización (PG), encargo como actividad del turno (HK), la compra entra al inventario (INV). Definido, sin construir.",
    "paginas": [],
    "rutas": [],
    "colecciones": {
@@ -996,26 +1002,58 @@
     "colaborador"
    ],
    "reqRaiz": [
-    "REQ-CMP-1",
+    "REQ-CMP-1"
+   ],
+   "mapaTecnico": null,
+   "zonaPw": null,
+   "alias": [
+    "Compras",
+    "CMP"
+   ],
+   "adr": [],
+   "da": [
+    "DA-38"
+   ],
+   "riesgo": {
+    "probabilidad": 1,
+    "impacto": 2,
+    "motivo": "Sin código; cuando se construya sube a 2×3 (dinero y stock, Diseño M-519)."
+   }
+  },
+  {
+   "id": "PC1",
+   "nombre": "Puntos de control (QR) y actividades guiadas por cámara",
+   "familia": "operativo",
+   "estado": "definido",
+   "que": "Actividades guiadas por cámara (PC1-1) y puntos de control con QR y respaldo (PC1-2); nace en HK con QR y respaldo; el colaborador lo hace en el portal. Definido, sin construir.",
+   "paginas": [],
+   "rutas": [],
+   "colecciones": {
+    "escribe": [],
+    "lee": []
+   },
+   "actores": [
+    "colaborador",
+    "operador"
+   ],
+   "reqRaiz": [
     "REQ-PC1-1",
     "REQ-PC1-2"
    ],
    "mapaTecnico": null,
    "zonaPw": null,
    "alias": [
-    "Compras",
     "PC1",
-    "CMP"
+    "puntos de control"
    ],
    "adr": [],
    "da": [
-    "DA-36",
-    "DA-38"
+    "DA-36"
    ],
    "riesgo": {
     "probabilidad": 1,
     "impacto": 2,
-    "motivo": "Sin código; el riesgo aparece cuando se construya (toca inventario y dinero)."
+    "motivo": "Sin código; cuando se construya toca HK y el portal (fotos, QR)."
    }
   },
   {
@@ -2186,7 +2224,9 @@
    "nota": "Crítico (dinero). Cruce cerrado 10-oct: la diferencia entre anticipo y factura va al saldo del colaborador en su liquidación (saldo de adelantos de PG1 B2, decidido 11-sep). Supuestos de diseño: el anticipo lo registra el operador con permiso de pagos al encargar la compra; tope de anticipo opcional",
    "modulos": [
     "CMP",
-    "INV"
+    "INV",
+    "PG",
+    "HK"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2541,7 +2581,10 @@
    "prioridad": 12,
    "nota": "Normal. 12 criterios. Reclamos en INC1-2 (crítico). · 14-oct: nivel y página completa por criterio (100 % N1/N2).",
    "modulos": [
-    "INC1"
+    "INC1",
+    "INV",
+    "HK",
+    "POR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2557,7 +2600,9 @@
    "prioridad": 14,
    "nota": "Crítico. Cruce cerrado 10-oct: sin cargo al colaborador (DA-12 pospuesta). Al escribir criterios, confirmar los plazos vigentes de Airbnb en su centro de ayuda. Faltan criterios. [v2: antes de entregar, DA propia + cruce alcance/riesgo/reversión con hora]",
    "modulos": [
-    "INC1"
+    "INC1",
+    "INV",
+    "CAL"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2670,7 +2715,8 @@
    "nota": "Crítico (cambia lectura y escritura del colaborador). Después de INV2·4a. Incluye proveedores de lavandería (criterio 12): qué datos ve el colaborador se decide con DA-33. DA-33 decidida (a). Cada pendiente muestra estado, sitio y tarea. Faltan criterios con perfil y página; va después de INV2·4a. E",
    "modulos": [
     "INV",
-    "HK"
+    "HK",
+    "POR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2703,7 +2749,8 @@
    "nota": "Normal. 13 criterios; incluye DA-30 (titular) y DA-22 punto 1 (resuelve el operador). Supuestos: zonas principal y apto; entrega precargada, recepción a ciegas. Sin entregar: cola congelada hasta ~17-oct. Prueba con dos titulares: zz-verif-colab2 autorizado por Carlos (M-182); pedir la cuenta al Arq",
    "modulos": [
     "INV",
-    "HK"
+    "HK",
+    "POR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2718,7 +2765,8 @@
    "nota": "Normal. 7 plantillas del sistema sobre la tarea inventario (lote 40); 12 criterios, N1/N2 12/12. Orden MI1-a → MI1-b → INV2-5 → MI1-c.",
    "modulos": [
     "INV",
-    "FL"
+    "FL",
+    "HK"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2803,7 +2851,8 @@
    "nota": "Crítico. DA-34 (a con ajuste) y cruce 12-oct 19:13. Después de 4-1, antes de 4-2. · 14-oct: partido por Desarrollo en L-95 (servidor + Inventario) y L-96 (HK); 6 decisiones de detalle aceptadas (M-337). · L-95 con ok de Diseño 14-oct 14:05 (M-340). Condición para L-96: HK no muestra al apoyo los bot",
    "modulos": [
     "INV",
-    "HK"
+    "HK",
+    "POR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2843,7 +2892,9 @@
    "prioridad": 18,
    "nota": "Normal. 12 criterios, N1/N2 12/12; se prueba en pruebas. (R11). Contenido v1 con partes «a confirmar» por Carlos (juegos, categorías, dotación). Después de INV2-6-3 e INV2-7-1.",
    "modulos": [
-    "INV"
+    "INV",
+    "FL",
+    "PR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2857,7 +2908,9 @@
    "prioridad": 10,
    "nota": "Espera la definición del módulo de superadmin de plataforma (bolsa).",
    "modulos": [
-    "INV"
+    "INV",
+    "FL",
+    "PR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2931,7 +2984,8 @@
    "modulos": [
     "K3",
     "HK",
-    "SH"
+    "SH",
+    "SRV"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2950,7 +3004,9 @@
     "K3",
     "HK",
     "SH",
-    "INC1"
+    "INC1",
+    "SRV",
+    "POR"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -2978,7 +3034,8 @@
    "prioridad": 6,
    "nota": "Normal. Usa la categoría del sistema que ya existe (lote 23); el vocabulario es «categoría», no «etiqueta». Pedido P-9 (10-oct); DA-21 decidida. La llamada a una sola actividad de otro flujo no existe hoy: se omite. Carlos 10-oct: Mantenimiento e Inventario son categorías predefinidas del sistema (a",
    "modulos": [
-    "FL"
+    "FL",
+    "INV"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -3008,7 +3065,9 @@
    "nota": "Normal. Reemplaza REQ-INV2-5 (actividad de inventario). Pedido P-9 (10-oct); DA-21 decidida. La llamada a una sola actividad de otro flujo no existe hoy: se omite. Criterios escritos (9, 13 y 12) en claude/producto/requerimientos-mantenimiento-inventario-flujos-2026-10.md; supuestos revisados contra",
    "modulos": [
     "HK",
-    "INC1"
+    "INC1",
+    "FL",
+    "CAL"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -3348,7 +3407,9 @@
    "nota": "Normal. 13 criterios. Lo que necesita QR (al escanear, activos por QR) pasa a PC1-2. · 14-oct: nivel y página completa por criterio (100 % N1/N2).",
    "modulos": [
     "HK",
-    "CMP"
+    "PC1",
+    "POR",
+    "FL"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -3365,7 +3426,7 @@
    "nota": "Crítico. Cruce 10-oct (corregido por Carlos 12:54): si el QR no lee, el respaldo es SUBIR una foto del punto tomada con la cámara del celular (se permite la galería, porque si la cámara del STR falla no sirve tomarla desde el sistema); el control es leer los metadatos de la imagen (fecha y hora de c",
    "modulos": [
     "HK",
-    "CMP"
+    "PC1"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -3396,7 +3457,9 @@
    "prioridad": 19,
    "nota": "Crítico (dinero). Ya definido (ficha 5(b), 23-sep); base de F11·5b, REQ-BT1 y CMP1. Revisar criterios contra lo decidido el 10-oct.",
    "modulos": [
-    "PG"
+    "PG",
+    "POR",
+    "INV"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -3427,7 +3490,9 @@
    "prioridad": null,
    "nota": "Sin definir. DA-8 (11-oct): el propietario tercero no tiene cuenta; a lo sumo un informe periódico.",
    "modulos": [
-    "PR"
+    "PR",
+    "CAL",
+    "PG"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -3459,7 +3524,8 @@
    "prioridad": "baja",
    "nota": "Por definir cuando haya una casa real.",
    "modulos": [
-    "PR"
+    "PR",
+    "CAL"
    ],
    "origen": "diseno.json",
    "historico": false
@@ -4087,7 +4153,7 @@
    "req": "DT-35",
    "zona": "inventario",
    "modulos": [
-    "INV",
+    "API",
     "SRV"
    ],
    "casos": [
@@ -4109,14 +4175,16 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "DT-40.spec.js",
    "req": "DT-40",
    "zona": "inventario",
    "modulos": [
-    "INV",
+    "API",
     "SRV"
    ],
    "casos": [
@@ -4138,14 +4206,16 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "DT-41.spec.js",
    "req": "DT-41",
    "zona": "inventario",
    "modulos": [
-    "INV",
+    "API",
     "SRV"
    ],
    "casos": [
@@ -4176,7 +4246,9 @@
    },
    "niveles": {
     "N2": 2
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-117.spec.js",
@@ -4204,7 +4276,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-121.spec.js",
@@ -4232,7 +4306,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-125.spec.js",
@@ -4278,7 +4354,9 @@
    "niveles": {
     "N2": 2,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-126.spec.js",
@@ -4333,7 +4411,9 @@
    },
    "niveles": {
     "N2": 4
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-127.spec.js",
@@ -4373,7 +4453,9 @@
    },
    "niveles": {
     "N2": 2
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-128-b.spec.js",
@@ -4381,7 +4463,6 @@
    "zona": "inventario",
    "modulos": [
     "HK",
-    "POR",
     "SRV"
    ],
    "casos": [
@@ -4403,7 +4484,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-128.spec.js",
@@ -4411,7 +4494,6 @@
    "zona": "inventario",
    "modulos": [
     "HK",
-    "INV",
     "SRV"
    ],
    "casos": [
@@ -4433,7 +4515,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-130.spec.js",
@@ -4462,7 +4546,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-131.spec.js",
@@ -4510,7 +4596,9 @@
    "niveles": {
     "N2": 2,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "INC-132.spec.js",
@@ -4518,8 +4606,7 @@
    "zona": "inventario",
    "modulos": [
     "HK",
-    "K3",
-    "POR"
+    "K3"
    ],
    "casos": [
     {
@@ -4583,7 +4670,9 @@
    "niveles": {
     "N2": 5,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "L-108.spec.js",
@@ -4612,14 +4701,15 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "R-3-db-config.spec.js",
    "req": "R-3",
    "zona": "api",
    "modulos": [
-    "SH",
     "SRV"
    ],
    "casos": [
@@ -4641,7 +4731,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-3-4-hk.spec.js",
@@ -4771,7 +4863,9 @@
    "niveles": {
     "N2": 11,
     "N3": 2
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-3-4.spec.js",
@@ -4779,7 +4873,8 @@
    "zona": "inventario",
    "modulos": [
     "HK",
-    "INV"
+    "INV",
+    "POR"
    ],
    "casos": [
     {
@@ -4834,7 +4929,9 @@
    "niveles": {
     "N2": 4,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-4-1-interfaz.spec.js",
@@ -4843,7 +4940,6 @@
    "modulos": [
     "HK",
     "INV",
-    "POR",
     "SRV"
    ],
    "casos": [
@@ -4901,7 +4997,9 @@
    "niveles": {
     "N2": 4,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-4-1.spec.js",
@@ -4931,7 +5029,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-4-2-dif.spec.js",
@@ -4939,7 +5039,8 @@
    "zona": "inventario",
    "modulos": [
     "HK",
-    "INV"
+    "INV",
+    "POR"
    ],
    "casos": [
     {
@@ -5026,7 +5127,9 @@
    "niveles": {
     "N2": 8,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-4-2.spec.js",
@@ -5166,7 +5269,9 @@
    "niveles": {
     "N2": 13,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-7-1-hk-turno.spec.js",
@@ -5231,7 +5336,9 @@
    "niveles": {
     "N2": 4,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-7-1-hk.spec.js",
@@ -5261,7 +5368,9 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-INV2-7-1.spec.js",
@@ -5367,7 +5476,9 @@
    "niveles": {
     "N2": 9,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-K3b-aviso.spec.js",
@@ -5376,7 +5487,6 @@
    "modulos": [
     "HK",
     "K3",
-    "POR",
     "SH"
    ],
    "casos": [
@@ -5451,7 +5561,9 @@
    "niveles": {
     "N2": 5,
     "N3": 2
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-K3b.spec.js",
@@ -5460,7 +5572,6 @@
    "modulos": [
     "HK",
     "K3",
-    "POR",
     "SH"
    ],
    "casos": [
@@ -5517,7 +5628,9 @@
    "niveles": {
     "N2": 4,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-K3c-vista.spec.js",
@@ -5527,7 +5640,6 @@
     "HK",
     "INC1",
     "K3",
-    "POR",
     "SH"
    ],
    "casos": [
@@ -5594,7 +5706,9 @@
    "niveles": {
     "N2": 5,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-K3c.spec.js",
@@ -5604,7 +5718,6 @@
     "HK",
     "INC1",
     "K3",
-    "POR",
     "SH"
    ],
    "casos": [
@@ -5645,15 +5758,16 @@
    },
    "niveles": {
     "N2": 3
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-MOD-6-carga-rol.spec.js",
    "req": "REQ-MOD-6",
    "zona": "modelo",
    "modulos": [
-    "MOD",
-    "SH"
+    "MOD"
    ],
    "casos": [
     {
@@ -5674,15 +5788,16 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-MOD-6-carga.spec.js",
    "req": "REQ-MOD-6",
    "zona": "modelo",
    "modulos": [
-    "MOD",
-    "SH"
+    "MOD"
    ],
    "casos": [
     {
@@ -5711,15 +5826,16 @@
    },
    "niveles": {
     "N2": 2
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-MOD-6-complemento.spec.js",
    "req": "REQ-MOD-6",
    "zona": "modelo",
    "modulos": [
-    "MOD",
-    "SH"
+    "MOD"
    ],
    "casos": [
     {
@@ -5740,15 +5856,16 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-MOD-6-credenciales.spec.js",
    "req": "REQ-MOD-6",
    "zona": "modelo",
    "modulos": [
-    "MOD",
-    "SH"
+    "MOD"
    ],
    "casos": [
     {
@@ -5769,15 +5886,16 @@
    },
    "niveles": {
     "N2": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-MOD-6-lectura.spec.js",
    "req": "REQ-MOD-6",
    "zona": "modelo",
    "modulos": [
-    "MOD",
-    "SH"
+    "MOD"
    ],
    "casos": [
     {
@@ -5806,15 +5924,16 @@
    },
    "niveles": {
     "N2": 2
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-MOD-6.spec.js",
    "req": "REQ-MOD-6",
    "zona": "modelo",
    "modulos": [
-    "MOD",
-    "SH"
+    "MOD"
    ],
    "casos": [
     {
@@ -5861,7 +5980,9 @@
    "niveles": {
     "N2": 3,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-TB-3.spec.js",
@@ -5947,7 +6068,9 @@
    "niveles": {
     "N2": 7,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-TB-4.spec.js",
@@ -6024,7 +6147,9 @@
    "niveles": {
     "N2": 6,
     "N3": 1
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
   },
   {
    "archivo": "REQ-TB-5.spec.js",
@@ -6101,7 +6226,42 @@
    },
    "niveles": {
     "N2": 7
-   }
+   },
+   "origen": "tests/e2e",
+   "anclaje": "req"
+  },
+  {
+   "archivo": "herramientas/pw/humo-pw.spec.js",
+   "req": null,
+   "zona": "sesiones",
+   "modulos": [
+    "SH",
+    "U"
+   ],
+   "casos": [],
+   "nCasos": 0,
+   "paginas": {},
+   "perfiles": {},
+   "niveles": {},
+   "origen": "herramientas/pw",
+   "anclaje": "pw",
+   "nota": "Inicio de sesión de los tres perfiles en cada corrida de la cola (Desarrollo M-520): cubre U aunque tests/e2e no tenga guion de U"
+  },
+  {
+   "archivo": "herramientas/pw/sesiones.spec.js",
+   "req": null,
+   "zona": "sesiones",
+   "modulos": [
+    "U"
+   ],
+   "casos": [],
+   "nCasos": 0,
+   "paginas": {},
+   "perfiles": {},
+   "niveles": {},
+   "origen": "herramientas/pw",
+   "anclaje": "pw",
+   "nota": "correr\\sesiones.txt: comprueba y recupera la sesión de cada perfil (LM-37)"
   }
  ],
  "cambios": {
@@ -6673,6 +6833,20 @@
     "req": "REQ-PR1-5 · INC-114",
     "resumen": "La ventana del turno sigue la hora acordada (salida acordada → hora propia → ficha; fin con la llegada de la que entra; sin entrada +6 h con tope 23:59); guarda",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-104",
+    "fecha": "2026-10-14",
+    "req": "INC-126 (+ diagnóstico INC-127)",
+    "resumen": "Portal: ?turno= espera hasta 20 s la lista del servidor y abre el turno aunque llegue tarde; aviso una sola vez; guion INC-126 con diagnóstico de lo que ve HK; ",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-105",
+    "fecha": "2026-10-14",
+    "req": "INC-127",
+    "resumen": "HK no manda hk:turnos hasta que su puente escucha portal:abrir (_hkPuenteListo, bloque [PUENTE]); p5c86.",
+    "estado": "aceptado"
    }
   ],
   "INC1": [
@@ -6893,6 +7067,34 @@
     "estado": "aceptado"
    },
    {
+    "lote": "L-95",
+    "fecha": "2026-10-14",
+    "req": "REQ-INV2-7-1 (1/2)",
+    "resumen": "Lugares dentro de la zona: colección inv-sububicaciones (lectura del colaborador por zona visible, 403 de escritura, export), ventana «Lugares» en Inventario (c",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-96",
+    "fecha": "2026-10-14",
+    "req": "INC-125 (REQ-INV2-7-1 1/2, criterio k)",
+    "resumen": "Ventana «Lugares» legible a 390 px: a ≤ 560 px cada lugar es una tarjeta con rótulos y botones a la vista; en la lista de lugares los nombres se cortan solo ent",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-100",
+    "fecha": "2026-10-14",
+    "req": "REQ-INV2-7-1 (2/2)",
+    "resumen": "HK: tarea de inventario agrupada por lugar con fotos de cierre del lugar o del artículo (claves inv:: del turno); no se marca sin ellas y el cierre las cuenta; ",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-101",
+    "fecha": "2026-10-14",
+    "req": "REQ-INV2-7-1 (2/2, segunda pasada N2)",
+    "resumen": "Guion REQ-INV2-7-1-hk-turno.spec.js (turno de hoy con tarea de conteo; criterios 6–9 y 13 en N2).",
+    "estado": "aceptado"
+   },
+   {
     "lote": "L-104",
     "fecha": "2026-10-14",
     "req": "INC-126 (+ diagnóstico INC-127)",
@@ -6907,6 +7109,34 @@
     "estado": "aceptado"
    },
    {
+    "lote": "L-102",
+    "fecha": "2026-10-14",
+    "req": "REQ-INV2-3-4 (1/2)",
+    "resumen": "Pendientes al cerrar el turno y lavandería externa: servidor ([PEND], inv-pendientes, inv-proveedores, lavanderia/recepcion) e Inventario (estados con pendiente",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-106",
+    "fecha": "2026-10-14",
+    "req": "REQ-INV2-7-1 (criterio 13, N3)",
+    "resumen": "Guion hk-turno: caso e a 390 px, conteo en el cuadro y captura sin página completa.",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-103",
+    "fecha": "2026-10-14",
+    "req": "REQ-INV2-3-4 (2/2)",
+    "resumen": "El servidor crea los pendientes al cerrar el turno (port PHP de _invEstadoLugarJuego); HK: aviso, «Pendientes del turno anterior», Hecho y Llevar a…; crear por ",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-113",
+    "fecha": "2026-10-14",
+    "req": "INC-130",
+    "resumen": "HK: un pull de turnos pedido antes de un guardado local no pisa ese turno; si salta alguno, el próximo pull es completo; p5c91",
+    "estado": "aceptado"
+   },
+   {
     "lote": "L-115",
     "fecha": "2026-10-15",
     "req": "INC-131",
@@ -6914,10 +7144,45 @@
     "estado": "aceptado"
    },
    {
+    "lote": "L-107",
+    "fecha": "2026-10-15",
+    "req": "REQ-INV2-4-2 (1/2)",
+    "resumen": "Entrega y recepción de zona en todo turno con titular (servidor + HK); p5c93 → p5c94",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-114",
+    "fecha": "2026-10-15",
+    "req": "REQ-INV2-4-2 (2/2)",
+    "resumen": "Inventario: diferencias de entrega y recepción y su resolución por el operador; p5c94 → p5c95",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-120",
+    "fecha": "2026-10-15",
+    "req": "guion REQ-INV2-3-4",
+    "resumen": "Guion de Proveedores espera el foco antes de escribir",
+    "estado": "aceptado"
+   },
+   {
     "lote": "L-127",
     "fecha": "2026-10-15",
     "req": "INC-132",
     "resumen": "Portal: el iframe de HK reserva el alto de la barra de procesos/fotos fallidas para que no tape el pie del panel",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-124",
+    "fecha": "2026-10-15",
+    "req": "REQ-K3-3 (1/2)",
+    "resumen": "Corte mensual en el servidor: migración 13, api/lib/corte.php, POST /api/drive/corte (X-Cron-Key) y corte-prueba (solo admin, solo zz), copias con huella/corte,",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-125",
+    "fecha": "2026-10-15",
+    "req": "REQ-K3-3 (2/2)",
+    "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
     "estado": "aceptado"
    }
   ],
@@ -7158,6 +7423,34 @@
     "req": "DT-41",
     "resumen": "GET /api/diagnostico solo admin",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-116",
+    "fecha": "2026-10-15",
+    "req": "REQ-K3-2 (1/2)",
+    "resumen": "Copia a Drive: cron, cola de copia, INC-97; migración 11",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-117",
+    "fecha": "2026-10-15",
+    "req": "REQ-K3-2 (2/2)",
+    "resumen": "Aviso fijo del corte y estado de copia en el registro; migración 12",
+    "estado": "parcial"
+   },
+   {
+    "lote": "L-124",
+    "fecha": "2026-10-15",
+    "req": "REQ-K3-3 (1/2)",
+    "resumen": "Corte mensual en el servidor: migración 13, api/lib/corte.php, POST /api/drive/corte (X-Cron-Key) y corte-prueba (solo admin, solo zz), copias con huella/corte,",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-125",
+    "fecha": "2026-10-15",
+    "req": "REQ-K3-3 (2/2)",
+    "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
+    "estado": "aceptado"
    }
   ],
   "API": [
@@ -7167,12 +7460,41 @@
     "req": "REQ-TB-3",
     "resumen": "STRApi.docs (commit de main por la API de GitHub, raw/<sha>, encabezado «Datos de las HH:MM · sha», respaldo a main) en las 6 páginas del grupo Proyecto; botón ",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-98",
+    "fecha": "2026-10-14",
+    "req": "DT-35",
+    "resumen": "PHP 8.3.33 en LENOVO (winget PHP.PHP.8.3, usuario actual; el hosting usa 8.3.35): los tests corren el PHP real (inv-accesos-zona e inv-traslado-403: 78 casos má",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-99",
+    "fecha": "2026-10-14",
+    "req": "DT-35 (cierre)",
+    "resumen": "Mapa de tests al día sobre PHP en LENOVO: la cola y los tests usan C:\\php (8.3.35, php.ini del Arquitecto); quitar el 8.3.33 de winget de las consolas de Carlos",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-118",
+    "fecha": "2026-10-15",
+    "req": "DT-40",
+    "resumen": "Conexión persistente con prueba de vida; 3.er intento ≥1 s",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-119",
+    "fecha": "2026-10-15",
+    "req": "DT-41",
+    "resumen": "GET /api/diagnostico solo admin",
+    "estado": "aceptado"
    }
   ],
   "KN": [],
   "PG": [],
   "M2": [],
   "CMP": [],
+  "PC1": [],
   "M6": []
  },
  "incidentes": {
@@ -7491,6 +7813,13 @@
     "severidad": "medio",
     "etapa": "✅",
     "titulo": "Portal: el enlace ?turno= de un turno recién asignado dice «Ese turno no está asignado a ti» y no lo abre"
+   },
+   {
+    "id": "INC-129",
+    "fecha": "2026-10-14",
+    "severidad": "medio",
+    "etapa": "🔍",
+    "titulo": "inv-articulos del colaborador trae artículos de zonas privada y revocada (REQ-INV2-7-1.spec.js f)"
    }
   ],
   "KN": [
@@ -7642,6 +7971,7 @@
   "PG": [],
   "M2": [],
   "CMP": [],
+  "PC1": [],
   "M6": []
  },
  "cobertura": {
@@ -7651,8 +7981,8 @@
    "reqAceptadosConGuion": 2,
    "reqEntregados": 0,
    "reqHistoricos": 2,
-   "guiones": 11,
-   "casos": 33,
+   "guiones": 5,
+   "casos": 21,
    "perfiles": [
     "admin",
     "colab",
@@ -7672,20 +8002,23 @@
    "reqAceptadosConGuion": 0,
    "reqEntregados": 0,
    "reqHistoricos": 1,
-   "guiones": 0,
-   "casos": 0,
-   "perfiles": [],
-   "lotes30d": 1,
-   "lotesTotal": 1,
+   "guiones": 3,
+   "casos": 4,
+   "perfiles": [
+    "admin",
+    "oper"
+   ],
+   "lotes30d": 5,
+   "lotesTotal": 5,
    "incidentes": 3,
    "incidentesAbiertos": 0,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 12
+   "hotspot": 36
   },
   "SRV": {
-   "reqVigentes": 1,
-   "reqAceptados": 1,
+   "reqVigentes": 3,
+   "reqAceptados": 3,
    "reqAceptadosConGuion": 1,
    "reqEntregados": 0,
    "reqHistoricos": 3,
@@ -7696,13 +8029,13 @@
     "colab",
     "oper"
    ],
-   "lotes30d": 12,
-   "lotesTotal": 12,
+   "lotes30d": 16,
+   "lotesTotal": 16,
    "incidentes": 8,
    "incidentesAbiertos": 5,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 78
+   "hotspot": 102
   },
   "U": {
    "reqVigentes": 1,
@@ -7710,7 +8043,7 @@
    "reqAceptadosConGuion": 0,
    "reqEntregados": 0,
    "reqHistoricos": 5,
-   "guiones": 0,
+   "guiones": 2,
    "casos": 0,
    "perfiles": [],
    "lotes30d": 2,
@@ -7722,7 +8055,7 @@
    "hotspot": 9
   },
   "PR": {
-   "reqVigentes": 4,
+   "reqVigentes": 6,
    "reqAceptados": 2,
    "reqAceptadosConGuion": 0,
    "reqEntregados": 0,
@@ -7741,10 +8074,10 @@
    "hotspot": 10
   },
   "CAL": {
-   "reqVigentes": 3,
+   "reqVigentes": 7,
    "reqAceptados": 2,
    "reqAceptadosConGuion": 0,
-   "reqEntregados": 1,
+   "reqEntregados": 3,
    "reqHistoricos": 11,
    "guiones": 1,
    "casos": 2,
@@ -7752,19 +8085,19 @@
     "admin",
     "colab"
    ],
-   "lotes30d": 4,
-   "lotesTotal": 4,
+   "lotes30d": 6,
+   "lotesTotal": 6,
    "incidentes": 5,
    "incidentesAbiertos": 3,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 30
+   "hotspot": 42
   },
   "FL": {
-   "reqVigentes": 4,
+   "reqVigentes": 8,
    "reqAceptados": 0,
    "reqAceptadosConGuion": 0,
-   "reqEntregados": 4,
+   "reqEntregados": 6,
    "reqHistoricos": 12,
    "guiones": 0,
    "casos": 0,
@@ -7778,10 +8111,10 @@
    "hotspot": 26
   },
   "HK": {
-   "reqVigentes": 10,
+   "reqVigentes": 13,
    "reqAceptados": 7,
    "reqAceptadosConGuion": 6,
-   "reqEntregados": 3,
+   "reqEntregados": 6,
    "reqHistoricos": 23,
    "guiones": 22,
    "casos": 106,
@@ -7800,35 +8133,35 @@
    "hotspot": 369
   },
   "POR": {
-   "reqVigentes": 2,
-   "reqAceptados": 0,
-   "reqAceptadosConGuion": 0,
-   "reqEntregados": 2,
+   "reqVigentes": 9,
+   "reqAceptados": 4,
+   "reqAceptadosConGuion": 3,
+   "reqEntregados": 5,
    "reqHistoricos": 5,
-   "guiones": 17,
-   "casos": 87,
+   "guiones": 12,
+   "casos": 68,
    "perfiles": [
     "admin",
     "colab",
     "colab2",
     "oper"
    ],
-   "lotes30d": 5,
-   "lotesTotal": 5,
-   "incidentes": 2,
-   "incidentesAbiertos": 0,
+   "lotes30d": 18,
+   "lotesTotal": 18,
+   "incidentes": 3,
+   "incidentesAbiertos": 1,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 36
+   "hotspot": 114
   },
   "INV": {
-   "reqVigentes": 17,
+   "reqVigentes": 21,
    "reqAceptados": 9,
    "reqAceptadosConGuion": 4,
-   "reqEntregados": 5,
+   "reqEntregados": 9,
    "reqHistoricos": 2,
-   "guiones": 15,
-   "casos": 72,
+   "guiones": 11,
+   "casos": 67,
    "perfiles": [
     "admin",
     "colab",
@@ -7840,8 +8173,8 @@
    "incidentes": 8,
    "incidentesAbiertos": 6,
    "riesgo": "alto",
-   "puntajeRiesgo": 6,
-   "hotspot": 132
+   "puntajeRiesgo": 9,
+   "hotspot": 198
   },
   "KN": {
    "reqVigentes": 0,
@@ -7903,10 +8236,10 @@
    "hotspot": 30
   },
   "PG": {
-   "reqVigentes": 2,
+   "reqVigentes": 4,
    "reqAceptados": 0,
    "reqAceptadosConGuion": 0,
-   "reqEntregados": 2,
+   "reqEntregados": 3,
    "reqHistoricos": 2,
    "guiones": 0,
    "casos": 0,
@@ -7937,10 +8270,27 @@
    "hotspot": 3
   },
   "CMP": {
-   "reqVigentes": 3,
+   "reqVigentes": 1,
    "reqAceptados": 0,
    "reqAceptadosConGuion": 0,
-   "reqEntregados": 3,
+   "reqEntregados": 1,
+   "reqHistoricos": 0,
+   "guiones": 0,
+   "casos": 0,
+   "perfiles": [],
+   "lotes30d": 0,
+   "lotesTotal": 0,
+   "incidentes": 0,
+   "incidentesAbiertos": 0,
+   "riesgo": "bajo",
+   "puntajeRiesgo": 2,
+   "hotspot": 2
+  },
+  "PC1": {
+   "reqVigentes": 2,
+   "reqAceptados": 0,
+   "reqAceptadosConGuion": 0,
+   "reqEntregados": 2,
    "reqHistoricos": 0,
    "guiones": 0,
    "casos": 0,
@@ -8010,7 +8360,7 @@
   }
  },
  "zonasPw": {
-  "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»); LM-39b propone zonas = módulos.",
+  "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»). LM-39b: zona = id de módulo o lista de ids; «sesiones» sigue como zona especial (no es módulo); cambio de las 37 cabeceras y de plantillas/guion-e2e.js en el mismo lote (Desarrollo M-520).",
   "zonas": [
    "inventario",
    "shell-y-api",
@@ -8027,23 +8377,18 @@
    "fecha": "2026-10-15",
    "cambio": "Línea base del mapa legible por máquina: 19 módulos, 12 actores, 32 relaciones, 24 reglas, 18 elementos de configuración, anclaje de 58 REQ vigentes + 85 históricos y 37 guiones",
    "lote": "LM-40"
+  },
+  {
+   "fecha": "2026-10-15",
+   "cambio": "Revisión de Diseño (M-519): 17 anclajes REQ ampliados; PC1 separado de CMP; K3 construido (sin activar); actores K3, INC1, CAL, PR; INV 3×3. Revisión de Desarrollo (M-520): anclaje de guiones REQ antes que página, `modulos` por caso, guiones de pw (humo, sesiones) para U, archivoModulo para la regresión, zona como lista en LM-39b",
+   "lote": "LM-40"
   }
  ],
  "avisos": [
   {
    "regla": "M5 cobertura",
-   "id": "API",
-   "detalle": "módulo construido sin ningún guion e2e"
-  },
-  {
-   "regla": "M5 cobertura",
    "id": "U",
-   "detalle": "módulo construido sin ningún guion e2e"
-  },
-  {
-   "regla": "M5 cobertura",
-   "id": "U",
-   "detalle": "REQ aceptados en octubre sin guion que los nombre"
+   "detalle": "módulo construido sin ningún guion e2e (lo cubre herramientas/pw/humo-pw.spec.js, herramientas/pw/sesiones.spec.js)"
   },
   {
    "regla": "M5 cobertura",

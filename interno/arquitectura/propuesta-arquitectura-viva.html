@@ -1,0 +1,217 @@
+<title>Arquitectura viva del STR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Plano de arquitectura: una columna legible, el diagrama grande en el centro, capas como estratos. */
+:root{
+  --bg:#f6f4ef; --fg:#1f2328; --muted:#5b6470; --line:#d9d4c8; --panel:#ffffff;
+  --accent:#0f6e56; --accent-soft:#dcefe7;
+  --warn:#b4530a; --warn-soft:#fbe7d3;
+  --layer1:#e8eef9; --layer2:#e5f1ec; --layer3:#f3ecdf; --layer4:#efe6f2; --layer5:#e9e9e9;
+  --ink-layer:#1f2328;
+  --display:"Fraunces",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16181c; --fg:#e8e6e1; --muted:#a6adb8; --line:#2f343c; --panel:#1f2329;
+  --accent:#4fc39f; --accent-soft:#17352c; --warn:#f0a35a; --warn-soft:#3a2714;
+  --layer1:#1f2a3f; --layer2:#1b3129; --layer3:#3a3122; --layer4:#33273a; --layer5:#2a2d33; --ink-layer:#e8e6e1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16181c; --fg:#e8e6e1; --muted:#a6adb8; --line:#2f343c; --panel:#1f2329;
+  --accent:#4fc39f; --accent-soft:#17352c; --warn:#f0a35a; --warn-soft:#3a2714;
+  --layer1:#1f2a3f; --layer2:#1b3129; --layer3:#3a3122; --layer4:#33273a; --layer5:#2a2d33; --ink-layer:#e8e6e1; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+main{max-width:980px;margin:0 auto;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(30px,4.5vw,44px);font-weight:700}
+h2{font-size:clamp(22px,3vw,28px);font-weight:600}
+h3{font-size:18px;font-weight:600}
+p{margin:0;max-width:68ch}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:12px}
+header p{color:var(--muted);font-size:17px}
+section{display:grid;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:grid;gap:8px;min-width:0}
+.choque{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+.choque .card{border-left:4px solid var(--warn)}
+.vs{font-family:var(--display);font-size:28px;color:var(--warn);text-align:center}
+.tag{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.cita{font-size:15px}
+.nota{background:var(--warn-soft);border-radius:8px;padding:12px 14px;font-size:15px}
+.diagrama{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto}
+svg{display:block;width:100%;height:auto;max-width:100%;font-family:var(--body)}
+.svg-title{font-family:var(--display);font-size:17px;font-weight:600;fill:var(--ink-layer)}
+.svg-sub{font-size:12.5px;fill:var(--muted)}
+.svg-doc{font-family:var(--mono);font-size:11.5px;fill:var(--accent);font-weight:500}
+.svg-cobit{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.svg-label{font-size:13px;fill:var(--fg);font-weight:600}
+.svg-small{font-size:12px;fill:var(--fg)}
+.leyenda{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.leyenda .card{gap:6px}
+.leyenda .card h3{display:flex;gap:10px;align-items:center}
+.sw{width:14px;height:14px;border-radius:3px;border:1px solid var(--line);flex:none}
+.pasos{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.paso{display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:center;padding:12px 16px;background:var(--panel);border-top:1px solid var(--line);min-width:0}
+.paso:first-child{border-top:0}
+.paso .n{font-family:var(--display);font-size:22px;color:var(--accent);font-weight:700}
+.paso .t{font-size:14px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+.paso b{font-weight:600}
+.ok{background:var(--accent-soft);color:var(--fg);border-radius:8px;padding:12px 14px;font-size:15px}
+code{font-family:var(--mono);font-size:.92em}
+@media (max-width:640px){.choque{grid-template-columns:1fr}.vs{transform:rotate(90deg)}.paso{grid-template-columns:40px 1fr}.paso .t{white-space:normal;grid-column:2}}
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">Propuesta del Arquitecto · 15-oct-2026 · APO03 · APO14 · BAI10 · APO01</div>
+  <h1>Arquitectura viva del STR</h1>
+  <p>Hoy el STR tiene las piezas (definiciones, REQ, ADR, DA, mapas por archivo) pero ninguna vista que las una. La propuesta es un mapa en cinco capas, con un registro de reglas que las cruzan, y una puerta en cada lote que lo comprueba.</p>
+</header>
+
+<section>
+  <h2>1 · El vacío, visto en un caso real</h2>
+  <div class="choque">
+    <div class="card"><span class="tag">S2.1 · Incidentes (módulo M3)</span><p class="cita">«La evidencia de incidentes no se borra.»</p></div>
+    <div class="vs">≠</div>
+    <div class="card"><span class="tag">DA-32 · Retención K3-3 (transversal)</span><p class="cita">«El día de corte se borran del sistema todas las fotos y videos.»</p></div>
+  </div>
+  <div class="nota">Las dos reglas son válidas en su módulo. Nadie las vio juntas hasta que Desarrollo redactó el lote L-124. Eso es lo que falta: el lugar donde las reglas de distintos módulos se encuentran <em>antes</em> de construir.</div>
+</section>
+
+<section>
+  <h2>2 · El mapa: cinco capas y tres documentos que las sostienen</h2>
+  <p>Las capas son las que pide COBIT 2019 para una arquitectura de referencia (APO03). Cada capa del STR ya existe en el código; lo nuevo es escribirla como vista, con sus relaciones, y mantenerla al día.</p>
+  <div class="diagrama">
+  <svg viewBox="0 0 960 620" role="img" aria-label="Diagrama: cinco capas del STR y los documentos que las describen">
+    <!-- capas -->
+    <g>
+      <rect x="20" y="20" width="620" height="96" rx="10" fill="var(--layer1)"/>
+      <text x="36" y="48" class="svg-title">Negocio</text>
+      <text x="36" y="70" class="svg-sub">Dos productos (app y plataforma pública) · actores: admin, operador, colaborador, propietario, huésped</text>
+      <text x="36" y="90" class="svg-sub">El tenant es «negocio» · planes y módulos contratados · procesos: turno, incidente, inventario, compra</text>
+
+      <rect x="20" y="126" width="620" height="96" rx="10" fill="var(--layer2)"/>
+      <text x="36" y="154" class="svg-title">Información y datos</text>
+      <text x="36" y="176" class="svg-sub">Colecciones /api/col (turnos, reservas, tickets, inventario…) · archivos: fotos, evidencia, videos, guías</text>
+      <text x="36" y="196" class="svg-sub">Ciclo de vida: quién escribe, cuánto dura, cómo se borra y se respalda · Ley 1581</text>
+
+      <rect x="20" y="232" width="620" height="118" rx="10" fill="var(--layer3)"/>
+      <text x="36" y="260" class="svg-title">Aplicación (módulos y relaciones)</text>
+      <text x="36" y="282" class="svg-sub">Operativos: M1 Housekeeping · M3 Incidentes · M5 Calendario · INV2 Inventario · CMP1 Compras · PC1 Puntos de control · PG1 Pagos</text>
+      <text x="36" y="302" class="svg-sub">Transversales: identidad y roles (U6) · colecciones · archivos y evidencia · copia a Drive y retención (K3) · flujos (F11) · tablero</text>
+      <text x="36" y="326" class="svg-sub">Una fila por REQ: estado, lote, páginas y rutas que toca · matriz módulo × módulo: quién lee y escribe qué</text>
+
+      <rect x="20" y="360" width="620" height="96" rx="10" fill="var(--layer4)"/>
+      <text x="36" y="388" class="svg-title">Tecnología</text>
+      <text x="36" y="410" class="svg-sub">Páginas HTML + str-api.js · PHP (str-api) · MySQL · Firebase (identidad) · Google Drive (copia) · GitHub → Hostinger</text>
+      <text x="36" y="430" class="svg-sub">Fábrica: cola en LENOVO, pw, juez, hooks, servicio del modelo</text>
+
+      <rect x="20" y="466" width="620" height="96" rx="10" fill="var(--layer5)"/>
+      <text x="36" y="494" class="svg-title">Infraestructura y configuración</text>
+      <text x="36" y="516" class="svg-sub">Hosting compartido srv1281 · PHP 8.3, 60 procesos · MariaDB: 75 conexiones, 20 nuevas/s por cuenta · tareas programadas</text>
+      <text x="36" y="536" class="svg-sub">secrets.php (qué claves, nunca el valor) · dominios y certificados · respaldos: hoy no hay respaldo de api/uploads/</text>
+    </g>
+
+    <!-- documentos a la derecha -->
+    <g>
+      <line x1="640" y1="68" x2="690" y2="68" stroke="var(--line)" stroke-width="2"/>
+      <line x1="640" y1="174" x2="690" y2="174" stroke="var(--line)" stroke-width="2"/>
+      <line x1="640" y1="291" x2="690" y2="291" stroke="var(--line)" stroke-width="2"/>
+      <line x1="640" y1="408" x2="690" y2="408" stroke="var(--line)" stroke-width="2"/>
+      <line x1="640" y1="514" x2="690" y2="514" stroke="var(--line)" stroke-width="2"/>
+
+      <!-- mapa-str: negocio + aplicación + tecnología -->
+      <path d="M690 68 L710 68 L710 408 L690 408" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <rect x="722" y="190" width="218" height="96" rx="8" fill="var(--panel)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="736" y="214" class="svg-label">Mapa del STR</text>
+      <text x="736" y="234" class="svg-doc">arquitectura/mapa-str.md</text>
+      <text x="736" y="254" class="svg-small">Sistema → módulos → funcionalidades</text>
+      <text x="736" y="272" class="svg-cobit">APO03.02 arquitectura de referencia</text>
+
+      <!-- datos-ciclo-vida -->
+      <rect x="722" y="126" width="218" height="52" rx="8" fill="var(--panel)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="736" y="148" class="svg-label">Ciclo de vida de los datos</text>
+      <text x="736" y="166" class="svg-doc">arquitectura/datos-ciclo-vida.md</text>
+      <text x="736" y="118" class="svg-cobit">APO14 retención · archivo · respaldo</text>
+
+      <!-- infraestructura -->
+      <rect x="722" y="488" width="218" height="52" rx="8" fill="var(--panel)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="736" y="510" class="svg-label">Ficha de configuración</text>
+      <text x="736" y="528" class="svg-doc">arquitectura/infraestructura-configuracion.md</text>
+      <text x="736" y="556" class="svg-cobit">BAI10 línea base de elementos y relaciones</text>
+      <line x1="690" y1="514" x2="722" y2="514" stroke="var(--accent)" stroke-width="2"/>
+      <line x1="690" y1="174" x2="722" y2="174" stroke="var(--accent)" stroke-width="2"/>
+      <line x1="710" y1="238" x2="722" y2="238" stroke="var(--accent)" stroke-width="2"/>
+    </g>
+
+    <!-- reglas transversales: banda vertical que cruza todas las capas -->
+    <g>
+      <rect x="560" y="12" width="70" height="558" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5" opacity=".95"/>
+      <text transform="translate(602 291) rotate(-90)" text-anchor="middle" class="svg-label" fill="var(--fg)">Reglas transversales R-n</text>
+      <text transform="translate(620 291) rotate(-90)" text-anchor="middle" class="svg-cobit">S2.1 · DA-32 · tenant · zz-verif- · «nunca borrar usuarios» · APO01</text>
+    </g>
+
+    <!-- pie -->
+    <text x="20" y="598" class="svg-sub">Las capas vienen de APO03 (COBIT 2019). La banda naranja es el registro de reglas: cruza todas las capas; ahí S2.1 y DA-32 aparecen juntas y se decide cuál manda.</text>
+  </svg>
+  </div>
+  <div class="leyenda">
+    <div class="card"><h3><span class="sw" style="background:var(--accent-soft);border-color:var(--accent)"></span>Tres documentos</h3><p>Mapa del STR (negocio, aplicación, tecnología), ciclo de vida de los datos y ficha de configuración. Los escribe el Arquitecto desde el código, los REQ, los ADR y hPanel; Diseño corrige los hechos de producto.</p></div>
+    <div class="card"><h3><span class="sw" style="background:var(--warn-soft);border-color:var(--warn)"></span>Un registro de reglas</h3><p>Una tabla: regla, origen, dueño, a qué módulos aplica, excepciones y estado (vigente, en conflicto, derogada). Las que tocan el negocio las decides tú y quedan escritas, no en el chat.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · La puerta: cada lote declara qué toca y la revisión previa lo comprueba</h2>
+  <div class="diagrama">
+  <svg viewBox="0 0 960 230" role="img" aria-label="Flujo: REQ o lote declara reglas y relaciones; la revisión previa las cruza con el registro; entra a la cola o se detiene">
+    <defs><marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+    <rect x="20" y="50" width="250" height="120" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+    <text x="36" y="78" class="svg-label">REQ o instrucción de lote</text>
+    <text x="36" y="104" class="svg-small">+ «Reglas transversales que toca: R-n…»</text>
+    <text x="36" y="126" class="svg-small">+ «Mapa: módulos y relaciones que cambia»</text>
+    <text x="36" y="152" class="svg-cobit">igual que hoy con «Alcance»</text>
+
+    <line x1="270" y1="110" x2="340" y2="110" stroke="var(--muted)" stroke-width="2" marker-end="url(#f)"/>
+
+    <rect x="345" y="50" width="250" height="120" rx="10" fill="var(--warn-soft)" stroke="var(--warn)"/>
+    <text x="361" y="78" class="svg-label">Revisión previa</text>
+    <text x="361" y="104" class="svg-small">cruza lo declarado con el registro</text>
+    <text x="361" y="126" class="svg-small">y con la matriz de relaciones del mapa</text>
+    <text x="361" y="152" class="svg-cobit">APO03.05 cumplimiento de arquitectura</text>
+
+    <line x1="595" y1="85" x2="670" y2="60" stroke="var(--muted)" stroke-width="2" marker-end="url(#f)"/>
+    <line x1="595" y1="135" x2="670" y2="160" stroke="var(--muted)" stroke-width="2" marker-end="url(#f)"/>
+
+    <rect x="675" y="20" width="265" height="72" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="691" y="46" class="svg-label">Entra a la cola</text>
+    <text x="691" y="70" class="svg-small">reglas vigentes; el mapa se actualiza al cerrar</text>
+
+    <rect x="675" y="128" width="265" height="72" rx="10" fill="var(--panel)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="691" y="154" class="svg-label">Se detiene</text>
+    <text x="691" y="178" class="svg-small">toca una regla «en conflicto»: decides tú primero</text>
+  </svg>
+  </div>
+  <p>Con esta puerta, L-124 no habría llegado a redactarse con DA-32 pisando a S2.1: el conflicto aparece al declarar «toca R-S2.1 y R-DA-32», y la decisión se toma antes, no en una pregunta de pantalla a mitad de la revisión.</p>
+</section>
+
+<section>
+  <h2>4 · En qué orden y cuánto cuesta</h2>
+  <div class="pasos">
+    <div class="paso"><span class="n">1</span><div><b>Registro de reglas transversales</b> · con S2.1 / DA-32 marcado «en conflicto» y tu decisión escrita. Destraba K3-3.</div><span class="t">1 sesión</span></div>
+    <div class="paso"><span class="n">2</span><div><b>Plantillas</b> · dos líneas nuevas en REQ e instrucción; la revisión previa las comprueba.</div><span class="t">horas</span></div>
+    <div class="paso"><span class="n">3</span><div><b>Mapa del STR</b> · vistas de sistema, módulos y relaciones; la lista de funcionalidades sale de los REQ existentes.</div><span class="t">2 sesiones</span></div>
+    <div class="paso"><span class="n">4</span><div><b>Ciclo de vida de los datos</b> · una fila por clase de dato; retenciones aprobadas por ti y por Diseño.</div><span class="t">1 sesión</span></div>
+    <div class="paso"><span class="n">5</span><div><b>Ficha de configuración</b> · línea base fechada de hosting, base, tareas, secretos (nombres), despliegue y respaldos; contigo, por lo que solo se ve en hPanel.</div><span class="t">1 sesión</span></div>
+  </div>
+  <div class="ok">Nada entra a la cola ni toca el código: son documentos de la capa Marco y dos líneas en las plantillas. Los mantiene el Arquitecto; se revisan al cerrar cada ADR o DA y al menos una vez al mes.</div>
+</section>
+
+<section>
+  <h2>5 · Y la pregunta de hoy</h2>
+  <div class="card">
+    <h3>Evidencia de incidentes en el corte mensual</h3>
+    <p>Recomendación: <b>no borrar la evidencia de incidentes abiertos</b>; la de incidentes cerrados se borra en el primer corte posterior al cierre, con copia a Drive antes si la hay. La prueba vale mientras el incidente vive (reclamos, daños, seguros); «nunca borrar» acumula sin límite en un hosting de 25–50 GB. Queda como regla R-n que acota DA-32 y modifica S2.1, y L-124 la lee antes de encolarse.</p>
+  </div>
+</section>
+</main>

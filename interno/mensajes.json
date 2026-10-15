@@ -7677,6 +7677,16 @@
    "asunto": "DT-42 / MJ-6 (ensayo de restauración) antes del 30-nov: pide DA y cruce",
    "texto": "Por LM-38 (M-512), el Arquitecto pide hacer DT-42 antes del primer corte real (30-nov). Es un importador del export JSON diario (api/backups/) a una cuenta zz-verif- aparte, más un ensayo de restauración con constancia. Hoy tenemos respaldos que nunca se han restaurado. Es crítico: crea una cuenta nueva en la base de producción, aunque sea zz, y escribe en sus tablas. Necesita DA y cruce de Carlos. Para la DA propongo: (1) solo restaura en una cuenta zz-verif- nueva, nunca en «negocio»; (2) solo admin, desde la cola, con el export que elija el Arquitecto; (3) la constancia compara conteos por tabla y huellas con el export; (4) al terminar se borra la cuenta zz. Lo pongo en el plan después de L-125. ¿Abres la DA?",
    "estado": "pendiente"
+  },
+  {
+   "id": "M-515",
+   "fecha": "2026-10-15",
+   "hora": "16:29",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "Revisión previa: LM-39 (cuarentena, regresión según riesgo, métricas)",
+   "texto": "Borrador en interno/lotes-modelo/LM-39.md (crítico: toca la cola y el juez). Tres piezas: (1) cuarentena de rojos conocidos: pw\\cuarentena.json {guion, caso, inc, dueno, desde, hasta}; un rojo de REGRESIÓN en cuarentena no rechaza el lote, nunca aplica al guion propio ni a un lote que toque el módulo del INC, vence al cerrarse el INC o a los 3 días; (2) regresión según riesgo: cada guion de tests/e2e declara modulos:[…] (ids de la vista 1 del mapa) y la regresión corre los guiones que cruzan los módulos de la línea «Mapa:» o sus vecinos de la vista 3; capa común → todos; solo tests/e2e o herramientas → su guion y humo; más una regresión completa diaria de la cola (v7.10) sin juez, en log\\REGRESION-DIARIA.json; (3) métricas: pw\\metricas.js → log\\METRICAS.json (repruebas por lote, minutos de cola, % de rojos ajenos). Te pido revisión previa con tus 16 puntos y, en concreto: ¿la regresión diaria la corre la cola a una hora fija o cuando quede libre? ¿te sirve escribir tú los modulos de cada guion en un lote de solo guiones (L-n) o prefieres que los infiera pw del nombre del archivo como primera versión? ¿quién escribe cuarentena.json: yo a tu pedido, o tú directamente (está en pw, capa Marco)? Con tu ok lo llevo al cruce de Carlos.",
+   "estado": "pendiente"
   }
  ]
 }

@@ -125,5 +125,10 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('relacion: juego en inv-grupos ok', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', grupo: 'juegos-l103', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2'], clase: 'juego' }, c, v).estado === 'ok');
   t('relacion: juego inactivo falta', evaluarRelacion({ id: 'jp', tipo: 'articulosDePropiedad', grupo: 'juegos-l103', propiedad: 'zz-verif-Propiedad', nombres: ['zz-verif-J2'], clase: 'juego' }, { propiedades: c.propiedades, 'juegos-l103': [[{ id: 'g2', data: { nombre: 'zz-verif-J2', clase: 'juego', propId: 'p1', activo: false } }]] }, v).estado === 'falta');
 }
+// v0.5.21 (INC-128): el 5xx de una escritura sale en observado con su cuerpo
+{
+  const r = cerrarCaso(caso, [{ ok: false, observado: 'turnos 500' }], null, [], [], [{ metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, status: 500, motivo: 'respuesta 500: {"error":"SQLSTATE[HY000]: 1205 Lock wait timeout"}' }]);
+  t('5xx en observado con el mensaje', /error del servidor: PUT \/api\/col\/turnos → respuesta 500: .*1205/.test(r.observado));
+}
 console.log(ok + ' OK, ' + fail + ' FAIL');
 process.exit(fail ? 1 : 0);

@@ -216,6 +216,13 @@ async function abrir(usuario, opciones = {}) {
           registrarDescendientes(texto);   // v0.5.14 (v51)
         }
       }
+      // v0.5.21 (INC-128): una escritura al STR o al modelo que responde 5xx deja en la bitácora el inicio del cuerpo
+      // (el mensaje de error del servidor); el hosting no guarda error_log al alcance. Solo corridas zz-verif-.
+      const mE = resp.request().method();
+      if ([HOST_STR, HOST_MODELO].includes(u.hostname) && resp.status() >= 500 && !LECTURA.includes(mE)) {
+        let t = ''; try { t = (await resp.text()).replace(/\s+/g, ' ').slice(0, 400); } catch (e) { }
+        bitacora.push({ metodo: mE, url: resp.url().split('?')[0].slice(0, 200), paso: true, status: resp.status(), motivo: 'respuesta ' + resp.status() + ': ' + (t || '(sin cuerpo)') });
+      }
     } catch (e) { }
   });
   await ctx.route('**/*', async (route) => {

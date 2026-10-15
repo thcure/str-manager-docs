@@ -63,6 +63,9 @@ function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = [])
   if (error) partes.push('error: ' + error);
   // v0.4.1: una escritura cortada es aviso, no fallo: la guardia ya la impidio y la app hace escrituras de fondo
   // (reintentos, colecciones enteras) que no son del caso. Queda en avisos para que Desarrollo y el juez la vean.
+  // v0.5.21 (INC-128): errores 5xx del servidor en escrituras del caso, con el inicio del cuerpo
+  const e5 = (pasaron || []).filter(b => b.status >= 500);
+  if (e5.length) partes.push('error del servidor: ' + [...new Set(e5.map(b => b.metodo + ' ' + b.url.replace(/^https?:\/\/[^/]+/, '') + ' → ' + b.motivo))].join(' || ').slice(0, 700));
   if (bloqueos.length) partes.push('aviso: la guardia corto ' + bloqueos.length + ' peticion(es): ' + [...new Set(bloqueos.map(b => b.metodo + ' ' + b.url + (b.motivo ? ' (' + b.motivo + ')' : '')))].join(', '));
   const limpio = !error && fallan.length === 0;
   let ok;

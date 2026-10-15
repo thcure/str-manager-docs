@@ -1,0 +1,167 @@
+<title>Arquitectura viva en el modelo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mismo plano que la propuesta: una columna, diagramas anchos con scroll propio, capas como estratos. */
+:root{
+  --bg:#f6f4ef; --fg:#1f2328; --muted:#5b6470; --line:#d9d4c8; --panel:#ffffff;
+  --accent:#0f6e56; --accent-soft:#dcefe7;
+  --warn:#b4530a; --warn-soft:#fbe7d3;
+  --new:#7a3e9d; --new-soft:#efe4f5;
+  --layer:#eceae3; --layer-hi:#e5f1ec;
+  --display:"Fraunces",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16181c; --fg:#e8e6e1; --muted:#a6adb8; --line:#2f343c; --panel:#1f2329;
+  --accent:#4fc39f; --accent-soft:#17352c; --warn:#f0a35a; --warn-soft:#3a2714;
+  --new:#c48ae6; --new-soft:#30223a; --layer:#23262c; --layer-hi:#1b3129; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16181c; --fg:#e8e6e1; --muted:#a6adb8; --line:#2f343c; --panel:#1f2329;
+  --accent:#4fc39f; --accent-soft:#17352c; --warn:#f0a35a; --warn-soft:#3a2714;
+  --new:#c48ae6; --new-soft:#30223a; --layer:#23262c; --layer-hi:#1b3129; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+main{max-width:980px;margin:0 auto;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(30px,4.5vw,44px);font-weight:700}
+h2{font-size:clamp(22px,3vw,28px);font-weight:600}
+h3{font-size:17px;font-weight:600}
+p{margin:0;max-width:68ch}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:12px}
+header p{color:var(--muted);font-size:17px}
+section{display:grid;gap:16px}
+.diagrama{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto}
+svg{display:block;width:100%;height:auto;max-width:100%;font-family:var(--body)}
+.t1{font-family:var(--display);font-size:16px;font-weight:600;fill:var(--fg)}
+.t2{font-size:12.5px;fill:var(--muted)}
+.t3{font-size:12.5px;fill:var(--fg)}
+.mono{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.num{font-family:var(--display);font-size:22px;font-weight:700;fill:var(--muted)}
+.nuevo{font-family:var(--mono);font-size:11px;fill:var(--new);font-weight:500}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:8px;min-width:0}
+.card.nuevo-c{border-left:4px solid var(--new)}
+.card.ext{border-left:4px solid var(--accent)}
+.tag{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.n{border-color:var(--new);color:var(--new)}
+.pill.e{border-color:var(--accent);color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+.tabla{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+th,td{text-align:left;padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-top:0}
+td code,p code{font-family:var(--mono);font-size:.9em}
+.ok{background:var(--accent-soft);border-radius:8px;padding:12px 14px;font-size:15px}
+.aviso{background:var(--warn-soft);border-radius:8px;padding:12px 14px;font-size:15px}
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">Propuesta del Arquitecto · 15-oct-2026 · encaje con el mapa de gobierno de la fábrica (13-oct)</div>
+  <h1>Cómo entra la arquitectura viva en el modelo que ya tenemos</h1>
+  <p>No es un método nuevo ni una capa nueva. Es la arquitectura del <strong>proyecto P01</strong> (hoy solo existe la de la fábrica), escrita como artefactos de la capa 3, exigida por el marco COBIT ya adoptado, y comprobada por una puerta que ya existe: la revisión previa de cada lote.</p>
+</header>
+
+<section>
+  <h2>1 · En las siete capas del modelo</h2>
+  <div class="diagrama">
+  <svg viewBox="0 0 960 560" role="img" aria-label="Las siete capas del modelo y dónde se apoya cada pieza de la arquitectura viva">
+    <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--new)"/></marker></defs>
+    <!-- capas (izquierda) -->
+    <g>
+      <rect x="20" y="16" width="520" height="54" rx="8" fill="var(--layer)"/><text x="32" y="50" class="num">7</text><text x="62" y="38" class="t1">Gobierno · Carlos</text><text x="62" y="58" class="t2">decide valor, dinero y riesgo: DA-n, cruces, puertas</text>
+      <rect x="20" y="78" width="520" height="54" rx="8" fill="var(--layer-hi)"/><text x="32" y="112" class="num">6</text><text x="62" y="100" class="t1">Marco · COBIT adoptado (cobit.json)</text><text x="62" y="120" class="t2">APO03 arquitectura · APO14 datos · BAI10 configuración · APO01 políticas</text>
+      <rect x="20" y="140" width="520" height="54" rx="8" fill="var(--layer-hi)"/><text x="32" y="174" class="num">5</text><text x="62" y="162" class="t1">Metodología · proceso de cambios, PRUEBAS-v1, ciclo de proyecto</text><text x="62" y="182" class="t2">REQ → DA → instrucción → revisión previa → cola → pruebas → juez → aceptado</text>
+      <rect x="20" y="202" width="520" height="54" rx="8" fill="var(--layer)"/><text x="32" y="236" class="num">4</text><text x="62" y="224" class="t1">Roles · encargos</text><text x="62" y="244" class="t2">Diseño redacta · Desarrollo construye · Arquitecto gobierna el método · juez acepta</text>
+      <rect x="20" y="264" width="520" height="54" rx="8" fill="var(--layer-hi)"/><text x="32" y="298" class="num">3</text><text x="62" y="286" class="t1">Artefactos · REQ, DA, instrucciones, veredictos, líneas base…</text><text x="62" y="306" class="t2">plantillas en herramientas/plantillas/ · esquema.json</text>
+      <rect x="20" y="326" width="520" height="54" rx="8" fill="var(--layer)"/><text x="32" y="360" class="num">2</text><text x="62" y="348" class="t1">Herramientas · cola, pw, juez, hooks, servicio del modelo</text><text x="62" y="368" class="t2">guardas automáticas: sin cruce no arranca, sin tests no hay commit, solo zz-verif-</text>
+      <rect x="20" y="388" width="520" height="54" rx="8" fill="var(--layer-hi)"/><text x="32" y="422" class="num">1</text><text x="62" y="410" class="t1">Infraestructura · Hostinger, LENOVO, GitHub, Firebase</text><text x="62" y="430" class="t2">líneas base lb-hostinger, lb-lenovo… en conocimiento.json</text>
+      <rect x="20" y="450" width="520" height="54" rx="8" fill="var(--layer)"/><text x="32" y="484" class="num">0</text><text x="62" y="472" class="t1">Proyectos · P01 STR Manager</text><text x="62" y="492" class="t2">código, datos, ambientes, semilla; hoy sin arquitectura propia escrita</text>
+    </g>
+    <!-- piezas nuevas (derecha) -->
+    <g>
+      <rect x="600" y="78" width="340" height="54" rx="8" fill="var(--new-soft)" stroke="var(--new)"/><text x="614" y="100" class="t3" font-weight="600">Prácticas que ya están adoptadas</text><text x="614" y="120" class="t2">APO03.02 y .05, APO14, BAI10 pasan de «par» a «ok» con un «cómo» escrito</text>
+      <line x1="540" y1="105" x2="600" y2="105" stroke="var(--new)" stroke-width="2" marker-end="url(#a)"/>
+
+      <rect x="600" y="140" width="340" height="54" rx="8" fill="var(--new-soft)" stroke="var(--new)"/><text x="614" y="162" class="t3" font-weight="600">Dos líneas más en la revisión previa</text><text x="614" y="182" class="t2">«Reglas transversales que toca» · «Mapa: relaciones que cambia» (punto 14 y 15)</text>
+      <line x1="540" y1="167" x2="600" y2="167" stroke="var(--new)" stroke-width="2" marker-end="url(#a)"/>
+
+      <rect x="600" y="202" width="340" height="54" rx="8" fill="var(--new-soft)" stroke="var(--new)"/><text x="614" y="224" class="t3" font-weight="600">Sin roles nuevos</text><text x="614" y="244" class="t2">Arquitecto escribe y mantiene · Diseño corrige producto · Carlos decide reglas</text>
+      <line x1="540" y1="229" x2="600" y2="229" stroke="var(--new)" stroke-width="2" marker-end="url(#a)"/>
+
+      <rect x="600" y="264" width="340" height="54" rx="8" fill="var(--new-soft)" stroke="var(--new)" stroke-width="2"/><text x="614" y="286" class="t3" font-weight="600">Aquí viven las piezas nuevas</text><text x="614" y="306" class="t2">mapa-str · reglas-transversales · datos-ciclo-vida (artefactos de P01)</text>
+      <line x1="540" y1="291" x2="600" y2="291" stroke="var(--new)" stroke-width="2" marker-end="url(#a)"/>
+
+      <rect x="600" y="388" width="340" height="54" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="614" y="410" class="t3" font-weight="600">La ficha de configuración ya existe a medias</text><text x="614" y="430" class="t2">se completa lb-hostinger en conocimiento.json; no se crea otra fuente</text>
+      <line x1="540" y1="415" x2="600" y2="415" stroke="var(--accent)" stroke-width="2" marker-end="url(#a)"/>
+
+      <rect x="600" y="450" width="340" height="54" rx="8" fill="var(--new-soft)" stroke="var(--new)"/><text x="614" y="472" class="t3" font-weight="600">El proyecto gana su arquitectura</text><text x="614" y="492" class="t2">ADR-008: «la fábrica tiene la suya; cada proyecto la suya»</text>
+      <line x1="540" y1="477" x2="600" y2="477" stroke="var(--new)" stroke-width="2" marker-end="url(#a)"/>
+    </g>
+    <text x="20" y="540" class="t2">Capas 7 y 2 no cambian: Carlos sigue decidiendo igual, y ninguna herramienta nueva entra a la cola.</text>
+  </svg>
+  </div>
+</section>
+
+<section>
+  <h2>2 · En el ciclo de un lote</h2>
+  <p>El ciclo es el mismo de siempre. Cambian dos puntos: la revisión previa consulta el registro y el mapa antes de dar el ok, y la aceptación devuelve lo construido al mapa.</p>
+  <div class="diagrama">
+  <svg viewBox="0 0 960 300" role="img" aria-label="Ciclo del lote con la consulta al registro en la revisión previa y la actualización del mapa al aceptar">
+    <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker>
+          <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--new)"/></marker></defs>
+    <!-- fila del ciclo -->
+    <g>
+      <rect x="20" y="120" width="100" height="56" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="70" y="144" text-anchor="middle" class="t3">REQ</text><text x="70" y="162" text-anchor="middle" class="t2">Diseño</text>
+      <rect x="140" y="120" width="100" height="56" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="190" y="144" text-anchor="middle" class="t3">DA</text><text x="190" y="162" text-anchor="middle" class="t2">Carlos si es crítico</text>
+      <rect x="260" y="120" width="110" height="56" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="315" y="144" text-anchor="middle" class="t3">Instrucción</text><text x="315" y="162" text-anchor="middle" class="t2">Desarrollo</text>
+      <rect x="390" y="112" width="130" height="72" rx="8" fill="var(--new-soft)" stroke="var(--new)" stroke-width="2"/><text x="455" y="138" text-anchor="middle" class="t3" font-weight="600">Revisión previa</text><text x="455" y="156" text-anchor="middle" class="t2">13 puntos + 2 nuevos</text><text x="455" y="172" text-anchor="middle" class="t2">consulta registro y mapa</text>
+      <rect x="540" y="120" width="100" height="56" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="590" y="144" text-anchor="middle" class="t3">Cola · CLI</text><text x="590" y="162" text-anchor="middle" class="t2">hooks, tests</text>
+      <rect x="660" y="120" width="100" height="56" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="710" y="144" text-anchor="middle" class="t3">Pruebas</text><text x="710" y="162" text-anchor="middle" class="t2">pw, N1–N3</text>
+      <rect x="780" y="120" width="80" height="56" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="820" y="144" text-anchor="middle" class="t3">Juez</text><text x="820" y="162" text-anchor="middle" class="t2">veredicto</text>
+      <rect x="880" y="120" width="60" height="56" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="910" y="152" text-anchor="middle" class="t3">Acept.</text>
+      <g stroke="var(--muted)" stroke-width="2" marker-end="url(#b)"><line x1="120" y1="148" x2="140" y2="148"/><line x1="240" y1="148" x2="260" y2="148"/><line x1="370" y1="148" x2="390" y2="148"/><line x1="520" y1="148" x2="540" y2="148"/><line x1="640" y1="148" x2="660" y2="148"/><line x1="760" y1="148" x2="780" y2="148"/><line x1="860" y1="148" x2="880" y2="148"/></g>
+    </g>
+    <!-- registro y mapa arriba -->
+    <rect x="300" y="16" width="310" height="60" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/><text x="455" y="40" text-anchor="middle" class="t3" font-weight="600">Registro de reglas transversales</text><text x="455" y="60" text-anchor="middle" class="t2">R-n · vigente / en conflicto / derogada · dueño</text>
+    <rect x="640" y="16" width="300" height="60" rx="8" fill="var(--panel)" stroke="var(--accent)"/><text x="790" y="40" text-anchor="middle" class="t3" font-weight="600">Mapa del STR + ciclo de vida de datos</text><text x="790" y="60" text-anchor="middle" class="t2">módulos, relaciones, retenciones</text>
+    <line x1="455" y1="76" x2="455" y2="112" stroke="var(--new)" stroke-width="2" marker-end="url(#c)"/>
+    <line x1="680" y1="76" x2="480" y2="112" stroke="var(--new)" stroke-width="2" marker-end="url(#c)"/>
+    <path d="M910 120 L910 96 L790 96 L790 76" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#c)"/>
+    <text x="912" y="104" class="t2">actualiza</text>
+    <!-- detención -->
+    <path d="M455 184 L455 220" fill="none" stroke="var(--warn)" stroke-width="2" marker-end="url(#b)"/>
+    <rect x="330" y="222" width="250" height="56" rx="8" fill="var(--panel)" stroke="var(--warn)" stroke-width="1.5"/><text x="455" y="246" text-anchor="middle" class="t3" font-weight="600">Toca una regla «en conflicto»</text><text x="455" y="266" text-anchor="middle" class="t2">no entra: Carlos decide y queda escrito primero</text>
+    <text x="20" y="40" class="t2">Qué no cambia: la cola, pw, el juez y los hooks</text><text x="20" y="58" class="t2">no leen nada nuevo. Todo pasa antes, en papel.</text>
+  </svg>
+  </div>
+</section>
+
+<section>
+  <h2>3 · Qué es nuevo y qué se extiende (regla «un dato, una fuente»)</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>Pieza</th><th>Estado</th><th>Fuente única</th><th>Escribe</th><th>Práctica</th></tr></thead>
+    <tbody>
+      <tr><td>Mapa del STR (sistema → módulos → funcionalidades → relaciones)</td><td><span class="pill n">nuevo</span></td><td><code>claude/arquitectura/mapa-str.md</code>; la lista de funcionalidades sale de los REQ en <code>diseno.json</code>, no se duplica</td><td>Arquitecto; Diseño corrige</td><td>APO03.02</td></tr>
+      <tr><td>Registro de reglas transversales</td><td><span class="pill n">nuevo</span></td><td><code>claude/arquitectura/reglas-transversales.md</code>; cada regla apunta a su DA, REQ o ley; la decisión sigue viviendo en la DA</td><td>Arquitecto; Carlos decide</td><td>APO01</td></tr>
+      <tr><td>Ciclo de vida de los datos</td><td><span class="pill n">nuevo</span></td><td><code>claude/arquitectura/datos-ciclo-vida.md</code></td><td>Arquitecto; Diseño y Carlos aprueban retenciones</td><td>APO14</td></tr>
+      <tr><td>Ficha de infraestructura y configuración</td><td><span class="pill e">se extiende</span></td><td>la línea base <code>lb-hostinger</code> de <code>conocimiento.json</code> (ya existe); se completa con MySQL, tareas, secretos por nombre, respaldos</td><td>Arquitecto, con Carlos</td><td>BAI10.02</td></tr>
+      <tr><td>Plantillas de REQ e instrucción</td><td><span class="pill e">se extiende</span></td><td><code>herramientas/plantillas/</code>: dos líneas nuevas; <code>revisor-previo</code> pasa de 13 a 15 puntos</td><td>Arquitecto</td><td>APO03.05</td></tr>
+      <tr><td>Mapa de funcionamiento de la fábrica</td><td><span class="pill">ya existe</span></td><td><code>conocimiento.json</code> y <code>mapa-gobierno-fabrica</code>: es la arquitectura de la fábrica; no se toca</td><td>Arquitecto</td><td>APO03.02 (fábrica)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>4 · Lo que cambia y lo que no, en una frase cada uno</h2>
+  <div class="cards">
+    <div class="card nuevo-c"><span class="tag">Cambia</span><h3>El proyecto P01 tiene arquitectura escrita</h3><p>Hasta hoy solo la fábrica la tenía (capas, autoridad, flujos). El STR pasa a tener la suya: qué módulos hay, cómo se relacionan, qué reglas los cruzan y qué pasa con sus datos.</p></div>
+    <div class="card nuevo-c"><span class="tag">Cambia</span><h3>La revisión previa mira dos cosas más</h3><p>Reglas transversales y relaciones del mapa, igual que hoy mira el Alcance. Una regla «en conflicto» detiene el lote antes de redactarlo entero.</p></div>
+    <div class="card ext"><span class="tag">No cambia</span><h3>Roles, cola, pw, juez, hooks</h3><p>Nadie nuevo decide; ninguna herramienta lee archivos nuevos. La puerta es de papel, en la capa donde ya se decide qué entra.</p></div>
+    <div class="card ext"><span class="tag">No cambia</span><h3>Tu papel</h3><p>Sigues decidiendo reglas de negocio, dinero y riesgo. La diferencia es que las reglas que decides quedan en un registro con dueño y estado, no repartidas en chats y DA sueltas.</p></div>
+  </div>
+  <div class="ok">Regla 4 del mapa de gobierno, «toda lección sube una capa», aplicada: el choque S2.1 / DA-32 (capa 0, un lote) sube a artefacto (registro de reglas, capa 3), a punto de la revisión previa (capa 5) y a práctica COBIT con «cómo» escrito (capa 6). Con tu decisión (capa 7) en cada paso que la necesite.</div>
+  <div class="aviso">Lo que haría falta registrar, como pide el propio mapa de gobierno: <code>cobit.json</code> (APO03.02/.05, APO14, BAI10 con su «cómo»), <code>proceso.json</code> (los dos puntos nuevos de la revisión previa) y un LM-n para el cambio de plantillas. Es una tarde de trabajo del Arquitecto; nada pasa por la cola.</div>
+</section>
+</main>

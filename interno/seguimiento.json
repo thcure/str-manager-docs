@@ -749,12 +749,12 @@
    "id": "INC-133",
    "tipo": "INC",
    "modulo": "HK · cola de subida",
-   "etapa": "🔍",
+   "etapa": "✅",
    "fecha": "2026-10-15",
    "severidad": "alto",
    "titulo": "Cola de subida: una foto agregada mientras se remata la anterior se sube antes de guardarse en el teléfono, se borra y queda «fallida» sin remedio",
    "causa": "str-cola-subida.js: agregar() pone el ítem en _items al instante (L255) y guarda el blob después (L258); _candidatos() (L133) no excluye los ítems de _sinPersistir; si _ciclo (L204) lo toma, _subirUno (L172-173) llama a _guardar sin blob, que escribe blob=null (L82) sobre el que guardaba agregar; agregar luego borra _blobs (L260) y _leerBlob devuelve null: «el archivo ya no está en el teléfono» (L177), sin fetch. Los reintentos fallan igual. Evidencia: L-126-pruebas regresion[49]: 5 de 6 POST /api/upload, hueco de 30 s = espera del guion; la bitácora de pw no ve el POST de B1.",
-   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno. · 14:32 diagnóstico (subagente, solo lectura): causa en la app, no en el arnés ni el servidor. Afecta a usuarios reales (pierden la foto). Arreglo propuesto: excluir _sinPersistir en _candidatos, re-procesar al terminar si llegó algo durante _procesando, y _guardar no escribe null si el blob sigue en memoria; prueba unitaria de la carrera. Lote fix pedido a Diseño. · 14:34 lectura del Arquitecto (M-503): en su cronología la foto sí subió +31 s después (hueco de 31 s entre la 3.ª y la 4.ª; servidor en 150–500 ms): la cola no toma la foto al acabar la anterior y la retoma con un disparador posterior. Mismo arreglo (excluir _sinPersistir + re-procesar al terminar + _guardar no escribe null). El lote fix añade al guion REQ-INV2-4-2 c el estado de la cola (listar: estado, intentos, ultimoError) cuando falte una foto."
+   "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno. · 14:32 diagnóstico (subagente, solo lectura): causa en la app, no en el arnés ni el servidor. Afecta a usuarios reales (pierden la foto). Arreglo propuesto: excluir _sinPersistir en _candidatos, re-procesar al terminar si llegó algo durante _procesando, y _guardar no escribe null si el blob sigue en memoria; prueba unitaria de la carrera. Lote fix pedido a Diseño. · 14:34 lectura del Arquitecto (M-503): en su cronología la foto sí subió +31 s después (hueco de 31 s entre la 3.ª y la 4.ª; servidor en 150–500 ms): la cola no toma la foto al acabar la anterior y la retoma con un disparador posterior. Mismo arreglo (excluir _sinPersistir + re-procesar al terminar + _guardar no escribe null). El lote fix añade al guion REQ-INV2-4-2 c el estado de la cola (listar: estado, intentos, ultimoError) cuando falte una foto. · 15:16 cerrado con L-128 aceptado (6 subidas seguidas, sin hueco)."
   }
  ],
  "dts": [
@@ -11499,7 +11499,7 @@
    "categoria": "normal",
    "resumen": "Portal: el iframe de HK reserva el alto de la barra de procesos/fotos fallidas para que no tape el pie del panel",
    "estado": "no aceptado",
-   "observacion": "11:50 redactado (subagente autor) y revisión previa 16/16 (subagente; caso g corregido). Espera: ok de Diseño y respuesta del Arquitecto a M-496 (STRColaSubida.quitar en el guion). Va tras aceptar K3-2 y antes de L-124 (Diseño, M-495). · 11:55 ok de Diseño (M-497); guion ajustado a M-496; red de seguridad de la cola local pedida al Arquitecto (M-498). Al cerrar INC-132, anotar en REQ-U6.3 (pedido de Diseño) · 14:14 encolado (K3-2: L-116 aceptado, L-117 parcial con solo N4 pendiente) · Construido f22b53a (75/75; p5c96 → p5c97; también str-flujos, str-inventario y str-propiedades por el grep, como pide RT-20) · 14:45 juez: no aceptado; el arreglo de INC-132 cumple (a–f, capturas N3 a 390 y 1366 px). Rojo: g (el guion contaba la línea roja de #procesosBar aunque la barra ya no tenía «show»: defecto del guion, se corrige en L-128 § 3b) y REQ-INV2-4-2 c (INC-133, lo corrige L-128). Reprueba tras L-128 con hechas\\L-127 actualizado",
+   "observacion": "11:50 redactado (subagente autor) y revisión previa 16/16 (subagente; caso g corregido). Espera: ok de Diseño y respuesta del Arquitecto a M-496 (STRColaSubida.quitar en el guion). Va tras aceptar K3-2 y antes de L-124 (Diseño, M-495). · 11:55 ok de Diseño (M-497); guion ajustado a M-496; red de seguridad de la cola local pedida al Arquitecto (M-498). Al cerrar INC-132, anotar en REQ-U6.3 (pedido de Diseño) · 14:14 encolado (K3-2: L-116 aceptado, L-117 parcial con solo N4 pendiente) · Construido f22b53a (75/75; p5c96 → p5c97; también str-flujos, str-inventario y str-propiedades por el grep, como pide RT-20) · 14:45 juez: no aceptado; el arreglo de INC-132 cumple (a–f, capturas N3 a 390 y 1366 px). Rojo: g (el guion contaba la línea roja de #procesosBar aunque la barra ya no tenía «show»: defecto del guion, se corrige en L-128 § 3b) y REQ-INV2-4-2 c (INC-133, lo corrige L-128). Reprueba tras L-128 con hechas\\L-127 actualizado · 15:20 reprueba encolada (tras L-128)",
    "hash": "f22b53a",
    "aceptacion": {
     "lote": "L-127",
@@ -11602,9 +11602,48 @@
    "req": "INC-133",
    "categoria": "normal",
    "resumen": "Cola de subida: no subir una foto antes de guardarla; re-procesar lo que llega con la cola trabajando; _guardar no borra el archivo. Guion REQ-INV2-4-2 anota la cola si falta una foto; guion INC-132 g mira solo la barra visible",
-   "estado": "registrado",
-   "observacion": "14:55 redactado (subagente autor; prueba unitaria de la carrera: actual 6 FAIL, corregido 12/12). Ok de Diseño M-504 (alcance ampliado con el guion de INC-132 g). Revisión previa en curso. · revisión previa 16/16 (subagente; prueba de la carrera: actual 6 FAIL, corregido 12/12 en 15 corridas; diffs de guiones solo lo declarado; fallas 4 y 8 de texto corregidas) · 14:56 encolado · Construido 0457c8c (76/76: carrera 12/12, cola-subida 27/27, e2e-esquema 14/14; p5c97 → p5c98; más docs/claude/housekeeping-2.md por el límite de tamaño). hechas\\L-107 y hechas\\L-127 actualizados con los guiones nuevos (cmp igual a main)",
-   "hash": "0457c8c"
+   "estado": "aceptado",
+   "observacion": "14:55 redactado (subagente autor; prueba unitaria de la carrera: actual 6 FAIL, corregido 12/12). Ok de Diseño M-504 (alcance ampliado con el guion de INC-132 g). Revisión previa en curso. · revisión previa 16/16 (subagente; prueba de la carrera: actual 6 FAIL, corregido 12/12 en 15 corridas; diffs de guiones solo lo declarado; fallas 4 y 8 de texto corregidas) · 14:56 encolado · Construido 0457c8c (76/76: carrera 12/12, cola-subida 27/27, e2e-esquema 14/14; p5c97 → p5c98; más docs/claude/housekeeping-2.md por el límite de tamaño). hechas\\L-107 y hechas\\L-127 actualizados con los guiones nuevos (cmp igual a main) · 15:16 ACEPTADO (juez): N1 a–c y N2 d (REQ-INV2-4-2 c: 6 POST /api/upload sin hueco > 5 s; INC-132 g en verde); regresión entera en verde",
+   "hash": "0457c8c",
+   "aceptacion": {
+    "lote": "L-128",
+    "hash": "0457c8c",
+    "fecha": "2026-10-15",
+    "horaBogota": "15:16",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 76/76 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 76/76 archivos OK"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 76/76 archivos OK"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "REQ-INV2-4-2.spec.js c (zz-verif-colab2 entrega tA, portal.html): fotos de lugar o artículo «Foto al cierre»: 5/5 en 200; cronología con 6 POST /api/upload (+0, +324, +720, +1029, +1340, +1656ms), ningún hueco mayor a 5 s entre dos seguidos · INC-132.spec.js g: «sin la línea roja del aviso: sí»; iframe de HK termina en 844 px de 844 (barra oculta, hasta el alto de la ventana)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "REQ-INV2-4-2.spec.js: limpiar() corrió sin error · INC-132.spec.js: limpiar() corrió sin error",
+    "notas": "Sin criterios N3 ni N4 en este lote (Pruebas derivadas trae solo a, b, c en N1 y d en N2); n3Preparados vacío es consistente. entrada, n1 y toda la regresión (incluida INC-125 b, cuya captura es la única en log\\capturas\\L-128) están en ok: true; ningún ok: false en pruebas.json."
+   }
   }
  ],
  "esquema": {

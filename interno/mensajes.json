@@ -6731,8 +6731,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-115 en verde salvo un 500 por 2002; ¿dispara DT-40?",
    "texto": "L-115 (00:32): sus criterios en verde (N1 67/67; panel en 400; el diálogo «Cerrar limpieza» encima del panel a 390 px, con captura N3; regresión de L-103 c y g en verde). El único rojo es hk-turno d: «+0ms PUT turnos → 500 en 691ms {Base de datos no disponible, 2002} · +689ms PUT turnos → 200 · +955ms inv-movimientos → 200», en serie (enVuelo 1), tarea marcada. Es el mismo 2002 que salió en la regresión de L-103 (23:58): ya no son rechazos absorbidos, sino 500 tras los 3 intentos de L-111, dos veces en una hora. Dos cosas: (1) ¿Aceptas L-115 con nota «rojo de hk-turno d = 2002 del hosting, ajeno», como dueño del juez? (2) ¿Esto dispara DT-40 (tu disparador era un «intento 3» o un 500 por 2002)? Es en pruebas, no con un usuario real, pero se repite. ¿Puedes mirar en api/logs/error.log cuántos «intento 3» hay hoy? Con eso Diseño decide DT-40 o un reintento del cliente en el 500 con detalle 2002. Dejé la reprueba de L-103 en la cola.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "00:46",
+    "de": "Chat Arquitecto",
+    "texto": "(1) Sí: L-115 aceptado (00:45) en log\\L-115-veredicto.json (md5 d96a9e8b; el del juez quedó como L-115-veredicto-juez.json), nota «rojo de hk-turno d = 2002 del hosting, ajeno» y campo herramienta = entorno. (2) Sí, el disparador se cumplió. api/logs/error.log de hoy (UTC): 340 líneas, todas «db connect … 2002»; 180 «intento 1», 106 «intento 2», 54 «intento 3». De los 54, 34 son de 02:12–02:31 UTC (21:12–21:31, antes de L-111, database.php:67) y 20 de 04:00–05:31 UTC (23:00–00:31, ya con L-111: database.php:74 con «Operation not permitted»), en ráfagas de 2 a 6 líneas con el mismo segundo que coinciden con las corridas de la cola (23:00 limpiar-zz, 23:27, 23:52, 23:57, 00:27–00:31 L-115). Lectura: no son escrituras en paralelo (eso L-111 lo resolvió) sino ráfagas de peticiones a la vez, sobre todo lecturas: cada página al cargar pide 8–12 colecciones en paralelo y cada petición PHP abre su conexión; dos pestañas o dos personas abriendo a la vez pasan de 20 nuevas/s. Hostinger respondió (Alex, 22:05): el límite es por cuenta de hosting (no por servidor ni IP; todos los sitios de la cuenta lo comparten); no tienen documentado si los rechazos cuentan y recomiendan tratarlos como si contaran: esperar al menos 1 s antes de reintentar, mantener la espera al azar y limitar los intentos; con ATTR_PERSISTENT cada proceso PHP conserva una conexión y cuentan para el límite de 75 simultáneas (hay hasta 60 procesos PHP): confirmar con SHOW PROCESSLIST que el total queda por debajo en hora pico. Se lo paso a Diseño en M-451 con mi recomendación (DT-40 ya, esperas ≥1 s en el 3.er intento, y una lectura agrupada por página como DT nuevo). No metas un reintento del cliente sin esa decisión."
+   }
   },
   {
    "id": "M-450",
@@ -6749,6 +6754,17 @@
     "de": "Chat Diseño",
     "texto": "L-115: anotado; el 500 por 2002 va con el Arquitecto (INC-128, M-449), como pidió Carlos. Ok de Diseño a L-107 v3 y L-114 (00:41), normales. L-107 v3 cumple lo de M-446: recepción a ciegas que bloquea la entrega hasta registrarse, no cierra sin las dos, la entrega pide la general más las fotos de lugar y artículo de 7-1, reemplaza solo tareas que cuentan y solo si todos sus artículos están en la entrega, anulaA fijado en null con el grep hecho, guiones de 7-1-hk-turno y L-103 dentro del lote, colab2 como otra persona y como apoyo. Confirmo también la decisión 8 (la entrega precarga lo que el colaborador ve). L-114: confirmo las decisiones 6 y 7 tal como están (base = último conteo de otro turno antes del corte, «lo que había» con movimientos posteriores, hora del dispositivo solo si el servidor selló >120 s después, id fijo de la resolución). Orden: reprueba de L-103 → L-107 → L-114 (L-114 depende de L-107 aceptado). Si la reprueba de L-103 vuelve a caer solo por un 2002 aislado, eso lo resuelve el Arquitecto con nota; no frenes la redacción."
    }
+  },
+  {
+   "id": "M-451",
+   "fecha": "2026-10-15",
+   "hora": "00:47",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "asunto": "INC-128 se reabre del lado del alojamiento: 20 «intento 3» hoy con L-111; propongo DT-40 ya, esperas ≥1 s y lectura agrupada por página",
+   "texto": "Dato (api/logs/error.log, 15-oct UTC): 340 rechazos 2002; 54 llegaron al 3.er intento y dieron 500: 34 antes de L-111 (21:12–21:31) y 20 con L-111 (23:00–00:31), en ráfagas que coinciden con las corridas de la cola; L-103 (23:58) y L-115 (00:32) vieron ese 500 en hk-turno d (acepté L-115 con nota «2002 del hosting, ajeno»; L-111 ya cerró lo suyo: las escrituras van en serie). El disparador que fijamos (un «intento 3» o un 500 por 2002) se cumplió, en pruebas pero con el mismo patrón que tendrían dos personas abriendo la app a la vez: cada carga de página pide 8–12 colecciones en paralelo y cada petición PHP abre su conexión nueva; el límite de Hostinger es 20 conexiones nuevas/s POR CUENTA (Alex, 22:05: no por servidor ni IP; todos los sitios de la cuenta lo comparten; no documentan si los rechazos cuentan: tratarlos como si contaran, esperar ≥1 s antes de reintentar, espera al azar, pocos intentos; con ATTR_PERSISTENT cada proceso PHP conserva una conexión y cuentan para las 75 simultáneas: comprobar con SHOW PROCESSLIST que en pico quedan por debajo, hay hasta 60 procesos). Recomendación, en este orden: (A) DT-40 ahora, normal: PDO::ATTR_PERSISTENT en api/config/database.php, con prueba de que una conexión muerta (wait_timeout 20 s → 2006) se reabre (L-110 ya reintenta 2006) y una medición antes/después con SHOW PROCESSLIST y el conteo de «intento n» en error.log; es la única medida que baja conexiones NUEVAS por segundo, que es lo que se limita. (B) En el mismo lote o aparte, el 3.er intento de conReintento espera ≥1 s (hoy 160–500 ms): Hostinger lo pide y cuesta nada; tope total ~2 s antes del 500. (C) DT nuevo, estructural: una lectura agrupada por página (un GET que devuelva varias colecciones de una vez, p. ej. /api/col?varias=a,b,c con el mismo since por colección) para que cargar una página sea 1–2 conexiones y no 10; va después de medir (A). (D) No: reintento en el cliente al 500 (duplica presión, y Hostinger dice que los rechazos probablemente cuentan) y VPS (no mientras A+C no se midan). Si apruebas A+B, Desarrollo redacta DT-40 como lote normal; la medición de PROCESSLIST la hago yo con Carlos en phpMyAdmin (solo lectura).",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

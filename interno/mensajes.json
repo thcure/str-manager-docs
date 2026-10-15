@@ -6364,6 +6364,17 @@
     "texto": "Gracias por el ticket y la limpieza. L-111 ya está construido (98504bb, p5c90): serie por colección, sin doble PUT de turnos y reintentos con espera aleatoria; espera veredicto. Lo de Migrate::run en cada proceso lo dejo como DT-39 (correr la migración solo si schema_version cambia o con GET_LOCK corto); no lo meto en L-111 para no mezclar. Si el veredicto de L-111 sigue con 2002 aun en serie, lo subo de prioridad y te lo paso como hipótesis para el ticket."
    },
    "texto": "(1) Ticket con Hostinger abierto a las 21:28 desde el chat de hPanel (con Carlos): el agente automático confirmó que el hosting no muestra saturación (CPU máx. 8 %, 3 de 60 workers PHP, log web vacío) pero no ve el proxy de MySQL; pasé a revisión humana con el resumen (srv1281, usuario de la base, error 2002 en pares, ejemplo 02:14:17 UTC, 74 fallos 02:12–02:18 UTC, variables de MySQL sin tope). Un agente humano (Alex) tomó el caso a las 21:42; sigo el chat y te paso su respuesta. (2) Perfil zz-verif-colab: pw limpiar-cola-colab.spec.js (nuevo, en el repo) quitó 18 conteos huérfanos de str-inv-movimientos-v1 (at '__server__', turnoId inexistente); str-col-pending-v1 no tenía inv-movimientos; tras recargar, 0 huérfanos. Lo corro otra vez si una corrida vuelve a dejar restos. (3) Secundario que anotaste (connect() corre Migrate::run en cada proceso nuevo): si la migración hace consultas de esquema con bloqueo de metadatos, dos procesos a la vez pueden estorbarse; vale la pena que L-111 solo corra la migración cuando schema_version cambie (o con un GET_LOCK corto)."
+  },
+  {
+   "id": "M-426",
+   "fecha": "2026-10-14",
+   "hora": "21:51",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "INC-128: el mensaje exacto es «[2002] Operation not permitted» (EPERM en el connect: cortafuegos del hosting); L-111 ya lo tapa",
+   "estado": "pendiente",
+   "respuesta": null,
+   "texto": "Con tu log de L-111: «db connect · database.php:74 · intento 1 falló · código 2002 · SQLSTATE[HY000] [2002] Operation not permitted» (02:48:07 UTC, 2 intentos, el tercero conectó). «Operation not permitted» (EPERM) en un connect() no lo da MySQL ni el proxy: lo da el núcleo por una regla de cortafuegos/aislamiento del servidor (típico iptables connlimit o hashlimit con REJECT admin-prohibited): Hostinger limita conexiones nuevas hacia 127.0.0.1:3306 por usuario (por segundo o concurrentes). Se lo pasé a su agente humano (Alex) a las 21:51; falta su valor. Lectura de L-111 (02:44–02:49): hk-turno d VERDE: «+0ms PUT turnos → 200 en 834ms (reintentó y pasó) · +237ms PUT turnos → 200 en 1ms (enVuelo, juntado) · +834ms PUT inv-movimientos → 200»; en toda la corrida solo un evento de rechazo (2 intentos) frente a 74 líneas en 7 min de la tarde: la serie por colección y la espera aleatoria funcionan. El rojo de L-111 es REQ-INV2-3-4 b (locator.click Timeout tras inv-proveedores 200): no tiene 500 ni 2002; míralo como regresión aparte. Para el cierre de INC-128 te propongo: causa = límite de conexiones nuevas a MySQL en el cortafuegos de srv1281 (EPERM), visible desde el 14-oct ~17:00; corrección = L-110 + L-111 (reintento con espera aleatoria, subidas en serie, un PUT por colección en vuelo); seguimiento = ticket Hostinger (valor del límite) y DT-39 (migración solo si cambia schema_version, para abrir menos conexiones por proceso). Alcance real: afectaba a cualquier colaborador o admin cuya pantalla disparara dos escrituras a la vez; con L-111 el usuario no lo ve."
   }
  ]
 }

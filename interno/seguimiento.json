@@ -738,12 +738,12 @@
    "id": "INC-132",
    "tipo": "INC",
    "modulo": "HK · cola de subida",
-   "etapa": "🔍",
+   "etapa": "✅",
    "fecha": "2026-10-15",
    "severidad": "medio",
    "titulo": "El aviso fijo «1 foto no se pudo subir → abrir turno» tapa los botones del pie del panel del turno y no deja cerrar el turno",
    "causa": "Por confirmar en el código: el aviso de la cola de subida queda fijo abajo, a todo lo ancho, sobre el panel; el clic al botón de cierre no llega (Timeout). Se disparó porque una foto de la entrega no subió (en g0: fotos 200/200/200/—/200/200), probablemente por un corte de conexión.",
-   "nota": "Origen: L-122-veredicto-2 (11:22), regresión REQ-INV2-3-4-hk g; h y j en cascada (pendiente de J2 no creado). Captura log\\capturas\\L-122\\REQ-INV2-3-4-hk-g-error.png. Pide lote fix tras K3-2. · 14:45 L-127: arreglo verificado (a–f); falta aceptación formal por g (guion) e INC-133 en la regresión."
+   "nota": "Origen: L-122-veredicto-2 (11:22), regresión REQ-INV2-3-4-hk g; h y j en cascada (pendiente de J2 no creado). Captura log\\capturas\\L-122\\REQ-INV2-3-4-hk-g-error.png. Pide lote fix tras K3-2. · 14:45 L-127: arreglo verificado (a–f); falta aceptación formal por g (guion) e INC-133 en la regresión. · cerrado con L-127 aceptado. Pendiente pedido de Diseño: anotarlo como corregido en REQ-U6.3 (es de Diseño)."
   },
   {
    "id": "INC-133",
@@ -11498,84 +11498,71 @@
    "req": "INC-132",
    "categoria": "normal",
    "resumen": "Portal: el iframe de HK reserva el alto de la barra de procesos/fotos fallidas para que no tape el pie del panel",
-   "estado": "no aceptado",
-   "observacion": "11:50 redactado (subagente autor) y revisión previa 16/16 (subagente; caso g corregido). Espera: ok de Diseño y respuesta del Arquitecto a M-496 (STRColaSubida.quitar en el guion). Va tras aceptar K3-2 y antes de L-124 (Diseño, M-495). · 11:55 ok de Diseño (M-497); guion ajustado a M-496; red de seguridad de la cola local pedida al Arquitecto (M-498). Al cerrar INC-132, anotar en REQ-U6.3 (pedido de Diseño) · 14:14 encolado (K3-2: L-116 aceptado, L-117 parcial con solo N4 pendiente) · Construido f22b53a (75/75; p5c96 → p5c97; también str-flujos, str-inventario y str-propiedades por el grep, como pide RT-20) · 14:45 juez: no aceptado; el arreglo de INC-132 cumple (a–f, capturas N3 a 390 y 1366 px). Rojo: g (el guion contaba la línea roja de #procesosBar aunque la barra ya no tenía «show»: defecto del guion, se corrige en L-128 § 3b) y REQ-INV2-4-2 c (INC-133, lo corrige L-128). Reprueba tras L-128 con hechas\\L-127 actualizado · 15:20 reprueba encolada (tras L-128)",
+   "estado": "aceptado",
+   "observacion": "11:50 redactado (subagente autor) y revisión previa 16/16 (subagente; caso g corregido). Espera: ok de Diseño y respuesta del Arquitecto a M-496 (STRColaSubida.quitar en el guion). Va tras aceptar K3-2 y antes de L-124 (Diseño, M-495). · 11:55 ok de Diseño (M-497); guion ajustado a M-496; red de seguridad de la cola local pedida al Arquitecto (M-498). Al cerrar INC-132, anotar en REQ-U6.3 (pedido de Diseño) · 14:14 encolado (K3-2: L-116 aceptado, L-117 parcial con solo N4 pendiente) · Construido f22b53a (75/75; p5c96 → p5c97; también str-flujos, str-inventario y str-propiedades por el grep, como pide RT-20) · 14:45 juez: no aceptado; el arreglo de INC-132 cumple (a–f, capturas N3 a 390 y 1366 px). Rojo: g (el guion contaba la línea roja de #procesosBar aunque la barra ya no tenía «show»: defecto del guion, se corrige en L-128 § 3b) y REQ-INV2-4-2 c (INC-133, lo corrige L-128). Reprueba tras L-128 con hechas\\L-127 actualizado · 15:20 reprueba encolada (tras L-128) · 15:32 reprueba: ACEPTADO (juez)",
    "hash": "f22b53a",
    "aceptacion": {
     "lote": "L-127",
-    "hash": "f22b53a",
+    "hash": "0457c8c",
     "fecha": "2026-10-15",
-    "horaBogota": "14:41",
-    "resultado": "no aceptado",
+    "horaBogota": "15:32",
+    "resultado": "aceptado",
     "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
     "criterios": [
      {
       "c": "a",
       "nivel": "N1",
       "ok": true,
-      "observado": "node tests/run.js: 75/75 archivos OK"
+      "observado": "node tests/run.js: 76/76 archivos OK"
      },
      {
       "c": "b",
       "nivel": "N2",
       "ok": true,
-      "observado": "si: lastpush alineado: 6 turnos | si: turno sh-m-1792092610851: 200 | escrituras en serie (máx. 1 en vuelo)"
+      "observado": "si: lastpush alineado: 6 turnos | si: turno sh-m-1792095689932: 200 | escrituras en serie (máx. 1 en vuelo)"
      },
      {
       "c": "c",
       "nivel": "N2",
       "ok": true,
-      "observado": "si: subidas a /api/upload con ref sh-m-1792092610851 cortadas (sin red simulada); las demás siguen a la guardia | si: turno de la corrida: sh-m-1792092610851 | si: HK con la versión de este lote (≥ p5c97) | si: HK al día (inventario y pendientes): sí | si: iniciar turno: 200 | si: recepción y entrega registradas (7 fotos a la cola) | si: fotos fallidas en la cola del teléfono: 7 | si: aviso fijo del portal: «7 fotos no se pudieron subir → abrir turno» | escrituras en serie (máx. 1 en vuelo)"
+      "observado": "si: subidas a /api/upload con ref sh-m-1792095689932 cortadas (sin red simulada); las demás siguen a la guardia | si: turno de la corrida: sh-m-1792095689932 | si: HK con la versión de este lote (≥ p5c97) | si: HK al día (inventario y pendientes): sí | si: lastpush alineado: 2 turnos | si: iniciar turno: 200 | si: recepción y entrega registradas: recepcion dp_muyum184g3ozd: 1 foto(s) en la cola · conteos 200 · entrega dp_muyum184g3ozd: 6 foto(s) en la cola · conteos 200 | si: fotos fallidas en la cola del teléfono: 7 | si: aviso fijo del portal: «7 fotos no se pudieron subir → abrir turno» | escrituras en serie (máx. 1 en vuelo)"
      },
      {
       "c": "d",
       "nivel": "N2",
       "ok": true,
-      "observado": "si: aviso fijo del portal: «7 fotos no se pudieron subir → abrir turno» | si: 390 px: botones del pie «Reintentar todo», «⚠ Reportar incidente», «🧹 Cerrar limpieza» libres | si: 390 px: el iframe de HK termina en 789 px y la barra empieza en 789 px (ventana 844 px) | si: «Cerrar limpieza» en el pie: sí | si: «Cerrar limpieza» avisa y lista las fotos pendientes («📷 7 fotos pendientes de subir (…)») | guardado 200"
+      "observado": "si: aviso fijo del portal: «7 fotos no se pudieron subir → abrir turno» | si: 390 px: botones del pie: «Reintentar todo» libre · «⚠ Reportar incidente» libre · «🧹 Cerrar limpieza» libre | si: 390 px: el iframe de HK termina en 789 px y la barra empieza en 789 px (ventana 844 px) | si: «Cerrar limpieza» en el pie: sí | si: «Cerrar limpieza» avisa y lista las fotos pendientes: «🧹 Cerrar limpieza Pendientes obligatorias: zz-verif-Limpieza480 zz-verif-Conteo de cierre 📷 7 fotos pendientes de subir (Recepción · zz-veri…» | guardado 200"
      },
      {
       "c": "e",
       "nivel": "N2",
       "ok": true,
-      "observado": "si: 1366 px: botones del pie «Reintentar todo», «⚠ Reportar incidente», «✅ Cerrar turno» libres | si: 1366 px: el iframe de HK termina en 845 px y la barra empieza en 845 px (ventana 900 px) | si: «Cerrar turno» avisa y lista las fotos pendientes y guarda (200) | si: turno cerrado («↩ Reabrir» en el pie); 1366 px, turno cerrado: pie también libre"
+      "observado": "si: aviso fijo del portal: «7 fotos no se pudieron subir → abrir turno» | si: 1366 px: botones del pie: «Reintentar todo» libre · «⚠ Reportar incidente» libre · «✅ Cerrar turno» libre | si: 1366 px: el iframe de HK termina en 845 px y la barra empieza en 845 px (ventana 900 px) | si: «Cerrar turno» en el pie: sí | si: «Cerrar turno» avisa y lista las fotos pendientes y guarda (200) | si: turno cerrado («↩ Reabrir» en el pie): sí | 1366 px, turno cerrado: pie también libre"
      },
      {
       "c": "f",
       "nivel": "N3",
       "ok": true,
-      "observado": "pie-390.png y pie-1366.png: el turno aparece «Completado», con el pie completo encima de la barra roja «7 fotos no se pudieron subir → abrir turno» («📷 7 fallidas», «Reintentar todo», «⚠ Reportar incidente», «↩ Reabrir»); ningún botón del pie queda detrás de la barra ni cortado en ninguno de los dos anchos (confirmado también en el texto visible .txt de cada captura)"
+      "observado": "pie-390.png y pie-1366.png: el turno aparece «Completado», con el pie completo (📷 7 fallidas, Reintentar todo, ⚠ Reportar incidente, ↩ Reabrir) encima de la barra roja «7 fotos no se pudieron subir → abrir turno»; en ningún ancho queda ningún botón del pie detrás de la barra ni cortado (confirmado también en el texto visible .txt de cada captura)"
      },
      {
       "c": "g",
       "nivel": "N2",
-      "ok": false,
-      "observado": "si: fotos de este turno quitadas de la cola del teléfono: {\"n\":7,\"q\":7} | NO: sin la línea roja del aviso: no | si: iframe de HK: termina en 844 px de 844 (barra oculta) | si: corte de /api/upload quitado"
+      "ok": true,
+      "observado": "si: fotos de este turno quitadas de la cola del teléfono: {\"n\":7,\"q\":7} | si: sin la línea roja del aviso: sí | si: iframe de HK: termina en 844 px de 844 (barra oculta) | si: corte de /api/upload quitado"
      },
      {
       "c": "h",
       "nivel": "N2",
-      "ok": false,
-      "observado": "regresión de la zona inventario: REQ-INV2-3-4-hk.spec.js caso g e INC-131.spec.js (los que cita el criterio) en verde, pero no «todos en verde»: REQ-INV2-4-2.spec.js caso c quedó en rojo (una de las 6 fotos de la entrega de tA sin respuesta del servidor)"
+      "ok": true,
+      "observado": "regresión de la zona inventario en verde, incluidos los casos citados: REQ-INV2-3-4-hk.spec.js caso g («✅ Turno cerrado 🧺 Pendientes que deja este turno: zz-verif-J2 · zz-verif-Secando · zz-verif-Tendedero · Recoger y organizar») e INC-131.spec.js (b y c, incluido el diálogo «Cerrar limpieza» encima del panel a 390 px)"
      }
     ],
     "criteriosPendientes": [],
     "dispositivo": [],
-    "incs": [
-     {
-      "titulo": "Caso g: tras vaciar la cola local de las 7 fotos del turno, la barra roja del portal («N fotos no se pudieron subir») no desapareció dentro de los 20 s que esperó el guion",
-      "nivel": "bajo",
-      "causa": "El aviso se repinta en _actualizarProcesos, que según el mapa de dependientes de la propia instrucción corre también en un setInterval de 30 s; vaciar str-cola-subida en el teléfono no fuerza un repintado inmediato del portal, así que la línea roja puede tardar más de 20 s en irse. La comprobación posterior del mismo caso («iframe termina en 844 px de 844, barra oculta») muestra que sí terminó por desaparecer; el guion simplemente dejó de esperar antes de que eso ocurriera.",
-      "observado": "NO: sin la línea roja del aviso: no (tras 20000 ms) | si, a continuación: iframe de HK termina en 844 px de 844 (barra oculta)"
-     },
-     {
-      "titulo": "Regresión REQ-INV2-4-2.spec.js, caso c: una de las 6 fotos de la entrega de tA (zz-verif-colab2) quedó sin respuesta del servidor",
-      "nivel": "medio",
-      "causa": "En la cronología del caso hay un salto de +539 ms a +31601 ms antes de que esa subida respondiera; el resto de fotos y escrituras de ese mismo turno sí dieron 200. La captura REQ-INV2-4-2-c-error.png confirma que no es pantalla de login ni corte de red del arnés: se ve el turno normal con «1 fallida» y la barra roja de una sola foto. No toca nada del alcance de este lote (CSS/JS de portal.html); parece una demora puntual de /api/upload en el entorno de pruebas, pero conviene confirmarla antes del siguiente lote por si se repite.",
-      "observado": "NO: entrega de tA a nombre de zz-verif-colab2 · fotos de lugar o artículo «Foto al cierre»: inv::su_mv8jpj9j24ipa 200, inv::su_mv8jpj9j24ipa::ar_mv8jpg2a620f7 —, inv::su_mv8jpjk5l5qfu::ar_mv8jpguytag40 200, inv::su_mv8jpjk5l5qfu::ar_mv8jph2d2k6tm 200, inv::-::ar_mv8jphaps5fs3 200"
-     }
-    ],
+    "incs": [],
     "datosDePrueba": "limpieza: \"limpiar() corrio sin error\" (pruebas.json › limpieza)",
-    "notas": "Hash f22b53a confirmado en log\\L-127-instr-fix-inc132-aviso-subida.txt (HEAD después: f22b53a1b3d113b2250d74dc5ff02e350d0a37da). El arreglo de INC-132 en sí (a–f) cumple completo, incluidas las dos capturas N3 a 390 y 1366 px. No aplica «herramienta»: no hay pantalla de login, ni net::ERR_CONNECTION_CLOSED/ERR_NETWORK_CHANGED, ni defecto de orden de perfiles (M-487) en ninguno de los dos casos en rojo; tampoco comparten una misma causa de arnés/entorno como para marcar el lote completo como no responsable. Las dos fallas (g y REQ-INV2-4-2.spec.js c) son ajenas al alcance declarado de este lote (CSS/JS de la barra del portal) y no impiden considerar hecho el propio INC-132, pero sí impiden aceptar el lote tal como lo pide el formato del juez (regla: «no aceptado» si algún criterio o la regresión tiene ok: false)."
+    "notas": "Segunda corrida (hash 0457c8c) tras el veredicto anterior (f22b53a, «no aceptado»): las dos fallas de esa corrida ya no aparecen. Caso g: la línea roja del aviso desaparece dentro del plazo («sin la línea roja del aviso: sí»), a diferencia de la corrida anterior. Regresión REQ-INV2-4-2.spec.js caso c (foto sin respuesta en esa corrida) también quedó en verde esta vez («entrega de tA · fotos subidas: 6 · PUT de turnos libre: sí»); no se repitió en ningún otro caso de esta corrida. No hay ningún ok:false en n2, n3 ni regresión; no aplica «herramienta» (no hay pantalla de login, net::ERR_CONNECTION_CLOSED/ERR_NETWORK_CHANGED, ni defecto de orden de perfiles M-487)."
    }
   },
   {

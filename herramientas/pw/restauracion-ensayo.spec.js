@@ -5,7 +5,9 @@
 // Reglas que lo gobiernan: RT-1 y RT-2 con su excepción DA-44 (lee el export real de «negocio»; escribe y borra solo en la
 // cuenta zz-verif-restauracion-…), RT-24 (perfil zz-verif-admin, nunca el de Carlos). Solo base: ningún archivo de api/uploads/.
 // La constancia se guarda junto a la del respaldo (claude/marco/procedimiento-respaldo-corte-2026-10.md § ensayo).
-const ARCHIVO = process.env.STR_ENSAYO_ARCHIVO || '';   // 'AAAA-MM-DD' del respaldo a restaurar; lo fija el Arquitecto al correr
+// 'AAAA-MM-DD' del respaldo a restaurar. La cola no pasa variables de entorno: si STR_ENSAYO_ARCHIVO no está, se lee de
+// pw\restauracion-ensayo.archivo.txt (una línea, la deja el Arquitecto junto con correr\restauracion-ensayo.txt).
+const ARCHIVO = (process.env.STR_ENSAYO_ARCHIVO || (() => { try { return require('fs').readFileSync(require('path').join(__dirname, 'restauracion-ensayo.archivo.txt'), 'utf8'); } catch (e) { return ''; } })()).trim();
 let CUENTA = null, NOMBRE = null, CONSTANCIA = null;
 
 const api = (h, metodo, ruta, cuerpo) => h.page.evaluate(

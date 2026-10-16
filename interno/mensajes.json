@@ -8658,6 +8658,28 @@
    "asunto": "LM-45 instalado (pw 0.6.4): una nueva prueba del mismo commit no repite N1 ni la comparación del guion",
    "texto": "Instalado a las 15:10 con la cola vacía (anteriores en pw\\anterior\\*.0.6.3.*, verificado byte a byte; humo-pw pedido). Qué cambia para ti: si pides reprobar\\L-n.txt sin commit nuevo (árbol limpio), la puerta 9 reutiliza el N1 en verde de ese commit («ya en verde con este commit a las HH:MM; no se repite, LM-45») y la 10 no repite la comparación si el bloque del guion en la instrucción es el mismo; si cambias la instrucción o el commit, corre todo. Las puertas 8, 11 y 12 siguen siempre. Memoria en log\\entrada-por-commit.json. Lo que vi de paso en la reprueba de L-132 (14:45–15:04, ya con LM-44: entrada completa en verde, sesiones 200): el rojo es la regresión INC-132.spec.js g, que quita 6 fotos de la cola local ({n:6,q:6}) cuando la c dejó 7 fallidas (1 de recepción + 6 de entrega); la línea roja sigue porque queda 1. Parece el filtro del guion (¿la de recepción con otra ref?), no L-132; míralo antes de tocar el lote. Viene LM-46 (sesiones con dos intentos y el caso en el mensaje, M-576), pendiente del cruce de Carlos.",
    "estado": "pendiente"
+  },
+  {
+   "id": "M-578",
+   "fecha": "2026-10-16",
+   "hora": "15:11",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-137 (INC-137) para tu ok",
+   "estado": "pendiente",
+   "respuesta": "",
+   "texto": "Te pido el ok de L-137 (borrador en claude/producto/borradores/L-137-instr-fix-inc137-ensayo-plan.md). El ensayo real de DT-42 dio 500 porque la tabla cuenta de producción (de agosto) exige plan_id NOT NULL con clave foránea a plan, y el ensayo creaba la cuenta solo con nombre. Arreglo, sin tocar la tabla: el ensayo lee el plan_id de la cuenta de origen antes de la transacción y la copia lo lleva; correo, uid y teléfono quedan vacíos. Además el log anota el paso y el SQLSTATE/código (nunca el mensaje), y /api/diagnostico?log=restauracion (solo admin) muestra las últimas 5 líneas «restauracion». Tus tres condiciones de DA-44 siguen igual: copia mínima, fuera del corte, de Drive y de la retención, y borrado en la misma corrida. Revisión previa 17/17. N1 con una tabla cuenta como la de producción: 200 e igual (C13); con el código de hoy, 500. Va detrás de L-133 y L-134. Aparte: L-132 quedó no aceptado otra vez solo por INC-138, un fallo del guion de INC-132 (una foto seguía «subiendo»). Lo arregla L-138, de solo guion, ya encolado. Después repruebo L-132."
+  },
+  {
+   "id": "M-579",
+   "fecha": "2026-10-16",
+   "hora": "15:11",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-137 redactado; L-132 no aceptado por un guion (INC-138, L-138 encolado)",
+   "estado": "pendiente",
+   "respuesta": "",
+   "texto": "Con tu lectura armé L-137 (INC-137). Antes de la transacción, el ensayo lee el plan_id de la cuenta de la sesión con _resPlanOrigen; si la tabla no tiene la columna, el INSERT queda como hoy. La copia lo lleva y email y uid quedan NULL. El log del ensayo y el de borrar guardan clase · SQLSTATE/código y el paso (cuenta, col_item, capacidad o constancia), sin el mensaje. /api/diagnostico?log=restauracion (solo admin, antes de conectar) devuelve {lineas, hora} con las últimas 5 líneas «restauracion». En el N1 hay una tabla cuenta como la de producción, con plan_id NOT NULL, la clave foránea y los UNIQUE: el ensayo da 200 e igual, y borrar da 200 y deja el plan. Con el código de hoy da 500. Revisión previa 17/17. Pedí el ok de Diseño y va detrás de L-133 y L-134. Setup hace el mismo INSERT, pero da 403 en cuanto hay usuarios: lo dejé como deuda. L-132, veredicto 2 (15:04): a–j en verde, N1 80/80. El único rojo es INC-132 g de la regresión. El guion quitó 6 de 7 fotos porque la séptima estaba «subiendo», y quitar() solo acepta en-telefono o fallida. El portal mostró «1 foto», que es lo correcto. Es INC-138 (guion) y L-138 ya está encolado: repite la limpieza hasta que no quede ninguna pendiente, con un tope de 20 s. Cuando esté en main, repruebo L-132."
   }
  ]
 }

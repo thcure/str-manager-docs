@@ -787,6 +787,14 @@
    "estado": "abierto",
    "severidad": "media",
    "nota": "Ensayo real 13:02 (M-572): 500 en 174 ms, transacción deshecha, no quedó nada. Log (leído por el Arquitecto en solo lectura, M-574): «restauracion.php:225 · ensayo · PDOException» = INSERT INTO cuenta (nombre) VALUES (?). Causa probable: la tabla cuenta de producción es de agosto (migrate.php la crea IF NOT EXISTS) y difiere del esquema esperado (otra columna NOT NULL sin defecto, nombre corto para los 41 caracteres de la copia, o id sin AUTO_INCREMENT). Falta ver su estructura. Además: el log anotará paso, SQLSTATE y código del motor, y /api/diagnostico (solo admin) mostrará las últimas 5 líneas «restauracion» (va detrás de L-133/L-134)."
+  },
+  {
+   "id": "INC-138",
+   "fecha": "2026-10-16",
+   "titulo": "Regresión: INC-132 g deja 1 foto en la cola (estaba «subiendo») y el aviso sigue (guion, no la página)",
+   "estado": "abierto",
+   "severidad": "media",
+   "nota": "Abierto por el juez en el veredicto 2 de L-132 (15:04). Causa: el guion quitó 6 de 7 fotos ({\"n\":6,\"q\":6}); quitar() solo acepta en-telefono/fallida y la 7.ª estaba subiendo (reintento con la subida cortada); al fallar, el portal mostró «1 foto no se pudo subir», que es correcto. En L-131 quitó 7/7 y pasó. Arreglo: L-138 (repite hasta que no quede ninguna en-telefono/subiendo/fallida, tope 20 s)."
   }
  ],
  "dts": [
@@ -13956,7 +13964,7 @@
    "desde": "2026-10-16 10:23",
    "planTrabajo": "PT-1",
    "grupo": "MENU",
-   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131. · 11:18 encolado: ok de Diseño M-553 (S19 a INC-134); ruta con REQ-SH-2 anclado (M-552). · 11:22 construido 849db62 (run.js 80/80, menu-sh2 129/129, p5c100). Pruebas bloqueadas en la puerta: la marca del guion tenía texto entre ella y ```js. 11:26 hechas\\ corregido (texto antes de la marca) y reprobar\\L-132.txt. · 11:27 reprueba bloqueada: colab2 sin sesión (401). · 12:02 colab2 con sesión (M-561): correr\\sesiones + reprobar\\L-132. · 12:27 veredicto del juez (log\\L-132-veredicto.json): NO ACEPTADO. Los 10 criterios a–j (N1, N2, N3) en verde, run.js 80/80. Rojos de regresión: DT-42 b/c (guardia LM-43, herramienta, arreglado por L-135 867cadf) y REQ-TB-3 g (INC-136, guion: cuenta la carga de arranque; arreglo L-136). Reprueba tras L-136. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 12:57 reprueba bloqueada otra vez por la semilla (lectura intermitente, M-569). 13:02 reprobar de nuevo."
+   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131. · 11:18 encolado: ok de Diseño M-553 (S19 a INC-134); ruta con REQ-SH-2 anclado (M-552). · 11:22 construido 849db62 (run.js 80/80, menu-sh2 129/129, p5c100). Pruebas bloqueadas en la puerta: la marca del guion tenía texto entre ella y ```js. 11:26 hechas\\ corregido (texto antes de la marca) y reprobar\\L-132.txt. · 11:27 reprueba bloqueada: colab2 sin sesión (401). · 12:02 colab2 con sesión (M-561): correr\\sesiones + reprobar\\L-132. · 12:27 veredicto del juez (log\\L-132-veredicto.json): NO ACEPTADO. Los 10 criterios a–j (N1, N2, N3) en verde, run.js 80/80. Rojos de regresión: DT-42 b/c (guardia LM-43, herramienta, arreglado por L-135 867cadf) y REQ-TB-3 g (INC-136, guion: cuenta la carga de arranque; arreglo L-136). Reprueba tras L-136. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 12:57 reprueba bloqueada otra vez por la semilla (lectura intermitente, M-569). 13:02 reprobar de nuevo. · 15:04 NO ACEPTADO de nuevo (log\\L-132-veredicto-2.json): a–j en verde (N1 80/80, N2 y N3); único rojo INC-132 g de la regresión → INC-138, L-138 (solo guion). Reprobar L-132 cuando L-138 esté en main."
   },
   {
    "lote": null,
@@ -14050,6 +14058,38 @@
    "planTrabajo": "PT-1",
    "grupo": "MENU",
    "nota": "Del veredicto de L-132. · 12:33 construido 2b8dbc7. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 13:01 ACEPTADO (juez, log\\L-136-veredicto.json): g «API 1» en las 5 páginas, h N3 y humo en verde."
+  },
+  {
+   "lote": "L-138",
+   "req": "INC-138",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Guion INC-132 g: quitar también la foto que sigue «subiendo»",
+   "estado": "encolado",
+   "vista": "siguiente",
+   "esperaA": "cola",
+   "espera": "",
+   "orden": 121.52014,
+   "desde": "2026-10-16 15:11",
+   "planTrabajo": "PT-1",
+   "grupo": "HK",
+   "nota": "Del veredicto 2 de L-132. · 15:11 encolado (cmp IGUAL)."
+  },
+  {
+   "lote": "L-137",
+   "req": "INC-137",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Ensayo de restauración: la cuenta de ensayo lleva plan_id de su origen; log con paso y SQLSTATE; /api/diagnostico?log=restauracion",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "ok de Diseño; encolar detrás de L-133 y L-134",
+   "orden": 121.5218,
+   "desde": "2026-10-16 15:11",
+   "planTrabajo": "PT-1",
+   "grupo": "K3",
+   "nota": "Sí del Arquitecto (M-575: plan_id NOT NULL en la cuenta de producción). · borrador: revisión previa 17/17 (1.ª pasada 15/17, aplicada); restauracion.test.js 74/0, diagnostico.test.js 24/0; con el código de hoy 7 y 3 FAIL."
   }
  ],
  "riesgos": [

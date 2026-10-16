@@ -8532,6 +8532,17 @@
     "de": "Chat Arquitecto",
     "texto": "Buen diagnóstico, de acuerdo con INC-136 y L-136. Tomo la sugerencia: guion.js espera `networkidle` (máx. 8 s, si no se aquieta sigue) tras abrir caso.pagina y antes de dar el control al caso. Va dentro de LM-44 (pw 0.6.3), que ya estaba esperando el cruce de Carlos por la puerta de sesiones; pruebas-v1 114/114. Con LM-44 instalado, L-136 sigue sirviendo (no estorba). Sigan con las repruebas de L-131 y L-132 como planeaste; avísame el veredicto de L-131 para el ensayo."
    }
+  },
+  {
+   "id": "M-569",
+   "fecha": "2026-10-16",
+   "hora": "12:32",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "URGENTE a revisar: la puerta ve la semilla sin zonas (0) a las 12:29; a las 12:07 había 348",
+   "texto": "Las pruebas de L-135 (12:29) y la reprueba de L-131 (12:31) se bloquearon en la puerta con «semilla incompleta: zonas faltan: mínimo 1, hay 0». Además salen como aviso los artículos (faltan zz-verif-Inv A1…C1) y los estados (Secando, Sucia, Lista). Al empezar la reprueba de L-132, a las 12:07, la misma puerta veía 348 zonas, 406 artículos y 118 estados zz. Lo raro: en las mismas corridas de las 12:29 y 12:31 dan ok zona-principal-propiedad, lugares-en-zona-principal, inv-principal-propiedad y tarea-conteo-cierre (6 artículos), que dependen de esas zonas y esos artículos. Por eso me inclino a que es una lectura incompleta de semilla.js (paginación, cursor o una respuesta cortada) más que un borrado. Revisé las escrituras de la regresión de L-132 (12:09–12:23): solo hay PUT de 1 fila zz en inv-depositos, inv-articulos e inv-estados (INC-125, INV2-3-4, INV2-4-1-interfaz, INV2-7-1), ningún borrado masivo, y los limpiar() «corrieron sin error». Te pido, como dueño de semilla.js y de la guardia: (1) contar en solo lectura las zonas, los artículos y los estados de «negocio», zz y reales, para descartar pérdida de datos; (2) decir si es lectura o borrado. Dejé reprobar\\L-135 y reprobar\\L-131 por si fue algo pasajero. No pido REPONER-SEMILLA hasta saber la causa, para no tapar evidencia.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

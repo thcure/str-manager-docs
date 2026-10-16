@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { BASE, COLA, abrir, explicarError, recuperarSesion } = require('./comun');   // v0.5.32: recuperarSesion
-const { extraerGuion, igual, loteDe, correrGuion, cargar } = require('./guion');
+const { extraerGuion, igual, loteDe, correrGuion, cargar, horaBogota } = require('./guion');
 const { comprobarSemilla } = require('./semilla');
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
@@ -172,6 +172,26 @@ async function sesionViva(perfil) {
   finally { if (ctx) await ctx.close().catch(() => { }); }
 }
 
+// v0.6.4 (LM-45, cruce de Carlos 16-oct): una nueva prueba del MISMO commit no repite lo que ya pasó en verde con ese commit.
+// N1 (P4.b): se salta si la cola ya lo dio en verde para ese commit con el árbol limpio. Guion (P4.c): se salta la comparación
+// si ya se comparó con ESE commit y ESE bloque de la instrucción (si la instrucción cambió, se vuelve a comparar). El guion se
+// sigue cargando siempre (lo usa el paso 13). Memoria: log\entrada-por-commit.json. Puras: claveGuion, puedeSaltar, anotar.
+function claveGuion(codigo) { return require('crypto').createHash('sha256').update(String(codigo || '').replace(/\r\n/g, '\n')).digest('hex').slice(0, 16); }
+function puedeSaltar(memoria, commit, limpio, que, clave) {
+  if (!commit || !limpio || !memoria || !memoria[commit]) return null;
+  const m = memoria[commit][que];
+  if (!m || m.ok !== true) return null;
+  if (que === 'guion' && m.clave !== clave) return null;
+  return m;
+}
+function anotar(memoria, commit, que, dato) {
+  const out = Object.assign({}, memoria || {});
+  out[commit] = Object.assign({}, out[commit] || {}, { [que]: dato });
+  const claves = Object.keys(out);   // se guardan solo los últimos 30 commits
+  if (claves.length > 30) claves.slice(0, claves.length - 30).forEach((k) => { delete out[k]; });
+  return out;
+}
+
 async function main() {
   const instr = arg('--instr'); const repo = arg('--repo', path.join(require('os').homedir(), 'str-manager'));
   if (!instr || !fs.existsSync(instr)) { console.log('Uso: node probar-lote.js --instr <archivo de la instruccion>'); process.exit(2); }
@@ -180,6 +200,13 @@ async function main() {
   const out = { lote, instruccion: path.basename(instr), proceso: 'PRUEBAS-v1', inicio: new Date().toISOString(), entrada: [], n1: null, n2: [], regresion: [], limpiezaRegresion: [], resultado: null, causa: null };
   const git = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: repo, encoding: 'utf8' });
   out.commit = (git.stdout || '').trim() || null;
+  // LM-45: commit completo y árbol limpio (sin cambios sin commit) para poder reutilizar resultados de una corrida anterior
+  const commitLargo = (spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).stdout || '').trim() || null;
+  const st = spawnSync('git', ['status', '--porcelain'], { cwd: repo, encoding: 'utf8' });
+  const arbolLimpio = st.status === 0 && !(st.stdout || '').trim();
+  const rutaMemoria = path.join(COLA, 'log', 'entrada-por-commit.json');
+  let memoria = leerJson(rutaMemoria, {});
+  const guardarMemoria = (que, dato) => { if (!commitLargo || !arbolLimpio) return; memoria = anotar(memoria, commitLargo, que, dato); try { fs.writeFileSync(rutaMemoria, JSON.stringify(memoria, null, 1)); } catch (e) { } };
   const entra = (c, ok, observado) => { out.entrada.push({ c, ok, observado }); console.log((ok ? 'OK  ' : 'NO  ') + 'P4 ' + c + ' · ' + observado); return ok; };
   const fin = (resultado, causa) => {
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
@@ -206,10 +233,17 @@ async function main() {
   if (!entra('despliegue', desplegado, obs)) return fin('bloqueado', 'despliegue: ' + obs);
 
   // P4.b tests/ en verde (N1) en el commit del lote
-  const t = spawnSync(process.execPath, ['tests/run.js'], { cwd: repo, encoding: 'utf8', timeout: 300000 });
-  const resumen = ((t.stdout || '').match(/\d+\/\d+ archivos OK/) || ['sin resumen'])[0];
-  out.n1 = { ok: t.status === 0, observado: 'node tests/run.js: ' + resumen };
-  if (!entra('tests/ en verde', t.status === 0, resumen)) return fin('bloqueado', 'tests/ en rojo en el commit del lote: ' + resumen);
+  const yaN1 = puedeSaltar(memoria, commitLargo, arbolLimpio, 'n1');
+  if (yaN1) {
+    out.n1 = { ok: true, observado: 'node tests/run.js: ' + yaN1.resumen + ' (ya en verde con este commit a las ' + yaN1.hora + '; no se repite, LM-45)', reutilizado: true };
+    entra('tests/ en verde', true, out.n1.observado);
+  } else {
+    const t = spawnSync(process.execPath, ['tests/run.js'], { cwd: repo, encoding: 'utf8', timeout: 300000 });
+    const resumen = ((t.stdout || '').match(/\d+\/\d+ archivos OK/) || ['sin resumen'])[0];
+    out.n1 = { ok: t.status === 0, observado: 'node tests/run.js: ' + resumen };
+    if (!entra('tests/ en verde', t.status === 0, resumen)) return fin('bloqueado', 'tests/ en rojo en el commit del lote: ' + resumen);
+    guardarMemoria('n1', { ok: true, resumen, hora: horaBogota() });
+  }
 
   // P4.c guion N2 igual al de la instruccion
   const g = extraerGuion(texto);
@@ -219,9 +253,13 @@ async function main() {
     rutaSpec = path.join(repo, ...g.ruta.split('/'));
     if (!g.codigo) return entra('guion N2', false, g.error), fin('bloqueado', 'guion N2 mal escrito en la instruccion: ' + g.error);
     if (!fs.existsSync(rutaSpec)) return entra('guion N2', false, g.ruta + ' no esta en el commit'), fin('bloqueado', 'la CLI no copio el guion a ' + g.ruta);
-    if (!igual(fs.readFileSync(rutaSpec, 'utf8'), g.codigo)) return entra('guion N2', false, g.ruta + ' distinto del bloque de la instruccion'), fin('bloqueado', 'el guion del commit no es igual al de la instruccion (independencia)');
+    const claveG = claveGuion(g.codigo), yaG = puedeSaltar(memoria, commitLargo, arbolLimpio, 'guion', claveG);
+    if (!yaG) {
+      if (!igual(fs.readFileSync(rutaSpec, 'utf8'), g.codigo)) return entra('guion N2', false, g.ruta + ' distinto del bloque de la instruccion'), fin('bloqueado', 'el guion del commit no es igual al de la instruccion (independencia)');
+      guardarMemoria('guion', { ok: true, clave: claveG, ruta: g.ruta, hora: horaBogota() });
+    }
     try { spec = cargar(rutaSpec); } catch (e) { return entra('guion N2', false, 'no carga: ' + e.message), fin('bloqueado', 'el guion no carga: ' + e.message); }
-    entra('guion N2', true, g.ruta + ' igual a la instruccion · ' + (spec.casos || []).length + ' caso(s)');
+    entra('guion N2', true, g.ruta + ' igual a la instruccion · ' + (spec.casos || []).length + ' caso(s)' + (yaG ? ' (comparado con este commit a las ' + yaG.hora + '; no se repite, LM-45)' : ''));
   }
 
   // P4.d semilla zz-verif- y P4.e sesiones de los perfiles que usa el guion
@@ -277,5 +315,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
+module.exports = { claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

@@ -242,6 +242,19 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('sesión: solo 401 → sin sesión', !s3.ok && s3.ultimo === 401);
   t('sesión: ninguna /api/me → sin sesión', !sesionPorRespuestas([]).ok && sesionPorRespuestas(null).ultimo === null);
 }
+{ // v0.6.4 (LM-45): una nueva prueba del mismo commit no repite N1 ni la comparación del guion
+  const { puedeSaltar, anotar, claveGuion } = require('./probar-lote');
+  let m = anotar({}, 'abc', 'n1', { ok: true, resumen: '80/80 archivos OK', hora: '12:00:00' });
+  t('LM-45: mismo commit y árbol limpio → salta N1', !!puedeSaltar(m, 'abc', true, 'n1'));
+  t('LM-45: otro commit → no salta', puedeSaltar(m, 'def', true, 'n1') === null);
+  t('LM-45: árbol con cambios sin commit → no salta', puedeSaltar(m, 'abc', false, 'n1') === null);
+  m = anotar(m, 'abc', 'guion', { ok: true, clave: claveGuion('x\r\ny'), ruta: 'tests/e2e/X.spec.js' });
+  t('LM-45: guion con el mismo bloque (CRLF = LF) → salta la comparación', !!puedeSaltar(m, 'abc', true, 'guion', claveGuion('x\ny')));
+  t('LM-45: instrucción cambiada (otro bloque) → vuelve a comparar', puedeSaltar(m, 'abc', true, 'guion', claveGuion('x\nz')) === null);
+  t('LM-45: anotar conserva n1 al anotar guion', !!puedeSaltar(m, 'abc', true, 'n1'));
+  let big = {}; for (let i = 0; i < 35; i++) big = anotar(big, 'c' + i, 'n1', { ok: true });
+  t('LM-45: la memoria guarda solo 30 commits', Object.keys(big).length === 30 && !big.c0 && !!big.c34);
+}
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];

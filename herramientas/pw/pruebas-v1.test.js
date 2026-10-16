@@ -232,6 +232,16 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('enmascarar: zz-verif-L-117-r-ar1 se conserva', enmascararTexto('zz-verif-L-117-r-ar1-sn3kg') === 'zz-verif-L-117-r-ar1-sn3kg');
   t('enmascarar: cantidad corta no se toca', enmascararTexto('cantidad 12345') === 'cantidad 12345');
 }
+{ // v0.6.3 (LM-44): la puerta mira todas las /api/me de la carga; basta una 200 (renovación del propio shell)
+  const { sesionPorRespuestas } = require('./probar-lote');
+  const s1 = sesionPorRespuestas([200]);
+  t('sesión: 200 a la primera → ok, no renovada', s1.ok && !s1.renovada);
+  const s2 = sesionPorRespuestas([401, 200]);
+  t('sesión: 401 y luego 200 (JWT vencido, el shell renueva) → ok, renovada', s2.ok && s2.renovada && s2.ultimo === 200);
+  const s3 = sesionPorRespuestas([401, 401]);
+  t('sesión: solo 401 → sin sesión', !s3.ok && s3.ultimo === 401);
+  t('sesión: ninguna /api/me → sin sesión', !sesionPorRespuestas([]).ok && sesionPorRespuestas(null).ultimo === null);
+}
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];

@@ -133,22 +133,41 @@ function cargarGuiones(dirE2e, excluir) {
   return out;
 }
 
+// v0.6.3 (LM-44): con el JWT vencido (dura 24 h) la PRIMERA /api/me del shell da 401 y, segundos después, el propio shell
+// renueva con Firebase y pide /api/me otra vez (200). La puerta tomaba la primera respuesta y bloqueaba «sin sesión» con una
+// sesión viva (L-131 colab 11:03, L-132 colab2 11:27, 16-oct; Carlos abría el perfil y «ya estaba abierta»). Ahora mira todas
+// las /api/me de la carga durante una ventana corta: basta una 200 (la que trae la renovación del propio shell). Pura.
+function sesionPorRespuestas(estados) {
+  const e = (estados || []).filter((x) => x != null);
+  if (!e.length) return { ok: false, ultimo: null, renovada: false };
+  const ok = e.indexOf(200) !== -1;
+  return { ok, ultimo: ok ? 200 : e[e.length - 1], renovada: ok && e[0] !== 200 };
+}
+const VENTANA_RENOVACION_MS = 15000;
+
 async function sesionViva(perfil) {
   let ctx;
   try {
     const a = await abrir(perfil); ctx = a.ctx;
     const p = await ctx.newPage();
+    const estados = [];
+    p.on('response', (r) => { try { if (new URL(r.url()).pathname.endsWith('/api/me')) estados.push(r.status()); } catch (e) { } });
     const me = p.waitForResponse(r => new URL(r.url()).pathname.endsWith('/api/me'), { timeout: 30000 }).catch(() => null);
     await p.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded' });
-    const r = await me;
+    await me;
+    // LM-44: si la primera no fue 200, espera a que el shell renueve (otra /api/me 200) antes de decidir.
+    const t0 = Date.now();
+    while (!sesionPorRespuestas(estados).ok && Date.now() - t0 < VENTANA_RENOVACION_MS) await p.waitForTimeout(500);
+    const s = sesionPorRespuestas(estados);
     // v0.5.28 (M-474): la app exige el usuario de Google/Firebase antes de mirar /api/me; si el perfil lo perdió, el shell
     // va a login.html sin pedir nada (o con /api/me 200 y aun así a login). Eso también es «sin sesión» y bloquea.
     await p.waitForTimeout(1500);
     let enLogin = /\/login\.html/.test(p.url()) || await p.locator('input[type="password"]').count().catch(() => 0) > 0;
     // v0.5.32: antes de bloquear, intenta recuperarla como lo hace Carlos (Continuar con Google, sin contraseña)
     if (enLogin) { const rec = await recuperarSesion(ctx, p, perfil); if (rec.ok) return { ok: true, observado: rec.observado, recuperada: true }; enLogin = true; var motivoRec = rec.observado; }
-    if (enLogin) return { ok: false, observado: perfil + ': el shell termina en login.html (sesion de Google/Firebase del perfil perdida; /api/me ' + (r ? r.status() : 'no pedido') + '; recuperación automática: ' + (motivoRec || '—') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
-    return r && r.status() === 200 ? { ok: true, observado: perfil + ': /api/me 200' } : { ok: false, observado: perfil + ': sin sesion (/api/me ' + (r ? r.status() : 'sin respuesta') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
+    if (enLogin) return { ok: false, observado: perfil + ': el shell termina en login.html (sesion de Google/Firebase del perfil perdida; /api/me ' + (s.ultimo == null ? 'no pedido' : s.ultimo) + '; recuperación automática: ' + (motivoRec || '—') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
+    return s.ok ? { ok: true, observado: perfil + ': /api/me 200' + (s.renovada ? ' (renovada por el shell tras ' + estados.filter((x) => x !== 200).join(',') + ')' : ''), renovada: s.renovada }
+      : { ok: false, observado: perfil + ': sin sesion (/api/me ' + (s.ultimo == null ? 'sin respuesta' : estados.join(',')) + ' en ' + Math.round(VENTANA_RENOVACION_MS / 1000) + ' s) (Carlos: node abrir-perfil.js ' + perfil + ')' };
   } catch (e) { return { ok: false, observado: perfil + ': ' + explicarError(e, perfil) }; }
   finally { if (ctx) await ctx.close().catch(() => { }); }
 }
@@ -258,5 +277,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
+module.exports = { sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

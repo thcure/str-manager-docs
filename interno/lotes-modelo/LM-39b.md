@@ -1,12 +1,13 @@
 # LM-39b · Regresión según el riesgo y el mapa, con centinelas (MJ-2)
 
-Categoría: crítico (cambia qué prueba la cola)
+Categoría: crítico (cambia qué prueba la cola) · cruce previo con Carlos: 15-oct-2026 18:35, chat del Arquitecto («ok» a la tabla hoy / con LM-39b, tras «ok 39b» pedido en el mensaje anterior)
 Alcance: interno/mapa-modulos.json (ya existe desde LM-40; escritor: Arquitecto) · herramientas/modelo/ruta.js (copiado a pw\ruta.js por la cola; la misma función que usa mapa.py --ruta y el mapa gráfico, LM-41) · herramientas/pw/probar-lote.js · herramientas/pw/centinelas.json (nuevo) · herramientas/pw/pruebas-v1.test.js · herramientas/pw/package.json · herramientas/pw/LEEME.md · herramientas/plantillas/instruccion.md (línea «Regresión») · herramientas/plantillas/revisor-previo.md (punto 14) · interno/proceso.json (l. 958: regresión por módulos) · interno/conocimiento.json (ficha BAI07.05-p) · interno/mejoras.json (MJ-2) · claude/arquitectura/mapa-str.md (apunta a mapa-modulos.json) · claude/arquitectura/reglas-transversales.md (RT-24 y fila de historial) · interno/lotes-modelo/LM-39b.md · copia en LENOVO (pw). Estimado: ~10 archivos, sin .ps1 (la regresión diaria va en LM-39d)
 Reglas transversales que toca: RT-24 (cambia: la regresión deja de ser la zona entera) · RT-23 · RT-4 (mapa-modulos.json es la fuente; mapa-str.md lo explica) · RT-2
 Mapa: módulos y relaciones que cambia: ninguno del producto; las vistas 1 y 3 pasan a ser **entrada de la cola** por mapa-modulos.json (ids normalizados: «SH → todos» y «INC1 / M3» se separan)
 Riesgo: medio · R-1 (que la selección deje fuera un efecto lateral: REQ-INV2-4-2 c atrapó INC-133 en lotes de K3 que no tocaban inventario). Mitigación: centinelas, páginas visitadas, capa común completa, regresión diaria (LM-39d).
 Reversión: pw y cola anteriores (v7.9) y `git revert`.
-Origen: Carlos 15-oct-2026; LM-38. Requerimiento: interno/mejoras.json › MJ-2. Revisión previa: Desarrollo, M-515.
+Origen: Carlos 15-oct-2026; LM-38. Requerimiento: interno/mejoras.json › MJ-2. Revisión previa: Desarrollo, M-515 y M-518 (ok para llevar al cruce).
+Estado: instalado (15-oct 18:50): pw 0.6.0 en LENOVO (probar-lote.js, pruebas-v1.test.js 109/109, ruta.js, mapa-modulos.json, centinelas.json, LEEME, package.json; juez\texto-juez.md); anteriores en pw\anterior\. Pendiente: a2 (humo tras instalar, correr\humo-pw.txt dejado) y b (reprueba de L-117 con 0.6.0, reprobar\L-117.txt dejado).
 Depende de: LM-40 y LM-41 instalados (mapa-modulos.json, ruta.js); LM-39a aceptado. El campo `cubre` de los casos lo anota Desarrollo en un lote de solo guiones (antes o después); sin `cubre`, ruta.js usa los módulos del guion (anclaje por REQ, M-520, o por página); un guion sin módulos corre siempre (cae a su zona, como hoy). `zona` admite lista de ids de módulo; «sesiones» sigue como zona especial.
 ¿Quién más depende?: el revisor previo (punto 14), Desarrollo al escribir la línea «Mapa:», el juez (lista de guiones no corridos), el vigía (aviso).
 

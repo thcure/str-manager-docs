@@ -2,6 +2,11 @@
 // despues del commit y push de un lote; tambien se puede correr a mano. Lo mantiene el Arquitecto.
 // No juzga N3 ni escribe el veredicto: deja log\<lote>-pruebas.json para el verificador (que juzga) y el Chat Desarrollo.
 // Uso: node probar-lote.js --instr <hechas\L-n-instr-x.md> [--repo C:\Users\ktcol\str-manager] [--sin-espera]
+// v0.6.0 (LM-39b, MJ-2): la regresion la elige la RUTA del lote (pw\ruta.js + pw\mapa-modulos.json, copiados de
+// str-manager-docs por el Arquitecto): modulos tocados (archivos del Alcance, linea «Mapa:», REQ) → corren los guiones con
+// un caso cuyo `cubre` (o sus modulos) cae en la ruta, mas los centinelas (pw\centinelas.json) en lotes criticos o de capa
+// comun. «Regresión:» explicita sigue mandando (zonas o ids de modulo; ninguna; todas). `zona` admite lista. Un lote de solo
+// guiones o herramientas corre pw\humo-pw.spec.js y lo deja en n2 como caso «humo». Sin mapa o sin ruta.js: cae a la zona (v0.5.27).
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -25,8 +30,10 @@ function versionNueva(texto) {
 function guionesDeZona(dirE2e, zona, excluir) {
   if (!zona || !fs.existsSync(dirE2e)) return [];
   return fs.readdirSync(dirE2e).filter(f => f.endsWith('.spec.js') && f !== excluir).map(f => path.join(dirE2e, f))
-    .filter(f => { try { return cargar(f).zona === zona; } catch (e) { return false; } });
+    .filter(f => { try { return tieneZona(cargar(f), zona); } catch (e) { return false; } });
 }
+// v0.6.0: `zona` puede ser texto o lista de textos (ids de modulo o nombres de zona)
+function tieneZona(spec, zona) { const z = spec && spec.zona; return Array.isArray(z) ? z.includes(zona) : z === zona; }
 
 // Puro (v0.5.27, M-463): zonas cuya regresion corre el lote, y por que.
 //  1. Si la cabecera trae «Regresión: a, b» (o «Regresion:»), esas; «Regresión: todas» = todas las zonas de tests/e2e;
@@ -54,8 +61,56 @@ function zonasRegresion(texto, zonaGuion, zonasDisponibles = []) {
 function zonasDisponibles(dirE2e) {
   if (!fs.existsSync(dirE2e)) return [];
   const z = new Set();
-  fs.readdirSync(dirE2e).filter(f => f.endsWith('.spec.js')).forEach(f => { try { const s = cargar(path.join(dirE2e, f)); if (s && s.zona) z.add(s.zona); } catch (e) { } });
+  fs.readdirSync(dirE2e).filter(f => f.endsWith('.spec.js')).forEach(f => { try { const s = cargar(path.join(dirE2e, f)); if (s && s.zona) (Array.isArray(s.zona) ? s.zona : [s.zona]).forEach(x => z.add(x)); } catch (e) { } });
   return [...z];
+}
+
+// v0.6.0 (LM-39b): seleccion de la regresion por la ruta del lote. Pura: recibe el texto de la instruccion, el guion del lote
+// (o null), los guiones de tests/e2e ya cargados [{archivo, spec}], el mapa (o null) y los centinelas [{guion, inc, desde}].
+//   → { modo, corren: [{archivo, por}], noCorren: [{archivo, porQue}], ruta, humo, motivo }
+//   modo: 'declarada' («Regresión:» en la cabecera) | 'ruta' | 'zona' (sin mapa o sin ruta.js: como v0.5.27).
+function cargarRuta() { try { return require('./ruta'); } catch (e) { return null; } }
+function seleccionRegresion(texto, spec, guiones, mapa, centinelas = [], R = cargarRuta()) {
+  const cab = String(texto).replace(/\r\n/g, '\n').split('\n').slice(0, 20).join('\n');
+  const al = (cab.match(/^Alcance:.*$/m) || [''])[0];
+  const critico = /^Categor[ií]a:.*cr[ií]tico/mi.test(cab);
+  const conCentinelas = critico || TOCA_COMUN.test(al);
+  const porArchivo = Object.fromEntries(guiones.map(g => [g.archivo, g]));
+  const out = { modo: null, corren: [], noCorren: [], ruta: null, humo: false, motivo: '' };
+  const meter = (archivo, por) => { const e = out.corren.find(x => x.archivo === archivo); if (e) { if (!e.por.includes(por)) e.por.push(por); } else out.corren.push({ archivo, por: [por] }); };
+  const mods = (g) => (mapa && R ? R.modulosDeGuion(mapa, g.spec).modulos : []);
+  const dec = cab.match(/^Regresi[oó]n:\s*(.+)$/mi);
+  if (dec) {
+    const v = dec[1].trim(); out.modo = 'declarada'; out.motivo = 'la instruccion declara «Regresión: ' + v + '»';
+    if (/^todas\b/i.test(v)) guiones.forEach(g => meter(g.archivo, 'Regresión: todas'));
+    else if (!/^ninguna\b/i.test(v)) {
+      const toks = v.split(/[,;]| y /).map(x => x.trim().replace(/^zonas?\s+/i, '').replace(/^m[oó]dulos?\s+/i, '').replace(/[.`()]+$/, '').replace(/\s.*$/, '')).filter(Boolean);
+      for (const g of guiones) for (const t of toks) if (tieneZona(g.spec, t) || mods(g).includes(t)) meter(g.archivo, 'Regresión: ' + t);
+    }
+  } else if (mapa && R) {
+    const lote = R.leerCabecera(texto);
+    if (spec && spec.req && !lote.req.includes(spec.req)) lote.req = (lote.req + ' ' + spec.req).trim();
+    const gs = guiones.map(g => { const m = R.modulosDeGuion(mapa, g.spec); return { archivo: g.archivo, req: g.spec.req, zona: g.spec.zona, modulos: m.modulos, casos: (g.spec.casos || []).map(c => ({ c: c.c, cubre: c.cubre || [] })) }; });
+    const r = R.ruta(mapa, gs, lote);
+    out.modo = 'ruta'; out.ruta = { modulos: r.modulos, porQue: r.porQue, relaciones: r.relaciones.map(x => x.id), reglas: r.reglas.map(x => x.id), huecos: r.huecos, aDeclarar: r.aDeclarar, soloGuiones: !!r.soloGuiones, resumen: r.resumen };
+    out.humo = !!r.soloGuiones;
+    out.motivo = r.resumen;
+    for (const g of r.guionesCorren) { const cc = r.casosCorren.filter(x => x.guion === g.archivo); meter(g.archivo, 'ruta: ' + [...new Set(cc.flatMap(x => x.por))].slice(0, 4).join(', ')); }
+  } else {
+    out.modo = 'zona'; const zr = zonasRegresion(texto, spec ? spec.zona : null, [...new Set(guiones.flatMap(g => Array.isArray(g.spec.zona) ? g.spec.zona : [g.spec.zona]).filter(Boolean))]);
+    out.motivo = 'sin mapa-modulos.json o ruta.js en pw\\: ' + zr.motivo;
+    for (const g of guiones) for (const z of zr.zonas) if (tieneZona(g.spec, z)) meter(g.archivo, 'zona ' + z);
+  }
+  if (conCentinelas && !(dec && /^ninguna\b/i.test(dec[1]))) for (const c of centinelas) if (porArchivo[c.guion]) meter(c.guion, 'centinela (' + (c.inc || 'INC') + ')');
+  for (const g of guiones) if (!out.corren.some(x => x.archivo === g.archivo)) out.noCorren.push({ archivo: g.archivo, porQue: out.modo === 'ruta' ? 'ningun caso cubre un nodo de la ruta (' + mods(g).join(', ') + ')' : out.modo === 'declarada' ? 'fuera de lo declarado' : 'fuera de la zona' });
+  return out;
+}
+function leerJson(ruta, porDefecto) { try { return JSON.parse(fs.readFileSync(ruta, 'utf8')); } catch (e) { return porDefecto; } }
+function cargarGuiones(dirE2e, excluir) {
+  if (!fs.existsSync(dirE2e)) return [];
+  const out = [];
+  for (const f of fs.readdirSync(dirE2e).filter(f => f.endsWith('.spec.js') && f !== excluir).sort()) { try { out.push({ archivo: f, ruta: path.join(dirE2e, f), spec: cargar(path.join(dirE2e, f)) }); } catch (e) { } }
+  return out;
 }
 
 async function sesionViva(perfil) {
@@ -136,27 +191,39 @@ async function main() {
   // Sin guion N2 la cola no usa la semilla: queda como aviso y no bloquea (v0.3.1)
   if (!spec && sem.estado === 'incompleta') entra('semilla zz-verif- (aviso, el lote no trae guion)', true, sem.grupos.filter(x => x.estado === 'falta').map(x => x.id + ': ' + x.observado).join('; '));
   else if (!entra('semilla zz-verif-', sem.estado !== 'incompleta', sem.estado + (sem.error ? ' · ' + sem.error : '') + ' · ' + sem.grupos.map(x => x.id + ' ' + x.estado).join(', '))) return fin('bloqueado', 'semilla incompleta: ' + sem.grupos.filter(x => x.estado === 'falta').map(x => x.observado).join('; '));
-  // v0.5.27 (M-463): las zonas de la regresion salen de zonasRegresion() (declaradas en la cabecera, o la del guion +
-  // inventario si el lote toca servidor o capa comun) y corre aunque el lote no traiga guion propio.
+  // v0.6.0 (LM-39b): la regresion la elige la ruta del lote (seleccionRegresion); «Regresión:» explicita manda; sin mapa, zona.
   const dirE2e = rutaSpec ? path.dirname(rutaSpec) : path.join(repo, 'tests', 'e2e');
-  const zr = zonasRegresion(texto, spec ? spec.zona : null, zonasDisponibles(dirE2e));
+  const mapa = leerJson(path.join(__dirname, 'mapa-modulos.json'), null);
+  const centinelas = leerJson(path.join(__dirname, 'centinelas.json'), []);
+  const guiones = cargarGuiones(dirE2e, rutaSpec ? path.basename(rutaSpec) : null);
+  const sel = seleccionRegresion(texto, spec, guiones, mapa, centinelas);
+  const humoSpec = sel.humo && fs.existsSync(path.join(__dirname, 'humo-pw.spec.js')) ? cargar(path.join(__dirname, 'humo-pw.spec.js')) : null;
   // v0.5.28 (M-474): P4.e comprueba la sesion de TODOS los perfiles que van a correr (guion del lote + regresion), no solo
   // los del guion: un perfil sin sesion tumbaba 30 casos en cascada (L-122) en vez de bloquear en la puerta.
   const perfiles = new Set(((spec && spec.casos) || []).map(c => c.perfil));
-  for (const z of zr.zonas) for (const f of guionesDeZona(dirE2e, z, rutaSpec ? path.basename(rutaSpec) : null)) { try { (cargar(f).casos || []).forEach(c => { if (c.nivel !== 'N3' && c.perfil) perfiles.add(c.perfil); }); } catch (e) { } }
+  for (const c of sel.corren) { const g = guiones.find(x => x.archivo === c.archivo); if (g) (g.spec.casos || []).forEach(k => { if (k.nivel !== 'N3' && k.perfil) perfiles.add(k.perfil); }); }
+  if (humoSpec) (humoSpec.casos || []).forEach(k => { if (k.perfil) perfiles.add(k.perfil); });
   for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
 
   // P5 guion del lote + regresion (sin Claude).
-  out.zonasRegresion = { zonas: zr.zonas, motivo: zr.motivo };
-  console.log('regresion: zonas ' + (zr.zonas.length ? zr.zonas.join(', ') : '(ninguna)') + ' · ' + zr.motivo);
+  out.regresionSeleccion = { modo: sel.modo, motivo: sel.motivo, ruta: sel.ruta, corren: sel.corren, noCorren: sel.noCorren, centinelas: centinelas.map(c => c.guion), mapaLineaBase: mapa ? mapa.lineaBase : null };
+  out.zonasRegresion = { zonas: [], motivo: 'v0.6.0: la regresion se elige por ' + sel.modo + ' (ver regresionSeleccion)' };   // compatibilidad con el juez
+  console.log('regresion (' + sel.modo + '): corren ' + (sel.corren.length ? sel.corren.map(x => x.archivo.replace('.spec.js', '')).join(', ') : '(ninguno)') + ' · no corren ' + sel.noCorren.length + ' · ' + sel.motivo);
+  if (sel.ruta && (sel.ruta.huecos.relaciones.length || sel.ruta.huecos.reglas.length)) console.log('huecos de la ruta: ' + sel.ruta.huecos.relaciones.map(x => x.id).concat(sel.ruta.huecos.reglas.map(x => x.id)).join(', '));
   if (spec) {
     const r = await correrGuion(spec, { lote, dirGuion: path.dirname(rutaSpec) }); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.nivel + ' ' + x.c + ' · ' + x.observado));
   }
+  // v0.6.0 (LM-39b, M-524): lote de solo guiones o herramientas → humo-pw dentro de la corrida, como caso n2 «humo»
+  if (humoSpec) {
+    const rh = await correrGuion(humoSpec, { lote, prefijo: 'zz-verif-' + lote + '-h-', dirGuion: __dirname, nombreGuion: 'humo-pw' });
+    const okH = rh.casos.length > 0 && rh.casos.every(x => x.ok !== false);
+    out.humo = { ok: okH, casos: rh.casos, limpieza: rh.limpieza, perfiles: rh.perfiles };
+    out.n2.push({ c: 'humo', nivel: 'N2', perfil: 'admin', pagina: '/str-app-shell.html', que: 'humo-pw en verde (lote de solo guiones o herramientas)', ok: okH, observado: rh.casos.map(x => (x.ok ? 'OK ' : 'NO ') + x.c + ' ' + x.observado).join(' | ').slice(0, 600) });
+    console.log((okH ? 'OK  ' : 'NO  ') + 'N2 humo · ' + rh.casos.length + ' caso(s)');
+  }
   {
-    const vistos = new Set();
-    const lista = [];
-    for (const z of zr.zonas) for (const f of guionesDeZona(dirE2e, z, rutaSpec ? path.basename(rutaSpec) : null)) { if (!vistos.has(f)) { vistos.add(f); lista.push(f); } }
+    const lista = sel.corren.map(c => (guiones.find(g => g.archivo === c.archivo) || {}).ruta).filter(Boolean);
     for (const f of lista) {
       try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrGuion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') });   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */ }
       catch (e) { out.regresion.push({ guion: path.basename(f), ok: false, observado: e.message }); }
@@ -169,5 +236,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN };
+module.exports = { versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

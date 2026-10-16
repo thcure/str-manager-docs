@@ -29,7 +29,7 @@
 
 module.exports = {
   req: 'REQ-X-n',            // REQ o INC del lote
-  zona: 'calendario',        // área de CLAUDE.md § 2 (sin .md): la regresión corre todos los guiones de la misma zona
+  zona: ['CAL'],             // id(s) de módulo del mapa del STR (interno/mapa-modulos.json); antes: área de CLAUDE.md § 2. Desde pw 0.6.0 la regresión se elige por la ruta del lote, no por la zona
   casos: [
     {
       c: 'c', perfil: 'admin', pagina: '/str-calendario.html',

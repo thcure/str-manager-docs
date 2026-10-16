@@ -2,7 +2,8 @@
 'use strict';
 const { extraerGuion, igual, loteDe, cerrarCaso } = require('./guion');
 const { nombresZz, evaluar, evaluarRelacion, alcanceRelacion, registros } = require('./semilla');
-const { versionNueva, zonasRegresion } = require('./probar-lote');
+const { versionNueva, zonasRegresion, seleccionRegresion, tieneZona } = require('./probar-lote');
+let RUTA; try { RUTA = require('./ruta'); } catch (e) { RUTA = require('../modelo/ruta'); }   // en LENOVO vive como pw\ruta.js; en el repo, herramientas/modelo/ruta.js
 const { argsCamara, explicarError } = require('./comun');
 let ok = 0, fail = 0;
 const t = (n, c) => { if (c) { ok++; console.log('OK   ' + n); } else { fail++; console.log('FAIL ' + n); } };
@@ -131,6 +132,43 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('5xx en observado con el mensaje', /error del servidor: PUT \/api\/col\/turnos → respuesta 500: .*1205/.test(r.observado));
 }
 // v0.5.22 (INC-128): cronología de escrituras
+
+// v0.6.0 (LM-39b): seleccion de la regresion por la ruta del lote
+{
+  const mapa = { modulos: [{ id: 'HK' }, { id: 'POR' }, { id: 'INV' }, { id: 'K3' }, { id: 'KN' }, { id: 'SH' }, { id: 'SRV' }],
+    relaciones: [{ id: 'REL-05', origen: 'HK', destino: 'POR', estado: 'vigente' }, { id: 'REL-30', origen: 'HK', destino: 'KN', estado: 'vigente' }],
+    reglas: [{ id: 'RT-8', titulo: 'Corte', modulos: ['K3', 'HK'], prueba: 'caso' }],
+    anclajeReq: { 'REQ-K3-2': ['K3', 'HK'], 'REQ-K2': ['KN'] },
+    anclajeGuiones: { paginaModulo: { '/str-conocimiento.html': 'KN', '/portal.html': 'POR' }, reqModulo: { 'INC-130': ['HK', 'POR'] }, archivoModulo: { mapa: { 'str-cola-subida.js': ['HK', 'POR', 'INV', 'K3'] } } } };
+  const guiones = [
+    { archivo: 'INC-130.spec.js', spec: { req: 'INC-130', zona: 'inventario', casos: [{ c: 'a', perfil: 'colab', pagina: '/portal.html', cubre: ['HK', 'REL-05'] }] } },
+    { archivo: 'REQ-K3b.spec.js', spec: { req: 'REQ-K3b', zona: ['K3', 'HK'], casos: [{ c: 'a', perfil: 'admin', pagina: '/str-app-shell.html', cubre: ['REL-16', 'RT-8'] }] } },
+    { archivo: 'REQ-TB-5.spec.js', spec: { req: 'REQ-TB-5', zona: 'proyecto', casos: [{ c: 'a', perfil: 'admin', pagina: '/str-seg-proyecto.html', cubre: ['PRJ'] }] } },
+    { archivo: 'REQ-INV2-4-2.spec.js', spec: { req: 'REQ-INV2-4-2', zona: 'inventario', casos: [{ c: 'c', perfil: 'colab', pagina: '/portal.html', cubre: ['INV', 'HK'] }] } },
+  ];
+  const cent = [{ guion: 'REQ-INV2-4-2.spec.js', inc: 'INC-133', desde: '2026-10-15' }];
+  const cabCola = '# instr — INC-999: cola\nCategoría: **normal**\nAlcance: `str-cola-subida.js` · `?v=p1` → `p2`; no toques `api/`\nMapa: módulos y relaciones que cambia: HK\n';
+  let r = seleccionRegresion(cabCola, null, guiones, mapa, cent, RUTA);
+  t('seleccion por ruta: modo ruta y modulos HK, INV, K3, POR', r.modo === 'ruta' && r.ruta.modulos.join(',') === 'HK,INV,K3,POR');
+  t('seleccion por ruta: corren los guiones de la ruta y no el de proyecto', r.corren.map(x => x.archivo).sort().join(',') === 'INC-130.spec.js,REQ-INV2-4-2.spec.js,REQ-K3b.spec.js' && r.noCorren.map(x => x.archivo).join() === 'REQ-TB-5.spec.js');
+  t('seleccion por ruta: centinela entra por capa comun (str-cola-subida)', r.corren.find(x => x.archivo === 'REQ-INV2-4-2.spec.js').por.some(p => /centinela/.test(p)));
+  const cabKn = '# instr — REQ-K2: guias\nCategoría: **estándar**\nAlcance: `str-conocimiento.html`\nMapa: módulos y relaciones que cambia: ninguna\n';
+  r = seleccionRegresion(cabKn, null, guiones, mapa, cent, RUTA);
+  t('seleccion por ruta: un lote en KN no corre inventario ni centinelas', r.corren.length === 0 && r.noCorren.length === 4 && r.ruta.modulos.join() === 'KN');
+  r = seleccionRegresion('# instr — x\nAlcance: `str-cola-subida.js`\nRegresión: ninguna (solo guiones)\n', null, guiones, mapa, cent, RUTA);
+  t('«Regresión: ninguna» no corre nada, ni centinelas', r.modo === 'declarada' && r.corren.length === 0);
+  r = seleccionRegresion('# instr — x\nAlcance: `str-conocimiento.html`\nRegresión: todas\n', null, guiones, mapa, cent, RUTA);
+  t('«Regresión: todas» corre los cuatro', r.corren.length === 4);
+  r = seleccionRegresion('# instr — x\nAlcance: `str-conocimiento.html`\nRegresión: proyecto, K3\n', null, guiones, mapa, cent, RUTA);
+  t('«Regresión: proyecto, K3» acepta zona y id de modulo (zona como lista)', r.corren.map(x => x.archivo).sort().join(',') === 'REQ-K3b.spec.js,REQ-TB-5.spec.js');
+  r = seleccionRegresion('# instr — L-129: cubre\nCategoría: **normal**\nAlcance: `tests/e2e/INC-130.spec.js` · `tests/e2e-esquema.test.js`\nMapa: módulos y relaciones que cambia: ninguno\n', null, guiones, mapa, cent, RUTA);
+  t('lote de solo guiones: humo y sin regresion', r.humo === true && r.corren.length === 0 && r.ruta.soloGuiones === true);
+  r = seleccionRegresion(cabCola, { req: 'INC-999', zona: 'inventario', casos: [] }, guiones, null, cent, RUTA);
+  t('sin mapa cae a la zona (v0.5.27) y mantiene centinelas', r.modo === 'zona' && r.corren.some(x => x.archivo === 'INC-130.spec.js') && r.corren.some(x => x.archivo === 'REQ-INV2-4-2.spec.js'));
+  r = seleccionRegresion(cabCola.replace('**normal**', '**crítico** (DA-1, cruce)'), null, guiones, mapa, cent, RUTA);
+  t('lote critico: centinela aunque la ruta no lo trajera', r.corren.find(x => x.archivo === 'REQ-INV2-4-2.spec.js').por.some(p => /centinela/.test(p)));
+  t('tieneZona: texto y lista', tieneZona({ zona: 'a' }, 'a') && tieneZona({ zona: ['a', 'b'] }, 'b') && !tieneZona({ zona: ['a'] }, 'b'));
+}
 {
   const r = cerrarCaso(caso, [{ ok: true, observado: 'x' }], null, [], [], [
     { metodo: 'PUT', url: 'https://app.x/api/col/turnos', paso: true, motivo: 'a', t: 1000, status: 200, ms: 180 },

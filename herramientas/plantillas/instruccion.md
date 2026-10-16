@@ -7,7 +7,7 @@ Reglas de uso: el borrador va **sin número** (el número se asigna al encolar);
 Categoría: **<estándar | normal | crítico>** (<por qué; para crítico: DA-n y «cruce previo con Carlos: fecha hora, dónde»>)
 Alcance: <archivos y rutas exactos> · `?v=<actual>` → `<nuevo>` en <dónde> · `schema_version` <igual | n → m> · <sin cambios de base de datos | migración: …>
 Impacto: <qué cambia para el usuario; qué INC/DT cierra>
-Regresión: <opcional (pw 0.5.27, M-463): zonas de `tests/e2e` que corre la cola además del guion, p. ej. `inventario, sesiones`; `todas`; o `ninguna` con el porqué. Sin esta línea: la zona del guion y, si el Alcance toca `api/`, `database.php`, `str-api.js`, `str-app-shell`, `portal.html`, `str-cola-subida` o `secrets.php`, también `inventario`>
+Regresión: <opcional (pw 0.6.0, LM-39b): normalmente NO se escribe: la cola corre los guiones de la **ruta** del lote (§ Ruta de pruebas) más los centinelas si el lote es crítico o toca la capa común. Solo para forzar: ids de módulo o zonas, p. ej. `HK, K3` o `inventario`; `todas`; o `ninguna` con el porqué (un lote de solo guiones no la necesita: la cola corre su guion y el humo)>
 Reglas transversales que toca: <RT-n, RT-m (LM-36: `claude/arquitectura/reglas-transversales.md`); «ninguna» solo si el lote no toca datos, permisos, archivos, retención ni conexiones. Una RT «en conflicto» = el lote no se encola>
 Mapa: módulos y relaciones que cambia: <módulo(s) de la vista 1 y relación(es) de la vista 3 de `claude/arquitectura/mapa-str.md` que este lote crea, cambia o quita (colección, evento o ruta nueva); «ninguna» si solo corrige dentro de un módulo>
 Riesgo: <bajo | medio | alto> (<R-n>). Mitigación: <una frase>.
@@ -43,7 +43,7 @@ N1 → «cubierto por tests/<archivo>» (la cola corre `node tests/run.js` en la
 
 ### Guion N2 → `tests/e2e/<REQ-o-INC>.spec.js` (la CLI lo copia tal cual, sin cambiar un byte; plantilla: `herramientas/plantillas/guion-e2e.js`)
 ```js
-module.exports = { req: '<REQ-X-n>', zona: '<área de CLAUDE.md § 2>', casos: [ /* un caso por criterio N2 y por hueco de la ruta; cada uno con cubre: ['REL-n', 'RT-n', '<módulo>'] */ ], async limpiar(h) { } };
+module.exports = { req: '<REQ-X-n>', zona: ['<id de módulo del mapa, p. ej. HK>'], casos: [ /* un caso por criterio N2 y por hueco de la ruta; cada uno con cubre: ['REL-n', 'RT-n', '<módulo>'] */ ], async limpiar(h) { } };
 ```
 Sin criterios N2: borra esta subsección (la cola lo anota y sigue). La cola comprueba que el archivo del commit es igual a este bloque: si la CLI lo cambia, el lote queda «bloqueado» sin gastar verificación.
 Los criterios de permisos y 403 van «cubierto por tests/<archivo>»: el verificador lee el resultado, no los prueba en el navegador. Lo mismo los criterios de **ancho o móvil** (390 px, media queries): el verificador no puede cambiar el tamaño de la ventana; se prueban con un test que lea el CSS (lote 69, 11-oct). Si un criterio exige llegar «desde el menú», la prueba lo dice y empieza en `str-app-shell.html`.

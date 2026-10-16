@@ -61,6 +61,22 @@ function reglasDeRuta(mapa, modulos) {
   return (mapa.reglas || []).filter((g) => g.modulos.includes('*') || g.modulos.some((m) => set.has(m)));
 }
 
+// Módulos de un guion (misma regla que mapa.py › M4, M-520): `modulos` de un caso gana; si no, el REQ del guion (reqModulo o
+// anclajeReq, sin sumar páginas); si no, las páginas de sus casos por paginaModulo. Devuelve { modulos[], anclaje }.
+function modulosDeGuion(mapa, spec) {
+  const ag = mapa.anclajeGuiones || {}, pm = ag.paginaModulo || {}, rm = ag.reqModulo || {}, ancla = mapa.anclajeReq || {};
+  const ids = new Set((mapa.modulos || []).map((m) => m.id));
+  const porCaso = new Set(), porPagina = new Set();
+  for (const c of (spec && spec.casos) || []) {
+    for (const m of c.modulos || []) if (ids.has(m)) porCaso.add(m);
+    if (!(c.modulos || []).length && c.pagina && pm[c.pagina]) porPagina.add(pm[c.pagina]);
+  }
+  const porReq = new Set(rm[spec && spec.req] || ancla[spec && spec.req] || []);
+  if (porCaso.size) return { modulos: [...new Set([...porCaso, ...porReq])].sort(), anclaje: 'caso' };
+  if (porReq.size) return { modulos: [...porReq].sort(), anclaje: 'req' };
+  return { modulos: [...porPagina].sort(), anclaje: porPagina.size ? 'pagina' : 'ninguno' };
+}
+
 // Qué cubre cada caso: lo declarado en `cubre`, o los módulos del guion.
 function nodosDelCaso(g, c) {
   const n = new Set();
@@ -176,7 +192,7 @@ function markdown(r) {
   return L.join('\n');
 }
 
-module.exports = { ruta, cobertura, leerCabecera, markdown, modulosDelLote, relacionesDeRuta, reglasDeRuta, nodosDelCaso };
+module.exports = { ruta, cobertura, leerCabecera, markdown, modulosDelLote, relacionesDeRuta, reglasDeRuta, nodosDelCaso, modulosDeGuion };
 
 if (require.main === module) {
   const fs = require('fs');

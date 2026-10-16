@@ -803,6 +803,14 @@
    "estado": "abierto",
    "severidad": "baja",
    "nota": "Abierto por el juez en el veredicto 4 de L-132 (16:40): str-elementos.html cayó a main en vez de raw/<sha> (REQ-TB-3 g) y str-seg-proyecto.html no pintó a tiempo indicadores y semáforo (REQ-TB-5 c, e), tras 32 min con muchas consultas a la API de GitHub. Ajeno a L-132. Sospecha: límite de consultas sin autenticar de la API de GitHub. A mirar después de FL-12; no bloquea."
+  },
+  {
+   "id": "INC-140",
+   "fecha": "2026-10-16",
+   "titulo": "El HK embebido en el portal navega a login.html cuando Firebase le da null al arrancar; login entra solo y vuelve: bucle que dispara el freno de INC-56 («varios inicios automáticos») desde el 3.º en 30 s",
+   "estado": "abierto",
+   "severidad": "media",
+   "nota": "Visto en las repruebas de L-132 (perfil colab, M-582/M-588); acordado con el Arquitecto (M-589). Causa: str-m1-housekeeping.html L7270–7272 onAuthStateChanged → location.replace('login.html') también dentro del iframe; el freno de login.html (sessionStorage str-login-autos, 30 s, >2) es correcto. Arreglo: el HK embebido nunca navega a login.html; espera authStateReady con tope (como L-133) y, sin usuario, avisa al portal y sigue con el JWT del portal. Guion con 5 aperturas del portal del colab en < 30 s. Detrás de L-133."
   }
  ],
  "dts": [
@@ -13989,12 +13997,12 @@
    "estado": "no aceptado",
    "vista": "siguiente",
    "esperaA": "Carlos",
-   "espera": "abrir perfil colab + LM-46; luego reprobar",
+   "espera": "INC-140 aceptado o cruce de LM-47b (Arquitecto); no reprobar antes",
    "orden": 121.521,
    "desde": "2026-10-16 10:23",
    "planTrabajo": "PT-1",
    "grupo": "MENU",
-   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131. · 11:18 encolado: ok de Diseño M-553 (S19 a INC-134); ruta con REQ-SH-2 anclado (M-552). · 11:22 construido 849db62 (run.js 80/80, menu-sh2 129/129, p5c100). Pruebas bloqueadas en la puerta: la marca del guion tenía texto entre ella y ```js. 11:26 hechas\\ corregido (texto antes de la marca) y reprobar\\L-132.txt. · 11:27 reprueba bloqueada: colab2 sin sesión (401). · 12:02 colab2 con sesión (M-561): correr\\sesiones + reprobar\\L-132. · 12:27 veredicto del juez (log\\L-132-veredicto.json): NO ACEPTADO. Los 10 criterios a–j (N1, N2, N3) en verde, run.js 80/80. Rojos de regresión: DT-42 b/c (guardia LM-43, herramienta, arreglado por L-135 867cadf) y REQ-TB-3 g (INC-136, guion: cuenta la carga de arranque; arreglo L-136). Reprueba tras L-136. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 12:57 reprueba bloqueada otra vez por la semilla (lectura intermitente, M-569). 13:02 reprobar de nuevo. · 15:04 NO ACEPTADO de nuevo (log\\L-132-veredicto-2.json): a–j en verde (N1 80/80, N2 y N3); único rojo INC-132 g de la regresión → INC-138, L-138 (solo guion). Reprobar L-132 cuando L-138 esté en main. · 15:14 reprobar\\L-132 (con L-138 en main). · 16:05 NO ACEPTADO 3 (log\\L-132-veredicto-3.json): a–j en verde, sin INC; rojos de la regresión por herramienta: el iframe de HK del perfil colab sin sesión de 15:21 a 15:44 (pantalla de login; INC-132 c–g, INV2-3-4-hk, INV2-4-2, INV2-7-1, K3b/K3c). 15:52 correr\\sesiones y reprobar\\L-132. · 15:54 Arquitecto (M-580): no es el perfil (sesiones 200, colab entra bien antes y después); lectura: producto, sesión del iframe de HK en el portal (familia INC-134, L-133 deja fuera los iframes). Si la reprueba de 15:52 lo repite → INC nuevo, a mirar junto a L-133. · 16:40 NO ACEPTADO 4 (log\\L-132-veredicto-4.json): n1 y a–j en verde; rojos de regresión por la sesión de Google del perfil colab (M-582: colab2 pasa en la misma corrida) e INC-139 (GitHub, bajo). Espera: Carlos abre el perfil colab y el Arquitecto instala LM-46; luego reprobar."
+   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131. · 11:18 encolado: ok de Diseño M-553 (S19 a INC-134); ruta con REQ-SH-2 anclado (M-552). · 11:22 construido 849db62 (run.js 80/80, menu-sh2 129/129, p5c100). Pruebas bloqueadas en la puerta: la marca del guion tenía texto entre ella y ```js. 11:26 hechas\\ corregido (texto antes de la marca) y reprobar\\L-132.txt. · 11:27 reprueba bloqueada: colab2 sin sesión (401). · 12:02 colab2 con sesión (M-561): correr\\sesiones + reprobar\\L-132. · 12:27 veredicto del juez (log\\L-132-veredicto.json): NO ACEPTADO. Los 10 criterios a–j (N1, N2, N3) en verde, run.js 80/80. Rojos de regresión: DT-42 b/c (guardia LM-43, herramienta, arreglado por L-135 867cadf) y REQ-TB-3 g (INC-136, guion: cuenta la carga de arranque; arreglo L-136). Reprueba tras L-136. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 12:57 reprueba bloqueada otra vez por la semilla (lectura intermitente, M-569). 13:02 reprobar de nuevo. · 15:04 NO ACEPTADO de nuevo (log\\L-132-veredicto-2.json): a–j en verde (N1 80/80, N2 y N3); único rojo INC-132 g de la regresión → INC-138, L-138 (solo guion). Reprobar L-132 cuando L-138 esté en main. · 15:14 reprobar\\L-132 (con L-138 en main). · 16:05 NO ACEPTADO 3 (log\\L-132-veredicto-3.json): a–j en verde, sin INC; rojos de la regresión por herramienta: el iframe de HK del perfil colab sin sesión de 15:21 a 15:44 (pantalla de login; INC-132 c–g, INV2-3-4-hk, INV2-4-2, INV2-7-1, K3b/K3c). 15:52 correr\\sesiones y reprobar\\L-132. · 15:54 Arquitecto (M-580): no es el perfil (sesiones 200, colab entra bien antes y después); lectura: producto, sesión del iframe de HK en el portal (familia INC-134, L-133 deja fuera los iframes). Si la reprueba de 15:52 lo repite → INC nuevo, a mirar junto a L-133. · 16:40 NO ACEPTADO 4 (log\\L-132-veredicto-4.json): n1 y a–j en verde; rojos de regresión por la sesión de Google del perfil colab (M-582: colab2 pasa en la misma corrida) e INC-139 (GitHub, bajo). Espera: Carlos abre el perfil colab y el Arquitecto instala LM-46; luego reprobar. · 16:53 Arquitecto (M-589): los rojos vienen de INC-140 (bucle del HK embebido); L-132 espera INC-140 o LM-47b."
   },
   {
    "lote": null,
@@ -14032,15 +14040,15 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Shell: esperar a Firebase antes de renovar la sesión (aviso «Entrar» con sesión iniciada)",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
    "esperaA": "cola",
-   "espera": "aceptación de L-132; luego encolar",
+   "espera": "",
    "orden": 121.5215,
    "desde": "2026-10-16 11:18",
    "planTrabajo": "PT-1",
    "grupo": "MENU",
-   "nota": "Sacado de L-132 por Diseño (M-553). · 11:19 Arquitecto: normal (M-554), con tope de 8 s en la espera a Firebase (aplicado; sesion-shell 14/14). · 11:33 ok de Diseño (M-555)."
+   "nota": "Sacado de L-132 por Diseño (M-553). · 11:19 Arquitecto: normal (M-554), con tope de 8 s en la espera a Firebase (aplicado; sesion-shell 14/14). · 11:33 ok de Diseño (M-555). · 16:55 encolado (cmp IGUAL); L-132 queda en espera de INC-140/LM-47b (M-589)."
   },
   {
    "lote": "L-134",

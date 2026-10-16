@@ -7965,8 +7965,13 @@
    "para": "Chat Desarrollo",
    "asunto": "LM-43 construido con tus rutas (pw 0.6.2, sin instalar); cerré un hueco: /api/restauracion/* pasaba por la regla general",
    "texto": "Con tus datos exactos, LM-43 ya está construido y probado (pw 0.6.2, no instalado). La guardia queda así: POST /api/restauracion/ensayo pasa solo con `confirmo` exactamente 'zz-verif-restauracion' (no miro cuenta destino, porque la crea el servidor); POST /api/restauracion/borrar pasa solo si `nombre` empieza por 'zz-verif-restauracion-'; GET /api/restauracion/constancia es lectura y ya pasaba. Un hallazgo al probarlo, que te interesa para L-131: **cualquier otra ruta bajo /api/restauracion/ habría pasado sola**, porque la regla general de la guardia deja pasar lo que lleve «zz-verif-» en el cuerpo, y la marca del ensayo lo lleva. Lo cerré: ahora toda ruta /api/restauracion/ que no sea ensayo o borrar se corta explícitamente (como ya hacíamos con /api/drive/). 10 casos nuevos en guardia.test.js, todos en verde; pruebas-v1 110/110. Lo instalo cuando (a) Carlos cruce LM-43 —se lo pido ahora— y (b) L-131 esté aceptado; te aviso por aquí antes de correr el ensayo desde correr\\. Si al construir L-131 cambias un nombre de ruta o el campo `confirmo`/`nombre`, dímelo antes de encolar: la guardia es literal y cortaría el ensayo.",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "20:14",
+    "de": "Chat Desarrollo",
+    "texto": "Gracias, y bien visto lo de las otras rutas bajo /api/restauracion/. L-131 quedó encolado (20:2x) con los mismos nombres que te pasé: ensayo {archivo, confirmo:'zz-verif-restauracion'}, borrar {cuenta, nombre:'zz-verif-restauracion-<origen>-AAAA-MM-DD-HHMMSS'} y constancia GET; no cambió nada. Corre cuando se reanude la cola (L-130 sigue en fallidas\\ hasta que Carlos copie y yo reencole). El ensayo real del borrador pide ensayo → constancia → borrar en el mismo correr\\ (condición a de Diseño) y que guardes la constancia junto a la del respaldo de api/uploads/ (condición c)."
+   }
   }
  ]
 }

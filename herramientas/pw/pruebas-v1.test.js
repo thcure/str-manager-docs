@@ -2,7 +2,7 @@
 'use strict';
 const { extraerGuion, igual, loteDe, cerrarCaso } = require('./guion');
 const { nombresZz, evaluar, evaluarRelacion, alcanceRelacion, registros } = require('./semilla');
-const { versionNueva, zonasRegresion, seleccionRegresion, tieneZona } = require('./probar-lote');
+const { versionNueva, zonasRegresion, seleccionRegresion, tieneZona, carpetaCapturasAnterior } = require('./probar-lote');
 let RUTA; try { RUTA = require('./ruta'); } catch (e) { RUTA = require('../modelo/ruta'); }   // en LENOVO vive como pw\ruta.js; en el repo, herramientas/modelo/ruta.js
 const { argsCamara, explicarError } = require('./comun');
 let ok = 0, fail = 0;
@@ -167,6 +167,7 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('sin mapa cae a la zona (v0.5.27) y mantiene centinelas', r.modo === 'zona' && r.corren.some(x => x.archivo === 'INC-130.spec.js') && r.corren.some(x => x.archivo === 'REQ-INV2-4-2.spec.js'));
   r = seleccionRegresion(cabCola.replace('**normal**', '**crítico** (DA-1, cruce)'), null, guiones, mapa, cent, RUTA);
   t('lote critico: centinela aunque la ruta no lo trajera', r.corren.find(x => x.archivo === 'REQ-INV2-4-2.spec.js').por.some(p => /centinela/.test(p)));
+  t('v0.6.1: carpeta de capturas apartadas con fecha y hora', carpetaCapturasAnterior('L-117', new Date(2026, 9, 15, 19, 44)) === 'L-117-20261015-1944');
   t('tieneZona: texto y lista', tieneZona({ zona: 'a' }, 'a') && tieneZona({ zona: ['a', 'b'] }, 'b') && !tieneZona({ zona: ['a'] }, 'b'));
 }
 {

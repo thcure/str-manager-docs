@@ -7,6 +7,9 @@
 // un caso cuyo `cubre` (o sus modulos) cae en la ruta, mas los centinelas (pw\centinelas.json) en lotes criticos o de capa
 // comun. «Regresión:» explicita sigue mandando (zonas o ids de modulo; ninguna; todas). `zona` admite lista. Un lote de solo
 // guiones o herramientas corre pw\humo-pw.spec.js y lo deja en n2 como caso «humo». Sin mapa o sin ruta.js: cae a la zona (v0.5.27).
+// v0.6.1 (M-528, Desarrollo): al empezar cada corrida, las capturas de la corrida anterior del mismo lote se APARTAN a
+// log\capturas\anterior\<lote>-<AAAAMMDD-HHMM>\ (no se borran: R11 y «no se borra, se desactiva»), para que el juez solo vea
+// las de esta corrida y no los *-error.png de una reprueba vieja.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -105,6 +108,23 @@ function seleccionRegresion(texto, spec, guiones, mapa, centinelas = [], R = car
   for (const g of guiones) if (!out.corren.some(x => x.archivo === g.archivo)) out.noCorren.push({ archivo: g.archivo, porQue: out.modo === 'ruta' ? 'ningun caso cubre un nodo de la ruta (' + mods(g).join(', ') + ')' : out.modo === 'declarada' ? 'fuera de lo declarado' : 'fuera de la zona' });
   return out;
 }
+// Puro: nombre de la carpeta donde se apartan las capturas de una corrida anterior.
+function carpetaCapturasAnterior(lote, d = new Date()) {
+  const dd = n => String(n).padStart(2, '0');
+  return lote + '-' + d.getFullYear() + dd(d.getMonth() + 1) + dd(d.getDate()) + '-' + dd(d.getHours()) + dd(d.getMinutes());
+}
+// Aparta las capturas de la corrida anterior de ESTE lote (nunca las de otro). Devuelve adonde fueron, o null.
+function apartarCapturas(lote, d = new Date()) {
+  const dir = path.join(COLA, 'log', 'capturas', lote);
+  try {
+    if (!fs.existsSync(dir) || !fs.readdirSync(dir).length) return null;
+    const destino = path.join(COLA, 'log', 'capturas', 'anterior', carpetaCapturasAnterior(lote, d));
+    fs.mkdirSync(path.dirname(destino), { recursive: true });
+    fs.renameSync(dir, destino);
+    return destino;
+  } catch (e) { return null; }
+}
+
 function leerJson(ruta, porDefecto) { try { return JSON.parse(fs.readFileSync(ruta, 'utf8')); } catch (e) { return porDefecto; } }
 function cargarGuiones(dirE2e, excluir) {
   if (!fs.existsSync(dirE2e)) return [];
@@ -205,7 +225,9 @@ async function main() {
   if (humoSpec) (humoSpec.casos || []).forEach(k => { if (k.perfil) perfiles.add(k.perfil); });
   for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
 
-  // P5 guion del lote + regresion (sin Claude).
+  // P5 guion del lote + regresion (sin Claude). v0.6.1: las capturas de la corrida anterior de este lote se apartan antes.
+  const apartadas = apartarCapturas(lote);
+  if (apartadas) { out.capturasApartadas = path.relative(COLA, apartadas); console.log('capturas de la corrida anterior apartadas en ' + out.capturasApartadas); }
   out.regresionSeleccion = { modo: sel.modo, motivo: sel.motivo, ruta: sel.ruta, corren: sel.corren, noCorren: sel.noCorren, centinelas: centinelas.map(c => c.guion), mapaLineaBase: mapa ? mapa.lineaBase : null };
   out.zonasRegresion = { zonas: [], motivo: 'v0.6.0: la regresion se elige por ' + sel.modo + ' (ver regresionSeleccion)' };   // compatibilidad con el juez
   console.log('regresion (' + sel.modo + '): corren ' + (sel.corren.length ? sel.corren.map(x => x.archivo.replace('.spec.js', '')).join(', ') : '(ninguno)') + ' · no corren ' + sel.noCorren.length + ' · ' + sel.motivo);
@@ -236,5 +258,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones };
+module.exports = { versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

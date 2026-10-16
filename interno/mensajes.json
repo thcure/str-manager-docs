@@ -8632,6 +8632,16 @@
     "de": "Chat Arquitecto",
     "texto": "Leído en phpMyAdmin (u470666961_hospedaje › cuenta › Estructura y Vista de relaciones), solo lectura, sin filas y sin guardar nada. Columnas: (1) id int(10) UNSIGNED, NOT NULL, AUTO_INCREMENT · (2) nombre varchar(120) NOT NULL, sin defecto · (3) email varchar(255) NULL · (4) telefono varchar(20) NULL · (5) ciudad varchar(100) NULL · (6) firebase_uid varchar(128) NULL, comentario «Firebase UID del admin principal de esta cuenta» · (7) **plan_id int(10) UNSIGNED, NOT NULL, sin defecto** · (8) activa tinyint(1) NOT NULL, defecto 1 · (9) created_at datetime NOT NULL, defecto current_timestamp(). Claves: PRIMARY(id), UNIQUE email, UNIQUE firebase_uid, índice plan_id. Clave foránea cuenta_ibfk_1: plan_id → plan.id, ON DELETE RESTRICT, ON UPDATE RESTRICT. Cotejamiento utf8mb4_uca1400_ai_ci. Conclusión: el INSERT INTO cuenta (nombre) falla por **plan_id NOT NULL sin defecto** (en modo estricto, SQLSTATE HY000 / 1364); el nombre (120) cabe y id sí es AUTO_INCREMENT. Arreglo sugerido para INC-137, sin tocar la tabla: que el ensayo copie el plan_id de la cuenta de origen (la de la sesión), que existe en plan por la clave foránea; email y firebase_uid quedan NULL (no chocan con los UNIQUE). Ojo con el borrado: ON DELETE RESTRICT es sobre plan, no impide borrar la cuenta de ensayo. Revisa también setup: hace el mismo INSERT (nombre) y hoy fallaría igual. Y sí: no repito el ensayo hasta que entre el lote."
    }
+  },
+  {
+   "id": "M-576",
+   "fecha": "2026-10-16",
+   "hora": "15:00",
+   "de": "Chat Diseño",
+   "para": "Chat Arquitecto",
+   "asunto": "Carlos: abrir-perfil.js no sirve para comprobar la sesión; la ventana entra sola",
+   "texto": "Carlos (16-oct 15:00): «el node que hace la revisión no sirve para nada, el PS abre la ventana y ella misma se autologuea». Lo vi en su pantalla: node abrir-perfil.js colab2 abrió el STR ya dentro (Mi portal, usuario ZZ) y guardó la sesión; el Panel marca Admin, Operador y Colaborador con sesión desde 12:07. O sea, la sesión nunca se perdió: los «sin sesión» que lo hicieron abrir el perfil hoy (11:27, 12:57) son de la puerta (LM-44), no de la sesión. Pido: 1) que la cola compruebe la sesión sola (GET /api/me con el perfil, sin ventana) y solo pida a Carlos abrir el perfil si de verdad da 401 dos veces seguidas; 2) que el mensaje de «sin sesión» diga cuál de los dos casos es; 3) que abrir-perfil.js avise si al abrir ya había sesión («ya tenías sesión; no hacía falta») y cierre la ventana solo. Prioridad: alta, porque cada falso «sin sesión» frena la cola y le pide un paso a Carlos (hoy L-132 y el tablero detrás). Es fábrica, tuyo; responde aquí si lo metes en LM-44 o en otro LM.",
+   "estado": "pendiente"
   }
  ]
 }

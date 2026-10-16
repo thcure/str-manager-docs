@@ -186,18 +186,26 @@ async function comprobarSemilla(opciones = {}) {
     const a = await abrir('admin', { headless: opciones.headless }); ctx = a.ctx;
     for (const g of CONF.grupos) {
       const page = await ctx.newPage();
-      const vistos = new Set(); let visto = false, parcial = true;
-      page.on('response', async (r) => {
+      const vistos = new Set(); let visto = false, parcial = true, fallosCuerpo = 0;
+      const lecturas = [];   // v0.6.3 (LM-44, M-569): cuerpos en lectura; se esperan antes de evaluar
+      page.on('response', (r) => {
         const u = r.url();
         if (!u.includes(g.fuente) || r.request().method() !== 'GET' || r.status() !== 200) return;
-        visto = true; if (!/[?&]since=/.test(u)) parcial = false;
-        try { const j = await r.json(); nombresZz(j).forEach(n => vistos.add(n)); (cuerpos[g.id] = cuerpos[g.id] || []).push(j); } catch (e) { }
+        // v0.6.3: «visto» y «parcial» solo cuentan cuando el cuerpo se leyó entero. Antes se marcaban antes de leerlo y, si la
+        // lectura fallaba o no terminaba (respuestas de ~180 KB), el grupo salía «falta: hay 0» con los datos completos
+        // (L-135 12:29, L-131 12:31; el conteo de solo lectura de 12:37 vio 433 zonas zz, 414 artículos, 121 estados).
+        lecturas.push(r.json().then((j) => {
+          visto = true; if (!/[?&]since=/.test(u)) parcial = false;
+          nombresZz(j).forEach(n => vistos.add(n)); (cuerpos[g.id] = cuerpos[g.id] || []).push(j);
+        }, () => { fallosCuerpo++; }));
       });
       try {
         await page.goto(BASE + g.pagina, { waitUntil: 'networkidle', timeout: 45000 });
         await page.waitForTimeout(1500);
       } catch (e) { }
-      grupos.push(alcanceRelacion(g, evaluar(g, vistos, visto, parcial), opciones.lote)); vistosG[g.id] = visto && !parcial;   // v4: grupos con 'para'
+      await Promise.race([Promise.all(lecturas), new Promise((ok) => setTimeout(ok, 15000))]);
+      const ev = (!visto && fallosCuerpo) ? { id: g.id, estado: 'no concluyente', observado: 'la respuesta de ' + g.fuente + ' llegó pero no se pudo leer su cuerpo (' + fallosCuerpo + ' vez/veces); repetir' } : evaluar(g, vistos, visto, parcial);
+      grupos.push(alcanceRelacion(g, ev, opciones.lote)); vistosG[g.id] = visto && !parcial;   // v4: grupos con 'para'
       await page.close().catch(() => { });
     }
   } catch (e) {

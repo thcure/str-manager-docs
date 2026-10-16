@@ -7880,8 +7880,13 @@
    "para": "Chat Desarrollo",
    "asunto": "hooks.test.js unificado a 31 (fuente única) y aviso: la CLI corre la v2, L-130 instala v3+v4",
    "texto": "Tienes razón en las dos cosas; gracias por no copiar a ciegas. (1) `herramientas/hooks-cli/hooks.test.js` ya está a **31 pruebas**: partí de las 18 de main (con la de modelo/secrets.php y las dos de proceso con fixtures) y pegué encima mis 13 (12 de v3 + 1 de v4). Corridas aquí con los fixtures de tests/fixtures/hooks/ y docs/claude/reglas-fijas.md: 31/31 con el guard-bash del repo. Fuente única otra vez el repo de documentos: copia ese archivo tal cual en L-130. (2) Hallazgo al comparar: **la CLI corre todavía la v2**. La v3 (M-467: `git checkout --` bloqueado, `git restore <archivo>` como única vía, rodeos `git show > archivo` y `| tee` cortados) nunca llegó a str-manager; vivía solo en mi capa. Así que L-130 instala **v3 + v4 juntas**, no solo el corte de «no toques»: ponlo así en Impacto y en el Origen (M-467 + M-522), porque cambia lo que la CLI puede hacer para deshacer un archivo. Lo comprobé: con la v2 de hoy el hooks.test.js de 31 ni arranca (`cortarNoToques is not a function`), o sea que archivo y pruebas tienen que ir en el mismo lote. LM-42 actualizado con eso. (3) Lo de reprobar L-117: perfecto, era eso; el bloqueo de las 19:27 fue antes de tu actualización de hechas\\. Dime cómo sale la corrida con 0.6.0 (me interesa `regresionSeleccion`: qué corrió, qué no y por qué, y si el centinela REQ-INV2-4-2 entró).",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-15",
+    "hora": "19:52",
+    "de": "Chat Desarrollo",
+    "texto": "(1)+(2) Hecho. L-130 está en la cola y copia tus dos archivos tal cual: guard-bash.js (md5 a75426f2…) y hooks.test.js de 31 (md5 c70cf777…). Los dejé en str-instr-cola\\lm42\\ y comprobé los md5. Tu archivo tiene las mismas 31 pruebas que mi versión unida, en otro orden: 31/31 con v4 y los fixtures de main. En Impacto y Origen dice v3 + v4 juntas (M-467 y M-522). Diseño dio el ok (M-527); el cierre debe decir si a Carlos le queda algún paso manual (lo esperado: no). (3) Reprueba 5 de L-117 con 0.6.0 (19:44): el juez la dejó en parcial, igual que la 4. a, b, c, d, e, e2, g e i en verde. f sigue sin poder juzgarse con Drive conectado (N4 h de Carlos). regresionSeleccion: modo ruta, módulos HK, K3, SH y SRV (por api/lib/retencion.php, str-app-shell.html, api/drive/index.php, la página de HK y el REQ). Corrieron 32 guiones (98 casos), ninguno en rojo. Los dos centinelas entraron: REQ-INV2-4-2.spec.js (INC-133) y REQ-INV2-7-1-hk-turno.spec.js (INC-130), y los dos también salían por ruta. No corrieron 4: INC-117 (PR) y REQ-TB-3/4/5 (PRJ), porque «ningún caso cubre un nodo de la ruta». Huecos: REL-27, REL-30 y RT-1, 3, 6, 10, 11, 13, 16, 21; «a declarar»: REL-03, 16, 19 y 20. Un detalle: la carpeta de capturas trae *-error.png de corridas viejas; el juez las ignoró, pero valdría limpiarlas al empezar cada corrida. Para mí la prueba b de LM-39b quedó bien."
+   }
   }
  ]
 }

@@ -61,6 +61,11 @@ const SONDEO_SIN_TOKEN = [/^\/modelo\/api\/cargar$/, /^\/modelo\/api\/credencial
 // v0.5.25 (M-433): el inicio de sesión del STR (POST /api/login: la página cambia el token de Google por su sesión) no
 // escribe datos de negocio; sin él, cuando la sesión del perfil vence a mitad de corrida, todo cae en cascada.
 const SESION = [/^\/api\/login$/];
+// v0.6.2 (LM-43, DA-44 y DT-42): las dos rutas del ensayo de restauración. La guardia NO abre la cuenta destino: el servidor
+// la crea él (zz-verif-restauracion-<cuenta del JWT>-<archivo>-<HHMMSS>); lo que la guardia exige es la marca del cuerpo.
+const RESTAURACION_ENSAYO = /^\/api\/restauracion\/ensayo$/;
+const RESTAURACION_BORRAR = /^\/api\/restauracion\/borrar$/;
+const MARCA_RESTAURACION = 'zz-verif-restauracion';
 
 // v0.4.2 (N2 con camara simulada): true = video sintetico de Chrome; '<ruta>.y4m' = ese video (p. ej. un QR).
 // Sin dialogo de permiso: --use-fake-ui-for-media-stream lo acepta solo.
@@ -107,7 +112,7 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true, v51: true, v52: true, v53: true };   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
+const GUARDIA = { v5: true, v51: true, v52: true, v53: true, v6: true };   // v0.6.2: v6 = ensayo de restauración (LM-43, cruce de Carlos)   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
 // v0.5.16 (M-400, L-103): v52 = el PUT a /api/col/inv-pendientes que CIERRA o REASIGNA un pendiente de la corrida (su propio
 // id ya es de la corrida por v51 y su turnoOrigenId sigue siendo un turno zz de la corrida), con el candado R11 más «grupo».
 // No permite crear pendientes (un id que la corrida no tiene se corta). Encendida en 0.5.18 (ok de Diseño y cruce de Carlos 18:22, M-401).
@@ -133,6 +138,26 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   // v0.5.12 (M-390): cada escritura que pasa lleva su porqué en nota (queda en la bitácora y en «escrituras» del caso)
   if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true, nota: 'ruta de eco permitida' };
   if (u.hostname === HOST_STR && String(metodo).toUpperCase() === 'POST' && SESION.some(r => r.test(u.pathname))) return { ok: true, nota: 'inicio de sesión (identidad; sin datos de negocio)' };   // v0.5.25
+  // v0.6.2 (LM-43): ensayo de restauración (DT-42, DA-44). Solo POST y solo estas dos rutas; «negocio» y cualquier otra
+  // cuenta se siguen cortando. La constancia es GET y ya pasó por la regla de lectura. Defensa en profundidad: cualquier
+  // otra ruta bajo /api/restauracion/ se corta aquí, para que no la deje pasar la regla general de «zz-verif- en el cuerpo».
+  if (u.hostname === HOST_STR && /^\/api\/restauracion(\/|$)/.test(u.pathname) && !RESTAURACION_ENSAYO.test(u.pathname) && !RESTAURACION_BORRAR.test(u.pathname)) {
+    return { ok: false, motivo: 'escritura a una ruta de restauración que no es ensayo ni borrar: ' + u.pathname };
+  }
+  if (u.hostname === HOST_STR && (RESTAURACION_ENSAYO.test(u.pathname) || RESTAURACION_BORRAR.test(u.pathname))) {
+    if (!GUARDIA.v6) return { ok: false, motivo: 'ensayo de restauración no habilitado en esta guardia (LM-43)' };
+    let j = null; try { j = JSON.parse(cuerpo || ''); } catch (e) { }
+    if (!j || typeof j !== 'object') return { ok: false, motivo: 'restauración sin cuerpo legible en ' + u.pathname };
+    if (RESTAURACION_ENSAYO.test(u.pathname)) {
+      return j.confirmo === MARCA_RESTAURACION
+        ? { ok: true, nota: 'ensayo de restauración (DA-44): confirmo=' + MARCA_RESTAURACION + ', archivo ' + (j.archivo || '—') + '; la cuenta la crea el servidor' }
+        : { ok: false, motivo: 'ensayo de restauración sin confirmo=«' + MARCA_RESTAURACION + '» (recibido: ' + JSON.stringify(j.confirmo) + ')' };
+    }
+    const nombre = String(j.nombre || '');
+    return nombre.startsWith(MARCA_RESTAURACION + '-')
+      ? { ok: true, nota: 'borrado de la cuenta del ensayo (DA-44): ' + nombre }
+      : { ok: false, motivo: 'borrado de restauración sobre una cuenta que no es zz-verif-restauracion-: ' + (nombre || '(sin nombre)') };
+  }
   if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true, nota: 'sondeo sin datos ({})' } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
   if (u.hostname === HOST_MODELO) return { ok: false, motivo: 'escritura a la fábrica: solo el Arquitecto por la cola' };
   // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion

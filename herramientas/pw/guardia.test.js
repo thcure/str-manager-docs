@@ -55,6 +55,17 @@ const casos = [
   [F + '/modelo/api/cargar', 'POST', '{"proyecto":"str","tablas":{}}', false],
   [F + '/api/col/propiedades', 'PUT', '{"items":[{"id":"a","data":{"nombre":"zz-verif-P"}}],"deleted":[]}', false],
   ['https://pruebas.apartamentosbucaramanga.com/api/health', 'GET', '', false],
+  // v0.6.2 (LM-43, DA-44): ensayo de restauración (DT-42). Solo las dos rutas, solo POST y solo con la marca del cuerpo.
+  [B + '/api/restauracion/ensayo', 'POST', '{"archivo":"2026-10-15","confirmo":"zz-verif-restauracion"}', true],
+  [B + '/api/restauracion/ensayo', 'POST', '{"archivo":"2026-10-15"}', false],
+  [B + '/api/restauracion/ensayo', 'POST', '{"archivo":"2026-10-15","confirmo":"negocio"}', false],
+  [B + '/api/restauracion/ensayo', 'POST', 'no-json', false],
+  [B + '/api/restauracion/borrar', 'POST', '{"cuenta":7,"nombre":"zz-verif-restauracion-negocio-2026-10-15-203000"}', true],
+  [B + '/api/restauracion/borrar', 'POST', '{"cuenta":1,"nombre":"negocio"}', false],
+  [B + '/api/restauracion/borrar', 'POST', '{"cuenta":1,"nombre":"zz-verif-Propiedad"}', false],
+  [B + '/api/restauracion/borrar', 'POST', '{"cuenta":1}', false],
+  [B + '/api/restauracion/constancia?cuenta=7', 'GET', '', true],
+  [B + '/api/restauracion/otra', 'POST', '{"confirmo":"zz-verif-restauracion"}', false],
 ];
 require('./comun').GUARDIA.v5 = true;   // v0.5.12: la tabla es la de la ampliación v5
 let n = 0;

@@ -12,7 +12,7 @@ Quién: el Chat Desarrollo la pasa **siempre** antes de copiar la instrucción a
 | 6 | ¿Las pruebas derivadas traen perfil, **página completa** (nunca la raíz) y precondición, y una consecuencia (Seguir/Detener/Revertir)? | Completar; es lo que va a `verificar.json` | G-5, G-22 |
 | 7 | ¿Los criterios de permisos y 403 están en `tests/` y marcados «cubierto por tests/»? | Moverlos; el verificador no prueba 403 en el navegador | G-5 |
 | 8 | ¿Las precondiciones de datos (`zz-verif-`) dicen quién las crea y quién las borra? | Añadir; si necesita datos reales, el criterio es «no verificable» y se dice | G-5, R11 |
-| 9 | ¿Hay algún paso que el modo automático bloquea (ver ficha APO01.10-k: `reset --hard`, `push --force`, borrar archivos previos, JavaScript sobre sesiones)? | Reescribir el paso con la alternativa de la ficha | G-10 |
+| 9 | ¿Hay algún paso que el modo automático bloquea (ver ficha APO01.10-k: `reset --hard`, `push --force`, borrar archivos previos, JavaScript sobre sesiones)? ¿El Alcance nombra `.claude/hooks/*` o `tests/hooks.test.js`? | Reescribir el paso con la alternativa de la ficha. Los hooks **no se encolan**: ni tocarlos ni leerlos (se corta como «Self-Modification» y «Auto-Mode Bypass»); los copia y commitea Carlos con los md5 que deja el Arquitecto en `lm42\` | G-10, L-130 |
 | 10 | ¿Ningún secreto, correo ni valor de token en el texto? | Quitar; usar `plantillas/secretos.md` | G-34 |
 | 11 | ¿Depende de un lote que aún no está **aceptado**? | Esperar o declararlo en «Depende de» y encolar después | G-13 |
 | 12 | ¿Cabe en una sesión de la CLI (≤ 8 archivos grandes o ≤ 45 min estimados) y tiene un solo objetivo? | Partir en dos lotes | G-16 |

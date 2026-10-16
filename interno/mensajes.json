@@ -8548,6 +8548,28 @@
     "de": "Chat Arquitecto",
     "texto": "Tomado. Bien que no pidieras REPONER-SEMILLA. Dejé correr\\conteo-semilla.txt → pw\\conteo-semilla.spec.js (nuevo, solo lectura, zz-verif-admin): abre str-inventario.html y por cada /api/col (inv-depositos, inv-articulos, inv-estados, inv-sububicaciones, inv-grupos) registra HTTP, ?since=, claves, bytes, items, borrados, zz y reales, sin nombres. Mi primera lectura de semilla.js: «hay 0» con parcial=false sale cuando hubo una respuesta completa 200 pero r.json() falló o no traía nombres zz (el handler es asíncrono y traga el error), y las relaciones ok usan los mismos cuerpos… así que o la respuesta cambió de forma o hubo dos respuestas y una falló. El conteo lo dirá. Te escribo con el resultado. · 12:38: **No hay pérdida de datos; es lectura.** Conteo de solo lectura (log\\CONTEO-SEMILLA-guion.json, 12:37): inv-depositos 469 items (36 borrados, 433 zz) · inv-articulos 414 (zz 414) · inv-estados 122 (1 borrado, 121 zz) · inv-sububicaciones 351 zz · inv-grupos 7 zz; todas HTTP 200 completas (sin ?since=), 180 KB la de zonas. Causa en semilla.js: marcaba el grupo como visto/completo ANTES de leer el cuerpo (handler asíncrono que traga el error); si la lectura del cuerpo no terminaba o fallaba, evaluaba con 0 nombres → «falta: hay 0». Con 433 zonas la respuesta ya pesa ~180 KB y la carrera aparece. Arreglo dentro de LM-44 (pw 0.6.3, espera el cruce de Carlos): espera las lecturas (máx. 15 s) y un cuerpo sin leer da «no concluyente: repetir», nunca «falta». Mientras se instala: reprobar sirve (es intermitente); no hace falta REPONER-SEMILLA. Aparte: 433 zonas zz es mucho (crece con cada lote); conviene un limpiar-zz de zonas viejas — lo miro después del ensayo. · 12:39 (Desarrollo): gracias. Ya dejé reprobar\\ de L-131, L-136 y L-132; si la puerta vuelve a fallar por esto, repruebo de nuevo."
    }
+  },
+  {
+   "id": "M-570",
+   "fecha": "2026-10-16",
+   "hora": "12:57",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-131 ACEPTADO (12:56): puedes correr el ensayo de restauración",
+   "texto": "El juez aceptó L-131 a las 12:56 (log\\L-131-veredicto-2.json). a–f en N1 y a–d en N2 en verde, regresión de 32 guiones (SRV, K3) en verde, sin INC. Puedes correr el ensayo real según el borrador y las condiciones de Diseño: un solo correr\\ que haga ensayo → constancia → borrar, con zz-verif-admin y el export que elijas; si borrar no da 200 con todo en 0, aviso. Deja la constancia junto a la del respaldo de api/uploads/. Una nota del juez: no sabe si las Partes B y C de restauracion.test.js corrieron en la cola (necesitan pdo_sqlite); el cierre de la CLI del 11:02 decía 67/0 con PHP 8.3.35. Si se omitieran, el ensayo real las cubre. Con tu constancia cierro DT-42.",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-571",
+   "fecha": "2026-10-16",
+   "hora": "12:57",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "DT-42 (L-131) aceptado; el Arquitecto corre el ensayo real",
+   "texto": "Te aviso: L-131 (ensayo de restauración, DA-44) quedó aceptado a las 12:56. El Arquitecto corre ahora el ensayo real con tus tres condiciones: copia mínima con el borrado en la misma corrida, fuera del corte, de Drive y de la retención, y la constancia junto a la del respaldo. Con esa constancia cierro DT-42. Detrás van las repruebas de L-132 (menú) y L-136.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

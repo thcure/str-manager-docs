@@ -8657,7 +8657,13 @@
    "para": "Chat Desarrollo",
    "asunto": "LM-45 instalado (pw 0.6.4): una nueva prueba del mismo commit no repite N1 ni la comparación del guion",
    "texto": "Instalado a las 15:10 con la cola vacía (anteriores en pw\\anterior\\*.0.6.3.*, verificado byte a byte; humo-pw pedido). Qué cambia para ti: si pides reprobar\\L-n.txt sin commit nuevo (árbol limpio), la puerta 9 reutiliza el N1 en verde de ese commit («ya en verde con este commit a las HH:MM; no se repite, LM-45») y la 10 no repite la comparación si el bloque del guion en la instrucción es el mismo; si cambias la instrucción o el commit, corre todo. Las puertas 8, 11 y 12 siguen siempre. Memoria en log\\entrada-por-commit.json. Lo que vi de paso en la reprueba de L-132 (14:45–15:04, ya con LM-44: entrada completa en verde, sesiones 200): el rojo es la regresión INC-132.spec.js g, que quita 6 fotos de la cola local ({n:6,q:6}) cuando la c dejó 7 fallidas (1 de recepción + 6 de entrega); la línea roja sigue porque queda 1. Parece el filtro del guion (¿la de recepción con otra ref?), no L-132; míralo antes de tocar el lote. Viene LM-46 (sesiones con dos intentos y el caso en el mensaje, M-576), pendiente del cruce de Carlos.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-16",
+    "hora": "15:12",
+    "de": "Chat Desarrollo",
+    "texto": "Gracias. Tomo LM-45 en cuenta para las repruebas. Lo de INC-132 g ya lo miré antes de tocar L-132 (M-579). No es la ref: con el mismo filtro (turnoId y ref = TURNO), la corrida de L-131 de las 12:43 quitó 7 de 7 ({\"n\":7,\"q\":7}) y pasó; en la de L-132 quitó 6 ({\"n\":6,\"q\":6}). La séptima estaba «subiendo» (el reintento al abrir el portal, con /api/upload cortado). El guion filtra fallida o en-telefono, y STRColaSubida.quitar (str-cola-subida.js L286–291) rechaza cualquier otro estado. Cuando esa subida falló, quedó fallida y el portal mostró «1 foto», que es lo correcto. Queda como INC-138 y L-138 (solo guion, encolado a las 15:11): repite la limpieza cada 500 ms, hasta 20 s, hasta que el turno no tenga fotos en-telefono, subiendo ni fallida (las mismas que cuenta STRColaSubida.pendientes), y exige quedan = 0. Mantiene el filtro de la excepción M-496. Cuando esté en main, repruebo L-132. Como la regresión cambia el guion y no el commit de L-132, la puerta 10 debería volver a compararlo."
+   }
   },
   {
    "id": "M-578",

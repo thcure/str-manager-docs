@@ -755,6 +755,14 @@
    "titulo": "Cola de subida: una foto agregada mientras se remata la anterior se sube antes de guardarse en el teléfono, se borra y queda «fallida» sin remedio",
    "causa": "str-cola-subida.js: agregar() pone el ítem en _items al instante (L255) y guarda el blob después (L258); _candidatos() (L133) no excluye los ítems de _sinPersistir; si _ciclo (L204) lo toma, _subirUno (L172-173) llama a _guardar sin blob, que escribe blob=null (L82) sobre el que guardaba agregar; agregar luego borra _blobs (L260) y _leerBlob devuelve null: «el archivo ya no está en el teléfono» (L177), sin fetch. Los reintentos fallan igual. Evidencia: L-126-pruebas regresion[49]: 5 de 6 POST /api/upload, hueco de 30 s = espera del guion; la bitácora de pw no ve el POST de B1.",
    "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno. · 14:32 diagnóstico (subagente, solo lectura): causa en la app, no en el arnés ni el servidor. Afecta a usuarios reales (pierden la foto). Arreglo propuesto: excluir _sinPersistir en _candidatos, re-procesar al terminar si llegó algo durante _procesando, y _guardar no escribe null si el blob sigue en memoria; prueba unitaria de la carrera. Lote fix pedido a Diseño. · 14:34 lectura del Arquitecto (M-503): en su cronología la foto sí subió +31 s después (hueco de 31 s entre la 3.ª y la 4.ª; servidor en 150–500 ms): la cola no toma la foto al acabar la anterior y la retoma con un disparador posterior. Mismo arreglo (excluir _sinPersistir + re-procesar al terminar + _guardar no escribe null). El lote fix añade al guion REQ-INV2-4-2 c el estado de la cola (listar: estado, intentos, ultimoError) cuando falte una foto. · 15:16 cerrado con L-128 aceptado (6 subidas seguidas, sin hueco)."
+  },
+  {
+   "id": "INC-134",
+   "fecha": "2026-10-16",
+   "titulo": "Shell: aviso «Sesión vencida · Entrar» con sesión iniciada (renueva antes de que Firebase recupere al usuario)",
+   "estado": "abierto",
+   "severidad": "media",
+   "nota": "Visto por Carlos en el STR (REQ-SH-2, supuesto). Causa: _strRenewApiSession lee currentUser antes de authStateReady; str-api.js borra la sesión y el aviso queda. Arreglo en L-133 (después de L-132); categoría según el Arquitecto (RT-16)."
   }
  ],
  "dts": [
@@ -13874,15 +13882,15 @@
    "req": "REQ-SH-2",
    "categoria": "normal",
    "resumen": "Menú del STR: solo lo que funciona (4 grupos, Lo que viene, sin datos de ejemplo)",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
-   "esperaA": "Arquitecto y Diseño",
-   "espera": "anclaje de REQ-SH-2 en el mapa; ok de Diseño (incluye S19, renovación de sesión)",
+   "esperaA": "CLI",
+   "espera": "",
    "orden": 121.521,
    "desde": "2026-10-16 10:23",
    "planTrabajo": "PT-1",
    "grupo": "MENU",
-   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131."
+   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131. · 11:18 encolado: ok de Diseño M-553 (S19 a INC-134); ruta con REQ-SH-2 anclado (M-552)."
   },
   {
    "lote": null,
@@ -13913,6 +13921,22 @@
    "planTrabajo": "PT-1",
    "grupo": "MENU",
    "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md."
+  },
+  {
+   "lote": "L-133",
+   "req": "INC-134",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Shell: esperar a Firebase antes de renovar la sesión (aviso «Entrar» con sesión iniciada)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Arquitecto",
+   "espera": "categoría por RT-16 y revisión previa",
+   "orden": 121.5215,
+   "desde": "2026-10-16 11:18",
+   "planTrabajo": "PT-1",
+   "grupo": "MENU",
+   "nota": "Sacado de L-132 por Diseño (M-553)."
   }
  ],
  "riesgos": [

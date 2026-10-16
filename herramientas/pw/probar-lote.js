@@ -145,7 +145,7 @@ function sesionPorRespuestas(estados) {
 }
 const VENTANA_RENOVACION_MS = 15000;
 
-async function sesionViva(perfil) {
+async function sesionUnaVez(perfil) {
   let ctx;
   try {
     const a = await abrir(perfil); ctx = a.ctx;
@@ -164,12 +164,29 @@ async function sesionViva(perfil) {
     await p.waitForTimeout(1500);
     let enLogin = /\/login\.html/.test(p.url()) || await p.locator('input[type="password"]').count().catch(() => 0) > 0;
     // v0.5.32: antes de bloquear, intenta recuperarla como lo hace Carlos (Continuar con Google, sin contraseña)
-    if (enLogin) { const rec = await recuperarSesion(ctx, p, perfil); if (rec.ok) return { ok: true, observado: rec.observado, recuperada: true }; enLogin = true; var motivoRec = rec.observado; }
-    if (enLogin) return { ok: false, observado: perfil + ': el shell termina en login.html (sesion de Google/Firebase del perfil perdida; /api/me ' + (s.ultimo == null ? 'no pedido' : s.ultimo) + '; recuperación automática: ' + (motivoRec || '—') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
-    return s.ok ? { ok: true, observado: perfil + ': /api/me 200' + (s.renovada ? ' (renovada por el shell tras ' + estados.filter((x) => x !== 200).join(',') + ')' : ''), renovada: s.renovada }
-      : { ok: false, observado: perfil + ': sin sesion (/api/me ' + (s.ultimo == null ? 'sin respuesta' : estados.join(',')) + ' en ' + Math.round(VENTANA_RENOVACION_MS / 1000) + ' s) (Carlos: node abrir-perfil.js ' + perfil + ')' };
-  } catch (e) { return { ok: false, observado: perfil + ': ' + explicarError(e, perfil) }; }
+    if (enLogin) { const rec = await recuperarSesion(ctx, p, perfil); if (rec.ok) return { ok: true, caso: 'ok', observado: rec.observado, recuperada: true }; enLogin = true; var motivoRec = rec.observado; }
+    if (enLogin) return { ok: false, caso: 'google', observado: perfil + ': SESION DE GOOGLE PERDIDA: el shell termina en login.html (/api/me ' + (s.ultimo == null ? 'no pedido' : s.ultimo) + '; recuperación automática: ' + (motivoRec || '—') + ') (Carlos: node abrir-perfil.js ' + perfil + ')' };
+    return s.ok ? { ok: true, caso: 'ok', observado: perfil + ': /api/me 200' + (s.renovada ? ' (renovada por el shell tras ' + estados.filter((x) => x !== 200).join(',') + ')' : ''), renovada: s.renovada }
+      : { ok: false, caso: 'api-me', estados: estados.slice(), observado: perfil + ': /api/me ' + (s.ultimo == null ? 'sin respuesta' : estados.join(',')) + ' en ' + Math.round(VENTANA_RENOVACION_MS / 1000) + ' s, con la sesión de Google viva (el shell no fue a login)' };
+  } catch (e) { return { ok: false, caso: 'error', observado: perfil + ': ' + explicarError(e, perfil) }; }
   finally { if (ctx) await ctx.close().catch(() => { }); }
+}
+
+// v0.6.5 (LM-46, M-576 de Diseño con Carlos, 16-oct): la sesión del perfil casi nunca se pierde; un /api/me que no da 200
+// con Google vivo es del servidor o de la red, y abrir el perfil no lo arregla. Por eso: (1) si el shell no fue a login y
+// /api/me no dio 200, se repite la comprobación UNA vez más (perfil cerrado y reabierto, 3 s después) y solo se bloquea si
+// falla dos veces seguidas; (2) el bloqueo dice cuál de los dos casos es: «SESION DE GOOGLE PERDIDA» (único caso en que
+// Carlos abre el perfil) o «/api/me no dio 200 dos veces con Google vivo» (no abrir el perfil; lo revisa el Arquitecto).
+function mensajeSesion(perfil, intentos) {
+  const ult = intentos[intentos.length - 1];
+  if (ult.ok) return { ok: true, caso: 'ok', observado: ult.observado + (intentos.length > 1 ? ' (segundo intento; el primero: ' + intentos[0].observado + ')' : ''), renovada: ult.renovada };
+  if (ult.caso === 'google' || ult.caso === 'error') return { ok: false, caso: ult.caso, observado: ult.observado };
+  return { ok: false, caso: 'api-me', observado: perfil + ': /api/me NO DIO 200 DOS VECES SEGUIDAS con la sesión de Google viva (' + intentos.map((x) => (x.estados || []).join(',') || 'sin respuesta').join(' / ') + '). No es el perfil: NO hace falta abrirlo; el Arquitecto revisa el servidor (LM-46)' };
+}
+async function sesionViva(perfil, opciones = {}) {
+  const intentos = [await sesionUnaVez(perfil)];
+  if (!intentos[0].ok && intentos[0].caso === 'api-me') { await new Promise((r) => setTimeout(r, opciones.espera == null ? 3000 : opciones.espera)); intentos.push(await sesionUnaVez(perfil)); }
+  return mensajeSesion(perfil, intentos);
 }
 
 // v0.6.4 (LM-45, cruce de Carlos 16-oct): una nueva prueba del MISMO commit no repite lo que ya pasó en verde con ese commit.
@@ -315,5 +332,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
+module.exports = { mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

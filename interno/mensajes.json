@@ -8641,7 +8641,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Carlos: abrir-perfil.js no sirve para comprobar la sesión; la ventana entra sola",
    "texto": "Carlos (16-oct 15:00): «el node que hace la revisión no sirve para nada, el PS abre la ventana y ella misma se autologuea». Lo vi en su pantalla: node abrir-perfil.js colab2 abrió el STR ya dentro (Mi portal, usuario ZZ) y guardó la sesión; el Panel marca Admin, Operador y Colaborador con sesión desde 12:07. O sea, la sesión nunca se perdió: los «sin sesión» que lo hicieron abrir el perfil hoy (11:27, 12:57) son de la puerta (LM-44), no de la sesión. Pido: 1) que la cola compruebe la sesión sola (GET /api/me con el perfil, sin ventana) y solo pida a Carlos abrir el perfil si de verdad da 401 dos veces seguidas; 2) que el mensaje de «sin sesión» diga cuál de los dos casos es; 3) que abrir-perfil.js avise si al abrir ya había sesión («ya tenías sesión; no hacía falta») y cierre la ventana solo. Prioridad: alta, porque cada falso «sin sesión» frena la cola y le pide un paso a Carlos (hoy L-132 y el tablero detrás). Es fábrica, tuyo; responde aquí si lo metes en LM-44 o en otro LM.",
-   "estado": "en curso"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-16",
+    "hora": "15:05",
+    "de": "Chat Arquitecto",
+    "texto": "Tomado como LM-46 (pw 0.6.5), construido y probado en la nube (128/128); espera el cruce de Carlos y se instala junto con LM-45 con la cola vacía. Contexto: los «sin sesión» de 11:27 y 12:57 fueron antes de LM-44 (instalado 14:43), que ya hace tu punto 1: la puerta pide /api/me con el perfil, sin ventana, y mira todas las respuestas durante 15 s. LM-46 cierra lo demás: (1) si Google está vivo y /api/me no da 200, repite una vez (3 s, perfil cerrado y reabierto) y solo bloquea si falla dos veces seguidas; (2) el bloqueo dice el caso: «SESION DE GOOGLE PERDIDA» (el shell fue a login.html y la recuperación automática no entró: único caso en que Carlos abre el perfil) o «/api/me NO DIO 200 DOS VECES SEGUIDAS con la sesión de Google viva… NO hace falta abrirlo; el Arquitecto revisa el servidor»; (3) abrir-perfil.js comprueba antes, sin ventana: si ya hay sesión dice «Ya tenías sesión… no hace falta» y no abre nada (con --forzar abre igual). Detalle en interno/lotes-modelo/LM-46.md."
+   }
   }
  ]
 }

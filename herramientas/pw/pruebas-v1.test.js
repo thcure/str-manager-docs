@@ -242,6 +242,23 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('sesión: solo 401 → sin sesión', !s3.ok && s3.ultimo === 401);
   t('sesión: ninguna /api/me → sin sesión', !sesionPorRespuestas([]).ok && sesionPorRespuestas(null).ultimo === null);
 }
+{ // v0.6.5 (LM-46, M-576): dos intentos antes de bloquear y el bloqueo dice cuál de los dos casos es
+  const { mensajeSesion } = require('./probar-lote');
+  const okA = { ok: true, caso: 'ok', observado: 'colab: /api/me 200' };
+  const meA = { ok: false, caso: 'api-me', estados: [401], observado: 'colab: /api/me 401' };
+  const goo = { ok: false, caso: 'google', observado: 'colab: SESION DE GOOGLE PERDIDA: login.html' };
+  const err = { ok: false, caso: 'error', observado: 'colab: perfil en uso' };
+  t('LM-46: 200 a la primera → ok sin segundo intento', mensajeSesion('colab', [okA]).ok && !/segundo/.test(mensajeSesion('colab', [okA]).observado));
+  const r2 = mensajeSesion('colab', [meA, okA]);
+  t('LM-46: falla y luego 200 → ok, dice «segundo intento»', r2.ok && /segundo intento/.test(r2.observado));
+  const r3 = mensajeSesion('colab', [meA, Object.assign({}, meA, { estados: [401, 401] })]);
+  t('LM-46: /api/me sin 200 dos veces → bloquea como api-me', !r3.ok && r3.caso === 'api-me' && /DOS VECES/.test(r3.observado) && /401 \/ 401,401/.test(r3.observado));
+  t('LM-46: api-me no manda a abrir el perfil', !/node abrir-perfil/.test(r3.observado) && /NO hace falta abrirlo/.test(r3.observado));
+  const r4 = mensajeSesion('colab', [goo]);
+  t('LM-46: Google perdida → caso google, sí pide abrir el perfil', !r4.ok && r4.caso === 'google' && /GOOGLE PERDIDA/.test(r4.observado));
+  t('LM-46: error de perfil en uso → caso error, mensaje tal cual', mensajeSesion('colab', [err]).caso === 'error' && mensajeSesion('colab', [err]).observado === err.observado);
+  t('LM-46: sesionViva exportada', typeof require('./probar-lote').sesionViva === 'function');
+}
 { // v0.6.4 (LM-45): una nueva prueba del mismo commit no repite N1 ni la comparación del guion
   const { puedeSaltar, anotar, claveGuion } = require('./probar-lote');
   let m = anotar({}, 'abc', 'n1', { ok: true, resumen: '80/80 archivos OK', hora: '12:00:00' });

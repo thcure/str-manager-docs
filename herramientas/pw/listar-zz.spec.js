@@ -17,34 +17,38 @@ function agrupar(vivos) {
   }
   return { lotes, fijos, sinNombre, reales };
 }
-module.exports = {
-  req: 'LISTAR-ZZ',
-  zona: ['INV'],
-  agrupar, RE_LOTE,
-  casos: [{
-    c: 'l1', perfil: 'admin', pagina: '/str-inventario.html', cubre: ['INV'],
-    que: 'Solo lectura: filas zz-verif- por colección, separadas en acumuladas por lote (L<n>) y fijas (semilla)',
+// v2: un caso por colección (el log corta cada caso a 900 caracteres) y formato compacto: «L100 9» (el prefijo siempre es
+// zz-verif-L-<n>-) y los nombres fijos completos.
+function caso(col, i) {
+  return {
+    c: 'l' + (i + 1), perfil: 'admin', pagina: '/str-inventario.html', cubre: ['INV'],
+    que: 'Solo lectura: ' + col + ' · filas zz-verif- acumuladas por lote (L<n>) y fijas (semilla)',
     async prueba(h) {
-      const p = h.page, cuerpos = {}, lecturas = [];
+      const p = h.page, filas = new Map(), lecturas = []; let vista = false;
       p.on('response', (r) => {
         try {
-          const u = new URL(r.url()); const col = COLS.find((c) => u.pathname.endsWith('/api/col/' + c));
-          if (!col || r.request().method() !== 'GET' || r.status() !== 200) return;
-          lecturas.push(r.json().then((j) => { const it = Array.isArray(j && j.items) ? j.items : (Array.isArray(j) ? j : []); const prev = cuerpos[col] || new Map(); it.forEach((x) => x && x.id != null && prev.set(String(x.id), x)); cuerpos[col] = prev; }).catch(() => { }));
+          const u = new URL(r.url());
+          if (!u.pathname.endsWith('/api/col/' + col) || r.request().method() !== 'GET' || r.status() !== 200) return;
+          vista = true;
+          lecturas.push(r.json().then((j) => { (Array.isArray(j && j.items) ? j.items : (Array.isArray(j) ? j : [])).forEach((x) => x && x.id != null && filas.set(String(x.id), x)); }).catch(() => { }));
         } catch (e) { }
       });
       const base = h.BASE || new URL(p.url()).origin;
       await p.goto(base + '/str-inventario.html', { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
       await p.waitForTimeout(3000);
       await Promise.race([Promise.all(lecturas), new Promise((r) => setTimeout(r, 15000))]);
-      for (const c of COLS) {
-        if (!cuerpos[c]) { h.espera(true, c + ': la página no la pidió'); continue; }
-        const vivos = [...cuerpos[c].values()].filter((x) => x && !x.deleted && x.data);
-        const g = agrupar(vivos);
-        const tot = Object.values(g.lotes).reduce((a, b) => a + b.n, 0);
-        const det = Object.keys(g.lotes).sort().map((k) => k + ' ' + g.lotes[k].n + ' [' + Object.entries(g.lotes[k].prefijos).map(([pf, n]) => pf + '×' + n).join(', ') + ']').join('; ');
-        h.espera(true, c + ': vivos ' + vivos.length + ' · por lote ' + tot + ' · fijos ' + g.fijos.length + ' · zz sin nombre zz ' + g.sinNombre.length + ' · reales ' + g.reales + ' || lotes: ' + (det || '-') + ' || fijos: ' + (g.fijos.slice(0, 80).join(' | ') || '-'));
-      }
+      if (!vista) { h.espera(true, col + ': la página no la pidió'); return; }
+      const vivos = [...filas.values()].filter((x) => x && !x.deleted && x.data);
+      const g = agrupar(vivos);
+      const tot = Object.values(g.lotes).reduce((a, b) => a + b.n, 0);
+      const det = Object.keys(g.lotes).sort((a, b) => Number(a.slice(1)) - Number(b.slice(1))).map((k) => k + ' ' + g.lotes[k].n).join(', ');
+      h.espera(true, col + ': vivos ' + vivos.length + ' · por lote ' + tot + ' · fijos ' + g.fijos.length + ' · zz sin nombre zz ' + g.sinNombre.length + ' · reales ' + g.reales + ' || ' + (det || '-') + ' || fijos: ' + (g.fijos.map((n) => n.replace(/^zz-verif-/, '')).join(' | ') || '-'));
     },
-  }],
+  };
+}
+module.exports = {
+  req: 'LISTAR-ZZ',
+  zona: ['INV'],
+  agrupar, RE_LOTE,
+  casos: COLS.map(caso),
 };

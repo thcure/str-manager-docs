@@ -13,31 +13,44 @@ const path = require('path');
 function config() {
   const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'limpiar-zz.json'), 'utf8'));
   if (!/^[a-z0-9-]+$/.test(String(c.col || ''))) throw new Error('limpiar-zz.json: col inválida');
-  const prefijos = (Array.isArray(c.prefijos) ? c.prefijos : [c.prefijo]).map((x) => String(x || ''));
+  // v4 (limpieza al sobre RT-25, 16-oct): "lotes": true = todas las filas cuyo campo empieza por zz-verif-L<n>- o
+  // zz-verif-L-<n>- (acumuladas por los lotes; la expresión está fija aquí, no se configura). Nunca toca la semilla fija.
+  const lotes = c.lotes === true;
+  const prefijos = lotes ? ['zz-verif-L<n>-'] : (Array.isArray(c.prefijos) ? c.prefijos : [c.prefijo]).map((x) => String(x || ''));
   if (!prefijos.length || prefijos.some((x) => !/^zz-verif-/.test(x))) throw new Error('limpiar-zz.json: cada prefijo debe empezar por zz-verif-');
   const campo = String(c.campo || 'nombre');
   if (!/^[A-Za-z0-9_]+$/.test(campo)) throw new Error('limpiar-zz.json: campo inválido');
   const pagina = String(c.pagina || '/str-inventario.html');
   if (!/^\/[a-z0-9-]+\.html$/.test(pagina)) throw new Error('limpiar-zz.json: pagina inválida');
-  return { col: c.col, prefijos, campo, hoy: c.hoy === true, pagina };
+  const tope = Math.max(1, Math.min(200, Number(c.tope) || 100));   // filas por petición
+  return { col: c.col, prefijos, campo, hoy: c.hoy === true, pagina, lotes, tope };
 }
 function hoyBogota() {
   const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   return f;   // AAAA-MM-DD
 }
+const RE_LOTE = /^zz-verif-L-?\d+-/;
+// Colecciones donde se buscan referencias: una fila de lote cuyo id aparece en los datos de una fila que NO es de lote
+// (semilla fija u otra) no se borra (protegida), para no dejar a la semilla apuntando a una fila borrada.
+const COLS_REF = ['propiedades', 'flujos', 'turnos', 'inv-depositos', 'inv-articulos', 'inv-estados', 'inv-sububicaciones', 'inv-grupos', 'inv-proveedores'];
+function protegidos(candidatos, otras) {   // pura: candidatos [{id}], otras [{id, data}] (filas que no se borran)
+  const texto = otras.map((x) => JSON.stringify(x.data || {})).join('\n');
+  return new Set(candidatos.map((x) => String(x.id)).filter((id) => id.length >= 4 && (texto.indexOf('"' + id + '"') >= 0)));
+}
 const filas = (j) => (Array.isArray(j) ? j : (j && Array.isArray(j.items) ? j.items : [])).filter((x) => x && !x.deleted && x.data && typeof x.data === 'object');
 let CFG = null; try { CFG = config(); } catch (e) { CFG = null; }
 module.exports = {
   req: 'LIMPIAR-ZZ',
+  protegidos, RE_LOTE,
   zona: 'sesiones',
   casos: [{
     c: 'z', perfil: 'admin', pagina: (CFG && CFG.pagina) || '/str-inventario.html',
     que: 'no queda ninguna fila cuyo campo empiece por alguno de los prefijos zz-verif- de limpiar-zz.json en su colección',
     async prueba(h) {
       const p = h.page;
-      const { col, prefijos, campo, hoy } = config();
+      const { col, prefijos, campo, hoy, lotes, tope } = config();
       const fecha = hoyBogota();
-      const conPrefijo = (x) => prefijos.some((pf) => String((x.data || {})[campo] || '').startsWith(pf)) && (!hoy || JSON.stringify(x.data || {}).indexOf(fecha) >= 0);
+      const conPrefijo = (x) => (lotes ? RE_LOTE.test(String((x.data || {})[campo] || '')) : prefijos.some((pf) => String((x.data || {})[campo] || '').startsWith(pf))) && (!hoy || JSON.stringify(x.data || {}).indexOf(fecha) >= 0);
       // Tres fuentes, por si la página pide la colección por diferencias o no la pide: STRApi.get (lo que el servidor tiene
       // ahora), la respuesta del servidor al recargar y la copia local de la app (str-<col>-v1), unidas por id.
       const leer = async (soloServidor) => {
@@ -60,18 +73,34 @@ module.exports = {
         loc.forEach((x) => { if (x && x.id != null && !x.deleted && !porId.has(String(x.id))) { const d = Object.assign({}, x); delete d.id; porId.set(String(x.id), { id: x.id, data: d }); } });
         return [...porId.values()].filter(conPrefijo);
       };
-      const antes = await leer();
-      h.espera(true, col + ' · ' + campo + ' con prefijo ' + prefijos.join(' | ') + (hoy ? ' · solo de hoy ' + fecha : '') + ': ' + antes.length + ' fila(s)' + (antes.length ? ' (' + antes.map((x) => x.id).join(', ') + ')' : ''));
+      let antes = await leer();
+      h.espera(true, col + ' · ' + campo + ' con prefijo ' + prefijos.join(' | ') + (hoy ? ' · solo de hoy ' + fecha : '') + ': ' + antes.length + ' fila(s)' + (antes.length && antes.length <= 30 ? ' (' + antes.map((x) => x.id).join(', ') + ')' : ''));
+      if (lotes && antes.length) {   // v4: protege las filas de lote a las que apunta una fila que se queda
+        const otras = [];
+        for (const c of COLS_REF) {
+          const j = await p.evaluate(async (cc) => { try { return await STRApi.get('/col/' + cc); } catch (e) { return null; } }, c).catch(() => null);
+          filas(j).forEach((x) => { if (!(c === col && conPrefijo(x))) otras.push(x); });
+        }
+        const prot = protegidos(antes, otras);
+        h.espera(true, 'filas de lote a las que apunta una fila que se queda (no se borran): ' + prot.size + (prot.size ? ' (' + [...prot].slice(0, 20).join(', ') + ')' : '') + ' · filas que se quedan revisadas: ' + otras.length);
+        antes = antes.filter((x) => !prot.has(String(x.id)));
+      }
       if (!antes.length) return;
       await p.waitForFunction(() => window.STRApi && STRApi.col && typeof STRApi.col.push === 'function', null, { timeout: 30000 });
-      const ids = antes.map((x) => String(x.id));
-      const items = antes.map((x) => ({ id: x.id, data: x.data }));
-      const re = await h.respuesta('/api/col/' + col, () => p.evaluate(([c, it]) => STRApi.col.push(c, it, []).catch((e) => ({ error: String(e && e.message || e) })), [col, items])).catch(() => null);
-      h.espera(!!re && re.status() === 200, 'resubida tal cual (para que la guardia anote los ids): ' + (re ? re.status() : 'sin respuesta'));
-      const borra = await h.respuesta('/api/col/' + col, () => p.evaluate(([c, id]) => STRApi.col.push(c, [], id).catch((e) => ({ error: String(e && e.message || e) })), [col, ids])).catch(() => null);
-      h.espera(!!borra && borra.status() === 200, 'borrado de ' + ids.length + ' id(s): ' + (borra ? borra.status() : 'sin respuesta'));
-      const despues = await leer(true);   // tras borrar manda el servidor; la copia local puede tardar en enterarse
-      h.espera(despues.length === 0, 'quedan con el prefijo tras releer (según el servidor): ' + despues.length + (despues.length ? ' (' + despues.map((x) => x.id).join(', ') + ')' : ''));
+      // v4: por tandas de `tope` filas (100 por defecto), en serie: resubir tal cual y borrar
+      let borradas = 0, malas = 0;
+      for (let i = 0; i < antes.length; i += tope) {
+        const tanda = antes.slice(i, i + tope);
+        const ids = tanda.map((x) => String(x.id));
+        const items = tanda.map((x) => ({ id: x.id, data: x.data }));
+        const re = await h.respuesta('/api/col/' + col, () => p.evaluate(([c, it]) => STRApi.col.push(c, it, []).catch((e) => ({ error: String(e && e.message || e) })), [col, items])).catch(() => null);
+        const borra = (re && re.status() === 200) ? await h.respuesta('/api/col/' + col, () => p.evaluate(([c, id]) => STRApi.col.push(c, [], id).catch((e) => ({ error: String(e && e.message || e) })), [col, ids])).catch(() => null) : null;
+        if (borra && borra.status() === 200) borradas += ids.length; else malas++;
+        if (malas) { h.espera(false, 'tanda ' + (i / tope + 1) + ': resubida ' + (re ? re.status() : 'sin respuesta') + ' · borrado ' + (borra ? borra.status() : 'no se intentó')); break; }
+      }
+      h.espera(malas === 0, 'borradas ' + borradas + ' de ' + antes.length + ' en tandas de ' + tope);
+      const despues = (await leer(true)).filter((x) => antes.some((a) => String(a.id) === String(x.id)));   // tras borrar manda el servidor
+      h.espera(despues.length === 0, 'quedan de las que se iban a borrar, tras releer (según el servidor): ' + despues.length + (despues.length && despues.length <= 30 ? ' (' + despues.map((x) => x.id).join(', ') + ')' : ''));
     },
   }],
 };

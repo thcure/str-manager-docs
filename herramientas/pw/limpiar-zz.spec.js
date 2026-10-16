@@ -12,7 +12,9 @@ const path = require('path');
 // v2 (M-458): acepta "prefijo" (uno) o "prefijos" (lista); todos deben empezar por zz-verif-.
 function config() {
   const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'limpiar-zz.json'), 'utf8'));
-  if (!/^[a-z0-9-]+$/.test(String(c.col || ''))) throw new Error('limpiar-zz.json: col inválida');
+  // v4.1: "cols": [..] limpia varias colecciones en orden, un caso por colección (mismas reglas para todas)
+  const cols = Array.isArray(c.cols) ? c.cols.map(String) : [String(c.col || '')];
+  if (!cols.length || cols.some((x) => !/^[a-z0-9-]+$/.test(x))) throw new Error('limpiar-zz.json: col inválida');
   // v4 (limpieza al sobre RT-25, 16-oct): "lotes": true = todas las filas cuyo campo empieza por zz-verif-L<n>- o
   // zz-verif-L-<n>- (acumuladas por los lotes; la expresión está fija aquí, no se configura). Nunca toca la semilla fija.
   const lotes = c.lotes === true;
@@ -23,7 +25,7 @@ function config() {
   const pagina = String(c.pagina || '/str-inventario.html');
   if (!/^\/[a-z0-9-]+\.html$/.test(pagina)) throw new Error('limpiar-zz.json: pagina inválida');
   const tope = Math.max(1, Math.min(200, Number(c.tope) || 100));   // filas por petición
-  return { col: c.col, prefijos, campo, hoy: c.hoy === true, pagina, lotes, tope };
+  return { col: cols[0], cols, prefijos, campo, hoy: c.hoy === true, pagina, lotes, tope };
 }
 function hoyBogota() {
   const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -45,12 +47,12 @@ module.exports = {
   req: 'LIMPIAR-ZZ',
   protegidos, RE_LOTE,
   zona: 'sesiones',
-  casos: [{
-    c: 'z', perfil: 'admin', pagina: (CFG && CFG.pagina) || '/str-inventario.html',
+  casos: ((CFG && CFG.cols) || ['?']).map((colCaso, iCaso) => ({
+    c: iCaso ? 'z' + (iCaso + 1) : 'z', perfil: 'admin', pagina: (CFG && CFG.pagina) || '/str-inventario.html',
     que: 'no queda ninguna fila cuyo campo empiece por alguno de los prefijos zz-verif- de limpiar-zz.json en su colección',
     async prueba(h) {
       const p = h.page;
-      const { col, prefijos, campo, hoy, lotes, tope } = config();
+      const { prefijos, campo, hoy, lotes, tope } = config(); const col = colCaso;
       const fecha = hoyBogota();
       const conPrefijo = (x) => (lotes ? RE_LOTE.test(String((x.data || {})[campo] || '')) : prefijos.some((pf) => String((x.data || {})[campo] || '').startsWith(pf))) && (!hoy || JSON.stringify(x.data || {}).indexOf(fecha) >= 0);
       // Tres fuentes, por si la página pide la colección por diferencias o no la pide: STRApi.get (lo que el servidor tiene
@@ -104,5 +106,5 @@ module.exports = {
       const despues = (await leer(true)).filter((x) => antes.some((a) => String(a.id) === String(x.id)));   // tras borrar manda el servidor
       h.espera(despues.length === 0, 'quedan de las que se iban a borrar, tras releer (según el servidor): ' + despues.length + (despues.length && despues.length <= 30 ? ' (' + despues.map((x) => x.id).join(', ') + ')' : ''));
     },
-  }],
+  })),
 };

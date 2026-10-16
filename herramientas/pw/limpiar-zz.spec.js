@@ -32,7 +32,9 @@ function hoyBogota() {
 const RE_LOTE = /^zz-verif-L-?\d+-/;
 // Colecciones donde se buscan referencias: una fila de lote cuyo id aparece en los datos de una fila que NO es de lote
 // (semilla fija u otra) no se borra (protegida), para no dejar a la semilla apuntando a una fila borrada.
-const COLS_REF = ['propiedades', 'flujos', 'turnos', 'inv-depositos', 'inv-articulos', 'inv-estados', 'inv-sububicaciones', 'inv-grupos', 'inv-proveedores'];
+// Solo cuentan las filas que se quedan y no son de lote (la semilla fija, propiedades y flujos); las filas de otros lotes
+// y los turnos o movimientos de pruebas viejas no protegen nada (se irían igual en su propia limpieza).
+const COLS_REF = ['propiedades', 'flujos', 'inv-depositos', 'inv-articulos', 'inv-estados', 'inv-sububicaciones', 'inv-grupos', 'inv-proveedores'];
 function protegidos(candidatos, otras) {   // pura: candidatos [{id}], otras [{id, data}] (filas que no se borran)
   const texto = otras.map((x) => JSON.stringify(x.data || {})).join('\n');
   return new Set(candidatos.map((x) => String(x.id)).filter((id) => id.length >= 4 && (texto.indexOf('"' + id + '"') >= 0)));
@@ -79,7 +81,7 @@ module.exports = {
         const otras = [];
         for (const c of COLS_REF) {
           const j = await p.evaluate(async (cc) => { try { return await STRApi.get('/col/' + cc); } catch (e) { return null; } }, c).catch(() => null);
-          filas(j).forEach((x) => { if (!(c === col && conPrefijo(x))) otras.push(x); });
+          filas(j).forEach((x) => { if (!conPrefijo(x) && !RE_LOTE.test(String((x.data || {}).nombre || ''))) otras.push(x); });
         }
         const prot = protegidos(antes, otras);
         h.espera(true, 'filas de lote a las que apunta una fila que se queda (no se borran): ' + prot.size + (prot.size ? ' (' + [...prot].slice(0, 20).join(', ') + ')' : '') + ' · filas que se quedan revisadas: ' + otras.length);

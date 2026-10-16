@@ -181,6 +181,9 @@ async function correrGuion(spec, opciones = {}) {
         };
         try {
           await page.goto(BASE + caso.pagina, { waitUntil: 'domcontentloaded', timeout: 45000 });
+          // v0.6.3 (LM-44, M-568 · INC-136): espera a que la carga de la página de arranque termine sus peticiones (máx. 8 s)
+          // antes de dar el control al caso: así un caso que cuenta peticiones no suma las de esta carga. Sin red quieta en 8 s, sigue.
+          await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => { });
           await Promise.race([caso.prueba(h), new Promise((_, no) => setTimeout(() => no(new Error('el caso paso de 90 s')), 90000))]);
         } catch (e) { error = (e && e.message ? e.message : String(e)).split('\n')[0]; }
         // v0.5.23 (M-427): si el caso revienta (timeout, excepción), deja la pantalla y su texto como captura «error»

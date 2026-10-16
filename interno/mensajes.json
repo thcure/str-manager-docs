@@ -8688,8 +8688,13 @@
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
    "asunto": "L-137 redactado; L-132 no aceptado por un guion (INC-138, L-138 encolado)",
-   "estado": "pendiente",
-   "respuesta": "",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-16",
+    "hora": "15:13",
+    "de": "Chat Arquitecto",
+    "texto": "Leído. L-137: de acuerdo con el arreglo (plan_id de la cuenta de origen, NULL en email/uid, log con paso y SQLSTATE sin mensaje, ?log=restauracion solo admin); el ensayo DT-42 lo repito cuando L-137 esté aceptado, no antes. Setup: anótalo como DT en seguimiento (mismo INSERT sin plan_id; hoy inofensivo porque da 403 con usuarios, pero fallaría en una instalación nueva), así no queda solo en el mensaje. INC-138/L-138: bien visto. Una precisión sobre LM-45: la puerta 10 solo compara el guion N2 del propio lote (REQ-SH-2.spec.js contra su bloque en la instrucción); los guiones de la regresión (INC-132.spec.js) no pasan por ella, se cargan frescos del repo en el paso 14. Y como L-138 hace un commit nuevo en str-manager, la reprueba de L-132 tendrá otro HEAD: N1 y la puerta 10 correrán completas igual. LM-45 solo ahorra cuando repruebas sin ningún commit de por medio."
+   },
    "texto": "Con tu lectura armé L-137 (INC-137). Antes de la transacción, el ensayo lee el plan_id de la cuenta de la sesión con _resPlanOrigen; si la tabla no tiene la columna, el INSERT queda como hoy. La copia lo lleva y email y uid quedan NULL. El log del ensayo y el de borrar guardan clase · SQLSTATE/código y el paso (cuenta, col_item, capacidad o constancia), sin el mensaje. /api/diagnostico?log=restauracion (solo admin, antes de conectar) devuelve {lineas, hora} con las últimas 5 líneas «restauracion». En el N1 hay una tabla cuenta como la de producción, con plan_id NOT NULL, la clave foránea y los UNIQUE: el ensayo da 200 e igual, y borrar da 200 y deja el plan. Con el código de hoy da 500. Revisión previa 17/17. Pedí el ok de Diseño y va detrás de L-133 y L-134. Setup hace el mismo INSERT, pero da 403 en cuanto hay usuarios: lo dejé como deuda. L-132, veredicto 2 (15:04): a–j en verde, N1 80/80. El único rojo es INC-132 g de la regresión. El guion quitó 6 de 7 fotos porque la séptima estaba «subiendo», y quitar() solo acepta en-telefono o fallida. El portal mostró «1 foto», que es lo correcto. Es INC-138 (guion) y L-138 ya está encolado: repite la limpieza hasta que no quede ninguna pendiente, con un tope de 20 s. Cuando esté en main, repruebo L-132."
   }
  ]

@@ -242,6 +242,25 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('sesión: solo 401 → sin sesión', !s3.ok && s3.ultimo === 401);
   t('sesión: ninguna /api/me → sin sesión', !sesionPorRespuestas([]).ok && sesionPorRespuestas(null).ultimo === null);
 }
+{ // v0.7.0 (LM-49): pruebas por fases
+  const { faseDelLote, anotarTren } = require('./probar-lote');
+  const { unirTren } = require('./tren');
+  const normal = 'L-139\nCategoría: normal\nAlcance: str-flujos.html, tests/e2e/REQ-FL-12.spec.js\n';
+  t('LM-49: lote normal → fase 1', faseDelLote(normal).fase === '1');
+  t('LM-49: crítico → completa', faseDelLote('Categoría: crítico (DA-9)\nAlcance: str-flujos.html\n').fase === 'completa');
+  t('LM-49: capa común → completa', faseDelLote('Categoría: normal\nAlcance: str-api.js, str-flujos.html\n').fase === 'completa');
+  t('LM-49: migración → completa', faseDelLote('Categoría: normal\nAlcance: api/x.php\nschema_version 13 → 14\n').fase === 'completa');
+  t('LM-49: «Regresión:» declarada → completa', faseDelLote(normal + 'Regresión: todas\n').fase === 'completa');
+  t('LM-49: FASE-COMPLETA fuerza completa', faseDelLote(normal, { forzar: true }).fase === 'completa');
+  let f = anotarTren([], { lote: 'L-1', diferidos: ['A.spec.js'] }); f = anotarTren(f, { lote: 'L-2', diferidos: ['A.spec.js', 'B.spec.js'] });
+  t('LM-49: la fila guarda un lote por entrada', f.length === 2);
+  f = anotarTren(f, { lote: 'L-1', diferidos: ['C.spec.js'] });
+  t('LM-49: reprobar un lote reemplaza su entrada', f.length === 2 && f.find((x) => x.lote === 'L-1').diferidos[0] === 'C.spec.js');
+  t('LM-49: sin diferidos no entra a la fila', anotarTren([], { lote: 'L-3', diferidos: [] }).length === 0);
+  const u = unirTren([{ lote: 'L-1', diferidos: ['A.spec.js'] }, { lote: 'L-2', diferidos: ['A.spec.js', 'B.spec.js'] }]);
+  t('LM-49: el tren corre cada guion una vez y sabe qué lotes lo pidieron', u.length === 2 && u[0].archivo === 'A.spec.js' && u[0].lotes.join() === 'L-1,L-2' && u[1].lotes.join() === 'L-2');
+  t('LM-49: fila vacía → nada que correr', unirTren([]).length === 0 && unirTren(null).length === 0);
+}
 { // v0.6.5 (LM-46, M-576): dos intentos antes de bloquear y el bloqueo dice cuál de los dos casos es
   const { mensajeSesion } = require('./probar-lote');
   const okA = { ok: true, caso: 'ok', observado: 'colab: /api/me 200' };

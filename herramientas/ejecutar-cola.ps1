@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -212,7 +212,26 @@ try {
   # v5 (B3b): orden por numero de lote, no por nombre; acepta 75-instr-*.md y L-75-instr-*.md (id L-n del modelo)
   $pendientes = Get-ChildItem -Path $Cola -Filter '*.md' -File | Where-Object { $_.Name -notmatch '\.sin-cruce\.md$' } |
     Sort-Object @{ Expression = { if ($_.Name -match '^(?:L-)?(\d+)-') { [int]$Matches[1] } else { 999999 } } }, Name
-  if (-not $pendientes) { exit 0 }
+  if (-not $pendientes) {
+    # v9 (LM-49): con la cola sin lotes corre el TREN (fase 2): la regresion diferida de los lotes en fase 1, una sola vez.
+    # Corre si hay 3 o mas lotes en log\tren-pendiente.json, o con el archivo TREN en la cola (lo pide el Arquitecto o el panel).
+    $pendTren = Join-Path $Log 'tren-pendiente.json'
+    $nTren = 0; try { $nTren = @((Get-Content -Raw -Encoding UTF8 $pendTren | ConvertFrom-Json)).Count } catch { }
+    $pedidoTren = Join-Path $Cola 'TREN'
+    $tren = Join-Path $Cola 'pw\tren.js'
+    $nodeT = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+    if ($nodeT -and (Test-Path $tren) -and $nTren -gt 0 -and ($nTren -ge 3 -or (Test-Path $pedidoTren))) {
+      Resumen "TREN | $nTren lote(s) en la fila | empieza"
+      Push-Location (Join-Path $Cola 'pw')
+      $salidaT = Join-Path $Log 'tren.txt'
+      (& $nodeT $tren --repo $Repo 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaT -Encoding UTF8
+      Pop-Location
+      $ultT = (Get-Content -Path $salidaT -Encoding UTF8 -ErrorAction SilentlyContinue | Where-Object { $_ -match '^Tren ' } | Select-Object -Last 1)
+      Resumen ("TREN | " + $ultT)
+    }
+    if (Test-Path $pedidoTren) { Remove-Item -Path $pedidoTren -Force -ErrorAction SilentlyContinue }
+    exit 0
+  }
 
   # v3: la CLI acepta --permission-prompts none desde la 2.1.259; si esta version no lo conoce, no se pasa
   $flagsExtra = @()

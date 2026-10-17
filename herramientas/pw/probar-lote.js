@@ -108,6 +108,25 @@ function seleccionRegresion(texto, spec, guiones, mapa, centinelas = [], R = car
   for (const g of guiones) if (!out.corren.some(x => x.archivo === g.archivo)) out.noCorren.push({ archivo: g.archivo, porQue: out.modo === 'ruta' ? 'ningun caso cubre un nodo de la ruta (' + mods(g).join(', ') + ')' : out.modo === 'declarada' ? 'fuera de lo declarado' : 'fuera de la zona' });
   return out;
 }
+// v0.7.0 (LM-49, cruce de Carlos 17-oct-2026): pruebas por fases. Fase 1 (frena el lote): N1, guion y N3 propios, humo y
+// los centinelas que caen en la ruta. La regresión restante se DIFIERE al tren (pw\tren.js), que la corre una sola vez para
+// varios lotes. Fase completa (regresión en el propio lote, como antes): críticos, capa común, migraciones, «Regresión:»
+// declarada, o el archivo FASE-COMPLETA en la cola. Puras: faseDelLote, anotarTren.
+function faseDelLote(texto, opciones = {}) {
+  const cab = String(texto || '').replace(/\r\n/g, '\n').split('\n').slice(0, 20).join('\n');
+  const al = (cab.match(/^Alcance:.*$/m) || [''])[0];
+  if (opciones.forzar) return { fase: 'completa', motivo: 'archivo FASE-COMPLETA en la cola' };
+  if (/^Categor[ií]a:.*cr[ií]tico/mi.test(cab)) return { fase: 'completa', motivo: 'lote crítico' };
+  if (TOCA_COMUN.test(al)) return { fase: 'completa', motivo: 'el Alcance toca la capa común o el servidor' };
+  if (/migraci[oó]n|migrate\.php|schema_version[^\n]*\d+\s*(?:→|->)\s*\d+/i.test(cab)) return { fase: 'completa', motivo: 'migración de base de datos' };
+  if (/^Regresi[oó]n:/mi.test(cab)) return { fase: 'completa', motivo: 'la instrucción declara «Regresión:»' };
+  return { fase: '1', motivo: 'lote normal: regresión diferida al tren (LM-49)' };
+}
+function anotarTren(pendiente, entrada) {   // un lote reprobado reemplaza su entrada anterior
+  const lista = (Array.isArray(pendiente) ? pendiente : []).filter((x) => x && x.lote !== entrada.lote);
+  if (entrada.diferidos && entrada.diferidos.length) lista.push(entrada);
+  return lista;
+}
 // Puro: nombre de la carpeta donde se apartan las capturas de una corrida anterior.
 function carpetaCapturasAnterior(lote, d = new Date()) {
   const dd = n => String(n).padStart(2, '0');
@@ -291,7 +310,14 @@ async function main() {
   const centinelas = leerJson(path.join(__dirname, 'centinelas.json'), []);
   const guiones = cargarGuiones(dirE2e, rutaSpec ? path.basename(rutaSpec) : null);
   const sel = seleccionRegresion(texto, spec, guiones, mapa, centinelas);
-  const humoSpec = sel.humo && fs.existsSync(path.join(__dirname, 'humo-pw.spec.js')) ? cargar(path.join(__dirname, 'humo-pw.spec.js')) : null;
+  // LM-49: fase 1 → solo corren los centinelas que caen en la ruta; lo demás va al tren. Humo siempre en fase 1.
+  const fase = faseDelLote(texto, { forzar: fs.existsSync(path.join(COLA, 'FASE-COMPLETA')) });
+  const esCentinela = (a) => centinelas.some((c) => c.guion === a);
+  const diferidos = fase.fase === '1' ? sel.corren.filter((c) => !esCentinela(c.archivo)).map((c) => c.archivo) : [];
+  if (fase.fase === '1') sel.corren = sel.corren.filter((c) => esCentinela(c.archivo));
+  out.fase = { fase: fase.fase, motivo: fase.motivo, corren: sel.corren.map((c) => c.archivo), diferidos };
+  console.log('fase ' + fase.fase + ' (' + fase.motivo + ')' + (diferidos.length ? ' · al tren: ' + diferidos.join(', ') : ''));
+  const humoSpec = (sel.humo || fase.fase === '1') && fs.existsSync(path.join(__dirname, 'humo-pw.spec.js')) ? cargar(path.join(__dirname, 'humo-pw.spec.js')) : null;
   // v0.5.28 (M-474): P4.e comprueba la sesion de TODOS los perfiles que van a correr (guion del lote + regresion), no solo
   // los del guion: un perfil sin sesion tumbaba 30 casos en cascada (L-122) en vez de bloquear en la puerta.
   const perfiles = new Set(((spec && spec.casos) || []).map(c => c.perfil));
@@ -315,7 +341,7 @@ async function main() {
     const rh = await correrGuion(humoSpec, { lote, prefijo: 'zz-verif-' + lote + '-h-', dirGuion: __dirname, nombreGuion: 'humo-pw' });
     const okH = rh.casos.length > 0 && rh.casos.every(x => x.ok !== false);
     out.humo = { ok: okH, casos: rh.casos, limpieza: rh.limpieza, perfiles: rh.perfiles };
-    out.n2.push({ c: 'humo', nivel: 'N2', perfil: 'admin', pagina: '/str-app-shell.html', que: 'humo-pw en verde (lote de solo guiones o herramientas)', ok: okH, observado: rh.casos.map(x => (x.ok ? 'OK ' : 'NO ') + x.c + ' ' + x.observado).join(' | ').slice(0, 600) });
+    out.n2.push({ c: 'humo', nivel: 'N2', perfil: 'admin', pagina: '/str-app-shell.html', que: fase.fase === '1' ? 'humo-pw en verde (fase 1, LM-49)' : 'humo-pw en verde (lote de solo guiones o herramientas)', ok: okH, observado: rh.casos.map(x => (x.ok ? 'OK ' : 'NO ') + x.c + ' ' + x.observado).join(' | ').slice(0, 600) });
     console.log((okH ? 'OK  ' : 'NO  ') + 'N2 humo · ' + rh.casos.length + ' caso(s)');
   }
   {
@@ -327,10 +353,15 @@ async function main() {
     out.regresion.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + 'regresion ' + x.guion + ' ' + (x.c || '') + ' · ' + x.observado));
     out.limpiezaRegresion.forEach(x => console.log('limpieza regresion ' + x.guion + ' · ' + x.limpieza));
   }
+  if (fase.fase === '1') {   // LM-49: deja la regresión diferida en la fila del tren
+    const rutaTren = path.join(COLA, 'log', 'tren-pendiente.json');
+    try { fs.writeFileSync(rutaTren, JSON.stringify(anotarTren(leerJson(rutaTren, []), { lote, commit: out.commit, hora: horaBogota(), diferidos }), null, 1)); out.fase.tren = 'anotado en log\\tren-pendiente.json'; }
+    catch (e) { out.fase.tren = 'no se pudo anotar: ' + e.message; }
+  }
   const rojo = out.n2.some(x => x.ok === false) || out.regresion.some(x => x.ok === false);
   out.n3Preparados = out.n2.filter(x => x.nivel === 'N3' && x.ok === null).map(x => x.c);
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
+module.exports = { faseDelLote, anotarTren, mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

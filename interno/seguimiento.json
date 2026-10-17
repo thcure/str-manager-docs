@@ -588,9 +588,10 @@
    "severidad": "crítico",
    "titulo": "El colaborador lee reservas, propiedades, tickets y otras colecciones de cualquier propiedad donde tuvo un turno, de cualquier fecha y también como apoyo, sin límite de tiempo.",
    "causa": "_colLecturaContexto (api/col/index.php ~629–665) arma $misProps con el propId de todo turno suyo no borrado (sin filtro de fecha) y _colInvEsMiTurno cuenta los apoyos; ese contexto filtra turnos, reservas, propiedades, tickets, inv-movimientos, guias, ubicaciones y prop-workflows.",
-   "pendiente": "Diseño lo define con DA propia y Carlos (M-250 respuesta 5); no entra en REQ-INV2-4-1, que usa un contexto aparte solo para zonas. · 17-oct 08:48 DA-45 de Carlos (M-597): ventana hoy o mañana (Bogotá), titular o apoyo, turno no borrado, sin historial; lote L-141 detrás de L-140. · 08:50 DA-45 cancelada «de momento» por Carlos (M-598): sin lote ni prioridad hasta que la retome. Lectura del código hecha (claude/producto/lectura-inc120-colaborador-2026-10.md).",
+   "pendiente": "Diseño lo define con DA propia y Carlos (M-250 respuesta 5); no entra en REQ-INV2-4-1, que usa un contexto aparte solo para zonas. · 17-oct 08:48 DA-45 de Carlos (M-597): ventana hoy o mañana (Bogotá), titular o apoyo, turno no borrado, sin historial; lote L-141 detrás de L-140. · 08:50 DA-45 cancelada «de momento» por Carlos (M-598): sin lote ni prioridad hasta que la retome. Lectura del código hecha (claude/producto/lectura-inc120-colaborador-2026-10.md). · 08:56 DA-45 aprobada en tres capas (M-602): gestión con un trimestre, propiedad mientras tenga turno o incidente, datos del huésped solo nombre y horas el día del turno. P0 detrás de INC-141.",
    "estado": "abierto",
-   "origen": "Lectura del código para REQ-INV2-4-1 (13-oct), confirmado por Diseño en la respuesta a M-250."
+   "origen": "Lectura del código para REQ-INV2-4-1 (13-oct), confirmado por Diseño en la respuesta a M-250.",
+   "prioridad": "P0"
   },
   {
    "id": "INC-121",
@@ -714,7 +715,7 @@
    "pendiente": "Revisar contra e0c7b9d cuando se resuelva INC-128.",
    "estado": "abierto",
    "origen": "Veredicto de L-108 (19:24).",
-   "prioridad": "P2"
+   "prioridad": "P3"
   },
   {
    "id": "INC-130",
@@ -833,7 +834,8 @@
    "titulo": "PUT /api/col/tickets solo valida el creadoPor entrante: con el id de un ticket ajeno, un colaborador puede leerlo completo en la respuesta o pisarlo",
    "estado": "abierto",
    "severidad": "crítico",
-   "nota": "Visto en la lectura de INC-120 (solo lectura). api/col/index.php: la validación del colaborador en tickets mira el creadoPor que manda (~L1393–1404), no el guardado; con updated_at viejo la rama ~L1733–1739 copia el ticket ajeno y lo devuelve (~L1775–1776); con updated_at nuevo lo pisa. Los ids (tk_<ms base36>_<5 aleatorios>) no se enumeran fácil. Clase: la pone Diseño (LM-48)."
+   "nota": "Visto en la lectura de INC-120 (solo lectura). api/col/index.php: la validación del colaborador en tickets mira el creadoPor que manda (~L1393–1404), no el guardado; con updated_at viejo la rama ~L1733–1739 copia el ticket ajeno y lo devuelve (~L1775–1776); con updated_at nuevo lo pisa. Los ids (tk_<ms base36>_<5 aleatorios>) no se enumeran fácil. Clase: la pone Diseño (LM-48). · 08:54 DA-46 de Carlos (M-601): P0; lote L-141.",
+   "prioridad": "P0"
   }
  ],
  "dts": [
@@ -14211,6 +14213,22 @@
    "planTrabajo": "PT-1",
    "grupo": "HK",
    "nota": "Acordado con el Arquitecto (M-589). Borrador: revisión previa 17/17 (1.ª pasada 15/17, aplicada); hk-sesion-embebido.test.js 10/0 (código de hoy 7 FAIL); guion INC-140.spec.js (5 aperturas del portal del colab en < 30 s). · 07:33 ok de Diseño sin cambios (M-591). · 08:38 encolado (cmp IGUAL); LM-48 regla 4: destraba L-132, va primero (Arquitecto M-592). · 08:49 construido d40dfb4 (?v= p5c101 → p5c102; 82/82; la sección del mapa quedó en docs/claude/housekeeping-2.md por el tope de 60 000 caracteres)."
+  },
+  {
+   "lote": "L-141",
+   "req": "INC-141",
+   "categoria": "crítico",
+   "riesgo": "R-2",
+   "resumen": "PUT /api/col: el colaborador solo reescribe un incidente o un movimiento si la fila guardada es suya",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "esperaA": "Diseño",
+   "espera": "revisión previa, ok de Diseño y cruce de Carlos (Arquitecto); va tras L-140",
+   "orden": 121.52017,
+   "desde": "2026-10-17 08:58",
+   "planTrabajo": "PT-1",
+   "grupo": "SRV",
+   "nota": "DA-46 (M-601). N1 col-ajeno-guardado 10/0 (código de hoy 9 FAIL); guion INC-141.spec.js."
   }
  ],
  "riesgos": [

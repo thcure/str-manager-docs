@@ -13574,6 +13574,20 @@
     "notas": "pruebas.json dice resultado: \"rojo\"; causa: 80 casos de regresión fallan, todos por page.goto → net::ERR_INTERNET_DISCONNECTED entre las 17:11:13 y las 17:13:00 (se cayó la conexión a internet del entorno de pruebas a mitad de la regresión; no es un fallo de la app ni de este lote — ningún caso llegó a ejecutar código). Los 4 criterios propios del lote (a, b por N2; c, d por N1) están en verde. De los 80 casos rojos, 46 son de guiones/páginas fuera del Alcance (portal.html, str-app-shell.html, str-tablero.html) y cumplen las 4 condiciones de regla ajena (LM-47b): van a regresionAjena. Los otros 34 caen en str-m1-housekeeping.html o str-inventario.html, que SÍ están en el Alcance de este lote (H1–H7, I1): por la condición 4 de LM-47b (\"si el lote cambió str-m1-housekeeping.html y cae un caso de HK, no aplica\") no pueden excusarse, y por LM-50 eso basta para que \"el lote no se acepta\" aunque la causa (net::ERR_INTERNET_DISCONNECTED) sea la misma caída de red. No se abren INC: por M-472/el párrafo de net::ERR_* en page.goto, estos 80 casos son cascada del arnés/entorno, no evidencia de un defecto de producto. herramienta: la corrida de regresión se cortó por una caída de conectividad a internet del entorno (net::ERR_INTERNET_DISCONNECTED), no por el código del lote; hay que repetir la regresión con la red restablecida antes de poder aceptar. Deuda de cobertura (regresionSeleccion.ruta.huecos, sin cambiar el resultado): relaciones REL-08, REL-15, REL-21, REL-22, REL-30; reglas RT-10, RT-11, RT-15 — ninguna la toca este lote. Sin sesiones caídas ni perdidas. Sin criterios N3 ni N4 en la instrucción.",
     "herramienta": "la conexión a internet del entorno de pruebas se cayó durante la regresión (net::ERR_INTERNET_DISCONNECTED en page.goto) entre las 17:11:13 y las 17:13:00, afectando los 80 casos de regresión posteriores a ese punto"
    }
+  },
+  {
+   "lote": "LM-52",
+   "tipo": "modelo",
+   "fecha": "2026-10-17",
+   "hash": null,
+   "version": "v1",
+   "req": "PRUEBAS-v1",
+   "categoria": "crítico",
+   "resumen": "LM-52: sin internet en LENOVO a mitad de la corrida (net::ERR_INTERNET_DISCONNECTED y afines), pw espera hasta 10 min; si vuelve la red repite el guion una vez, si no deja la corrida «bloqueado» y no llega al juez.",
+   "motivo": "M-656: L-146 (P0) no aceptado con sus criterios en verde por 80 casos de red (17:11–17:13).",
+   "aprobacion": null,
+   "estado": "registrado",
+   "observacion": "Espera cruce de Carlos."
   }
  ],
  "esquema": {

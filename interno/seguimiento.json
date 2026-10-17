@@ -588,10 +588,9 @@
    "severidad": "crítico",
    "titulo": "El colaborador lee reservas, propiedades, tickets y otras colecciones de cualquier propiedad donde tuvo un turno, de cualquier fecha y también como apoyo, sin límite de tiempo.",
    "causa": "_colLecturaContexto (api/col/index.php ~629–665) arma $misProps con el propId de todo turno suyo no borrado (sin filtro de fecha) y _colInvEsMiTurno cuenta los apoyos; ese contexto filtra turnos, reservas, propiedades, tickets, inv-movimientos, guias, ubicaciones y prop-workflows.",
-   "pendiente": "Diseño lo define con DA propia y Carlos (M-250 respuesta 5); no entra en REQ-INV2-4-1, que usa un contexto aparte solo para zonas. · 17-oct 08:48 DA-45 de Carlos (M-597): ventana hoy o mañana (Bogotá), titular o apoyo, turno no borrado, sin historial; lote L-141 detrás de L-140.",
+   "pendiente": "Diseño lo define con DA propia y Carlos (M-250 respuesta 5); no entra en REQ-INV2-4-1, que usa un contexto aparte solo para zonas. · 17-oct 08:48 DA-45 de Carlos (M-597): ventana hoy o mañana (Bogotá), titular o apoyo, turno no borrado, sin historial; lote L-141 detrás de L-140. · 08:50 DA-45 cancelada «de momento» por Carlos (M-598): sin lote ni prioridad hasta que la retome. Lectura del código hecha (claude/producto/lectura-inc120-colaborador-2026-10.md).",
    "estado": "abierto",
-   "origen": "Lectura del código para REQ-INV2-4-1 (13-oct), confirmado por Diseño en la respuesta a M-250.",
-   "prioridad": "P0"
+   "origen": "Lectura del código para REQ-INV2-4-1 (13-oct), confirmado por Diseño en la respuesta a M-250."
   },
   {
    "id": "INC-121",
@@ -711,12 +710,11 @@
    "fecha": "2026-10-14",
    "severidad": "medio",
    "titulo": "inv-articulos del colaborador trae artículos de zonas privada y revocada (REQ-INV2-7-1.spec.js f)",
-   "causa": "Por confirmar: filtro del servidor o restos de semilla con los mismos ids. Visto en la regresión de L-108.",
+   "causa": "Por confirmar: filtro del servidor o restos de semilla con los mismos ids. Visto en la regresión de L-108. · 17-oct (lectura en solo lectura): no es un fallo del filtro; el servidor manda todo el catálogo de inv-articulos a propósito (sin costo; el artículo no tiene zona) y lo que se ve son artículos zz-verif- de la semilla que limpiar() de REQ-INV2-7-1 solo desactiva; el guion f exige que lleguen.",
    "pendiente": "Revisar contra e0c7b9d cuando se resuelva INC-128.",
    "estado": "abierto",
    "origen": "Veredicto de L-108 (19:24).",
-   "prioridad": "P2",
-   "prioridad_nota": "P0 si la DA de Carlos lo cubre junto con INC-120"
+   "prioridad": "P2"
   },
   {
    "id": "INC-130",
@@ -828,6 +826,14 @@
    "severidad": "media",
    "nota": "Visto en las repruebas de L-132 (perfil colab, M-582/M-588); acordado con el Arquitecto (M-589). Causa: str-m1-housekeeping.html L7270–7272 onAuthStateChanged → location.replace('login.html') también dentro del iframe; el freno de login.html (sessionStorage str-login-autos, 30 s, >2) es correcto. Arreglo: el HK embebido nunca navega a login.html; espera authStateReady con tope (como L-133) y, sin usuario, avisa al portal y sigue con el JWT del portal. Guion con 5 aperturas del portal del colab en < 30 s. Detrás de L-133.",
    "prioridad": "P1 por destrabe"
+  },
+  {
+   "id": "INC-141",
+   "fecha": "2026-10-17",
+   "titulo": "PUT /api/col/tickets solo valida el creadoPor entrante: con el id de un ticket ajeno, un colaborador puede leerlo completo en la respuesta o pisarlo",
+   "estado": "abierto",
+   "severidad": "crítico",
+   "nota": "Visto en la lectura de INC-120 (solo lectura). api/col/index.php: la validación del colaborador en tickets mira el creadoPor que manda (~L1393–1404), no el guardado; con updated_at viejo la rama ~L1733–1739 copia el ticket ajeno y lo devuelve (~L1775–1776); con updated_at nuevo lo pisa. Los ids (tk_<ms base36>_<5 aleatorios>) no se enumeran fácil. Clase: la pone Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -14183,7 +14189,7 @@
    "estado": "redactado",
    "vista": "siguiente",
    "esperaA": "cola",
-   "espera": "encolar tras L-140 e INC-120 + INC-129 (P0, cuando Carlos tome la DA), M-594/M-595",
+   "espera": "encolar tras L-140 (orden LM-48; DA-45 cancelada, M-598)",
    "orden": 121.5219,
    "desde": "2026-10-16 16:49",
    "planTrabajo": "PT-1",
@@ -14196,7 +14202,7 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "HK embebido en el portal: nunca a login.html; espera a Firebase con tope y sigue con el JWT del portal; en un 401 sin identidad avisa al portal",
-   "estado": "encolado",
+   "estado": "construido",
    "vista": "siguiente",
    "esperaA": "cola",
    "espera": "",
@@ -14204,7 +14210,7 @@
    "desde": "2026-10-17 07:32",
    "planTrabajo": "PT-1",
    "grupo": "HK",
-   "nota": "Acordado con el Arquitecto (M-589). Borrador: revisión previa 17/17 (1.ª pasada 15/17, aplicada); hk-sesion-embebido.test.js 10/0 (código de hoy 7 FAIL); guion INC-140.spec.js (5 aperturas del portal del colab en < 30 s). · 07:33 ok de Diseño sin cambios (M-591). · 08:38 encolado (cmp IGUAL); LM-48 regla 4: destraba L-132, va primero (Arquitecto M-592)."
+   "nota": "Acordado con el Arquitecto (M-589). Borrador: revisión previa 17/17 (1.ª pasada 15/17, aplicada); hk-sesion-embebido.test.js 10/0 (código de hoy 7 FAIL); guion INC-140.spec.js (5 aperturas del portal del colab en < 30 s). · 07:33 ok de Diseño sin cambios (M-591). · 08:38 encolado (cmp IGUAL); LM-48 regla 4: destraba L-132, va primero (Arquitecto M-592). · 08:49 construido d40dfb4 (?v= p5c101 → p5c102; 82/82; la sección del mapa quedó en docs/claude/housekeeping-2.md por el tope de 60 000 caracteres)."
   }
  ],
  "riesgos": [

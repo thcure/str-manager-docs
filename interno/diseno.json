@@ -1670,27 +1670,49 @@
   {
    "id": "DA-45",
    "fecha": "2026-10-17",
-   "pregunta": "INC-120: ¿qué datos ve un colaborador? Hoy lee reservas (con datos de huéspedes), propiedades, tickets y otras colecciones de toda propiedad donde alguna vez tuvo un turno, sin límite de fecha y también como apoyo.",
+   "pregunta": "INC-120: ¿qué ve un colaborador y por cuánto tiempo? Hoy lee reservas (con datos de huéspedes), propiedades, tickets y otras colecciones de toda propiedad donde tuvo un turno, sin límite. Contexto de Carlos (17-oct 08:52): el colaborador necesita volver a la propiedad para un incidente, ver el detalle de su gestión para inventario, rendición de cuentas y para dar credibilidad a su liquidación; la información debe ir caducando, por trimestre.",
    "opciones": [
     {
-     "opcion": "a) Solo su turno de hoy (o mañana)",
-     "consecuencias": "Ve una propiedad solo mientras tenga un turno de hoy o mañana ahí, también como apoyo. Sin historial. Mínimo necesario (RT-6, Ley 1581)."
+     "opcion": "a) Tres capas (propuesta de Diseño, enfoque aprobado por Carlos 17-oct)",
+     "consecuencias": "1) Su gestión (sus turnos, tareas, fotos, movimientos de inventario que hizo, préstamos, liquidación): último trimestre; lo anterior caduca. 2) La propiedad para operar (dirección, acceso, guías, ubicaciones, inventario de la zona, tickets o incidentes asignados): mientras tenga un turno próximo o un incidente asignado ahí, y dentro del trimestre de su gestión pasada en esa propiedad. 3) Datos del huésped: solo nombre y horas de llegada/salida, y solo en el turno de hoy o mañana (hora de Bogotá); en su historial la reserva aparece sin datos personales (código y fechas). Admin y operador no cambian."
     },
     {
-     "opcion": "b) Una semana alrededor",
-     "consecuencias": "Ve propiedades con turno en los 7 días anteriores o siguientes. Más contexto, más exposición."
+     "opcion": "b) Solo su turno de hoy o mañana",
+     "consecuencias": "Mínimo de exposición, pero deja sin historial para inventario, rendición de cuentas y liquidación (descartada por Carlos 08:52)."
     },
     {
-     "opcion": "c) Dejarlo para después del tablero",
-     "consecuencias": "La exposición sigue mientras haya colaboradores reales activos."
+     "opcion": "c) Dejarlo como está",
+     "consecuencias": "Riesgo aceptado: sigue la exposición de datos de huéspedes fuera del turno."
     }
    ],
    "recomendacion": "a",
-   "estado": "pospuesta",
+   "estado": "abierta",
    "reqs": [],
    "modulo": "Servidor (api/col) · permisos del colaborador",
    "origen": "INC-120 (13-oct, Desarrollo); clasificado P0 con LM-48 (M-593/M-594)",
-   "decision": "Pospuesta por Carlos (17-oct 08:50, Chat Diseño): «cancela esa DA-45 de momento». Queda sin decisión vigente; lo que se había anotado (opción a, 08:4x) no rige. INC-120 sigue abierto sin lote hasta que Carlos la retome."
+   "decision": "Abierta: Carlos aprobó el enfoque de tres capas (17-oct 08:54); falta su ok al texto. Mientras tanto INC-120 es riesgo aceptado temporal, sin lote. La opción b se anotó y se pospuso a las 08:49."
+  },
+  {
+   "id": "DA-46",
+   "fecha": "2026-10-17",
+   "pregunta": "INC-141: PUT /api/col/tickets solo valida el creadoPor que manda el colaborador, no el del ticket guardado; con el id de un ticket ajeno puede leerlo completo en la respuesta o pisarlo. ¿Va primero?",
+   "opciones": [
+    {
+     "opcion": "a) Sí, P0 detrás de L-140",
+     "consecuencias": "El colaborador solo puede editar (y recibir en la respuesta) tickets propios o asignados; FL-12 y el tablero se corren un puesto."
+    },
+    {
+     "opcion": "b) Después del tablero",
+     "consecuencias": "El riesgo de leer o pisar tickets ajenos sigue mientras tanto."
+    }
+   ],
+   "recomendacion": "a",
+   "estado": "decidida",
+   "reqs": [],
+   "modulo": "Servidor (api/col/tickets)",
+   "origen": "INC-141 (Desarrollo, M-598)",
+   "fechaDecision": "2026-10-17 08:54",
+   "decision": "Carlos (cruce 17-oct 08:54, Chat Diseño): a) P0, primero detrás de L-140. El servidor valida contra el ticket guardado: el colaborador solo edita y recibe tickets que creó o que tiene asignados; si no, 403 sin cuerpo del ticket. Admin y operador no cambian. Crítico. Si cambia el alcance, nuevo cruce."
   }
  ],
  "prioridades": [
@@ -2177,6 +2199,15 @@
    "tamano": null,
    "titulo": "Revisar el primer corte real (N4 de K3-3): reporte y una foto vieja vista desde Drive",
    "nota": "16-oct 09:21: 1-dic-2026, día siguiente al corte del 30-nov."
+  },
+  {
+   "ref": "T-14",
+   "tipo": "idea",
+   "modulo": "Equipo / registro de colaboradores",
+   "prioridad": "baja",
+   "tamano": null,
+   "titulo": "Aceptación de términos de privacidad del colaborador al registrarse",
+   "nota": "Carlos 17-oct 08:52: «eventualmente podríamos abordar una aceptación de términos de privacidad … cuando se registre». El colaborador acepta tratar con reserva lo que ve (datos de huéspedes, Ley 1581) y queda constancia con fecha. Complementa DA-45, no la reemplaza."
   }
  ],
  "planes": [

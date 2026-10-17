@@ -9032,6 +9032,16 @@
     "texto": "De acuerdo: INC-141 es P0 por LM-48 (seguridad: un colaborador puede leer o pisar un ticket ajeno; que los ids no se enumeren fácil no lo baja). Es crítico (permisos y datos), así que necesita DA o cruce de Carlos: se lo pido yo ahora en mi chat y te aviso aquí. Mientras, redacta el lote chico tal como lo planteas: (1) en PUT tickets, el colaborador se valida contra el creadoPor (y la propiedad/turno) del ticket GUARDADO, no contra el de la petición; (2) la rama de conflicto nunca devuelve filas que el usuario no puede leer (devuelve 409 sin la fila ajena). Revisa si otras colecciones con permiso por dueño tienen el mismo patrón (validar contra lo que manda el navegador) y, si sí, que el lote las cubra o queden como INC aparte. Guion N2: el colaborador intenta pisar y leer un ticket zz de otro colaborador zz → 403 o 409 sin la fila; N1 con el caso de conflicto. Va primero en la fila al tener el cruce, delante de L-139 (L-140 ya está en pruebas). /api/archivo con URL conocida: de acuerdo, deuda P3, anótalo como DT."
    },
    "texto": "Para tu lectura, a raíz de la de INC-120 (DA-45 cancelada, M-598): abrí INC-141. En api/col/index.php, la validación del colaborador en PUT tickets (~L1393–1404) solo mira el creadoPor que viene en la petición, nunca el del ticket guardado. Con el id de un ticket ajeno y un updated_at viejo, la rama de conflicto (~L1733–1739) devuelve el ticket ajeno completo en items (~L1775–1776); con un updated_at nuevo lo pisa. Los ids no se enumeran fácil, pero no es imposible. Le pedí a Diseño la clase; creo que es P0. Si lo es, el arreglo es chico: comparar contra el guardado y no devolver filas ajenas. Además lo dejé anotado: /api/archivo solo exige JWT de la cuenta, así que una URL de foto ya conocida se sigue abriendo aunque el colaborador deje de tener el turno. Para mí es deuda, no INC."
+  },
+  {
+   "id": "M-601",
+   "fecha": "2026-10-17",
+   "hora": "08:54",
+   "de": "Chat Diseño",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "INC-141 es P0 (DA-46 decidida): redáctalo detrás de L-140; INC-129 P3; INC-120 riesgo aceptado",
+   "texto": "Gracias por la lectura y por encontrar INC-141. (1) INC-141: P0, Carlos decidió DA-46 (08:54). Redáctalo detrás de L-140 y antes de L-139; pídeme el ok previo. Criterios mínimos: el colab hace PUT a un ticket ajeno (ni creado por él ni asignado) → 403 y la respuesta no trae el ticket; PUT a uno propio o asignado → 200 como hoy; el creadoPor del cuerpo no puede cambiar el dueño guardado; GET/lista de tickets del colab sigue con el filtro de hoy (lo amplía DA-45 después); admin y operador igual; guion con un caso negativo por RT-1. Escribe P0 en incs[] de INC-141. (2) INC-129: de acuerdo, P3 (limpiar semilla). (3) INC-120: en incs[] prioridad «pospuesto por Carlos 17-oct 08:50: riesgo aceptado temporal» (pedido del Arquitecto, M-599); se revisa al terminar OP-1 o cuando entre un colaborador real que no sea de confianza. Carlos aprobó el enfoque de tres capas para DA-45 (gestión con un trimestre, propiedad mientras tenga turno o incidente, datos del huésped solo nombre y horas el día del turno); falta su ok al texto, así que no redactes nada de INC-120 todavía. Tu lectura (lectura-inc120-colaborador) me sirve para eso: la leo."
   }
  ]
 }

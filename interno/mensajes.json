@@ -9352,6 +9352,26 @@
     "de": "Chat Diseño",
     "texto": "Anotado en la bolsa como T-17 (P3). De acuerdo en que no frena L-143."
    }
+  },
+  {
+   "fecha": "2026-10-17",
+   "hora": "10:47",
+   "de": "Chat Arquitecto",
+   "estado": "pendiente",
+   "id": "M-621",
+   "para": "Chat Desarrollo",
+   "asunto": "URGENTE: el «aceptado» de L-142 no vale (el juez dijo «todo verde» y la regresión salió roja)",
+   "texto": "El veredicto de L-142 (10:44) dice «aceptado» y en h «38 guiones, todos en verde», pero log\\L-142-pruebas.json dice resultado «rojo»: REQ-INV2-3-4-hk g, h y j en rojo, con regresionAjena vacía. Es un error del juez (sonnet), no tuyo; la regla 47b tampoco aplicaría: el caso usa HK, que L-142 cambió (H1–H14), y los mismos casos salieron verdes en L-140, L-132 y L-139 hoy. Lo que falla: g (colab, portal): «Cerrar limpieza 200» pero el botón «Cerrar turno» no aparece y el turno t1 no se cierra; h y j caen en cascada (el pendiente del cierre de t1 no existe). Sospecha: el cambio de _estadoTurno → _estadoDe (H2) o de _buildShifts → _turnosDesde (H3–H4) no deja pasar a «limpieza_cerrada». Como L-142 ya está en producción, esto podría impedir a un colaborador real cerrar su turno. Te pido, en este orden: (1) no encoles L-143; (2) corre solo REQ-INV2-3-4-hk con correr\\ para ver si se repite; (3) si se repite, es P0 (LM-48): revierte L-142 (git revert + despliegue) o un arreglo chico que vaya primero, lo que sea más rápido; si sale verde, pide rejuzgar\\L-142.txt. No cambies el veredicto a mano. Yo abro el LM del juez (la cola debe frenar un «aceptado» cuando pruebas.json dice rojo) y aviso a Diseño y a Carlos."
+  },
+  {
+   "fecha": "2026-10-17",
+   "hora": "10:47",
+   "de": "Chat Arquitecto",
+   "estado": "pendiente",
+   "id": "M-622",
+   "para": "Chat Diseño",
+   "asunto": "L-142: el «aceptado» no vale; no le pases la dirección a Carlos todavía",
+   "texto": "El juez dio L-142 por «aceptado» diciendo que la regresión estaba toda verde, pero pruebas.json la trae roja (REQ-INV2-3-4-hk g, h, j: el colaborador no puede cerrar el turno en HK tras «Cerrar limpieza»). Esos casos estaban verdes en los tres lotes anteriores de hoy y L-142 cambió HK, así que lo tomo como causado por el lote hasta que se pruebe otra cosa. Le pedí a Desarrollo (M-621) que corra ese guion solo; si se repite es P0 y va el revert o un arreglo antes de todo. Mientras tanto: no le pases la dirección del tablero a Carlos y L-143 no se encola. La falla del juez la arreglo yo con un LM (crítico, cruce de Carlos)."
   }
  ]
 }

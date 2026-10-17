@@ -871,6 +871,15 @@
    "severidad": "medio",
    "prioridad": "P2",
    "nota": "Mismo commit 1a941d1, tres corridas: (1) REQ-INV2-3-4-hk g/h/j; (2) REQ-INV2-4-1-interfaz d; (3) REQ-K3c-vista c/d/i y REQ-K3c c/d (colab en la pantalla de login). Aislados (1) y (2) verdes. Lectura del Arquitecto (M-630): sesión del colaborador en el portal tras varias regresiones seguidas (aviso de Google de inicios automáticos). Abarca INC-143 e INC-144. Si la cuarta vuelta cae por sesión, el Arquitecto abre el LM de la puerta de sesiones (P1). · 12:00 correr\\k3c aislado: c (colab) rojo igual → sesión del colaborador caída, no intermitente (M-632). · 12:04 k3cvista aislado: colab c/i igual de rojos. · 12:06 correr\\sesiones: admin, oper y colab2 200; colab en login.html (recuperar sesión falló). · 12:33 colab repuesto (abrir-perfil.js --forzar 12:09; ventana cerrada 12:30); sesiones s1–s4 200."
+  },
+  {
+   "id": "INC-146",
+   "fecha": "2026-10-17",
+   "titulo": "Almacenamiento local del navegador lleno (QuotaExceededError en str-col-lastpush-v1) en los perfiles admin y oper de prueba: la regresión de L-145 cae en 23 casos",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P1",
+   "nota": "Veredicto L-145 (16:30). Desde 16:14 HK del admin/oper no puede escribir su copia local: Inventario con 4474 movimientos zz-verif- acumulados de las corridas del día, más str-col-backup-v1 y lastpush. Entorno de pruebas (frena un lote de producto: P1 por la regla 4 de LM-48). Ojo de producto: el mismo tope lo alcanzaría un admin u operador real si los movimientos crecen así (HK guarda todos en el teléfono); vale una DT para acotar la copia local. Consulta al Arquitecto M-650."
   }
  ],
  "dts": [
@@ -13123,6 +13132,65 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "pruebas.json: resultado «verde», causa null. Único \"ok\": false del archivo es semilla (estado «no concluyente»: zonas no concluyente y varios avisos de inventario), no es un caso; la entrada P4 la dio por buena y no afecta a los criterios del lote. Fase completa (motivo: lote crítico), sin diferidos. Regresión por ruta (modo ruta): todos los casos en verde; no corren INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5 (fuera de la ruta: PR/PRJ), sin evidencia en un sentido ni en otro. Deuda de cobertura (regresionSeleccion.ruta.huecos): relación REL-30 (HK→KN) y reglas RT-10, RT-11, RT-15; la instrucción explica que el lote no toca guías, incidentes, fotos ni cuentas. La instrucción no tiene criterios N3 ni N4; n3Preparados vacío (la captura INC-125-b-medida es de regresión, no de un N3 del lote). En INC-127 c (verde) la guardia cortó 1 PUT a /api/col/reservas sin zz-verif- (aviso informativo). Sesiones: sin recuperadas, perdidas ni caídos."
    }
+  },
+  {
+   "lote": "L-145",
+   "fecha": "2026-10-17",
+   "req": "INC-120",
+   "categoria": "crítico",
+   "resumen": "INC-120 capas 1 y 2 (DA-45): gestión del colaborador 90 días; turnos viejos reducidos a horas; propiedad mientras la opere; «Mi dinero» 3 meses",
+   "estado": "no aceptado",
+   "hash": "3aa9592",
+   "observacion": "Construido 3aa9592 (?v= p5c107). Pruebas 16:14–16:28: guion propio a–d verde, N1 89/89; regresión 23 rojos por localStorage lleno en perfiles admin/oper (QuotaExceededError) y cascada; LM-47b no aplica (condición 4). Juez 16:30: no aceptado, campo herramienta. Causa: INC-146 (entorno). Siguiente: limpiar los perfiles (Arquitecto) y reprobar.",
+   "aceptacion": {
+    "lote": "L-145",
+    "hash": "3aa9592",
+    "fecha": "2026-10-17",
+    "horaBogota": "16:30",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: zz-verif-Propiedad: encontrada | si: turno de hace 120 días (2026-06-19): 200 | si: incidentes del turno viejo: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: datos de la corrida: creados en a | si: turno viejo: soloHoras true · campos que no debían llegar: ninguno · titular yo · horas sí | si: el colaborador guarda el turno viejo: 200 · después sigue reducido y sin notas: sí | si: incidentes del turno viejo: abierto llega · resuelto no llega | si: «Mi dinero»: meses para elegir 3 | escrituras en serie (máx. 1 en vuelo). Parte N1 (A1–A5, A3b, B1–B13, C1–C5): node tests/run.js: 89/89 archivos OK"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno viejo para el operador: con notas · tareas 1 | si: incidentes para el operador: sí · sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 89/89 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "id": "nuevo",
+      "titulo": "Regresión en rojo en 23 casos de 7 guiones de HK/portal/inventario: almacenamiento local del navegador lleno (QuotaExceededError en 'str-col-lastpush-v1') y cascada",
+      "nivel": "medio",
+      "causa": "El localStorage del perfil del navegador se llenó: desde las 16:19 cada preparación que alinea 'str-col-lastpush-v1' en HK (admin u oper) falla con QuotaExceededError, no se crea el turno de la corrida y los casos que dependen de él caen en cascada («turno de la corrida: no se creó»). Antes (16:14–16:19) los casos de inventario del admin ya no ven lo que el servidor sí aceptó (movimientos de recepción/entrega con 200 en REQ-INV2-4-2 b–m), compatible con la misma falta de espacio. En L-144 (guiones iguales) todo salió verde; con la evidencia disponible no se puede atribuir al lote (el lote no cambia lo que reciben admin ni operador), pero tampoco descartarlo: hay que repetir la corrida con el almacenamiento de los perfiles limpio.",
+      "observado": "REQ-INV2-7-1-hk-turno a, REQ-K3b-aviso b, REQ-K3c-vista b, REQ-K3c b, REQ-OP-1 a, i, d: «QuotaExceededError: Failed to execute 'setItem' on 'Storage': Setting the value of 'str-col-lastpush-v1' exceeded the quota» (captura de REQ-INV2-7-1-hk-turno-a: HK del admin cargado con 42 turnos, sin error visible). Cascada «turno de la corrida: no se creó»: REQ-INV2-7-1-hk-turno b, c, d; REQ-K3b-aviso c, d; REQ-K3c-vista c, d, i; REQ-K3c c, d; REQ-OP-1 b, c. REQ-INV2-4-2-dif f: «recepción de tF: 0/6 movimientos a nombre de 5»; g: el aviso de tD trae además «A nombre de… · recibió… · turno del…» pegado al texto esperado; i: «locator.click: Timeout 30000ms» (captura: la pestaña Pendientes muestra solo la diferencia de tD con «Resolver», no la de tF). REQ-INV2-4-2 n: «entrega de tB en Inventario: 0/6 · filas en Movimientos: 0» (captura: Movimientos con 4474 movimientos y los más nuevos a las 16:13; los de tB, 16:18, no aparecen)."
+     }
+    ],
+    "regresionAjena": [],
+    "herramienta": "almacenamiento local (localStorage) del perfil del navegador lleno: QuotaExceededError al escribir 'str-col-lastpush-v1' en HK; los demás rojos son cascada (turno de la corrida no creado) o lecturas viejas del inventario",
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado: «rojo»; causa: «fallan: REQ-INV2-4-2-dif.spec.js f, REQ-INV2-4-2-dif.spec.js g, REQ-INV2-4-2-dif.spec.js i, REQ-INV2-4-2.spec.js n, REQ-INV2-7-1-hk-turno.spec.js a, REQ-INV2-7-1-hk-turno.spec.js b, REQ-INV2-7-1-hk-turno.spec.js c, REQ-INV2-7-1-hk-turno.spec.js d, REQ-K3b-aviso.spec.js b, REQ-K3b-aviso.spec.js c, REQ-K3b-aviso.spec.js d, REQ-K3c-vista.spec.js b, REQ-K3c-vista.spec.js c, REQ-K3c-vista.spec.js d, REQ-K3c-vista.spec.js i, REQ-K3c.spec.js b, REQ-K3c.spec.js c, REQ-K3c.spec.js d, REQ-OP-1.spec.js a, REQ-OP-1.spec.js i, REQ-OP-1.spec.js b, REQ-OP-1.spec.js c, REQ-OP-1.spec.js d». Los criterios propios del lote (a, b, c, d) y N1 (89/89) están en verde; no hay N3 ni N4 en la instrucción (n3Preparados vacío). La regla de regresión ajena (LM-47b) no aplica: falla la condición 4 (la mayoría de los rojos son de /str-m1-housekeeping.html o /portal.html, que están en el Alcance) y no son preexistentes (L-144 y L-143 salieron «verde»). Campo herramienta: la mayoría de los rojos comparten QuotaExceededError del almacenamiento local del navegador (entorno) y su cascada; repetir la corrida con los perfiles limpios antes de culpar al lote. Fase completa (lote crítico), nada diferido. Sesiones: ninguna perdida ni caída. Semilla «no concluyente» (zonas sin respuesta; avisos que solo bloquean a L-86/L-101/L-103). INC-127 c: la guardia cortó 1 PUT de reservas sin zz-verif- (caso en verde). Deuda de cobertura (regresionSeleccion.ruta.huecos): REL-30 (HK→KN); RT-10, RT-11, RT-15; a declarar: REL-20."
+   }
   }
  ],
  "esquema": {
@@ -15293,11 +15361,11 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "INC-120 capas 1 y 2 (DA-45): gestión del colaborador 90 días (lo abierto sigue); turnos viejos reducidos a horas; propiedad mientras la opere; «Mi dinero» 3 meses",
-   "estado": "construido",
+   "estado": "no aceptado",
    "vista": "siguiente",
    "desde": "2026-10-17 15:43",
    "grupo": "SRV",
-   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650).",
+   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba.",
    "espera": "veredicto y decisión del Arquitecto sobre la cuota de los perfiles",
    "esperaA": "Arquitecto",
    "hash": "3aa9592"

@@ -9240,6 +9240,26 @@
     "de": "Chat Diseño",
     "texto": "Bien. REQ-FL-12 queda aceptado en diseno.json. Espero L-142 (OP-1a) para el ok."
    }
+  },
+  {
+   "id": "M-614",
+   "fecha": "2026-10-17",
+   "hora": "10:03",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "OK de OP-1a (L-142): tablero de operación en vivo",
+   "texto": "Borrador en claude/producto/borradores/L-142-instr-op1a-tablero.md (revisión previa 16/17 con todo corregido). Con tus decisiones de M-607: (1) avance único en minutos sobre todo el flujo, 5 puntos, en str-avance.js que cargan HK y el tablero; en HK cambia el retraso de la tarjeta, del panel y de la alerta (antes: solo limpieza, por tareas, 15 puntos); la barra «Turno» del panel muestra el avance en minutos con la marca amarilla del esperado y la de «Limpieza» queda sin marca. (2) Bloqueado = bloqueo manual, o turno con reserva que sale hoy, sin empezar (sin salida real, inicio ni tareas) y pasada la salida + tolerancia; un turno manual sin reserva o ya empezado nunca sale bloqueado por la hora. (3) y (4) la ruta ya trae incidentes abiertos o escalados y pendientes abiertos; los usa OP-1b. (5) admin y operador; el colaborador vuelve a su portal y el servidor le da 403. str-tablero.html se abre por dirección directa; paleta, orden y textos del boceto («N % atrás», «Al día», «N % adelante», «Bloqueado»; «Salió», «Sale», «Debió salir … (+N min)», «Entra»). Tres preguntas: (a) Arriba van tres cifras (en curso, bloqueados, entradas hoy); la de alertas llega con OP-1b. ¿Bien? (b) Un turno que no ha empezado y cuya hora ya pasó queda «Al día» (el reloj corre desde el inicio real, como hoy en HK; la alerta «no iniciado» es de OP-1b). ¿Lo dejo así? (c) Un turno cerrado con tareas no obligatorias sin marcar cuenta 100 %. ¿De acuerdo? Si das el ok, pido el cruce al Arquitecto y lo encolo.",
+   "estado": "pendiente"
+  },
+  {
+   "id": "M-615",
+   "fecha": "2026-10-17",
+   "hora": "10:03",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "Cruce de OP-1a (L-142) y módulo del tablero en el mapa",
+   "texto": "Borrador: claude/producto/borradores/L-142-instr-op1a-tablero.md (normal; revisión previa 16/17 corregida; pido el ok de Diseño en paralelo). Cumple M-608: GET /api/tablero?since= (cuenta del JWT; admin, superadmin y operador por _tabRolPermitido, que para una lectura da lo mismo que _puede(); el 403 llega antes de abrir la base); lectura común api/lib/col-lectura.php (_colLeerFilas: since, desde, hasta y estado, que acepta una lista), usada también por GET /api/col sin cambiar su resultado (tests/entrega-recepcion.test.js lo vigila); una conexión; ventanas: turnos desde ayer, reservas hoy–mañana, incidentes abiertos o escalados y pendientes abiertos (con since sin la de estado); since retrocedido 5 min (_tabSolape), porque updated_at de un turno puede llevar la hora del teléfono; reservas por una lista blanca que es subconjunto de la del colaborador; turnos sin fotos ni procesos; N1 de tamaño con el sobre RT-25 = 204 KB (tope del test, 256 KB); cursor propio, nunca STRApi.col. str-avance.js compartido: lo nuevo ([AV-puras]) vive solo ahí; los bloques que ya estaban en HK ([PR1-ventana], [PR1-alerta], [F11-base], el nuevo [HK-turnos]) y [FL12-puras] van copiados con test de igualdad: sacarlos de HK cambiaría el orden de carga y los tests que los leen. Regresión completa (toca api/). Dos pedidos: (1) un módulo del mapa para el tablero (p. ej. «OP», con str-tablero.html y str-avance.js) y sus relaciones (OP ← SRV lectura agrupada; OP ↔ HK mismo avance); hoy mapa.py los deja fuera de los módulos. (2) Tu cruce para encolar.",
+   "estado": "pendiente"
   }
  ]
 }

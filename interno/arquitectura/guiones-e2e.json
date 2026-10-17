@@ -1,6 +1,6 @@
 {
  "que": "Foto de str-manager/tests/e2e (solo cabecera y casos: req, zona, c, perfil, pagina, nivel, que); la toma el Arquitecto o la cola; la lee herramientas/modelo/mapa.py",
- "tomadaEn": "2026-10-15",
+ "tomadaEn": "2026-10-17",
  "guiones": {
   "DT-35.spec.js": {
    "req": "DT-35",
@@ -73,6 +73,73 @@
       "DT-41",
       "SRV",
       "RT-14"
+     ],
+     "modulos": []
+    }
+   ]
+  },
+  "DT-42.spec.js": {
+   "req": "DT-42",
+   "zona": [
+    "SRV"
+   ],
+   "lote": null,
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "oper",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Operador: 403 en ensayo, constancia y borrar",
+     "camara": false,
+     "cubre": [
+      "DT-42",
+      "SRV",
+      "RT-14",
+      "REL-27"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "admin",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Admin: archivo inválido → 400 (rutas, extensión, fecha imposible, vacío). El rechazo de confirmo/nombre sin prefijo lo prueba el N1 (A5, C7): la guardia de la cola lo corta antes del servidor, por diseño (LM-43)",
+     "camara": false,
+     "cubre": [
+      "DT-42",
+      "SRV",
+      "RT-2"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "c",
+     "perfil": "admin",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Admin: constancia nunca sobre la cuenta de la sesión; borrar con fecha imposible o cuenta en texto → 400; la cuenta sigue. El rechazo de confirmo/nombre sin prefijo lo prueba el N1 (A5, C7): la guardia de la cola lo corta antes del servidor, por diseño (LM-43)",
+     "camara": false,
+     "cubre": [
+      "DT-42",
+      "SRV",
+      "RT-1",
+      "RT-5"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "d",
+     "perfil": "admin",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Admin: cuenta inexistente → 404 en constancia y borrar; constancia con cuenta inválida → 400",
+     "camara": false,
+     "cubre": [
+      "DT-42",
+      "SRV",
+      "RT-19"
      ],
      "modulos": []
     }
@@ -487,6 +554,68 @@
     }
    ]
   },
+  "INC-134.spec.js": {
+   "req": "INC-134",
+   "zona": [
+    "SH"
+   ],
+   "lote": null,
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Admin con sesión: sin «Entrar» ni aviso rojo; a lo sumo una renovación al cargar",
+     "camara": false,
+     "cubre": [
+      "INC-134",
+      "SH",
+      "RT-16"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "oper",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Operador con sesión: sin «Entrar» ni aviso rojo; a lo sumo una renovación al cargar",
+     "camara": false,
+     "cubre": [
+      "INC-134",
+      "SH",
+      "RT-16"
+     ],
+     "modulos": []
+    }
+   ]
+  },
+  "INC-140.spec.js": {
+   "req": "INC-140",
+   "zona": [
+    "HK",
+    "POR"
+   ],
+   "lote": null,
+   "casos": [
+    {
+     "c": "b",
+     "perfil": "colab",
+     "pagina": "/portal.html",
+     "nivel": "N2",
+     "que": "El colaborador abre el portal 5 veces en menos de 30 s y el HK carga las 5; ningún iframe pasa por login.html",
+     "camara": false,
+     "cubre": [
+      "INC-140",
+      "HK",
+      "POR",
+      "REL-05"
+     ],
+     "modulos": []
+    }
+   ]
+  },
   "L-108.spec.js": {
    "req": "L-108",
    "zona": "inventario",
@@ -523,6 +652,55 @@
      "cubre": [
       "R-3",
       "SRV"
+     ],
+     "modulos": []
+    }
+   ]
+  },
+  "REQ-FL-12.spec.js": {
+   "req": "REQ-FL-12",
+   "zona": [
+    "FL"
+   ],
+   "lote": null,
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "admin",
+     "pagina": "/str-flujos.html",
+     "nivel": "N2",
+     "que": "Crear un flujo eligiendo el emoji de la lista y un nombre corto: se guarda y se ve en la lista de flujos",
+     "camara": false,
+     "cubre": [
+      "REQ-FL-12",
+      "FL",
+      "RT-21"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "admin",
+     "pagina": "/str-flujos.html",
+     "nivel": "N2",
+     "que": "Pegar un emoji libre y un nombre corto largo: se guarda el emoji y el nombre corto queda en 12",
+     "camara": false,
+     "cubre": [
+      "REQ-FL-12",
+      "FL"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "c",
+     "perfil": "admin",
+     "pagina": "/str-flujos.html",
+     "nivel": "N2",
+     "que": "Sin emoji y sin nombre corto: la tarjeta muestra el neutro ▫️ y nada falla",
+     "camara": false,
+     "cubre": [
+      "REQ-FL-12",
+      "FL"
      ],
      "modulos": []
     }
@@ -2103,6 +2281,298 @@
      "cubre": [
       "REQ-MOD-6",
       "SRV"
+     ],
+     "modulos": []
+    }
+   ]
+  },
+  "REQ-OP-1.spec.js": {
+   "req": "REQ-OP-1",
+   "zona": [
+    "tablero"
+   ],
+   "lote": null,
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "admin",
+     "pagina": "/str-m1-housekeeping.html",
+     "nivel": "N2",
+     "que": "Un turno de hoy de zz-verif-Propiedad se ve en el tablero como bloque con su tramo (emoji y nombre corto; título con nombre, zona y minutos), «zz-verif-colab · 0 %» y «Al día»",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "HK",
+      "SRV",
+      "FL",
+      "REQ-OP-1",
+      "REL-33",
+      "REL-34",
+      "RT-4"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "i",
+     "perfil": "admin",
+     "pagina": "/str-m1-housekeeping.html",
+     "nivel": "N2",
+     "que": "Un turno que debió empezar hace una hora y no ha empezado sale «Sin empezar · debía empezar H (+N min)» con el color y el orden de atrasado (M-614)",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "HK",
+      "REQ-OP-1",
+      "REL-34"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "colab",
+     "pagina": "/portal.html",
+     "nivel": "N2",
+     "que": "El colaborador registra «Unidad desocupada» y marca zz-verif-Limpieza en su turno",
+     "camara": false,
+     "cubre": [
+      "HK",
+      "POR"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "g",
+     "perfil": "colab",
+     "pagina": "/str-tablero.html",
+     "nivel": "N2",
+     "que": "El colaborador no entra al tablero: vuelve a su portal sin leer /api/tablero (el 403 del servidor lo prueba tests/tablero-op.test.js)",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "RT-14",
+      "REL-33"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "c",
+     "perfil": "oper",
+     "pagina": "/str-tablero.html",
+     "nivel": "N2",
+     "que": "El operador ve el tramo en curso, «zz-verif-colab · N %» (0 < N < 100), «N % adelante», «Salió …» bajo la propiedad, y la lista en orden por atención con su puesto",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "HK",
+      "REQ-OP-1",
+      "REL-33",
+      "REL-34",
+      "RT-4"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "d",
+     "perfil": "oper",
+     "pagina": "/str-tablero.html",
+     "nivel": "N2",
+     "que": "Al marcar la última tarea, el tramo pasa a hecho y el rótulo a 100 % sin recargar (≤ 1 min); una sola lectura agrupada por minuto y ninguna de /api/col; del huésped solo nombre y fechas",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "HK",
+      "REQ-OP-1",
+      "REL-33",
+      "RT-19",
+      "RT-6"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "e",
+     "perfil": "oper",
+     "pagina": "/str-tablero.html",
+     "nivel": "N3",
+     "que": "Tablero a lo ancho: cifras, cuadro «Turnos de hoy» con bloques, tramos, rótulos, raya de la hora, marcas por hora y leyenda, con la paleta del boceto",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "REQ-OP-1"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "f",
+     "perfil": "oper",
+     "pagina": "/str-tablero.html",
+     "nivel": "N3",
+     "que": "A 390 px: cuadros uno debajo del otro; la línea de tiempo se desplaza de lado dentro de su cuadro, sin barra lateral en la página",
+     "camara": false,
+     "cubre": [
+      "OP",
+      "REQ-OP-1"
+     ],
+     "modulos": []
+    }
+   ]
+  },
+  "REQ-SH-2.spec.js": {
+   "req": "REQ-SH-2",
+   "zona": [
+    "SH"
+   ],
+   "lote": null,
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 1: el admin ve solo los 4 grupos y sus entradas, en orden (más Favoritos); ninguna maqueta",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH",
+      "PRJ"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "c",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 3: «Lo que viene» lista lo pendiente con nombre, para y etapa; la etapa mostrada es la que sale de diseno.json y seguimiento.json del mismo commit (M-547)",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH",
+      "PRJ",
+      "REL-24",
+      "RT-4"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "d",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 4: al entrar, ni el shell ni su página de inicio muestran datos inventados; sin selector de propiedad de muestra",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "e",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 5: al entrar, el STR abre en el Tablero si su entrada existe (REQ-OP-1); si no, en Limpieza & HK",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "f",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 6: Proyecto va al final, cerrado al entrar, solo admin; sus 7 páginas abren igual",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH",
+      "PRJ"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "g",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 7: ninguna entrada aparece dos veces fuera de Favoritos; Favoritos solo trae lo que el perfil marcó",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "h",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 8: cada página real abre desde su nueva entrada (Operación del día, Configurar el negocio, Lo que viene)",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH",
+      "PRJ"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "i",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N3",
+     "que": "Criterio 8 (390 px): el menú plegado se abre con ☰ y se leen los grupos sin desbordar",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "j",
+     "perfil": "admin",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N3",
+     "que": "Criterio 3 (vista): «Lo que viene» se entiende a 390 px: por área, nombre, para qué sirve, etapa y orden",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH",
+      "PRJ"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "oper",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterios 2 y 5: el operador no ve «Lo que viene» ni «Proyecto»; ve las 8 entradas que su rol abre y entra en Limpieza & HK",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b2",
+     "perfil": "oper",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "Criterio 2 (negativo, RT-14 y RT-13): el operador que abre a mano «Lo que viene» o Seg. Proyecto vuelve al STR sin ver nada",
+     "camara": false,
+     "cubre": [
+      "REQ-SH-2",
+      "SH",
+      "PRJ",
+      "RT-14",
+      "RT-13"
      ],
      "modulos": []
     }

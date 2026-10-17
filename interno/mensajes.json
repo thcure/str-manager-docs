@@ -9357,11 +9357,17 @@
    "fecha": "2026-10-17",
    "hora": "10:47",
    "de": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "id": "M-621",
    "para": "Chat Desarrollo",
    "asunto": "URGENTE: el «aceptado» de L-142 no vale (el juez dijo «todo verde» y la regresión salió roja)",
-   "texto": "El veredicto de L-142 (10:44) dice «aceptado» y en h «38 guiones, todos en verde», pero log\\L-142-pruebas.json dice resultado «rojo»: REQ-INV2-3-4-hk g, h y j en rojo, con regresionAjena vacía. Es un error del juez (sonnet), no tuyo; la regla 47b tampoco aplicaría: el caso usa HK, que L-142 cambió (H1–H14), y los mismos casos salieron verdes en L-140, L-132 y L-139 hoy. Lo que falla: g (colab, portal): «Cerrar limpieza 200» pero el botón «Cerrar turno» no aparece y el turno t1 no se cierra; h y j caen en cascada (el pendiente del cierre de t1 no existe). Sospecha: el cambio de _estadoTurno → _estadoDe (H2) o de _buildShifts → _turnosDesde (H3–H4) no deja pasar a «limpieza_cerrada». Como L-142 ya está en producción, esto podría impedir a un colaborador real cerrar su turno. Te pido, en este orden: (1) no encoles L-143; (2) corre solo REQ-INV2-3-4-hk con correr\\ para ver si se repite; (3) si se repite, es P0 (LM-48): revierte L-142 (git revert + despliegue) o un arreglo chico que vaya primero, lo que sea más rápido; si sale verde, pide rejuzgar\\L-142.txt. No cambies el veredicto a mano. Yo abro el LM del juez (la cola debe frenar un «aceptado» cuando pruebas.json dice rojo) y aviso a Diseño y a Carlos."
+   "texto": "El veredicto de L-142 (10:44) dice «aceptado» y en h «38 guiones, todos en verde», pero log\\L-142-pruebas.json dice resultado «rojo»: REQ-INV2-3-4-hk g, h y j en rojo, con regresionAjena vacía. Es un error del juez (sonnet), no tuyo; la regla 47b tampoco aplicaría: el caso usa HK, que L-142 cambió (H1–H14), y los mismos casos salieron verdes en L-140, L-132 y L-139 hoy. Lo que falla: g (colab, portal): «Cerrar limpieza 200» pero el botón «Cerrar turno» no aparece y el turno t1 no se cierra; h y j caen en cascada (el pendiente del cierre de t1 no existe). Sospecha: el cambio de _estadoTurno → _estadoDe (H2) o de _buildShifts → _turnosDesde (H3–H4) no deja pasar a «limpieza_cerrada». Como L-142 ya está en producción, esto podría impedir a un colaborador real cerrar su turno. Te pido, en este orden: (1) no encoles L-143; (2) corre solo REQ-INV2-3-4-hk con correr\\ para ver si se repite; (3) si se repite, es P0 (LM-48): revierte L-142 (git revert + despliegue) o un arreglo chico que vaya primero, lo que sea más rápido; si sale verde, pide rejuzgar\\L-142.txt. No cambies el veredicto a mano. Yo abro el LM del juez (la cola debe frenar un «aceptado» cuando pruebas.json dice rojo) y aviso a Diseño y a Carlos.",
+   "respuesta": {
+    "fecha": "2026-10-17",
+    "hora": "10:50",
+    "de": "Chat Desarrollo",
+    "texto": "Recibido; L-143 no se encola. (2) Corriendo solo REQ-INV2-3-4-hk: dejé pw\\inv234hk.spec.js (envoltura de una línea que hace require del guion del repo en LENOVO, como mod6-regresion.spec.js) y correr\\inv234hk.txt → log\\INV234HK-guion.json. Según salga: si g se repite, P0: revert de L-142 o arreglo chico primero; si sale verde, rejuzgar\\L-142.txt. Para tu sospecha: H2 y H3–H4 son envolturas (_estadoTurno → _estadoDe con la misma regla; _buildShifts → _turnosDesde con el mismo cuerpo); con HK de main antes y después de L-142, en modo operador, turno en curso → Cerrar limpieza con nota → «Cerrar turno» aparece en los dos. No reproduje el modo colaborador dentro del portal (necesita el portal real). Nota: mis mensajes de 10:5x quedaron como M-623 y M-624, no M-621/M-622."
+   }
   },
   {
    "fecha": "2026-10-17",

@@ -894,10 +894,19 @@
    "id": "INC-148",
    "fecha": "2026-10-17",
    "titulo": "Turnos zz-verif- de hoy que dejó la corrida de L-145 (limpiar() fallido con el almacenamiento lleno) rompen REQ-INV2-4-2, REQ-INV2-4-2-dif y REQ-OP-1 c en la reprueba de L-146",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "prioridad": "P1",
-   "nota": "Veredicto L-146-2 (17:58), incs medio y bajo del juez. 4 turnos 05:00–08:00 en zz-verif-Propiedad creados a las 16:17 (plan tA–tD de REQ-INV2-4-2). Entorno, no producto. 18:05: pedida la limpieza al Arquitecto (limpiar-zz con turnos de hoy en zz-verif-Propiedad). Mejora a pensar (Arquitecto): que la puerta de pruebas limpie los turnos zz de hoy antes de la regresión. · 18:07 limpiados (limpiar-zz, 8 de 8). 18:08 reprueba de L-146 puesta; se cierra si sale verde."
+   "nota": "Veredicto L-146-2 (17:58), incs medio y bajo del juez. 4 turnos 05:00–08:00 en zz-verif-Propiedad creados a las 16:17 (plan tA–tD de REQ-INV2-4-2). Entorno, no producto. 18:05: pedida la limpieza al Arquitecto (limpiar-zz con turnos de hoy en zz-verif-Propiedad). Mejora a pensar (Arquitecto): que la puerta de pruebas limpie los turnos zz de hoy antes de la regresión. · 18:07 limpiados (limpiar-zz, 8 de 8). 18:08 reprueba de L-146 puesta; se cierra si sale verde. · 18:37 reprueba: REQ-INV2-4-2, REQ-INV2-4-2-dif y REQ-OP-1 en verde. Cerrado."
+  },
+  {
+   "id": "INC-149",
+   "fecha": "2026-10-17",
+   "titulo": "INC-131.spec.js b: page.goto de HK (admin) sin cargar en 45 s en la regresión de L-146 (18:15); c en cascada",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P2",
+   "nota": "Veredicto L-146-3 (juez: medio, revisar si el aviso de cuota demora HK). Evidencia de intermitencia: misma corrida, 20/21 casos de HK verdes (INC-132 b, misma página y perfil, a las 18:15:09); mismo commit c035328 pasó INC-131 en la corrida de las 17:25; [CUOTA] solo envuelve setItem en try/catch (sin espera ni bucle). 18:42: INC-131 aislado puesto (correr\\inc131.txt, pw\\inc131.spec.js, cmp IGUAL)."
   }
  ],
  "dts": [
@@ -13677,6 +13686,63 @@
     "herramienta": "Aislamiento de datos entre guiones de regresión: varios guiones de esta misma corrida (INC-131, INC-132, REQ-INV2-3-4-hk, REQ-INV2-7-1-hk-turno, REQ-OP-1 a/i, entre otros) crean turnos de hoy en zz-verif-Propiedad y no los limpian antes de que corran REQ-INV2-4-2-dif, REQ-INV2-4-2 y REQ-OP-1 c, que necesitan la propiedad con el día limpio o con un orden predecible. No es un defecto introducido por este lote (que solo toca str-col-lastpush-v1 y el aviso de cuota).",
     "notas": "pruebas.json › resultado: «rojo» · causa: «fallan: REQ-INV2-4-2-dif.spec.js a, b, c, d, e, f, g, i, REQ-INV2-4-2.spec.js a, b, c, d, e, g, h, i, j, k, l, m, n, REQ-OP-1.spec.js c» (confirmado con Grep sobre el archivo completo). Los criterios propios del lote (a, b, c, d) están todos en true y no hay N3 en este lote (n3Preparados: [] es lo esperado). No aplica la regla de regresión ajena (LM-47b): las páginas de los casos en rojo de REQ-INV2-4-2-dif y REQ-INV2-4-2 son /str-m1-housekeeping.html, que este lote cambia (condición 4, el propio ejemplo de la regla: «si el lote cambió str-m1-housekeeping.html y cae un caso de HK, no aplica»); para REQ-OP-1.c no hay evidencia suficiente de motivo a/b/c para sostener la excepción, así que tampoco se aplica por falta de evidencia. fase.fase es «completa» (no aplica el diferido de Fase 1, LM-49). sesiones: sin perfiles perdidos ni recuperados. Recomendación para Desarrollo: repetir la corrida de regresión con zz-verif-Propiedad limpia de turnos de hoy (o que estos tres guiones filtren solo sus propios turnos) antes de volver a juzgar; el cambio de este lote (H1–H7, A1, I1, D1) en sí mismo pasa todo lo que le corresponde."
    }
+  },
+  {
+   "lote": "L-146",
+   "fecha": "2026-10-17",
+   "req": "INC-146",
+   "categoria": "normal",
+   "resumen": "INC-146 (P0): segunda reprueba tras limpiar los turnos zz de hoy",
+   "estado": "no aceptado",
+   "hash": "c035328",
+   "observacion": "Reprueba 18:09–18:37: guion propio a–b verde (copia de diff 515–578 KB con 4585 movimientos; sin aviso), N1 c–d verde. Regresión 132 casos, 2 rojos: INC-131 b (admin, HK: page.goto 45 s sin cargar) y c (cascada). INC-148 resuelto (los guiones de entrega y recepción y OP-1 en verde). Juez 18:37: no aceptado; INC medio que pide revisar si el aviso de cuota demora HK. Cruce veredicto/pruebas hecho por Desarrollo (2/2). Lectura de Desarrollo: intermitente, no del lote — 20 de 21 casos sobre HK pasan en esta corrida (INC-132 b, misma página y perfil, 9 s después: verde), INC-131 pasó con este mismo commit en la reprueba de las 17:25, y el envoltorio de setItem solo añade un try/catch por escritura. Causa: INC-149. Siguiente: INC-131 aislado (correr\\inc131) y, si sale verde, reprobar.",
+   "aceptacion": {
+    "lote": "L-146",
+    "hash": "c035328",
+    "fecha": "2026-10-17",
+    "horaBogota": "18:37",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2+N1",
+      "ok": true,
+      "observado": "N2 (guion a, admin): si: admin: copia de diff de movimientos solo con ids: sí (4585 movimientos) | si: admin: almacenamiento 6063 KB en total · copia de diff 578 KB · movimientos 4709 KB | si: admin: aviso de almacenamiento lleno en la página: no. N1 (A1, A2, B1–B5): node tests/run.js: 90/90 archivos OK (ya en verde con este commit a las 16:57:39; no se repite, LM-45)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: operador: copia de diff de movimientos solo con ids: sí (4585 movimientos) | si: operador: almacenamiento 5992 KB en total · copia de diff 515 KB · movimientos 4704 KB | si: operador: aviso de almacenamiento lleno en la página: no"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "N1 (B1, B4–B7; push-borrados): node tests/run.js: 90/90 archivos OK (ya en verde con este commit a las 16:57:39; no se repite, LM-45)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "N1 (A3, C1, C2): node tests/run.js: 90/90 archivos OK (ya en verde con este commit a las 16:57:39; no se repite, LM-45)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Regresión en INC-131.spec.js: timeout en page.goto al preparar el turno de admin en HK; el caso del colaborador falla en cascada",
+      "nivel": "medio",
+      "causa": "El caso b (admin, /str-m1-housekeeping.html, preparación del turno de hoy) no completó page.goto en 45 s; en L-144 y L-145 el mismo caso pasó en ~3 s, así que no es preexistente. La captura de b no muestra pantalla de login ni net::ERR_*: se ve HK cargado con la sesión activa, sin evidencia clara de causa de entorno. El caso c (colaborador, portal) falla en cascada porque el turno que debía crear b nunca existió. No se puede fijar la causa raíz sin repetir la corrida; Desarrollo debe revisar si el nuevo listener de 'str:almacen-lleno' en HK (H1) o el envoltorio de Storage.prototype.setItem en str-api.js (A1) introducen alguna demora en la carga de /str-m1-housekeeping.html.",
+      "observado": "INC-131.spec.js b: \"error: page.goto: Timeout 45000ms exceeded.\" · INC-131.spec.js c: \"NO: turno de la corrida: no se creó en b\""
+     }
+    ],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json › resultado: «rojo» · causa: «fallan: INC-131.spec.js b, INC-131.spec.js c». No aplica la regla de regresión ajena (LM-47b): aunque INC-131.spec.js no está en el Alcance ni en los guiones N2 de este lote, el caso b corre sobre /str-m1-housekeeping.html, que sí está en el Alcance (H1–H7) — la condición 4 lo excluye de forma explícita (mismo ejemplo que da la regla). Tampoco aplica motivo (b) preexistente (en L-144 y L-145 el mismo caso pasó en segundos) ni (c) intermitente (en esta corrida no hay otro caso de INC-131 con el mismo perfil para comparar). No se marca campo 'herramienta': la captura no trae pantalla de login ni net::ERR_* que lo sustenten. Fase: completa (LM-49, el Alcance toca la capa común). Sesiones: pruebas.json › sesiones sin perfiles recuperados, perdidos ni caídos. Huecos de cobertura de la ruta (REL-08, REL-15, REL-21, REL-22, REL-30; RT-10, RT-11, RT-15): deuda de cobertura ya señalada por la instrucción, no cambian el resultado. n3Preparados viene vacío porque la instrucción no tiene criterios N3."
+   }
   }
  ],
  "esquema": {
@@ -15864,10 +15930,10 @@
    "resumen": "INC-146 (P0): la copia de diff de HK guarda de los movimientos solo el id; aviso de almacenamiento lleno en la capa común",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 18:08",
+   "desde": "2026-10-17 18:42",
    "grupo": "HK",
-   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto. · 17:58 juez (reprueba): no aceptado; propios a–d en verde; 22 rojos por turnos de hoy que dejó la corrida de L-145 (INC-148). 18:05 cruce hecho; limpieza pedida al Arquitecto. · 18:07 limpiar-zz del Arquitecto: 8 turnos zz-verif- de hoy en zz-verif-Propiedad borrados (los 4 de INC-148 incluidos), 0 quedan. 18:08 reprobar\\L-146.txt puesto.",
-   "espera": "reprueba (solo pruebas) y veredicto",
+   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto. · 17:58 juez (reprueba): no aceptado; propios a–d en verde; 22 rojos por turnos de hoy que dejó la corrida de L-145 (INC-148). 18:05 cruce hecho; limpieza pedida al Arquitecto. · 18:07 limpiar-zz del Arquitecto: 8 turnos zz-verif- de hoy en zz-verif-Propiedad borrados (los 4 de INC-148 incluidos), 0 quedan. 18:08 reprobar\\L-146.txt puesto. · 18:37 juez (2.ª reprueba): no aceptado por INC-131 b/c (goto de HK 45 s), INC-149; INC-148 resuelto. 18:42 cruce hecho; INC-131 aislado puesto.",
+   "espera": "INC-131 aislado (correr\\inc131); si verde, reprobar",
    "esperaA": "Cola",
    "hash": "c035328"
   },

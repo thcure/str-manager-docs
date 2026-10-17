@@ -1,5 +1,5 @@
 {
- "generadoEn": "2026-10-16 11:11",
+ "generadoEn": "2026-10-17 10:07",
  "lineaBase": "2026-10-15",
  "codigo": {
   "version": "p5c96",
@@ -1195,6 +1195,55 @@
     "impacto": 1,
     "motivo": "Aislado del producto (base y sitio aparte); solo la fábrica lo usa."
    }
+  },
+  {
+   "id": "OP",
+   "nombre": "Tablero de operación en vivo (OP-1)",
+   "familia": "operativo",
+   "estado": "definido",
+   "que": "Página de inicio del admin y el operador: turnos de hoy por propiedad con su avance (mismo cálculo que HK, str-avance.js), atrasos y bloqueos, salidas y entradas, alertas (OP-1b). Solo lee: una lectura agrupada por minuto (GET /api/tablero?since=) con cursor propio, nunca el de HK.",
+   "paginas": [
+    "str-tablero.html",
+    "str-avance.js"
+   ],
+   "rutas": [
+    "/tablero?since="
+   ],
+   "colecciones": {
+    "escribe": [],
+    "lee": [
+     "turnos (desde ayer)",
+     "reservas (hoy y mañana, lista blanca)",
+     "tickets (abiertos o escalados)",
+     "inv-pendientes (abiertos)",
+     "propiedades",
+     "flujos",
+     "usuarios (mínimos)"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-OP-1"
+   ],
+   "mapaTecnico": "tablero",
+   "zonaPw": "tablero",
+   "alias": [
+    "Tablero",
+    "Tablero de operación",
+    "OP-1",
+    "OP-1a",
+    "OP-1b"
+   ],
+   "adr": [],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 2,
+    "motivo": "Solo lee, pero comparte el cálculo de avance con HK (un cambio en str-avance.js mueve los dos) y añade una lectura por minuto por pantalla abierta (RT-19)."
+   }
   }
  ],
  "relaciones": [
@@ -1590,6 +1639,37 @@
    "regla": "",
    "rt": [
     "RT-6"
+   ],
+   "estado": "por construir",
+   "generica": false
+  },
+  {
+   "id": "REL-33",
+   "origen": "OP",
+   "destino": "SRV",
+   "mecanismo": "`GET /api/tablero?since=` con `api/lib/col-lectura.php` (`_colLeerFilas`, la misma lectura de `/api/col`)",
+   "dato": "turnos, reservas, incidentes, pendientes, propiedades, flujos y usuarios mínimos en una respuesta",
+   "regla": "una conexión por petición; 403 al colaborador antes de abrir la base; datos del huésped solo nombre y fechas",
+   "rt": [
+    "RT-1",
+    "RT-4",
+    "RT-6",
+    "RT-14",
+    "RT-19",
+    "RT-21"
+   ],
+   "estado": "por construir",
+   "generica": false
+  },
+  {
+   "id": "REL-34",
+   "origen": "OP",
+   "destino": "HK",
+   "mecanismo": "`str-avance.js` ([AV-puras]) cargado por los dos; bloques de HK copiados con test de igualdad",
+   "dato": "avance esperado y real del turno en minutos, estado del tramo (al día, atrás, adelante, bloqueado)",
+   "regla": "«atrasado» significa lo mismo en el tablero y en HK",
+   "rt": [
+    "RT-4"
    ],
    "estado": "por construir",
    "generica": false
@@ -2620,11 +2700,11 @@
   {
    "id": "REQ-FL-12",
    "titulo": "Emoji y nombre corto por flujo de trabajo",
-   "estado": "entregado",
+   "estado": "aceptado",
    "documento": "claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md › REQ-FL-12",
    "das": [],
    "prioridad": 38,
-   "nota": "16-oct 10:20: Normal. 5 criterios. Base visual del tablero OP-1. Orden propuesto: SH-2 → FL-12 → OP-1, detrás de L-130/L-131 y antes de la etapa 2; espera confirmación de Carlos. · 10:22: Carlos confirmó el orden; entregado (M-544).",
+   "nota": "16-oct 10:20: Normal. 5 criterios. Base visual del tablero OP-1. Orden propuesto: SH-2 → FL-12 → OP-1, detrás de L-130/L-131 y antes de la etapa 2; espera confirmación de Carlos. · 10:22: Carlos confirmó el orden; entregado (M-544). · 17-oct 09:52: L-139 aceptado (a–e en verde, regresión por ruta, s",
    "modulos": [
     "FL"
    ],
@@ -3311,6 +3391,7 @@
    "prioridad": 39,
    "nota": "16-oct 10:20: Normal (solo lee). 12 criterios. Boceto aprobado con Carlos 16-oct (artefacto «Tablero de operación en vivo», v19). Reemplaza el panel de ejemplo y pasa a ser la página de inicio. Orden propuesto: SH-2 → FL-12 → OP-1, detrás de L-130/L-131 y antes de la etapa 2; espera confirmación de ",
    "modulos": [
+    "OP",
     "SH",
     "HK",
     "CAL",
@@ -3745,11 +3826,11 @@
   {
    "id": "REQ-SH-2",
    "titulo": "Menú del STR: solo lo que funciona (4 grupos, «Lo que viene», sin datos de ejemplo)",
-   "estado": "entregado",
+   "estado": "aceptado",
    "documento": "claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md › REQ-SH-2",
    "das": [],
    "prioridad": 37,
-   "nota": "16-oct 10:20: Normal. 8 criterios. Decisiones de Carlos 16-oct (menú revisado en producción). Orden propuesto: SH-2 → FL-12 → OP-1, detrás de L-130/L-131 y antes de la etapa 2; espera confirmación de Carlos. · 10:22: Carlos confirmó el orden; entregado (M-544).",
+   "nota": "16-oct 10:20: Normal. 8 criterios. Decisiones de Carlos 16-oct (menú revisado en producción). Orden propuesto: SH-2 → FL-12 → OP-1, detrás de L-130/L-131 y antes de la etapa 2; espera confirmación de Carlos. · 10:22: Carlos confirmó el orden; entregado (M-544). · 17-oct 09:31: L-132 aceptado (veredi",
    "modulos": [
     "SH",
     "PRJ"
@@ -7454,6 +7535,13 @@
     "req": "REQ-F9.o",
     "resumen": "Foto de tarea exigida (hasta 10, mínimo 1), heredada de la actividad sin excepción; _fbFotoEfectiva en HK/Propiedades/Flujos; captura con reducción a 1600 px, m",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-139",
+    "fecha": "2026-10-17",
+    "req": "REQ-FL-12",
+    "resumen": "Emoji y nombre corto por flujo (editor, lista, copias por propiedad y Excel)",
+    "estado": "aceptado"
    }
   ],
   "HK": [
@@ -7736,6 +7824,20 @@
     "req": "REQ-K3-3 (2/2)",
     "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-138",
+    "fecha": "2026-10-16",
+    "req": "INC-138",
+    "resumen": "Guion INC-132 g: quitar también la foto que sigue «subiendo»",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-140",
+    "fecha": "2026-10-17",
+    "req": "INC-140",
+    "resumen": "HK embebido en el portal: nunca a login.html; espera a Firebase con tope y sigue con el JWT del portal; en un 401 sin identidad avisa al portal",
+    "estado": "aceptado"
    }
   ],
   "PRJ": [
@@ -7857,6 +7959,20 @@
     "req": "REQ-TB-5 + INC-118 + REQ-SP-3 (c7)",
     "resumen": "Tablero de Seg. Proyecto: «Ciclo de verificación (7 días)» con mediana construido→aceptado, % con más de un veredicto y semáforo de lotes en verificación > 30 m",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-132",
+    "fecha": "2026-10-17",
+    "req": "REQ-SH-2",
+    "resumen": "Menú del STR: solo lo que funciona (4 grupos, Lo que viene, sin datos de ejemplo)",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-136",
+    "fecha": "2026-10-16",
+    "req": "INC-136",
+    "resumen": "Guion REQ-TB-3 g: esperar red quieta antes de contar",
+    "estado": "aceptado"
    }
   ],
   "SH": [
@@ -7907,6 +8023,20 @@
     "fecha": "2026-10-15",
     "req": "REQ-K3-3 (2/2)",
     "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-132",
+    "fecha": "2026-10-17",
+    "req": "REQ-SH-2",
+    "resumen": "Menú del STR: solo lo que funciona (4 grupos, Lo que viene, sin datos de ejemplo)",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-133",
+    "fecha": "2026-10-17",
+    "req": "INC-134",
+    "resumen": "Shell: esperar a Firebase antes de renovar la sesión (aviso «Entrar» con sesión iniciada)",
     "estado": "aceptado"
    }
   ],
@@ -8354,6 +8484,29 @@
     "req": "REQ-K3-3 (2/2)",
     "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-138",
+    "fecha": "2026-10-16",
+    "req": "INC-138",
+    "resumen": "Guion INC-132 g: quitar también la foto que sigue «subiendo»",
+    "estado": "aceptado"
+   }
+  ],
+  "OP": [
+   {
+    "lote": 63,
+    "fecha": "2026-10-09",
+    "req": "REQ-TB-1",
+    "resumen": "str-seg-proyecto.html: pestaña Tablero desde diseno.json y seguimiento.json; bloque puro [TB1] y test.",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-94",
+    "fecha": "2026-10-14",
+    "req": "REQ-TB-5 + INC-118 + REQ-SP-3 (c7)",
+    "resumen": "Tablero de Seg. Proyecto: «Ciclo de verificación (7 días)» con mediana construido→aceptado, % con más de un veredicto y semáforo de lotes en verificación > 30 m",
+    "estado": "aceptado"
    }
   ],
   "U": [
@@ -8694,6 +8847,27 @@
     "severidad": "alto",
     "etapa": "✅",
     "titulo": "Cola de subida: una foto agregada mientras se remata la anterior se sube antes de guardarse en el teléfono, se borra y queda «fallida» sin remedio"
+   },
+   {
+    "id": "INC-138",
+    "fecha": "2026-10-16",
+    "severidad": "media",
+    "etapa": null,
+    "titulo": "Regresión: INC-132 g deja 1 foto en la cola (estaba «subiendo») y el aviso sigue (guion, no la página)"
+   },
+   {
+    "id": "INC-140",
+    "fecha": "2026-10-16",
+    "severidad": "media",
+    "etapa": null,
+    "titulo": "El HK embebido en el portal navega a login.html cuando Firebase le da null al arrancar; login entra solo y vuelve: bucle que dispara el freno de INC-56 («varios"
+   },
+   {
+    "id": "INC-142",
+    "fecha": "2026-10-17",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "HK en modo colaborador: el aviso de huésped aún en la unidad crea el ticket con creadoPor «operador» y la autorresolución del checkout tardío edita tickets ajen"
    }
   ],
   "CAL": [
@@ -8770,6 +8944,20 @@
     "severidad": "crítico",
     "etapa": "✔",
     "titulo": "GET /api/col/<colección> no filtra por rol: cualquier usuario del negocio, incluido el colaborador, recibe la colección completa (reservas con datos de huéspede"
+   },
+   {
+    "id": "INC-136",
+    "fecha": "2026-10-16",
+    "severidad": "media",
+    "etapa": null,
+    "titulo": "Regresión: REQ-TB-3 g cuenta 2 consultas a la API en str-cobit.html (guion, no la página)"
+   },
+   {
+    "id": "INC-139",
+    "fecha": "2026-10-16",
+    "severidad": "baja",
+    "etapa": null,
+    "titulo": "Lectura intermitente de los JSON del repo de documentos (API de GitHub) en páginas de Proyecto al final de una regresión larga"
    }
   ],
   "PRJ": [
@@ -8814,6 +9002,20 @@
     "severidad": "medio",
     "etapa": "📝",
     "titulo": "La guardia del verificador local corta los GET de las páginas del grupo Proyecto a raw.githubusercontent.com (y cortará api.github.com): las pestañas que leen l"
+   },
+   {
+    "id": "INC-136",
+    "fecha": "2026-10-16",
+    "severidad": "media",
+    "etapa": null,
+    "titulo": "Regresión: REQ-TB-3 g cuenta 2 consultas a la API en str-cobit.html (guion, no la página)"
+   },
+   {
+    "id": "INC-139",
+    "fecha": "2026-10-16",
+    "severidad": "baja",
+    "etapa": null,
+    "titulo": "Lectura intermitente de los JSON del repo de documentos (API de GitHub) en páginas de Proyecto al final de una regresión larga"
    }
   ],
   "SRV": [
@@ -8950,6 +9152,20 @@
     "severidad": "bajo",
     "etapa": "📝",
     "titulo": "Conectar Drive sin marcar la casilla de permiso de Google (desmarcada por defecto) vuelve con ?drive=error sin motivo; el callback no anota ultimo_error ni log "
+   },
+   {
+    "id": "INC-135",
+    "fecha": "2026-10-16",
+    "severidad": "baja",
+    "etapa": null,
+    "titulo": "Drive: con invalid_grant se guarda solo «Google retiró el permiso» y se pierde el código y la descripción de Google"
+   },
+   {
+    "id": "INC-138",
+    "fecha": "2026-10-16",
+    "severidad": "media",
+    "etapa": null,
+    "titulo": "Regresión: INC-132 g deja 1 foto en la cola (estaba «subiendo») y el aviso sigue (guion, no la página)"
    }
   ],
   "INV": [
@@ -9026,22 +9242,6 @@
     "titulo": "En un navegador sin datos guardados, str-propiedades.html sube al servidor propiedades y tipos de demostración antes de traer los reales."
    }
   ],
-  "U": [
-   {
-    "id": "INC-108",
-    "fecha": "2026-10-10",
-    "severidad": "medio",
-    "etapa": "✔",
-    "titulo": "Un usuario tiene dos roles y un admin nuevo no puede entrar. zz-verif-admin ve 'No tienes una cuenta activa en STR Manager'."
-   },
-   {
-    "id": "INC-110",
-    "fecha": "2026-10-10",
-    "severidad": "bajo",
-    "etapa": "📝",
-    "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
-   }
-  ],
   "SH": [
    {
     "id": "INC-108",
@@ -9070,6 +9270,29 @@
     "severidad": "bajo",
     "etapa": "📝",
     "titulo": "La barra superior muestra además el nombre de la cuenta de Google del perfil (#userName), no el del usuario del STR (visto con operador y con admin de prueba)."
+   },
+   {
+    "id": "INC-134",
+    "fecha": "2026-10-16",
+    "severidad": "media",
+    "etapa": null,
+    "titulo": "Shell: aviso «Sesión vencida · Entrar» con sesión iniciada (renueva antes de que Firebase recupere al usuario)"
+   }
+  ],
+  "U": [
+   {
+    "id": "INC-108",
+    "fecha": "2026-10-10",
+    "severidad": "medio",
+    "etapa": "✔",
+    "titulo": "Un usuario tiene dos roles y un admin nuevo no puede entrar. zz-verif-admin ve 'No tienes una cuenta activa en STR Manager'."
+   },
+   {
+    "id": "INC-110",
+    "fecha": "2026-10-10",
+    "severidad": "bajo",
+    "etapa": "📝",
+    "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
    }
   ],
   "INC1": [],
@@ -9077,14 +9300,15 @@
   "M2": [],
   "CMP": [],
   "PC1": [],
-  "M6": []
+  "M6": [],
+  "OP": []
  },
  "cobertura": {
   "SH": {
    "reqVigentes": 4,
-   "reqAceptados": 2,
+   "reqAceptados": 3,
    "reqAceptadosConGuion": 2,
-   "reqEntregados": 2,
+   "reqEntregados": 1,
    "reqHistoricos": 2,
    "guiones": 5,
    "casos": 21,
@@ -9093,13 +9317,13 @@
     "colab",
     "oper"
    ],
-   "lotes30d": 7,
-   "lotesTotal": 7,
-   "incidentes": 4,
-   "incidentesAbiertos": 2,
+   "lotes30d": 9,
+   "lotesTotal": 9,
+   "incidentes": 5,
+   "incidentesAbiertos": 3,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 48
+   "hotspot": 60
   },
   "API": {
    "reqVigentes": 0,
@@ -9115,8 +9339,8 @@
    ],
    "lotes30d": 5,
    "lotesTotal": 5,
-   "incidentes": 3,
-   "incidentesAbiertos": 0,
+   "incidentes": 5,
+   "incidentesAbiertos": 2,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
    "hotspot": 36
@@ -9200,20 +9424,20 @@
   },
   "FL": {
    "reqVigentes": 10,
-   "reqAceptados": 0,
+   "reqAceptados": 1,
    "reqAceptadosConGuion": 0,
-   "reqEntregados": 8,
+   "reqEntregados": 7,
    "reqHistoricos": 12,
    "guiones": 0,
    "casos": 0,
    "perfiles": [],
-   "lotes30d": 12,
-   "lotesTotal": 12,
+   "lotes30d": 13,
+   "lotesTotal": 13,
    "incidentes": 2,
    "incidentesAbiertos": 0,
    "riesgo": "bajo",
    "puntajeRiesgo": 2,
-   "hotspot": 26
+   "hotspot": 28
   },
   "HK": {
    "reqVigentes": 14,
@@ -9229,13 +9453,13 @@
     "colab2",
     "oper"
    ],
-   "lotes30d": 40,
-   "lotesTotal": 40,
-   "incidentes": 13,
-   "incidentesAbiertos": 4,
+   "lotes30d": 42,
+   "lotesTotal": 42,
+   "incidentes": 16,
+   "incidentesAbiertos": 7,
    "riesgo": "alto",
    "puntajeRiesgo": 9,
-   "hotspot": 369
+   "hotspot": 387
   },
   "POR": {
    "reqVigentes": 9,
@@ -9311,13 +9535,13 @@
     "colab",
     "oper"
    ],
-   "lotes30d": 9,
-   "lotesTotal": 9,
-   "incidentes": 1,
-   "incidentesAbiertos": 1,
+   "lotes30d": 10,
+   "lotesTotal": 10,
+   "incidentes": 3,
+   "incidentesAbiertos": 3,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 60
+   "hotspot": 66
   },
   "INC1": {
    "reqVigentes": 6,
@@ -9427,22 +9651,22 @@
   },
   "PRJ": {
    "reqVigentes": 10,
-   "reqAceptados": 7,
+   "reqAceptados": 8,
    "reqAceptadosConGuion": 3,
-   "reqEntregados": 3,
+   "reqEntregados": 2,
    "reqHistoricos": 5,
    "guiones": 3,
    "casos": 22,
    "perfiles": [
     "admin"
    ],
-   "lotes30d": 17,
-   "lotesTotal": 17,
-   "incidentes": 6,
-   "incidentesAbiertos": 3,
+   "lotes30d": 19,
+   "lotesTotal": 19,
+   "incidentes": 8,
+   "incidentesAbiertos": 5,
    "riesgo": "bajo",
    "puntajeRiesgo": 2,
-   "hotspot": 36
+   "hotspot": 40
   },
   "MOD": {
    "reqVigentes": 11,
@@ -9462,6 +9686,23 @@
    "riesgo": "bajo",
    "puntajeRiesgo": 1,
    "hotspot": 11
+  },
+  "OP": {
+   "reqVigentes": 1,
+   "reqAceptados": 0,
+   "reqAceptadosConGuion": 0,
+   "reqEntregados": 1,
+   "reqHistoricos": 0,
+   "guiones": 0,
+   "casos": 0,
+   "perfiles": [],
+   "lotes30d": 2,
+   "lotesTotal": 2,
+   "incidentes": 0,
+   "incidentesAbiertos": 0,
+   "riesgo": "medio",
+   "puntajeRiesgo": 4,
+   "hotspot": 12
   }
  },
  "coberturaNodos": {
@@ -10013,6 +10254,7 @@
    "FL"
   ],
   "REQ-OP-1": [
+   "OP",
    "SH",
    "HK",
    "CAL",
@@ -10242,6 +10484,11 @@
    "fecha": "2026-10-16",
    "cambio": "Anclajes de REQ-SH-2 (SH, PRJ), REQ-FL-12 (FL) y REQ-OP-1 (SH, HK, CAL, INV, FL), propuestos por Desarrollo (M-552) y coherentes con el documento del REQ (Módulos). Página nueva /str-lo-que-viene.html → PRJ: es alcance del proyecto, transitoria en el STR hasta D4 (ADR-009 v4 § 4b)",
    "lote": "M-552"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "Módulo OP (tablero, 10:07) con str-tablero.html y str-avance.js; REL-33 (OP→SRV, lectura agrupada /api/tablero) y REL-34 (OP↔HK, mismo avance, RT-4); REQ-OP-1 anclado también a OP. Pedido de Desarrollo para L-142 (OP-1a)",
+   "lote": "M-615"
   }
  ],
  "avisos": [
@@ -10254,6 +10501,11 @@
    "regla": "M5 cobertura",
    "id": "FL",
    "detalle": "módulo construido sin ningún guion e2e"
+  },
+  {
+   "regla": "M5 cobertura",
+   "id": "FL",
+   "detalle": "REQ aceptados en octubre sin guion que los nombre"
   },
   {
    "regla": "M5 cobertura",

@@ -1196,6 +1196,55 @@
     "impacto": 1,
     "motivo": "Aislado del producto (base y sitio aparte); solo la fábrica lo usa."
    }
+  },
+  {
+   "id": "OP",
+   "nombre": "Tablero de operación en vivo (OP-1)",
+   "familia": "operativo",
+   "estado": "definido",
+   "que": "Página de inicio del admin y el operador: turnos de hoy por propiedad con su avance (mismo cálculo que HK, str-avance.js), atrasos y bloqueos, salidas y entradas, alertas (OP-1b). Solo lee: una lectura agrupada por minuto (GET /api/tablero?since=) con cursor propio, nunca el de HK.",
+   "paginas": [
+    "str-tablero.html",
+    "str-avance.js"
+   ],
+   "rutas": [
+    "/tablero?since="
+   ],
+   "colecciones": {
+    "escribe": [],
+    "lee": [
+     "turnos (desde ayer)",
+     "reservas (hoy y mañana, lista blanca)",
+     "tickets (abiertos o escalados)",
+     "inv-pendientes (abiertos)",
+     "propiedades",
+     "flujos",
+     "usuarios (mínimos)"
+    ]
+   },
+   "actores": [
+    "admin",
+    "operador"
+   ],
+   "reqRaiz": [
+    "REQ-OP-1"
+   ],
+   "mapaTecnico": "tablero",
+   "zonaPw": "tablero",
+   "alias": [
+    "Tablero",
+    "Tablero de operación",
+    "OP-1",
+    "OP-1a",
+    "OP-1b"
+   ],
+   "adr": [],
+   "da": [],
+   "riesgo": {
+    "probabilidad": 2,
+    "impacto": 2,
+    "motivo": "Solo lee, pero comparte el cálculo de avance con HK (un cambio en str-avance.js mueve los dos) y añade una lectura por minuto por pantalla abierta (RT-19)."
+   }
   }
  ],
  "relaciones": [
@@ -1591,6 +1640,37 @@
    "regla": "",
    "rt": [
     "RT-6"
+   ],
+   "estado": "por construir",
+   "generica": false
+  },
+  {
+   "id": "REL-33",
+   "origen": "OP",
+   "destino": "SRV",
+   "mecanismo": "`GET /api/tablero?since=` con `api/lib/col-lectura.php` (`_colLeerFilas`, la misma lectura de `/api/col`)",
+   "dato": "turnos, reservas, incidentes, pendientes, propiedades, flujos y usuarios mínimos en una respuesta",
+   "regla": "una conexión por petición; 403 al colaborador antes de abrir la base; datos del huésped solo nombre y fechas",
+   "rt": [
+    "RT-1",
+    "RT-4",
+    "RT-6",
+    "RT-14",
+    "RT-19",
+    "RT-21"
+   ],
+   "estado": "por construir",
+   "generica": false
+  },
+  {
+   "id": "REL-34",
+   "origen": "OP",
+   "destino": "HK",
+   "mecanismo": "`str-avance.js` ([AV-puras]) cargado por los dos; bloques de HK copiados con test de igualdad",
+   "dato": "avance esperado y real del turno en minutos, estado del tramo (al día, atrás, adelante, bloqueado)",
+   "regla": "«atrasado» significa lo mismo en el tablero y en HK",
+   "rt": [
+    "RT-4"
    ],
    "estado": "por construir",
    "generica": false
@@ -2296,6 +2376,7 @@
    "FL"
   ],
   "REQ-OP-1": [
+   "OP",
    "SH",
    "HK",
    "CAL",
@@ -2664,6 +2745,11 @@
    "fecha": "2026-10-16",
    "cambio": "Anclajes de REQ-SH-2 (SH, PRJ), REQ-FL-12 (FL) y REQ-OP-1 (SH, HK, CAL, INV, FL), propuestos por Desarrollo (M-552) y coherentes con el documento del REQ (Módulos). Página nueva /str-lo-que-viene.html → PRJ: es alcance del proyecto, transitoria en el STR hasta D4 (ADR-009 v4 § 4b)",
    "lote": "M-552"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "Módulo OP (tablero, 10:07) con str-tablero.html y str-avance.js; REL-33 (OP→SRV, lectura agrupada /api/tablero) y REL-34 (OP↔HK, mismo avance, RT-4); REQ-OP-1 anclado también a OP. Pedido de Desarrollo para L-142 (OP-1a)",
+   "lote": "M-615"
   }
  ]
 }

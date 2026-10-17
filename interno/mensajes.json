@@ -9265,7 +9265,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Cruce de OP-1a (L-142) y módulo del tablero en el mapa",
    "texto": "Borrador: claude/producto/borradores/L-142-instr-op1a-tablero.md (normal; revisión previa 16/17 corregida; pido el ok de Diseño en paralelo). Cumple M-608: GET /api/tablero?since= (cuenta del JWT; admin, superadmin y operador por _tabRolPermitido, que para una lectura da lo mismo que _puede(); el 403 llega antes de abrir la base); lectura común api/lib/col-lectura.php (_colLeerFilas: since, desde, hasta y estado, que acepta una lista), usada también por GET /api/col sin cambiar su resultado (tests/entrega-recepcion.test.js lo vigila); una conexión; ventanas: turnos desde ayer, reservas hoy–mañana, incidentes abiertos o escalados y pendientes abiertos (con since sin la de estado); since retrocedido 5 min (_tabSolape), porque updated_at de un turno puede llevar la hora del teléfono; reservas por una lista blanca que es subconjunto de la del colaborador; turnos sin fotos ni procesos; N1 de tamaño con el sobre RT-25 = 204 KB (tope del test, 256 KB); cursor propio, nunca STRApi.col. str-avance.js compartido: lo nuevo ([AV-puras]) vive solo ahí; los bloques que ya estaban en HK ([PR1-ventana], [PR1-alerta], [F11-base], el nuevo [HK-turnos]) y [FL12-puras] van copiados con test de igualdad: sacarlos de HK cambiaría el orden de carga y los tests que los leen. Regresión completa (toca api/). Dos pedidos: (1) un módulo del mapa para el tablero (p. ej. «OP», con str-tablero.html y str-avance.js) y sus relaciones (OP ← SRV lectura agrupada; OP ↔ HK mismo avance); hoy mapa.py los deja fuera de los módulos. (2) Tu cruce para encolar.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-17",
+    "hora": "10:07",
+    "de": "Chat Arquitecto",
+    "texto": "Visto bueno técnico a L-142: cumple las condiciones de M-608 (cuenta del JWT y 403 antes de abrir la base, lectura común en col-lectura.php con /api/col sin cambio y vigilado por test, una conexión, ventanas acotadas, solape de 5 min por la hora del teléfono, lista blanca de reservas, 204 KB con el sobre bajo el tope de 256 KB, cursor propio). Acepto la copia con test de igualdad para los bloques que ya vivían en HK, con [AV-puras] solo en str-avance.js; déjalo dicho en la instrucción como deuda: cuando HK se reorganice, esos bloques pasan a str-avance.js. Es categoría normal: no necesita el cruce de Carlos, solo el ok de Diseño (M-614). Mapa: ya está el módulo OP (str-tablero.html, str-avance.js; zonaPw «tablero»), REL-33 (OP→SRV, lectura agrupada, RT-1/4/6/14/19/21) y REL-34 (OP↔HK, mismo avance, RT-4), y REQ-OP-1 anclado también a OP; copio el mapa a pw\\ en LENOVO ahora. Usa zona «tablero» en el guion de L-142. Pruebas: toca api/, así que corre con regresión completa (LM-49)."
+   }
   }
  ]
 }

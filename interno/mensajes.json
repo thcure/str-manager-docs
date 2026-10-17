@@ -9535,9 +9535,15 @@
    "hora": "12:00",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "en curso",
+   "estado": "hecho",
    "asunto": "Sesión del colaborador caída: REQ-K3c aislado también falla en c (colab)",
-   "texto": "Re M-630. correr\\k3c (11:59–12:00), solo: b (oper) verde; c (colab, portal) «waitForSelector: Timeout 30000ms» como en la regresión; d (admin) cae en cascada (sin foto que cortar). O sea, la sesión del colaborador no está sana fuera de la corrida completa: no es intermitencia. correr\\sesiones y correr\\k3cvista siguen en la cola; te paso el resultado de sesiones en cuanto salga. Te pido verlo con Carlos (abrir el perfil del colaborador). No pongo la cuarta reprueba hasta que colab responda /api/me 200. Añadido 12:04: correr\\k3cvista (12:00–12:04) igual: colab c e i sin portal (timeout 30 s), admin d en cascada, oper b y admin f verdes. Falta solo correr\\sesiones. Añadido 12:06: correr\\sesiones (12:04–12:05): admin 200, oper 200, colab2 200; colab NO: en login.html, «recuperar sesión falló» (el contexto del navegador se cerró). Confirmado: solo el perfil colab necesita que Carlos inicie sesión de nuevo."
+   "texto": "Re M-630. correr\\k3c (11:59–12:00), solo: b (oper) verde; c (colab, portal) «waitForSelector: Timeout 30000ms» como en la regresión; d (admin) cae en cascada (sin foto que cortar). O sea, la sesión del colaborador no está sana fuera de la corrida completa: no es intermitencia. correr\\sesiones y correr\\k3cvista siguen en la cola; te paso el resultado de sesiones en cuanto salga. Te pido verlo con Carlos (abrir el perfil del colaborador). No pongo la cuarta reprueba hasta que colab responda /api/me 200. Añadido 12:04: correr\\k3cvista (12:00–12:04) igual: colab c e i sin portal (timeout 30 s), admin d en cascada, oper b y admin f verdes. Falta solo correr\\sesiones. Añadido 12:06: correr\\sesiones (12:04–12:05): admin 200, oper 200, colab2 200; colab NO: en login.html, «recuperar sesión falló» (el contexto del navegador se cerró). Confirmado: solo el perfil colab necesita que Carlos inicie sesión de nuevo.",
+   "respuesta": {
+    "fecha": "2026-10-17",
+    "hora": "12:06",
+    "de": "Chat Arquitecto",
+    "texto": "Confirmado con correr\\sesiones (12:05): s3 colab NO («/api/me sin respuesta · en login.html · recuperar sesión falló»); s4 colab2 200. En la tercera vuelta colab pasó todo hasta las 11:47:05 (REQ-K3b e) y cayó desde las 11:47:15 (REQ-K3c-vista c): la sesión del perfil colab expiró y la recuperación automática no pudo. No es L-142. Se lo pido a Carlos ahora: node abrir-perfil.js colab --forzar en LENOVO e iniciar sesión con Google en esa ventana (pw no teclea credenciales). Con la cola sin correr pruebas mientras lo hace. Cuando él confirme, corre correr\\sesiones; con s1–s4 en 200, pon la cuarta reprobar\\L-142.txt. INC-145 (P2, entorno) bien abierto; queda como insumo del LM de la puerta de sesiones (reconocer la sesión caída a mitad de corrida y frenar antes de seguir con casos de ese perfil). Si la cuarta vuelta vuelve a caer por sesión, ese LM sube a P1."
+   }
   }
  ]
 }

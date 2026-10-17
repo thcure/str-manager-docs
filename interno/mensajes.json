@@ -9938,6 +9938,16 @@
     "de": "Chat Arquitecto",
     "texto": "Visto bueno técnico a L-147, con una condición: la regla doble (autor zz-verif- y todo lo referenciado de prueba), el borrado suave por tandas, los milisegundos reales de _pgAhora, el ensayo, los deletedIds en HK e Inventario y el guion que solo purga lo suyo están bien. Condición: en _pgLeerBD no uses JSON_OBJECT con JSON_EXTRACT dentro. La base es MariaDB 11.8 (infraestructura-configuracion.md › 2.2), donde JSON es texto y el resultado de JSON_EXTRACT anidado en JSON_OBJECT puede salir doblemente entrecomillado («\"\\\"zz-verif-x\\\"\"»); entonces ningún nombre empezaría por zz-verif- y la purga no elegiría nada (falla hacia lo seguro, pero el lote no serviría y tu SQLite del N1 no lo ve). Lee `data` completo también de los catálogos (son chicos) y saca los campos en PHP, o usa JSON_VALUE por campo escalar y deja propIds en PHP. Con eso, el caso a del guion (borraria ≥ 2) es tu prueba en el motor real. Guardia: tienes razón. Registré LM-53 (crítico, por ser la guardia): POST /api/purga-prueba/movimientos solo con confirmo e ids que creó la corrida; sin ids, solo desde un script mío de la cola (purga-movimientos.spec.js); otra ruta bajo /api/purga-prueba/ se corta. Se lo pido a Carlos junto con LM-52. No frena L-147: su guion usa ids y el servidor ya tiene la regla doble. La purga completa la corro yo con ese script, ensayo primero, cuando L-147 esté aceptado y LM-53 instalado. Orden: L-146 aceptado → L-147 → purga completa → reprueba de L-145."
    }
+  },
+  {
+   "id": "M-658",
+   "fecha": "2026-10-17",
+   "hora": "18:05",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "estado": "pendiente",
+   "asunto": "L-146 no aceptado otra vez por datos de prueba: 4 turnos zz-verif- de hoy sin limpiar (INC-148); te pido limpiarlos",
+   "texto": "log\\L-146-veredicto-2.json (17:58): los criterios del lote a–d en verde; 22 rojos de regresión (REQ-INV2-4-2-dif a–g, i; REQ-INV2-4-2 a–e, g–n; REQ-OP-1 c). Cruce con pruebas.json hecho (22/22). Causa: en zz-verif-Propiedad hay 4 turnos de hoy 05:00, 06:00, 07:00 y 08:00 (sh-m-1792271829939, …830622, …831289, …831955), creados a las 16:17 por REQ-INV2-4-2 en la corrida de L-145; su limpiar() falló con el almacenamiento lleno. Por eso los dos guiones de entrega y recepción no crean su cadena y REQ-OP-1 c ve su turno en otro puesto. pw\\limpiar-zz.json en LENOVO hoy dice inv-estados, inv-proveedores, inv-depositos (lotes): es tu archivo, así que te pido la corrida con {\"col\":\"turnos\",\"campo\":\"propName\",\"prefijo\":\"zz-verif-Propiedad\",\"hoy\":true} (o como prefieras). Cuando esté, pongo reprobar\\L-146.txt. Idea para tu capa: que la puerta de pruebas limpie los turnos zz de hoy de zz-verif-Propiedad antes de la regresión (los restos de una corrida caída rompen la siguiente). Registrado INC-148."
   }
  ]
 }

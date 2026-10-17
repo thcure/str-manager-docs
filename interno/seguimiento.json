@@ -889,6 +889,15 @@
    "severidad": "menor",
    "prioridad": "P3",
    "nota": "Entorno, no producto: ningún caso llegó a ejecutar código. Dos cortes de red en 15 min. Se cierra con la reprueba de L-146 en verde. Si se repite, pedir a Carlos revisar la conexión de LENOVO."
+  },
+  {
+   "id": "INC-148",
+   "fecha": "2026-10-17",
+   "titulo": "Turnos zz-verif- de hoy que dejó la corrida de L-145 (limpiar() fallido con el almacenamiento lleno) rompen REQ-INV2-4-2, REQ-INV2-4-2-dif y REQ-OP-1 c en la reprueba de L-146",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P1",
+   "nota": "Veredicto L-146-2 (17:58), incs medio y bajo del juez. 4 turnos 05:00–08:00 en zz-verif-Propiedad creados a las 16:17 (plan tA–tD de REQ-INV2-4-2). Entorno, no producto. 18:05: pedida la limpieza al Arquitecto (limpiar-zz con turnos de hoy en zz-verif-Propiedad). Mejora a pensar (Arquitecto): que la puerta de pruebas limpie los turnos zz de hoy antes de la regresión."
   }
  ],
  "dts": [
@@ -13602,6 +13611,72 @@
    "aprobacion": null,
    "estado": "registrado",
    "observacion": "Espera cruce de Carlos (junto con LM-52)."
+  },
+  {
+   "lote": "L-146",
+   "fecha": "2026-10-17",
+   "req": "INC-146",
+   "categoria": "normal",
+   "resumen": "INC-146 (P0): reprueba (solo pruebas) tras la caída de red",
+   "estado": "no aceptado",
+   "hash": "c035328",
+   "observacion": "Reprueba 17:25–17:58: guion propio a–b verde (copia de diff 487–588 KB con 4554 movimientos; sin aviso), N1 c–d verde (90/90). Regresión 22 rojos: REQ-INV2-4-2-dif (8) y REQ-INV2-4-2 (13) no crean su cadena porque ya hay 4 turnos de hoy 05:00–08:00 en zz-verif-Propiedad (sh-m-1792271829939…831955, creados a las 16:17 por REQ-INV2-4-2 en la corrida de L-145, cuyo limpiar() falló con el almacenamiento lleno); REQ-OP-1 c, el puesto de su turno cambia por esos turnos. Páginas de HK (Alcance) → LM-47b no aplica. Juez 17:58: no aceptado, campo herramienta. Cruce veredicto/pruebas hecho por Desarrollo (22/22). Causa: INC-148 (entorno). Siguiente: limpiar esos turnos (Arquitecto, limpiar-zz) y reprobar.",
+   "aceptacion": {
+    "lote": "L-146",
+    "hash": "c035328",
+    "fecha": "2026-10-17",
+    "horaBogota": "17:58",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: admin: copia de diff de movimientos solo con ids: sí (4554 movimientos) | si: admin: almacenamiento 6038 KB en total · copia de diff 588 KB · movimientos 4678 KB | si: admin: aviso de almacenamiento lleno en la página: no (más N1: node tests/run.js 90/90 OK, A1/A2/B1–B5)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: operador: copia de diff de movimientos solo con ids: sí (4554 movimientos) | si: operador: almacenamiento 5926 KB en total · copia de diff 487 KB · movimientos 4669 KB | si: operador: aviso de almacenamiento lleno en la página: no"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 90/90 archivos OK (B1, B4–B7 y push-borrados incluidos; ya en verde con este commit a las 16:57:39)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 90/90 archivos OK (A3, C1, C2 incluidos; ya en verde con este commit a las 16:57:39)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "REQ-INV2-4-2-dif y REQ-INV2-4-2: la precondición «sin turnos de otra corrida hoy» falla porque quedan turnos de hoy en zz-verif-Propiedad creados por otros guiones de esta misma corrida",
+      "nivel": "medio",
+      "causa": "La regresión por ruta corrió antes, sobre la misma zz-verif-Propiedad y el mismo día, guiones que crean turnos de hoy y no los borran (p. ej. INC-131, INC-132, REQ-INV2-3-4-hk, REQ-INV2-7-1-hk-turno, REQ-OP-1 a/i). Cuando corren REQ-INV2-4-2-dif.a y REQ-INV2-4-2.a, ya hay turnos de hoy antes del corte horario que exigen; la propia preparación del guion lo detecta y lo reporta (\"hay turnos de otra corrida hoy en zz-verif-Propiedad\", con referencia a las Precondiciones de L-114/L-107). Como tA–tF (o tA–tD) no se crean, todo lo que depende de ellos (b–n) cae en timeout esperando selectores que nunca aparecen. No hay evidencia de que el cambio de este lote (copia de diff de movimientos, aviso de cuota) tenga relación con la creación u orden de turnos.",
+      "observado": "REQ-INV2-4-2-dif.spec.js: a, b, c, d, e, f, g, i en rojo (ver sus capturas <letra>-error.png/.txt) · REQ-INV2-4-2.spec.js: a, b, c, d, e, g, h, i, j, k, l, m, n en rojo, todas con el mismo patrón «turno <letra> de la corrida: no se creó en a» o el timeout que de ahí se encadena",
+      "ajeno": false
+     },
+     {
+      "titulo": "REQ-OP-1.spec.js c: el orden por atención y el puesto del turno de la prueba cambian porque hay turnos de hoy de otros guiones de la misma corrida en zz-verif-Propiedad",
+      "nivel": "bajo",
+      "causa": "Con 10 turnos de hoy en zz-verif-Propiedad (varios \"Al día\" acumulados por otros guiones de la corrida, más uno \"Sin empezar\" ajeno a las 11:00 am), el turno de la prueba queda en el puesto 10 en vez del puesto que el guion espera con datos propios aislados; el orden por atención en sí (atrasado → al día → adelantado) es correcto.",
+      "observado": "si: tramo en curso, rótulo «zz-verif-colab · 40 %», «39 % adelante», «Salió 5:55 pm» correctos | NO: orden por atención (10 filas): 1–2 atrasado, 3–9 al-dia, 10 adelantado — no coincide con lo que el guion espera",
+      "ajeno": false
+     }
+    ],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion (INC-146.spec.js solo lee: ninguno que revertir)",
+    "herramienta": "Aislamiento de datos entre guiones de regresión: varios guiones de esta misma corrida (INC-131, INC-132, REQ-INV2-3-4-hk, REQ-INV2-7-1-hk-turno, REQ-OP-1 a/i, entre otros) crean turnos de hoy en zz-verif-Propiedad y no los limpian antes de que corran REQ-INV2-4-2-dif, REQ-INV2-4-2 y REQ-OP-1 c, que necesitan la propiedad con el día limpio o con un orden predecible. No es un defecto introducido por este lote (que solo toca str-col-lastpush-v1 y el aviso de cuota).",
+    "notas": "pruebas.json › resultado: «rojo» · causa: «fallan: REQ-INV2-4-2-dif.spec.js a, b, c, d, e, f, g, i, REQ-INV2-4-2.spec.js a, b, c, d, e, g, h, i, j, k, l, m, n, REQ-OP-1.spec.js c» (confirmado con Grep sobre el archivo completo). Los criterios propios del lote (a, b, c, d) están todos en true y no hay N3 en este lote (n3Preparados: [] es lo esperado). No aplica la regla de regresión ajena (LM-47b): las páginas de los casos en rojo de REQ-INV2-4-2-dif y REQ-INV2-4-2 son /str-m1-housekeeping.html, que este lote cambia (condición 4, el propio ejemplo de la regla: «si el lote cambió str-m1-housekeeping.html y cae un caso de HK, no aplica»); para REQ-OP-1.c no hay evidencia suficiente de motivo a/b/c para sostener la excepción, así que tampoco se aplica por falta de evidencia. fase.fase es «completa» (no aplica el diferido de Fase 1, LM-49). sesiones: sin perfiles perdidos ni recuperados. Recomendación para Desarrollo: repetir la corrida de regresión con zz-verif-Propiedad limpia de turnos de hoy (o que estos tres guiones filtren solo sus propios turnos) antes de volver a juzgar; el cambio de este lote (H1–H7, A1, I1, D1) en sí mismo pasa todo lo que le corresponde."
+   }
   }
  ],
  "esquema": {
@@ -15789,11 +15864,11 @@
    "resumen": "INC-146 (P0): la copia de diff de HK guarda de los movimientos solo el id; aviso de almacenamiento lleno en la capa común",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 17:24",
+   "desde": "2026-10-17 18:05",
    "grupo": "HK",
-   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto.",
-   "espera": "reprueba (solo pruebas) y veredicto",
-   "esperaA": "Cola",
+   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto. · 17:58 juez (reprueba): no aceptado; propios a–d en verde; 22 rojos por turnos de hoy que dejó la corrida de L-145 (INC-148). 18:05 cruce hecho; limpieza pedida al Arquitecto.",
+   "espera": "limpiar los 4 turnos zz-verif- de hoy (INC-148); luego reprobar",
+   "esperaA": "Arquitecto",
    "hash": "c035328"
   },
   {

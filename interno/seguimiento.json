@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-17 11:25",
+ "actualizadoEn": "2026-10-17 12:00",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -862,6 +862,15 @@
    "severidad": "bajo",
    "prioridad": "P3",
    "nota": "Reprueba de L-142 (pruebas.json 11:17) rojo; correr\\inv241i (11:23) verde. Probable conteo antes de que se apliquen los permisos del operador; esperar al estado de permisos aplicado antes de contar. Si se repite aislado, sube a INC de la página."
+  },
+  {
+   "id": "INC-145",
+   "fecha": "2026-10-17",
+   "titulo": "Regresión completa: rojos intermitentes distintos en cada corrida de L-142, todos de sesión o permisos de colaborador/operador (entorno)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P2",
+   "nota": "Mismo commit 1a941d1, tres corridas: (1) REQ-INV2-3-4-hk g/h/j; (2) REQ-INV2-4-1-interfaz d; (3) REQ-K3c-vista c/d/i y REQ-K3c c/d (colab en la pantalla de login). Aislados (1) y (2) verdes. Lectura del Arquitecto (M-630): sesión del colaborador en el portal tras varias regresiones seguidas (aviso de Google de inicios automáticos). Abarca INC-143 e INC-144. Si la cuarta vuelta cae por sesión, el Arquitecto abre el LM de la puerta de sesiones (P1)."
   }
  ],
  "dts": [
@@ -12822,6 +12831,93 @@
    "aprobacion": "Carlos 17-oct-2026 11:36, chat del Arquitecto («ok»)",
    "estado": "instalado",
    "observacion": "Revisados los aceptados desde LM-47b: L-142 inconsistente dos veces (10:44 y 11:20). Cruzado 11:36; instalado en LENOVO 11:58 con la cola vacía (cola v10, juez v10; anteriores ejecutar-cola.v9.ps1 y juez\\anterior\\texto-juez.v9.md; verificado byte a byte). Prueba a hecha; b y d con los próximos lotes. El veredicto-3 de L-142 cuadra con el control."
+  },
+  {
+   "lote": "L-142",
+   "fecha": "2026-10-17",
+   "req": "REQ-OP-1",
+   "categoria": "normal",
+   "resumen": "OP-1a: Tablero de operación (solo lectura) y avance compartido con HK",
+   "estado": "no aceptado",
+   "hash": "1a941d1",
+   "observacion": "Corrida 1 (10:42) y 2 (11:17): juez «aceptado» inconsistente con pruebas.json en rojo (INV2-3-4-hk g/h/j; INV2-4-1-interfaz d); anulados por el Arquitecto (M-621, M-627); los dos casos verdes aislados. Corrida 3 (11:52): no aceptado, bien juzgado (M-630, control LM-50): criterios propios en verde, h (regresión) rojo por 5 casos K3c con el colaborador sin sesión (entorno; LM-47b no aplica, condición 4). Causa: INC-145. Siguiente: sesiones sanas y cuarta reprueba.",
+   "aceptacion": {
+    "lote": "L-142",
+    "hash": "1a941d1",
+    "fecha": "2026-10-17",
+    "horaBogota": "11:52",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "N1",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 85/85 archivos OK (ya en verde con este commit a las 10:16:50; no se repite, LM-45)"
+     },
+     {
+      "c": "a",
+      "nivel": "N1 + N2 + N3 (e)",
+      "ok": true,
+      "observado": "si: lastpush alineado (M-372): 6 turnos | si: turno sh-m-1792254368165 (13:00–23:59): 200 | si: fila del turno en el tablero: sí, puesto 1 | si: tramos por hacer: [\"pend\"] | si: tramo con emoji y nombre corto: «▫️ zz-verif-Flujo base» | si: título del tramo (nombre · zona · minutos): «▫️ zz-verif-Flujo base · sin zona · 25 min» | si: rótulo «zz-verif-colab · 0 %» · motivo «Al día» · clase al-dia"
+     },
+     {
+      "c": "i",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "si: lastpush alineado (M-372): 7 turnos | si: turno sh-m-1792254371497 (10:26–23:59): 200 | si: turno de las 10:26: clase atrasado · «Sin empezar · debía empezar 10:26 am (+60 min)»"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792254368165 | si: unidad desocupada: 200 | si: tarea zz-verif-Limpieza: 200 · marcada sí"
+     },
+     {
+      "c": "g",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "si: colaborador en /portal.html · filas 0 · lecturas de /api/tablero 0 (403 del servidor cubierto por tests/tablero-op.test.js)"
+     },
+     {
+      "c": "c",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "si: fila del turno: sí, puesto 2 | si: tramo en curso: [\"curso\"] | si: rótulo con el avance en minutos: «zz-verif-colab · 40 %» | si: clase adelantado · motivo «39 % adelante» | si: bajo la propiedad: «Salió 11:26 am» | si: orden por atención (2 filas): 1 atrasado Sin empezar (+61 min) | 2 adelantado 39 % adelante"
+     },
+     {
+      "c": "d",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "si: tarea zz-verif-Conteo de cierre marcada desde HK (otra pestaña) tras abrir el tablero: 200 | si: sin recargar: tramos [\"hecho\"] · rótulo «zz-verif-colab · 100 %» | si: recargas del tablero: 0 | si: lecturas de /api/tablero en el caso: 2 (200, 200) | si: lecturas de /api/col desde el tablero: 0 | si: campos del huésped o fotos en /api/tablero (RT-6): ninguno"
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "captura a 1440 px: cifras arriba (turnos en curso 1, bloqueados 0, entradas hoy 0); cuadro «Turnos de hoy» con 2 filas (puesto 1 y 2), motivo con su color (naranja «Sin empezar · debía empezar 10:26 am (+62 min)», verde «95 % adelante»); fila 2 con «Salió 11:26 am» bajo la propiedad; bloques con el tramo «zz-verif-Flujo base» y rótulo «zz-verif-colab · N %» debajo; raya amarilla de la hora (11:28) dentro del rango con marca «11 am»; leyenda completa (colores, tramo hecho/en curso/por hacer, nota de la hora)"
+     },
+     {
+      "c": "f",
+      "nivel": "N1 (CSS) + N3",
+      "ok": true,
+      "observado": "captura a 390 px: sin barra lateral en la página; cifras y cuadro «Turnos de hoy» uno debajo del otro en una sola columna; N1 del caso: página sin desplazamiento (scrollWidth 390/390) y cuadro de turnos con desplazamiento propio (792/364, se desplaza de lado dentro de su cuadro)"
+     },
+     {
+      "c": "h",
+      "nivel": "N1 + regresión",
+      "ok": false,
+      "observado": "tests/run.js en verde y 134/139 casos de regresión en verde (HK, CAL, INV, SRV, SH, FL), pero 5 casos de regresión en rojo (REQ-K3c-vista.spec.js c/d/i, REQ-K3c.spec.js c/d); no se puede confirmar «HK, Calendario e Inventario siguen igual» sin reservas — ver regresión y campo herramienta"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "herramienta": "el colaborador llegó sin sesión en REQ-K3c-vista.spec.js y REQ-K3c.spec.js: la captura del caso c muestra la pantalla de login («Acceso interno», «Continuar con Google») y la del caso i muestra el portal con «Tu sesión no está activa · Iniciar sesión»; los casos d de los dos guiones son cascada (no hay foto que cortar porque c nunca llegó a subirla)",
+    "notas": "Fase completa (LM-49): regresión por ruta (38 guiones, 139 casos). 5 casos rojos, los 5 por falta de sesión del colaborador (ver campo herramienta), no por un defecto de este lote. Se evaluó la regla de regresión ajena (LM-47b): se cumplen (1) N1, N2 y N3 propios del lote en true, (2) REQ-K3c-vista.spec.js y REQ-K3c.spec.js no están en el Alcance ni en los guiones N2, y (3) los 5 casos tienen evidencia de causa herramienta/entorno (pantalla de login / sin sesión / cascada); pero falla (4): REQ-K3c-vista.spec.js d y REQ-K3c.spec.js d corren sobre /str-m1-housekeeping.html, página que este lote cambió (H1–H14) — exactamente el ejemplo que la propia regla da para no aplicarla. Por eso el resultado es «no aceptado» aunque no se abre ningún INC (M-435, M-472): la causa es del arnés, y Desarrollo debe repetir la corrida con la sesión arreglada."
+   }
   }
  ],
  "esquema": {
@@ -14807,15 +14903,15 @@
    "req": "REQ-OP-1",
    "categoria": "normal",
    "resumen": "OP-1a: tablero de operación en vivo (GET /api/tablero, str-tablero.html por dirección directa) y el avance compartido con HK (str-avance.js); criterios 1–6, 9, 11 y 12",
-   "estado": "construido",
+   "estado": "no aceptado",
    "vista": "siguiente",
    "esperaA": "Cola",
-   "espera": "tercera corrida completa de L-142; el Arquitecto revisa el veredicto contra pruebas.json",
+   "espera": "sesiones de los perfiles en 200; luego cuarta reprueba",
    "orden": 121.523,
    "desde": "2026-10-16 10:23",
    "planTrabajo": "PT-1",
    "grupo": "OP",
-   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 2026-10-17 09:52 L-142 (OP-1a) redactado con M-607 (Diseño) y M-608 (Arquitecto): ruta GET /api/tablero con lectura común _colLeerFilas (api/lib/col-lectura.php, también en /api/col), str-tablero.html, str-avance.js (copias con test de igualdad + [AV-puras]) y HK con el mismo avance (5 puntos, minutos sobre todo el flujo). N1 avance 47/0, tablero-op 34/0 (tamaño sobre RT-25: 204 KB); run.js en verde; guion REQ-OP-1.spec.js (a–g). OP-1b (sin turno hoy, alertas, menú con data-inicio) va aparte. · 10:03 revisión previa 16/17 (falló el 6; defectos: turno cerrado atrasado, bloqueado con turno empezado o sin reserva, cursor con teléfono atrasado, tiempo de d, hora de a; escalados): corregido; avance 51/0, tablero-op 36/0; borrador = mod (IGUAL). Pedido ok a Diseño y cruce al Arquitecto. · 10:06 ok de Diseño (M-614) con «Sin empezar» (aplicado: N1 38/0 y caso i); 10:07 visto bueno del Arquitecto (M-615: módulo OP, REL-33, REL-34, zona tablero). · 10:10 encolado (cmp IGUAL). · 10:16 construido 1a941d1 (p5c104; 85/85; php -l limpio; sobre RT-25 203 785 B; sin diferencias de alcance). · 10:42 ACEPTADO por el juez (log\\L-142-veredicto.json: a–i en verde). OJO: el veredicto dice regresión «toda en verde», pero L-142-pruebas.json da resultado rojo: REQ-INV2-3-4-hk g (t1 no se cerró: tras «Cerrar limpieza 200 [nota]» no estaba «Cerrar turno»), h y j en cascada; verdes en L-140 (08:55) y L-132 (09:17). Reproducido aquí con HK de main antes y después de L-142 (cerrar limpieza → cerrar turno aparece en ambos): sin falla determinista; probable intermitencia. Pedido al Arquitecto (M-621). · 10:50 M-621 (Arquitecto): el «aceptado» no vale (error del juez); corriendo solo REQ-INV2-3-4-hk (correr\\inv234hk) para ver si se repite; si se repite, P0 (revert o arreglo). · 10:52 INV234HK verde (13 casos, g/h/j ok): no se repite; reprobar\\L-142.txt puesto (M-623, Arquitecto). · 10:56 M-625: el Arquitecto revisa el veredicto de la reprueba contra pruebas.json; si cuadra, aceptado y se encola L-143. · 11:22 reprueba: juez «aceptado» (veredicto-2) pero pruebas.json rojo en REQ-INV2-4-1-interfaz d (operador ve controles de edición en Zonas); INV2-3-4-hk verde. correr\\inv241i puesto; consulta al Arquitecto (M-627). · 11:25 INV241I aislado verde (d: 0 controles). INC-144 (P3). M-627 (Arquitecto): verde → otra reprueba; reprobar\\L-142.txt puesto (11:25).",
+   "nota": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 2026-10-17 09:52 L-142 (OP-1a) redactado con M-607 (Diseño) y M-608 (Arquitecto): ruta GET /api/tablero con lectura común _colLeerFilas (api/lib/col-lectura.php, también en /api/col), str-tablero.html, str-avance.js (copias con test de igualdad + [AV-puras]) y HK con el mismo avance (5 puntos, minutos sobre todo el flujo). N1 avance 47/0, tablero-op 34/0 (tamaño sobre RT-25: 204 KB); run.js en verde; guion REQ-OP-1.spec.js (a–g). OP-1b (sin turno hoy, alertas, menú con data-inicio) va aparte. · 10:03 revisión previa 16/17 (falló el 6; defectos: turno cerrado atrasado, bloqueado con turno empezado o sin reserva, cursor con teléfono atrasado, tiempo de d, hora de a; escalados): corregido; avance 51/0, tablero-op 36/0; borrador = mod (IGUAL). Pedido ok a Diseño y cruce al Arquitecto. · 10:06 ok de Diseño (M-614) con «Sin empezar» (aplicado: N1 38/0 y caso i); 10:07 visto bueno del Arquitecto (M-615: módulo OP, REL-33, REL-34, zona tablero). · 10:10 encolado (cmp IGUAL). · 10:16 construido 1a941d1 (p5c104; 85/85; php -l limpio; sobre RT-25 203 785 B; sin diferencias de alcance). · 10:42 ACEPTADO por el juez (log\\L-142-veredicto.json: a–i en verde). OJO: el veredicto dice regresión «toda en verde», pero L-142-pruebas.json da resultado rojo: REQ-INV2-3-4-hk g (t1 no se cerró: tras «Cerrar limpieza 200 [nota]» no estaba «Cerrar turno»), h y j en cascada; verdes en L-140 (08:55) y L-132 (09:17). Reproducido aquí con HK de main antes y después de L-142 (cerrar limpieza → cerrar turno aparece en ambos): sin falla determinista; probable intermitencia. Pedido al Arquitecto (M-621). · 10:50 M-621 (Arquitecto): el «aceptado» no vale (error del juez); corriendo solo REQ-INV2-3-4-hk (correr\\inv234hk) para ver si se repite; si se repite, P0 (revert o arreglo). · 10:52 INV234HK verde (13 casos, g/h/j ok): no se repite; reprobar\\L-142.txt puesto (M-623, Arquitecto). · 10:56 M-625: el Arquitecto revisa el veredicto de la reprueba contra pruebas.json; si cuadra, aceptado y se encola L-143. · 11:22 reprueba: juez «aceptado» (veredicto-2) pero pruebas.json rojo en REQ-INV2-4-1-interfaz d (operador ve controles de edición en Zonas); INV2-3-4-hk verde. correr\\inv241i puesto; consulta al Arquitecto (M-627). · 11:25 INV241I aislado verde (d: 0 controles). INC-144 (P3). M-627 (Arquitecto): verde → otra reprueba; reprobar\\L-142.txt puesto (11:25). · 12:00 veredicto-3: no aceptado por regresión (K3c, colab sin sesión; entorno, M-630). INC-145. correr\\sesiones (y k3c, k3cvista aislados) puestos; con las tres sesiones en 200, cuarta reprueba.",
    "riesgo": "R-2"
   },
   {

@@ -836,6 +836,14 @@
    "severidad": "crítico",
    "nota": "Visto en la lectura de INC-120 (solo lectura). api/col/index.php: la validación del colaborador en tickets mira el creadoPor que manda (~L1393–1404), no el guardado; con updated_at viejo la rama ~L1733–1739 copia el ticket ajeno y lo devuelve (~L1775–1776); con updated_at nuevo lo pisa. Los ids (tk_<ms base36>_<5 aleatorios>) no se enumeran fácil. Clase: la pone Diseño (LM-48). · 08:54 DA-46 de Carlos (M-601): P0; lote L-141.",
    "prioridad": "P2"
+  },
+  {
+   "id": "INC-142",
+   "fecha": "2026-10-17",
+   "titulo": "HK en modo colaborador: el aviso de huésped aún en la unidad crea el ticket con creadoPor «operador» y la autorresolución del checkout tardío edita tickets ajenos; los dos dan 403 y el 403 tumba el envío entero de tickets",
+   "estado": "abierto",
+   "severidad": "medio",
+   "nota": "Visto en la revisión previa de L-141. str-m1-housekeeping.html ~L6569 (_huespedAunEnUnidad, creadoPor:'operador') y ~L6537 (_registrarCheckoutReal resuelve checkout-tardio de su turno creados por otro). Hoy ya dan 403 por la regla del creadoPor que manda; L-141 no lo cambia. Arreglo posible: creadoPor = el colaborador en el aviso y que la autorresolución no toque tickets ajenos (o la haga el servidor). Clase: la pone Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -14228,7 +14236,7 @@
    "desde": "2026-10-17 08:58",
    "planTrabajo": "PT-1",
    "grupo": "SRV",
-   "nota": "DA-46 (M-601). N1 col-ajeno-guardado 10/0 (código de hoy 9 FAIL); guion INC-141.spec.js."
+   "nota": "DA-46 (M-601). N1 col-ajeno-guardado 10/0 (código de hoy 9 FAIL); guion INC-141.spec.js. · Revisión previa 1.ª pasada 12/17: pendiente al retomarlo (tras OP-1): citar el cruce de DA-46 (08:54, Chat Diseño) y M-604; inv-movimientos ya es inmutable (409 para todo rol, REQ-INV1 ~L1483–1496): quitarlo de C1/C2 o dejarlo como defensa y corregir § 0 y la derivada c; añadir docs/claude/servidor-php.md al alcance; caso c del guion con perfil oper (el arnés agrupa por perfil); alinear letras de las derivadas; INC-142 aparte."
   }
  ],
  "riesgos": [

@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -55,29 +55,34 @@ function Probar-Y-Juzgar([string]$nombre, [string]$hash) {
     $ultima = (Get-Content -Path $salidaP -Encoding UTF8 -ErrorAction SilentlyContinue | Where-Object { $_ -match '^Pruebas ' } | Select-Object -Last 1)
     Resumen "PRUEBAS | $($nombre) | codigo $codP | $ultima"
     Write-Host "PRUEBAS - $ultima"
-    # v7 (LM-19): juez local. Claude sin navegador, sin red y sin comandos lee instruccion, pruebas.json y capturas
-    # y escribe solo el veredicto. Sonnet; Opus si el lote es critico. Con SIN-JUEZ en la cola no corre.
-    $loteId = $null; if ($nombre -match '^(?:L-)?(\d+)-') { $loteId = 'L-' + $Matches[1] }
-    $pruebasJson = if ($loteId) { Join-Path $Log ($loteId + '-pruebas.json') } else { $null }
-    $juez = Join-Path $Cola 'juez\texto-juez.md'
-    if ($loteId -and (Test-Path $pruebasJson) -and (Test-Path $juez) -and -not (Test-Path (Join-Path $Cola 'SIN-JUEZ'))) {
-      $pr = $null; try { $pr = Get-Content -Raw -Encoding UTF8 $pruebasJson | ConvertFrom-Json } catch { }
-      if ($pr -and ($pr.resultado -eq 'verde' -or $pr.resultado -eq 'rojo')) {
-        $n = 1; $arch = $loteId + '-veredicto.json'
-        while (Test-Path (Join-Path $Log $arch)) { $n++; $arch = $loteId + '-veredicto-' + $n + '.json' }
-        $cabH = (Get-Content -Path (Join-Path $Hechas $nombre) -TotalCount 15 -Encoding UTF8 | Out-String)
-        $modelo = 'sonnet'; if ($cabH -match '(?i)categor[i\u00ed]a[^\r\n]*cr[i\u00ed]tico') { $modelo = 'opus' }
-        $t = Get-Content -Raw -Encoding UTF8 $juez
-        $t = $t.Replace('{LOTE}', $loteId).Replace('{INSTR}', ('hechas\' + $nombre)).Replace('{PRUEBAS}', ('log\' + $loteId + '-pruebas.json')).Replace('{CAPTURAS}', ('log\capturas\' + $loteId)).Replace('{ARCHIVO}', ('log\' + $arch)).Replace('{HASH}', $hash.Substring(0,7))
-        $pj = Join-Path $Log ($loteId + '-juez.md')
-        [IO.File]::WriteAllText($pj, $t, (New-Object System.Text.UTF8Encoding $false))
-        $salidaJ = Join-Path $Log ($loteId + '-juez.txt')
-        $promptJ = 'Lee el archivo log\' + $loteId + '-juez.md y sigue esas instrucciones.'
-        Push-Location $Cola
-        (& $Claude -p $promptJ --model $modelo --permission-mode default --strict-mcp-config --allowedTools 'Read' 'Glob' 'Grep' ('Edit(./log/' + $arch + ')') --disallowedTools 'Bash' 'WebFetch' 'WebSearch' 'NotebookEdit' --output-format text 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaJ -Encoding UTF8
-        Pop-Location
-        if (Test-Path (Join-Path $Log $arch)) { Resumen "JUEZ | $($nombre) | $modelo | $arch" } else { Resumen "JUEZ | $($nombre) | $modelo | sin veredicto: ver log\$loteId-juez.txt" }
-      }
+    Juzgar $nombre $hash
+  }
+}
+
+# v8 (LM-47b, 17-oct-2026): el juez como funcion propia; lo usan Probar-Y-Juzgar y rejuzgar\ (solo juez, sin repetir pruebas).
+function Juzgar([string]$nombre, [string]$hash) {
+  # v7 (LM-19): juez local. Claude sin navegador, sin red y sin comandos lee instruccion, pruebas.json y capturas
+  # y escribe solo el veredicto. Sonnet; Opus si el lote es critico. Con SIN-JUEZ en la cola no corre.
+  $loteId = $null; if ($nombre -match '^(?:L-)?(\d+)-') { $loteId = 'L-' + $Matches[1] }
+  $pruebasJson = if ($loteId) { Join-Path $Log ($loteId + '-pruebas.json') } else { $null }
+  $juez = Join-Path $Cola 'juez\texto-juez.md'
+  if ($loteId -and (Test-Path $pruebasJson) -and (Test-Path $juez) -and -not (Test-Path (Join-Path $Cola 'SIN-JUEZ'))) {
+    $pr = $null; try { $pr = Get-Content -Raw -Encoding UTF8 $pruebasJson | ConvertFrom-Json } catch { }
+    if ($pr -and ($pr.resultado -eq 'verde' -or $pr.resultado -eq 'rojo')) {
+      $n = 1; $arch = $loteId + '-veredicto.json'
+      while (Test-Path (Join-Path $Log $arch)) { $n++; $arch = $loteId + '-veredicto-' + $n + '.json' }
+      $cabH = (Get-Content -Path (Join-Path $Hechas $nombre) -TotalCount 15 -Encoding UTF8 | Out-String)
+      $modelo = 'sonnet'; if ($cabH -match '(?i)categor[i\u00ed]a[^\r\n]*cr[i\u00ed]tico') { $modelo = 'opus' }
+      $t = Get-Content -Raw -Encoding UTF8 $juez
+      $t = $t.Replace('{LOTE}', $loteId).Replace('{INSTR}', ('hechas\' + $nombre)).Replace('{PRUEBAS}', ('log\' + $loteId + '-pruebas.json')).Replace('{CAPTURAS}', ('log\capturas\' + $loteId)).Replace('{ARCHIVO}', ('log\' + $arch)).Replace('{HASH}', $hash.Substring(0,7)).Replace('{HORA}', (Get-Date -Format 'HH:mm')).Replace('{FECHA}', (Get-Date -Format 'yyyy-MM-dd'))
+      $pj = Join-Path $Log ($loteId + '-juez.md')
+      [IO.File]::WriteAllText($pj, $t, (New-Object System.Text.UTF8Encoding $false))
+      $salidaJ = Join-Path $Log ($loteId + '-juez.txt')
+      $promptJ = 'Lee el archivo log\' + $loteId + '-juez.md y sigue esas instrucciones.'
+      Push-Location $Cola
+      (& $Claude -p $promptJ --model $modelo --permission-mode default --strict-mcp-config --allowedTools 'Read' 'Glob' 'Grep' ('Edit(./log/' + $arch + ')') --disallowedTools 'Bash' 'WebFetch' 'WebSearch' 'NotebookEdit' --output-format text 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaJ -Encoding UTF8
+      Pop-Location
+      if (Test-Path (Join-Path $Log $arch)) { Resumen "JUEZ | $($nombre) | $modelo | $arch" } else { Resumen "JUEZ | $($nombre) | $modelo | sin veredicto: ver log\$loteId-juez.txt" }
     }
   }
 }
@@ -164,6 +169,24 @@ try {
     } else { Resumen "REPROBAR | $nomR | no esta en hechas; se ignora" }
     $destR = Join-Path $Reprobar 'hechos'; if (-not (Test-Path $destR)) { New-Item -ItemType Directory -Path $destR | Out-Null }
     Move-Item -Path $rp.FullName -Destination (Join-Path $destR ($rp.BaseName + '.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
+  }
+
+  # v8 (LM-47b): rejuzgar\<L-n o archivo de hechas sin .md>.txt -> corre SOLO el juez sobre el ultimo log\L-n-pruebas.json,
+  # sin repetir pruebas (p. ej. tras cambiar las reglas del juez). El .txt pasa a rejuzgar\hechos\ con la hora.
+  $Rejuzgar = Join-Path $Cola 'rejuzgar'
+  foreach ($rj in @(Get-ChildItem -Path $Rejuzgar -Filter '*.txt' -File -ErrorAction SilentlyContinue)) {
+    $nomJ = $rj.BaseName + '.md'
+    if (-not (Test-Path (Join-Path $Hechas $nomJ))) {
+      $candJ = @(Get-ChildItem -Path $Hechas -Filter ($rj.BaseName + '-instr-*.md') -File -ErrorAction SilentlyContinue)
+      if ($candJ.Count -eq 1) { $nomJ = $candJ[0].Name }
+    }
+    if (Test-Path (Join-Path $Hechas $nomJ)) {
+      $hJ = (git rev-parse HEAD 2>$null | Select-Object -First 1).Trim()
+      Resumen "REJUZGAR | $nomJ | pedido con rejuzgar\$($rj.Name)"
+      Juzgar $nomJ $hJ
+    } else { Resumen "REJUZGAR | $nomJ | no esta en hechas; se ignora" }
+    $destJ = Join-Path $Rejuzgar 'hechos'; if (-not (Test-Path $destJ)) { New-Item -ItemType Directory -Path $destJ | Out-Null }
+    Move-Item -Path $rj.FullName -Destination (Join-Path $destJ ($rj.BaseName + '.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
   }
 
   # v7.2 (B7, LM-16/LM-20): modelo-cargas\MIGRAR o modelo-cargas\paquete-*.json -> pw\modelo-llamar.js (token de

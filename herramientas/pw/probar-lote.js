@@ -14,7 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { BASE, COLA, abrir, explicarError, recuperarSesion } = require('./comun');   // v0.5.32: recuperarSesion
+const { BASE, COLA, abrir, explicarError, recuperarSesion, recuperarConChrome } = require('./comun');   // v0.5.32: recuperarSesion
 const { extraerGuion, igual, loteDe, correrGuion, cargar, horaBogota } = require('./guion');
 const { comprobarSemilla } = require('./semilla');
 
@@ -205,7 +205,53 @@ function mensajeSesion(perfil, intentos) {
 async function sesionViva(perfil, opciones = {}) {
   const intentos = [await sesionUnaVez(perfil)];
   if (!intentos[0].ok && intentos[0].caso === 'api-me') { await new Promise((r) => setTimeout(r, opciones.espera == null ? 3000 : opciones.espera)); intentos.push(await sesionUnaVez(perfil)); }
-  return mensajeSesion(perfil, intentos);
+  const res = mensajeSesion(perfil, intentos);
+  // v0.8.0 (LM-51): sesión de Google perdida y recuperarSesion no pudo → Chrome normal del perfil 25 s (como abrir-perfil.js)
+  if (!res.ok && res.caso === 'google' && !opciones.sinChrome) {
+    const rc = await recuperarConChrome(perfil, (pf) => sesionViva(pf, Object.assign({}, opciones, { sinChrome: true })));
+    if (rc.ok) return { ok: true, caso: 'ok', observado: rc.observado, recuperada: 'chrome' };
+    return { ok: false, caso: 'google', observado: res.observado + ' · ' + rc.observado };
+  }
+  return res;
+}
+
+// v0.8.0 (LM-51): corre un guion cuidando la sesión de sus perfiles. Si un caso cae en login (rc.sinSesion, guion.js),
+// recupera ese perfil (sesionViva: Firebase y, si no, Chrome normal) y repite el guion UNA vez. Un perfil que no se
+// recupera queda en estado.caidos: sus casos de este y de los guiones siguientes no se corren y salen ok:false con
+// sinSesion (entorno). estado = { caidos: Set, recuperadas: [], perdidas: [] }. Lo usan la regresión, el guion propio y tren.js.
+function saltarCaidos(sp, estado) {
+  const saltados = [];
+  sp.casos = (sp.casos || []).filter((c) => {
+    const pf = c.perfil || 'admin';
+    if (!estado.caidos.has(pf)) return true;
+    saltados.push({ c: c.c, nivel: c.nivel || 'N2', perfil: pf, pagina: c.pagina, que: c.que, ok: false, sinSesion: true, observado: 'no se corrió: la sesión de ' + pf + ' se perdió y no se recuperó (entorno, LM-51)' });
+    return false;
+  });
+  return saltados;
+}
+async function correrConSesion(sp, opts, estado, nombre, deps = {}) {
+  const correr = deps.correr || correrGuion, comprobar = deps.sesion || sesionViva;
+  let saltados = saltarCaidos(sp, estado);
+  let rr = sp.casos.length ? await correr(sp, opts) : { casos: [], limpieza: 'sin casos (perfiles sin sesión)', perfiles: [] };
+  const perdidos = [...new Set(rr.casos.filter((x) => x.sinSesion).map((x) => x.perfil || 'admin'))];
+  if (perdidos.length) {
+    let alguno = false;
+    for (const pf of perdidos) {
+      const s = await comprobar(pf);
+      if (s.ok) { alguno = true; estado.recuperadas.push({ perfil: pf, guion: nombre, hora: horaBogota(), observado: s.observado }); }
+      else { estado.caidos.add(pf); estado.perdidas.push({ perfil: pf, guion: nombre, hora: horaBogota(), observado: s.observado }); }
+    }
+    if (alguno) {
+      saltados = saltados.concat(saltarCaidos(sp, estado));
+      if (sp.casos.length) { rr = await correr(sp, opts); rr.casos.forEach((x) => { x.repetidoPorSesion = true; }); }
+      else rr = { casos: [], limpieza: rr.limpieza, perfiles: rr.perfiles };
+    } else {
+      // nadie se recuperó: los casos de esos perfiles quedan como «sin sesión», el resto tal cual
+      rr.casos = rr.casos.map((x) => (estado.caidos.has(x.perfil || 'admin') && x.ok === false) ? Object.assign(x, { sinSesion: true }) : x);
+    }
+  }
+  rr.casos = rr.casos.concat(saltados);
+  return rr;
 }
 
 // v0.6.4 (LM-45, cruce de Carlos 16-oct): una nueva prueba del MISMO commit no repite lo que ya pasó en verde con ese commit.
@@ -246,6 +292,7 @@ async function main() {
   const entra = (c, ok, observado) => { out.entrada.push({ c, ok, observado }); console.log((ok ? 'OK  ' : 'NO  ') + 'P4 ' + c + ' · ' + observado); return ok; };
   const fin = (resultado, causa) => {
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
+    if (out.sesiones && out.sesiones.caidos instanceof Set) out.sesiones = { recuperadas: out.sesiones.recuperadas, perdidas: out.sesiones.perdidas, caidos: [...out.sesiones.caidos] };   // LM-51
     fs.writeFileSync(path.join(COLA, 'log', lote + '-pruebas.json'), JSON.stringify(out, null, 1));
     console.log('Pruebas ' + lote + ': ' + resultado + (causa ? ' - ' + causa : '') + ' - log\\' + lote + '-pruebas.json');
     process.exit(resultado === 'verde' ? 0 : 1);
@@ -332,8 +379,10 @@ async function main() {
   out.zonasRegresion = { zonas: [], motivo: 'v0.6.0: la regresion se elige por ' + sel.modo + ' (ver regresionSeleccion)' };   // compatibilidad con el juez
   console.log('regresion (' + sel.modo + '): corren ' + (sel.corren.length ? sel.corren.map(x => x.archivo.replace('.spec.js', '')).join(', ') : '(ninguno)') + ' · no corren ' + sel.noCorren.length + ' · ' + sel.motivo);
   if (sel.ruta && (sel.ruta.huecos.relaciones.length || sel.ruta.huecos.reglas.length)) console.log('huecos de la ruta: ' + sel.ruta.huecos.relaciones.map(x => x.id).concat(sel.ruta.huecos.reglas.map(x => x.id)).join(', '));
+  const estadoSesion = { caidos: new Set(), recuperadas: [], perdidas: [] };   // v0.8.0 (LM-51)
+  out.sesiones = estadoSesion;
   if (spec) {
-    const r = await correrGuion(spec, { lote, dirGuion: path.dirname(rutaSpec) }); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
+    const r = await correrConSesion(spec, { lote, dirGuion: path.dirname(rutaSpec) }, estadoSesion, 'guion del lote'); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.nivel + ' ' + x.c + ' · ' + x.observado));
   }
   // v0.6.0 (LM-39b, M-524): lote de solo guiones o herramientas → humo-pw dentro de la corrida, como caso n2 «humo»
@@ -347,7 +396,7 @@ async function main() {
   {
     const lista = sel.corren.map(c => (guiones.find(g => g.archivo === c.archivo) || {}).ruta).filter(Boolean);
     for (const f of lista) {
-      try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrGuion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') });   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */ }
+      try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrConSesion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') }, estadoSesion, path.basename(f));   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */ }
       catch (e) { out.regresion.push({ guion: path.basename(f), ok: false, observado: e.message }); }
     }
     out.regresion.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + 'regresion ' + x.guion + ' ' + (x.c || '') + ' · ' + x.observado));
@@ -363,5 +412,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { faseDelLote, anotarTren, mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
+module.exports = { correrConSesion, saltarCaidos, faseDelLote, anotarTren, mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

@@ -291,10 +291,49 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   let big = {}; for (let i = 0; i < 35; i++) big = anotar(big, 'c' + i, 'n1', { ok: true });
   t('LM-45: la memoria guarda solo 30 commits', Object.keys(big).length === 30 && !big.c0 && !!big.c34);
 }
+{ // v0.8.0 (LM-51): la cola recupera sola la sesión caída (Chrome normal del perfil) y repite el guion una vez
+  const { puedeRecuperar, anotarRecuperacion, TOPE_RECUPERAR_MS } = require('./comun');
+  const { esSinSesion } = require('./guion');
+  const { saltarCaidos, correrConSesion } = require('./probar-lote');
+  t('LM-51: sin registro → se puede recuperar', puedeRecuperar([], 'colab', 0));
+  t('LM-51: el mismo perfil hace 29 min → no (tope 30 min)', !puedeRecuperar([{ perfil: 'colab', ms: 0 }], 'colab', 29 * 60000));
+  t('LM-51: el mismo perfil hace 30 min → sí', puedeRecuperar([{ perfil: 'colab', ms: 0 }], 'colab', TOPE_RECUPERAR_MS));
+  t('LM-51: otro perfil reciente no frena', puedeRecuperar([{ perfil: 'admin', ms: 0 }], 'colab', 1000));
+  let reg = []; for (let i = 0; i < 105; i++) reg = anotarRecuperacion(reg, { perfil: 'colab', ms: i });
+  t('LM-51: el registro guarda las últimas 100', reg.length === 100 && reg[0].ms === 5);
+  t('LM-51: login.html en la página → sin sesión', esSinSesion('https://app.x/login.html', [], ''));
+  t('LM-51: login.html en un iframe → sin sesión', esSinSesion('https://app.x/portal.html', ['https://app.x/login.html?v=p5c104'], ''));
+  t('LM-51: «Tu sesión no está activa» en el portal → sin sesión', esSinSesion('https://app.x/portal.html', [], 'Tu sesión no está activa · Iniciar sesión'));
+  t('LM-51: HK normal → no', !esSinSesion('https://app.x/portal.html', ['https://app.x/str-m1-housekeeping.html'], 'Turnos de hoy'));
+  const est0 = { caidos: new Set(['colab']), recuperadas: [], perdidas: [] };
+  const sp0 = { casos: [{ c: 'a', perfil: 'admin' }, { c: 'b', perfil: 'colab' }, { c: 'c' }] };
+  const sal = saltarCaidos(sp0, est0);
+  t('LM-51: saltarCaidos quita los casos del perfil caído y los deja ok:false sinSesion', sp0.casos.map((c) => c.c).join() === 'a,c' && sal.length === 1 && sal[0].c === 'b' && sal[0].ok === false && sal[0].sinSesion === true);
+  global.__lm51 = (async () => {
+    // 1) colab cae en login, se recupera → el guion se repite una vez y quedan los resultados de la repetición
+    let vueltas = 0;
+    const correr = async (sp) => { vueltas++; return { casos: sp.casos.map((c) => ({ c: c.c, perfil: c.perfil, ok: vueltas > 1 || c.perfil !== 'colab', sinSesion: vueltas === 1 && c.perfil === 'colab' })), limpieza: 'ok', perfiles: [] }; };
+    const e1 = { caidos: new Set(), recuperadas: [], perdidas: [] };
+    const r1 = await correrConSesion({ casos: [{ c: 'a', perfil: 'admin' }, { c: 'b', perfil: 'colab' }] }, {}, e1, 'X.spec.js', { correr, sesion: async () => ({ ok: true, observado: 'colab: recuperada' }) });
+    t('LM-51: sesión caída y recuperada → el guion corre 2 veces y queda verde', vueltas === 2 && r1.casos.every((c) => c.ok && c.repetidoPorSesion) && e1.recuperadas.length === 1 && e1.recuperadas[0].guion === 'X.spec.js');
+    // 2) no se recupera → colab queda caído; el guion siguiente no corre sus casos de colab
+    let corridas = [];
+    const correr2 = async (sp) => { corridas.push(sp.casos.map((c) => c.c).join()); return { casos: sp.casos.map((c) => ({ c: c.c, perfil: c.perfil, ok: c.perfil !== 'colab', sinSesion: c.perfil === 'colab' })), limpieza: 'ok', perfiles: [] }; };
+    const e2 = { caidos: new Set(), recuperadas: [], perdidas: [] };
+    const r2 = await correrConSesion({ casos: [{ c: 'a', perfil: 'admin' }, { c: 'b', perfil: 'colab' }] }, {}, e2, 'Y.spec.js', { correr: correr2, sesion: async () => ({ ok: false, observado: 'colab: no' }) });
+    t('LM-51: no se recupera → no repite, colab caído y su caso sinSesion', corridas.length === 1 && e2.caidos.has('colab') && r2.casos.find((c) => c.c === 'b').sinSesion === true && e2.perdidas.length === 1);
+    const r3 = await correrConSesion({ casos: [{ c: 'x', perfil: 'colab' }, { c: 'y', perfil: 'oper' }] }, {}, e2, 'Z.spec.js', { correr: correr2, sesion: async () => ({ ok: false }) });
+    t('LM-51: guion siguiente: solo corre oper; colab sale «no se corrió»', corridas[1] === 'y' && r3.casos.find((c) => c.c === 'x').ok === false && /no se corrió/.test(r3.casos.find((c) => c.c === 'x').observado));
+    // 3) sin caídas → corre una vez y no toca nada
+    let v3 = 0;
+    const r4 = await correrConSesion({ casos: [{ c: 'a' }] }, {}, { caidos: new Set(), recuperadas: [], perdidas: [] }, 'W', { correr: async (sp) => { v3++; return { casos: [{ c: 'a', ok: true }], limpieza: 'ok', perfiles: [] }; }, sesion: async () => { throw new Error('no debía'); } });
+    t('LM-51: lote sin caídas → una corrida, sin repetidos', v3 === 1 && !r4.casos[0].repetidoPorSesion);
+  })();
+}
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];
   const ctx = { pages: () => [{ close: async () => { orden.push('pagina'); } }, { close: async () => { throw new Error('ya cerrada'); } }], close: async () => { orden.push('ctx'); } };
-  cerrarSuave(ctx).then((h) => { t('cerrarSuave: páginas antes que el contexto', orden.join(',') === 'pagina,ctx'); t('cerrarSuave: devuelve HH:MM:SS', /^\d\d:\d\d:\d\d$/.test(h)); console.log(ok + ' OK, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0); });
+  Promise.resolve(global.__lm51).then(() => cerrarSuave(ctx)).then((h) => { t('cerrarSuave: páginas antes que el contexto', orden.join(',') === 'pagina,ctx'); t('cerrarSuave: devuelve HH:MM:SS', /^\d\d:\d\d:\d\d$/.test(h)); console.log(ok + ' OK, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0); });
 }
 

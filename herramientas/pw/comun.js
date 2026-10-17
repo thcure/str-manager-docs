@@ -1,4 +1,5 @@
 // comun.js - verificador local (Playwright) del STR (B10-1, LM-17; lo mantiene el Arquitecto).
+// v0.8.0 (LM-51): recuperarConChrome: la sesión caída de un perfil se recupera abriendo su Chrome normal 25 s (sin Carlos).
 // Perfiles persistentes de prueba en pw\perfiles-chrome\<usuario>\ (cookies del STR); nunca el perfil de Carlos.
 // v0.2 (12-oct): usa el Chrome instalado (channel 'chrome'), no el Chromium de Playwright: Google no deja iniciar sesion
 // en un navegador automatizado, asi que el inicio de sesion se hace en Chrome normal (abrir-perfil.js) y Playwright
@@ -355,4 +356,61 @@ async function recuperarSesion(ctx, page, perfil) {
   finally { RECUPERANDO.activo = false; }
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError, recuperarSesion, RECUPERANDO, HOSTS_IDENTIDAD };
+
+// v0.8.0 (LM-51, cruce de Carlos 17-oct-2026 «dale»): si la sesión de un perfil cayó y recuperarSesion() no pudo (Google
+// frena el inicio de sesión en el Chrome automatizado), la cola hace lo mismo que Carlos con abrir-perfil.js: abre el
+// Chrome NORMAL con ese perfil (sin automatización), espera a que se autentique solo con la cuenta de Google del perfil,
+// lo cierra y comprueba la sesión sin ventana. Nunca teclea ni lee nada en ese Chrome. Tope: una por perfil cada 30 min.
+function rutaChrome() {
+  const fs = require('fs');
+  const c = [
+    path.join(process.env['ProgramFiles'] || 'C:\\Program Files', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    path.join(process.env['LOCALAPPDATA'] || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+  ];
+  return c.find((x) => x && fs.existsSync(x)) || null;
+}
+const TOPE_RECUPERAR_MS = 30 * 60000;
+// Pura: ¿se puede recuperar este perfil ahora? (la última recuperación con Chrome de ese perfil fue hace más del tope)
+function puedeRecuperar(registro, perfil, ahoraMs, topeMs = TOPE_RECUPERAR_MS) {
+  const ult = (Array.isArray(registro) ? registro : []).filter((x) => x && x.perfil === perfil).map((x) => x.ms).filter((n) => typeof n === 'number');
+  if (!ult.length) return true;
+  return ahoraMs - Math.max(...ult) >= topeMs;
+}
+// Pura: agrega la recuperación al registro (se guardan las últimas 100).
+function anotarRecuperacion(registro, entrada) { return (Array.isArray(registro) ? registro : []).concat([entrada]).slice(-100); }
+function cerrarProceso(proc) {
+  if (!proc || proc.exitCode != null) return;
+  try {
+    if (process.platform === 'win32') require('child_process').spawnSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], { stdio: 'ignore' });
+    else proc.kill('SIGKILL');
+  } catch (e) { }
+}
+// comprobar(perfil) → { ok, observado } (lo pasa quien llama: sesionViva sin recuperación con Chrome, para no dar vueltas).
+async function recuperarConChrome(perfil, comprobar, opciones = {}) {
+  const fs = require('fs');
+  const rutaReg = path.join(COLA, 'log', 'sesiones-recuperadas.json');
+  let reg = []; try { reg = JSON.parse(fs.readFileSync(rutaReg, 'utf8')); } catch (e) { }
+  const ahora = Date.now();
+  if (!opciones.sinTope && !puedeRecuperar(reg, perfil, ahora)) return { ok: false, observado: perfil + ': ya se intentó recuperar con Chrome hace menos de 30 min (tope LM-51)' };
+  const chrome = rutaChrome();
+  if (!chrome) return { ok: false, observado: perfil + ': no encontré chrome.exe para recuperar la sesión' };
+  const espera = opciones.esperaMs == null ? 25000 : opciones.esperaMs;
+  const intentos = [];
+  let fin = { ok: false, observado: '' };
+  for (let i = 1; i <= 2; i++) {
+    const proc = require('child_process').spawn(chrome, ['--user-data-dir=' + dirPerfil(perfil), '--no-first-run', '--no-default-browser-check', '--new-window', BASE + '/login.html'], { stdio: 'ignore', detached: false });
+    await new Promise((r) => setTimeout(r, espera));
+    cerrarProceso(proc);
+    await new Promise((r) => setTimeout(r, 3000));   // que Chrome suelte el perfil antes de abrirlo con Playwright
+    fin = await comprobar(perfil);
+    intentos.push((fin.ok ? 'ok' : 'no') + ': ' + String(fin.observado || '').slice(0, 160));
+    if (fin.ok) break;
+  }
+  const entrada = { perfil, ms: ahora, hora: new Date(ahora).toISOString(), ok: !!fin.ok, intentos };
+  try { fs.mkdirSync(path.dirname(rutaReg), { recursive: true }); fs.writeFileSync(rutaReg, JSON.stringify(anotarRecuperacion(reg, entrada), null, 1)); } catch (e) { }
+  return fin.ok ? { ok: true, observado: perfil + ': sesión recuperada abriendo el Chrome normal del perfil ' + Math.round(espera / 1000) + ' s (LM-51, sin teclear nada; ' + intentos.length + ' intento' + (intentos.length > 1 ? 's' : '') + ')' }
+    : { ok: false, observado: perfil + ': tampoco se recuperó con el Chrome normal del perfil (LM-51; ' + intentos.join(' / ') + ')' };
+}
+
+module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError, recuperarSesion, RECUPERANDO, HOSTS_IDENTIDAD, rutaChrome, puedeRecuperar, anotarRecuperacion, recuperarConChrome, TOPE_RECUPERAR_MS };

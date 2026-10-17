@@ -2,6 +2,8 @@
 // porque Google rechaza el inicio de sesion en un navegador controlado por Playwright). La sesion queda en
 // pw\perfiles-chrome\<usuario> y Playwright la reutiliza despues.
 // Uso: node abrir-perfil.js admin | oper | colab | colab2   [--forzar]
+// v3 (LM-51, 17-oct): la comprobación ya intenta sola la recuperación con el Chrome normal del perfil (recuperarConChrome);
+// solo si eso también falla se abre la ventana. Uso igual.
 // v2 (LM-46, M-576, 16-oct): antes de abrir la ventana comprueba la sesión sin ventana (la misma puerta de la cola, dos
 // intentos). Si ya hay sesión, lo dice y NO abre nada; con --forzar abre igual. Si la puerta no puede usar el perfil
 // (p. ej. la cola lo está usando), lo dice y abre como antes.

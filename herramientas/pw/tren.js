@@ -1,4 +1,4 @@
-// tren.js - fase 2 de LM-49 (pruebas por fases, cruce de Carlos 17-oct-2026). Lo mantiene el Arquitecto.
+// tren.js (v2, LM-51: los guiones corren con correrConSesion: sesión caída → recuperar y repetir una vez) - fase 2 de LM-49 (pruebas por fases, cruce de Carlos 17-oct-2026). Lo mantiene el Arquitecto.
 // Corre UNA vez la regresión que la fase 1 de varios lotes dejó diferida en log\tren-pendiente.json: une los guiones de
 // todos los lotes, comprueba las sesiones de los perfiles que van a correr, corre cada guion una sola vez (sin N3) y deja
 // log\TREN-<AAAAMMDD-HHMM>.json con cada caso y los lotes que lo pidieron. No juzga ni acepta: un rojo es un INC que se
@@ -12,7 +12,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { COLA } = require('./comun');
 const { correrGuion, cargar, horaBogota } = require('./guion');
-const { cargarGuiones, sesionViva } = require('./probar-lote');
+const { cargarGuiones, sesionViva, correrConSesion } = require('./probar-lote');
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
 const leer = (r, d) => { try { return JSON.parse(fs.readFileSync(r, 'utf8')); } catch (e) { return d; } };
@@ -38,8 +38,10 @@ async function main() {
   const id = 'TREN-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + horaBogota().slice(0, 5).replace(':', '');
   const commit = (spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: repo, encoding: 'utf8' }).stdout || '').trim() || null;
   const out = { tren: id, proceso: 'LM-49 fase 2', commit, inicio: new Date().toISOString(), lotes: pendiente.map((e) => e.lote), guiones: union, entrada: [], regresion: [], limpieza: [], resultado: null, causa: null };
+  const estadoSesion = { caidos: new Set(), recuperadas: [], perdidas: [] };   // LM-51: sesión caída a mitad del tren
   const fin = (resultado, causa, vaciar) => {
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
+    out.sesiones = { recuperadas: estadoSesion.recuperadas, perdidas: estadoSesion.perdidas, caidos: [...estadoSesion.caidos] };
     fs.writeFileSync(path.join(dirLog, id + '.json'), JSON.stringify(out, null, 1));
     if (vaciar) {
       const hist = leer(path.join(dirLog, 'tren-historial.json'), []);
@@ -63,7 +65,7 @@ async function main() {
   for (const x of lista.filter((y) => y.g)) {
     try {
       const sp = cargar(x.g.ruta); sp.casos = (sp.casos || []).filter((c) => c.nivel !== 'N3');
-      const rr = await correrGuion(sp, { lote: id, prefijo: 'zz-verif-' + id + '-r-', dirGuion: path.dirname(x.g.ruta), nombreGuion: x.archivo.replace(/\.spec\.js$/, '') });
+      const rr = await correrConSesion(sp, { lote: id, prefijo: 'zz-verif-' + id + '-r-', dirGuion: path.dirname(x.g.ruta), nombreGuion: x.archivo.replace(/\.spec\.js$/, '') }, estadoSesion, x.archivo);   // LM-51
       rr.casos.forEach((c) => out.regresion.push(Object.assign({ guion: x.archivo, lotes: x.lotes }, c)));
       out.limpieza.push({ guion: x.archivo, limpieza: rr.limpieza });
     } catch (e) { out.regresion.push({ guion: x.archivo, lotes: x.lotes, ok: false, observado: e.message }); }

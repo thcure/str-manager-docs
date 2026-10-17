@@ -87,6 +87,15 @@ async function cerrarSuave(ctx) {
   await ctx.close().catch(() => { });
   return horaBogota();
 }
+// v0.8.0 (LM-51): ¿el caso cayó en la pantalla de inicio de sesión? (la página o un iframe en login.html, o los textos de
+// login del STR y del portal). Pura. Lo usa probar-lote para recuperar la sesión del perfil y repetir el guion una vez.
+const TEXTOS_SIN_SESION = ['Acceso interno', 'Continuar con Google', 'Tu sesión no está activa'];
+function esSinSesion(url, urlsMarcos, texto) {
+  const enLogin = (u) => /\/login\.html(\?|#|$)/.test(String(u || ''));
+  if (enLogin(url) || (urlsMarcos || []).some(enLogin)) return true;
+  const tx = String(texto || '');
+  return TEXTOS_SIN_SESION.some((s) => tx.includes(s));
+}
 function cerrarCaso(caso, esperas, error, bloqueos, capturas = [], pasaron = []) {
   const n3 = caso.nivel === 'N3';
   const fallan = esperas.filter(e => !e.ok);
@@ -194,6 +203,14 @@ async function correrGuion(spec, opciones = {}) {
         // v0.5.30 (M-487): orden real de ejecución y hora de cierre (Bogotá), porque los casos corren agrupados por perfil
         // y un caso que depende de otro de un perfil posterior corre ANTES de él: el juez lo ve aquí sin deducirlo.
         rc.orden = resultados.length + 1; rc.hora = horaBogota();
+        if (rc.ok === false) {   // v0.8.0 (LM-51): marca el caso que cayó en login (sesión del perfil perdida)
+          try {
+            let tx = ''; try { tx = await page.innerText('body', { timeout: 2000 }); } catch (e3) { }
+            const marcos = page.frames().filter((f) => f !== page.mainFrame()).map((f) => f.url());
+            for (const f of page.frames()) { if (f === page.mainFrame()) continue; try { tx += '\n' + await f.innerText('body', { timeout: 1500 }); } catch (e4) { } }
+            if (esSinSesion(page.url(), marcos, tx)) rc.sinSesion = true;
+          } catch (e5) { }
+        }
         resultados.push(rc);
         await page.close().catch(() => { });
       }
@@ -234,7 +251,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
+module.exports = { esSinSesion, extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

@@ -880,6 +880,15 @@
    "severidad": "medio",
    "prioridad": "P0",
    "nota": "Veredicto L-145 (16:30). Desde 16:14 HK del admin/oper no puede escribir su copia local: Inventario con 4474 movimientos zz-verif- acumulados de las corridas del día, más str-col-backup-v1 y lastpush. Entorno de pruebas (frena un lote de producto: P1 por la regla 4 de LM-48). Ojo de producto: el mismo tope lo alcanzaría un admin u operador real si los movimientos crecen así (HK guarda todos en el teléfono); vale una DT para acotar la copia local. Consulta al Arquitecto M-650. · 16:38 cache-perfiles (Arquitecto 16:36) bajó admin/oper a ~5 MB, pero str-inv-movimientos-v1 queda en ~4,6 MB y lastpush guarda otra copia completa (HK ~L3534): se vuelve a llenar en la primera corrida. Propuesta de DT de producto (lastpush de movimientos solo con ids; copia local acotada) en M-651. · 16:46 Diseño: P0 (M-652). Lote L-146 redactado (copia de diff de movimientos solo con ids + aviso de almacenamiento lleno); revisión previa en curso."
+  },
+  {
+   "id": "INC-147",
+   "fecha": "2026-10-17",
+   "titulo": "Regresión de L-146 cortada por caída de internet en LENOVO (net::ERR_INTERNET_DISCONNECTED en page.goto, 17:11–17:13); antes, puerta bloqueada por DNS (17:00)",
+   "estado": "abierto",
+   "severidad": "menor",
+   "prioridad": "P3",
+   "nota": "Entorno, no producto: ningún caso llegó a ejecutar código. Dos cortes de red en 15 min. Se cierra con la reprueba de L-146 en verde. Si se repite, pedir a Carlos revisar la conexión de LENOVO."
   }
  ],
  "dts": [
@@ -13191,6 +13200,380 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "pruebas.json › resultado: «rojo»; causa: «fallan: REQ-INV2-4-2-dif.spec.js f, REQ-INV2-4-2-dif.spec.js g, REQ-INV2-4-2-dif.spec.js i, REQ-INV2-4-2.spec.js n, REQ-INV2-7-1-hk-turno.spec.js a, REQ-INV2-7-1-hk-turno.spec.js b, REQ-INV2-7-1-hk-turno.spec.js c, REQ-INV2-7-1-hk-turno.spec.js d, REQ-K3b-aviso.spec.js b, REQ-K3b-aviso.spec.js c, REQ-K3b-aviso.spec.js d, REQ-K3c-vista.spec.js b, REQ-K3c-vista.spec.js c, REQ-K3c-vista.spec.js d, REQ-K3c-vista.spec.js i, REQ-K3c.spec.js b, REQ-K3c.spec.js c, REQ-K3c.spec.js d, REQ-OP-1.spec.js a, REQ-OP-1.spec.js i, REQ-OP-1.spec.js b, REQ-OP-1.spec.js c, REQ-OP-1.spec.js d». Los criterios propios del lote (a, b, c, d) y N1 (89/89) están en verde; no hay N3 ni N4 en la instrucción (n3Preparados vacío). La regla de regresión ajena (LM-47b) no aplica: falla la condición 4 (la mayoría de los rojos son de /str-m1-housekeeping.html o /portal.html, que están en el Alcance) y no son preexistentes (L-144 y L-143 salieron «verde»). Campo herramienta: la mayoría de los rojos comparten QuotaExceededError del almacenamiento local del navegador (entorno) y su cascada; repetir la corrida con los perfiles limpios antes de culpar al lote. Fase completa (lote crítico), nada diferido. Sesiones: ninguna perdida ni caída. Semilla «no concluyente» (zonas sin respuesta; avisos que solo bloquean a L-86/L-101/L-103). INC-127 c: la guardia cortó 1 PUT de reservas sin zz-verif- (caso en verde). Deuda de cobertura (regresionSeleccion.ruta.huecos): REL-30 (HK→KN); RT-10, RT-11, RT-15; a declarar: REL-20."
    }
+  },
+  {
+   "lote": "L-146",
+   "fecha": "2026-10-17",
+   "req": "INC-146",
+   "categoria": "normal",
+   "resumen": "INC-146 (P0): la copia de diff de HK guarda de los movimientos solo el id; aviso de almacenamiento lleno en la capa común",
+   "estado": "no aceptado",
+   "hash": "c035328",
+   "observacion": "Construido c035328 (?v= p5c108; run.js 90/90). Pruebas 17:01–17:13: guion propio a–b verde (copia de diff 243–324 KB, antes ~4,9 MB; sin aviso), N1 c–d verde; regresión 80 rojos, todos page.goto net::ERR_INTERNET_DISCONNECTED desde las 17:11 (se cayó la red de LENOVO). 34 en HK/Inventario (Alcance) → LM-47b no aplica. Juez 17:13: no aceptado, campo herramienta. Cruce veredicto/pruebas hecho por Desarrollo (80/80). Causa: INC-147 (entorno). Siguiente: reprobar con la red arriba.",
+   "aceptacion": {
+    "lote": "L-146",
+    "hash": "c035328",
+    "fecha": "2026-10-17",
+    "horaBogota": "17:13",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: admin: copia de diff de movimientos solo con ids: sí (4523 movimientos) | si: admin: almacenamiento 4354 KB en total · copia de diff 324 KB · movimientos 3273 KB | si: admin: aviso de almacenamiento lleno en la página: no"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: operador: copia de diff de movimientos solo con ids: sí (4523 movimientos) | si: operador: almacenamiento 4266 KB en total · copia de diff 243 KB · movimientos 3273 KB | si: operador: aviso de almacenamiento lleno en la página: no"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 90/90 archivos OK (ya en verde con este commit a las 16:57:39; no se repite, LM-45) — cubre B1, B4–B7 y push-borrados.test.js"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "mismo N1 que el criterio c (90/90 archivos OK) — cubre A3, C1, C2"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [
+     {
+      "guion": "REQ-INV2-4-1-interfaz.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "g",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "h",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "i",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "j",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "k",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "l",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "m",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk-turno.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk-turno.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk-turno.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk.spec.js",
+      "c": "h",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1.spec.js",
+      "c": "f",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b-aviso.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b-aviso.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b-aviso.spec.js",
+      "c": "e2",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c-vista.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c-vista.spec.js",
+      "c": "f",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c-vista.spec.js",
+      "c": "i",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1.spec.js",
+      "c": "g",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1b.spec.js",
+      "c": "a",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1b.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1b.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1b.spec.js",
+      "c": "h",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-OP-1b.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "a",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "f",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "g",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "h",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-SH-2.spec.js",
+      "c": "b2",
+      "motivo": "a",
+      "evidencia": "net::ERR_INTERNET_DISCONNECTED en page.goto",
+      "inc": "nuevo"
+     }
+    ],
+    "datosDePrueba": "ninguno (el guion solo lee) — pruebas.json › limpieza: \"sin limpiar() en el guion\"",
+    "notas": "pruebas.json dice resultado: \"rojo\"; causa: 80 casos de regresión fallan, todos por page.goto → net::ERR_INTERNET_DISCONNECTED entre las 17:11:13 y las 17:13:00 (se cayó la conexión a internet del entorno de pruebas a mitad de la regresión; no es un fallo de la app ni de este lote — ningún caso llegó a ejecutar código). Los 4 criterios propios del lote (a, b por N2; c, d por N1) están en verde. De los 80 casos rojos, 46 son de guiones/páginas fuera del Alcance (portal.html, str-app-shell.html, str-tablero.html) y cumplen las 4 condiciones de regla ajena (LM-47b): van a regresionAjena. Los otros 34 caen en str-m1-housekeeping.html o str-inventario.html, que SÍ están en el Alcance de este lote (H1–H7, I1): por la condición 4 de LM-47b (\"si el lote cambió str-m1-housekeeping.html y cae un caso de HK, no aplica\") no pueden excusarse, y por LM-50 eso basta para que \"el lote no se acepta\" aunque la causa (net::ERR_INTERNET_DISCONNECTED) sea la misma caída de red. No se abren INC: por M-472/el párrafo de net::ERR_* en page.goto, estos 80 casos son cascada del arnés/entorno, no evidencia de un defecto de producto. herramienta: la corrida de regresión se cortó por una caída de conectividad a internet del entorno (net::ERR_INTERNET_DISCONNECTED), no por el código del lote; hay que repetir la regresión con la red restablecida antes de poder aceptar. Deuda de cobertura (regresionSeleccion.ruta.huecos, sin cambiar el resultado): relaciones REL-08, REL-15, REL-21, REL-22, REL-30; reglas RT-10, RT-11, RT-15 — ninguna la toca este lote. Sin sesiones caídas ni perdidas. Sin criterios N3 ni N4 en la instrucción.",
+    "herramienta": "la conexión a internet del entorno de pruebas se cayó durante la regresión (net::ERR_INTERNET_DISCONNECTED en page.goto) entre las 17:11:13 y las 17:13:00, afectando los 80 casos de regresión posteriores a ese punto"
+   }
   }
  ],
  "esquema": {
@@ -15376,12 +15759,12 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "INC-146 (P0): la copia de diff de HK guarda de los movimientos solo el id; aviso de almacenamiento lleno en la capa común",
-   "estado": "construido",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 16:46",
+   "desde": "2026-10-17 17:24",
    "grupo": "HK",
-   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas).",
-   "espera": "pruebas y veredicto del juez",
+   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto.",
+   "espera": "reprueba (solo pruebas) y veredicto",
    "esperaA": "Cola",
    "hash": "c035328"
   }

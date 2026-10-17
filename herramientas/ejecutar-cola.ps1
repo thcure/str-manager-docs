@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v10, 17-oct-2026, LM-50: Control-Veredicto compara el veredicto con pruebas.json; un «aceptado» con rojos sin explicar repite el juez una vez con opus y, si sigue, JUEZ-INCONSISTENTE + log\L-n-inconsistente.txt) (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -60,29 +60,69 @@ function Probar-Y-Juzgar([string]$nombre, [string]$hash) {
 }
 
 # v8 (LM-47b, 17-oct-2026): el juez como funcion propia; lo usan Probar-Y-Juzgar y rejuzgar\ (solo juez, sin repetir pruebas).
+# v10 (LM-50, 17-oct-2026): control determinista del veredicto contra pruebas.json. Pura: devuelve los rojos que un
+# «aceptado» deja sin explicar (n1, casos de n2 con ok false, casos de regresion con ok false que no estan en
+# regresionAjena por guion y letra). Sin rojos fuera, o veredicto distinto de «aceptado», devuelve una lista vacia.
+function Control-Veredicto($pr, $ve) {
+  $fuera = @()
+  if (-not $ve -or $ve.resultado -ne 'aceptado') { return ,$fuera }
+  if ($pr.n1 -and ($pr.n1.ok -eq $false)) { $fuera += 'n1' }
+  foreach ($c in @($pr.n2)) { if ($c -and ($c.ok -eq $false)) { $fuera += ('n2 ' + $c.c) } }
+  $aj = @{}
+  foreach ($a in @($ve.regresionAjena)) { if ($a -and $a.guion) { $aj[(([string]$a.guion) -replace '\.spec\.js$', '') + ' ' + $a.c] = $true } }
+  foreach ($c in @($pr.regresion)) {
+    if ($c -and ($c.ok -eq $false)) {
+      $k = (([string]$c.guion) -replace '\.spec\.js$', '') + ' ' + $c.c
+      if (-not $aj.ContainsKey($k)) { $fuera += $k }
+    }
+  }
+  return ,$fuera
+}
+
 function Juzgar([string]$nombre, [string]$hash) {
   # v7 (LM-19): juez local. Claude sin navegador, sin red y sin comandos lee instruccion, pruebas.json y capturas
   # y escribe solo el veredicto. Sonnet; Opus si el lote es critico. Con SIN-JUEZ en la cola no corre.
+  # v10 (LM-50): si el veredicto dice «aceptado» y Control-Veredicto encuentra rojos sin explicar, el juez corre UNA vez
+  # mas con opus y el aviso en su texto (veredicto nuevo; el anterior no se toca). Si sigue inconsistente:
+  # JUEZ-INCONSISTENTE en el resumen y log\L-n-inconsistente.txt: el lote no cuenta como aceptado.
   $loteId = $null; if ($nombre -match '^(?:L-)?(\d+)-') { $loteId = 'L-' + $Matches[1] }
   $pruebasJson = if ($loteId) { Join-Path $Log ($loteId + '-pruebas.json') } else { $null }
   $juez = Join-Path $Cola 'juez\texto-juez.md'
   if ($loteId -and (Test-Path $pruebasJson) -and (Test-Path $juez) -and -not (Test-Path (Join-Path $Cola 'SIN-JUEZ'))) {
     $pr = $null; try { $pr = Get-Content -Raw -Encoding UTF8 $pruebasJson | ConvertFrom-Json } catch { }
     if ($pr -and ($pr.resultado -eq 'verde' -or $pr.resultado -eq 'rojo')) {
-      $n = 1; $arch = $loteId + '-veredicto.json'
-      while (Test-Path (Join-Path $Log $arch)) { $n++; $arch = $loteId + '-veredicto-' + $n + '.json' }
       $cabH = (Get-Content -Path (Join-Path $Hechas $nombre) -TotalCount 15 -Encoding UTF8 | Out-String)
       $modelo = 'sonnet'; if ($cabH -match '(?i)categor[i\u00ed]a[^\r\n]*cr[i\u00ed]tico') { $modelo = 'opus' }
-      $t = Get-Content -Raw -Encoding UTF8 $juez
-      $t = $t.Replace('{LOTE}', $loteId).Replace('{INSTR}', ('hechas\' + $nombre)).Replace('{PRUEBAS}', ('log\' + $loteId + '-pruebas.json')).Replace('{CAPTURAS}', ('log\capturas\' + $loteId)).Replace('{ARCHIVO}', ('log\' + $arch)).Replace('{HASH}', $hash.Substring(0,7)).Replace('{HORA}', (Get-Date -Format 'HH:mm')).Replace('{FECHA}', (Get-Date -Format 'yyyy-MM-dd'))
-      $pj = Join-Path $Log ($loteId + '-juez.md')
-      [IO.File]::WriteAllText($pj, $t, (New-Object System.Text.UTF8Encoding $false))
-      $salidaJ = Join-Path $Log ($loteId + '-juez.txt')
-      $promptJ = 'Lee el archivo log\' + $loteId + '-juez.md y sigue esas instrucciones.'
-      Push-Location $Cola
-      (& $Claude -p $promptJ --model $modelo --permission-mode default --strict-mcp-config --allowedTools 'Read' 'Glob' 'Grep' ('Edit(./log/' + $arch + ')') --disallowedTools 'Bash' 'WebFetch' 'WebSearch' 'NotebookEdit' --output-format text 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaJ -Encoding UTF8
-      Pop-Location
-      if (Test-Path (Join-Path $Log $arch)) { Resumen "JUEZ | $($nombre) | $modelo | $arch" } else { Resumen "JUEZ | $($nombre) | $modelo | sin veredicto: ver log\$loteId-juez.txt" }
+      $aviso = ''
+      for ($vuelta = 1; $vuelta -le 2; $vuelta++) {
+        $n = 1; $arch = $loteId + '-veredicto.json'
+        while (Test-Path (Join-Path $Log $arch)) { $n++; $arch = $loteId + '-veredicto-' + $n + '.json' }
+        $t = Get-Content -Raw -Encoding UTF8 $juez
+        $t = $t.Replace('{LOTE}', $loteId).Replace('{INSTR}', ('hechas\' + $nombre)).Replace('{PRUEBAS}', ('log\' + $loteId + '-pruebas.json')).Replace('{CAPTURAS}', ('log\capturas\' + $loteId)).Replace('{ARCHIVO}', ('log\' + $arch)).Replace('{HASH}', $hash.Substring(0,7)).Replace('{HORA}', (Get-Date -Format 'HH:mm')).Replace('{FECHA}', (Get-Date -Format 'yyyy-MM-dd'))
+        if ($aviso) { $t = $t + "`n`n" + $aviso + "`n" }
+        $pj = Join-Path $Log ($loteId + '-juez.md')
+        [IO.File]::WriteAllText($pj, $t, (New-Object System.Text.UTF8Encoding $false))
+        $salidaJ = Join-Path $Log ($loteId + '-juez.txt')
+        $promptJ = 'Lee el archivo log\' + $loteId + '-juez.md y sigue esas instrucciones.'
+        Push-Location $Cola
+        (& $Claude -p $promptJ --model $modelo --permission-mode default --strict-mcp-config --allowedTools 'Read' 'Glob' 'Grep' ('Edit(./log/' + $arch + ')') --disallowedTools 'Bash' 'WebFetch' 'WebSearch' 'NotebookEdit' --output-format text 2>&1 | ForEach-Object { "$_" }) | Out-File -FilePath $salidaJ -Encoding UTF8
+        Pop-Location
+        if (-not (Test-Path (Join-Path $Log $arch))) { Resumen "JUEZ | $($nombre) | $modelo | sin veredicto: ver log\$loteId-juez.txt"; return }
+        Resumen "JUEZ | $($nombre) | $modelo | $arch"
+        $ve = $null; try { $ve = Get-Content -Raw -Encoding UTF8 (Join-Path $Log $arch) | ConvertFrom-Json } catch { }
+        $fuera = Control-Veredicto $pr $ve
+        if ($fuera.Count -eq 0) { return }
+        $lista = ($fuera -join ', ')
+        if ($vuelta -eq 1) {
+          Resumen "JUEZ-CONTROL | $($nombre) | $arch dice aceptado con rojos sin explicar: $lista | otra vuelta con opus"
+          $modelo = 'opus'
+          $aviso = '## Control de la cola (LM-50)' + "`n" + 'Tu veredicto anterior (log\' + $arch + ') dice «aceptado», pero `' + ('log\' + $loteId + '-pruebas.json') + '` dice `resultado: "' + $pr.resultado + '"` y estos casos estan en rojo y no van en `regresionAjena`: ' + $lista + '. Revisalos uno por uno: van a `regresionAjena` solo si cumplen las cuatro condiciones de la regla de regresion ajena; si no, el resultado es «no aceptado». Escribe el veredicto nuevo en el archivo indicado arriba.'
+        } else {
+          Resumen "JUEZ-INCONSISTENTE | $($nombre) | $arch sigue diciendo aceptado con rojos sin explicar: $lista | no cuenta como aceptado; lo revisa el Arquitecto"
+          $txt = 'LM-50 · ' + (Get-Date -Format 'yyyy-MM-dd HH:mm') + "`r`n" + 'Lote ' + $loteId + ': el veredicto ' + $arch + ' dice aceptado con rojos que no van en regresionAjena: ' + $lista + "`r`n" + 'No cuenta como aceptado hasta que lo revise el Arquitecto.'
+          [IO.File]::WriteAllText((Join-Path $Log ($loteId + '-inconsistente.txt')), $txt, (New-Object System.Text.UTF8Encoding $false))
+        }
+      }
     }
   }
 }

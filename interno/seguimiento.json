@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-17 13:08",
+ "actualizadoEn": "2026-10-17 13:37",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -12931,6 +12931,86 @@
    "aprobacion": "Carlos 17-oct-2026 12:29, chat del Arquitecto («dale»)",
    "estado": "registrado",
    "observacion": "Construido: pw 0.8.0 (comun, guion, probar-lote, tren v2, abrir-perfil v3) y juez v11; pruebas-v1.test.js 153/153. Se instala con la cola vacía."
+  },
+  {
+   "lote": "L-143",
+   "fecha": "2026-10-17",
+   "req": "REQ-OP-1",
+   "categoria": "normal",
+   "resumen": "OP-1b: Tablero como inicio del menú (admin y operador), alertas por urgencia, «Sin turno hoy» y cuarta cifra; sin lecturas con el panel oculto",
+   "estado": "aceptado",
+   "hash": "d5c9791",
+   "observacion": "Encolado 13:04 tras aceptar L-142. Construido d5c9791 (13:04–13:07; run.js 86/86; ?v= p5c105). Pruebas 13:07–13:34: verde, causa null; regresión por ruta 39 guiones / 147 casos sin rojos. Juez 13:34: ACEPTADO, criterios a–i en verde; cruce veredicto/pruebas hecho por Desarrollo (LM-50 instalado). Veredicto en log\\L-143-veredicto.json.",
+   "aceptacion": {
+    "lote": "L-143",
+    "hash": "d5c9791",
+    "fecha": "2026-10-17",
+    "horaBogota": "13:34",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "si: Operación del día: Tablero, Calendario, Limpieza & HK, Inventario | si: inicio: str-tablero.html · marcado «Tablero» · paneles a la vista 1 | si: Tablero cargado dentro del shell: sí · «Sin permiso»: 0"
+     },
+     {
+      "c": "b",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "si: 5 propiedades sin turno hoy: 1 Sin reserva (Lista · sin reservas en los próximos 30 días) | 2 Ocupada (Huésped en casa · noche 2 de 2 · sale mañana 10:30 am) | 3 Ocupada (Huésped en casa · noche 5 de 5 · sale mañana 10:30 am) | 4 Ocupada (Huésped en casa · noche 4 de 6 · sale mar 20-oct 10:30 am) | 5 Ocupada (Huésped en casa · noche 10 de 14 · sale jue 22-oct 10:30 am)"
+     },
+     {
+      "c": "c",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "si: 2 alertas por urgencia: 4 Sin reservas en los próximos 30 días | 4 Sin reservas en los próximos 30 días | si: cifra «Alertas» 2 · alertas en el cuadro 2 | si: alto del cuadro de alertas 240 px · de turnos 240 px"
+     },
+     {
+      "c": "d",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "si: Operación del día del operador: Tablero, Calendario, Limpieza & HK, Inventario | si: Tablero del operador: abierto · cargado sí · «Sin permiso» 0"
+     },
+     {
+      "c": "e",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 86/86 archivos OK (tests/tablero-op.test.js y el caso g de L-142 cubren el 403 al colaborador)"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "En la captura f-tablero-completo: cuatro cifras (Turnos en curso, Bloqueados, Entradas hoy, Alertas: 2 · «2 urgentes»); a la derecha de «Turnos de hoy» el cuadro «Alertas · por urgencia» con marca roja, lugar y hora, título y detalle, con la misma altura que el cuadro de turnos (no más alto); debajo, «Sin turno hoy» con puesto 1 a 5, nombre, motivo en su color (Sin reserva en rojo, Ocupada en verde) y barra con el detalle"
+     },
+     {
+      "c": "g",
+      "nivel": "N1(CSS)+N3",
+      "ok": true,
+      "observado": "si (del guion): página a 390 px: scrollWidth 390 · clientWidth 390. En la captura g-tablero-movil: sin barra lateral; cifras en dos columnas (2x2); cuadros «Turnos de hoy», «Alertas» y «Sin turno hoy» uno debajo del otro"
+     },
+     {
+      "c": "h",
+      "nivel": "N1+N2",
+      "ok": true,
+      "observado": "si: lecturas con el Tablero a la vista: 1 · en 62 s con Limpieza & HK a la vista: 0"
+     },
+     {
+      "c": "i",
+      "nivel": "N1+regresión",
+      "ok": true,
+      "observado": "node tests/run.js: 86/86 archivos OK; regresión por ruta (8 módulos, 39 guiones, 147 casos) sin casos en rojo (pruebas.json: resultado «verde», causa null)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null (confirmado con Grep: ningún \"ok\": false fuera del campo informativo semilla.ok, que es de la puerta de entrada P4, no de los criterios de este lote). Fase completa (no aplica diferido). Deuda de cobertura de la ruta (regresionSeleccion.ruta.huecos), sin cambiar el resultado: relaciones REL-08, REL-22, REL-30; reglas RT-10, RT-11. 4 guiones no corrieron (INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5): ningún caso cubre un nodo de la ruta; no es hueco ni ausencia de evidencia, no se abre INC."
+   }
   }
  ],
  "esquema": {
@@ -15073,15 +15153,15 @@
    "req": "REQ-OP-1",
    "categoria": "normal",
    "resumen": "OP-1b: «Sin turno hoy», alertas, cifra de alertas y la entrada del menú como inicio (data-inicio=1); criterios 7, 8 y 10",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "Cola",
-   "espera": "pruebas y veredicto del juez; luego pausa para LM-51 (M-637)",
+   "esperaA": "Arquitecto",
+   "espera": "la cola no recibe lotes hasta que el Arquitecto confirme LM-51 instalado (M-637)",
    "orden": 121.5231,
    "desde": "2026-10-17 09:52",
    "planTrabajo": "PT-1",
    "grupo": "OP",
-   "nota": "Partición LM-47 J4 (M-608). Ajusta REQ-SH-2.spec.js y roles.test.js (menú y página de inicio). · 10:22 L-143 redactado (pedido de Diseño M-616): «Sin turno hoy», alertas (5 clases), cifra de alertas, pausa con el panel oculto y entrada «Tablero» con data-inicio=1; ruta con reservas hasta hoy + 30 (213 KB con el sobre). N1 tablero-alertas 11/0, tablero-op 38/0, menu-sh2 132/0, roles 54/0; guion REQ-OP-1b.spec.js y REQ-SH-2.spec.js ajustado; borrador = mod (IGUAL). · 10:35 revisión previa 15/17 (fallaron 5 y 17; defectos: reintento cada 5 s, «Entra hoy», alerta «no iniciado», tiempo del caso h, incidente de turno automático, alerta doble, pendientes sin tarea): corregido; tablero-alertas 13/0; borrador = mod (IGUAL). Pedido ok a Diseño y visto bueno al Arquitecto. · 10:36 ok de Diseño sin cambios (M-618; enlaces de acción a la bolsa como T-16). · 13:04 encolado tras aceptar L-142 (M-625/M-630); cola: L-143-instr-op1b-tablero.md, cmp IGUAL. · 13:05 tras su veredicto, pausa de la cola hasta que el Arquitecto confirme LM-51 instalado (M-637). · 13:08 construido d5c9791 (13:04–13:07): 47 cambios aplicados, run.js 86/86, tablero-alertas 13/13, ?v= p5c104→p5c105 en 34 sitios, php -l ok, 213025 B. En pruebas.",
+   "nota": "Partición LM-47 J4 (M-608). Ajusta REQ-SH-2.spec.js y roles.test.js (menú y página de inicio). · 10:22 L-143 redactado (pedido de Diseño M-616): «Sin turno hoy», alertas (5 clases), cifra de alertas, pausa con el panel oculto y entrada «Tablero» con data-inicio=1; ruta con reservas hasta hoy + 30 (213 KB con el sobre). N1 tablero-alertas 11/0, tablero-op 38/0, menu-sh2 132/0, roles 54/0; guion REQ-OP-1b.spec.js y REQ-SH-2.spec.js ajustado; borrador = mod (IGUAL). · 10:35 revisión previa 15/17 (fallaron 5 y 17; defectos: reintento cada 5 s, «Entra hoy», alerta «no iniciado», tiempo del caso h, incidente de turno automático, alerta doble, pendientes sin tarea): corregido; tablero-alertas 13/0; borrador = mod (IGUAL). Pedido ok a Diseño y visto bueno al Arquitecto. · 10:36 ok de Diseño sin cambios (M-618; enlaces de acción a la bolsa como T-16). · 13:04 encolado tras aceptar L-142 (M-625/M-630); cola: L-143-instr-op1b-tablero.md, cmp IGUAL. · 13:05 tras su veredicto, pausa de la cola hasta que el Arquitecto confirme LM-51 instalado (M-637). · 13:08 construido d5c9791 (13:04–13:07): 47 cambios aplicados, run.js 86/86, tablero-alertas 13/13, ?v= p5c104→p5c105 en 34 sitios, php -l ok, 213025 B. En pruebas. · 13:37 ACEPTADO (juez 13:34, consistente con pruebas.json verde).",
    "riesgo": "R-2",
    "hash": "d5c9791"
   }

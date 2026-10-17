@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-17 14:57",
+ "actualizadoEn": "2026-10-17 15:28",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -588,7 +588,7 @@
    "severidad": "crítico",
    "titulo": "El colaborador lee reservas, propiedades, tickets y otras colecciones de cualquier propiedad donde tuvo un turno, de cualquier fecha y también como apoyo, sin límite de tiempo.",
    "causa": "_colLecturaContexto (api/col/index.php ~629–665) arma $misProps con el propId de todo turno suyo no borrado (sin filtro de fecha) y _colInvEsMiTurno cuenta los apoyos; ese contexto filtra turnos, reservas, propiedades, tickets, inv-movimientos, guias, ubicaciones y prop-workflows.",
-   "pendiente": "Diseño lo define con DA propia y Carlos (M-250 respuesta 5); no entra en REQ-INV2-4-1, que usa un contexto aparte solo para zonas. · 17-oct 08:48 DA-45 de Carlos (M-597): ventana hoy o mañana (Bogotá), titular o apoyo, turno no borrado, sin historial; lote L-141 detrás de L-140. · 08:50 DA-45 cancelada «de momento» por Carlos (M-598): sin lote ni prioridad hasta que la retome. Lectura del código hecha (claude/producto/lectura-inc120-colaborador-2026-10.md). · 08:56 DA-45 aprobada en tres capas (M-602): gestión con un trimestre, propiedad mientras tenga turno o incidente, datos del huésped solo nombre y horas el día del turno. P0 detrás de INC-141.",
+   "pendiente": "Diseño lo define con DA propia y Carlos (M-250 respuesta 5); no entra en REQ-INV2-4-1, que usa un contexto aparte solo para zonas. · 17-oct 08:48 DA-45 de Carlos (M-597): ventana hoy o mañana (Bogotá), titular o apoyo, turno no borrado, sin historial; lote L-141 detrás de L-140. · 08:50 DA-45 cancelada «de momento» por Carlos (M-598): sin lote ni prioridad hasta que la retome. Lectura del código hecha (claude/producto/lectura-inc120-colaborador-2026-10.md). · 08:56 DA-45 aprobada en tres capas (M-602): gestión con un trimestre, propiedad mientras tenga turno o incidente, datos del huésped solo nombre y horas el día del turno. P0 detrás de INC-141. · 15:28 capa 3 aceptada (L-144, c1d9b63); faltan capas 1 y 2.",
    "estado": "abierto",
    "origen": "Lectura del código para REQ-INV2-4-1 (13-oct), confirmado por Diseño en la respuesta a M-250.",
    "prioridad": "P2"
@@ -13067,6 +13067,62 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "pruebas.json › resultado: «verde» · causa: null. Ningún caso de regresión con ok:false (el único \"ok\": false del archivo es el de la semilla, «no concluyente», que no es criterio ni caso). Fase «completa» (lote crítico): regresión por ruta (SRV), 37 guiones, huecos: 0 relaciones, 0 reglas. La instrucción no tiene criterios N3; n3Preparados vacío (la captura INC-125-b-medida es de regresión). Sesiones: ninguna recuperada, perdida ni caída. Entrada P4 en verde (despliegue, tests 87/87, guion igual a la instrucción, sesiones admin/colab/oper/colab2)."
    }
+  },
+  {
+   "lote": "L-144",
+   "fecha": "2026-10-17",
+   "req": "INC-120",
+   "categoria": "crítico",
+   "resumen": "INC-120 capa 3 (DA-45): el colaborador recibe datos del huésped solo del turno de hoy o mañana; historial con código y fechas; respuesta del PUT y caché del teléfono con la misma regla",
+   "estado": "aceptado",
+   "hash": "c1d9b63",
+   "observacion": "DA-45 (Carlos 08:56; precisada por Diseño M-644: cantidad, código y canal = operativos); ok de Diseño M-644. Encolado 14:53, construido c1d9b63 (?v= p5c106; run.js 88/88). Observación: en S9 la CLI aplicó un busca que difería en un espacio en vez de detenerse (M-645; resultado correcto). Pruebas: verde, causa null, regresión por ruta sin rojos, sesiones sin pérdidas. Juez 15:25: ACEPTADO, criterios a–d; cruce veredicto/pruebas hecho por Desarrollo. Veredicto en log\\L-144-veredicto.json. Quedan las capas 1 y 2 de DA-45.",
+   "aceptacion": {
+    "lote": "L-144",
+    "hash": "c1d9b63",
+    "fecha": "2026-10-17",
+    "horaBogota": "15:25",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: zz-verif-Propiedad: encontrada | si: reservas de la corrida: 200 | si: turno lejano (2026-10-24): 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: datos de la corrida: creados en a | si: reserva que sale hoy: con el nombre | si: reserva lejana: sinDatosHuesped true · datos personales que llegaron: ninguno · código y fechas: sí | si: turno lejano: nombres no llegan · notas sí | si: el colaborador guarda el turno lejano: 200 · nombres en la respuesta: no | si: copia del teléfono purgada hoy: marca inc120:2026-10-17 | si: reserva lejana en la copia del teléfono: sin nombre | si: tarjeta del turno lejano: dice por qué no hay nombre | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 88/88 archivos OK (A1, A3b, A5, A6, B1–B8, B10–B13, C1–C5 en tests/lectura-huesped.test.js)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: reserva lejana para el operador: con nombre | si: turno lejano para el operador: con nombres · nota del colaborador sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 88/88 archivos OK (A3, A4, B8, B9, C5, C6)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json: resultado «verde», causa null. Único \"ok\": false del archivo es semilla (estado «no concluyente»: zonas no concluyente y varios avisos de inventario), no es un caso; la entrada P4 la dio por buena y no afecta a los criterios del lote. Fase completa (motivo: lote crítico), sin diferidos. Regresión por ruta (modo ruta): todos los casos en verde; no corren INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5 (fuera de la ruta: PR/PRJ), sin evidencia en un sentido ni en otro. Deuda de cobertura (regresionSeleccion.ruta.huecos): relación REL-30 (HK→KN) y reglas RT-10, RT-11, RT-15; la instrucción explica que el lote no toca guías, incidentes, fotos ni cuentas. La instrucción no tiene criterios N3 ni N4; n3Preparados vacío (la captura INC-125-b-medida es de regresión, no de un N3 del lote). En INC-127 c (verde) la guardia cortó 1 PUT a /api/col/reservas sin zz-verif- (aviso informativo). Sesiones: sin recuperadas, perdidas ni caídos."
+   }
   }
  ],
  "esquema": {
@@ -15224,13 +15280,11 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "INC-120 capa 3 (DA-45): datos del huésped al colaborador solo del turno de hoy o mañana; historial con código y fechas; purga diaria del teléfono",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
    "desde": "2026-10-17 14:40",
    "grupo": "SRV",
-   "nota": "14:40 redactado sobre main tras L-141: servidor (ventana en el contexto, filtro de reservas y turnos, PUT conserva nombres), port, HK (purga diaria, texto «Huésped (se ve un día antes del turno)»), portal, doc; N1 lectura-huesped 22/0 con PHP real; guion INC-120-c3 (admin → colab → oper). Capas 1 y 2 en otro lote. Revisión previa en curso. · 14:50 revisión previa (subagente) 16/17 → corregidos: respuesta del PUT sin nombres (S10), recarga de reservas tras since (H6), purga no con subidas pendientes, canceladas/bloqueos fuera, ids del guion con prefijo y guardado del colaborador en b. N1 27/0. Ok y precisiones pedidos a Diseño (M-644). · 14:53 ok de Diseño (M-644: cantidad, código y canal = operativos, precisado en DA-45); encolado, cmp IGUAL. · 14:57 construido c1d9b63 (14:53–14:57): S1–S10, J1–J6, H1–H7, P1–P2, D1; ?v= p5c106; test 27/0; run.js 88/88. S9: el busca traía «$exData = ($existing» y main tiene «$exData =($existing» (L-141 lo dejó sin espacio); la CLI lo aplicó igual en vez de detenerse. En pruebas.",
-   "espera": "pruebas y veredicto del juez",
-   "esperaA": "Cola",
+   "nota": "14:40 redactado sobre main tras L-141: servidor (ventana en el contexto, filtro de reservas y turnos, PUT conserva nombres), port, HK (purga diaria, texto «Huésped (se ve un día antes del turno)»), portal, doc; N1 lectura-huesped 22/0 con PHP real; guion INC-120-c3 (admin → colab → oper). Capas 1 y 2 en otro lote. Revisión previa en curso. · 14:50 revisión previa (subagente) 16/17 → corregidos: respuesta del PUT sin nombres (S10), recarga de reservas tras since (H6), purga no con subidas pendientes, canceladas/bloqueos fuera, ids del guion con prefijo y guardado del colaborador en b. N1 27/0. Ok y precisiones pedidos a Diseño (M-644). · 14:53 ok de Diseño (M-644: cantidad, código y canal = operativos, precisado en DA-45); encolado, cmp IGUAL. · 14:57 construido c1d9b63 (14:53–14:57): S1–S10, J1–J6, H1–H7, P1–P2, D1; ?v= p5c106; test 27/0; run.js 88/88. S9: el busca traía «$exData = ($existing» y main tiene «$exData =($existing» (L-141 lo dejó sin espacio); la CLI lo aplicó igual en vez de detenerse. En pruebas. · 15:28 ACEPTADO (juez 15:25, consistente con pruebas verde).",
    "hash": "c1d9b63"
   }
  ],

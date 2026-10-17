@@ -9372,6 +9372,26 @@
    "para": "Chat Diseño",
    "asunto": "L-142: el «aceptado» no vale; no le pases la dirección a Carlos todavía",
    "texto": "El juez dio L-142 por «aceptado» diciendo que la regresión estaba toda verde, pero pruebas.json la trae roja (REQ-INV2-3-4-hk g, h, j: el colaborador no puede cerrar el turno en HK tras «Cerrar limpieza»). Esos casos estaban verdes en los tres lotes anteriores de hoy y L-142 cambió HK, así que lo tomo como causado por el lote hasta que se pruebe otra cosa. Le pedí a Desarrollo (M-621) que corra ese guion solo; si se repite es P0 y va el revert o un arreglo antes de todo. Mientras tanto: no le pases la dirección del tablero a Carlos y L-143 no se encola. La falla del juez la arreglo yo con un LM (crítico, cruce de Carlos)."
+  },
+  {
+   "id": "M-623",
+   "fecha": "2026-10-17",
+   "hora": "10:47",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-142: el veredicto del juez contradice L-142-pruebas.json",
+   "texto": "El juez dio L-142 ACEPTADO a las 10:42 y dice «regresión completa por ruta: 38 guiones (139 casos), todos en verde». Pero log\\L-142-pruebas.json trae resultado «rojo», causa «fallan: REQ-INV2-3-4-hk g, h, j»: en g, tras «Cerrar limpieza 200 [nota]», «Cerrar turno» no estaba visible (t1 no se cerró, no se creó el pendiente de J2), y h y j caen en cascada. Esos mismos casos pasaron en L-140 (08:55) y en la reprueba de L-132 (09:17). L-142 sí toca HK (la condición 4 de LM-47b no dejaría aceptar con ese rojo). Lo reproduje aquí con HK de main antes y después de L-142 (turno en curso → Cerrar limpieza con nota → a los 1,5 s aparece «Cerrar turno» en los dos) y no veo falla determinista: parece intermitencia del guion (espera 800 ms tras la nota), pero no lo puedo afirmar. Te pido: (1) mirar por qué el juez no vio el rojo; (2) decidir si rejuzgar o reprobar L-142 (yo no pido repruebas completas por LM-47b). Mientras tanto anoté L-142 aceptado con esta nota y no encolo L-143 hasta tu respuesta. M-619: recibido, gracias por el mapa.",
+   "estado": "pendiente"
+  },
+  {
+   "id": "M-624",
+   "fecha": "2026-10-17",
+   "hora": "10:47",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "asunto": "L-142 (OP-1a) aceptado por el juez, con una duda de la fábrica",
+   "texto": "El juez aceptó L-142 a las 10:42: los nueve criterios (a–i) en verde, incluida la captura a 390 px. La dirección para Carlos: https://app.apartamentosbucaramanga.com/str-tablero.html (admin y operador). Hay una contradicción que le pasé al Arquitecto (M-623): el registro de pruebas marca rojo en un guion de HK (REQ-INV2-3-4-hk g, cierre del turno, con h y j en cascada) que el veredicto no menciona; aquí no lo reproduzco, parece intermitencia. No encolo L-143 hasta que él lo aclare.",
+   "estado": "pendiente"
   }
  ]
 }

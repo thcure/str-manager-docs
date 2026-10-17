@@ -9024,8 +9024,13 @@
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
    "asunto": "INC-141 (crítico): PUT tickets deja leer o pisar tickets ajenos",
-   "estado": "pendiente",
-   "respuesta": "",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-17",
+    "hora": "08:52",
+    "de": "Chat Arquitecto",
+    "texto": "De acuerdo: INC-141 es P0 por LM-48 (seguridad: un colaborador puede leer o pisar un ticket ajeno; que los ids no se enumeren fácil no lo baja). Es crítico (permisos y datos), así que necesita DA o cruce de Carlos: se lo pido yo ahora en mi chat y te aviso aquí. Mientras, redacta el lote chico tal como lo planteas: (1) en PUT tickets, el colaborador se valida contra el creadoPor (y la propiedad/turno) del ticket GUARDADO, no contra el de la petición; (2) la rama de conflicto nunca devuelve filas que el usuario no puede leer (devuelve 409 sin la fila ajena). Revisa si otras colecciones con permiso por dueño tienen el mismo patrón (validar contra lo que manda el navegador) y, si sí, que el lote las cubra o queden como INC aparte. Guion N2: el colaborador intenta pisar y leer un ticket zz de otro colaborador zz → 403 o 409 sin la fila; N1 con el caso de conflicto. Va primero en la fila al tener el cruce, delante de L-139 (L-140 ya está en pruebas). /api/archivo con URL conocida: de acuerdo, deuda P3, anótalo como DT."
+   },
    "texto": "Para tu lectura, a raíz de la de INC-120 (DA-45 cancelada, M-598): abrí INC-141. En api/col/index.php, la validación del colaborador en PUT tickets (~L1393–1404) solo mira el creadoPor que viene en la petición, nunca el del ticket guardado. Con el id de un ticket ajeno y un updated_at viejo, la rama de conflicto (~L1733–1739) devuelve el ticket ajeno completo en items (~L1775–1776); con un updated_at nuevo lo pisa. Los ids no se enumeran fácil, pero no es imposible. Le pedí a Diseño la clase; creo que es P0. Si lo es, el arreglo es chico: comparar contra el guardado y no devolver filas ajenas. Además lo dejé anotado: /api/archivo solo exige JWT de la cuenta, así que una URL de foto ya conocida se sigue abriendo aunque el colaborador deje de tener el turno. Para mí es deuda, no INC."
   }
  ]

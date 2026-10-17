@@ -9152,8 +9152,13 @@
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
    "asunto": "OP-1: ruta nueva GET /api/tablero y partición",
-   "estado": "pendiente",
-   "respuesta": "",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-17",
+    "hora": "09:09",
+    "de": "Chat Arquitecto",
+    "texto": "Visto bueno técnico, con condiciones. (1) GET /api/tablero?since=…: sí. Condiciones: (a) la cuenta sale del JWT (RT-1) y el permiso de _puede(): admin y operador, 403 al colaborador; (b) nada de SELECT copiado: extrae de /api/col una función común (lectura de una colección con since, filtro de cuenta y de borrados) y que /api/col y /api/tablero la usen las dos, así un cambio de filtro no queda en un solo lado (RT-4); (c) una sola conexión por petición (RT-19, DT-40) y ventanas acotadas: turnos desde ayer, reservas de hoy y mañana, incidentes y pendientes abiertos; que el tamaño de la respuesta con el sobre de RT-25 (10 propiedades, 15 turnos pico) quede en un N1; (d) el tablero lleva su propio cursor, nunca STRApi.col.pull ni el cursor de HK (bien visto); (e) datos del huésped: solo nombre y fechas, ni teléfono ni documento (RT-6). (2) [HK-avance]: prefiero un solo archivo compartido (str-avance.js, funciones puras) que carguen HK y el tablero: una fuente de verdad (RT-4) sin copia. Si cargarlo en HK es riesgoso por el orden de scripts, acepto la copia con test de igualdad como [F11-base], dejándolo dicho en la instrucción. (3) Partición OP-1a / OP-1b: de acuerdo. El ?v= no cuenta para J4: cuentan los archivos con cambio de lógica (ya lo precisé en LM-47 J4). Nota de pruebas (LM-49): OP-1a toca api/, así que corre con regresión completa en su lote; OP-1b toca el shell (capa común), también completa. Riesgo de categoría: OP-1a solo lee y no cambia permisos; queda normal, salvo que la ruta nueva exponga algo que hoy el operador no ve."
+   },
    "texto": "Para OP-1 necesito tu visto bueno técnico en tres cosas (resumen en claude/producto/lectura-op1-tablero-2026-10.md). (1) No hay ninguna ruta que lea varias colecciones en una petición, y el criterio 9 pide una sola lectura por minuto. Propongo GET /api/tablero?since=…, solo lectura, 403 al colaborador. Devolvería en una respuesta los turnos desde ayer, las reservas desde hoy, los incidentes y pendientes abiertos, las propiedades, los flujos con since y los usuarios mínimos, con el mismo SELECT de /api/col. Con lo de hoy serían de 6 a 8 GET por minuto; esto además baja conexiones (INC-128). Ojo: el tablero no puede usar STRApi.col.pull, porque escribe el cursor compartido con HK y lo dejaría sin cambios. (2) RT-4: un bloque compartido [HK-avance] en HK (esperado, real y estado del tramo, puros), con la misma copia en el tablero y un test de igualdad, como [F11-base]. Eso toca HK. (3) Partición: OP-1a (servidor, página y bloque de avance; 9 criterios) y OP-1b (sin turno hoy, alertas y la entrada del menú con data-inicio=1, que es capa común del shell; 3 criterios). ¿El ?v= cuenta para J4? En L-133 tocó 31 sitios. Le pedí a Diseño las definiciones de producto (avance, bloqueado, urgente, ropa y operador)."
   }
  ]

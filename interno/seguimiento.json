@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-17 09:35",
+ "actualizadoEn": "2026-10-17 09:36",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -12100,6 +12100,640 @@
    "aprobacion": "Carlos 17-oct-2026 08:46, chat del Arquitecto («dale»)",
    "estado": "instalado",
    "observacion": "Instalado en LENOVO 17-oct 09:10 con la cola vacía (pw 0.7.0 + tren.js, cola v9, juez v9; anteriores en pw\\anterior\\*.0.6.5.*, ejecutar-cola.v8.ps1, juez\\anterior\\texto-juez.v8.md; verificado byte a byte). Humo pedido. Pruebas b–d: con los próximos lotes."
+  },
+  {
+   "lote": "L-131",
+   "fecha": "2026-10-16",
+   "req": "DT-42 (MJ-6, DA-44)",
+   "categoria": "crítico",
+   "resumen": "Importador del export JSON a una cuenta zz y ensayo de restauración con constancia",
+   "estado": "aceptado",
+   "observacion": "Antes del primer corte real (30-nov-2026). Asumimos hoy: respaldos sin restauración probada. · 17:00 Diseño abrió DA-44 (M-516). · 19:31 DA-44 decidida por Carlos: a) copia real temporal, 4 salvaguardas + solo base (sin api/uploads/) + constancia del borrado de la cuenta zz. · 20:03 borrador L-131 corregido tras revisión previa (sync_log, copia atada al origen, guion sin fechas válidas); 63/63 con php. · 20:14 encolado: 2.ª revisión previa 17/17; ok de Diseño M-530 con 3 condiciones aplicadas; excepción DA-44 en RT-1/RT-2 (M-531); restauracion.test.js 67/67 con php. · 10:52 FALLO sin commit: tests 77/78 en main por claude-md (§ 1 ≠ reglas-fijas, heredado de L-130); el lote pasaba lo suyo (restauracion 67/0). Se reencola igual. · 10:59 reencolado sin cambios tras 3dcf74a (main 78/78, M-550). · 11:02 construido d7a32c7 (run.js 79/79, guion 4 casos). 11:03 pruebas bloqueadas en la puerta: perfil colab sin sesión (401); no se gastó verificación. · 11:49 Carlos abrió la sesión de colab (M-559): correr\\sesiones + reprobar\\L-131. · 12:05 veredicto del juez (log\\L-131-veredicto.json): NO ACEPTADO por herramienta. N1 a–f en verde (run.js 80/80); N2 a y d en verde; b y c en rojo porque la guardia de pw (LM-43, literal) cortó dos POST negativos antes de llegar al servidor: ensayo con confirmo «zz-verif-otra-cosa» y borrar con nombre «zz-verif-negocio». Regresión entera en verde (32 guiones). Sin INC. Esos dos rechazos los cubre el N1: A5 (confirmo exacto) y C7 (borrar sin prefijo → 400, PHP real). Propuesto al Arquitecto: aceptar con evidencia cruzada o lote de guion. · 12:29/12:31 pruebas bloqueadas en la puerta: semilla «zonas: mínimo 1, hay 0» (12:07 había 348). 12:32 reprobar de nuevo; diagnóstico al Arquitecto. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 12:56 ACEPTADO (juez, log\\L-131-veredicto-2.json): a–f N1 y a–d N2 en verde; regresión 32 guiones (SRV, K3) en verde; sin INC. Sigue el ensayo real (Arquitecto, correr\\restauracion-ensayo).",
+   "hash": "2b8dbc7",
+   "aceptacion": {
+    "lote": "L-131",
+    "hash": "2b8dbc7",
+    "fecha": "2026-10-16",
+    "horaBogota": "12:57",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK (A2 en tests/restauracion.test.js)"
+     },
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ensayo como operador: 403 Solo admin | si: constancia como operador: 403 Solo admin | si: borrar como operador: 403 Solo admin | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK (A4, A5, B1, C1)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ensayo con archivo \"../x\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"2026-13-40\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"2026-02-30\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"x.json\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"\": 400 Se necesita archivo AAAA-MM-DD y confirmo | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK (A5, A6, B5, C5, C6, C7, C9)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: cuenta de la sesión leída de /api/me: 1 | si: constancia de la cuenta de la sesión: 403 Nunca sobre la cuenta de la sesión | si: borrar con un nombre de copia con fecha imposible: 400 Se necesita cuenta (número) y nombre zz-verif-restauracion-… | si: borrar con cuenta en texto: 400 Se necesita cuenta (número) y nombre zz-verif-restauracion-… | si: la cuenta de la sesión sigue: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: constancia de una cuenta que no existe: 404 La cuenta no existe | si: borrar una cuenta que no existe: 404 La cuenta no existe | si: constancia con cuenta=abc: 400 cuenta inválida | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "e",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK (C1–C12; la instrucción prevé OMITIDA sin pdo_sqlite en la cola, cubierta entonces por el ensayo real)"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK (A3, A10, A11, A12, B6)"
+     },
+     {
+      "c": "regresion",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "32 guiones por ruta (SRV, K3), todos los casos de regresion con ok: true; ninguno en rojo"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "La instrucción no tiene criterios N3 ni N4 (n3Preparados vacío; la única captura de la carpeta, INC-125-b-medida, es de la regresión). Entrada P4 en verde (despliegue, 80/80 tests, guion igual, semilla completa con avisos que no bloquean este lote, sesiones de oper/admin/colab/colab2). n1.observado no dice si las Partes B y C de tests/restauracion.test.js corrieron u OMITIDA (sin pdo_sqlite): si se omitieron, el criterio e queda cubierto por el ensayo real, como prevé la instrucción. Deuda de cobertura (regresionSeleccion.ruta.huecos): relaciones REL-22, REL-27, REL-28; reglas RT-1, RT-6, RT-10, RT-11, RT-16, RT-21; REL-19 a declarar. No corrieron 6 guiones fuera de la ruta (INC-117, INC-127, INC-130, REQ-TB-3/4/5): no es evidencia en ningún sentido. Hora del veredicto aproximada al cierre de la corrida (fin 17:56Z)."
+   }
+  },
+  {
+   "lote": "L-132",
+   "fecha": "2026-10-17",
+   "req": "REQ-SH-2",
+   "categoria": "normal",
+   "resumen": "Menú del STR: solo lo que funciona (4 grupos, Lo que viene, sin datos de ejemplo)",
+   "estado": "aceptado",
+   "observacion": "Entregado por Diseño M-544 (Carlos 10:22). claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md. · 11:11 borrador L-132: revisión previa 15/17 → correcciones aplicadas (título del guion, etapa, favoritos); menu-sh2 131/131. · 11:18 encolado: ok de Diseño M-553 (S19 a INC-134); ruta con REQ-SH-2 anclado (M-552). · 11:22 construido 849db62 (run.js 80/80, menu-sh2 129/129, p5c100). Pruebas bloqueadas en la puerta: la marca del guion tenía texto entre ella y ```js. 11:26 hechas\\ corregido (texto antes de la marca) y reprobar\\L-132.txt. · 11:27 reprueba bloqueada: colab2 sin sesión (401). · 12:02 colab2 con sesión (M-561): correr\\sesiones + reprobar\\L-132. · 12:27 veredicto del juez (log\\L-132-veredicto.json): NO ACEPTADO. Los 10 criterios a–j (N1, N2, N3) en verde, run.js 80/80. Rojos de regresión: DT-42 b/c (guardia LM-43, herramienta, arreglado por L-135 867cadf) y REQ-TB-3 g (INC-136, guion: cuenta la carga de arranque; arreglo L-136). Reprueba tras L-136. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 12:57 reprueba bloqueada otra vez por la semilla (lectura intermitente, M-569). 13:02 reprobar de nuevo. · 15:04 NO ACEPTADO de nuevo (log\\L-132-veredicto-2.json): a–j en verde (N1 80/80, N2 y N3); único rojo INC-132 g de la regresión → INC-138, L-138 (solo guion). Reprobar L-132 cuando L-138 esté en main. · 15:14 reprobar\\L-132 (con L-138 en main). · 16:05 NO ACEPTADO 3 (log\\L-132-veredicto-3.json): a–j en verde, sin INC; rojos de la regresión por herramienta: el iframe de HK del perfil colab sin sesión de 15:21 a 15:44 (pantalla de login; INC-132 c–g, INV2-3-4-hk, INV2-4-2, INV2-7-1, K3b/K3c). 15:52 correr\\sesiones y reprobar\\L-132. · 15:54 Arquitecto (M-580): no es el perfil (sesiones 200, colab entra bien antes y después); lectura: producto, sesión del iframe de HK en el portal (familia INC-134, L-133 deja fuera los iframes). Si la reprueba de 15:52 lo repite → INC nuevo, a mirar junto a L-133. · 16:40 NO ACEPTADO 4 (log\\L-132-veredicto-4.json): n1 y a–j en verde; rojos de regresión por la sesión de Google del perfil colab (M-582: colab2 pasa en la misma corrida) e INC-139 (GitHub, bajo). Espera: Carlos abre el perfil colab y el Arquitecto instala LM-46; luego reprobar. · 16:53 Arquitecto (M-589): los rojos vienen de INC-140 (bucle del HK embebido); L-132 espera INC-140 o LM-47b. · 08:23 REJUZGADO (log\\L-132-veredicto-5.json): sigue no aceptado; LM-47b no aplica porque 3 rojos (K3b-aviso d, K3c-vista d, K3c d) tienen pagina str-m1-housekeeping.html, que L-132 cambia (condición 4). Queda esperando L-140. · 09:10 reprobar\\L-132 puesto (M-592, M-609). · 09:31 ACEPTADO (log\\L-132-veredicto-6.json): a–j en verde, regresión completa en verde, sin INC; huecos de cobertura REL-30, RT-6, RT-10, RT-11, RT-13 (deuda, no cambian el resultado).",
+   "hash": "d40dfb4",
+   "aceptacion": {
+    "lote": "L-132",
+    "hash": "d40dfb4",
+    "fecha": "2026-10-17",
+    "horaBogota": "09:31",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1: node tests/run.js 82/82 archivos OK (08:49:59, reutilizado, LM-45). N2: menú del admin: [[\"Operación del día\",[\"Calendario\",\"Limpieza & HK\",\"Inventario\"]],[\"Configurar el negocio\",[\"Propiedades\",\"Flujos de trabajo\",\"Guías\",\"Equipo y permisos\",\"Configuración\"]],[\"Lo que viene\",[\"Lo que viene\"]],[\"Proyecto\",[\"Seg. Proyecto\",\"Marco de Trabajo\",\"Instrucciones\",\"Cobit\",\"Elementos\",\"Base de conocimiento\",\"Nomenclatura\"]]]; Favoritos arriba; entradas: 16; maquetas o sin página real: ninguna"
+     },
+     {
+      "c": "b",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1 en verde. N2 (caso b): grupos ocultos al operador: nav-group-lo-que-viene, nav-group-proyecto; entradas del operador: Operación del día (Calendario, Limpieza & HK, Inventario) y Configurar el negocio (Propiedades, Flujos de trabajo, Guías, Equipo y permisos, Configuración); inicio del operador: Limpieza & HK abierto. N2 (caso b2, negativo RT-14/RT-13): str-lo-que-viene.html como operador → vuelve a /str-app-shell.html con contenido de la página 0; str-seg-proyecto.html como operador → igual, contenido 0"
+     },
+     {
+      "c": "c",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1 en verde. N2: entrada «Lo que viene» visible solo admin, abre str-lo-que-viene.html; encabezado «Datos de las 09:10 · fd58a9c»; estado ok · 14 áreas · sin nombre, para o etapa: ninguna; primeras áreas con nombre, para qué sirve y etapa calculada (p. ej. «Mantenimiento e incidentes» · definido · orden 1)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1 en verde. N2: textos de muestra en el shell: ninguno; selector de propiedad de muestra: 0; HK (página de inicio) abierto sin textos de muestra"
+     },
+     {
+      "c": "e",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1 en verde. N2: inicio esperado Limpieza & HK (no existe aún la entrada de Tablero/REQ-OP-1); abre str-m1-housekeeping.html, marcado en el menú «Limpieza & HK», 1 panel a la vista"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "último grupo: Proyecto · cerrado: true · otros grupos no quedan plegados; entradas de Proyecto ocultas hasta abrirlo; las 7 páginas de Proyecto (Seg. Proyecto, Marco de Trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura) abren con panel a la vista y página cargada, sin «Sin permiso»"
+     },
+     {
+      "c": "g",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1 en verde. N2: repetidos fuera de Favoritos: ninguno; Favoritos del perfil admin: vacío, sin ★ en el menú (informativo, no afecta el resultado)"
+     },
+     {
+      "c": "h",
+      "nivel": "N1 + N2",
+      "ok": true,
+      "observado": "N1 en verde (node tests/run.js 82/82). N2: las 9 entradas de los tres primeros grupos abren con panel a la vista y página cargada (Calendario, Limpieza & HK, Inventario, Propiedades, Flujos de trabajo, Guías, Equipo y permisos; Flujos y Configuración con su panel propio a la vista); ningún clic falló por una guardia cortando una escritura al cargar"
+     },
+     {
+      "c": "i",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura i-menu-390: a 390 px el panel lateral queda abierto encima del contenido (HK detrás, en gris) con Favoritos, «Operación del día» (Calendario, Limpieza & HK, Inventario), «Configurar el negocio» (Propiedades, Flujos de trabajo, Guías, Equipo y permisos, Configuración), «Lo que viene» y «Proyecto» (este plegado, sin sus 7 entradas a la vista); ningún texto se ve cortado; el n2 ya midió scrollWidth 390 = clientWidth 390 (sin barra de desplazamiento lateral), consistente con la captura"
+     },
+     {
+      "c": "j",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Captura j-lo-que-viene-390: a 390 px las tarjetas de «Lo que viene» se ven una debajo de otra, cada una con su número de orden, el nombre del área, la etapa como etiqueta (p. ej. «Definido») y el texto de para qué sirve; el encabezado muestra «Datos de las 09:10 · fd58a9c» y «14 áreas · 9 definidas · 5 ideas»; texto legible y sin cortar en las tarjetas visibles"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Fase 'completa' (fase.fase): regresión normal, no diferida. regresionSeleccion.ruta.huecos trae 1 relación (REL-30, HK→KN) y 4 reglas (RT-6, RT-10, RT-11, RT-13) sin cubrir por esta ruta: deuda de cobertura, no cambia el resultado. Todos los casos de n2 y regresion están en ok:true; sin INC."
+   }
+  },
+  {
+   "lote": "L-133",
+   "fecha": "2026-10-17",
+   "req": "INC-134",
+   "categoria": "normal",
+   "resumen": "Shell: esperar a Firebase antes de renovar la sesión (aviso «Entrar» con sesión iniciada)",
+   "estado": "aceptado",
+   "observacion": "Sacado de L-132 por Diseño (M-553). · 11:19 Arquitecto: normal (M-554), con tope de 8 s en la espera a Firebase (aplicado; sesion-shell 14/14). · 11:33 ok de Diseño (M-555). · 16:55 encolado (cmp IGUAL); L-132 queda en espera de INC-140/LM-47b (M-589). · 16-oct 16:57 FALLO sin commit: límite semanal de la CLI («You've hit your weekly limit»), no del lote. · 17-oct 07:26 reencolado con el mismo nombre (cmp IGUAL), M-590. · 07:29 construido d37a8aa (?v= p5c100 → p5c101 en 31 sitios; run.js 81/81; sesion-shell 14/14). · 07:55 NO ACEPTADO (log\\L-133-veredicto.json): a y b en verde, N1 81/81; 31 rojos de regresión en cascada por la sesión del colab en el iframe de HK (INC-140), sin INC del lote. 08:34 rejuzgar pedido (no por mí). · 08:34 ACEPTADO con regresión ajena (LM-47b, log\\L-133-veredicto-2.json): a y b en verde; 31 rojos ajenos (27 sin sesión del iframe = INC-140, 1 preexistente REQ-INV2-7-1 f).",
+   "hash": "d37a8aa",
+   "aceptacion": {
+    "lote": "L-133",
+    "hash": "d37a8aa",
+    "fecha": "2026-10-17",
+    "horaBogota": "08:34",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 81/81 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "admin (n2 caso a): si: barra con la sesión — «Entrar» oculto · usuario a la vista | si: aviso rojo «Sesión vencida · Entrar» en el shell: no | si: POST /api/login al cargar: 0 (máximo 1). oper (n2 caso b): si: barra con la sesión — «Entrar» oculto · usuario a la vista | si: aviso rojo «Sesión vencida · Entrar» en el shell: no | si: POST /api/login al cargar: 0 (máximo 1)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Arnés/entorno: el iframe embebido (HK/portal) llega sin sesión durante la corrida larga de regresión por ruta",
+      "nivel": "medio",
+      "causa": "en varios perfiles (admin/colab) el iframe #hkFrame del portal o del shell de HK muestra la pantalla de login «STR Manager · Acceso interno · CORREO ELECTRÓNICO · Continuar con Google» en vez de la app: el perfil llegó sin sesión iniciada. No está relacionado con el cambio de L-133 (str-app-shell.html, _strRenewApiSession): ninguno de estos casos pasa por esa página.",
+      "observado": "27 de 31 casos rojos de la regresión: 23 con la pantalla de login a la vista en su captura (INC-131 c; INC-132 c,d,e,g; REQ-INV2-3-4-hk g0,g,h,j,k,l; REQ-INV2-4-2 e,g,h,i,j,k,l,m; REQ-INV2-7-1-hk-turno b,c,d; REQ-K3b-aviso c; REQ-K3c-vista c,i; REQ-K3c c) y 4 en cascada directa del mismo turno/foto cuyo paso previo falló así (REQ-INV2-4-2 n; REQ-K3b-aviso d; REQ-K3c-vista d; REQ-K3c d)",
+      "ajeno": true
+     },
+     {
+      "titulo": "REQ-INV2-7-1.spec.js caso f: el colaborador no recibe los lugares de la zona base (la página no pidió /api/col/inv-sububicaciones)",
+      "nivel": "bajo",
+      "causa": "defecto preexistente del guion o de HK con el colaborador, ya en rojo antes de L-133 (deuda, no introducida por este lote)",
+      "observado": "caso f en rojo: «NO: HK pidió /api/col/inv-sububicaciones al cargar | NO: llegan los lugares de base»; el mismo guion y letra ya salió con ok:false en log/L-108-pruebas.json y log/L-110-pruebas.json (ambos 2026-10-15, antes de L-133)",
+      "ajeno": true
+     }
+    ],
+    "regresionAjena": [
+     {
+      "guion": "INC-131.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame muestra la pantalla de login «Acceso interno» (perfil colab sin sesión)",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "INC-132.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "INC-132.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "INC-132.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "INC-132.spec.js",
+      "c": "g",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-3-4-hk.spec.js",
+      "c": "g0",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-3-4-hk.spec.js",
+      "c": "g",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-3-4-hk.spec.js",
+      "c": "h",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-3-4-hk.spec.js",
+      "c": "j",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-3-4-hk.spec.js",
+      "c": "k",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-3-4-hk.spec.js",
+      "c": "l",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "g",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "h",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "i",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "j",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "k",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "l",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "m",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-2.spec.js",
+      "c": "n",
+      "motivo": "a",
+      "evidencia": "captura sin login (admin con sesión normal en str-inventario.html); cascada: depende de la entrega del turno tB que no se registró porque el caso previo (mismo guion/turno) falló por sin-sesión en el iframe",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk-turno.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk-turno.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1-hk-turno.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»; además mismo guion+letra ya en rojo en log/L-108-pruebas.json y log/L-110-pruebas.json",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-7-1.spec.js",
+      "c": "f",
+      "motivo": "b",
+      "evidencia": "mismo guion+letra con ok:false en log/L-108-pruebas.json y log/L-110-pruebas.json (ambos 2026-10-15, antes de L-133)",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b-aviso.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3b-aviso.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "captura sin login (HK con sesión normal); cascada: depende de la foto de recepción del turno que falló en el caso c por sin-sesión",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c-vista.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c-vista.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "captura sin login (HK con sesión normal); cascada: depende de la foto del turno que falló en el caso c por sin-sesión",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c-vista.spec.js",
+      "c": "i",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c.spec.js",
+      "c": "c",
+      "motivo": "a",
+      "evidencia": "captura: iframe #hkFrame con pantalla de login «Acceso interno»",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-K3c.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "captura sin login (HK con turno «En progreso», sesión normal); cascada: depende de la foto del turno que falló en el caso c por sin-sesión",
+      "inc": "nuevo"
+     }
+    ],
+    "datosDePrueba": "sin limpiar() en el guion (el guion N2 de este lote, tests/e2e/INC-134.spec.js, no crea datos de prueba; coincide con «Datos de prueba: ninguno» de la instrucción)",
+    "herramienta": "en 27 de los 31 casos rojos de la regresión por ruta, el iframe embebido (HK/portal) llegó sin sesión iniciada (pantalla de login «Acceso interno») o es cascada directa de eso dentro del mismo turno; no es causa del lote L-133",
+    "notas": "Aceptado con regresión ajena (LM-47b). Ninguno de los 31 casos rojos de la regresión toca str-app-shell.html (el único archivo que cambia L-133): 27 son sin-sesión del arnés en el iframe embebido (23 directos con la pantalla de login a la vista en su captura, 4 en cascada del mismo turno) y 1 (REQ-INV2-7-1.spec.js f) es preexistente, ya en rojo en L-108 y L-110 (2026-10-15). Los criterios propios del lote (N1 y N2) están todos en verde. No hay criterios N3 en la instrucción de este lote."
+   }
+  },
+  {
+   "lote": "L-135",
+   "fecha": "2026-10-16",
+   "req": "DT-42",
+   "categoria": "normal",
+   "resumen": "Guion de DT-42 sin los dos pasos que la guardia de la cola corta (LM-43)",
+   "estado": "aceptado",
+   "observacion": "Pedido del Arquitecto M-566 (no pudo aceptar a mano: el modo automático lo cortó). Después: hechas\\L-131 con el guion nuevo y reprobar\\L-131. · 12:29 construido 867cadf. 12:30 hechas\\L-131 con el guion nuevo (cmp IGUAL) y reprobar\\L-131. · 12:29/12:31 pruebas bloqueadas en la puerta: semilla «zonas: mínimo 1, hay 0» (12:07 había 348). 12:32 reprobar de nuevo; diagnóstico al Arquitecto. · 12:36 ACEPTADO (juez, log\\L-135-veredicto.json): a–d N2 y e N1 en verde. La puerta pasó la semilla en esta corrida.",
+   "hash": "2b8dbc7",
+   "aceptacion": {
+    "lote": "L-135",
+    "hash": "2b8dbc7",
+    "fecha": "2026-10-16",
+    "horaBogota": "12:36",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ensayo como operador: 403 Solo admin | si: constancia como operador: 403 Solo admin | si: borrar como operador: 403 Solo admin | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ensayo con archivo \"../x\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"2026-13-40\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"2026-02-30\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"x.json\": 400 Se necesita archivo AAAA-MM-DD y confirmo | si: ensayo con archivo \"\": 400 Se necesita archivo AAAA-MM-DD y confirmo | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: cuenta de la sesión leída de /api/me: 1 | si: constancia de la cuenta de la sesión: 403 Nunca sobre la cuenta de la sesión | si: borrar con un nombre de copia con fecha imposible: 400 Se necesita cuenta (número) y nombre zz-verif-restauracion-… | si: borrar con cuenta en texto: 400 Se necesita cuenta (número) y nombre zz-verif-restauracion-… | si: la cuenta de la sesión sigue: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: constancia de una cuenta que no existe: 404 La cuenta no existe | si: borrar una cuenta que no existe: 404 La cuenta no existe | si: constancia con cuenta=abc: 400 cuenta inválida"
+     },
+     {
+      "c": "e",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Sin N3 en esta instrucción (solo N1/N2); no hay capturas que revisar. Regresión declarada «ninguna» (solo guiones: guion propio + humo); regresionSeleccion.modo=declarada y los 37 archivos en noCorren quedan «fuera de lo declarado», no evidencia ni ausencia de ella. Orden real de perfiles (oper=1, admin=2,3,4) coincide con lo declarado en el guion (oper (a) → admin (b,c,d)), sin dependencias entre casos fuera de orden."
+   }
+  },
+  {
+   "lote": "L-136",
+   "fecha": "2026-10-16",
+   "req": "INC-136",
+   "categoria": "normal",
+   "resumen": "Guion REQ-TB-3 g: esperar red quieta antes de contar",
+   "estado": "aceptado",
+   "observacion": "Del veredicto de L-132. · 12:33 construido 2b8dbc7. · 12:38 reprobar de nuevo (la puerta pasó la semilla en L-135 a las 12:36; falló en L-131 a las 12:35: lectura intermitente, M-569). · 13:01 ACEPTADO (juez, log\\L-136-veredicto.json): g «API 1» en las 5 páginas, h N3 y humo en verde.",
+   "hash": "2b8dbc7",
+   "aceptacion": {
+    "lote": "L-136",
+    "hash": "2b8dbc7",
+    "fecha": "2026-10-16",
+    "horaBogota": "13:05",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "n1",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: /str-cobit.html: API 1 · cobit.json desde raw/<sha> 1 · «Datos de las 12:58 · 1da1ca6» | si: /str-instrucciones.html: API 1 · instrucciones.json desde raw/<sha> 1 · «Datos de las 12:58 · 1da1ca6» | si: /str-marco-trabajo.html: API 1 · marco-trabajo.json desde raw/<sha> 1 · «Datos de las 12:58 · 1da1ca6» | si: /str-base-conocimiento.html: API 1 · conocimiento.json desde raw/<sha> 1 · «Datos de las 12:58 · 1da1ca6» | si: /str-elementos.html: API 1 · elementos.json desde raw/<sha> 1 · «Datos de las 12:58 · 1da1ca6»"
+     },
+     {
+      "c": "humo",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "OK s1 si: /api/me 200 · rol admin | OK w si: alta de zz-verif-humo-pw: 200 | si: baja de zz-verif-humo-pw: 200 | escrituras en serie (máx. 1 en vuelo) | OK s2 si: /api/me 200 · rol operador | OK s3 si: /api/me 200 · rol colaborador"
+     },
+     {
+      "c": "h",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "captura h-movil.png a 390 px: el encabezado «Datos de las 12:58 · 1da1ca6» y el botón «⟳ Actualizar» aparecen en una sola línea, sin cortes ni superposición; coincide con scrollWidth 390 = clientWidth 390 (sin desbordamiento horizontal de página)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "Lote de solo guiones (REQ-TB-3 caso g): sin ruta ni huecos de cobertura declarados en regresionSeleccion. regresion: sin casos; noCorren no se toma como evidencia. Semilla zz-verif- quedó 'no concluyente' en la entrada, pero solo bloquea L-86/L-101/L-103, no este lote."
+   }
+  },
+  {
+   "lote": "L-138",
+   "fecha": "2026-10-16",
+   "req": "INC-138",
+   "categoria": "normal",
+   "resumen": "Guion INC-132 g: quitar también la foto que sigue «subiendo»",
+   "estado": "aceptado",
+   "observacion": "Del veredicto 2 de L-132. · 15:11 encolado (cmp IGUAL). · 15:13 construido b4417bb. · 15:15 ACEPTADO (juez, log\\L-138-veredicto.json): g quitó 7/7, quedan 0, sin línea roja; N1 80/80, humo en verde.",
+   "hash": "b4417bb",
+   "aceptacion": {
+    "lote": "L-138",
+    "hash": "b4417bb",
+    "fecha": "2026-10-16",
+    "horaBogota": "15:15",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "tests/ en verde",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 80/80 archivos OK"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: subidas a /api/upload con ref sh-m-1792181654312 cortadas (sin red simulada); las demás siguen a la guardia | si: turno de la corrida: sh-m-1792181654312 | si: HK con la versión de este lote (≥ p5c97): https://app.apartamentosbucaramanga.com/str-m1-housekeeping.html?modo=colaborador&v=p5c100 | si: HK al día (inventario y pendientes): sí | si: lastpush alineado: 2 turnos | si: fotos de este turno quitadas de la cola del teléfono: {\"n\":7,\"q\":7,\"quedan\":0} | si: sin la línea roja del aviso: sí | si: iframe de HK: termina en 844 px de 844 (barra oculta) | si: corte de /api/upload quitado"
+     },
+     {
+      "c": "humo",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "OK s1 si: /api/me 200 · rol admin | OK w si: alta de zz-verif-humo-pw: 200 | si: baja de zz-verif-humo-pw: 200 | escrituras en serie (máx. 1 en vuelo) | OK s2 si: /api/me 200 · rol operador | OK s3 si: /api/me 200 · rol colaborador"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "La sección «Pruebas derivadas» de la instrucción solo declara el criterio g (nivel N2); los casos b–f son precondición del mismo guion y corrieron en verde (ok: true en n2), sin necesidad de reinterpretarlos como criterios propios. No hay letras N3 en la instrucción (el caso f con capturas es parte del guion, no un criterio del lote), así que no se abrieron las capturas de log\\capturas\\L-138. Lote de solo guiones (regresionSeleccion.ruta.soloGuiones=true, sin huecos de relaciones ni reglas): corrió su guion + humo-pw, humo-pw en verde. regresion[] vacía: sin regresión que evaluar."
+   }
+  },
+  {
+   "lote": "L-140",
+   "fecha": "2026-10-17",
+   "req": "INC-140",
+   "categoria": "normal",
+   "resumen": "HK embebido en el portal: nunca a login.html; espera a Firebase con tope y sigue con el JWT del portal; en un 401 sin identidad avisa al portal",
+   "estado": "aceptado",
+   "observacion": "Acordado con el Arquitecto (M-589). Borrador: revisión previa 17/17 (1.ª pasada 15/17, aplicada); hk-sesion-embebido.test.js 10/0 (código de hoy 7 FAIL); guion INC-140.spec.js (5 aperturas del portal del colab en < 30 s). · 07:33 ok de Diseño sin cambios (M-591). · 08:38 encolado (cmp IGUAL); LM-48 regla 4: destraba L-132, va primero (Arquitecto M-592). · 08:49 construido d40dfb4 (?v= p5c101 → p5c102; 82/82; la sección del mapa quedó en docs/claude/housekeeping-2.md por el tope de 60 000 caracteres). · 09:07 ACEPTADO (verificador y juez; a, b y c en verde; regresión completa en verde; sin INC).",
+   "hash": "d40dfb4",
+   "aceptacion": {
+    "lote": "L-140",
+    "hash": "d40dfb4",
+    "fecha": "2026-10-17",
+    "horaBogota": "09:07",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 82/82 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: 5 aperturas en 16 s | si: HK cargado en cada apertura: sí, sí, sí, sí, sí | si: navegaciones a login.html: ninguna | si: inicios automáticos de esta prueba contados por el freno de INC-56: 0 | si: aviso «Detectamos varios inicios…» en la página o el iframe: 0"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "regresión de la cola (selección por ruta, 23 guiones/88 casos) sin ningún ok:false: INC-126 (b,c,d,e), INC-132 (b,c,d,e,g), REQ-INV2-3-4-hk (a,b,c,e,f,g0,g,h,j,k,l…), REQ-K3b-aviso (b,c,d,e,e2) y REQ-K3b (b,c,d,e) todos en verde; REQ-K3c-vista y REQ-K3c también corrieron en verde"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "ninguno (limpieza de la cola: \"limpiar() corrio sin error\"; el guion solo lee)",
+    "notas": "Sin N3 en este lote (n3Preparados vacío, coincide con la instrucción: solo a=N1, b=N2, c=N2 regresión). Deuda de cobertura de la ruta (no la ejerce este cambio, M-521): relación REL-30 (HK→KN); reglas RT-6, RT-10, RT-11, RT-15."
+   }
   }
  ],
  "esquema": {

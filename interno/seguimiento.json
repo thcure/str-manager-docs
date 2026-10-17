@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-17 13:55",
+ "actualizadoEn": "2026-10-17 14:25",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -832,9 +832,9 @@
    "id": "INC-141",
    "fecha": "2026-10-17",
    "titulo": "PUT /api/col/tickets solo valida el creadoPor entrante: con el id de un ticket ajeno, un colaborador puede leerlo completo en la respuesta o pisarlo",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "crítico",
-   "nota": "Visto en la lectura de INC-120 (solo lectura). api/col/index.php: la validación del colaborador en tickets mira el creadoPor que manda (~L1393–1404), no el guardado; con updated_at viejo la rama ~L1733–1739 copia el ticket ajeno y lo devuelve (~L1775–1776); con updated_at nuevo lo pisa. Los ids (tk_<ms base36>_<5 aleatorios>) no se enumeran fácil. Clase: la pone Diseño (LM-48). · 08:54 DA-46 de Carlos (M-601): P0; lote L-141.",
+   "nota": "Visto en la lectura de INC-120 (solo lectura). api/col/index.php: la validación del colaborador en tickets mira el creadoPor que manda (~L1393–1404), no el guardado; con updated_at viejo la rama ~L1733–1739 copia el ticket ajeno y lo devuelve (~L1775–1776); con updated_at nuevo lo pisa. Los ids (tk_<ms base36>_<5 aleatorios>) no se enumeran fácil. Clase: la pone Diseño (LM-48). · 08:54 DA-46 de Carlos (M-601): P0; lote L-141. · 14:25 cerrado por L-141 (12b7696, aceptado).",
    "prioridad": "P2"
   },
   {
@@ -13011,6 +13011,62 @@
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "pruebas.json: resultado «verde», causa null (confirmado con Grep: ningún \"ok\": false fuera del campo informativo semilla.ok, que es de la puerta de entrada P4, no de los criterios de este lote). Fase completa (no aplica diferido). Deuda de cobertura de la ruta (regresionSeleccion.ruta.huecos), sin cambiar el resultado: relaciones REL-08, REL-22, REL-30; reglas RT-10, RT-11. 4 guiones no corrieron (INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5): ningún caso cubre un nodo de la ruta; no es hueco ni ausencia de evidencia, no se abre INC."
    }
+  },
+  {
+   "lote": "L-141",
+   "fecha": "2026-10-17",
+   "req": "INC-141",
+   "categoria": "crítico",
+   "resumen": "PUT /api/col/tickets: el colaborador solo reescribe un incidente si el creadoPor guardado es él; si no, 403 sin la fila",
+   "estado": "aceptado",
+   "hash": "12b7696",
+   "observacion": "DA-46 (Carlos, 08:54; actualizada por Diseño, M-641); ok de Diseño M-641. Encolado 13:51, construido 12b7696 (13:51–13:55; run.js 87/87). Pruebas: verde, causa null, regresión SRV 37 guiones sin rojos, sesiones sin pérdidas (LM-51). Juez 14:23: ACEPTADO, criterios a–d; cruce veredicto/pruebas hecho por Desarrollo. Veredicto en log\\L-141-veredicto.json.",
+   "aceptacion": {
+    "lote": "L-141",
+    "hash": "12b7696",
+    "fecha": "2026-10-17",
+    "horaBogota": "14:23",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: incidente del admin: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: PUT al incidente ajeno con updated_at viejo: 403 · trae la fila ajena: no | si: PUT al incidente ajeno con updated_at nuevo: 403 · trae la fila ajena: no | si: el incidente ajeno no está en su lista: no está | si: su propio incidente: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b (A1–A3, B1–B3)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 87/87 archivos OK"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: incidente del admin: descripción igual · dueño igual"
+     },
+     {
+      "c": "d (A4, B4)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 87/87 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado: «verde» · causa: null. Ningún caso de regresión con ok:false (el único \"ok\": false del archivo es el de la semilla, «no concluyente», que no es criterio ni caso). Fase «completa» (lote crítico): regresión por ruta (SRV), 37 guiones, huecos: 0 relaciones, 0 reglas. La instrucción no tiene criterios N3; n3Preparados vacío (la captura INC-125-b-medida es de regresión). Sesiones: ninguna recuperada, perdida ni caída. Entrada P4 en verde (despliegue, tests 87/87, guion igual a la instrucción, sesiones admin/colab/oper/colab2)."
+   }
   }
  ],
  "esquema": {
@@ -15138,15 +15194,13 @@
    "categoria": "crítico",
    "riesgo": "R-2",
    "resumen": "PUT /api/col: el colaborador solo reescribe un incidente o un movimiento si la fila guardada es suya",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "esperaA": "Cola",
-   "espera": "pruebas y veredicto del juez",
    "orden": 121.52017,
    "desde": "2026-10-17 08:58",
    "planTrabajo": "PT-1",
    "grupo": "SRV",
-   "nota": "DA-46 (M-601). N1 col-ajeno-guardado 10/0 (código de hoy 9 FAIL); guion INC-141.spec.js. · Revisión previa 1.ª pasada 12/17: pendiente al retomarlo (tras OP-1): citar el cruce de DA-46 (08:54, Chat Diseño) y M-604; inv-movimientos ya es inmutable (409 para todo rol, REQ-INV1 ~L1483–1496): quitarlo de C1/C2 o dejarlo como defensa y corregir § 0 y la derivada c; añadir docs/claude/servidor-php.md al alcance; caso c del guion con perfil oper (el arnés agrupa por perfil); alinear letras de las derivadas; INC-142 aparte. · 13:45 retomado sobre main tras L-143: queda solo tickets (inv-movimientos ya es inmutable, 409); doc en servidor-php.md; caso c con oper; derivadas a–d; DA-46 y M-604 citados; N1 9/0 (hoy 8 FAIL). Segunda revisión previa en curso; luego ok de Diseño. · 13:49 revisión previa (subagente) 13/17 → corregidos 6, 7, 13, 15; defensa: fila guardada ilegible → 403. N1 9/0. Ok pedido a Diseño (M-641). · 13:51 ok de Diseño (M-641); encolado, cmp IGUAL. · 13:55 construido 12b7696 (13:51–13:55): C1, C2, D1, test 9/0, guion; run.js 87/87; ?v= p5c105 igual. En pruebas.",
+   "nota": "DA-46 (M-601). N1 col-ajeno-guardado 10/0 (código de hoy 9 FAIL); guion INC-141.spec.js. · Revisión previa 1.ª pasada 12/17: pendiente al retomarlo (tras OP-1): citar el cruce de DA-46 (08:54, Chat Diseño) y M-604; inv-movimientos ya es inmutable (409 para todo rol, REQ-INV1 ~L1483–1496): quitarlo de C1/C2 o dejarlo como defensa y corregir § 0 y la derivada c; añadir docs/claude/servidor-php.md al alcance; caso c del guion con perfil oper (el arnés agrupa por perfil); alinear letras de las derivadas; INC-142 aparte. · 13:45 retomado sobre main tras L-143: queda solo tickets (inv-movimientos ya es inmutable, 409); doc en servidor-php.md; caso c con oper; derivadas a–d; DA-46 y M-604 citados; N1 9/0 (hoy 8 FAIL). Segunda revisión previa en curso; luego ok de Diseño. · 13:49 revisión previa (subagente) 13/17 → corregidos 6, 7, 13, 15; defensa: fila guardada ilegible → 403. N1 9/0. Ok pedido a Diseño (M-641). · 13:51 ok de Diseño (M-641); encolado, cmp IGUAL. · 13:55 construido 12b7696 (13:51–13:55): C1, C2, D1, test 9/0, guion; run.js 87/87; ?v= p5c105 igual. En pruebas. · 14:25 ACEPTADO (juez 14:23, consistente con pruebas.json verde).",
    "hash": "12b7696"
   },
   {

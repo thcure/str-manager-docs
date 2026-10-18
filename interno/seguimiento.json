@@ -1027,6 +1027,18 @@
    "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso? · 10:50 Diseño (M-697): P3 por naturaleza, primero por la regla 4 (destraba L-148); la pregunta del desempate va a Carlos. Revisor previo de L-152: mi explicación del orden solo vale si el flujo del turno real dura ≤ 7 min o no tiene flujo (empate en 100 → por nombre); si dura más, el tablero estaría mal. correr\\op1-orden puesto (solo lectura: puesto, clase, motivo y minutos de tramos por fila, sin nombres reales) para confirmarlo antes de encolar L-152. · 10:52 correr\\op1-orden: turno real «sin flujo» → 100: el tablero ordenó bien (empate → nombre). Deuda: el empate en 100 por nombre no tiene N1 propio (lo prueba el guion cuando se da). L-152 encolado. · 11:01 L-152 aceptado: REQ-OP-1 c verde con el mismo caso (dos sin empezar en 100 %, por nombre). Cerrado. Desempate por minutos: T-19 en la bolsa de Diseño.",
    "causaRaiz": "integración",
    "debioDetectarse": "revisión previa"
+  },
+  {
+   "id": "INC-156",
+   "fecha": "2026-10-18",
+   "titulo": "L-150: _cpMover crea la cuenta «zz-verif-pruebas» con INSERT INTO cuenta (nombre), pero en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan): el primer «mover» dará 500 (rollback, sin daño)",
+   "estado": "abierto",
+   "severidad": "alto",
+   "prioridad": "P0",
+   "origen": "Desarrollo, al revisar L-137 tras aceptar L-150",
+   "causaRaiz": "integración",
+   "debioDetectarse": "revisión previa",
+   "nota": "15:03 Mismo defecto que INC-137 (restauracion.php:225, M-575: plan_id NOT NULL en la cuenta de producción). Las pruebas usan el esquema de migrate.php (sin plan_id) y por eso C5 pasó. Efecto: el POST mover del Arquitecto daría 500 y la transacción se revierte (nada cambia). Arreglo: L-153, la cuenta nueva lleva el plan_id de la cuenta de origen (como L-137), con N1 sobre una tabla cuenta como la de producción. Bloquea el movimiento de usuarios de DA-47."
   }
  ],
  "dts": [

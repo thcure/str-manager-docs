@@ -1,6 +1,6 @@
 {
  "modulo": "INV",
- "version": 1,
+ "version": 2,
  "estadoArchivo": "borrador",
  "levantadoEn": "2026-10-18",
  "fuentes": [
@@ -12,7 +12,13 @@
   "inv-guiones.json: guiones e2e que tocan Inventario con sus casos (no se leyeron los .spec.js: se usaron los campos «que» y «cubre»)",
   "esquema.json y sistema.json de la línea base (MJ-16)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-791) y Chat Desarrollo (M-792)",
+   "que": "Diseño: no construidos confirmados; CU-INV-1.8 y 4.8 nuevos (P-15); limitantes de 1.1 y 10.1; 8.3 y 8.4 fuera del peso de producto (ámbito fábrica). Desarrollo: los 6 de confianza baja confirmados; 12.1 parcial; pendientes del cierre por REL-11; INC-143 e INC-144 son defectos del guion (prueba no fiable); INC-146 cerrado."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Catálogo de artículos, juegos y kits, con atributos y condición.",
@@ -132,7 +138,10 @@
    "declarado": "construido",
    "limitantes": [
     "La unidad de medida es texto libre: no hay unidades estructuradas ni conversiones.",
-    "Las clases son cuatro fijas (unidad, nivel, circulante, activo); no se pueden crear clases propias."
+    "Las clases son cuatro fijas (unidad, nivel, circulante, activo); no se pueden crear clases propias.",
+    "La unidad se usa como cantidad (en el negocio aparecen «4», «2», «200 ml»): falta separar presentación, contenido y unidad de medida (P-15).",
+    "La clase mezcla cómo se cuenta con cómo se comporta: Carlos quiere clase = consumible, ropa o activo, y el contenido aparte (P-15).",
+    "El proveedor de compra y la ubicación terminan escritos en la nota; no son campos (P-15)."
    ],
    "entradas": [],
    "salidas": [
@@ -166,6 +175,7 @@
     }
    ],
    "origen": [
+    "P-15",
     "REQ-INV1",
     "REQ-INV2-2"
    ],
@@ -508,6 +518,49 @@
      "inv-grupos"
     ],
     "notas": "toggleGrupo; activo:false."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-INV-1.8",
+   "capacidad": "CAP-INV-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Registrar la presentación de un artículo (en qué se compra y se cuenta), su contenido por presentación y la unidad de medida, separados de la clase",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy la unidad es texto libre y no hay presentación ni contenido (ver CU-INV-1.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el jabón de loza se compra en garrafa de 4 L",
+     "cuando": "se registra el artículo con presentación «garrafa», contenido 4 y unidad litro",
+     "entonces": "la existencia se lleva en garrafas y el total disponible se muestra en litros"
+    }
+   ],
+   "origen": [
+    "P-15"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "P-15"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "inv-articulos"
+    ],
+    "notas": "por diseñar"
    },
    "confianza": "alta"
   },
@@ -1544,7 +1597,9 @@
      "entonces": "se registra un movimiento inverso ligado al original y las existencias vuelven a lo anterior (hoy no existe)"
     }
    ],
-   "origen": [],
+   "origen": [
+    "M-777"
+   ],
    "reglas": [
     "RT-5"
    ],
@@ -1963,7 +2018,51 @@
     "colecciones": [],
     "notas": "Sin código."
    },
-   "confianza": "baja"
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-INV-4.8",
+   "capacidad": "CAP-INV-4",
+   "actor": [
+    "colaborador",
+    "operador"
+   ],
+   "que": "Contar en la revisión las presentaciones cerradas y el nivel de cada presentación abierta (pueden ser varias) y ver el total disponible y el consumo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Pendiente de Carlos (P-15): varias abiertas por separado o un total."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "había 4 garrafas de 4 L",
+     "cuando": "en la revisión quedan 1 cerrada y 2 abiertas con 1 L y 2,5 L",
+     "entonces": "la existencia es 3, el total disponible 7,5 L y el consumo 8,5 L"
+    }
+   ],
+   "origen": [
+    "P-15"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "P-15"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "inv-movimientos"
+    ],
+    "notas": "por diseñar"
+   },
+   "confianza": "alta"
   },
   {
    "id": "CU-INV-5.1",
@@ -2458,7 +2557,7 @@
     {
      "de": "CU-HK-1.4",
      "dato": "cierre del turno con los juegos cuyo estado deja pendiente",
-     "rel": "REL-10"
+     "rel": "REL-11"
     }
    ],
    "salidas": [
@@ -2493,7 +2592,6 @@
     "RT-14"
    ],
    "pendientes": [
-    "INC-143",
     "T-20"
    ],
    "pruebas": [
@@ -2502,7 +2600,9 @@
      "casos": [
       "c",
       "g"
-     ]
+     ],
+     "fiable": false,
+     "nota": "INC-143: defecto del guion, no de la página (M-792)"
     }
    ],
    "tecnica": {
@@ -2573,9 +2673,7 @@
     "RT-14",
     "RT-17"
    ],
-   "pendientes": [
-    "INC-143"
-   ],
+   "pendientes": [],
    "pruebas": [
     {
      "guion": "REQ-INV2-3-4-hk",
@@ -2583,7 +2681,9 @@
       "j",
       "k",
       "l"
-     ]
+     ],
+     "fiable": false,
+     "nota": "INC-143: defecto del guion, no de la página (M-792)"
     }
    ],
    "tecnica": {
@@ -3182,15 +3282,16 @@
     "RT-14"
    ],
    "pendientes": [
-    "INC-93",
-    "INC-144"
+    "INC-93"
    ],
    "pruebas": [
     {
      "guion": "REQ-INV2-4-1-interfaz",
      "casos": [
       "d"
-     ]
+     ],
+     "fiable": false,
+     "nota": "INC-144: defecto del guion, no de la página (M-792)"
     },
     {
      "guion": "REQ-INV2-7-1",
@@ -3501,7 +3602,8 @@
     ],
     "notas": "api/purga-prueba/index.php (solo admin; GET ensayo, POST {confirmo:'zz-verif-'}, con ids 1–200); regla en api/lib/purga-prueba.php [PURGA-PURO]; borrado por tandas de 200 con deleted=1. El archivo del endpoint no estaba entre las fuentes leídas (media)."
    },
-   "confianza": "media"
+   "confianza": "media",
+   "ambito": "fabrica"
   },
   {
    "id": "CU-INV-8.4",
@@ -3552,7 +3654,8 @@
     ],
     "notas": "_quitarMovsBorrados en _pullMovimientos quita res.deletedIds de movs y de str-inv-movimientos-v1. HK hace lo mismo en _hkInvPull."
    },
-   "confianza": "media"
+   "confianza": "media",
+   "ambito": "fabrica"
   },
   {
    "id": "CU-INV-8.5",
@@ -3754,7 +3857,8 @@
    "declarado": "parcial",
    "limitantes": [
     "Hoy hay un único mínimo por artículo y solo se compara con la zona principal; no existe el ideal ni el mínimo por zona.",
-    "La dotación ideal por tipo de propiedad está pendiente (fase 2/3 y REQ-INV2-6-3)."
+    "La dotación ideal por tipo de propiedad está pendiente (fase 2/3 y REQ-INV2-6-3).",
+    "El mínimo debe ir en presentaciones (existencia mínima requerida, decisión de Carlos en P-15) y separado de la cantidad por apto de activos y ropa. Pendiente de Carlos: mínimo por negocio o por zona."
    ],
    "entradas": [],
    "salidas": [],
@@ -3775,9 +3879,10 @@
     }
    ],
    "origen": [
-    "REQ-CMP-1",
+    "DA-22",
     "DA-38",
-    "DA-22"
+    "P-15",
+    "REQ-CMP-1"
    ],
    "reglas": [
     "RT-14"
@@ -3924,7 +4029,7 @@
     "colecciones": [],
     "notas": "Sin código."
    },
-   "confianza": "baja"
+   "confianza": "alta"
   },
   {
    "id": "CU-INV-11.1",
@@ -4135,7 +4240,7 @@
     "colecciones": [],
     "notas": "Sin código."
    },
-   "confianza": "baja"
+   "confianza": "alta"
   },
   {
    "id": "CU-INV-12.1",
@@ -4145,10 +4250,10 @@
     "operador"
    ],
    "que": "Armar un flujo de inventario (conteo, nivel, dotación) a partir de plantillas del sistema",
-   "declarado": "no-construido",
+   "declarado": "parcial",
    "limitantes": [
-    "Los REQ figuran «entregado» a Desarrollo (REQ-INV2-5 con siete plantillas del sistema); REQ-MI1-3 dice que reemplaza a REQ-INV2-5. El editor de Flujos no estaba entre las fuentes: no se pudo comprobar si ya existe.",
-    "La tarea de inventario (conteo, nivel, dotación) sí existe y la lee HK; lo pendiente son las plantillas y la categoría."
+    "La tarea de inventario (conteo, nivel, dotación) sí existe en el editor de Flujos, en su importación y exportación y en HK.",
+    "Faltan las plantillas del sistema y la categoría «Inventario» en Flujos (REQ-INV2-5, REQ-MI1-1)."
    ],
    "entradas": [],
    "salidas": [
@@ -4184,7 +4289,7 @@
     "colecciones": [],
     "notas": "Sin código en str-inventario.html; la tarea 'inventario' con inv.lista {conteo, nivel, dotacion} existe en el flujo y en HK (_INV_CLASES_LISTA)."
    },
-   "confianza": "baja"
+   "confianza": "alta"
   },
   {
    "id": "CU-INV-12.2",
@@ -4238,7 +4343,7 @@
     "colecciones": [],
     "notas": "Sin código en Inventario."
    },
-   "confianza": "baja"
+   "confianza": "alta"
   },
   {
    "id": "CU-INV-12.3",
@@ -4289,7 +4394,7 @@
     "colecciones": [],
     "notas": "Sin código en Inventario; la lectura es del portal."
    },
-   "confianza": "baja"
+   "confianza": "alta"
   }
  ],
  "sinAtar": [

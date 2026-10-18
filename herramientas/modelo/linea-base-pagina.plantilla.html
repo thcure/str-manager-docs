@@ -1,0 +1,248 @@
+<title>Línea base del STR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Libro de inventario: una franja de resumen, el mapa de calor como protagonista, y debajo diagrama, lista y ficha. */
+:root{
+  --papel:#f4f6f3; --hoja:#ffffff; --tinta:#1d2a2a; --tenue:#5d6b69; --linea:#d7deda; --acento:#0f6e6a;
+  --ok:#2f8a4e; --sinp:#c9a227; --inc:#c2412d; --noc:#8a96a3; --fuera:#d9dfdc; --okf:#e3f2e7; --sinpf:#f8f0d4; --incf:#f8e1dc; --nocf:#eceff2;
+  --f-tit:"Archivo","Arial Narrow",system-ui,sans-serif; --f-txt:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif; --f-dat:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --papel:#121a1a; --hoja:#1a2424; --tinta:#e3ebe8; --tenue:#9aaaa6; --linea:#2c3a39; --acento:#4fb3ad;
+  --ok:#5cc07a; --sinp:#e0bd4a; --inc:#ef7a64; --noc:#8e9aa6; --fuera:#2a3433; --okf:#1d3326; --sinpf:#3a321a; --incf:#3d221d; --nocf:#262e33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --papel:#121a1a; --hoja:#1a2424; --tinta:#e3ebe8; --tenue:#9aaaa6; --linea:#2c3a39; --acento:#4fb3ad;
+  --ok:#5cc07a; --sinp:#e0bd4a; --inc:#ef7a64; --noc:#8e9aa6; --fuera:#2a3433; --okf:#1d3326; --sinpf:#3a321a; --incf:#3d221d; --nocf:#262e33; color-scheme:dark}
+body{background:var(--papel);color:var(--tinta);font:15px/1.5 var(--f-txt)}
+.envoltura{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1,h2,h3{font-family:var(--f-tit);font-stretch:85%;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:1.9rem;font-weight:800}
+h2{font-size:1.25rem;font-weight:700}
+h3{font-size:1.02rem;font-weight:700}
+.etq{font:600 .7rem/1 var(--f-dat);letter-spacing:.08em;text-transform:uppercase;color:var(--tenue)}
+.dat{font-family:var(--f-dat);font-variant-numeric:tabular-nums}
+.tenue{color:var(--tenue)}
+header.cab{display:flex;flex-wrap:wrap;gap:18px 32px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--tinta);padding-bottom:16px}
+.cab .izq{display:grid;gap:6px;min-width:0}
+select,input[type=search]{font:inherit;color:var(--tinta);background:var(--hoja);border:1px solid var(--linea);border-radius:6px;padding:6px 10px}
+select:focus-visible,input:focus-visible,button:focus-visible,.tesela:focus-visible,tr:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+.cifras{display:flex;gap:28px;flex-wrap:wrap}
+.cifra{display:grid;gap:2px}
+.cifra b{font:800 2.4rem/1 var(--f-tit);font-stretch:80%}
+.barra{display:flex;height:12px;border-radius:3px;overflow:hidden;background:var(--fuera);min-width:220px}
+.barra span{display:block;height:100%}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem}
+.leyenda i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.e-comprobado{background:var(--ok)} .e-parcial{background:var(--ok);opacity:.6} .e-sin-prueba{background:var(--sinp)} .e-con-prueba-sin-resultado{background:var(--sinp);opacity:.6}
+.e-con-incidente{background:var(--inc)} .e-no-construido{background:transparent;box-shadow:inset 0 0 0 2px var(--noc)} .e-fuera-de-alcance{background:var(--fuera)}
+.calor{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.cap{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;padding:12px 14px;display:grid;gap:8px;align-content:start;min-width:0}
+.cap .fila{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.chip{font:600 .68rem/1 var(--f-dat);letter-spacing:.05em;text-transform:uppercase;padding:4px 6px;border-radius:4px;border:1px solid var(--linea);color:var(--tenue);white-space:nowrap}
+.teselas{display:flex;flex-wrap:wrap;gap:5px}
+.tesela{width:22px;height:22px;border-radius:4px;cursor:pointer;border:0;padding:0}
+.tesela:hover{transform:scale(1.15)}
+@media (prefers-reduced-motion:reduce){.tesela:hover{transform:none}}
+.pct{font:700 .9rem/1 var(--f-dat)}
+.diagrama{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow-x:auto}
+.diagrama svg{display:block;min-width:760px;width:100%;height:auto}
+.diagrama text{fill:var(--tinta);font-family:var(--f-txt);font-size:12px}
+.diagrama .t2{fill:var(--tenue);font-size:11px;font-family:var(--f-dat)}
+.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tabla{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow:auto;max-height:75vh}
+td.dat,td.est{white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--linea);vertical-align:top}
+th{font:600 .7rem/1.2 var(--f-dat);letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);background:var(--papel);position:sticky;top:0}
+tbody tr{cursor:pointer} tbody tr:hover{background:var(--papel)}
+.punto{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.cuerpo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:16px;align-items:start}
+@media (max-width:900px){.cuerpo{grid-template-columns:minmax(0,1fr)}}
+aside.ficha{background:var(--hoja);border:1px solid var(--linea);border-left:4px solid var(--acento);border-radius:8px;padding:14px 16px;display:grid;gap:12px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;min-width:0}
+.ficha dl{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:6px 10px;margin:0;font-size:.9rem}
+.ficha dt{color:var(--tenue);font-size:.8rem}
+.ficha dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.esc{border:1px solid var(--linea);border-radius:6px;padding:8px 10px;display:grid;gap:3px;font-size:.88rem}
+.esc b{font-family:var(--f-dat);font-size:.75rem;color:var(--tenue)}
+.vacio{color:var(--tenue);font-style:italic}
+.avisos{font-size:.85rem;color:var(--tenue);columns:2 320px;margin:0;padding-left:18px}
+.sec{display:grid;gap:12px}
+.sec>.fila{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+</style>
+
+<div class="envoltura">
+  <header class="cab">
+    <div class="izq">
+      <span class="etq">Línea base funcional · MJ-16</span>
+      <h1 id="titulo">Línea base del STR</h1>
+      <div class="filtros"><label class="etq" for="selMod">Módulo</label><select id="selMod"></select><span id="estadoArch" class="chip"></span></div>
+    </div>
+    <div class="cifras">
+      <div class="cifra"><span class="etq">Cobertura funcional</span><b id="cobS" class="dat">–</b><span class="tenue" id="cobBase"></span></div>
+      <div class="cifra"><span class="etq">Pesada por importancia</span><b id="cobP" class="dat">–</b><span class="tenue">esencial 3 · necesaria 2 · accesoria 1</span></div>
+    </div>
+  </header>
+
+  <section class="sec">
+    <div class="fila"><h2>Estado de los casos de uso</h2><span class="tenue" id="fuente"></span></div>
+    <div class="barra" id="barra" role="img"></div>
+    <div class="leyenda" id="leyenda"></div>
+  </section>
+
+  <section class="sec">
+    <div class="fila"><h2>Mapa de calor por capacidad</h2><span class="tenue">Cada cuadro es un caso de uso. Toca uno para ver su ficha.</span></div>
+    <div class="calor" id="calor"></div>
+  </section>
+
+  <section class="sec">
+    <div class="fila"><h2>Contexto</h2><span class="tenue">Quién usa cada capacidad y con qué otros módulos intercambia datos.</span></div>
+    <div class="diagrama" id="diagrama"></div>
+  </section>
+
+  <section class="sec">
+    <div class="fila"><h2>Casos de uso</h2>
+      <div class="filtros">
+        <label class="etq" for="fAct">Actor</label><select id="fAct"></select>
+        <label class="etq" for="fEst">Estado</label><select id="fEst"></select>
+        <label class="etq" for="fTipo">Tipo</label><select id="fTipo"></select>
+        <input type="search" id="fTxt" placeholder="Buscar…" aria-label="Buscar en los casos de uso">
+      </div>
+    </div>
+    <div class="cuerpo">
+      <div class="tabla"><table><thead><tr><th>Id</th><th>Caso de uso</th><th>Actor</th><th>Estado</th><th>Pruebas</th></tr></thead><tbody id="filas"></tbody></table></div>
+      <aside class="ficha" id="ficha" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="fila"><h2>Sin atar y avisos</h2><span class="tenue">Pendientes que no cuelgan de ningún caso de uso y flujos por completar.</span></div>
+    <ul class="avisos" id="avisos"></ul>
+  </section>
+</div>
+
+<script>
+const D = /*__DATOS__*/null;
+const ESTADOS = [
+  ['comprobado','Comprobado por prueba'],['parcial','Parcial, con prueba'],['con-incidente','Con incidente'],
+  ['sin-prueba','Construido sin prueba'],['con-prueba-sin-resultado','Con prueba sin resultado'],['no-construido','No construido'],['fuera-de-alcance','Fuera de alcance']];
+const NOMBRE_EST = Object.fromEntries(ESTADOS);
+const TIPOS = {operativa:'Operativa',control:'Control',datos:'Datos',integracion:'Integración',consulta:'Consulta'};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let MOD = null, SEL = null;
+
+function arrancar(){
+  const mods = Object.keys(D.modulos);
+  $('#selMod').innerHTML = mods.map((m) => `<option value="${m}">${m} · ${esc(D.nombresModulo[m] || m)}</option>`).join('');
+  $('#selMod').onchange = () => elegir($('#selMod').value);
+  ['#fAct','#fEst','#fTipo'].forEach((s) => $(s).onchange = pintarTabla);
+  $('#fTxt').oninput = pintarTabla;
+  elegir(mods[0]);
+}
+function elegir(m){
+  MOD = m; const A = D.modulos[m].archivo, I = D.modulos[m].informe;
+  $('#titulo').textContent = 'Línea base · ' + (D.nombresModulo[m] || m);
+  $('#estadoArch').textContent = A.estadoArchivo + ' · v' + A.version;
+  const c = I.cobertura;
+  $('#cobS').textContent = c.simple == null ? '–' : c.simple.toLocaleString('es-CO') + ' %';
+  $('#cobP').textContent = c.pesada == null ? '–' : c.pesada.toLocaleString('es-CO') + ' %';
+  $('#cobBase').textContent = `${c.alcance - c.faltan} de ${c.alcance} casos de uso comprobados`;
+  $('#fuente').textContent = 'Levantado ' + A.levantadoEn + ' · resultados de ' + (D.resultados || 'ninguna corrida') + ' · página ' + D.generado;
+  const tot = Object.values(I.porEstado).reduce((a, b) => a + b, 0);
+  $('#barra').innerHTML = ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<span class="e-${e}" style="width:${100 * I.porEstado[e] / tot}%" title="${esc(n)}: ${I.porEstado[e]}"></span>`).join('');
+  $('#barra').setAttribute('aria-label', ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => n + ' ' + I.porEstado[e]).join(', '));
+  $('#leyenda').innerHTML = ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<span><i class="e-${e}"></i>${esc(n)} <b class="dat">${I.porEstado[e]}</b></span>`).join('');
+  const acts = [...new Set(A.casosUso.flatMap((u) => u.actor))];
+  $('#fAct').innerHTML = '<option value="">Todos</option>' + acts.map((a) => `<option value="${a}">${esc(D.actores[a] || a)}</option>`).join('');
+  $('#fEst').innerHTML = '<option value="">Todos</option>' + ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<option value="${e}">${esc(n)}</option>`).join('');
+  $('#fTipo').innerHTML = '<option value="">Todos</option>' + Object.entries(TIPOS).map(([t, n]) => `<option value="${t}">${n}</option>`).join('');
+  pintarCalor(); pintarDiagrama(); pintarTabla(); ficha(A.casosUso[0]?.id);
+  const sin = (A.sinAtar || []).map((s) => `<li><b class="dat">${esc(s.id || s)}</b> ${esc(s.porque || '')}</li>`);
+  const av = D.avisos.filter((a) => a.includes(MOD) || a.includes('CU-' + MOD)).filter((a) => !/sin atar/.test(a)).map((a) => `<li>${esc(a)}</li>`);
+  $('#avisos').innerHTML = sin.concat(av).join('') || '<li class="vacio">Nada pendiente de atar.</li>';
+}
+function estado(id){ return D.modulos[MOD].informe.estados[id]; }
+function pintarCalor(){
+  const A = D.modulos[MOD].archivo;
+  $('#calor').innerHTML = A.capacidades.map((c) => {
+    const cus = A.casosUso.filter((u) => u.capacidad === c.id);
+    const alc = cus.filter((u) => estado(u.id) !== 'fuera-de-alcance');
+    const ok = alc.filter((u) => ['comprobado','parcial'].includes(estado(u.id))).length;
+    const pct = alc.length ? Math.round(100 * ok / alc.length) : null;
+    return `<article class="cap"><div class="fila"><span class="etq">${c.id}</span><span class="pct">${pct == null ? '–' : pct + ' %'}</span></div>
+      <h3>${esc(c.nombre)}</h3>
+      <div class="fila"><span class="chip">${TIPOS[c.tipo] || c.tipo}</span><span class="chip">${esc(c.peso)}</span></div>
+      <div class="teselas">${cus.map((u) => `<button class="tesela e-${estado(u.id)}" data-id="${u.id}" title="${u.id} · ${esc(u.que)} · ${esc(NOMBRE_EST[estado(u.id)])}" aria-label="${u.id}: ${esc(NOMBRE_EST[estado(u.id)])}"></button>`).join('')}</div></article>`;
+  }).join('');
+  document.querySelectorAll('.tesela').forEach((b) => b.onclick = () => ficha(b.dataset.id, true));
+}
+function pintarDiagrama(){
+  const A = D.modulos[MOD].archivo;
+  const caps = A.capacidades;
+  const acts = [...new Set(A.casosUso.flatMap((u) => u.actor))];
+  const otros = {};
+  A.casosUso.forEach((u) => ['entradas','salidas'].forEach((l) => (u[l] || []).forEach((f) => {
+    const dest = (f.a || f.de || '').split('-')[1]; if (!dest || dest === MOD) return;
+    const k = dest; otros[k] = otros[k] || {ent:0, sal:0, caps:new Set()}; otros[k][l === 'entradas' ? 'ent' : 'sal']++; otros[k].caps.add(u.capacidad);
+  })));
+  const om = Object.keys(otros);
+  const H = Math.max(caps.length, acts.length, om.length) * 44 + 60, W = 980;
+  const yA = (i) => 40 + i * ((H - 60) / Math.max(acts.length, 1)) + 18;
+  const yC = (i) => 40 + i * ((H - 60) / caps.length) + 18;
+  const yO = (i) => 40 + i * ((H - 60) / Math.max(om.length, 1)) + 18;
+  const ic = Object.fromEntries(caps.map((c, i) => [c.id, i]));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de contexto del módulo ${MOD}">`;
+  s += `<text x="20" y="22" class="t2">ACTORES</text><text x="300" y="22" class="t2">CAPACIDADES DE ${MOD}</text><text x="${W - 230}" y="22" class="t2">OTROS MÓDULOS</text>`;
+  s += `<rect x="290" y="30" width="400" height="${H - 40}" rx="8" fill="none" stroke="var(--acento)" stroke-width="1.5"/>`;
+  acts.forEach((a, i) => caps.forEach((c) => {
+    const n = A.casosUso.filter((u) => u.capacidad === c.id && u.actor.includes(a)).length;
+    if (n) s += `<line x1="150" y1="${yA(i)}" x2="300" y2="${yC(ic[c.id])}" stroke="var(--tenue)" stroke-opacity=".45" stroke-width="${Math.min(1 + n * .6, 5)}"/>`;
+  }));
+  om.forEach((m, i) => otros[m].caps.forEach((cid) => {
+    s += `<line x1="680" y1="${yC(ic[cid])}" x2="${W - 240}" y2="${yO(i)}" stroke="var(--acento)" stroke-opacity=".55" stroke-width="1.4"/>`;
+  }));
+  acts.forEach((a, i) => { s += `<rect x="20" y="${yA(i) - 14}" width="130" height="28" rx="14" fill="var(--papel)" stroke="var(--linea)"/><text x="85" y="${yA(i) + 4}" text-anchor="middle">${esc(D.actores[a] || a)}</text>`; });
+  caps.forEach((c, i) => {
+    const cus = A.casosUso.filter((u) => u.capacidad === c.id);
+    s += `<rect x="300" y="${yC(i) - 15}" width="380" height="30" rx="5" fill="var(--hoja)" stroke="var(--linea)"/><text x="312" y="${yC(i) + 4}">${esc(c.nombre.length > 46 ? c.nombre.slice(0, 45) + '…' : c.nombre)}</text>`;
+    cus.forEach((u, k) => { s += `<rect x="${600 + (k % 12) * 6.5}" y="${yC(i) - 9 + Math.floor(k / 12) * 7}" width="5" height="5" class="e-${estado(u.id)}" fill="${{'comprobado':'var(--ok)','parcial':'var(--ok)','con-incidente':'var(--inc)','sin-prueba':'var(--sinp)','con-prueba-sin-resultado':'var(--sinp)','no-construido':'var(--noc)','fuera-de-alcance':'var(--fuera)'}[estado(u.id)]}"/>`; });
+  });
+  om.forEach((m, i) => { s += `<rect x="${W - 240}" y="${yO(i) - 15}" width="220" height="30" rx="5" fill="var(--papel)" stroke="var(--linea)"/><text x="${W - 230}" y="${yO(i) + 4}">${esc(m)} · ${esc((D.nombresModulo[m] || '').slice(0, 20))}</text><text x="${W - 26}" y="${yO(i) + 4}" text-anchor="end" class="t2">↓${otros[m].ent} ↑${otros[m].sal}</text>`; });
+  s += '</svg>';
+  $('#diagrama').innerHTML = s;
+}
+function pintarTabla(){
+  const A = D.modulos[MOD].archivo;
+  const fa = $('#fAct').value, fe = $('#fEst').value, ft = $('#fTipo').value, tx = $('#fTxt').value.trim().toLowerCase();
+  const tipo = Object.fromEntries(A.capacidades.map((c) => [c.id, c.tipo]));
+  const filas = A.casosUso.filter((u) => (!fa || u.actor.includes(fa)) && (!fe || estado(u.id) === fe) && (!ft || tipo[u.capacidad] === ft)
+    && (!tx || JSON.stringify(u).toLowerCase().includes(tx)));
+  $('#filas').innerHTML = filas.map((u) => `<tr tabindex="0" data-id="${u.id}"><td class="dat">${u.id}</td><td>${esc(u.que)}</td><td>${u.actor.map((a) => esc(D.actores[a] || a)).join(', ')}</td>
+    <td class="est"><span class="punto e-${estado(u.id)}"></span>${esc(NOMBRE_EST[estado(u.id)])}</td><td class="dat">${(u.pruebas || []).length || '–'}</td></tr>`).join('') || '<tr><td colspan="5" class="vacio">Ningún caso de uso con esos filtros.</td></tr>';
+  document.querySelectorAll('#filas tr[data-id]').forEach((tr) => { tr.onclick = () => ficha(tr.dataset.id); tr.onkeydown = (e) => { if (e.key === 'Enter') ficha(tr.dataset.id); }; });
+}
+function lista(arr, f){ return arr && arr.length ? arr.map(f).join('<br>') : '<span class="vacio">—</span>'; }
+function ficha(id, ir){
+  const A = D.modulos[MOD].archivo; const u = A.casosUso.find((x) => x.id === id); if (!u) return;
+  const cap = A.capacidades.find((c) => c.id === u.capacidad);
+  const t = u.tecnica || {};
+  $('#ficha').innerHTML = `<div><span class="etq">${u.id} · ${esc(cap ? cap.nombre : '')}</span><h3>${esc(u.que)}</h3></div>
+   <div><span class="punto e-${estado(u.id)}"></span><b>${esc(NOMBRE_EST[estado(u.id)])}</b> <span class="tenue">· declarado ${esc(u.declarado)} · confianza ${esc(u.confianza || 'media')}${u.ambito === 'fabrica' ? ' · ámbito fábrica (no cuenta en la cobertura)' : ''}</span></div>
+   <dl>
+    <dt>Actor</dt><dd>${u.actor.map((a) => esc(D.actores[a] || a)).join(', ')}</dd>
+    <dt>Limitantes</dt><dd>${lista(u.limitantes, esc)}</dd>
+    <dt>Recibe de</dt><dd>${lista(u.entradas, (f) => `<span class="dat">${esc(f.de)}</span> ${esc(f.dato)}${f.rel ? ` <span class="tenue" title="${esc(D.rel[f.rel] || '')}">(${f.rel})</span>` : ''}`)}</dd>
+    <dt>Entrega a</dt><dd>${lista(u.salidas, (f) => `<span class="dat">${esc(f.a)}</span> ${esc(f.dato)}${f.rel ? ` <span class="tenue" title="${esc(D.rel[f.rel] || '')}">(${f.rel})</span>` : ''}`)}</dd>
+    <dt>Origen</dt><dd>${lista(u.origen, esc)}</dd>
+    <dt>Reglas</dt><dd>${lista(u.reglas, (r) => `${r} <span class="tenue">${esc(D.rt[r] || '')}</span>`)}</dd>
+    <dt>Pendientes</dt><dd>${lista(u.pendientes, (p) => { const i = D.incs[p]; return `<span class="dat">${p}</span>${i ? ` <span class="tenue">(${esc(i.e)})</span> ${esc(i.t.slice(0, 90))}` : ''}`; })}</dd>
+    <dt>Pruebas</dt><dd>${lista(u.pruebas, (p) => `<span class="dat">${esc(p.guion)}</span>${p.casos && p.casos.length ? ' · casos ' + esc(p.casos.join(', ')) : ''}${p.fiable === false ? ` <span class="tenue">· no fiable: ${esc(p.nota || '')}</span>` : ''}`)}</dd>
+    <dt>Técnica</dt><dd class="tenue">${esc([].concat(t.paginas || [], t.rutas || [], t.colecciones || []).join(' · ')) || '—'}</dd>
+   </dl>
+   <div style="display:grid;gap:6px"><span class="etq">Escenarios de prueba</span>${(u.escenarios || []).map((e) => `<div class="esc"><b>${esc(e.id)} · ${esc(e.tipo)}</b><span><b>Dado</b> ${esc(e.dado)}</span><span><b>Cuando</b> ${esc(e.cuando)}</span><span><b>Entonces</b> ${esc(e.entonces)}</span></div>`).join('') || '<span class="vacio">Sin escenarios.</span>'}</div>`;
+  if (ir && window.innerWidth < 900) $('#ficha').scrollIntoView({behavior:'smooth', block:'start'});
+}
+if (D) arrancar();
+</script>

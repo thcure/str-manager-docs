@@ -56,7 +56,7 @@ def estado_calculado(cu, incs, resultados):
     if d in ('no-construido', 'fuera-de-alcance'):
         return d
     abiertos = [p for p in cu.get('pendientes', []) if p.startswith('INC-') and incs.get(p) == 'abierto']
-    pr = cu.get('pruebas', [])
+    pr = [x for x in cu.get('pruebas', []) if x.get('fiable', True) is not False]
     if abiertos:
         return 'con-incidente'
     if not pr:
@@ -86,7 +86,7 @@ def cobertura(cus, caps, estados):
     B = Bp = A = Ap = 0
     for cu in cus:
         e = estados[cu['id']]
-        if e == 'fuera-de-alcance':
+        if e == 'fuera-de-alcance' or cu.get('ambito') == 'fabrica':
             continue
         w = peso_cap.get(cu.get('capacidad'), 2)
         B += 1; Bp += w
@@ -161,6 +161,8 @@ def main(argv):
                 err.append(f + ': ' + i + ' actor vacío o fuera del mapa ' + str(cu.get('actor')))
             if cu.get('declarado') not in DECL:
                 err.append(f + ': ' + i + ' «declarado» inválido')
+            if cu.get('ambito', 'producto') not in ('producto', 'fabrica'):
+                err.append(f + ': ' + i + ' ámbito inválido')
             if cu.get('confianza', 'media') not in CONF:
                 err.append(f + ': ' + i + ' confianza inválida')
             if cu.get('confianza') == 'baja':

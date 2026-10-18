@@ -215,6 +215,20 @@ async function sesionViva(perfil, opciones = {}) {
   return res;
 }
 
+// v0.9.0 (LM-52, cruce de Carlos 17-oct-2026): sin internet en LENOVO a mitad de la corrida. Un caso rojo con un error de
+// red DEL EQUIPO (no del servidor) hace esperar a la red (GET /api/health cada 20 s, hasta 10 min); si vuelve, el guion se
+// repite una vez (repetidoPorRed); si no, la corrida queda «bloqueado» y no llega al juez. Puras: esSinRed.
+const RE_SIN_RED = /net::ERR_(INTERNET_DISCONNECTED|NAME_NOT_RESOLVED|NETWORK_CHANGED|NETWORK_ACCESS_DENIED|ADDRESS_UNREACHABLE)\b/;
+function esSinRed(texto) { return RE_SIN_RED.test(String(texto || '')); }
+async function hayRed() {
+  try { const r = await fetch(BASE + '/api/health', { signal: AbortSignal.timeout(8000) }); return !!r; } catch (e) { return false; }
+}
+async function esperarRed(maxMs = 10 * 60000, cadaMs = 20000, probar = hayRed) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < maxMs) { if (await probar()) return true; await new Promise((r) => setTimeout(r, cadaMs)); }
+  return probar();
+}
+
 // v0.8.0 (LM-51): corre un guion cuidando la sesión de sus perfiles. Si un caso cae en login (rc.sinSesion, guion.js),
 // recupera ese perfil (sesionViva: Firebase y, si no, Chrome normal) y repite el guion UNA vez. Un perfil que no se
 // recupera queda en estado.caidos: sus casos de este y de los guiones siguientes no se corren y salen ok:false con
@@ -233,6 +247,16 @@ async function correrConSesion(sp, opts, estado, nombre, deps = {}) {
   const correr = deps.correr || correrGuion, comprobar = deps.sesion || sesionViva;
   let saltados = saltarCaidos(sp, estado);
   let rr = sp.casos.length ? await correr(sp, opts) : { casos: [], limpieza: 'sin casos (perfiles sin sesión)', perfiles: [] };
+  // LM-52: la red antes que la sesión (sin red, la recuperación de sesión fallaría y dejaría perfiles caídos sin motivo)
+  if (rr.casos.some((x) => x.ok === false && esSinRed(x.observado))) {
+    estado.red = estado.red || { cortes: [], bloqueada: false };
+    const desde = horaBogota();
+    const vuelve = await (deps.esperarRed || esperarRed)();
+    if (!vuelve) { estado.red.cortes.push({ desde, hasta: null, guion: nombre }); estado.red.bloqueada = true; return rr; }
+    estado.red.cortes.push({ desde, hasta: horaBogota(), guion: nombre });
+    rr = await correr(sp, opts); rr.casos.forEach((x) => { x.repetidoPorRed = true; });
+    if (rr.casos.some((x) => x.ok === false && esSinRed(x.observado))) { estado.red.cortes.push({ desde: horaBogota(), hasta: null, guion: nombre }); estado.red.bloqueada = true; return rr; }
+  }
   const perdidos = [...new Set(rr.casos.filter((x) => x.sinSesion).map((x) => x.perfil || 'admin'))];
   if (perdidos.length) {
     let alguno = false;
@@ -292,6 +316,7 @@ async function main() {
   const entra = (c, ok, observado) => { out.entrada.push({ c, ok, observado }); console.log((ok ? 'OK  ' : 'NO  ') + 'P4 ' + c + ' · ' + observado); return ok; };
   const fin = (resultado, causa) => {
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
+    if (out.sesiones && out.sesiones.red) out.red = out.sesiones.red;   // LM-52
     if (out.sesiones && out.sesiones.caidos instanceof Set) out.sesiones = { recuperadas: out.sesiones.recuperadas, perdidas: out.sesiones.perdidas, caidos: [...out.sesiones.caidos] };   // LM-51
     fs.writeFileSync(path.join(COLA, 'log', lote + '-pruebas.json'), JSON.stringify(out, null, 1));
     console.log('Pruebas ' + lote + ': ' + resultado + (causa ? ' - ' + causa : '') + ' - log\\' + lote + '-pruebas.json');
@@ -381,10 +406,17 @@ async function main() {
   if (sel.ruta && (sel.ruta.huecos.relaciones.length || sel.ruta.huecos.reglas.length)) console.log('huecos de la ruta: ' + sel.ruta.huecos.relaciones.map(x => x.id).concat(sel.ruta.huecos.reglas.map(x => x.id)).join(', '));
   const estadoSesion = { caidos: new Set(), recuperadas: [], perdidas: [] };   // v0.8.0 (LM-51)
   out.sesiones = estadoSesion;
+  // v0.9.0 (LM-52 · M-658, INC-148): restos de una corrida caída. Antes del guion y la regresión se borran los turnos
+  // zz-verif- de hoy en zz-verif-Propiedad (misma regla que limpiar-zz v3). No bloquea: si falla, queda anotado.
+  try {
+    const rz = await correrGuion(require('./limpiar-zz.spec.js').especCon({ col: 'turnos', campo: 'propName', prefijo: 'zz-verif-Propiedad', hoy: true, pagina: '/str-m1-housekeeping.html' }), { lote, prefijo: 'zz-verif-' + lote + '-z-', dirGuion: __dirname, nombreGuion: 'limpiar-restos' });
+    entra('restos', true, rz.casos.map((x) => x.observado).join(' | ').slice(0, 400) || 'sin casos');
+  } catch (e) { entra('restos', true, 'no se pudo limpiar (sigue): ' + String(e && e.message || e).slice(0, 200)); }
   if (spec) {
     const r = await correrConSesion(spec, { lote, dirGuion: path.dirname(rutaSpec) }, estadoSesion, 'guion del lote'); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.nivel + ' ' + x.c + ' · ' + x.observado));
   }
+  if (estadoSesion.red && estadoSesion.red.bloqueada) return fin('bloqueado', 'sin internet en LENOVO desde ' + estadoSesion.red.cortes[estadoSesion.red.cortes.length - 1].desde + ' (LM-52): se repite con reprobar cuando vuelva la red');
   // v0.6.0 (LM-39b, M-524): lote de solo guiones o herramientas → humo-pw dentro de la corrida, como caso n2 «humo»
   if (humoSpec) {
     const rh = await correrGuion(humoSpec, { lote, prefijo: 'zz-verif-' + lote + '-h-', dirGuion: __dirname, nombreGuion: 'humo-pw' });
@@ -396,9 +428,11 @@ async function main() {
   {
     const lista = sel.corren.map(c => (guiones.find(g => g.archivo === c.archivo) || {}).ruta).filter(Boolean);
     for (const f of lista) {
+      if (estadoSesion.red && estadoSesion.red.bloqueada) break;   // LM-52
       try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrConSesion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') }, estadoSesion, path.basename(f));   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */ }
       catch (e) { out.regresion.push({ guion: path.basename(f), ok: false, observado: e.message }); }
     }
+    if (estadoSesion.red && estadoSesion.red.bloqueada) return fin('bloqueado', 'sin internet en LENOVO desde ' + estadoSesion.red.cortes[estadoSesion.red.cortes.length - 1].desde + ' (LM-52): se repite con reprobar cuando vuelva la red');
     out.regresion.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + 'regresion ' + x.guion + ' ' + (x.c || '') + ' · ' + x.observado));
     out.limpiezaRegresion.forEach(x => console.log('limpieza regresion ' + x.guion + ' · ' + x.limpieza));
   }
@@ -412,5 +446,5 @@ async function main() {
   return fin(rojo ? 'rojo' : 'verde', rojo ? 'fallan: ' + out.n2.concat(out.regresion).filter(x => x.ok === false).map(x => (x.guion ? x.guion + ' ' : '') + x.c).join(', ') : null);
 }
 
-module.exports = { correrConSesion, saltarCaidos, faseDelLote, anotarTren, mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
+module.exports = { esSinRed, esperarRed, correrConSesion, saltarCaidos, faseDelLote, anotarTren, mensajeSesion, sesionViva, claveGuion, puedeSaltar, anotar, sesionPorRespuestas, versionNueva, guionesDeZona, zonasRegresion, TOCA_COMUN, tieneZona, seleccionRegresion, cargarGuiones, carpetaCapturasAnterior, apartarCapturas };
 if (require.main === module) main().catch(e => { console.log('error: ' + e.message); process.exit(1); });

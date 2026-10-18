@@ -1,4 +1,4 @@
-// tren.js (v2, LM-51: los guiones corren con correrConSesion: sesión caída → recuperar y repetir una vez) - fase 2 de LM-49 (pruebas por fases, cruce de Carlos 17-oct-2026). Lo mantiene el Arquitecto.
+// tren.js (v3, LM-52: sin red a mitad del tren espera hasta 10 min, repite el guion o queda bloqueado sin vaciar la fila) (v2, LM-51: los guiones corren con correrConSesion: sesión caída → recuperar y repetir una vez) - fase 2 de LM-49 (pruebas por fases, cruce de Carlos 17-oct-2026). Lo mantiene el Arquitecto.
 // Corre UNA vez la regresión que la fase 1 de varios lotes dejó diferida en log\tren-pendiente.json: une los guiones de
 // todos los lotes, comprueba las sesiones de los perfiles que van a correr, corre cada guion una sola vez (sin N3) y deja
 // log\TREN-<AAAAMMDD-HHMM>.json con cada caso y los lotes que lo pidieron. No juzga ni acepta: un rojo es un INC que se
@@ -41,6 +41,7 @@ async function main() {
   const estadoSesion = { caidos: new Set(), recuperadas: [], perdidas: [] };   // LM-51: sesión caída a mitad del tren
   const fin = (resultado, causa, vaciar) => {
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
+    if (estadoSesion.red) out.red = estadoSesion.red;   // LM-52
     out.sesiones = { recuperadas: estadoSesion.recuperadas, perdidas: estadoSesion.perdidas, caidos: [...estadoSesion.caidos] };
     fs.writeFileSync(path.join(dirLog, id + '.json'), JSON.stringify(out, null, 1));
     if (vaciar) {
@@ -63,6 +64,7 @@ async function main() {
     if (!s.ok) return fin('bloqueado', s.observado, false);
   }
   for (const x of lista.filter((y) => y.g)) {
+    if (estadoSesion.red && estadoSesion.red.bloqueada) break;   // LM-52
     try {
       const sp = cargar(x.g.ruta); sp.casos = (sp.casos || []).filter((c) => c.nivel !== 'N3');
       const rr = await correrConSesion(sp, { lote: id, prefijo: 'zz-verif-' + id + '-r-', dirGuion: path.dirname(x.g.ruta), nombreGuion: x.archivo.replace(/\.spec\.js$/, '') }, estadoSesion, x.archivo);   // LM-51
@@ -70,6 +72,7 @@ async function main() {
       out.limpieza.push({ guion: x.archivo, limpieza: rr.limpieza });
     } catch (e) { out.regresion.push({ guion: x.archivo, lotes: x.lotes, ok: false, observado: e.message }); }
   }
+  if (estadoSesion.red && estadoSesion.red.bloqueada) return fin('bloqueado', 'sin internet en LENOVO desde ' + estadoSesion.red.cortes[estadoSesion.red.cortes.length - 1].desde + ' (LM-52)', false);
   const rojos = out.regresion.filter((c) => c.ok === false);
   return fin(rojos.length ? 'rojo' : 'verde', rojos.length ? 'fallan: ' + rojos.map((c) => c.guion + ' ' + (c.c || '') + ' (' + c.lotes.join(',') + ')').join(', ') : null, true);
 }

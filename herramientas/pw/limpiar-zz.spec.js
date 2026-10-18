@@ -1,4 +1,4 @@
-// limpiar-zz.spec.js - borra la basura de prueba que un limpiar() no alcanzó (M-437): en UNA colección, las filas cuyo
+// limpiar-zz.spec.js (v5, LM-52: especCon para la puerta de probar-lote) - borra la basura de prueba que un limpiar() no alcanzó (M-437): en UNA colección, las filas cuyo
 // campo (por defecto `nombre`) empieza por un prefijo zz-verif- dado. Lo mantiene el Arquitecto. Qué y dónde lo dice pw\limpiar-zz.json:
 //   { "col": "inv-depositos", "prefijo": "zz-verif-L-111-r-" }  o  { "col": "inv-proveedores", "prefijos": ["zz-verif-L-103-r-", "zz-verif-L-111-r-"] }
 //   v3 (M-485): { "col": "turnos", "campo": "propName", "prefijo": "zz-verif-Propiedad", "hoy": true }  → turnos zz de hoy en zz-verif-Propiedad
@@ -10,8 +10,9 @@
 const fs = require('fs');
 const path = require('path');
 // v2 (M-458): acepta "prefijo" (uno) o "prefijos" (lista); todos deben empezar por zz-verif-.
-function config() {
-  const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'limpiar-zz.json'), 'utf8'));
+// v5 (LM-52): config(dado) usa ese objeto en vez de leer limpiar-zz.json (lo usa la puerta de probar-lote con especCon).
+function config(dado) {
+  const c = dado || JSON.parse(fs.readFileSync(path.join(__dirname, 'limpiar-zz.json'), 'utf8'));
   // v4.1: "cols": [..] limpia varias colecciones en orden, un caso por colección (mismas reglas para todas)
   const cols = Array.isArray(c.cols) ? c.cols.map(String) : [String(c.col || '')];
   if (!cols.length || cols.some((x) => !/^[a-z0-9-]+$/.test(x))) throw new Error('limpiar-zz.json: col inválida');
@@ -42,17 +43,14 @@ function protegidos(candidatos, otras) {   // pura: candidatos [{id}], otras [{i
   return new Set(candidatos.map((x) => String(x.id)).filter((id) => id.length >= 4 && (texto.indexOf('"' + id + '"') >= 0)));
 }
 const filas = (j) => (Array.isArray(j) ? j : (j && Array.isArray(j.items) ? j.items : [])).filter((x) => x && !x.deleted && x.data && typeof x.data === 'object');
-let CFG = null; try { CFG = config(); } catch (e) { CFG = null; }
-module.exports = {
-  req: 'LIMPIAR-ZZ',
-  protegidos, RE_LOTE,
-  zona: 'sesiones',
-  casos: ((CFG && CFG.cols) || ['?']).map((colCaso, iCaso) => ({
+function armarCasos(dado) {
+  let CFG = null; try { CFG = config(dado); } catch (e) { CFG = null; }
+  return ((CFG && CFG.cols) || ['?']).map((colCaso, iCaso) => ({
     c: iCaso ? 'z' + (iCaso + 1) : 'z', perfil: 'admin', pagina: (CFG && CFG.pagina) || '/str-inventario.html',
     que: 'no queda ninguna fila cuyo campo empiece por alguno de los prefijos zz-verif- de limpiar-zz.json en su colección',
     async prueba(h) {
       const p = h.page;
-      const { prefijos, campo, hoy, lotes, tope } = config(); const col = colCaso;
+      const { prefijos, campo, hoy, lotes, tope } = config(dado); const col = colCaso;
       const fecha = hoyBogota();
       const conPrefijo = (x) => (lotes ? RE_LOTE.test(String((x.data || {})[campo] || '')) : prefijos.some((pf) => String((x.data || {})[campo] || '').startsWith(pf))) && (!hoy || JSON.stringify(x.data || {}).indexOf(fecha) >= 0);
       // Tres fuentes, por si la página pide la colección por diferencias o no la pide: STRApi.get (lo que el servidor tiene
@@ -106,5 +104,13 @@ module.exports = {
       const despues = (await leer(true)).filter((x) => antes.some((a) => String(a.id) === String(x.id)));   // tras borrar manda el servidor
       h.espera(despues.length === 0, 'quedan de las que se iban a borrar, tras releer (según el servidor): ' + despues.length + (despues.length && despues.length <= 30 ? ' (' + despues.map((x) => x.id).join(', ') + ')' : ''));
     },
-  })),
+  }));
+}
+// v5 (LM-52): especCon(cfg) → un guion de limpieza con esa configuración (mismas reglas: solo prefijos zz-verif-).
+function especCon(dado) { return { req: 'LIMPIAR-ZZ', zona: 'sesiones', casos: armarCasos(dado) }; }
+module.exports = {
+  req: 'LIMPIAR-ZZ',
+  protegidos, RE_LOTE, especCon,
+  zona: 'sesiones',
+  casos: armarCasos(null),
 };

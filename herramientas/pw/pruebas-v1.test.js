@@ -330,10 +330,44 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
     t('LM-51: lote sin caídas → una corrida, sin repetidos', v3 === 1 && !r4.casos[0].repetidoPorSesion);
   })();
 }
+{ // v0.9.0 (LM-52): sin internet a mitad de la corrida · (LM-53): guardia de la purga de movimientos de prueba
+  const { esSinRed, esperarRed, correrConSesion } = require('./probar-lote');
+  const c = require('./comun');
+  t('LM-52: ERR_INTERNET_DISCONNECTED y ERR_NAME_NOT_RESOLVED son sin red', esSinRed('page.goto: net::ERR_INTERNET_DISCONNECTED at x') && esSinRed('net::ERR_NAME_NOT_RESOLVED'));
+  t('LM-52: errores del servidor no (CONNECTION_REFUSED, 500, 409)', !esSinRed('net::ERR_CONNECTION_REFUSED') && !esSinRed('HTTP 500') && !esSinRed('409'));
+  const B = 'https://app.apartamentosbucaramanga.com', ids = new Set(['mv1', 'mv2']);
+  const d = (b, u = '/api/purga-prueba/movimientos') => c.decidir(B + u, 'POST', JSON.stringify(b), ids, new Set());
+  t('LM-53: purga con ids de la corrida pasa', d({ confirmo: 'zz-verif-', ids: ['mv1', 'mv2'] }).ok);
+  t('LM-53: un id ajeno corta', !d({ confirmo: 'zz-verif-', ids: ['mv1', 'real'] }).ok);
+  t('LM-53: sin confirmo corta (aunque el cuerpo diga zz-verif-)', !d({ ids: ['mv1'], nota: 'zz-verif-x' }).ok);
+  t('LM-53: sin ids (purga completa) corta sin el script', !d({ confirmo: 'zz-verif-' }).ok);
+  t('LM-53: lista vacía corta', !d({ confirmo: 'zz-verif-', ids: [] }).ok);
+  t('LM-53: otra ruta bajo /api/purga-prueba/ corta', !d({ confirmo: 'zz-verif-', ids: ['mv1'] }, '/api/purga-prueba/otra').ok);
+  c.GUARDIA.purgaCompleta = true;
+  t('LM-53: con GUARDIA.purgaCompleta la purga completa pasa', d({ confirmo: 'zz-verif-' }).ok);
+  c.GUARDIA.purgaCompleta = false;
+  t('LM-53: el ensayo (GET) pasa como lectura', c.decidir(B + '/api/purga-prueba/movimientos', 'GET', '', ids, new Set()).ok);
+  t('LM-53: purga-movimientos.spec.js carga y apaga la bandera por defecto', require('./purga-movimientos.spec.js').casos.length === 1 && c.GUARDIA.purgaCompleta === false);
+  t('LM-52: limpiar-zz.especCon arma un caso con la regla de restos', require('./limpiar-zz.spec.js').especCon({ col: 'turnos', campo: 'propName', prefijo: 'zz-verif-Propiedad', hoy: true, pagina: '/str-m1-housekeeping.html' }).casos[0].pagina === '/str-m1-housekeeping.html');
+  global.__lm52 = (async () => {
+    let n = 0; const p = []; let cuenta = 0;
+    t('LM-52: esperarRed devuelve true cuando vuelve la red', await esperarRed(1000, 1, async () => (++cuenta) >= 3));
+    t('LM-52: esperarRed devuelve false si no vuelve', !(await esperarRed(20, 5, async () => false)));
+    const sinRed = { ok: false, observado: 'page.goto: net::ERR_INTERNET_DISCONNECTED' };
+    const correr = async (sp) => { n++; return { casos: sp.casos.map((k) => (n === 1 ? Object.assign({ c: k.c, perfil: k.perfil }, sinRed) : { c: k.c, perfil: k.perfil, ok: true })), limpieza: 'ok', perfiles: [] }; };
+    const e1 = { caidos: new Set(), recuperadas: [], perdidas: [] };
+    const r1 = await correrConSesion({ casos: [{ c: 'a', perfil: 'admin' }] }, {}, e1, 'X.spec.js', { correr, sesion: async () => { throw new Error('no debía'); }, esperarRed: async () => true });
+    t('LM-52: vuelve la red → repite el guion una vez, verde y repetidoPorRed', n === 2 && r1.casos[0].ok && r1.casos[0].repetidoPorRed && e1.red.cortes.length === 1 && e1.red.bloqueada === false);
+    n = 0;
+    const e2 = { caidos: new Set(), recuperadas: [], perdidas: [] };
+    await correrConSesion({ casos: [{ c: 'a', perfil: 'admin' }] }, {}, e2, 'Y.spec.js', { correr, sesion: async () => ({ ok: true }), esperarRed: async () => false });
+    t('LM-52: no vuelve en el tope → bloqueada, sin repetir ni tocar sesiones', n === 1 && e2.red.bloqueada === true && e2.caidos.size === 0);
+  })();
+}
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];
   const ctx = { pages: () => [{ close: async () => { orden.push('pagina'); } }, { close: async () => { throw new Error('ya cerrada'); } }], close: async () => { orden.push('ctx'); } };
-  Promise.resolve(global.__lm51).then(() => cerrarSuave(ctx)).then((h) => { t('cerrarSuave: páginas antes que el contexto', orden.join(',') === 'pagina,ctx'); t('cerrarSuave: devuelve HH:MM:SS', /^\d\d:\d\d:\d\d$/.test(h)); console.log(ok + ' OK, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0); });
+  Promise.resolve(global.__lm51).then(() => global.__lm52).then(() => cerrarSuave(ctx)).then((h) => { t('cerrarSuave: páginas antes que el contexto', orden.join(',') === 'pagina,ctx'); t('cerrarSuave: devuelve HH:MM:SS', /^\d\d:\d\d:\d\d$/.test(h)); console.log(ok + ' OK, ' + fail + ' FAIL'); process.exit(fail ? 1 : 0); });
 }
 

@@ -1,5 +1,6 @@
 // comun.js - verificador local (Playwright) del STR (B10-1, LM-17; lo mantiene el Arquitecto).
 // v0.8.0 (LM-51): recuperarConChrome: la sesión caída de un perfil se recupera abriendo su Chrome normal 25 s (sin Carlos).
+// v0.9.0 (LM-53): la guardia deja purgar movimientos de prueba solo con ids de la corrida (o la purga completa del script).
 // Perfiles persistentes de prueba en pw\perfiles-chrome\<usuario>\ (cookies del STR); nunca el perfil de Carlos.
 // v0.2 (12-oct): usa el Chrome instalado (channel 'chrome'), no el Chromium de Playwright: Google no deja iniciar sesion
 // en un navegador automatizado, asi que el inicio de sesion se hace en Chrome normal (abrir-perfil.js) y Playwright
@@ -113,7 +114,7 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true, v51: true, v52: true, v53: true, v6: true };   // v0.6.2: v6 = ensayo de restauración (LM-43, cruce de Carlos)   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
+const GUARDIA = { v5: true, v51: true, v52: true, v53: true, v6: true, v7: true, purgaCompleta: false };   // v0.9.0: v7 = purga de movimientos de prueba solo con ids de la corrida (LM-53, cruce de Carlos 17-oct); purgaCompleta solo la enciende purga-movimientos.spec.js   // v0.6.2: v6 = ensayo de restauración (LM-43, cruce de Carlos)   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
 // v0.5.16 (M-400, L-103): v52 = el PUT a /api/col/inv-pendientes que CIERRA o REASIGNA un pendiente de la corrida (su propio
 // id ya es de la corrida por v51 y su turnoOrigenId sigue siendo un turno zz de la corrida), con el candado R11 más «grupo».
 // No permite crear pendientes (un id que la corrida no tiene se corta). Encendida en 0.5.18 (ok de Diseño y cruce de Carlos 18:22, M-401).
@@ -221,6 +222,21 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   // esta corrida creó como zz-verif- (el turno de la corrida); el texto zz-verif- en el cuerpo no basta, y la pasada
   // programada (/api/drive/corte, /api/drive/cron) nunca pasa. Defensa en profundidad: aunque el servidor falle su 422,
   // un guion no puede pedirle borrar archivos de una ref real.
+  // v0.9.0 (LM-53, cruce de Carlos 17-oct-2026): purga de movimientos de inventario de prueba (L-147). Solo
+  // POST /api/purga-prueba/movimientos con confirmo «zz-verif-» y una lista de 1 a 200 ids que esta corrida creó como
+  // zz-verif-; sin ids (purga completa) solo con GUARDIA.purgaCompleta, que enciende únicamente purga-movimientos.spec.js
+  // (script de la cola del Arquitecto). Cualquier otra ruta bajo /api/purga-prueba/ se corta (no la deja pasar la regla
+  // general de «zz-verif- en el cuerpo»). El ensayo es GET y ya pasó por la regla de lectura.
+  if (GUARDIA.v7 && /^\/api\/purga-prueba(\/|$)/.test(u.pathname)) {
+    if (!/^\/api\/purga-prueba\/movimientos\/?$/.test(u.pathname)) return { ok: false, motivo: 'escritura a una ruta de purga que no es movimientos: ' + u.pathname };
+    let j = null; try { j = JSON.parse(cuerpo || ''); } catch (e) { }
+    if (!j || j.confirmo !== 'zz-verif-') return { ok: false, motivo: 'purga sin confirmo «zz-verif-»' };
+    if (j.ids === undefined) return GUARDIA.purgaCompleta ? { ok: true, nota: 'purga completa de movimientos de prueba (script de la cola del Arquitecto, LM-53)' } : { ok: false, motivo: 'purga completa (sin ids): solo desde purga-movimientos.spec.js (LM-53)' };
+    const ids = Array.isArray(j.ids) ? j.ids.map(String) : [];
+    if (!ids.length || ids.length > 200) return { ok: false, motivo: 'purga con ids: de 1 a 200 (recibidos ' + ids.length + ')' };
+    const ajenos = ids.filter((id) => !idsZz.has(id));
+    return ajenos.length ? { ok: false, motivo: 'purga de ' + ajenos.length + ' movimiento(s) que esta corrida no creó como zz-verif-' } : { ok: true, nota: 'purga de ' + ids.length + ' movimiento(s) zz de la corrida' };
+  }
   if (/^\/api\/drive\/(corte|cron)\/?$/.test(u.pathname)) return { ok: false, motivo: 'pasada programada de Drive (' + u.pathname + '): solo la tarea de hPanel' };
   if (/^\/api\/drive\/corte-prueba\/?$/.test(u.pathname)) {
     let j = null; try { j = JSON.parse(cuerpo || ''); } catch (e) { }

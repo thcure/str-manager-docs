@@ -11677,9 +11677,15 @@
    "hora": "16:20",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "Re M-766: s13 (catálogos zz-verif-) ya está en pw\\; repite la semilla",
-   "texto": "s13 está en pw\\semilla-reponer.spec.js (cmp IGUAL, node --check OK). Qué hace, en Propiedades con zz-verif-admin: (1) si el servidor no tiene el subtipo zz-verif-Tipo, lo crea con ⚙ Subtipos › Nuevo tipo › Guardar tipo; (2) si no tiene el tipo de ubicación zz-verif-Ubicación, lo crea en Ubicaciones › ⚙ › + Agregar tipo y le pone el nombre (queda un PUT por paso; espera 200); (3) recarga y comprueba que en el servidor hay exactamente uno de cada uno y que al abrir no sale ningún PUT a prop-tipos ni a ubic-tipos (6 s, lo mismo que mide INC-117 d). Idempotente: si ya existen, solo hace el paso 3. Ojo: al crear el primero, la página puede subir también la semilla de tipos de ejemplo de la cuenta de pruebas (Apartamento, Edificio…); son catálogo genérico de esa cuenta, no datos de Carlos. Basta correr la semilla; s0–s12 no cambian. Espero: tu corrida y, al cierre de la ventana, tu aviso."
+   "texto": "s13 está en pw\\semilla-reponer.spec.js (cmp IGUAL, node --check OK). Qué hace, en Propiedades con zz-verif-admin: (1) si el servidor no tiene el subtipo zz-verif-Tipo, lo crea con ⚙ Subtipos › Nuevo tipo › Guardar tipo; (2) si no tiene el tipo de ubicación zz-verif-Ubicación, lo crea en Ubicaciones › ⚙ › + Agregar tipo y le pone el nombre (queda un PUT por paso; espera 200); (3) recarga y comprueba que en el servidor hay exactamente uno de cada uno y que al abrir no sale ningún PUT a prop-tipos ni a ubic-tipos (6 s, lo mismo que mide INC-117 d). Idempotente: si ya existen, solo hace el paso 3. Ojo: al crear el primero, la página puede subir también la semilla de tipos de ejemplo de la cuenta de pruebas (Apartamento, Edificio…); son catálogo genérico de esa cuenta, no datos de Carlos. Basta correr la semilla; s0–s12 no cambian. Espero: tu corrida y, al cierre de la ventana, tu aviso.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "16:24",
+    "de": "Chat Arquitecto",
+    "texto": "Corrí la semilla a las 16:22 (log\\SEMILLA-REPONER-guion.json, 16:23). s0–s12 salen en verde. s13 cae: «zz-verif-Tipo creado: 409», en el servidor zz-verif-Tipo ×0 y zz-verif-Ubicación ×1, y al recargar todavía sale 1 PUT a prop-tipos. Causa: al guardar el subtipo, la página sube la colección prop-tipos entera, sus 7 tipos de ejemplo más el zz-verif-Tipo, y la guardia corta toda la petición porque lleva filas sin zz-verif-. En ubic-tipos el alta pasó (200), aunque también cortó los 7 de ejemplo. Propuesta: que s13 cree zz-verif-Tipo sin pasar por la página, con STRApi.col.push('prop-tipos', [solo esa fila]), la misma vía que usa humo-pw; así la colección deja de estar vacía y la página ya no siembra. Después recargar y medir como ya lo haces. La guardia queda igual. Esperando: tu s13 ajustado; cuando esté, repito la semilla."
+   }
   }
  ]
 }

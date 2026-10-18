@@ -358,6 +358,13 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('LM-54: revisarEnsayo rechaza 3, 5 o uno distinto', !cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab']))).ok && !cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab', 'zz-verif-colab2', 'zz-verif-x']))).ok && !cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab', 'zz-verif-otro']))).ok);
   t('LM-54: revisarEnsayo rechaza sesión en la cuenta de pruebas o movimientos sin revertir', !cp.revisarEnsayo(ens(zz(cp.ESPERADOS), { cuentaSesion: { id: 2, esPruebas: true } })).ok && !cp.revisarEnsayo(ens(zz(cp.ESPERADOS), { movimientosSinRevertir: 1 })).ok);
   t('LM-54: los dos scripts cargan con la bandera apagada', cp.casos.length === 1 && require('./cuenta-pruebas-revertir.spec.js').casos[0].c === 'r' && c.GUARDIA.cuentaPruebas === false);
+  // v0.10.1 (LM-54 paso 4): reingreso de los 4 perfiles en la cuenta nueva
+  const rz = require('./reingreso-zz.spec.js');
+  const me = (cu, cs, n = 'zz-verif-admin', nc = 'zz-verif-pruebas') => ({ status: 200, user: { cuenta_id: cu, nombre: n }, cuenta: { id: cs, nombre: nc } });
+  t('LM-54 reingreso: previo listo / no movido / reingresar / sin sesión', rz.decidirPrevio(me(9, 9)) === 'listo' && rz.decidirPrevio(me(1, 1, 'zz-verif-admin', 'negocio')) === 'no-movido' && rz.decidirPrevio(me(9, 1, 'zz-verif-admin', 'negocio')) === 'reingresar' && rz.decidirPrevio({ status: 401 }) === 'reingresar');
+  t('LM-54 reingreso: borra todo el almacenamiento de la app salvo Firebase', JSON.stringify(rz.clavesABorrar(['str-token', 'firebase:authUser:x', 'str-turnos-v1'])) === '["str-token","str-turnos-v1"]' && JSON.stringify(rz.basesABorrar(['str-cola-subida', 'firebaseLocalStorageDb', 'firebase-heartbeat-database'])) === '["str-cola-subida"]');
+  t('LM-54 reingreso: revisar exige cuenta de pruebas, mismo usuario y nombre del perfil', rz.revisarReingreso(me(9, 9, 'zz-verif-colab2'), 'colab2').ok && !rz.revisarReingreso(me(9, 1, 'zz-verif-admin', 'negocio'), 'admin').ok && !rz.revisarReingreso(me(9, 9, 'zz-verif-oper'), 'admin').ok);
+  t('LM-54 reingreso: 4 casos, uno por perfil, desde un archivo estático', rz.casos.map((x) => x.perfil).join() === 'admin,oper,colab,colab2' && rz.casos.every((x) => x.pagina === '/str-api.js'));
 }
 { // v0.9.0 (LM-52): sin internet a mitad de la corrida · (LM-53): guardia de la purga de movimientos de prueba
   const { esSinRed, esperarRed, correrConSesion } = require('./probar-lote');

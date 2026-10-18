@@ -198,6 +198,32 @@ try:
     for x in _r.get('avisos', []): avi(x['regla'], 'mapa', x['id'], x['detalle'])
 except Exception as ex: avi('M0 mapa', 'archivo', 'herramientas/modelo/mapa.py', f'no se pudo correr: {ex}')
 
+# LM-56 (MJ-15 fase C): origen del fallo en cada INC. Valor fuera de la lista = error R9; INC desde la fecha de LM-56 sin
+# los dos campos = aviso (la clasificación hacia atrás la hace Desarrollo, sin plazo).
+_io = E.get('incidenteOrigen') or {}
+if _io:
+    for i in seg.get('incs', []):
+        for campo in ('causaRaiz', 'debioDetectarse'):
+            v = i.get(campo)
+            if v is not None and v not in _io.get(campo, []): err('R9 origen', 'incidente', i.get('id'), f'{campo}={v!r} fuera de la lista (LM-56)')
+        if str(i.get('fecha') or '') >= _io.get('desde', '9999') and not (i.get('causaRaiz') and i.get('debioDetectarse')):
+            avi('R9 origen', 'incidente', i.get('id'), 'sin causaRaiz o debioDetectarse (LM-56: los propone el juez, los confirma Desarrollo)')
+
+# LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
+# mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
+try:
+    _mm = json.load(open(os.path.join(RAIZ, 'interno/mapa-modulos.json'), encoding='utf-8'))
+    _base = int(re.sub(r'\D', '', str(_mm.get('lineaBaseHasta') or 'L-0')) or 0)
+    _hist = ' '.join(str(h.get('lote') or '') for h in _mm.get('historial', []))
+    for c in cambios:
+        lote = str(c.get('lote') or '')
+        mm = re.fullmatch(r'L-(\d+)', lote)
+        if not mm or c.get('tipo') == 'modelo' or c.get('estado') not in ('aceptado', 'cerrado'): continue
+        if int(mm.group(1)) <= _base: continue
+        if not re.search(r'(?<![\w-])' + re.escape(lote) + r'(?![\w-]|\d)', _hist):
+            err('M7 mapa', 'lote', lote, 'aceptado sin fila en mapa-modulos.json › historial (LM-55): anota su cambio o agrégalo a la fila «sin cambios en el mapa»')
+except Exception as ex: avi('M7 mapa', 'archivo', 'interno/mapa-modulos.json', f'no se pudo revisar el historial: {ex}')
+
 # Informe
 res = {'fecha': ahora.strftime('%Y-%m-%d %H:%M'), 'errores': ERR, 'avisos': AVI,
        'conteos': {'requisitos': len(reqs), 'decisiones': len(das), 'pedidos': len(pedidos), 'planes': len(planes), 'lotes': len(lotes), 'cambios': len(cambios), 'items': len(items), 'mensajes': len(mensajes), 'encargos': len(encargos)}}

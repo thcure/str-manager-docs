@@ -2,9 +2,10 @@
  "version": 1,
  "lineaBase": "2026-10-15",
  "codigo": {
-  "version": "p5c96",
-  "schema": 12,
-  "rama": "main"
+  "version": "p5c109",
+  "schema": 13,
+  "rama": "main",
+  "alDia": "2026-10-18 (fase A de MJ-15: lotes hasta L-152)"
  },
  "escritor": "rol-arquitecto (LM-40, MJ-14); Diseño corrige hechos de producto por el buzón; Desarrollo propone anclajes de guiones por el buzón",
  "que": "Mapa del STR legible por máquina: módulos, actores, relaciones, reglas que los cruzan, infraestructura y externos, y el anclaje de cada REQ y de cada guion e2e a sus módulos. Es la fuente del mapa gráfico (interno/arquitectura/mapa-str.html) y la columna vertebral del diseño de pruebas (OM-1). El estado de cada REQ se lee de diseno.json / reqs-historial.json; los lotes e INC de seguimiento.json; las reglas completas de claude/arquitectura/reglas-transversales.md (un dato, una fuente).",
@@ -172,7 +173,7 @@
    "nombre": "Shell y menú",
    "familia": "transversal",
    "estado": "construido",
-   "que": "Marco de la aplicación: abre cada módulo en un iframe, aplica el rol al menú, panel Configuración (Copia en Google Drive), aviso fijo del corte, aviso «Subir mis datos», respaldo ⬇.",
+   "que": "Marco de la aplicación: menú de 4 grupos con «Lo que viene» y solo lo que funciona (L-132), Tablero como página de inicio de admin y operador (L-143), abre cada módulo en un iframe, aplica el rol al menú, panel Configuración (Copia en Google Drive), aviso fijo del corte, respaldo ⬇; espera a Firebase antes de renovar la sesión (L-133). Desde L-132 ya no escribe colecciones (sin paneles de maqueta ni aviso «Subir mis datos»).",
    "paginas": [
     "str-app-shell.html"
    ],
@@ -185,9 +186,7 @@
     "/drive/desconectar"
    ],
    "colecciones": {
-    "escribe": [
-     "(las no migradas que sube _uploadMisDatos)"
-    ],
+    "escribe": [],
     "lee": [
      "todas las de COL_KEYS"
     ]
@@ -223,7 +222,7 @@
    "nombre": "Cliente compartido (str-api.js)",
    "familia": "transversal",
    "estado": "construido",
-   "que": "`window.STRApi`: get/post/put/del con JWT, renovación de sesión ante 401, `col.pull/push` con una cola de un PUT en vuelo por colección, copia local `str-<col>-v1`, funciones puras (`horas.*`, `reservas.*`, `turnos.*`, `fechas.ymdLocal`), `upload`, `archivoUrl`, `docs.*`.",
+   "que": "`window.STRApi`: get/post/put/del con JWT, renovación de sesión ante 401, `col.pull/push` con una cola de un PUT en vuelo por colección, copia local `str-<col>-v1`, funciones puras (`horas.*`, `reservas.*`, `turnos.*`, `fechas.ymdLocal`), `upload`, `archivoUrl`, `docs.*`. Aviso de almacenamiento lleno ([CUOTA], L-146); err.datos en los errores (L-125).",
    "paginas": [
     "str-api.js"
    ],
@@ -275,7 +274,7 @@
    "nombre": "Servidor PHP (str-api) y almacén /api/col",
    "familia": "transversal",
    "estado": "construido",
-   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos.",
+   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos. Lectura común `api/lib/col-lectura.php` (L-142). El colaborador lee acotado: datos del huésped solo del turno de hoy o mañana (L-144) y su gestión 90 días atrás y adelante, con turnos viejos reducidos a horas (L-145); solo reescribe incidentes propios ya guardados (L-141). Purga suave de movimientos de prueba (L-147) y ensayo de restauración en cuentas zz-verif-restauracion-, que el respaldo y los crones dejan fuera (L-131).",
    "paginas": [
     "api/index.php",
     "api/lib/*",
@@ -288,7 +287,9 @@
     "/health",
     "/diagnostico",
     "/export",
-    "/export/cron"
+    "/export/cron",
+    "/restauracion/{ensayo,constancia,borrar} (L-131, solo admin)",
+    "GET/POST /purga-prueba/movimientos (L-147, solo admin)"
    ],
    "colecciones": {
     "escribe": [
@@ -515,7 +516,7 @@
    "nombre": "Flujos de trabajo",
    "familia": "operativo",
    "estado": "construido",
-   "que": "Editor de flujos (generales, copias por propiedad, compuestos), categorías, zonas, fotos exigidas, tiempos, tarea de inventario, importar/exportar Excel; las guías se enlazan desde el popover.",
+   "que": "Editor de flujos (generales, copias por propiedad, compuestos), categorías, zonas, fotos exigidas, tiempos, tarea de inventario, importar/exportar Excel; las guías se enlazan desde el popover. Cada flujo puede llevar emoji y nombre corto (L-139), que leen el tablero y HK.",
    "paginas": [
     "str-flujos.html"
    ],
@@ -561,7 +562,7 @@
    "nombre": "Housekeeping (M1): turnos, checklist, fotos, incidentes, inventario del turno",
    "familia": "operativo",
    "estado": "construido",
-   "que": "Arma los turnos automáticos desde las reservas, checklist desde el flujo base, horas y pago, fotos de tarea (cola local de subida), incidentes con evidencia y expediente, pendientes de cierre, entrega y recepción de zona, lugares y foto al cierre.",
+   "que": "Arma los turnos automáticos desde las reservas, checklist desde el flujo base, horas y pago, fotos de tarea (cola local de subida), incidentes con evidencia y expediente, pendientes de cierre, entrega y recepción de zona, lugares y foto al cierre. Avance y retraso con `str-avance.js`, el mismo cálculo del tablero (L-142); embebido nunca navega a login.html (L-140); la copia de diff guarda de los movimientos solo el id (L-146) y suelta los movimientos purgados al leer (L-147).",
    "paginas": [
     "str-m1-housekeeping.html",
     "str-cola-subida.js",
@@ -635,7 +636,7 @@
    "nombre": "Portal del colaborador",
    "familia": "operativo",
    "estado": "construido",
-   "que": "Vista móvil del colaborador: Hoy / Atrasados / Próximos / Recientes, «Mi dinero», procesos y fotos pendientes; todo sale del iframe de HK (`?modo=colaborador`), nunca reimplementa turnos.",
+   "que": "Vista móvil del colaborador: Hoy / Atrasados / Próximos / Recientes, «Mi dinero», procesos y fotos pendientes; todo sale del iframe de HK (`?modo=colaborador`), nunca reimplementa turnos. Recibe del servidor solo lo de su operación: datos del huésped de hoy o mañana (L-144) y 90 días de gestión (L-145); el iframe de HK deja el alto de la barra fija (L-127).",
    "paginas": [
     "portal.html"
    ],
@@ -682,7 +683,7 @@
    "nombre": "Inventario (INV1/INV2)",
    "familia": "operativo",
    "estado": "parcial",
-   "que": "Artículos, juegos y kits, zonas y lugares, existencias, circuito de la ropa, proveedores, pendientes, movimientos inmutables, accesos por zona, entrega y recepción con diferencias. Definido por construir: activos (INV2-6), actividad de inventario en Flujos (INV2-5), plantillas de arranque (INV2-8).",
+   "que": "Artículos, juegos y kits, zonas y lugares, existencias, circuito de la ropa, proveedores, pendientes, movimientos inmutables, accesos por zona, entrega y recepción con diferencias. Definido por construir: activos (INV2-6), actividad de inventario en Flujos (INV2-5), plantillas de arranque (INV2-8) Suelta los movimientos purgados al leer (L-147); diferencias de entrega y recepción con su resolución (L-114).",
    "paginas": [
     "str-inventario.html"
    ],
@@ -784,7 +785,7 @@
    "nombre": "Copia a Drive y retención (corte mensual)",
    "familia": "transversal",
    "estado": "construido",
-   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3-2 y K3-3 aceptados (15-oct). Sin activar: faltan las tareas programadas de hPanel y el respaldo de api/uploads/ (RT-12).",
+   "que": "Conexión OAuth por negocio (`drive.file`), pasada de copia cada 15 min (evidencia y video primero), insignia ☁ por archivo, aviso fijo del corte y recordatorios 7/3/1, corte mensual único del día 30 (borra binarios; conserva registro y enlace a Drive). K3-2 y K3-3 aceptados (15-oct). Sin activar: faltan las tareas programadas de hPanel y el respaldo de api/uploads/ (RT-12). Lo borrado en un corte se ve desde Drive o como «Eliminado en el corte del…» en /archivo y /expediente (L-125). Las copias zz-verif-restauracion- no pasan por la copia ni el corte (L-131).",
    "paginas": [
     "(tarjeta en el shell; insignia en HK; aviso de corte)",
     "api/lib/drive.php",
@@ -799,7 +800,8 @@
     "/drive/prueba",
     "/drive/copias",
     "POST /drive/cron",
-    "POST /drive/corte"
+    "POST /drive/corte",
+    "POST /drive/corte-prueba (L-124)"
    ],
    "colecciones": {
     "escribe": [
@@ -1105,7 +1107,8 @@
     "str-cobit.html",
     "str-elementos.html",
     "str-base-conocimiento.html",
-    "str-nomenclatura.html"
+    "str-nomenclatura.html",
+    "str-lo-que-viene.html (L-132, solo admin)"
    ],
    "rutas": [
     "(ninguna del STR; GitHub raw)"
@@ -1323,7 +1326,7 @@
    "origen": "FL",
    "destino": "HK",
    "mecanismo": "colección `flujos` (+ `flujo-categorias`)",
-   "dato": "actividades, tareas, subflujos, zonas, fotos exigidas, tiempos, tarea de inventario",
+   "dato": "actividades, tareas, subflujos, zonas, fotos exigidas, tiempos, tarea de inventario; emoji y nombre corto del flujo (L-139).",
    "regla": "Editar la plantilla no cambia las copias",
    "rt": [],
    "estado": "vigente",
@@ -1447,7 +1450,7 @@
    "origen": "K3",
    "destino": "HK",
    "mecanismo": "corte mensual (L-124) + vista (L-125)",
-   "dato": "borra binarios (también *.min.jpg); el registro conserva fecha, huella, corte y enlace; la app muestra el archivo desde Drive",
+   "dato": "borra binarios (también *.min.jpg); el registro conserva fecha, huella, corte y enlace; la app muestra el archivo desde Drive; /archivo y /expediente traen de Drive lo borrado o responden 410 (L-125).",
    "regla": "",
    "rt": [
     "RT-8",
@@ -1515,7 +1518,7 @@
    "destino": "CAL",
    "mecanismo": "`POST /sync-ical` cada 15 min",
    "dato": "reservas nuevas, canceladas, finalizadas; bloqueos de feed",
-   "regla": "El historial nunca se borra",
+   "regla": "El historial nunca se borra. Deja fuera las cuentas zz-verif-restauracion- (L-131).",
    "rt": [
     "RT-22"
    ],
@@ -1589,7 +1592,7 @@
    "origen": "cron",
    "destino": "K3",
    "mecanismo": "`POST /drive/cron` y `POST /drive/corte` cada 15 min (por crear)",
-   "dato": "pasada de copia; corte solo en la ventana del día 30",
+   "dato": "pasada de copia; corte solo en la ventana del día 30; deja fuera las cuentas zz-verif-restauracion- (L-131).",
    "regla": "Sin respaldo de api/uploads/ no se crea la tarea del corte",
    "rt": [
     "RT-12",
@@ -2777,6 +2780,72 @@
    "fecha": "2026-10-17",
    "cambio": "L-143 (OP-1b) aceptado (13:34, cuadra con pruebas.json): OP pasa a «construido» (tablero completo: página de inicio, alertas y «Sin turno hoy»)",
    "lote": "L-143"
+  },
+  {
+   "fecha": "2026-10-18",
+   "cambio": "Puesta al día (MJ-15 fase A): versión p5c109, schema 13; la línea base cubría hasta L-126 (p5c96).",
+   "lote": "MJ-15"
+  },
+  {
+   "fecha": "2026-10-15",
+   "cambio": "L-127: POR, el iframe de HK deja el alto de la barra fija (sin relación nueva).",
+   "lote": "L-127"
+  },
+  {
+   "fecha": "2026-10-15",
+   "cambio": "L-128: HK, la cola de subida no sube una foto antes de guardarla (sin relación nueva).",
+   "lote": "L-128"
+  },
+  {
+   "fecha": "2026-10-16",
+   "cambio": "L-131: SRV, ruta nueva /api/restauracion/{ensayo,constancia,borrar} (DA-44); el respaldo y los crones de sync-ical, copia a Drive y corte dejan fuera las cuentas zz-verif-restauracion- (REL-22, REL-28).",
+   "lote": "L-131"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-132: SH, menú de 4 grupos con «Lo que viene» y sin paneles de maqueta (ya no escribe colecciones); PRJ, página nueva str-lo-que-viene.html (lee por REL-24); HK quita dos maquetas.",
+   "lote": "L-132"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-133: SH espera a Firebase antes de renovar la sesión (REL-02 sigue igual).",
+   "lote": "L-133"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-139: FL, emoji y nombre corto por flujo (campos emoji? y nombreCorto? en flujos; REL-07).",
+   "lote": "L-139"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-140: HK embebido nunca navega a login.html; usa str:sin-sesion (REL-02).",
+   "lote": "L-140"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-141: SRV, el colaborador solo reescribe incidentes propios ya guardados (DA-46).",
+   "lote": "L-141"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-144 y L-145: SRV, HK, POR, lectura del colaborador acotada (datos del huésped de hoy o mañana; gestión 90 días; turnos viejos reducidos a horas) (DA-45).",
+   "lote": "L-144 · L-145"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-146: HK, API, INV, la copia de diff guarda de los movimientos solo el id; aviso de almacenamiento lleno.",
+   "lote": "L-146"
+  },
+  {
+   "fecha": "2026-10-17",
+   "cambio": "L-147: SRV, ruta nueva /api/purga-prueba/movimientos (solo admin); HK e INV sueltan los movimientos purgados al leer.",
+   "lote": "L-147"
+  },
+  {
+   "fecha": "2026-10-18",
+   "cambio": "Sin cambios en el mapa (solo guiones o pruebas): L-135, L-136, L-138, L-149, L-152.",
+   "lote": "L-135 · L-136 · L-138 · L-149 · L-152"
   }
- ]
+ ],
+ "lineaBaseHasta": "L-126"
 }

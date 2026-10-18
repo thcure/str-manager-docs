@@ -330,6 +330,35 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
     t('LM-51: lote sin caídas → una corrida, sin repetidos', v3 === 1 && !r4.casos[0].repetidoPorSesion);
   })();
 }
+{ // v0.10.0 (LM-54): guardia de /api/cuenta-pruebas (DA-47, L-150)
+  const c = require('./comun');
+  const B = 'https://app.apartamentosbucaramanga.com', U = B + '/api/cuenta-pruebas';
+  const d = (b, m = 'POST', u = U) => c.decidir(u, m, JSON.stringify(b), new Set(), new Set());
+  const mover = { confirmo: 'zz-verif-pruebas', ids: [11, 12, 13, 14] };
+  t('LM-54: sin la bandera, mover corta aunque diga zz-verif-', !d(mover).ok);
+  t('LM-54: sin la bandera, revertir corta', !d({ confirmo: 'zz-verif-pruebas', revertir: true }).ok);
+  t('LM-54: el ensayo (GET) pasa como lectura', c.decidir(U, 'GET', '', new Set(), new Set()).ok);
+  t('LM-54: PUT y DELETE cortan', !d(mover, 'PUT').ok && !d(mover, 'DELETE').ok);
+  t('LM-54: otra ruta bajo /api/cuenta-pruebas/ corta', !d(mover, 'POST', U + '/otra').ok);
+  c.GUARDIA.cuentaPruebas = true; c.GUARDIA.cuentaPruebasModo = 'mover'; c.GUARDIA.cuentaPruebasIds = new Set(['11', '12', '13', '14']);
+  t('LM-54: modo mover con los ids del ensayo pasa', d(mover).ok);
+  t('LM-54: un id que el ensayo no listó corta', !d({ confirmo: 'zz-verif-pruebas', ids: [11, 99] }).ok);
+  t('LM-54: sin confirmo exacto corta', !d({ confirmo: 'zz-verif-', ids: [11] }).ok);
+  t('LM-54: lista vacía u 11 ids cortan', !d({ confirmo: 'zz-verif-pruebas', ids: [] }).ok && !d({ confirmo: 'zz-verif-pruebas', ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }).ok);
+  t('LM-54: revertir en modo mover corta', !d({ confirmo: 'zz-verif-pruebas', revertir: true }).ok);
+  c.GUARDIA.cuentaPruebasModo = 'revertir';
+  t('LM-54: modo revertir pasa sin ids', d({ confirmo: 'zz-verif-pruebas', revertir: true }).ok);
+  t('LM-54: revertir con ids corta', !d({ confirmo: 'zz-verif-pruebas', revertir: true, ids: [11] }).ok);
+  t('LM-54: mover en modo revertir corta', !d(mover).ok);
+  c.GUARDIA.cuentaPruebas = false; c.GUARDIA.cuentaPruebasModo = null; c.GUARDIA.cuentaPruebasIds = new Set();
+  const cp = require('./cuenta-pruebas.spec.js');
+  const zz = (n) => n.map((x, i) => ({ id: 11 + i, nombre: x, rol: 'admin' }));
+  const ens = (u, o = {}) => Object.assign({ ensayo: true, cuentaSesion: { id: 1, esPruebas: false }, destino: { existe: false, id: null }, usuariosZz: u, movimientosSinRevertir: 0 }, o);
+  t('LM-54: revisarEnsayo acepta exactamente los 4', cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab2', 'zz-verif-colab']))).ok);
+  t('LM-54: revisarEnsayo rechaza 3, 5 o uno distinto', !cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab']))).ok && !cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab', 'zz-verif-colab2', 'zz-verif-x']))).ok && !cp.revisarEnsayo(ens(zz(['zz-verif-oper', 'zz-verif-admin', 'zz-verif-colab', 'zz-verif-otro']))).ok);
+  t('LM-54: revisarEnsayo rechaza sesión en la cuenta de pruebas o movimientos sin revertir', !cp.revisarEnsayo(ens(zz(cp.ESPERADOS), { cuentaSesion: { id: 2, esPruebas: true } })).ok && !cp.revisarEnsayo(ens(zz(cp.ESPERADOS), { movimientosSinRevertir: 1 })).ok);
+  t('LM-54: los dos scripts cargan con la bandera apagada', cp.casos.length === 1 && require('./cuenta-pruebas-revertir.spec.js').casos[0].c === 'r' && c.GUARDIA.cuentaPruebas === false);
+}
 { // v0.9.0 (LM-52): sin internet a mitad de la corrida · (LM-53): guardia de la purga de movimientos de prueba
   const { esSinRed, esperarRed, correrConSesion } = require('./probar-lote');
   const c = require('./comun');

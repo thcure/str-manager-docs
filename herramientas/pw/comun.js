@@ -114,7 +114,7 @@ function registrarLeidos(texto, leidos = ID_ZZ_LEIDOS) {
 // v0.5.13: ampliación v5 de LM-35 (pendienteId de un pendiente zz; proveedor y juego también zz) ENCENDIDA tras el
 // cruce de Carlos (14-oct 16:53, chat de Diseño, M-394). Con v5 = false decide como v0.5.6 + M-359 (reversión de una línea);
 // guardia.test.js prueba las dos.
-const GUARDIA = { v5: true, v51: true, v52: true, v53: true, v6: true, v7: true, purgaCompleta: false };   // v0.9.0: v7 = purga de movimientos de prueba solo con ids de la corrida (LM-53, cruce de Carlos 17-oct); purgaCompleta solo la enciende purga-movimientos.spec.js   // v0.6.2: v6 = ensayo de restauración (LM-43, cruce de Carlos)   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
+const GUARDIA = { v5: true, v51: true, v52: true, v53: true, v6: true, v7: true, v8: true, purgaCompleta: false, cuentaPruebas: false, cuentaPruebasModo: null, cuentaPruebasIds: new Set() };   // v0.10.0: v8 = /api/cuenta-pruebas solo desde cuenta-pruebas(-revertir).spec.js (LM-54, cruce de Carlos 18-oct)   // v0.9.0: v7 = purga de movimientos de prueba solo con ids de la corrida (LM-53, cruce de Carlos 17-oct); purgaCompleta solo la enciende purga-movimientos.spec.js   // v0.6.2: v6 = ensayo de restauración (LM-43, cruce de Carlos)   // v0.5.15: v51 (M-398, dentro del cruce de v5) · v0.5.18: v52 (cruce de Carlos 18:22, M-401)
 // v0.5.16 (M-400, L-103): v52 = el PUT a /api/col/inv-pendientes que CIERRA o REASIGNA un pendiente de la corrida (su propio
 // id ya es de la corrida por v51 y su turnoOrigenId sigue siendo un turno zz de la corrida), con el candado R11 más «grupo».
 // No permite crear pendientes (un id que la corrida no tiene se corta). Encendida en 0.5.18 (ok de Diseño y cruce de Carlos 18:22, M-401).
@@ -236,6 +236,27 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
     if (!ids.length || ids.length > 200) return { ok: false, motivo: 'purga con ids: de 1 a 200 (recibidos ' + ids.length + ')' };
     const ajenos = ids.filter((id) => !idsZz.has(id));
     return ajenos.length ? { ok: false, motivo: 'purga de ' + ajenos.length + ' movimiento(s) que esta corrida no creó como zz-verif-' } : { ok: true, nota: 'purga de ' + ids.length + ' movimiento(s) zz de la corrida' };
+  }
+  // v0.10.0 (LM-54, cruce de Carlos 18-oct-2026): cuenta de pruebas (L-150, DA-47). Toda escritura a /api/cuenta-pruebas
+  // (o debajo) se corta, aunque el cuerpo diga zz-verif-. Única excepción: GUARDIA.cuentaPruebas, que solo encienden
+  // cuenta-pruebas.spec.js (modo 'mover': POST exacto con confirmo 'zz-verif-pruebas' e ids, todos leídos en el ensayo
+  // de la misma corrida, en GUARDIA.cuentaPruebasIds) y cuenta-pruebas-revertir.spec.js (modo 'revertir': revertir true,
+  // sin ids). El ensayo es GET y ya pasó por la regla de lectura.
+  if (GUARDIA.v8 && /^\/api\/cuenta-pruebas(\/|$)/.test(u.pathname)) {
+    if (!/^\/api\/cuenta-pruebas\/?$/.test(u.pathname)) return { ok: false, motivo: 'escritura a una ruta bajo /api/cuenta-pruebas/: ' + u.pathname };
+    if (String(metodo).toUpperCase() !== 'POST') return { ok: false, motivo: 'cuenta de pruebas: solo POST (' + metodo + ')' };
+    if (!GUARDIA.cuentaPruebas) return { ok: false, motivo: 'mover o revertir usuarios entre cuentas: solo desde cuenta-pruebas.spec.js (LM-54)' };
+    let j = null; try { j = JSON.parse(cuerpo || ''); } catch (e) { }
+    if (!j || j.confirmo !== 'zz-verif-pruebas') return { ok: false, motivo: 'cuenta de pruebas sin confirmo «zz-verif-pruebas»' };
+    if (j.revertir === true) {
+      if (j.ids !== undefined) return { ok: false, motivo: 'revertir no lleva ids' };
+      return GUARDIA.cuentaPruebasModo === 'revertir' ? { ok: true, nota: 'revertir el último movimiento a la cuenta de pruebas (cuenta-pruebas-revertir.spec.js, LM-54)' } : { ok: false, motivo: 'revertir: solo en modo revertir (cuenta-pruebas-revertir.spec.js)' };
+    }
+    if (GUARDIA.cuentaPruebasModo !== 'mover') return { ok: false, motivo: 'mover: solo en modo mover (cuenta-pruebas.spec.js)' };
+    const ids = Array.isArray(j.ids) ? j.ids.map(String) : [];
+    if (!ids.length || ids.length > 10) return { ok: false, motivo: 'mover: de 1 a 10 ids (recibidos ' + ids.length + ')' };
+    const ajenos = ids.filter((id) => !GUARDIA.cuentaPruebasIds.has(id));
+    return ajenos.length ? { ok: false, motivo: 'mover ' + ajenos.length + ' usuario(s) que el ensayo de esta corrida no listó como zz-verif-' } : { ok: true, nota: 'mover ' + ids.length + ' usuario(s) zz-verif- a la cuenta de pruebas (cuenta-pruebas.spec.js, LM-54)' };
   }
   if (/^\/api\/drive\/(corte|cron)\/?$/.test(u.pathname)) return { ok: false, motivo: 'pasada programada de Drive (' + u.pathname + '): solo la tarea de hPanel' };
   if (/^\/api\/drive\/corte-prueba\/?$/.test(u.pathname)) {

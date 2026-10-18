@@ -962,7 +962,7 @@
    "severidad": "medio",
    "prioridad": "P3",
    "origen": "guion",
-   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso? · 10:50 Diseño (M-697): P3 por naturaleza, primero por la regla 4 (destraba L-148); la pregunta del desempate va a Carlos. Revisor previo de L-152: mi explicación del orden solo vale si el flujo del turno real dura ≤ 7 min o no tiene flujo (empate en 100 → por nombre); si dura más, el tablero estaría mal. correr\\op1-orden puesto (solo lectura: puesto, clase, motivo y minutos de tramos por fila, sin nombres reales) para confirmarlo antes de encolar L-152."
+   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso? · 10:50 Diseño (M-697): P3 por naturaleza, primero por la regla 4 (destraba L-148); la pregunta del desempate va a Carlos. Revisor previo de L-152: mi explicación del orden solo vale si el flujo del turno real dura ≤ 7 min o no tiene flujo (empate en 100 → por nombre); si dura más, el tablero estaría mal. correr\\op1-orden puesto (solo lectura: puesto, clase, motivo y minutos de tramos por fila, sin nombres reales) para confirmarlo antes de encolar L-152. · 10:52 correr\\op1-orden: turno real «sin flujo» → 100: el tablero ordenó bien (empate → nombre). Deuda: el empate en 100 por nombre no tiene N1 propio (lo prueba el guion cuando se da). L-152 encolado."
   }
  ],
  "dts": [
@@ -14313,6 +14313,15 @@
     "datosDePrueba": "sin limpiar() en el guion (tests/e2e/INC-150.spec.js solo lee, como dice la instrucción)",
     "notas": "pruebas.json trae resultado: «rojo», causa: «fallan: REQ-OP-1.spec.js c» (LM-50). Es un caso de regresion (REQ-OP-1.spec.js, guion fuera del Alcance de L-148). Revisé si aplica la regla de regresión ajena (LM-47b): condiciones (1), (2) y (4) se cumplen, pero falla la (3): su captura no muestra pantalla de login ni error de red/pw (no es motivo a); busqué el mismo guion y letra 'c' en L-141, L-143, L-144, L-145 y L-146 y siempre salió ok:true (no es motivo b, preexistente); y en esta misma corrida no hay otro caso de REQ-OP-1.spec.js con el mismo perfil que haga lo mismo (orden por atención) para citarlo como intermitente (no es motivo c). Como no se cumplen las cuatro condiciones, no va a regresionAjena y el resultado es «no aceptado» por este INC. sesiones: sin perfiles caídos ni recuperados. fase.fase es «completa» (no aplica la regla de Fase 1). Los criterios propios del lote (a, b) están en true."
    }
+  },
+  {
+   "lote": "L-152",
+   "fecha": "2026-10-18",
+   "req": "INC-155",
+   "categoria": "normal",
+   "resumen": "Guion REQ-OP-1 c: orden por atención con la regla de _avOrden (valor conocido, mayor primero, empate por nombre)",
+   "estado": "registrado",
+   "observacion": "Encolado 10:52 (cmp IGUAL). Solo tests/e2e/REQ-OP-1.spec.js. Revisión previa 17/17 tras corregir. Destraba L-148."
   }
  ],
  "esquema": {
@@ -16586,13 +16595,13 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Guion REQ-OP-1 c: el orden por atención con un turno «sin empezar» atrasado (solo guion)",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
-   "desde": "2026-10-18 10:47",
+   "desde": "2026-10-18 10:52",
    "grupo": "OP",
-   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido. · 10:50 revisor previo: 16/17 (13: cita de N1) y una condición sin comprobar (duración del turno real). correr\\op1-orden puesto para comprobarla.",
-   "espera": "resultado de correr\\op1-orden",
-   "esperaA": "CD"
+   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido. · 10:50 revisor previo: 16/17 (13: cita de N1) y una condición sin comprobar (duración del turno real). correr\\op1-orden puesto para comprobarla. · 10:52 correr\\op1-orden (10:50, solo lectura): el turno real atrasado está «sin flujo» → 100; con el zz (61/25 → 100) empatan y va por nombre: el tablero está bien. Guion con la regla de _avOrden (M-698). Revisor previo 17/17. Encolado (cmp IGUAL).",
+   "espera": "construcción y pruebas (fase 1)",
+   "esperaA": "CLI"
   }
  ],
  "riesgos": [

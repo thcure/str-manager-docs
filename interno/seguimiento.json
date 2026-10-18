@@ -907,6 +907,15 @@
    "severidad": "bajo",
    "prioridad": "P3",
    "nota": "Veredicto L-146-3 (juez: medio, revisar si el aviso de cuota demora HK). Evidencia de intermitencia: misma corrida, 20/21 casos de HK verdes (INC-132 b, misma página y perfil, a las 18:15:09); mismo commit c035328 pasó INC-131 en la corrida de las 17:25; [CUOTA] solo envuelve setItem en try/catch (sin espera ni bucle). 18:42: INC-131 aislado puesto (correr\\inc131.txt, pw\\inc131.spec.js, cmp IGUAL). · 18:43 INC-131 aislado: b y c verdes, limpiar sin error (log\\INC131-guion.json). 18:44 reprobar\\L-146.txt puesto. · 18:45 P3 por Diseño (M-660: aislado verde = fragilidad de la prueba; si HK vuelve a tardar 45 s, P2). Arquitecto (M-659): si se repite, mirar la captura: en blanco = red o servidor; a medio pintar = HK. · 19:13 L-146 aceptado (regresión completa sin rojos). Cerrado."
+  },
+  {
+   "id": "INC-150",
+   "fecha": "2026-10-17",
+   "titulo": "Purga de prueba (L-147): las propiedades se reconocen solo por `nombre`, pero guardan el nombre en `name`; los turnos de zz-verif-Propiedad no cuentan como de prueba y 4517 movimientos zz se quedan («turno»)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P2",
+   "nota": "Ensayo real del guion a de L-147 (19:3x): borraría 280 de 4859; excluidos autor 15, referencia 45, turno 4517. _pgContexto mira `$d->nombre` de propiedades; drive-copia (_dcClasificar) ya mira nombre o name. Falla hacia lo seguro (purga menos, nunca algo real). Arreglo: lote L-148 (propiedad: nombre o name; test N1 con una propiedad con `name`). 19:57 registrado."
   }
  ],
  "dts": [
@@ -13800,9 +13809,61 @@
    "req": "INC-146",
    "categoria": "normal",
    "resumen": "Purga de movimientos de inventario de prueba (zz-verif-): GET ensayo / POST borrado suave solo admin; HK e Inventario sueltan los borrados",
-   "estado": "registrado",
-   "observacion": "Encolado 19:17 (cmp IGUAL). Pares comprobados sobre los archivos reales de main c035328 (cola parada). Visto bueno técnico del Arquitecto M-657 (condición MariaDB aplicada); Diseño sin DA (M-652). Revisión previa 17/17. ?v= p5c109. Construido ee2b1fc 19:21 (run.js 91/91).",
-   "hash": "ee2b1fc"
+   "estado": "aceptado",
+   "observacion": "Encolado 19:17 (cmp IGUAL). Pares comprobados sobre los archivos reales de main c035328 (cola parada). Visto bueno técnico del Arquitecto M-657 (condición MariaDB aplicada); Diseño sin DA (M-652). Revisión previa 17/17. ?v= p5c109. Construido ee2b1fc 19:21 (run.js 91/91). Pruebas 19:2x–19:54: verde, causa null; guion a–e verde (ensayo: borraría 280 de 4859; 409 de un purgado; 400 sin confirmo; 403 al operador); regresión 148 casos sin rojos; sesiones sin pérdidas. Juez 19:54: ACEPTADO; cruce veredicto/pruebas hecho por Desarrollo. Veredicto en log\\L-147-veredicto.json. Hallazgo de Desarrollo en el ensayo: 4517 se quedan por «turno» (ver INC-150).",
+   "hash": "ee2b1fc",
+   "aceptacion": {
+    "lote": "L-147",
+    "hash": "ee2b1fc",
+    "fecha": "2026-10-17",
+    "horaBogota": "19:54",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "N1",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK"
+     },
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: preparación: artículo 200 · zona 200 · dos compras 200 | si: ensayo (GET): 200 · ensayo true | si: borraría 280 de 4859 movimientos · se quedan con algo de prueba: {\"autor\":15,\"referencia\":45,\"turno\":4517} | si: muestra (solo ids): [\"mv_mv4fppabokyzq\",\"mv_mv4fqp238nb37\",\"mv_mv4fr3ga9a7xg\",\"mv_mv4fsjbt3krlt\",\"mv_mv4ft3o5yllgl\"] | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: antes: la copia de HK tiene la compra 1: sí | si: purga con ids [compra 1]: 200 · borrados 1 | si: en el servidor: deleted 1 · cantidad 1 · por sí | si: después, en HK: compra 1 en la copia no · en la copia de diff no · compra 2 sigue sí | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: antes: Inventario tiene la compra 2: true | si: purga con ids [compra 2]: 200 · borrados 1 | si: después: en la página no · en la copia local no | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: volver a subir la compra 1 purgada: 409 | si: POST sin confirmo: 400 | si: repetir la purga de las dos compras: 200 · borrados 0 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: operador: GET 403 · POST 403 | escrituras en serie (máx. 1 en vuelo)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Instrucción solo define N1 y N2 (letras a-e); sin N3 (n3Preparados viene vacío, consistente). resultado de pruebas.json es \"verde\" y causa null: todos los n2 en true, regresion (43 casos) en true, entrada (puerta P4) en true. Fase: \"completa\" (LM-49): no hay regresión diferida. Sesiones: sin perdidas, caidos ni recuperadas. regresionSeleccion.ruta.huecos: relación REL-30 (HK→KN) y reglas RT-10, RT-11 no ejercidas por este lote — deuda de cobertura ya señalada por la propia instrucción como hueco esperado, no cambia el resultado. 4 guiones en noCorren (INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5): \"ningún caso cubre un nodo de la ruta\"; no es evidencia ni ausencia de evidencia, no se abre INC."
+   }
   }
  ],
  "esquema": {
@@ -16003,14 +16064,28 @@
    "categoria": "normal",
    "riesgo": "R-3",
    "resumen": "Purga de movimientos de inventario de prueba (zz-verif-): borrado suave solo admin, con ensayo; HK e Inventario sueltan los borrados al leer",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 19:22",
+   "desde": "2026-10-17 19:57",
    "grupo": "HK",
-   "nota": "17:30 pedido del Arquitecto (M-656): producto, lo redacta Desarrollo y el Arquitecto da el visto bueno técnico; Diseño sin DA. Condiciones: (1) solo movimientos de un usuario zz-verif- y con todo lo que referencian de prueba; (2) deleted=1 y updated_at nuevo, sin DELETE; (3) solo admin, con ensayo que cuenta y una línea sin datos en el log; (4) un movimiento sigue dando 409; (5) después de L-146 aceptado y antes de reprobar L-145. Hallazgo al leer el código: Inventario y HK no aplican los borrados de inv-movimientos (nunca los hubo); el lote lo añade. · 17:56 redactado (claude/producto/borradores/L-147-instr-inc146-purga-movimientos-prueba.md): GET ensayo / POST con confirmo e ids; regla en api/lib/purga-prueba.php (autor zz Y artículo o juego, lugares, turno, pendiente y responsable de prueba; referencias cerradas); tandas con hora de milisegundos reales (el cursor since truncado a .000 no las perdería); HK e Inventario aplican deletedIds. N1 21/0 (regla real en php; _pgPurgarBD real sobre SQLite). Guion INC-146-purga: purga solo sus 2 compras. Revisión previa (subagente) 15/17 → corregidos 5 y 14 y 12 defectos. Pares contra la copia de main de L-146; se rehacen contra los archivos reales de LENOVO al encolar (sin lote corriendo). · 17:58 visto bueno técnico del Arquitecto (M-657) con condición: sin JSON_OBJECT/JSON_EXTRACT anidado (MariaDB 11.8). 18:00 aplicada: data completo de catálogos y un JSON_EXTRACT suelto de propId para turnos, normalizado en PHP (_pgEscalarSql); N1 23/0. Guardia de pw: LM-53 del Arquitecto (crítico, a Carlos), no frena L-147. Orden: L-146 → L-147 → purga completa (script del Arquitecto) → reprueba L-145. · 19:15 L-146 aceptado: libre para encolar. · 19:17 pares rehechos sobre los archivos reales de main c035328 (solo cambiaba el ?v=; pares sin versión) — IGUAL; N1 23/0; encolado, cmp IGUAL. · 19:21 construido ee2b1fc (19:18–19:21): § 1, § 2, R1, H1, I1–I2, C1, D1; ?v= p5c109; run.js 91/91; test 23/23 (php y pdo_sqlite); 9 declarados = tocados. En pruebas. · 19:25 M-663: tras el veredicto, nada a la cola hasta que el Arquitecto confirme LM-52/LM-53 instalados; luego su purga completa y la reprueba de L-145.",
-   "espera": "pruebas y veredicto del juez",
-   "esperaA": "Cola",
+   "nota": "17:30 pedido del Arquitecto (M-656): producto, lo redacta Desarrollo y el Arquitecto da el visto bueno técnico; Diseño sin DA. Condiciones: (1) solo movimientos de un usuario zz-verif- y con todo lo que referencian de prueba; (2) deleted=1 y updated_at nuevo, sin DELETE; (3) solo admin, con ensayo que cuenta y una línea sin datos en el log; (4) un movimiento sigue dando 409; (5) después de L-146 aceptado y antes de reprobar L-145. Hallazgo al leer el código: Inventario y HK no aplican los borrados de inv-movimientos (nunca los hubo); el lote lo añade. · 17:56 redactado (claude/producto/borradores/L-147-instr-inc146-purga-movimientos-prueba.md): GET ensayo / POST con confirmo e ids; regla en api/lib/purga-prueba.php (autor zz Y artículo o juego, lugares, turno, pendiente y responsable de prueba; referencias cerradas); tandas con hora de milisegundos reales (el cursor since truncado a .000 no las perdería); HK e Inventario aplican deletedIds. N1 21/0 (regla real en php; _pgPurgarBD real sobre SQLite). Guion INC-146-purga: purga solo sus 2 compras. Revisión previa (subagente) 15/17 → corregidos 5 y 14 y 12 defectos. Pares contra la copia de main de L-146; se rehacen contra los archivos reales de LENOVO al encolar (sin lote corriendo). · 17:58 visto bueno técnico del Arquitecto (M-657) con condición: sin JSON_OBJECT/JSON_EXTRACT anidado (MariaDB 11.8). 18:00 aplicada: data completo de catálogos y un JSON_EXTRACT suelto de propId para turnos, normalizado en PHP (_pgEscalarSql); N1 23/0. Guardia de pw: LM-53 del Arquitecto (crítico, a Carlos), no frena L-147. Orden: L-146 → L-147 → purga completa (script del Arquitecto) → reprueba L-145. · 19:15 L-146 aceptado: libre para encolar. · 19:17 pares rehechos sobre los archivos reales de main c035328 (solo cambiaba el ?v=; pares sin versión) — IGUAL; N1 23/0; encolado, cmp IGUAL. · 19:21 construido ee2b1fc (19:18–19:21): § 1, § 2, R1, H1, I1–I2, C1, D1; ?v= p5c109; run.js 91/91; test 23/23 (php y pdo_sqlite); 9 declarados = tocados. En pruebas. · 19:25 M-663: tras el veredicto, nada a la cola hasta que el Arquitecto confirme LM-52/LM-53 instalados; luego su purga completa y la reprueba de L-145. · 19:54 juez: ACEPTADO (log\\L-147-veredicto.json). 19:57 registrado; hallazgo INC-150 (props por `name`) → L-148 antes de la purga completa.",
+   "espera": "confirmación de LM-52/LM-53 instalados (M-663)",
+   "esperaA": "Arquitecto",
    "hash": "ee2b1fc"
+  },
+  {
+   "lote": "L-148",
+   "req": "INC-150",
+   "categoria": "normal",
+   "riesgo": "R-2",
+   "resumen": "Purga de prueba: la propiedad cuenta como zz-verif- por `nombre` o `name` (como drive-copia)",
+   "estado": "previsto",
+   "vista": "siguiente",
+   "desde": "2026-10-17 19:57",
+   "grupo": "HK",
+   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663).",
+   "espera": "redacción",
+   "esperaA": "CD"
   }
  ],
  "riesgos": [

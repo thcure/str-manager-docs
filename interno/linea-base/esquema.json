@@ -1,0 +1,69 @@
+{
+ "version": 1,
+ "fecha": "2026-10-18",
+ "escritor": "Chat Arquitecto (estructura y extracción); el contenido de producto lo revisa y confirma Chat Diseño con Carlos",
+ "mejora": "MJ-16",
+ "que": "Esquema de la línea base funcional del STR (APO03.02 línea base, BAI02.01 requisitos como brecha de capacidades, ISO/IEC/IEEE 29148, ISO/IEC 25010/25023, ISO/IEC 29119-4). Un archivo por módulo en interno/linea-base/<MOD>.json y un archivo del sistema en interno/linea-base/sistema.json. Lo valida y lo calcula herramientas/modelo/linea-base.py.",
+ "principios": [
+  "Un dato, una fuente: módulos, actores, relaciones (REL-n) y reglas (RT-n) viven en interno/mapa-modulos.json; aquí solo se apuntan por id. Una relación que falte se agrega al mapa, no aquí.",
+  "Dos capas: la funcional (capacidades, casos de uso, flujos, escenarios) no nombra tecnología y sobrevive a una reescritura; la técnica (`tecnica` de cada caso de uso: archivos, rutas, colecciones) se reemplaza en una migración.",
+  "El estado de un caso de uso con prueba no se escribe a mano: lo calcula la herramienta con la última regresión. A mano solo se declara si está construido, en parte, sin construir o fuera de alcance.",
+  "Se levanta por ingeniería inversa desde lo que existe (código, REQ, DA, guiones, incidentes, mapa) y se valida con pruebas; lo que no cuelga de ningún caso de uso es una pista de alcance incompleto."
+ ],
+ "niveles": {
+  "sistema": "sistema.json: objetivos, alcance (dentro / fuera), módulos con su estado de levantamiento.",
+  "modulo": "<MOD>.json: el módulo del mapa (id), su alcance propio, sus capacidades y casos de uso.",
+  "capacidad": "Grupo de cosas que el módulo sabe hacer. Id CAP-<MOD>-<n>.",
+  "casoUso": "Un actor (o el sistema) logra algo concreto. Id CU-<MOD>-<n>.<m>. Es la unidad que se mide y que las pruebas cubren."
+ },
+ "archivoModulo": {
+  "modulo": "id del módulo en mapa-modulos.json (obligatorio)",
+  "version": "entero; sube con cada revisión",
+  "estadoArchivo": "borrador | revisado-diseno | vigente",
+  "levantadoEn": "AAAA-MM-DD",
+  "fuentes": "lista de lo leído para levantarlo (código en main <versión>, REQ, guiones, incidentes)",
+  "revisiones": "[{fecha, por, que}]",
+  "alcance": "{dentro: [texto], fuera: [texto], nota}",
+  "capacidades": "[capacidad]",
+  "casosUso": "[casoUso]",
+  "sinAtar": "pendientes (INC, DT, T, bolsa) del módulo que no cuelgan de ningún caso de uso, con una línea de por qué: pista de alcance incompleto"
+ },
+ "capacidad": {
+  "id": "CAP-<MOD>-<n> (obligatorio)",
+  "nombre": "corto (obligatorio)",
+  "tipo": "operativa | control | datos | integracion | consulta (obligatorio)",
+  "peso": "esencial | necesaria | accesoria (lo confirma Diseño con Carlos; en borrador puede ir «por-confirmar»)",
+  "que": "una o dos líneas"
+ },
+ "casoUso": {
+  "id": "CU-<MOD>-<n>.<m> (obligatorio; <n> es el número de su capacidad)",
+  "capacidad": "CAP-<MOD>-<n> (obligatorio)",
+  "actor": "[id de actor del mapa, o «sistema»] (obligatorio)",
+  "que": "verbo + objeto, desde el actor (obligatorio)",
+  "declarado": "construido | parcial | no-construido | fuera-de-alcance (obligatorio)",
+  "limitantes": "[texto]: lo que no se puede hoy y por qué (deuda, diseño pendiente, decisión)",
+  "entradas": "[{de: CU-…, dato, rel: REL-n}]: lo que recibe de otro caso de uso (de este u otro módulo); `dato` es el concepto funcional (p. ej. «movimiento de traspaso»), no la colección",
+  "salidas": "[{a: CU-…, dato, rel: REL-n}]: lo que entrega a otro caso de uso",
+  "escenarios": "[{id: E<n>, tipo: principal | alterno | excepcion, dado, cuando, entonces}]: la ruta funcional de prueba (ISO/IEC 29119-4)",
+  "origen": "[REQ-…, DA-…, P-…]: de qué requerimientos o decisiones nace",
+  "reglas": "[RT-n]",
+  "pendientes": "[INC-n, DT-n, T-n, P-n]: lo abierto o pasado que afecta a este caso de uso",
+  "pruebas": "[{guion, casos: [letra], escenarios: [E<n>]}]: guiones de tests/e2e o herramientas/pw que lo comprueban",
+  "tecnica": "{paginas: [], rutas: [], colecciones: [], notas}: realización técnica de hoy (capa que cambia en una reescritura)",
+  "verificado": "{fecha, como}: si no hay prueba y se comprobó a mano o leyendo el código",
+  "confianza": "alta | media | baja: qué tan seguro está quien lo levantó (baja = Desarrollo debe confirmarlo)"
+ },
+ "estadoCalculado": {
+  "comprobado": "construido o parcial, con al menos una prueba cuyo último resultado es verde",
+  "con-incidente": "tiene un INC abierto en pendientes, o su última prueba está en rojo",
+  "sin-prueba": "construido sin prueba (puede llevar `verificado`)",
+  "parcial": "declarado parcial, con prueba verde de lo que sí hace",
+  "no-construido": "declarado así; cuenta en el alcance (es brecha)",
+  "fuera-de-alcance": "no cuenta en el porcentaje"
+ },
+ "cobertura": {
+  "formula": "ISO/IEC 25023, completitud funcional: X = 1 − A/B, con B = casos de uso del alcance (todos salvo fuera-de-alcance) y A = los que no están comprobados.",
+  "pesada": "cada caso de uso pesa por el peso de su capacidad: esencial 3, necesaria 2, accesoria 1 (por-confirmar cuenta 2).",
+  "reporte": "por módulo: % simple, % pesado, conteo por estado calculado y por tipo de capacidad; siempre con la fecha del alcance conocido."
+ }
+}

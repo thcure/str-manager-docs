@@ -67,11 +67,12 @@ svg text{font-family:var(--sans)}
   <div class="tabla"><table>
     <tr><th>Nombre</th><th>Id del rol</th><th>Tipo</th><th>Qué decide o hace</th><th>Escribe (fuente única)</th></tr>
     <tr><td><strong>Carlos</strong></td><td><span class="id d">rol-dueno</span></td><td>Persona</td><td>Aprueba objetivos, decisiones (DA), críticos y cambios del modelo</td><td>Nada; recibe por el Panel y la notificación de Windows</td></tr>
-    <tr><td><strong>Chat Diseño</strong></td><td><span class="id c">rol-diseno</span></td><td>Chat (Sonnet)</td><td>Analista y jefe de proyecto: requisitos, decisiones, planes, prioridades</td><td><code>diseno.json</code>, documentos de REQ</td></tr>
+    <tr><td><strong>Chat Diseño</strong></td><td><span class="id c">rol-diseno</span></td><td>Chat (Opus)</td><td>Analista de negocio: pedidos, bolsa, requisitos al detalle, decisiones (DA), nivel P0–P3 propuesto</td><td><code>diseno.json</code>, documentos de REQ</td></tr>
+    <tr><td><strong>Chat Jefe de proyecto</strong></td><td><span class="id c">rol-jefe-proyecto</span></td><td>Chat (Sonnet)</td><td>Planes, orden de la cola, vigía del trabajo parado, revisión previa de críticos (LM-57)</td><td><code>proyecto.json</code></td></tr>
     <tr><td><strong>Chat Desarrollo</strong></td><td><span class="id c">rol-desarrollo</span></td><td>Chat (Opus)</td><td>Convierte REQ en lotes, encola, registra veredictos, gestiona INC</td><td><code>seguimiento.json</code>, la cola, <code>verificar.json</code>, <code>pre-vuelo.json</code></td></tr>
     <tr><td><strong>Chat Arquitecto</strong></td><td><span class="id c">rol-arquitecto</span></td><td>Chat (Opus)</td><td>Diseña y mantiene el modelo: proceso, encargos, herramientas, fichas</td><td><code>proceso.json</code>, encargos, <code>conocimiento.json</code>, <code>herramientas/</code></td></tr>
     <tr><td><strong>Agente CLI</strong></td><td><span class="id m">rol-cli</span></td><td>claude.exe en LENOVO</td><td>Construye el lote y hace commit y push</td><td>Código de <code>str-manager</code>, <code>log\NN-*.txt</code></td></tr>
-    <tr><td><strong>Agente verificador</strong></td><td><span class="id c">rol-verificador</span></td><td>Tarea de Cowork atada a LENOVO (Sonnet o Opus si es crítico)</td><td>Acepta o rechaza; nunca construye ni corrige</td><td><code>log\NN-veredicto*.json</code></td></tr>
+    <tr><td><strong>Agente verificador</strong></td><td><span class="id c">rol-verificador</span></td><td>Juez local de la cola en LENOVO (<code>claude -p</code>; Sonnet, Opus si es crítico); las tareas de Cowork, pausadas</td><td>Acepta o rechaza; nunca construye ni corrige</td><td><code>log\NN-veredicto*.json</code></td></tr>
     <tr><td><strong>Despertador</strong> (supervisor MEA01)</td><td><span class="id m">maquina</span></td><td>Script cada minuto en LENOVO</td><td>Vigila plazos y señales, avisa, repite, escala; orquesta por código</td><td><code>estado-vivo.json</code>, <code>buzon.log</code></td></tr>
     <tr><td><strong>Cola</strong></td><td><span class="id m">maquina</span></td><td>Script cada minuto en LENOVO</td><td>Arranca lotes si pasan las guardas</td><td><code>_resumen.txt</code>, <code>.corriendo</code>, <code>fallidas\</code></td></tr>
   </table></div>
@@ -84,7 +85,7 @@ svg text{font-family:var(--sans)}
     <tr><td><span class="id">REQ</span></td><td><code>REQ-&lt;MOD&gt;-&lt;n&gt;</code> · MOD = módulo en 1–4 mayúsculas · la <code>-n</code> es obligatoria</td><td><code>REQ-U-8</code>, <code>REQ-INV2-5</code>, <code>REQ-TB-3</code>, <code>REQ-MOD-2</code></td><td>Requisito</td><td>Diseño (los <code>REQ-MOD</code>, el Arquitecto)</td></tr>
     <tr><td><span class="id">DA</span></td><td><code>DA-&lt;n&gt;</code></td><td><code>DA-30</code></td><td>Decisión de Carlos</td><td>Diseño; decide Carlos</td></tr>
     <tr><td><span class="id">P</span></td><td><code>P-&lt;n&gt;</code></td><td><code>P-10</code></td><td>Pedido de Carlos, aún sin REQ</td><td>Diseño</td></tr>
-    <tr><td><span class="id">OB</span> / <span class="id">PT</span></td><td><code>OB-&lt;n&gt;</code> · <code>PT-&lt;n&gt;</code> (<code>PT-M&lt;n&gt;</code> si es del modelo)</td><td><code>OB-3</code>, <code>PT-7</code>, <code>PT-M1</code></td><td>Objetivo · Plan de trabajo</td><td>Diseño</td></tr>
+    <tr><td><span class="id">OB</span> / <span class="id">PT</span></td><td><code>OB-&lt;n&gt;</code> · <code>PT-&lt;n&gt;</code> (<code>PT-M&lt;n&gt;</code> si es del modelo)</td><td><code>OB-3</code>, <code>PT-7</code>, <code>PT-M1</code></td><td>Objetivo · Plan de trabajo</td><td>Diseño (OB) · Jefe de proyecto (PT)</td></tr>
     <tr><td><span class="id">L</span></td><td><code>L-&lt;n&gt;</code> en el modelo; en la cola sigue el archivo <code>NN-instr-&lt;tema&gt;.md</code></td><td><code>L-67</code> ↔ <code>67-instr-fix-inc108-un-usuario-un-rol.md</code></td><td>Lote</td><td>Desarrollo; el número se asigna <em>al encolar</em></td></tr>
     <tr><td><span class="id">V</span></td><td><code>V-&lt;lote&gt;-&lt;pasada&gt;</code> ↔ <code>log\NN-veredicto[-k].json</code></td><td><code>V-67-2</code> ↔ <code>67-veredicto-2.json</code></td><td>Veredicto (inmutable)</td><td>Verificador</td></tr>
     <tr><td><span class="id">INC</span></td><td><code>INC-&lt;n&gt;</code> · nivel: crítico · medio · bajo</td><td><code>INC-109</code></td><td>Incidente</td><td>Verificador lo detecta; Desarrollo lo gestiona</td></tr>
@@ -106,7 +107,7 @@ svg text{font-family:var(--sans)}
   <h2>3<span>Entidades por capa y quién las escribe</span></h2>
   <div class="grid">
     <div class="card"><h3>Estructura · <span class="id c">Arquitecto</span></h3><ul><li>proyecto, rol, encargo, proceso</li><li>ficha, lección, herramienta, riesgo</li></ul></div>
-    <div class="card"><h3>Definición · <span class="id c">Diseño</span></h3><ul><li>objetivo, plan de trabajo, requisito</li><li>decisión (DA), pedido, módulo</li><li>La <em>bolsa</em> no es entidad: es la vista de lo que no tiene plan</li></ul></div>
+    <div class="card"><h3>Definición · <span class="id c">Diseño</span></h3><ul><li>objetivo, requisito</li><li>decisión (DA), pedido, módulo</li><li>plan de trabajo y prioridades: <span class="id c">Jefe de proyecto</span></li><li>La <em>bolsa</em> no es entidad: es la vista de lo que no tiene plan</li></ul></div>
     <div class="card"><h3>Ejecución · <span class="id c">Desarrollo</span></h3><ul><li>lote (los estados mecánicos los pone la <span class="id m">máquina</span>)</li><li>cambio, incidente, deuda</li><li>veredicto: lo escribe el <strong>verificador</strong>, nadie lo edita</li><li>evento: quien provoca la transición</li></ul></div>
     <div class="card"><h3>Comunicación · todos</h3><ul><li>mensaje: quien envía lo crea; quien recibe cambia estado y respuesta; si es para Carlos, el remitente lo cierra</li><li>estado vivo: solo el <span class="id m">despertador</span></li></ul></div>
   </div>
@@ -155,7 +156,7 @@ svg text{font-family:var(--sans)}
   <h2>5<span>Buzón y avisos</span></h2>
   <div class="grid">
     <div class="card"><h3>Estados de un mensaje</h3><ul><li><code>pendiente</code> → <code>en curso</code> → <code>hecho</code></li><li><code>superado</code>: lo pone el remitente, con el mensaje que lo reemplaza</li><li><code>vencido</code>: un «Esperando: X» sin respuesta en 2 h; avisa a Carlos</li></ul></div>
-    <div class="card"><h3>Plazos del despertador</h3><ul><li>Aviso al minuto de aparecer</li><li>Recordatorio a los 30 min (como mucho cada 60)</li><li>Escalamiento a Diseño a los 60 min (como mucho cada 120); nunca por mensajes para Carlos</li><li>Respuesta → aviso al remitente (v10)</li></ul></div>
+    <div class="card"><h3>Plazos del despertador</h3><ul><li>Aviso al minuto de aparecer</li><li>Recordatorio a los 30 min (como mucho cada 60)</li><li>Escalamiento al Jefe de proyecto (si no existe, a Diseño) a los 60 min (como mucho cada 120); nunca por mensajes para Carlos</li><li>Respuesta → aviso al remitente (v10)</li></ul></div>
     <div class="card"><h3>Reglas</h3><ul><li>Palabras propias y rutas; nunca instrucciones pegadas ni credenciales</li><li>Nadie espera en silencio: antes de parar, «Esperando: X» a quien lo debe</li><li>Decisión de negocio = DA; al buzón va solo la acción que se necesita</li></ul></div>
   </div>
 </section>
@@ -167,12 +168,13 @@ svg text{font-family:var(--sans)}
     <tr><td><code>interno/instrucciones.json</code></td><td><code>encargos.json</code> (≤ 3 000 caracteres por rol) + <code>procedimientos.json</code></td><td>Arquitecto</td><td>La historia pasa a lecciones</td></tr>
     <tr><td>— (reglas sueltas en scripts)</td><td><code>interno/proceso.json</code></td><td>Arquitecto</td><td>Lo leen despertador, cola, tablero y encargos</td></tr>
     <tr><td><code>interno/seguimiento.json</code> (items, plan, cambios…)</td><td>lotes, cambios, INC, DT, riesgos (fase 1 JSON validado · fase 2 servicio del modelo)</td><td>Desarrollo</td><td>REQ, DA y pedidos salen de aquí</td></tr>
-    <tr><td><code>interno/diseno.json</code></td><td>REQ, DA, pedidos, objetivos, planes (fuente única)</td><td>Diseño</td><td>Estados finales del REQ derivados del lote</td></tr>
+    <tr><td><code>interno/diseno.json</code></td><td>REQ, DA, pedidos, bolsa, objetivos (fuente única)</td><td>Diseño</td><td>Estados finales del REQ derivados del lote</td></tr>
+    <tr><td><code>interno/proyecto.json</code></td><td>planes, prioridades, lecciones de seguimiento (fuente única)</td><td>Jefe de proyecto</td><td>Lo leen Desarrollo, el despertador y Seg. Proyecto (L-151)</td></tr>
     <tr><td><code>interno/conocimiento.json</code></td><td>fichas + mapa; líneas base aparte</td><td>Arquitecto</td><td>La Base de conocimiento se genera</td></tr>
     <tr><td><code>interno/elementos.json</code></td><td>vista generada; se archiva</td><td>—</td><td></td></tr>
     <tr><td><code>interno/marco-trabajo.json</code> · <code>situaciones/*.json</code></td><td>lecciones con <code>aplicadaEn</code> · situaciones por rol</td><td>Arquitecto · cada rol</td><td>Cada lección termina en regla, guardia, plantilla o descartada</td></tr>
     <tr><td><code>interno/mensajes.json</code> · <code>destinatarios.json</code></td><td>mensajes (archivo mensual) · absorbido por <em>rol</em></td><td>todos · Arquitecto</td><td></td></tr>
-    <tr><td><code>herramientas/vigilar-buzon.ps1</code> (v9)</td><td>despertador v10: motor de <code>proceso.json</code>; escribe <code>estado-vivo.json</code></td><td>Arquitecto</td><td>Instalado en LENOVO · <code>buzon\</code></td></tr>
+    <tr><td><code>herramientas/vigilar-buzon.ps1</code> (v11.3)</td><td>despertador v11.3: motor de <code>proceso.json</code>; escribe <code>estado-vivo.json</code></td><td>Arquitecto</td><td>Instalado en LENOVO · <code>buzon\</code></td></tr>
     <tr><td><code>herramientas/ejecutar-cola.ps1</code></td><td>cola con guardas (PAUSA, fallidas, DA en críticos)</td><td>Arquitecto</td><td>Instalado en LENOVO</td></tr>
     <tr><td><code>herramientas/panel/panel-str.ps1</code> (v2)</td><td>Panel v3: empezar/terminar jornada (cierra perfiles de prueba), pre-vuelo, estado vivo, «esperan de ti»</td><td>Arquitecto</td><td>Acceso directo «Panel STR»</td></tr>
     <tr><td><code>str-manager/CLAUDE.md</code></td><td>podado + hooks en <code>.claude/settings.json</code> (cabecera, tests, recarga tras compactar)</td><td>Arquitecto redacta; CLI aplica</td><td></td></tr>

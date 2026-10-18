@@ -953,6 +953,16 @@
    "severidad": "medio",
    "prioridad": "P3",
    "nota": "Veredicto L-145-3. Arreglo en L-149: el guion guarda el id de cada zona que crea, ubica «ficha» por id y limpiar() borra por id (la guardia deja borrar ids de la corrida). Las copias ya acumuladas (L-145, quizá L-148) las limpia el Arquitecto con limpiar-zz (inv-depositos, prefijo zz-verif-L-145-r-). 09:01. · 09:02 Diseño (M-677): P3 por naturaleza, pero va primero por la regla 4 de LM-48 v2 (destraba L-145). · 09:04 limpiar-zz del Arquitecto: 36 zonas zz-verif-L-145-r-/L-148-r- borradas, 0 quedan. · 09:16 L-149 aceptado (fase 1: REQ-INV2-4-1-interfaz no corrió; va en la regresión). Se cierra cuando la reprueba de L-145 lo saque en verde. 09:20 reprobar\\L-145.txt puesto. · 09:59 reprueba de L-145: REQ-INV2-4-1-interfaz verde (b y c). Cerrado."
+  },
+  {
+   "id": "INC-155",
+   "fecha": "2026-10-18",
+   "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orden por % de atraso",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P2",
+   "origen": "guion",
+   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso?"
   }
  ],
  "dts": [
@@ -14258,6 +14268,51 @@
    "aprobacion": "Carlos 18-oct-2026 10:13 (chat del Arquitecto, «ejecuta la fase D»)",
    "estado": "instalado",
    "observacion": "D1–D4 hechos: encargos instalados 10:25 (rol-jefe-proyecto v1, rol-diseno v3 con los ajustes de Diseño M-692, rol-desarrollo v2.1, reglas-comunes); despertador v11.3 instalado en LENOVO 10:18; cobit.json, elementos.json y proceso-cambios.md al día. Falta D5 (Carlos abre el chat), D6 (proyecto.json; L-151) y D7 (verificación)."
+  },
+  {
+   "lote": "L-148",
+   "fecha": "2026-10-18",
+   "req": "INC-150",
+   "categoria": "normal",
+   "resumen": "Purga de prueba: propiedad por nombre o name; turno sin propiedad por propName",
+   "estado": "no aceptado",
+   "hash": "f927201",
+   "observacion": "Reprueba 10:0x–10:40 sobre main f927201. Criterios propios a y b verdes (se quedan por «turno»: 0; borraría 5510 de 5527; N1 91/91). Único rojo: regresión REQ-OP-1 c (fuera del Alcance); el juez no lo excusa por LM-47b (no es red ni preexistente ni intermitente citable) y abre un INC de producto. Cruce veredicto/pruebas hecho por Desarrollo (1 rojo, el mismo). Lectura de Desarrollo: no es defecto del tablero sino del guion — con dos «atrasado» (hoy uno real sin empezar), el guion lee el motivo «Sin empezar · debía empezar … (+N min)» con parseInt (NaN) y compara minutos con el % de atraso; _avOrden ordena por % de la duración (tope 100) y desempata por nombre, tal como está documentado. Causa: INC-155 (guion). Siguiente: L-152 (solo guion) → reprueba de L-148.",
+   "aceptacion": {
+    "lote": "L-148",
+    "hash": "f927201",
+    "fecha": "2026-10-18",
+    "horaBogota": "10:40",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "N2 (guion a, caso único, zz-verif-admin): ensayo (GET): 200 · se quedan por «turno»: 0 (antes de L-148: 4517; tope 450) · borraría 5510 de 5527 · excluidos {\"autor\":15}. N1: node tests/run.js 91/91 archivos OK (incluye B2–B4 y C1–C3 de tests/purga-prueba.test.js)."
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (mismo n1 del criterio a; cubre B2, B3, B5 m25/m26 y el caso C de turno sin propiedad con propName)."
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Tablero (REQ-OP-1): con dos turnos atrasados a la vez, el orden «por atención» no deja primero al que lleva más retraso",
+      "nivel": "medio",
+      "causa": "El orden «por atención» del tablero, cuando hay más de un turno en estado atrasado, no los ordena entre sí por cuánto retraso llevan: dejó primero el turno con 7 min de retraso y después el de 61 min, en vez de poner primero el más urgente.",
+      "observado": "Captura log\\capturas\\L-148\\REQ-OP-1-c-error.png: lista «Por atención» con 1) «1801» atrasado, debía empezar 10:30 am (+7 min); 2) «zz-verif-Propiedad» atrasado, debía empezar 9:36 am (+61 min); 3) «zz-verif-Propiedad» adelantado 39 %. No es pantalla de login ni error de red."
+     }
+    ],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion (tests/e2e/INC-150.spec.js solo lee, como dice la instrucción)",
+    "notas": "pruebas.json trae resultado: «rojo», causa: «fallan: REQ-OP-1.spec.js c» (LM-50). Es un caso de regresion (REQ-OP-1.spec.js, guion fuera del Alcance de L-148). Revisé si aplica la regla de regresión ajena (LM-47b): condiciones (1), (2) y (4) se cumplen, pero falla la (3): su captura no muestra pantalla de login ni error de red/pw (no es motivo a); busqué el mismo guion y letra 'c' en L-141, L-143, L-144, L-145 y L-146 y siempre salió ok:true (no es motivo b, preexistente); y en esta misma corrida no hay otro caso de REQ-OP-1.spec.js con el mismo perfil que haga lo mismo (orden por atención) para citarlo como intermitente (no es motivo c). Como no se cumplen las cuatro condiciones, no va a regresionAjena y el resultado es «no aceptado» por este INC. sesiones: sin perfiles caídos ni recuperados. fase.fase es «completa» (no aplica la regla de Fase 1). Los criterios propios del lote (a, b) están en true."
+   }
   }
  ],
  "esquema": {
@@ -16477,9 +16532,9 @@
    "vista": "siguiente",
    "desde": "2026-10-17 21:22",
    "grupo": "HK",
-   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado. · 10:02 L-145 aceptado: va la reprueba de L-148. reprobar\\L-148.txt puesto (cmp IGUAL).",
-   "espera": "reprueba y veredicto",
-   "esperaA": "Cola",
+   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado. · 10:02 L-145 aceptado: va la reprueba de L-148. reprobar\\L-148.txt puesto (cmp IGUAL). · 10:40 juez: no aceptado por REQ-OP-1 c (regresión). 10:46 registrado: causa INC-155 (guion). Siguiente: L-152 (guion) → reprueba.",
+   "espera": "L-152 (guion REQ-OP-1 c) y reprueba",
+   "esperaA": "CD",
    "hash": "25e21df"
   },
   {
@@ -16523,6 +16578,20 @@
    "grupo": "SH",
    "nota": "10:20 M-693 (Arquitecto, LM-57 cruzado por Carlos 10:13): lote estándar. Páginas: str-seg-proyecto.html (pestaña Diseño: prioridades; Tablero e Ítems: planes, bolsa, plan activo, y objetivos que cruzan planes) y str-nomenclatura.html (texto fijo de roles y archivos). str-lo-que-viene.html solo lee reqs: no cambia. Tests: diseno, tablero, tablero-items, base-conocimiento-diagrama; guiones REQ-TB-3/TB-4. Va detrás de L-148 → purga → barrido; el orden frente a L-150 lo pone el Jefe de proyecto. · 10:29 M-695: encargos instalados; objetivos[] y bolsa[] se quedan en diseno.json; en proyecto.json: planes, prioridades, lecciones de seguimiento y traspaso. Redactando. str-nomenclatura.html no se edita (copia de la fuente del Arquitecto): M-696. · 10:33 M-696: fuente de Nomenclatura actualizada (6fa2bb5, 43 <tr>); va en L-151 (traer la fuente, reponer [STR], huellas nuevas). Falta: pares y ?v= contra LENOVO con la cola libre (L-148 en pruebas) y revisor previo.",
    "espera": "cola libre para leer los archivos reales (L-148 en pruebas)",
+   "esperaA": "CD"
+  },
+  {
+   "lote": "L-152",
+   "req": "INC-155",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Guion REQ-OP-1 c: el orden por atención con un turno «sin empezar» atrasado (solo guion)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "desde": "2026-10-18 10:47",
+   "grupo": "OP",
+   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido.",
+   "espera": "revisor previo",
    "esperaA": "CD"
   }
  ],

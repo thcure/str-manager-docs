@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-17",
+ "actualizadoEn": "2026-10-18 09:11",
  "escritor": "Chat de diseño (encargo rol-diseno)",
  "descripcion": "Lado funcional del proyecto: pedidos de Carlos, estado de cada REQ hasta entregarlo al Chat de desarrollo, decisiones pendientes (DA) y orden del trabajo. Lo escribe solo el Chat de diseño; los demás lo leen. El texto de cada REQ vive en claude/producto/requerimientos-*.md (un dato, una fuente).",
  "esquema": {
@@ -1714,6 +1714,30 @@
    "origen": "INC-141 (Desarrollo, M-598)",
    "fechaDecision": "2026-10-17 08:54",
    "decision": "Carlos (cruce 17-oct 08:5x, Chat Diseño): arreglar INC-141. Texto vigente (actualizado 13:49 con M-604/M-605): en PUT /api/col/tickets el servidor valida contra el ticket GUARDADO; un colaborador solo reescribe los incidentes que creó él (creadoPor guardado); con uno ajeno, 403 sin devolver la fila (ni con updated_at viejo ni nuevo), sin pisarlo ni revivirlo. Los incidentes de su turno los sigue viendo como hoy pero no los edita (no hay campo de asignación). Admin y operador no cambian. inv-movimientos no entra: ya es inmutable (409 a todo rol). Prioridad P2 (LM-48 v2: no impide ejecutar el STR), detrás de OP-1. Crítico (permisos): si cambia el alcance, nuevo cruce."
+  },
+  {
+   "id": "DA-47",
+   "fecha": "2026-10-18",
+   "pregunta": "Datos de prueba visibles en la cuenta real «negocio» (artículos zz-verif-Inv, zz-verif-Lavandería). ¿Se mueven los 4 usuarios zz-verif- y su semilla a una cuenta de pruebas aparte?",
+   "opciones": [
+    {
+     "opcion": "a) Cuenta de pruebas aparte «zz-verif-pruebas»",
+     "consecuencias": "Carlos y el operador no ven nada de prueba; la regresión deja de inflar los datos y el navegador de «negocio»; las purgas no tocan la cuenta real. Costo: ~3 lotes (barrido de limpieza en «negocio», lote de servidor crítico que mueve los 4 usuarios por id con ensayo y reversión, ajustes de K3 y DT-42) y una regresión completa; de Carlos: el cruce y un clic para conectar un Drive aparte para la cuenta de pruebas. Riesgo medio; reversión con un UPDATE."
+    },
+    {
+     "opcion": "b) Ocultar lo zz-verif- en la app",
+     "consecuencias": "Menos trabajo inmediato, pero una regla nueva en cada página y los datos de prueba siguen en la cuenta real (inflan el navegador y las purgas tocan «negocio»)."
+    },
+    {
+     "opcion": "c) Dejarlo como está por ahora",
+     "consecuencias": "Carlos sigue viendo datos de prueba mezclados con los reales."
+    }
+   ],
+   "recomendacion": "a",
+   "estado": "abierta",
+   "reqs": [],
+   "modulo": "Fundación (cuentas) y fábrica de pruebas",
+   "origen": "Revisión de inventario con Carlos (18-oct); propuesta y estimación del Arquitecto (M-678, M-680)"
   }
  ],
  "prioridades": [

@@ -10412,6 +10412,26 @@
     "de": "Chat Arquitecto",
     "texto": "Confirmado con el control de LM-50: verde y aceptado, cuadra. Además es el primer lote en fase 1 de LM-49: pruebas en 6 min, 43 guiones diferidos al tren (lo anoto en LM-49, prueba b). El tren de esa fila lo corro como regresión completa de DA-47 tras mover los usuarios (paso 5), así sirve para las dos cosas. Sigo tu orden: reprueba de L-145 → reprueba de L-148 → purga completa (mía); correr\\inventario-zz ya está puesto y corre cuando la cola quede libre."
    }
+  },
+  {
+   "id": "M-688",
+   "fecha": "2026-10-18",
+   "hora": "09:36",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "L-150 (DA-47): borrador para el ok previo",
+   "texto": "Borrador en claude/producto/borradores/L-150-instr-da47-cuenta-pruebas.md. Crítico. Tu criterio va explícito: un usuario sin zz-verif- nunca se mueve, ni al mover ni al revertir (N1 C2, C6, C11; la regla en PHP manda y el SQL lo repite). Ruta solo admin /api/cuenta-pruebas: GET ensayo sin correos; POST mover por ids (1–10, todo o nada, transacción, registro en cuenta_movimiento, migración 14); POST revertir el último movimiento de la cuenta de la sesión. La cuenta solo sale del JWT. Crones de Drive, corte y sync-ical excluyen la cuenta; export no. Guion solo lee. Revisor previo 17/17. Una pregunta: DA-47 habla de «Drive aparte» para la cuenta de pruebas; con este lote el cron de copia a Drive NO la recorre. Propongo dejarla excluida aquí y que el lote de K3 la habilite cuando Carlos conecte ese Drive (zz-verif- nunca va al Drive real). ¿Ok previo y ok a eso?"
+  },
+  {
+   "id": "M-689",
+   "fecha": "2026-10-18",
+   "hora": "09:36",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "estado": "pendiente",
+   "asunto": "L-150 (DA-47): borrador listo; falta la regla de la guardia para /api/cuenta-pruebas",
+   "texto": "Borrador en claude/producto/borradores/L-150-instr-da47-cuenta-pruebas.md (pido ok previo a Diseño en M-688). Dependencia nueva del revisor previo: hoy decidir() en herramientas/pw/comun.js dejaría pasar POST /api/cuenta-pruebas porque confirmo:'zz-verif-pruebas' lleva zz-verif-. Pido tu regla antes de desplegar: cortar todo POST a /api/cuenta-pruebas salvo tu script del movimiento (el GET pasa; el guion solo hace GET). Para tu script: POST {confirmo:'zz-verif-pruebas', ids:[…]} mueve; POST {confirmo:'zz-verif-pruebas', revertir:true} deshace el último. Tras mover, reingreso de los 4 perfiles (JWT 24 h). K3b/K3c y DT-42 quedan para tu lote de K3 y DT-42. Pares busca/pon: los reconfirmo contra LENOVO cuando la cola quede libre."
   }
  ]
 }

@@ -1851,8 +1851,7 @@
    "capa": "marco",
    "cobit": [
     "BAI02",
-    "BAI11",
-    "APO08.01"
+    "BAI08"
    ],
    "sdlc": [
     "requisitos"
@@ -1863,8 +1862,7 @@
    ],
    "rol": "AP",
    "usa": [
-    "AN",
-    "JP"
+    "AN"
    ],
    "vive": "str-manager-docs/interno/instrucciones.json → rol-diseno",
    "estado": "vigente",
@@ -1872,8 +1870,7 @@
     "APO01"
    ],
    "salida_a": [
-    "BAI02",
-    "BAI11"
+    "BAI02"
    ],
    "relacion": [
     "json-diseno",
@@ -1881,12 +1878,12 @@
     "herramienta-vigilar-buzon"
    ],
    "vigenciaDesde": "2026-10-09",
-   "notas": "Analista de negocio + Jefe de proyecto; pedido por Carlos el 9-oct-2026.",
+   "notas": "Analista de negocio (v3, LM-57, 18-oct-2026); el jefe de proyecto pasó a encargo-rol-jefe-proyecto. Antes: analista + jefe de proyecto (9-oct).",
    "ficha": "BAI11-d"
   },
   {
    "id": "json-diseno",
-   "nombre": "Lado funcional: pedidos, REQ, DA y prioridades (diseno.json)",
+   "nombre": "Lado funcional: pedidos, bolsa, REQ, DA y objetivos (diseno.json)",
    "tipo": "json",
    "capa": "producto",
    "cobit": [
@@ -1919,7 +1916,7 @@
     "encargo-rol-diseno"
    ],
    "vigenciaDesde": "2026-10-09",
-   "notas": "Escritor único: Chat de diseño. Pendiente: mostrarlo en Seg. Proyecto (lote estándar del Chat de desarrollo).",
+   "notas": "Escritor único: Chat Diseño. Desde LM-57 planes[] y prioridades[] pasan a proyecto.json (json-proyecto); se retiran de aquí cuando se acepte L-151.",
    "ficha": "BAI11-d"
   },
   {
@@ -1928,9 +1925,7 @@
    "tipo": "chat",
    "capa": "producto",
    "cobit": [
-    "BAI02",
-    "BAI11",
-    "APO08.01"
+    "BAI02"
    ],
    "sdlc": [
     "requisitos"
@@ -1940,10 +1935,8 @@
     "monitoreo"
    ],
    "rol": "AN",
-   "usa": [
-    "JP"
-   ],
-   "vive": "claude.ai › Proyectos › Diseño y Desarrollo; LENOVO; Sonnet 5.5; sesión en destinatarios.json",
+   "usa": [],
+   "vive": "claude.ai › Proyectos › Diseño y Desarrollo; LENOVO; Opus; sesión en destinatarios.json",
    "estado": "vigente",
    "entrada_de": [
     "EDM01"
@@ -2403,6 +2396,110 @@
    ],
    "vigenciaDesde": "2026-10-15",
    "notas": "Ficha APO03.02-m; LM-40; MJ-14"
+  },
+  {
+   "id": "encargo-rol-jefe-proyecto",
+   "nombre": "Encargo · Chat Jefe de proyecto (rol-jefe-proyecto)",
+   "tipo": "json",
+   "capa": "marco",
+   "cobit": [
+    "BAI11",
+    "APO08.01"
+   ],
+   "sdlc": [],
+   "pmi": [
+    "planificacion",
+    "monitoreo"
+   ],
+   "rol": "AP",
+   "usa": [
+    "JP"
+   ],
+   "vive": "str-manager-docs/interno/instrucciones.json → rol-jefe-proyecto",
+   "estado": "vigente",
+   "entrada_de": [
+    "APO01"
+   ],
+   "salida_a": [
+    "BAI11"
+   ],
+   "relacion": [
+    "json-proyecto",
+    "json-mensajes",
+    "herramienta-vigilar-buzon"
+   ],
+   "vigenciaDesde": "2026-10-18",
+   "notas": "LM-57 (MJ-15 fase D): separa el jefe de proyecto de Diseño.",
+   "ficha": "BAI11-d"
+  },
+  {
+   "id": "json-proyecto",
+   "nombre": "Orden y avance: planes, prioridades y lecciones de seguimiento (proyecto.json)",
+   "tipo": "json",
+   "capa": "gobierno",
+   "cobit": [
+    "BAI11",
+    "APO08.01"
+   ],
+   "sdlc": [],
+   "pmi": [
+    "planificacion",
+    "monitoreo"
+   ],
+   "rol": "JP",
+   "usa": [
+    "AN",
+    "SD"
+   ],
+   "vive": "str-manager-docs/interno/proyecto.json",
+   "estado": "previsto",
+   "entrada_de": [
+    "BAI02"
+   ],
+   "salida_a": [
+    "BAI03",
+    "BAI11"
+   ],
+   "relacion": [
+    "json-diseno",
+    "json-seguimiento",
+    "encargo-rol-jefe-proyecto"
+   ],
+   "vigenciaDesde": "2026-10-18",
+   "notas": "Escritor único: Chat Jefe de proyecto; lo crea en su primer paso (copia de planes[] y prioridades[] de diseno.json). Lo leen el despertador v11.3, validar.py y, desde L-151, Seg. Proyecto.",
+   "ficha": "BAI11-d"
+  },
+  {
+   "id": "chat-jefe-proyecto",
+   "nombre": "Chat Jefe de proyecto",
+   "tipo": "chat",
+   "capa": "gobierno",
+   "cobit": [
+    "BAI11"
+   ],
+   "sdlc": [],
+   "pmi": [
+    "planificacion",
+    "monitoreo"
+   ],
+   "rol": "JP",
+   "usa": [],
+   "vive": "claude.ai › Proyectos › Diseño y Desarrollo; Sonnet; sesión en destinatarios.json (al abrirlo)",
+   "estado": "previsto",
+   "entrada_de": [
+    "EDM01"
+   ],
+   "salida_a": [
+    "BAI03"
+   ],
+   "relacion": [
+    "encargo-rol-jefe-proyecto",
+    "json-proyecto",
+    "json-mensajes"
+   ],
+   "vigenciaDesde": "2026-10-18",
+   "notas": "Lo abre Carlos con el mensaje de arranque de LM-57 § 4.",
+   "ficha": "BAI11-d"
   }
  ]
 }

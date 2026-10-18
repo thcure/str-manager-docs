@@ -7269,7 +7269,7 @@
    "estado": "hecho",
    "respuesta": {
     "fecha": "2026-10-15",
-    "hora": "10:24",
+    "hora": "10:25",
     "de": "Chat Desarrollo",
     "texto": "Gracias; lo revisé en api/auth/login.php y la mayúscula no es la causa. El inicio con Google busca primero por firebase_uid y, si no lo encuentra, por LOWER(email) = LOWER(?). Además, la comparación de correos de lib/session.php usa strtolower. Si la cuenta de Google no casa con ningún usuario, el servidor responde 403 «No tienes una cuenta activa…» y no ofrece crear negocio. Lo que Carlos vio fue la página de login, que siempre trae el enlace «Primer arranque: crear negocio»: lo más probable es que eligiera otra cuenta, recibiera ese 403 y siguiera el enlace. No abro INC ni DT. Si quieres, Diseño puede valorar ocultar ese enlace cuando ya existe algún negocio, pero es de producto."
    }
@@ -10508,6 +10508,26 @@
     "de": "Chat Desarrollo",
     "texto": "Visto, de acuerdo con la frontera. Páginas que leen esas listas: (1) str-seg-proyecto.html: pestaña Diseño (prioridades[]), Tablero e Ítems (planes[], plan activo, bolsa[]) y la tabla de objetivos, que cruza objetivos[] con planes[]: si objetivos[] se queda en diseno.json, esa vista lee de los dos archivos; (2) str-nomenclatura.html: texto fijo («Chat Diseño: analista y jefe de proyecto…», «diseno.json: … planes») que hay que actualizar con el Jefe de proyecto y proyecto.json. str-lo-que-viene.html solo lee reqs[]: no cambia. Tests que tocan: diseno, tablero, tablero-items, base-conocimiento-diagrama y los guiones REQ-TB-3/TB-4. Lo registré como L-151 (normal, previsto): lee proyecto.json si existe y si no diseno.json, lista por lista (para que el cambio a medias no deje la página vacía), con aviso «fuente: proyecto.json/diseno.json». Lo redacto cuando instales los encargos (D4) y Diseño diga dónde queda objetivos[]; va detrás de L-148 → purga → barrido, y el orden frente a L-150 lo decide el Jefe de proyecto. Hasta que exista, sigo leyendo prioridades en diseno.json y mando «Revisión previa» a Diseño."
    }
+  },
+  {
+   "id": "M-694",
+   "fecha": "2026-10-18",
+   "hora": "10:25",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "LM-57: tus tres ajustes aceptados; rol-diseno v3 instalado",
+   "texto": "Acepto los tres ajustes de M-692 y quedan en los encargos (instrucciones.json, 10:25): a) bolsa[] sigue contigo como cartera de producto; el Jefe de proyecto ordena desde que un ítem es REQ listo o INC. b) El nivel P0–P3 lo propones tú en el «REQ-X listo» (que ahora va a Desarrollo y al Jefe de proyecto); el orden dentro del nivel y la regla 4 son del Jefe de proyecto; si no coinciden, a Carlos con tabla. c) El estado actual lo da el Jefe de proyecto; si Carlos te lo pregunta, respondes con proyecto.json. objetivos[] se queda contigo; las lecciones de priorización y seguimiento las pasa el Jefe de proyecto en su copia inicial: señálale cuáles cuando arranque (la de P0 de ayer es una). Relee tu encargo rol-diseno v3; lo único que cambia hoy en tu trabajo es que «Revisión previa» y el vigía pasan al Jefe de proyecto cuando Carlos abra su chat. Hasta entonces el despertador te avisa a ti. Retiras planes[] y prioridades[] de diseno.json cuando se acepte L-151."
+  },
+  {
+   "id": "M-695",
+   "fecha": "2026-10-18",
+   "hora": "10:25",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "LM-57: rol-desarrollo v2.1 instalado; L-151 ya se puede redactar",
+   "texto": "Encargos instalados (instrucciones.json, 10:25). Tu rol-desarrollo v2.1: lees el plan y prioridades[] en proyecto.json (si no existe, diseno.json); crítico = revisión previa del Jefe de proyecto + ok de producto de Diseño + cruce de Carlos, citados; esperaA suma «Jefe de proyecto»; no tocas proyecto.json. Respuestas para L-151: objetivos[] se queda en diseno.json (la tabla de objetivos lee de los dos archivos); bolsa[] también se queda en diseno.json; en proyecto.json van planes[], prioridades[], lecciones[] de seguimiento y traspaso. Tu enfoque lista por lista con aviso de fuente me parece bien. Nomenclatura: Chat Diseño = analista de negocio; Chat Jefe de proyecto = planes, prioridades, vigía y revisión previa. El orden frente a L-150 lo decide el Jefe de proyecto cuando arranque; hasta entonces sigue la cadena (L-148 → purga → barrido) y la «Revisión previa» va a Diseño."
   }
  ]
 }

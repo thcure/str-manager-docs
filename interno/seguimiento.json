@@ -921,10 +921,10 @@
    "id": "INC-151",
    "fecha": "2026-10-17",
    "titulo": "Guion INC-146-purga d y e desfasados con la guardia de LM-53 (corta el POST sin confirmo y el del operador con un id ajeno antes del servidor: 409 en vez de 400/403)",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "bajo",
    "prioridad": "P3",
-   "nota": "Veredicto L-145-2. Arreglo: d sin el POST sin confirmo (lo cubre N1 A2); e con un id de la corrida. Iba en L-148 pero la cola tomó la versión anterior (sin G1–G2); va en L-149 (solo guion). 20:41. · 20:43 P3 (Diseño M-669). · 21:16 también tumba L-148 (la ruta de purga está en su Alcance). 21:22: L-149 lo arregla; luego reprueba de L-148."
+   "nota": "Veredicto L-145-2. Arreglo: d sin el POST sin confirmo (lo cubre N1 A2); e con un id de la corrida. Iba en L-148 pero la cola tomó la versión anterior (sin G1–G2); va en L-149 (solo guion). 20:41. · 20:43 P3 (Diseño M-669). · 21:16 también tumba L-148 (la ruta de purga está en su Alcance). 21:22: L-149 lo arregla; luego reprueba de L-148. · 09:16 L-149 aceptado: d y e verdes con la guardia. Cerrado."
   },
   {
    "id": "INC-152",
@@ -951,7 +951,7 @@
    "estado": "abierto",
    "severidad": "medio",
    "prioridad": "P3",
-   "nota": "Veredicto L-145-3. Arreglo en L-149: el guion guarda el id de cada zona que crea, ubica «ficha» por id y limpiar() borra por id (la guardia deja borrar ids de la corrida). Las copias ya acumuladas (L-145, quizá L-148) las limpia el Arquitecto con limpiar-zz (inv-depositos, prefijo zz-verif-L-145-r-). 09:01. · 09:02 Diseño (M-677): P3 por naturaleza, pero va primero por la regla 4 de LM-48 v2 (destraba L-145). · 09:04 limpiar-zz del Arquitecto: 36 zonas zz-verif-L-145-r-/L-148-r- borradas, 0 quedan."
+   "nota": "Veredicto L-145-3. Arreglo en L-149: el guion guarda el id de cada zona que crea, ubica «ficha» por id y limpiar() borra por id (la guardia deja borrar ids de la corrida). Las copias ya acumuladas (L-145, quizá L-148) las limpia el Arquitecto con limpiar-zz (inv-depositos, prefijo zz-verif-L-145-r-). 09:01. · 09:02 Diseño (M-677): P3 por naturaleza, pero va primero por la regla 4 de LM-48 v2 (destraba L-145). · 09:04 limpiar-zz del Arquitecto: 36 zonas zz-verif-L-145-r-/L-148-r- borradas, 0 quedan. · 09:16 L-149 aceptado (fase 1: REQ-INV2-4-1-interfaz no corrió; va en la regresión). Se cierra cuando la reprueba de L-145 lo saque en verde. 09:20 reprobar\\L-145.txt puesto."
   }
  ],
  "dts": [
@@ -14124,9 +14124,49 @@
    "req": "INC-151, INC-154",
    "categoria": "normal",
    "resumen": "Guiones: INC-146-purga d y e con la guardia de LM-53; REQ-INV2-4-1-interfaz borra sus zonas por id",
-   "estado": "registrado",
-   "observacion": "Encolado 09:06 (cmp IGUAL). Revisión previa 17/17 tras corregir. Solo tests/e2e. Construido f927201 09:10 (run.js 91/91; tocó además el mapa tests-y-despliegue.md).",
-   "hash": "f927201"
+   "estado": "aceptado",
+   "observacion": "Encolado 09:06 (cmp IGUAL). Revisión previa 17/17 tras corregir. Solo tests/e2e. Construido f927201 09:10 (run.js 91/91; tocó además el mapa tests-y-despliegue.md). Pruebas 09:1x: verde, causa null; fase 1 (solo guiones: humo verde, regresión diferida al tren); d y e verdes con la guardia (409 del purgado, borrados 0; operador 403/403). Juez 09:16: ACEPTADO; cruce hecho por Desarrollo. Veredicto en log\\L-149-veredicto.json.",
+   "hash": "f927201",
+   "aceptacion": {
+    "lote": "L-149",
+    "hash": "f927201",
+    "fecha": "2026-10-18",
+    "horaBogota": "09:16",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "n1",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK"
+     },
+     {
+      "c": "humo-pw en verde (fase 1, LM-49)",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "OK s1 si: /api/me 200 · rol admin | OK w si: alta de zz-verif-humo-pw: 200 | si: baja de zz-verif-humo-pw: 200 | escrituras en serie (máx. 1 en vuelo) | OK s2 si: /api/me 200 · rol operador | OK s3 si: /api/me 200 · rol colaborador"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: volver a subir la compra 1 purgada: 409 | si: repetir la purga de las dos compras: 200 · borrados 0 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: operador: GET 403 · POST 403 | escrituras en serie (máx. 1 en vuelo)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado: «verde» · causa: null. Fase 1 (LM-49): regresión diferida al tren: DT-35.spec.js, DT-40.spec.js, DT-41.spec.js, DT-42.spec.js, INC-120-c12.spec.js, INC-120-c3.spec.js, INC-121.spec.js, INC-125.spec.js, INC-126.spec.js, INC-127.spec.js, INC-128-b.spec.js, INC-128.spec.js, INC-130.spec.js, INC-131.spec.js, INC-132.spec.js, INC-134.spec.js, INC-140.spec.js, INC-141.spec.js, INC-146.spec.js, INC-150.spec.js, L-108.spec.js, R-3-db-config.spec.js, REQ-FL-12.spec.js, REQ-INV2-3-4-hk.spec.js, REQ-INV2-3-4.spec.js, REQ-INV2-4-1-interfaz.spec.js, REQ-INV2-4-1.spec.js, REQ-INV2-4-2-dif.spec.js, REQ-INV2-7-1-hk.spec.js, REQ-INV2-7-1.spec.js, REQ-K3b-aviso.spec.js, REQ-K3b.spec.js, REQ-K3c-vista.spec.js, REQ-K3c.spec.js, REQ-MOD-6-carga-rol.spec.js, REQ-MOD-6-carga.spec.js, REQ-MOD-6-complemento.spec.js, REQ-MOD-6-credenciales.spec.js, REQ-MOD-6-lectura.spec.js, REQ-MOD-6.spec.js, REQ-OP-1.spec.js, REQ-OP-1b.spec.js, REQ-SH-2.spec.js. El criterio g (REQ-INV2-4-1-interfaz casos b y c) no se juzga en este lote porque su guion, REQ-INV2-4-1-interfaz.spec.js, quedó entre los diferidos: no es hueco ni falta de evidencia, se revisa en el tren y no cuenta para el resultado. Centinelas de la ruta (REQ-INV2-4-2.spec.js, REQ-INV2-7-1-hk-turno.spec.js) en verde, sin regresión ajena. Deuda de cobertura (regresionSeleccion.ruta.huecos, sin cambiar el resultado): relación REL-30 (HK→KN) y reglas RT-10 (Evidencia de incidentes) y RT-11 (Fotos de tarea); la propia instrucción del lote ya declara que no aplican (solo cambia un guion de pruebas)."
+   }
   }
  ],
  "esquema": {
@@ -16299,11 +16339,11 @@
    "resumen": "INC-120 capas 1 y 2 (DA-45): gestión del colaborador 90 días (lo abierto sigue); turnos viejos reducidos a horas; propiedad mientras la opere; «Mi dinero» 3 meses",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-18 09:01",
+   "desde": "2026-10-18 09:20",
    "grupo": "SRV",
-   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba. · 20:00 reprobar\\L-145.txt puesto (orden de M-664/M-665/M-666: L-146 arregló el almacenamiento; la purga no hace falta antes; LM-52 y LM-53 instalados 19:57). · 20:35 juez: no aceptado por INC-146-purga d/e (INC-151), REQ-MOD-6 g (INC-152) y REQ-OP-1 d (INC-153); criterios propios en verde. 20:41 registrado. · 20:43 orden de Diseño (M-669) y del Arquitecto (M-670): REQ-OP-1 aislado → reprueba de L-145 → L-149; INC-146-purga d/e y REQ-MOD-6 g serían ajenos (el juez ya lo dijo en el veredicto 2: motivo a). L-148 ya estaba en construcción (20:40), no se puede adelantar L-145 a él. · 20:59 Carlos cierra el día (M-672): L-148 en pruebas y correr\\op1 detrás; la reprueba se pone al volver si REQ-OP-1 sale verde. · 21:22 REQ-OP-1 aislado verde. 21:24 listo para reprobar; espero a que Carlos vuelva (la cola queda vacía para apagar, M-675). · 18-oct 08:19 sesiones s1–s4 OK (LENOVO de vuelta). 08:21 reprobar\\L-145.txt puesto. · 08:56 juez: no aceptado por zonas repetidas del guion REQ-INV2-4-1-interfaz (INC-154); purga d/e ajenos. 09:01 registrado. · 09:04 limpieza de zonas hecha (36/36).",
-   "espera": "L-149 (revisión previa en curso) → reprobar",
-   "esperaA": "CD",
+   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba. · 20:00 reprobar\\L-145.txt puesto (orden de M-664/M-665/M-666: L-146 arregló el almacenamiento; la purga no hace falta antes; LM-52 y LM-53 instalados 19:57). · 20:35 juez: no aceptado por INC-146-purga d/e (INC-151), REQ-MOD-6 g (INC-152) y REQ-OP-1 d (INC-153); criterios propios en verde. 20:41 registrado. · 20:43 orden de Diseño (M-669) y del Arquitecto (M-670): REQ-OP-1 aislado → reprueba de L-145 → L-149; INC-146-purga d/e y REQ-MOD-6 g serían ajenos (el juez ya lo dijo en el veredicto 2: motivo a). L-148 ya estaba en construcción (20:40), no se puede adelantar L-145 a él. · 20:59 Carlos cierra el día (M-672): L-148 en pruebas y correr\\op1 detrás; la reprueba se pone al volver si REQ-OP-1 sale verde. · 21:22 REQ-OP-1 aislado verde. 21:24 listo para reprobar; espero a que Carlos vuelva (la cola queda vacía para apagar, M-675). · 18-oct 08:19 sesiones s1–s4 OK (LENOVO de vuelta). 08:21 reprobar\\L-145.txt puesto. · 08:56 juez: no aceptado por zonas repetidas del guion REQ-INV2-4-1-interfaz (INC-154); purga d/e ajenos. 09:01 registrado. · 09:04 limpieza de zonas hecha (36/36). · 09:20 reprobar\\L-145.txt puesto (tras L-149 aceptado y la limpieza de zonas).",
+   "espera": "reprueba y veredicto",
+   "esperaA": "Cola",
    "hash": "3aa9592"
   },
   {
@@ -16357,13 +16397,13 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Guion INC-146-purga d y e con la guardia de LM-53 (solo guion)",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-18 09:10",
+   "desde": "2026-10-18 09:20",
    "grupo": "HK",
-   "nota": "20:41 G1–G2 que no entraron en L-148: d sin el POST sin confirmo; e con un id de la corrida. Solo tests/e2e. · 20:44 redactado (claude/producto/borradores/L-149-instr-inc151-guion-purga-guardia.md): guion completo, cambian d y e. Revisión previa 16/17 → corregido el 11 (P3; va después de la reprueba de L-145) y la línea «Mapa:». La guardia v7 deja pasar todas sus escrituras (R e ids compartidos entre perfiles). · 09:01 amplío L-149 con el arreglo de INC-154 (REQ-INV2-4-1-interfaz borra sus zonas por id); revisión previa de nuevo. · 09:06 revisión previa 2.ª pasada 15/17 → corregidos 6 y 13 (letra y páginas de la prueba derivada), id de la zona tomado de la página si la espera la resuelve el GET del pull, «sin red» en limpiar(). Pares Z1–Z5 sobre el archivo real (IGUAL). Encolado, cmp IGUAL (carpeta nueva). · 09:10 construido f927201 (09:07–09:10): guiones d/e y Z1–Z5; tocados 3 (los 2 declarados + docs/claude/tests-y-despliegue.md, mapa del área, 58 541 car.); run.js 91/91. Visto bueno del Arquitecto (M-679). En pruebas.",
-   "espera": "pruebas y veredicto",
-   "esperaA": "Cola",
+   "nota": "20:41 G1–G2 que no entraron en L-148: d sin el POST sin confirmo; e con un id de la corrida. Solo tests/e2e. · 20:44 redactado (claude/producto/borradores/L-149-instr-inc151-guion-purga-guardia.md): guion completo, cambian d y e. Revisión previa 16/17 → corregido el 11 (P3; va después de la reprueba de L-145) y la línea «Mapa:». La guardia v7 deja pasar todas sus escrituras (R e ids compartidos entre perfiles). · 09:01 amplío L-149 con el arreglo de INC-154 (REQ-INV2-4-1-interfaz borra sus zonas por id); revisión previa de nuevo. · 09:06 revisión previa 2.ª pasada 15/17 → corregidos 6 y 13 (letra y páginas de la prueba derivada), id de la zona tomado de la página si la espera la resuelve el GET del pull, «sin red» en limpiar(). Pares Z1–Z5 sobre el archivo real (IGUAL). Encolado, cmp IGUAL (carpeta nueva). · 09:10 construido f927201 (09:07–09:10): guiones d/e y Z1–Z5; tocados 3 (los 2 declarados + docs/claude/tests-y-despliegue.md, mapa del área, 58 541 car.); run.js 91/91. Visto bueno del Arquitecto (M-679). En pruebas. · 09:16 juez: ACEPTADO.",
+   "espera": "—",
+   "esperaA": "CD",
    "hash": "f927201"
   },
   {

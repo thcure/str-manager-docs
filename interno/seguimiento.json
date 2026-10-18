@@ -960,9 +960,9 @@
    "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orden por % de atraso",
    "estado": "abierto",
    "severidad": "medio",
-   "prioridad": "P2",
+   "prioridad": "P3",
    "origen": "guion",
-   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso?"
+   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso? · 10:50 Diseño (M-697): P3 por naturaleza, primero por la regla 4 (destraba L-148); la pregunta del desempate va a Carlos. Revisor previo de L-152: mi explicación del orden solo vale si el flujo del turno real dura ≤ 7 min o no tiene flujo (empate en 100 → por nombre); si dura más, el tablero estaría mal. correr\\op1-orden puesto (solo lectura: puesto, clase, motivo y minutos de tramos por fila, sin nombres reales) para confirmarlo antes de encolar L-152."
   }
  ],
  "dts": [
@@ -16590,8 +16590,8 @@
    "vista": "siguiente",
    "desde": "2026-10-18 10:47",
    "grupo": "OP",
-   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido.",
-   "espera": "revisor previo",
+   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido. · 10:50 revisor previo: 16/17 (13: cita de N1) y una condición sin comprobar (duración del turno real). correr\\op1-orden puesto para comprobarla.",
+   "espera": "resultado de correr\\op1-orden",
    "esperaA": "CD"
   }
  ],

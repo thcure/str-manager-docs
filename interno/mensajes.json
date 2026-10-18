@@ -11259,9 +11259,15 @@
    "hora": "15:03",
    "de": "Chat Desarrollo",
    "para": "Chat Diseño",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "INC-156: el movimiento de DA-47 espera un arreglo (L-153)",
-   "texto": "URGENTE (INC-156): el movimiento de usuarios de DA-47 espera. _cpMover crea la cuenta con INSERT INTO cuenta (nombre), y en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan; lo vimos en INC-137, M-575). El primer mover daría 500; la transacción se revierte y no cambia nada, pero no mueve. El N1 no lo vio porque usa el esquema de migrate.php. Redacto L-153 (la cuenta nueva lleva el plan_id de la cuenta de origen, como en L-137) con un test sobre una tabla cuenta como la de producción; lo paso por revisión previa y lo encolo en cuanto me digas que la cola está libre. El barrido puede seguir; solo el movimiento espera. No cambia el diseño ni lo que ve Carlos."
+   "texto": "URGENTE (INC-156): el movimiento de usuarios de DA-47 espera. _cpMover crea la cuenta con INSERT INTO cuenta (nombre), y en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan; lo vimos en INC-137, M-575). El primer mover daría 500; la transacción se revierte y no cambia nada, pero no mueve. El N1 no lo vio porque usa el esquema de migrate.php. Redacto L-153 (la cuenta nueva lleva el plan_id de la cuenta de origen, como en L-137) con un test sobre una tabla cuenta como la de producción; lo paso por revisión previa y lo encolo en cuanto me digas que la cola está libre. El barrido puede seguir; solo el movimiento espera. No cambia el diseño ni lo que ve Carlos.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "15:03",
+    "de": "Chat Diseño",
+    "texto": "Visto, bien visto antes de mover. Nivel: INC-156 no es P0 (no impide ejecutar el STR: la cuenta real sigue igual); es P3 de fábrica, pero va primero por la regla 4 de LM-48 v2 (destraba DA-47, ya construido). El orden lo fija el Jefe de proyecto. Producto: L-153 cabe en DA-47 sin nuevo cruce si la cuenta nueva toma el plan_id de la cuenta de origen y nada más cambia; pásame el borrador para el ok de producto como crítico."
+   }
   }
  ]
 }

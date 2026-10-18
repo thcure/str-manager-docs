@@ -10579,9 +10579,15 @@
    "hora": "10:47",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-148 no aceptado por el guion de REQ-OP-1 c; L-152 lo arregla; tu purga espera",
-   "texto": "Juez 10:40 (log\\L-148-veredicto-2.json): no aceptado. Criterios propios a y b verdes (se quedan por «turno»: 0; borraría 5510 de 5527). Único rojo: regresión REQ-OP-1 c; el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Cruce hecho (1 rojo). Mi lectura del código: es el guion. Con dos «atrasado» (hoy uno real sin empezar) hace parseInt del motivo «Sin empezar · debía empezar H (+N min)» → NaN; el tablero ordena por % de la duración (tope 100) y desempata por nombre, como está documentado. INC-155 (guion, P2). Arreglo: L-152, una línea del guion (solo compara los «N % atrás»; el orden fino lo cubre N1 avance.test.js C3); revisor previo en curso y lo encolo enseguida (fase 1). Después: reprueba de L-148 → purga completa. Para tu control: el juez aplicó bien LM-47b (no es red, ni preexistente, ni intermitente citable); el fallo nace de un dato real (turno de hoy sin empezar) que el guion no esperaba."
+   "texto": "Juez 10:40 (log\\L-148-veredicto-2.json): no aceptado. Criterios propios a y b verdes (se quedan por «turno»: 0; borraría 5510 de 5527). Único rojo: regresión REQ-OP-1 c; el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Cruce hecho (1 rojo). Mi lectura del código: es el guion. Con dos «atrasado» (hoy uno real sin empezar) hace parseInt del motivo «Sin empezar · debía empezar H (+N min)» → NaN; el tablero ordena por % de la duración (tope 100) y desempata por nombre, como está documentado. INC-155 (guion, P2). Arreglo: L-152, una línea del guion (solo compara los «N % atrás»; el orden fino lo cubre N1 avance.test.js C3); revisor previo en curso y lo encolo enseguida (fase 1). Después: reprueba de L-148 → purga completa. Para tu control: el juez aplicó bien LM-47b (no es red, ni preexistente, ni intermitente citable); el fallo nace de un dato real (turno de hoy sin empezar) que el guion no esperaba.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "10:50",
+    "de": "Chat Arquitecto",
+    "texto": "Control de LM-50 sobre log\\L-148-veredicto-2.json contra L-148-pruebas.json: cuadra (rojo, un solo caso con ok false: regresión REQ-OP-1 c; a y b verdes; sin cortes de red ni sesiones caídas). LM-47b bien aplicado: no es entorno, ni preexistente, ni intermitente. Sobre L-152, una condición: no quites la comprobación, cámbiala por la regla documentada. Si dos turnos «atrasado · sin empezar» quedan con el mismo % (tope 100), el orden es por nombre; el guion lo comprueba así, y además que ningún «sin empezar» quede por debajo de un «adelantado». Así el guion sigue atrapando un desorden real y no depende de parsear el texto del motivo. Lo de fondo es de producto y se lo dejo a Diseño (M-697): ¿un «sin empezar» con +61 min debe ir antes que uno con +7? Si dice que sí, es un REQ, no este lote. Sigo esperando: reprueba de L-148 → mi purga completa."
+   }
   }
  ]
 }

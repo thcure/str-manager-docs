@@ -1032,13 +1032,13 @@
    "id": "INC-156",
    "fecha": "2026-10-18",
    "titulo": "L-150: _cpMover crea la cuenta «zz-verif-pruebas» con INSERT INTO cuenta (nombre), pero en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan): el primer «mover» dará 500 (rollback, sin daño)",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "alto",
    "prioridad": "P3",
    "origen": "Desarrollo, al revisar L-137 tras aceptar L-150",
    "causaRaiz": "integración",
    "debioDetectarse": "revisión previa",
-   "nota": "15:03 Mismo defecto que INC-137 (restauracion.php:225, M-575: plan_id NOT NULL en la cuenta de producción). Las pruebas usan el esquema de migrate.php (sin plan_id) y por eso C5 pasó. Efecto: el POST mover del Arquitecto daría 500 y la transacción se revierte (nada cambia). Arreglo: L-153, la cuenta nueva lleva el plan_id de la cuenta de origen (como L-137), con N1 sobre una tabla cuenta como la de producción. Bloquea el movimiento de usuarios de DA-47. · 15:05 Diseño (M-742): P3 de fábrica, primero por la regla 4 (destraba DA-47); L-153 cabe en DA-47 sin nuevo cruce si solo toma el plan_id de origen. Borrador L-153 listo; revisor previo en curso."
+   "nota": "15:03 Mismo defecto que INC-137 (restauracion.php:225, M-575: plan_id NOT NULL en la cuenta de producción). Las pruebas usan el esquema de migrate.php (sin plan_id) y por eso C5 pasó. Efecto: el POST mover del Arquitecto daría 500 y la transacción se revierte (nada cambia). Arreglo: L-153, la cuenta nueva lleva el plan_id de la cuenta de origen (como L-137), con N1 sobre una tabla cuenta como la de producción. Bloquea el movimiento de usuarios de DA-47. · 15:05 Diseño (M-742): P3 de fábrica, primero por la regla 4 (destraba DA-47); L-153 cabe en DA-47 sin nuevo cruce si solo toma el plan_id de origen. Borrador L-153 listo; revisor previo en curso. · 15:32 L-153 aceptado. Cerrado (la prueba real es el movimiento del Arquitecto)."
   }
  ],
  "dts": [
@@ -14667,9 +14667,43 @@
    "req": "INC-156",
    "categoria": "crítico",
    "resumen": "La cuenta «zz-verif-pruebas» se crea con el plan_id de su cuenta de origen",
-   "estado": "instalado",
-   "observacion": "Encolado 15:11 (cmp IGUAL). DA-47 (cruce de Carlos 09:13; Diseño: cabe sin nuevo cruce, M-742); revisión previa del Jefe de proyecto M-749; ok de producto M-750. Construido 7f404ae 15:13 (run.js 92/92).",
-   "hash": "7f404ae"
+   "estado": "aceptado",
+   "observacion": "Encolado 15:11 (cmp IGUAL). DA-47 (cruce de Carlos 09:13; Diseño: cabe sin nuevo cruce, M-742); revisión previa del Jefe de proyecto M-749; ok de producto M-750. Construido 7f404ae 15:13 (run.js 92/92). Pruebas verde, fase completa (42 guiones por ruta, sin rojos). Juez 15:32: ACEPTADO; cruce veredicto/pruebas hecho por Desarrollo. Veredicto en log\\L-153-veredicto.json.",
+   "hash": "7f404ae",
+   "aceptacion": {
+    "lote": "L-153",
+    "hash": "7f404ae",
+    "fecha": "2026-10-18",
+    "horaBogota": "15:32",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 92/92 archivos OK (cubre C16–C17 y A13 de tests/cuenta-pruebas.test.js)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "guion a: si: ensayo como operador: 403 Solo admin · guion b: si: ensayo (GET): 200 · ensayo true | si: cuenta de la sesión: id sí · esPruebas false | si: destino: zz-verif-pruebas · existe false · id null | si: si la sesión ya está en la cuenta de pruebas, es el destino: no aplica (cuenta real) | si: usuariosZz: 4 (solo id, nombre y rol; todos zz-verif-: sí) | si: movimientos sin revertir: 0 | si: sin correos en la respuesta: sí"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null; sin casos con ok false. Fase «completa» (lote crítico): 42 guiones de regresión por ruta en verde; 9 no corren (fuera de la ruta), sin huecos de relaciones ni reglas. La instrucción no tiene criterios N3 (n3Preparados vacío); la única captura (INC-125-b-medida) es de regresión. Sesiones sin pérdidas; sin cortes de red."
+   },
+   "tiempos": {
+    "construido": "2026-10-18 15:13",
+    "aceptado": "2026-10-18 15:32",
+    "veredictos": 1,
+    "bloqueados": 0
+   }
   }
  ],
  "esquema": {
@@ -16960,13 +16994,13 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "La cuenta «zz-verif-pruebas» se crea con el plan_id de su cuenta de origen (cuenta.plan_id NOT NULL en producción)",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
    "desde": "2026-10-18 15:13",
    "grupo": "U",
-   "nota": "15:05 Destraba el movimiento de usuarios de DA-47. N1 36/0 (con el código de hoy caen A13 y C16 con «NOT NULL constraint failed: cuenta.plan_id»). Pide: revisor previo (subagente), revisión previa del Jefe de proyecto, ok de producto de Diseño (M-742). · 15:08 revisor previo 17/17 (3 detalles corregidos). Pedidos: revisión previa del Jefe de proyecto y ok de Diseño. · 15:09 revisión previa del Jefe de proyecto 17/17 ok (M-749); ok de producto de Diseño (M-750). 15:11 encolado (cmp IGUAL). Orden: L-153 → ventana de DA-47 (cola sin lotes) → L-137 → L-134 (M-748). · 15:13 construido 7f404ae (run.js 92/92; cuenta-pruebas 36/0; php -l limpio; 3/3 archivos).",
-   "espera": "pruebas y veredicto (crítico)",
-   "esperaA": "verificador",
+   "nota": "15:05 Destraba el movimiento de usuarios de DA-47. N1 36/0 (con el código de hoy caen A13 y C16 con «NOT NULL constraint failed: cuenta.plan_id»). Pide: revisor previo (subagente), revisión previa del Jefe de proyecto, ok de producto de Diseño (M-742). · 15:08 revisor previo 17/17 (3 detalles corregidos). Pedidos: revisión previa del Jefe de proyecto y ok de Diseño. · 15:09 revisión previa del Jefe de proyecto 17/17 ok (M-749); ok de producto de Diseño (M-750). 15:11 encolado (cmp IGUAL). Orden: L-153 → ventana de DA-47 (cola sin lotes) → L-137 → L-134 (M-748). · 15:13 construido 7f404ae (run.js 92/92; cuenta-pruebas 36/0; php -l limpio; 3/3 archivos). · 15:32 juez: ACEPTADO. 15:34 registrado. Sigue la ventana de DA-47 (Arquitecto).",
+   "espera": "",
+   "esperaA": "",
    "hash": "7f404ae"
   }
  ],

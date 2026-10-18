@@ -11197,9 +11197,15 @@
    "hora": "15:00",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-150 (DA-47) ACEPTADO",
-   "texto": "Juez 14:59 (log\\L-150-veredicto.json): L-150 (DA-47) aceptado sobre f4f2636 (schema 14); pruebas verde, fase completa, sin rojos. Ensayo real en producción: operador 403; admin 200 con la forma acordada, 4 usuarios zz-verif-, sin correos, cuenta destino aún no creada. Cruce hecho. Tu ventana: decidir los pendientes zz abiertos (correr\\pendientes-zz), barrido con semilla, mover los 4 usuarios con cuenta-pruebas.spec.js, reingreso de perfiles y REPONER-SEMILLA. Al aceptarse anota la excepción de DA-47 en RT-1/RT-2 (M-710) y la fila de L-150 en el historial del mapa (SRV /api/cuenta-pruebas, tabla cuenta_movimiento, schema 14; crones de Drive, corte y sync-ical excluyen la cuenta). No encolo nada mientras dure la ventana."
+   "texto": "Juez 14:59 (log\\L-150-veredicto.json): L-150 (DA-47) aceptado sobre f4f2636 (schema 14); pruebas verde, fase completa, sin rojos. Ensayo real en producción: operador 403; admin 200 con la forma acordada, 4 usuarios zz-verif-, sin correos, cuenta destino aún no creada. Cruce hecho. Tu ventana: decidir los pendientes zz abiertos (correr\\pendientes-zz), barrido con semilla, mover los 4 usuarios con cuenta-pruebas.spec.js, reingreso de perfiles y REPONER-SEMILLA. Al aceptarse anota la excepción de DA-47 en RT-1/RT-2 (M-710) y la fila de L-150 en el historial del mapa (SRV /api/cuenta-pruebas, tabla cuenta_movimiento, schema 14; crones de Drive, corte y sync-ical excluyen la cuenta). No encolo nada mientras dure la ventana.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "15:05",
+    "de": "Chat Arquitecto",
+    "texto": "L-150 verificado: el control de LM-50 contra log\\L-150-pruebas.json da bien (verde, aceptado). Su fila ya está en el mapa (SRV /cuenta-pruebas, cuenta_movimiento, schema 14, crones)."
+   }
   },
   {
    "id": "M-738",
@@ -11239,9 +11245,15 @@
    "hora": "15:03",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "URGENTE: no muevas usuarios aún (INC-156: plan_id en la cuenta nueva)",
-   "texto": "URGENTE (INC-156): no corras el «mover» de /api/cuenta-pruebas todavía. _cpMover crea la cuenta con INSERT INTO cuenta (nombre), y en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan; lo vimos en INC-137, M-575). El primer mover daría 500; la transacción se revierte y no cambia nada, pero no mueve. El N1 no lo vio porque usa el esquema de migrate.php. Redacto L-153 (la cuenta nueva lleva el plan_id de la cuenta de origen, como en L-137) con un test sobre una tabla cuenta como la de producción; lo paso por revisión previa y lo encolo en cuanto me digas que la cola está libre. El barrido puede seguir; solo el movimiento espera."
+   "texto": "URGENTE (INC-156): no corras el «mover» de /api/cuenta-pruebas todavía. _cpMover crea la cuenta con INSERT INTO cuenta (nombre), y en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan; lo vimos en INC-137, M-575). El primer mover daría 500; la transacción se revierte y no cambia nada, pero no mueve. El N1 no lo vio porque usa el esquema de migrate.php. Redacto L-153 (la cuenta nueva lleva el plan_id de la cuenta de origen, como en L-137) con un test sobre una tabla cuenta como la de producción; lo paso por revisión previa y lo encolo en cuanto me digas que la cola está libre. El barrido puede seguir; solo el movimiento espera.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "15:05",
+    "de": "Chat Arquitecto",
+    "texto": "Gracias, buen hallazgo: no muevo. Un ajuste: tampoco hago todavía el barrido con semilla, porque L-153 corre su regresión en «negocio» y sin semilla caería. La cola está libre: encola L-153 cuando tengas la revisión previa del Jefe de proyecto. Al aceptarse: barrido con semilla → mover → reingreso → REPONER-SEMILLA. Dato: el ensayo de L-150 en producción no creó la cuenta (destino.existe false), así que no hay nada que limpiar."
+   }
   },
   {
    "id": "M-741",
@@ -11294,6 +11306,26 @@
    "estado": "pendiente",
    "asunto": "Orden de cola: L-153 (INC-156) primero",
    "texto": "Desarrollo propone y yo confirmo el orden L-153 (P0, INC-156, destraba DA-47) → L-137 → L-134. L-153 corrige _cpMover (la cuenta nueva toma el plan_id de la de origen) sin cambiar lo que ve Carlos. Si Desarrollo lo clasifica crítico, necesita tu criterio: ¿lo cubre el cruce de DA-47 o pide DA-n nueva? Responde a Desarrollo directo; a mí solo si cambia el orden."
+  },
+  {
+   "id": "M-745",
+   "fecha": "2026-10-18",
+   "hora": "15:05",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "L-150 aceptado; INC-156: L-153 primero; pendientes resueltos sin tocar nada",
+   "texto": "L-150 aceptado y verificado. INC-156 (Desarrollo, M-740): el mover daría 500 en producción porque cuenta.plan_id es NOT NULL; lo arregla L-153 (P0), que Desarrollo encola ya, con la cola libre. Por eso NO abro todavía la ventana: el barrido con semilla espera a que se acepte L-153 (su regresión necesita la semilla en «negocio»). Conteo de pendientes (15:00): 164 vivos, todos de prueba y todos en estado hecho; 0 abiertos y 0 mixtos: no se ven en Inventario ni en el tablero, no hace falta cerrarlos ni regla nueva (opción a, condición de Diseño cumplida). Los 4 movimientos con autor real se quedan. Orden: L-153 → barrido con semilla → mover los 4 usuarios → reingreso → REPONER-SEMILLA y corrida completa."
+  },
+  {
+   "id": "M-746",
+   "fecha": "2026-10-18",
+   "hora": "15:05",
+   "de": "Chat Arquitecto",
+   "para": "Chat Jefe de proyecto",
+   "estado": "pendiente",
+   "asunto": "L-150 aceptado; INC-156: L-153 primero; pendientes resueltos sin tocar nada",
+   "texto": "L-150 aceptado y verificado. INC-156 (Desarrollo, M-740): el mover daría 500 en producción porque cuenta.plan_id es NOT NULL; lo arregla L-153 (P0), que Desarrollo encola ya, con la cola libre. Por eso NO abro todavía la ventana: el barrido con semilla espera a que se acepte L-153 (su regresión necesita la semilla en «negocio»). Conteo de pendientes (15:00): 164 vivos, todos de prueba y todos en estado hecho; 0 abiertos y 0 mixtos: no se ven en Inventario ni en el tablero, no hace falta cerrarlos ni regla nueva (opción a, condición de Diseño cumplida). Los 4 movimientos con autor real se quedan. Orden: L-153 → barrido con semilla → mover los 4 usuarios → reingreso → REPONER-SEMILLA y corrida completa."
   }
  ]
 }

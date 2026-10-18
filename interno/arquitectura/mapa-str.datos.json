@@ -1,9 +1,9 @@
 {
- "generadoEn": "2026-10-18 14:37",
+ "generadoEn": "2026-10-18 15:03",
  "lineaBase": "2026-10-15",
  "codigo": {
   "version": "p5c110",
-  "schema": 13,
+  "schema": 14,
   "rama": "main",
   "alDia": "2026-10-18 (lotes hasta L-152)"
  },
@@ -288,13 +288,15 @@
     "/export",
     "/export/cron",
     "/restauracion/{ensayo,constancia,borrar} (L-131, solo admin)",
-    "GET/POST /purga-prueba/movimientos (L-147, solo admin)"
+    "GET/POST /purga-prueba/movimientos (L-147, solo admin)",
+    "GET/POST /cuenta-pruebas (L-150, solo admin; POST solo desde cuenta-pruebas.spec.js por la guardia v8)"
    ],
    "colecciones": {
     "escribe": [
      "col_item (todas las colecciones)",
      "schema_version",
-     "inv-pendientes (al cerrar turno)"
+     "inv-pendientes (al cerrar turno)",
+     "cuenta_movimiento (14, L-150)"
     ],
     "lee": [
      "todas"
@@ -1529,7 +1531,7 @@
    "destino": "CAL",
    "mecanismo": "`POST /sync-ical` cada 15 min",
    "dato": "reservas nuevas, canceladas, finalizadas; bloqueos de feed",
-   "regla": "El historial nunca se borra. Deja fuera las cuentas zz-verif-restauracion- (L-131).",
+   "regla": "El historial nunca se borra. Deja fuera las cuentas zz-verif-restauracion- (L-131); también la cuenta zz-verif-pruebas (L-150).",
    "rt": [
     "RT-22"
    ],
@@ -1603,7 +1605,7 @@
    "origen": "cron",
    "destino": "K3",
    "mecanismo": "`POST /drive/cron` y `POST /drive/corte` cada 15 min (por crear)",
-   "dato": "pasada de copia; corte solo en la ventana del día 30; deja fuera las cuentas zz-verif-restauracion- (L-131).",
+   "dato": "pasada de copia; corte solo en la ventana del día 30; deja fuera las cuentas zz-verif-restauracion- (L-131); también la cuenta zz-verif-pruebas (L-150).",
    "regla": "Sin respaldo de api/uploads/ no se crea la tarea del corte",
    "rt": [
     "RT-12",
@@ -1983,7 +1985,7 @@
     "PRJ",
     "OP"
    ],
-   "detalle": "public_html/app/; despliegue automático desde main; ?v= p5c110; schema 13",
+   "detalle": "public_html/app/; despliegue automático desde main; ?v= p5c110; schema 14",
    "ficha": "infraestructura-configuracion.md § 2.1"
   },
   {
@@ -2008,14 +2010,14 @@
   },
   {
    "id": "EC-5",
-   "nombre": "MariaDB 11.8.9 · base …_hospedaje (schema 13)",
+   "nombre": "MariaDB 11.8.9 · base …_hospedaje (schema 14)",
    "tipo": "base",
    "modulos": [
     "SRV",
     "U",
     "K3"
    ],
-   "detalle": "col_item + usuario, cuenta, capacidad, ical_*, drive_*, cuenta_retencion, corte_reporte (13, L-124); max_user_connections 75; 20 conexiones nuevas/s",
+   "detalle": "col_item + usuario, cuenta, capacidad, ical_*, drive_*, cuenta_retencion, corte_reporte (13, L-124), cuenta_movimiento (14, L-150); max_user_connections 75; 20 conexiones nuevas/s",
    "ficha": "infraestructura-configuracion.md § 2.2"
   },
   {
@@ -10589,22 +10591,6 @@
     "titulo": "En un navegador sin datos guardados, str-propiedades.html sube al servidor propiedades y tipos de demostración antes de traer los reales."
    }
   ],
-  "U": [
-   {
-    "id": "INC-108",
-    "fecha": "2026-10-10",
-    "severidad": "medio",
-    "etapa": "✔",
-    "titulo": "Un usuario tiene dos roles y un admin nuevo no puede entrar. zz-verif-admin ve 'No tienes una cuenta activa en STR Manager'."
-   },
-   {
-    "id": "INC-110",
-    "fecha": "2026-10-10",
-    "severidad": "bajo",
-    "etapa": "📝",
-    "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
-   }
-  ],
   "SH": [
    {
     "id": "INC-108",
@@ -10654,6 +10640,22 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
+   }
+  ],
+  "U": [
+   {
+    "id": "INC-108",
+    "fecha": "2026-10-10",
+    "severidad": "medio",
+    "etapa": "✔",
+    "titulo": "Un usuario tiene dos roles y un admin nuevo no puede entrar. zz-verif-admin ve 'No tienes una cuenta activa en STR Manager'."
+   },
+   {
+    "id": "INC-110",
+    "fecha": "2026-10-10",
+    "severidad": "bajo",
+    "etapa": "📝",
+    "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
    }
   ],
   "OP": [
@@ -12093,6 +12095,11 @@
    "fecha": "2026-10-18",
    "cambio": "L-151: PRJ, Seg. Proyecto lee planes y prioridades de interno/proyecto.json (lista por lista, respaldo en diseno.json); Nomenclatura con el Jefe de proyecto; versión p5c110.",
    "lote": "L-151"
+  },
+  {
+   "fecha": "2026-10-18",
+   "cambio": "L-150: SRV, ruta nueva /api/cuenta-pruebas (ensayo, mover y revertir usuarios zz-verif- a la cuenta zz-verif-pruebas; solo admin), tabla cuenta_movimiento (migración 14); los crones de copia a Drive, corte y sync-ical dejan fuera esa cuenta (REL-22, REL-28); el respaldo la incluye (DA-47).",
+   "lote": "L-150"
   }
  ],
  "avisos": [

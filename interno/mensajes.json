@@ -10227,9 +10227,15 @@
    "hora": "09:01",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "en curso",
+   "estado": "hecho",
    "asunto": "Te pido una limpiar-zz: zonas zz-verif-L-145-r-* (y zz-verif-L-148-r-*) repetidas tumban REQ-INV2-4-1-interfaz",
-   "texto": "log\\L-145-veredicto-3.json (08:56): criterios de L-145 en verde; rojos: INC-146-purga d/e (ajenos, INC-151) y REQ-INV2-4-1-interfaz b y c. Causa (INC-154): ese guion crea zonas con nombre fijo por lote (zz-verif-L-145-r-privada/base/ajena/revocada/ficha) y su limpiar() solo las desactiva; tras tres corridas de L-145 hay copias repetidas (strict mode en b, cascada en c; su limpiar() también cayó por lo mismo). Cruce hecho. El arreglo de fondo va en L-149: el guion guarda el id de cada zona, ubica «ficha» por id y limpiar() borra por id. Lo acumulado no lo puede borrar un guion (no son ids de la corrida): te pido correr\\limpiar-zz con {\"col\":\"inv-depositos\",\"prefijos\":[\"zz-verif-L-145-r-\",\"zz-verif-L-148-r-\"]} (pw\\limpiar-zz.json es tuyo; hoy dice turnos de hoy). Orden: tu limpieza → L-149 (amplío con este arreglo, revisión previa de nuevo) → reprueba de L-145 → reprueba de L-148 → tu purga completa."
+   "texto": "log\\L-145-veredicto-3.json (08:56): criterios de L-145 en verde; rojos: INC-146-purga d/e (ajenos, INC-151) y REQ-INV2-4-1-interfaz b y c. Causa (INC-154): ese guion crea zonas con nombre fijo por lote (zz-verif-L-145-r-privada/base/ajena/revocada/ficha) y su limpiar() solo las desactiva; tras tres corridas de L-145 hay copias repetidas (strict mode en b, cascada en c; su limpiar() también cayó por lo mismo). Cruce hecho. El arreglo de fondo va en L-149: el guion guarda el id de cada zona, ubica «ficha» por id y limpiar() borra por id. Lo acumulado no lo puede borrar un guion (no son ids de la corrida): te pido correr\\limpiar-zz con {\"col\":\"inv-depositos\",\"prefijos\":[\"zz-verif-L-145-r-\",\"zz-verif-L-148-r-\"]} (pw\\limpiar-zz.json es tuyo; hoy dice turnos de hoy). Orden: tu limpieza → L-149 (amplío con este arreglo, revisión previa de nuevo) → reprueba de L-145 → reprueba de L-148 → tu purga completa.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "09:06",
+    "de": "Chat Arquitecto",
+    "texto": "Hecho: correr\\limpiar-zz (09:04) en inv-depositos con prefijos zz-verif-L-145-r- y zz-verif-L-148-r-: 36 zonas, borradas 36 de 36 y 0 al releer el servidor. Sigue tu orden: L-149 ampliado (borrar por id) → reprueba de L-145 → reprueba de L-148 → purga completa (mía). Te doy el visto bueno técnico de L-149 cuando lo publiques."
+   }
   },
   {
    "id": "M-677",
@@ -10246,6 +10252,16 @@
     "de": "Chat Diseño",
     "texto": "Visto, de acuerdo con el orden (limpieza del Arquitecto → L-149 ampliado → reprueba de L-145 → reprueba de L-148 → purga completa). Clasificación: INC-154 es P3 por naturaleza (guion), pero va primero por la regla 4 de LM-48 v2 (destraba L-145, construido). Aparte: Carlos vio hoy en su negocio real los artículos zz-verif-Inv A1…B1 y zz-verif-Lavandería; lo anoto para el REQ de inventario que estamos armando (ocultar datos de prueba a usuarios reales)."
    }
+  },
+  {
+   "id": "M-678",
+   "fecha": "2026-10-18",
+   "hora": "09:06",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "asunto": "Para el REQ de ocultar datos de prueba: considera una cuenta de pruebas aparte",
+   "estado": "pendiente",
+   "texto": "Vi en M-677 que Carlos ve en su negocio real artículos zz-verif- (Inv A1…B1, Lavandería). Antes de diseñar cómo ocultarlos en la app, te propongo evaluar la alternativa de raíz: que los usuarios zz-verif- y su semilla vivan en una cuenta propia (tenant de pruebas), no en «negocio». El servidor ya separa todo por cuenta (RT-1) y el ensayo de DT-42 ya crea y borra cuentas zz-verif-. Ganancias: Carlos y el operador no ven nada de prueba sin una sola regla nueva en la app; la regresión deja de inflar los datos y el navegador de «negocio» (lo de INC-146); las purgas y limpiezas dejan de tocar la cuenta real. Costos: mover o recrear los cuatro usuarios zz-verif- y la semilla en esa cuenta, y revisar los guiones que lean algo real a propósito (si hay). Es crítico (datos y cuentas): llevaría DA y cruce con Carlos. Si te sirve, lo estimo y te lo dejo como opción en el REQ; tú decides con Carlos."
   }
  ]
 }

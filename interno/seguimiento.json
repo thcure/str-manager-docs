@@ -915,7 +915,7 @@
    "estado": "abierto",
    "severidad": "medio",
    "prioridad": "P3",
-   "nota": "Ensayo real del guion a de L-147 (19:3x): borraría 280 de 4859; excluidos autor 15, referencia 45, turno 4517. _pgContexto mira `$d->nombre` de propiedades; drive-copia (_dcClasificar) ya mira nombre o name. Falla hacia lo seguro (purga menos, nunca algo real). Arreglo: lote L-148 (propiedad: nombre o name; test N1 con una propiedad con `name`). 19:57 registrado. · 20:00 P3 (Diseño M-665: fábrica, no toca nada real). Visto bueno técnico del Arquitecto a L-148 (M-664)."
+   "nota": "Ensayo real del guion a de L-147 (19:3x): borraría 280 de 4859; excluidos autor 15, referencia 45, turno 4517. _pgContexto mira `$d->nombre` de propiedades; drive-copia (_dcClasificar) ya mira nombre o name. Falla hacia lo seguro (purga menos, nunca algo real). Arreglo: lote L-148 (propiedad: nombre o name; test N1 con una propiedad con `name`). 19:57 registrado. · 20:00 P3 (Diseño M-665: fábrica, no toca nada real). Visto bueno técnico del Arquitecto a L-148 (M-664). · 21:16 el arreglo funciona en el motor real (turno 0; borraría 5112 de 5129); L-148 no aceptado solo por INC-151."
   },
   {
    "id": "INC-151",
@@ -924,7 +924,7 @@
    "estado": "abierto",
    "severidad": "bajo",
    "prioridad": "P3",
-   "nota": "Veredicto L-145-2. Arreglo: d sin el POST sin confirmo (lo cubre N1 A2); e con un id de la corrida. Iba en L-148 pero la cola tomó la versión anterior (sin G1–G2); va en L-149 (solo guion). 20:41. · 20:43 P3 (Diseño M-669)."
+   "nota": "Veredicto L-145-2. Arreglo: d sin el POST sin confirmo (lo cubre N1 A2); e con un id de la corrida. Iba en L-148 pero la cola tomó la versión anterior (sin G1–G2); va en L-149 (solo guion). 20:41. · 20:43 P3 (Diseño M-669). · 21:16 también tumba L-148 (la ruta de purga está en su Alcance). 21:22: L-149 lo arregla; luego reprueba de L-148."
   },
   {
    "id": "INC-152",
@@ -942,7 +942,7 @@
    "estado": "abierto",
    "severidad": "medio",
    "prioridad": "P2",
-   "nota": "El PUT de turnos dio 200 y el tablero leyó /api/tablero una vez (sigue «curso», 40 %). Mismo código de L-145 en main y el caso pasó a las 19:51 (L-147) y en L-146-4: lo leo intermitente (tiempo de la relectura del tablero). 20:41: se corre aislado antes de la reprueba; si se repite, se diagnostica con la captura y la fila del servidor. · 20:43 P2 solo si se repite aislado; si no, P3 (Diseño M-669). correr\\op1 puesto (pw\\op1.spec.js, cmp IGUAL); corre al terminar L-148."
+   "nota": "El PUT de turnos dio 200 y el tablero leyó /api/tablero una vez (sigue «curso», 40 %). Mismo código de L-145 en main y el caso pasó a las 19:51 (L-147) y en L-146-4: lo leo intermitente (tiempo de la relectura del tablero). 20:41: se corre aislado antes de la reprueba; si se repite, se diagnostica con la captura y la fila del servidor. · 20:43 P2 solo si se repite aislado; si no, P3 (Diseño M-669). correr\\op1 puesto (pw\\op1.spec.js, cmp IGUAL); corre al terminar L-148. · 21:0x REQ-OP-1 d verde en la regresión de L-148 (mismo código de L-145): otra muestra de intermitencia."
   }
  ],
  "dts": [
@@ -13969,9 +13969,51 @@
    "req": "INC-150",
    "categoria": "normal",
    "resumen": "Purga de prueba: propiedad por nombre o name; turno sin propiedad por propName",
-   "estado": "registrado",
-   "observacion": "Encolado 20:41. Visto bueno técnico del Arquitecto M-664 y M-667; revisión previa 17/17. La cola tomó la versión sin G1–G2 (cmp DIFIERE con .corriendo ya puesto; no se tocó el archivo en curso). Pares sobre main ee2b1fc. Construido 25e21df 20:42 (run.js 91/91).",
-   "hash": "25e21df"
+   "estado": "no aceptado",
+   "observacion": "Encolado 20:41. Visto bueno técnico del Arquitecto M-664 y M-667; revisión previa 17/17. La cola tomó la versión sin G1–G2 (cmp DIFIERE con .corriendo ya puesto; no se tocó el archivo en curso). Pares sobre main ee2b1fc. Construido 25e21df 20:42 (run.js 91/91). Pruebas 20:4x–21:16: guion INC-150 a verde en el motor real (se quedan por «turno»: 0, antes 4517; borraría 5112 de 5129; excluidos solo autor 15); N1 91/91. Regresión: solo INC-146-purga d y e rojos (la guardia de LM-53 corta antes del servidor: INC-151); LM-47b no aplica (la ruta es la de este lote). REQ-OP-1 d verde en esta corrida. Juez 21:16: no aceptado. Cruce veredicto/pruebas hecho por Desarrollo (2/2). Siguiente: L-149 y reprueba.",
+   "hash": "25e21df",
+   "aceptacion": {
+    "lote": "L-148",
+    "hash": "25e21df",
+    "fecha": "2026-10-17",
+    "horaBogota": "21:16",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ensayo (GET): 200 | si: se quedan por «turno»: 0 (antes de L-148: 4517; tope 450) · borraría 5112 de 5129 · excluidos {\"autor\":15} · muestra [\"mv_muzr68wh8blrw\",\"mv_muzr68whu38n6\",\"mv_mv4fppabokyzq\",\"mv_mv4fqp238nb37\",\"mv_mv4fr3ga9a7xg\"]"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "La guardia de pw corta la purga sin `confirmo` y oculta el 400 real (INC-146-purga.spec.js, caso d)",
+      "nivel": "medio",
+      "causa": "La guardia de pruebas (pw) intercepta el POST /api/purga-prueba/movimientos sin `confirmo` antes de llegar al servidor (aviso: «la guardia corto 1 peticion(es) ... purga sin confirmo «zz-verif-»»), así que el caso ve 409 en vez del 400 que debería devolver el servidor; no es un defecto de api/lib/purga-prueba.php.",
+      "observado": "si: volver a subir la compra 1 purgada: 409 | NO: POST sin confirmo: 409 | si: repetir la purga de las dos compras: 200 · borrados 0 | aviso: la guardia corto 1 peticion(es): POST https://app.apartamentosbucaramanga.com/api/purga-prueba/movimientos (purga sin confirmo «zz-verif-»)"
+     },
+     {
+      "titulo": "La guardia de pw corta la purga del operador y oculta el 403 real (INC-146-purga.spec.js, caso e)",
+      "nivel": "medio",
+      "causa": "La guardia de pruebas corta el POST /api/purga-prueba/movimientos del operador porque el movimiento no lo creó esta corrida como zz-verif- (aviso: «la guardia corto 1 peticion(es) ... purga de 1 movimiento(s) que esta corrida no creó como zz-verif-»), así que el caso ve 409 en vez del 403 que debería devolver el servidor para un operador sin permiso; no es un defecto de api/lib/purga-prueba.php.",
+      "observado": "NO: operador: GET 403 · POST 409 | aviso: la guardia corto 1 peticion(es): POST https://app.apartamentosbucaramanga.com/api/purga-prueba/movimientos (purga de 1 movimiento(s) que esta corrida no creó como zz-verif-)"
+     }
+    ],
+    "regresionAjena": [],
+    "herramienta": "la guardia de pw corta las peticiones de purga sin `confirmo` o sobre movimientos que la corrida no creó como zz-verif-, antes de llegar al servidor, y devuelve 409 en vez de dejar ver la respuesta real del servidor (INC-146-purga.spec.js, casos d y e)",
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «rojo», causa «fallan: INC-146-purga.spec.js d, INC-146-purga.spec.js e». No aplica la regresión ajena (LM-47b): aunque ambos casos muestran causa de herramienta/entorno (la guardia de pw corta la petición antes del servidor, motivo a) y el guion INC-146-purga.spec.js no aparece en el Alcance ni en los guiones N2 de esta instrucción, los dos ejercitan POST /api/purga-prueba/movimientos, que es justo lo que implementa api/lib/purga-prueba.php (Alcance de L-148): falla la condición 4, así que no se puede aceptar por esta regla. Capturas de d y e (M-472): solo la página de Zonas de inventario con sesión de admin/operador, sin pantalla de login ni net::ERR_*; no hay cascada que descartar. fase.fase = «completa» (no aplica diferir a tren). sesiones y red (pruebas.json): sin cortes ni caídas. regresionSeleccion.ruta.huecos: ninguno (sin deuda de cobertura). Los dos criterios propios del lote (a y b) están en verde."
+   }
   }
  ],
  "esquema": {
@@ -16187,13 +16229,13 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "Purga de prueba: la propiedad cuenta como zz-verif- por `nombre` o `name` (como drive-copia)",
-   "estado": "construido",
+   "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 20:43",
+   "desde": "2026-10-17 21:22",
    "grupo": "HK",
-   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1.",
-   "espera": "pruebas y veredicto del juez",
-   "esperaA": "Cola",
+   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado.",
+   "espera": "L-149 aceptado; luego reprobar",
+   "esperaA": "CD",
    "hash": "25e21df"
   },
   {

@@ -113,7 +113,11 @@ def main():
                      [fila('requisito', r, 'reqs-historial.reqs', i, {'estado': r.get('estado') or 'histórico'}) for i, r in enumerate(hist.get('reqs', []))]
     t['decision'] = [fila('decision', d, 'diseno.das', i) for i, d in enumerate(dis.get('das', []))]
     t['pedido'] = [fila('pedido', p, 'diseno.pedidos', i) for i, p in enumerate(dis.get('pedidos', []))]
-    t['plan_trabajo'] = [fila('plan_trabajo', p, 'diseno.planes', i) for i, p in enumerate(dis.get('planes', []))]
+    # LM-57: los planes son del Chat Jefe de proyecto (interno/proyecto.json) cuando ese archivo existe
+    if os.path.exists(os.path.join(RAIZ, 'interno/proyecto.json')):
+        t['plan_trabajo'] = [fila('plan_trabajo', p, 'proyecto.planes', i) for i, p in enumerate(J('interno/proyecto.json').get('planes', []))]
+    else:
+        t['plan_trabajo'] = [fila('plan_trabajo', p, 'diseno.planes', i) for i, p in enumerate(dis.get('planes', []))]
     t['leccion'] = [fila('leccion', x, 'diseno.lecciones', i) for i, x in enumerate(dis.get('lecciones', []))]
     t['lote'] = [fila('lote', p, 'seguimiento.plan', i, {'id': p.get('lote')}) for i, p in enumerate(seg.get('plan', []))]
     for i, c in enumerate(seg.get('cambios', [])):

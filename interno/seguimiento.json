@@ -958,11 +958,11 @@
    "id": "INC-155",
    "fecha": "2026-10-18",
    "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orden por % de atraso",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "prioridad": "P3",
    "origen": "guion",
-   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso? · 10:50 Diseño (M-697): P3 por naturaleza, primero por la regla 4 (destraba L-148); la pregunta del desempate va a Carlos. Revisor previo de L-152: mi explicación del orden solo vale si el flujo del turno real dura ≤ 7 min o no tiene flujo (empate en 100 → por nombre); si dura más, el tablero estaría mal. correr\\op1-orden puesto (solo lectura: puesto, clase, motivo y minutos de tramos por fila, sin nombres reales) para confirmarlo antes de encolar L-152. · 10:52 correr\\op1-orden: turno real «sin flujo» → 100: el tablero ordenó bien (empate → nombre). Deuda: el empate en 100 por nombre no tiene N1 propio (lo prueba el guion cuando se da). L-152 encolado."
+   "nota": "10:46 Veredicto L-148-2 (10:40): el juez lo abrió como defecto del tablero («+7 min antes que +61 min»). Lectura de Desarrollo sobre el código real: _avOrden (str-avance.js) ordena atrasados por `atraso` = % de la duración (en sin empezar, min(100, tarde/duración·100), mínimo UMBRAL+1) y desempata por nombre; «1801» (turno real de hoy, sin empezar) y el zz pueden quedar así con duraciones distintas o empatados en 100. El guion hace parseInt del motivo: «N % atrás» da N, pero «Sin empezar · …» da NaN y la comparación falla siempre que haya dos atrasados y uno sea sin empezar (antes de M-614 no existía ese motivo; hoy lo destapó un turno real atrasado). Arreglo: L-152, solo guion: el orden por clase se sigue comprobando; entre atrasados solo se compara el % de los que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden. Pregunta de producto a Diseño (no frena): ¿entre «sin empezar» empatados en 100 debería ir primero el de más minutos de retraso? · 10:50 Diseño (M-697): P3 por naturaleza, primero por la regla 4 (destraba L-148); la pregunta del desempate va a Carlos. Revisor previo de L-152: mi explicación del orden solo vale si el flujo del turno real dura ≤ 7 min o no tiene flujo (empate en 100 → por nombre); si dura más, el tablero estaría mal. correr\\op1-orden puesto (solo lectura: puesto, clase, motivo y minutos de tramos por fila, sin nombres reales) para confirmarlo antes de encolar L-152. · 10:52 correr\\op1-orden: turno real «sin flujo» → 100: el tablero ordenó bien (empate → nombre). Deuda: el empate en 100 por nombre no tiene N1 propio (lo prueba el guion cuando se da). L-152 encolado. · 11:01 L-152 aceptado: REQ-OP-1 c verde con el mismo caso (dos sin empezar en 100 %, por nombre). Cerrado. Desempate por minutos: T-19 en la bolsa de Diseño."
   }
  ],
  "dts": [
@@ -14320,9 +14320,73 @@
    "req": "INC-155",
    "categoria": "normal",
    "resumen": "Guion REQ-OP-1 c: orden por atención con la regla de _avOrden (valor conocido, mayor primero, empate por nombre)",
-   "estado": "instalado",
-   "observacion": "Encolado 10:52 (cmp IGUAL). Solo tests/e2e/REQ-OP-1.spec.js. Revisión previa 17/17 tras corregir. Destraba L-148. Construido 1341b82 10:54 (run.js 91/91; además docs/claude/tests-y-despliegue.md).",
-   "hash": "1341b82"
+   "estado": "aceptado",
+   "observacion": "Encolado 10:52 (cmp IGUAL). Solo tests/e2e/REQ-OP-1.spec.js. Revisión previa 17/17 tras corregir. Destraba L-148. Construido 1341b82 10:54 (run.js 91/91; además docs/claude/tests-y-despliegue.md). Pruebas 10:5x–11:01: verde, causa null; fase 1 (centinelas REQ-INV2-4-2 y REQ-INV2-7-1-hk-turno verdes; 30 guiones al tren); REQ-OP-1 c verde con dos atrasados sin empezar en 100 % por nombre. Juez 11:01: ACEPTADO; cruce veredicto/pruebas hecho por Desarrollo (sin rojos; e y f son N3). Veredicto en log\\L-152-veredicto.json.",
+   "hash": "1341b82",
+   "aceptacion": {
+    "lote": "L-152",
+    "hash": "1341b82",
+    "fecha": "2026-10-18",
+    "horaBogota": "11:01",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado (M-372): 6 turnos | si: turno sh-m-1792338966523 (12:00–23:59): 200 | si: turno de la corrida: sh-m-1792338966523 | si: fila del turno en el tablero: sí, puesto 2 | si: tramos por hacer: [\"pend\"] | si: tramo con emoji y nombre corto: «▫️ zz-verif-Flujo base» | si: título del tramo (nombre · zona · minutos): «▫️ zz-verif-Flujo base · sin zona · 25 min» | si: rótulo «zz-verif-colab · 0 %» · motivo «Al día» · clase al-dia | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "i",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado (M-372): 7 turnos | si: turno sh-m-1792338970406 (09:56–23:59): 200 | si: turno de la corrida: sh-m-1792338966523 | si: turno de las 09:56: clase atrasado · «Sin empezar · debía empezar 9:56 am (+60 min)» | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792338966523 | si: unidad desocupada: 200 | si: tarea zz-verif-Limpieza: 200 · marcada sí | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "g",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: colaborador en /portal.html · filas 0 · lecturas de /api/tablero 0"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno de la corrida: sh-m-1792338966523 | si: fila del turno: sí, puesto 3 | si: tramo en curso: [\"curso\"] | si: rótulo con el avance en minutos (zz-verif-Limpieza hecha, falta el conteo): «zz-verif-colab · 40 %» | si: clase adelantado · motivo «39 % adelante» | si: bajo la propiedad: «Salió 10:56 am» | si: orden por atención (3 filas; atrasados con % conocido 2): 1 atrasado Sin empezar · debía empezar 10:30 am (+26 min) [100 %] | 2 atrasado Sin empezar · debía empezar 9:56 am (+60 min) [100 %] | 3 adelantado 39 % adelante — regla de _avOrden aplicada por el guion (INC-155): ambos sin empezar en 100 %, empatan y van por nombre; el guion lee `atraso` con la regla nueva, ya no `parseInt` del motivo"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: lastpush alineado (M-372): 8 turnos | si: turno de la corrida: sh-m-1792338966523 | si: tarea zz-verif-Conteo de cierre marcada desde HK (otra pestaña, 0 s tras abrir el tablero): 200 | si: sin recargar: tramos [\"hecho\"] · rótulo «zz-verif-colab · 100 %» | si: recargas del tablero: 0 | si: lecturas de /api/tablero en el caso: 2 (200, 200) | si: lecturas de /api/col desde el tablero: 0 | si: campos del huésped o fotos en /api/tablero (RT-6): ninguno | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "a 1440 px: cifras arriba (turnos en curso 1 de 3, bloqueados 0, entradas hoy 0, alertas 4); cuadro «Turnos de hoy» con un bloque por turno, tramo «zz-verif-Flujo base» con emoji, rótulos de avance (0 %, 100 %) y de una fila ajena a la corrida con «sin flujo»; raya vertical de la hora actual (10:58) sobre las marcas de hora (10 am, 11 am); leyenda de clases (bloqueado, atrasado, al día, adelantado, sin empezar-sin hora) y de los tres estados del tramo; paleta oscura con ámbar para atrasado/sin empezar y verde para adelantado, acorde al boceto"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "a 390 px los cuadros (cifras, Turnos de hoy, Alertas, Sin turno hoy) quedan uno debajo del otro; dentro del cuadro de turnos la línea de tiempo se desplaza de lado (scrollWidth 792 / ancho visible 364, según el propio guion); la página no tiene scroll lateral (scrollWidth 390 = ancho 390) ni barra lateral visible"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "resultado de pruebas.json: «verde», causa: null. Fase 1 (LM-49): regresión diferida al tren: DT-41.spec.js, DT-42.spec.js, INC-120-c12.spec.js, INC-120-c3.spec.js, INC-125.spec.js, INC-126.spec.js, INC-127.spec.js, INC-128-b.spec.js, INC-130.spec.js, INC-131.spec.js, INC-132.spec.js, INC-134.spec.js, INC-140.spec.js, INC-141.spec.js, INC-146-purga.spec.js, INC-146.spec.js, INC-150.spec.js, REQ-FL-12.spec.js, REQ-INV2-3-4-hk.spec.js, REQ-INV2-3-4.spec.js, REQ-INV2-4-1-interfaz.spec.js, REQ-INV2-4-2-dif.spec.js, REQ-INV2-7-1-hk.spec.js, REQ-INV2-7-1.spec.js, REQ-K3b-aviso.spec.js, REQ-K3b.spec.js, REQ-K3c-vista.spec.js, REQ-K3c.spec.js, REQ-OP-1b.spec.js, REQ-SH-2.spec.js. Centinelas de la ruta en verde: REQ-INV2-4-2.spec.js y REQ-INV2-7-1-hk-turno.spec.js (todos sus casos ok). Humo-pw (fase 1) en verde. Deuda de cobertura (regresionSeleccion.ruta.huecos, no cambia el resultado): relaciones REL-08 (FL→KN), REL-22 (cron→CAL), REL-30 (HK→KN); reglas RT-10 (Evidencia de incidentes), RT-11 (Fotos de tarea); la propia instrucción ya explica por qué no aplican a este lote (solo cambia la comprobación de orden del caso c). Sin cortes de red ni sesiones caídas en esta corrida."
+   }
   }
  ],
  "esquema": {
@@ -16542,9 +16606,9 @@
    "vista": "siguiente",
    "desde": "2026-10-17 21:22",
    "grupo": "HK",
-   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado. · 10:02 L-145 aceptado: va la reprueba de L-148. reprobar\\L-148.txt puesto (cmp IGUAL). · 10:40 juez: no aceptado por REQ-OP-1 c (regresión). 10:46 registrado: causa INC-155 (guion). Siguiente: L-152 (guion) → reprueba.",
-   "espera": "L-152 (guion REQ-OP-1 c) y reprueba",
-   "esperaA": "CD",
+   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado. · 10:02 L-145 aceptado: va la reprueba de L-148. reprobar\\L-148.txt puesto (cmp IGUAL). · 10:40 juez: no aceptado por REQ-OP-1 c (regresión). 10:46 registrado: causa INC-155 (guion). Siguiente: L-152 (guion) → reprueba. · 11:04 L-152 aceptado: reprobar\\L-148.txt puesto (cmp IGUAL).",
+   "espera": "reprueba y veredicto",
+   "esperaA": "Cola",
    "hash": "25e21df"
   },
   {
@@ -16596,13 +16660,13 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Guion REQ-OP-1 c: el orden por atención con un turno «sin empezar» atrasado (solo guion)",
-   "estado": "construido",
+   "estado": "aceptado",
    "vista": "siguiente",
    "desde": "2026-10-18 10:55",
    "grupo": "OP",
-   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido. · 10:50 revisor previo: 16/17 (13: cita de N1) y una condición sin comprobar (duración del turno real). correr\\op1-orden puesto para comprobarla. · 10:52 correr\\op1-orden (10:50, solo lectura): el turno real atrasado está «sin flujo» → 100; con el zz (61/25 → 100) empatan y va por nombre: el tablero está bien. Guion con la regla de _avOrden (M-698). Revisor previo 17/17. Encolado (cmp IGUAL). · 10:54 construido 1341b82 (run.js 91/91; guion idéntico al N2; tocó además tests-y-despliegue.md, mapa del área). Pruebas en curso.",
-   "espera": "pruebas (fase 1) y veredicto",
-   "esperaA": "verificador",
+   "nota": "10:47 Destraba L-148 (regla 4 de LM-48 v2). Borrador listo; revisor previo en curso. Luego reprueba de L-148 → purga completa → barrido. · 10:50 revisor previo: 16/17 (13: cita de N1) y una condición sin comprobar (duración del turno real). correr\\op1-orden puesto para comprobarla. · 10:52 correr\\op1-orden (10:50, solo lectura): el turno real atrasado está «sin flujo» → 100; con el zz (61/25 → 100) empatan y va por nombre: el tablero está bien. Guion con la regla de _avOrden (M-698). Revisor previo 17/17. Encolado (cmp IGUAL). · 10:54 construido 1341b82 (run.js 91/91; guion idéntico al N2; tocó además tests-y-despliegue.md, mapa del área). Pruebas en curso. · 11:01 juez: ACEPTADO. 11:04 registrado; reprobar\\L-148.txt puesto (cmp IGUAL).",
+   "espera": "",
+   "esperaA": "",
    "hash": "1341b82"
   }
  ],

@@ -916,6 +916,33 @@
    "severidad": "medio",
    "prioridad": "P3",
    "nota": "Ensayo real del guion a de L-147 (19:3x): borraría 280 de 4859; excluidos autor 15, referencia 45, turno 4517. _pgContexto mira `$d->nombre` de propiedades; drive-copia (_dcClasificar) ya mira nombre o name. Falla hacia lo seguro (purga menos, nunca algo real). Arreglo: lote L-148 (propiedad: nombre o name; test N1 con una propiedad con `name`). 19:57 registrado. · 20:00 P3 (Diseño M-665: fábrica, no toca nada real). Visto bueno técnico del Arquitecto a L-148 (M-664)."
+  },
+  {
+   "id": "INC-151",
+   "fecha": "2026-10-17",
+   "titulo": "Guion INC-146-purga d y e desfasados con la guardia de LM-53 (corta el POST sin confirmo y el del operador con un id ajeno antes del servidor: 409 en vez de 400/403)",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "prioridad": "P2",
+   "nota": "Veredicto L-145-2. Arreglo: d sin el POST sin confirmo (lo cubre N1 A2); e con un id de la corrida. Iba en L-148 pero la cola tomó la versión anterior (sin G1–G2); va en L-149 (solo guion). 20:41."
+  },
+  {
+   "id": "INC-152",
+   "fecha": "2026-10-17",
+   "titulo": "REQ-MOD-6 g: apiRequestContext.get /api/health sin respuesta en 30 s (20:30) en la reprueba de L-145",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "prioridad": "P3",
+   "nota": "Herramienta/entorno según el juez: en la misma corrida /api/health 200 en DT-35 b, DT-40 b y R-3-db-config b; corte de red a las 20:33. Se cierra si la siguiente corrida sale verde."
+  },
+  {
+   "id": "INC-153",
+   "fecha": "2026-10-17",
+   "titulo": "REQ-OP-1 d: el tablero del operador no pasa a 100 % tras marcar la última tarea desde HK (20:32, reprueba de L-145)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P2",
+   "nota": "El PUT de turnos dio 200 y el tablero leyó /api/tablero una vez (sigue «curso», 40 %). Mismo código de L-145 en main y el caso pasó a las 19:51 (L-147) y en L-146-4: lo leo intermitente (tiempo de la relectura del tablero). 20:41: se corre aislado antes de la reprueba; si se repite, se diagnostica con la captura y la fila del servidor."
   }
  ],
  "dts": [
@@ -13864,6 +13891,86 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Instrucción solo define N1 y N2 (letras a-e); sin N3 (n3Preparados viene vacío, consistente). resultado de pruebas.json es \"verde\" y causa null: todos los n2 en true, regresion (43 casos) en true, entrada (puerta P4) en true. Fase: \"completa\" (LM-49): no hay regresión diferida. Sesiones: sin perdidas, caidos ni recuperadas. regresionSeleccion.ruta.huecos: relación REL-30 (HK→KN) y reglas RT-10, RT-11 no ejercidas por este lote — deuda de cobertura ya señalada por la propia instrucción como hueco esperado, no cambia el resultado. 4 guiones en noCorren (INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5): \"ningún caso cubre un nodo de la ruta\"; no es evidencia ni ausencia de evidencia, no se abre INC."
    }
+  },
+  {
+   "lote": "L-145",
+   "fecha": "2026-10-17",
+   "req": "INC-120",
+   "categoria": "crítico",
+   "resumen": "INC-120 capas 1 y 2: reprueba tras L-146",
+   "estado": "no aceptado",
+   "hash": "ee2b1fc",
+   "observacion": "Reprueba 20:0x–20:35 sobre main ee2b1fc: criterios propios a–d en verde. Regresión 150 casos, 4 rojos: INC-146-purga d y e (la guardia de LM-53 corta antes del servidor el POST sin confirmo y el del operador con un id ajeno: guion de L-147 desfasado, INC-151), REQ-MOD-6 g (timeout de pw en /api/health; en la misma corrida /api/health 200 en otros tres guiones, INC-152), REQ-OP-1 d (el tablero no pasa a 100 % al marcar la última tarea; HK y api/col en el Alcance, LM-47b no aplica; INC-153). Juez 20:35: no aceptado. Cruce veredicto/pruebas hecho por Desarrollo (4/4). Lectura de Desarrollo de REQ-OP-1 d: intermitente — el mismo caso pasó a las 19:51 (L-147) y 19:1x (L-146) con este mismo código de L-145 en main; corte de red 20:33. Siguiente: L-148 (en curso) → L-149 (guion INC-146-purga) → REQ-OP-1 aislado → reprueba.",
+   "aceptacion": {
+    "lote": "L-145",
+    "hash": "ee2b1fc",
+    "fecha": "2026-10-17",
+    "horaBogota": "20:35",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: zz-verif-Propiedad: encontrada | si: turno de hace 120 días (2026-06-19): 200 | si: incidentes del turno viejo: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: datos de la corrida: creados en a | si: turno viejo: soloHoras true · campos que no debían llegar: ninguno · titular yo · horas sí | si: el colaborador guarda el turno viejo: 200 · después sigue reducido y sin notas: sí | si: incidentes del turno viejo: abierto llega · resuelto no llega | si: «Mi dinero»: meses para elegir 3 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b (N1: A1–A5, A3b, B1–B13, C1–C5)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (ya en verde con este commit a las 19:22:05; no se repite, LM-45)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno viejo para el operador: con notas · tareas 1 | si: incidentes para el operador: sí · sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (ya en verde con este commit a las 19:22:05; no se repite, LM-45)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "Tablero del operador no pasa a 100 % al marcar la última tarea desde HK (REQ-OP-1 d)",
+      "nivel": "medio",
+      "causa": "Sin determinar con la evidencia de la corrida: el PUT /api/col/turnos desde HK (otra pestaña) devolvió 200, pero la lectura de /api/tablero que hizo el tablero después siguió dando el tramo «curso» y 40 %. El caso marca la tarea con HK y escribe por api/col/index.php, ambos en el Alcance de L-145 (H1 `_persistCol`, S12 guardia del PUT), así que no se puede descartar el lote: revisar si el `tareasDone` de esa tarea llega a la fila del servidor y si /api/tablero lo lee. No sale en ningún L-*-pruebas.json anterior (no es preexistente).",
+      "observado": "REQ-OP-1.spec.js d (oper, /str-tablero.html, orden 6, 20:32:26): «NO: sin recargar: tramos [\"curso\"] · rótulo «zz-verif-colab · 40 %» | NO: lecturas de /api/tablero en el caso: 1 (200)». Captura: tablero a las 8:32 pm, «actualizado 8:31 pm», el turno de la corrida «35 % adelante» con «zz-verif-colab · 40 %»."
+     },
+     {
+      "titulo": "La guardia de pw corta los POST de purga que INC-146-purga d y e necesitan para probar el 400/403",
+      "nivel": "bajo",
+      "causa": "Conflicto entre el guion INC-146-purga.spec.js y la guardia de la cola: la guardia corta antes del servidor el POST /api/purga-prueba/movimientos sin confirmo «zz-verif-» (d) y el del operador sobre un movimiento que la corrida no creó (e) y responde 409, así que el guion nunca ve el 400/403 del servidor. Herramienta, no del lote (dueño Desarrollo: que el guion lo pruebe por N1, como DT-42 con LM-43, o que la guardia deje pasar esos casos negativos).",
+      "observado": "d: «NO: POST sin confirmo: 409 | aviso: la guardia corto 1 peticion(es) … (purga sin confirmo «zz-verif-»)»; e: «NO: operador: GET 403 · POST 409 | aviso: la guardia corto 1 peticion(es) … (purga de 1 movimiento(s) que esta corrida no creó como zz-verif-)». Capturas: Inventario › Zonas, sin error en pantalla.",
+      "ajeno": true
+     }
+    ],
+    "regresionAjena": [],
+    "herramienta": "3 de los 4 rojos de regresión son del arnés pw: la guardia corta los POST de purga de INC-146-purga d y e, y REQ-MOD-6 g cae por «apiRequestContext.get: Timeout 30000ms exceeded» al leer /api/health",
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado «rojo»; causa «fallan: INC-146-purga.spec.js d, INC-146-purga.spec.js e, REQ-MOD-6.spec.js g, REQ-OP-1.spec.js d». Fase «completa» (lote crítico). Criterios propios del lote (a, b, c en N2; b y d en N1) todos en verde; la instrucción no trae N3 ni N4 (n3Preparados vacío). No aplica la regresión ajena (LM-47b): REQ-OP-1 d no tiene evidencia de herramienta/entorno (sin login, sin net::ERR, sin guardia), no es preexistente (Grep en log/L-*-pruebas.json: solo sale en L-145) ni intermitente con un caso equivalente, y además ejercita HK y el PUT de api/col/index.php, que están en el Alcance (falla la condición 4). Los otros tres rojos sí serían ajenos con motivo a: INC-146-purga d y e (guardia de pw, /str-inventario.html y /api/purga-prueba fuera del Alcance) y REQ-MOD-6 g (timeout de pw en /api/health; en la misma corrida /api/health dio 200 en DT-35 b, DT-40 b y R-3-db-config b); el campo herramienta los recoge. Red: un corte 20:33:28–20:33:49 durante REQ-OP-1b; sus casos repetidos (repetidoPorRed) están en verde y las capturas REQ-OP-1b-*-error son de la corrida cortada. Sesiones: ninguna perdida ni caída. Semilla «no concluyente» (avisos de inventario), sin efecto en los casos del lote. Deuda de cobertura de la ruta (sin cambiar el resultado): huecos REL-30 (HK→KN) y reglas RT-10, RT-11, RT-15; a declarar REL-20. No corren 4 guiones fuera de la ruta (INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5): no son evidencia."
+   }
+  },
+  {
+   "lote": "L-148",
+   "fecha": "2026-10-17",
+   "req": "INC-150",
+   "categoria": "normal",
+   "resumen": "Purga de prueba: propiedad por nombre o name; turno sin propiedad por propName",
+   "estado": "registrado",
+   "observacion": "Encolado 20:41. Visto bueno técnico del Arquitecto M-664 y M-667; revisión previa 17/17. La cola tomó la versión sin G1–G2 (cmp DIFIERE con .corriendo ya puesto; no se tocó el archivo en curso). Pares sobre main ee2b1fc."
   }
  ],
  "esquema": {
@@ -16036,11 +16143,11 @@
    "resumen": "INC-120 capas 1 y 2 (DA-45): gestión del colaborador 90 días (lo abierto sigue); turnos viejos reducidos a horas; propiedad mientras la opere; «Mi dinero» 3 meses",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 20:00",
+   "desde": "2026-10-17 20:41",
    "grupo": "SRV",
-   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba. · 20:00 reprobar\\L-145.txt puesto (orden de M-664/M-665/M-666: L-146 arregló el almacenamiento; la purga no hace falta antes; LM-52 y LM-53 instalados 19:57).",
-   "espera": "reprueba (solo pruebas) y veredicto",
-   "esperaA": "Cola",
+   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba. · 20:00 reprobar\\L-145.txt puesto (orden de M-664/M-665/M-666: L-146 arregló el almacenamiento; la purga no hace falta antes; LM-52 y LM-53 instalados 19:57). · 20:35 juez: no aceptado por INC-146-purga d/e (INC-151), REQ-MOD-6 g (INC-152) y REQ-OP-1 d (INC-153); criterios propios en verde. 20:41 registrado.",
+   "espera": "L-148 y L-149 aceptados, REQ-OP-1 aislado; luego reprobar",
+   "esperaA": "CD",
    "hash": "3aa9592"
   },
   {
@@ -16079,13 +16186,27 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "Purga de prueba: la propiedad cuenta como zz-verif- por `nombre` o `name` (como drive-copia)",
-   "estado": "redactado",
+   "estado": "encolado",
    "vista": "siguiente",
-   "desde": "2026-10-17 20:00",
+   "desde": "2026-10-17 20:41",
    "grupo": "HK",
-   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar.",
-   "espera": "veredicto de la reprueba de L-145; luego encolar",
-   "esperaA": "Cola"
+   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149.",
+   "espera": "construcción y pruebas",
+   "esperaA": "CLI"
+  },
+  {
+   "lote": "L-149",
+   "req": "INC-151",
+   "categoria": "normal",
+   "riesgo": "R-1",
+   "resumen": "Guion INC-146-purga d y e con la guardia de LM-53 (solo guion)",
+   "estado": "previsto",
+   "vista": "siguiente",
+   "desde": "2026-10-17 20:41",
+   "grupo": "HK",
+   "nota": "20:41 G1–G2 que no entraron en L-148: d sin el POST sin confirmo; e con un id de la corrida. Solo tests/e2e.",
+   "espera": "L-148 construido",
+   "esperaA": "CLI"
   }
  ],
  "riesgos": [

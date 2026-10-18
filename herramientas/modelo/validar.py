@@ -21,6 +21,8 @@ def carga(rel):
 
 dis = carga('interno/diseno.json'); seg = carga('interno/seguimiento.json'); men = carga('interno/mensajes.json'); ins = carga('interno/instrucciones.json')
 reqs = dis.get('reqs', []); das = dis.get('das', []); pedidos = dis.get('pedidos', []); planes = dis.get('planes', [])
+# LM-57: los planes son del Chat Jefe de proyecto (interno/proyecto.json) cuando ese archivo existe; si no, siguen en diseno.json
+if os.path.exists(os.path.join(RAIZ, 'interno/proyecto.json')): planes = carga('interno/proyecto.json').get('planes', [])
 lotes = seg.get('plan', []); cambios = seg.get('cambios', []); riesgos = seg.get('riesgos', [])
 # B4 (LM-15): tras el corte, seguimiento.json trae incs[] y dts[] en vez de items[]; se aceptan las dos formas
 items = seg.get('items', []) + [dict(i, tipo='INC') for i in seg.get('incs', [])] + [dict(i, tipo='DT') for i in seg.get('dts', [])]

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-15",
+ "actualizadoEn": "2026-10-18",
  "escritor": "Arquitecto (capa Marco, LM-38)",
  "descripcion": "Registro de mejoras del modelo y del producto (APO01.11, APO11.05): qué se propuso, qué se decidió y qué asumimos mientras no se hace. Un dato, una fuente: los problemas viven en situaciones/ (G-n), las lecciones en BAI08-l; aquí solo la mejora y su decisión.",
  "proceso": {
@@ -467,6 +467,42 @@
      "que": "LM-39b: la cola usa el mapa (ruta.js) para elegir la regresión"
     }
    ]
+  },
+  {
+   "id": "MJ-15",
+   "fecha": "2026-10-18",
+   "origen": "Carlos 18-oct-2026, conversación con el Agente verificador (Diseño se queda corto para definir contigo; ¿los errores son de Desarrollo?; ¿cómo va el mapa?) y en el chat del Arquitecto: «guarda el plan completo como mejora, define el punto de pausa … y ejecuta la fase D, E, por ahora»",
+   "problema": "(1) El mapa del sistema no se mantiene: mapa-str.md sin tocar desde el 15-oct y unos 12 lotes aceptados que cambian módulos sin su fila en el historial; nadie lo comprueba al aceptar. (2) No se registra de dónde nace cada incidente ni qué control debió detectarlo, así que no se sabe en qué fallamos. (3) Diseño carga dos trabajos (analista con Carlos y jefe de proyecto reactivo) y el segundo interrumpe al primero: los REQ quedan en el nivel general y aparecen brechas. (4) El panel del proyecto confunde: chats sin rol en el nombre y tres tareas del verificador remoto que ya no se usan.",
+   "propuesta": "Cinco fases. A · Mapa al día (Arquitecto, sin cruce): revisar lotes aceptados desde L-116 contra su línea «Mapa:», actualizar mapa-modulos.json (estados, rutas, relaciones, una fila por lote), regenerar mapa-str.html, reescribir mapa-str.md y revisar reglas-transversales, infraestructura-configuracion y datos-ciclo-vida; revisión de Diseño (producto) y Desarrollo (rutas); cierre con validar.py en 0 y la ruta de L-150 calculada con el mapa nuevo. B · Control (LM-55, normal): validar.py da error si un lote aceptado no tiene su fila en el historial del mapa; el Arquitecto actualiza el mapa en el mismo commit en que responde un «aceptado». C · Origen de incidentes (LM-56, crítico): campos origen (definición · construcción · integración · arquitectura · entorno · proceso) y debioDetectarse (REQ · revisión previa · tests · verificación · solo en uso) en cada INC; el juez los propone, Desarrollo los confirma; clasificación hacia atrás de los INC existentes; recuento mensual por origen con la lección al Arquitecto. D · Separar Diseño (LM-57, crítico): Chat Diseño (Opus) = analista: pedidos, REQ al detalle (ejemplos con datos, casos borde, boceto, criterios dado/cuando/entonces, lectura del código real), DA; Chat Jefe de proyecto nuevo (Sonnet) = planes, prioridades, bolsa, vigía del trabajo parado, revisión previa de críticos, en su propio archivo interno/proyecto.json (un escritor por archivo); modelos Diseño, Desarrollo y Arquitecto en Opus; proceso-cambios.md corregido. E · Panel: tareas del verificador remoto pausadas y renombradas (las reemplaza el juez local desde LM-19); chats con el nombre de su remitente del buzón y un emoji por rol; solo los activos fijados.",
+   "cobit": "APO03.02 (arquitectura de referencia, A–B); APO11.05 y BAI08 (aprendizaje de incidentes, C); APO01.02 y APO07 (roles y responsabilidades, D); APO01.11 (mejora del marco)",
+   "beneficio": "alto",
+   "costo": "medio",
+   "decision": "adoptar",
+   "asumimos": "Mientras A–C no se ejecuten, el mapa sigue desactualizado (la ruta de pruebas usa mapa-modulos.json, que sí tiene OP y los anclajes de guiones) y los INC se registran sin origen. Mientras D no esté instalado, Diseño sigue con los dos trabajos.",
+   "revisarCuando": "A, B y C: cuando Carlos diga que se ejecutan (18-oct: «por ahora» solo D y E). D: tras unos 15 lotes con el Jefe de proyecto, comparar costo (cambios[].costo) e INC por origen con lo de antes.",
+   "metrica": "A–B: lotes aceptados sin fila en el historial del mapa = 0 (lo cuenta validar.py). C: % de INC con origen; recuento mensual por origen. D: INC de origen «definición» por cada 10 lotes antes y después; costo por lote; compactaciones de Diseño.",
+   "dueno": "Arquitecto (A, B, C, D, E) · Diseño y Desarrollo (revisión del mapa; confirmar origen de INC) · Carlos (cruces de LM-56 y LM-57; abre el chat del Jefe de proyecto)",
+   "estado": "en curso",
+   "ejecuta": "D: LM-57 · E: Arquitecto (panel) · A: sin LM (capa Marco) · B: LM-55 · C: LM-56",
+   "tema": "GOB",
+   "objetivo": null,
+   "aporte": "Cierra la brecha entre REQ general y lo que debería ser (D), mantiene viva la ruta de pruebas (A–B, base de MJ-14) y deja medir en qué fallamos (C).",
+   "puntoDePausa": {
+    "regla": "Ninguna fase de esta mejora toca la cola ni la detiene. Si se pausa, lo que está corriendo sigue solo y su resultado queda en log\\ y en el buzón (hoy: reprueba de L-148 → purga completa de movimientos → barrido de DA-47). Cada paso termina en un commit con su casilla en historial[] de esta mejora y en el LM de su fase; al retomar, se lee esta mejora y el LM y se sigue desde la primera casilla sin marcar. Nada se repite desde cero.",
+    "pausaSegura": "entre pasos (después del commit del paso).",
+    "noPausarDentro": "(1) una instalación en LENOVO (va con la cola vacía, respaldo en pw\\anterior\\ o juez\\anterior\\ y verificación byte a byte): si se corta a mitad, se repone desde anterior\\ y se repite solo ese paso; (2) un cambio de instrucciones.json (encargos): se hace en un solo commit, así que o quedó o no quedó.",
+    "estadoPorFase": "A: pendiente (Carlos decide) · B: pendiente · C: pendiente · D: en curso (LM-57) · E: en curso"
+   },
+   "historial": [
+    {
+     "fecha": "2026-10-18",
+     "que": "10:13 registrada y adoptada por Carlos (chat del Arquitecto): plan completo con punto de pausa; ejecutar D y E por ahora"
+    },
+    {
+     "fecha": "2026-10-18",
+     "que": "10:17 D1–D3: LM-57 cruzado y registrado; consulta a Diseño (M-692) y aviso a Desarrollo (M-693); validar.py y despertador v11.3 construidos (hallazgo: el vigía y los escalamientos no llegaban a nadie desde LM-5). E: las tres tareas del verificador remoto ya estaban pausadas (14-oct)."
+    }
+   ]
   }
  ],
  "temas": [
@@ -489,6 +525,11 @@
    "id": "FAB",
    "nombre": "Infraestructura de la fábrica",
    "que": "Dominios, sitios y piezas comunes a todos los proyectos"
+  },
+  {
+   "id": "GOB",
+   "nombre": "Gobierno y aprendizaje de la fábrica",
+   "que": "Roles y encargos de los chats, mapa del sistema al día y aprendizaje de los incidentes"
   }
  ],
  "objetivos": [

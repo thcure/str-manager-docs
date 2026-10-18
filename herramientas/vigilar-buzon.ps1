@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.3 LM-57: escalamientos y vigia al Chat Jefe de proyecto si existe (si no, al Chat Diseno), por nombre normalizado; planes desde interno/proyecto.json si existe; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
 #     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
@@ -137,6 +137,11 @@ function Nom([string]$n) {
 }
 function BuscarDest($dest, [string]$nombre) { $k = Nom $nombre; return ($dest | Where-Object { (Nom ([string]$_.nombre)) -eq $k } | Select-Object -First 1) }
 
+# v11.3 (LM-57): quien recibe escalamientos y el vigia: el Chat Jefe de proyecto si esta en destinatarios.json; si no,
+# el Chat Diseno. Por nombre normalizado (Nom): antes era una regex '^Chat de dise.o$' que no casaba con 'Chat Disen~o'
+# (nombre desde LM-5), asi que el vigia y los escalamientos no le llegaban a nadie.
+function JefeProyecto($dest) { $j = BuscarDest $dest 'Jefe de proyecto'; if ($j) { return $j }; return (BuscarDest $dest 'Diseno') }
+
 function Avisar([string]$destNombre, [string]$texto, $dest) {
     $d = BuscarDest $dest $destNombre
     if ($d -and ([string]$d.canal) -eq 'windows') { return (Notificar-Windows 'STR: te esperan' $texto) }
@@ -170,6 +175,9 @@ try {
             foreach ($f in @('destinatarios.json', 'mensajes.json', 'seguimiento.json', 'diseno.json', 'proceso.json')) {
                 Move-Item -Force (Join-Path $CacheDir ($f + '.tmp')) (Join-Path $CacheDir $f)
             }
+            # v11.3 (LM-57): proyecto.json (Jefe de proyecto) es opcional: si aun no existe (404), se borra la copia vieja
+            try { Invoke-WebRequest -Uri "$RawBase/$sha/interno/proyecto.json" -UseBasicParsing -OutFile (Join-Path $CacheDir 'proyecto.json.tmp'); Move-Item -Force (Join-Path $CacheDir 'proyecto.json.tmp') (Join-Path $CacheDir 'proyecto.json') }
+            catch { Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $CacheDir 'proyecto.json.tmp'), (Join-Path $CacheDir 'proyecto.json') }
             if ($sha -ne $shaPrev) { $vistoEn = Get-Date }
             Set-Content -Path $EstSha -Value ($sha + '|' + ($(if ($vistoEn) { $vistoEn } else { Get-Date })).ToString('yyyy-MM-dd HH:mm:ss'))
         } catch { Log ('ERROR al descargar el commit ' + $sha + ': ' + $_.Exception.Message) }
@@ -262,7 +270,7 @@ try {
             function Leer-Marcas($ruta) { $h = @{}; if (Test-Path $ruta) { foreach ($l in @(Get-Content -Path $ruta)) { $q = ([string]$l) -split '\|'; if ($q.Count -gt 1) { try { $h[$q[0]] = [DateTime]::Parse($q[1]) } catch { } } } }; return $h }
             $recD = Leer-Marcas $EstRecD
             $escD = Leer-Marcas $EstEscD
-            $dis = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+            $dis = JefeProyecto $dest
             $porDest = @{}
             foreach ($m in $msgs) {
                 $id = [string]$m.id
@@ -334,10 +342,10 @@ try {
 
     # --- 4. Vigia de estancamiento ---
     try {
-        $dv = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+        $dv = JefeProyecto $dest
         $ahora = Get-Date
         $hayActivo = $true
-        try { $dz = LeerCache 'diseno.json'; $pls = @($dz.planes); if ($pls.Count -gt 0) { $hayActivo = (@($pls | Where-Object { ([string]$_.estado) -match '^activo' }).Count -gt 0) } } catch { }
+        try { $dz = $(if (Test-Path (Join-Path $CacheDir 'proyecto.json')) { LeerCache 'proyecto.json' } else { LeerCache 'diseno.json' }); $pls = @($dz.planes); if ($pls.Count -gt 0) { $hayActivo = (@($pls | Where-Object { ([string]$_.estado) -match '^activo' }).Count -gt 0) } } catch { }
         if ($dv -and $hayActivo -and $ahora.Hour -ge $VigiaDesde -and $ahora.Hour -lt $VigiaHasta) {
             $seg = LeerCache 'seguimiento.json'
             $libres = @($seg.plan | Where-Object {
@@ -407,7 +415,7 @@ try {
                 if (Avisar 'Chat de desarrollo' $texto $dest) {
                     Log "Cola detenida: lote $num en fallidas avisado a Chat de desarrollo."
                     if ($ult) {
-                        $dv5 = $dest | Where-Object { ([string]$_.nombre) -match '^Chat de dise.o$' } | Select-Object -First 1
+                        $dv5 = JefeProyecto $dest
                         if ($dv5 -and (Avisar ([string]$dv5.nombre) ('Escalamiento: ' + $texto) $dest)) { Log "Cola detenida: lote $num escalado al Chat de diseno." }
                     }
                     $ult = $ahoraF

@@ -943,6 +943,15 @@
    "severidad": "bajo",
    "prioridad": "P3",
    "nota": "El PUT de turnos dio 200 y el tablero leyó /api/tablero una vez (sigue «curso», 40 %). Mismo código de L-145 en main y el caso pasó a las 19:51 (L-147) y en L-146-4: lo leo intermitente (tiempo de la relectura del tablero). 20:41: se corre aislado antes de la reprueba; si se repite, se diagnostica con la captura y la fila del servidor. · 20:43 P2 solo si se repite aislado; si no, P3 (Diseño M-669). correr\\op1 puesto (pw\\op1.spec.js, cmp IGUAL); corre al terminar L-148. · 21:0x REQ-OP-1 d verde en la regresión de L-148 (mismo código de L-145): otra muestra de intermitencia. · 21:22 REQ-OP-1 aislado (correr\\op1): a, b, c, d, g, i verdes, e y f N3 preparados; limpiar sin error. Intermitente: P3 (Diseño M-674)."
+  },
+  {
+   "id": "INC-154",
+   "fecha": "2026-10-18",
+   "titulo": "REQ-INV2-4-1-interfaz: limpiar() solo desactiva las zonas zz-verif-L<n>-r-*; cada reprueba del mismo lote deja otra copia con el mismo nombre y el guion cae por strict mode (b) y en cascada (c)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "prioridad": "P2",
+   "nota": "Veredicto L-145-3. Arreglo en L-149: el guion guarda el id de cada zona que crea, ubica «ficha» por id y limpiar() borra por id (la guardia deja borrar ids de la corrida). Las copias ya acumuladas (L-145, quizá L-148) las limpia el Arquitecto con limpiar-zz (inv-depositos, prefijo zz-verif-L-145-r-). 09:01."
   }
  ],
  "dts": [
@@ -14014,6 +14023,100 @@
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "pruebas.json: resultado «rojo», causa «fallan: INC-146-purga.spec.js d, INC-146-purga.spec.js e». No aplica la regresión ajena (LM-47b): aunque ambos casos muestran causa de herramienta/entorno (la guardia de pw corta la petición antes del servidor, motivo a) y el guion INC-146-purga.spec.js no aparece en el Alcance ni en los guiones N2 de esta instrucción, los dos ejercitan POST /api/purga-prueba/movimientos, que es justo lo que implementa api/lib/purga-prueba.php (Alcance de L-148): falla la condición 4, así que no se puede aceptar por esta regla. Capturas de d y e (M-472): solo la página de Zonas de inventario con sesión de admin/operador, sin pantalla de login ni net::ERR_*; no hay cascada que descartar. fase.fase = «completa» (no aplica diferir a tren). sesiones y red (pruebas.json): sin cortes ni caídas. regresionSeleccion.ruta.huecos: ninguno (sin deuda de cobertura). Los dos criterios propios del lote (a y b) están en verde."
    }
+  },
+  {
+   "lote": "L-145",
+   "fecha": "2026-10-18",
+   "req": "INC-120",
+   "categoria": "crítico",
+   "resumen": "INC-120 capas 1 y 2: segunda reprueba",
+   "estado": "no aceptado",
+   "hash": "25e21df",
+   "observacion": "Reprueba 08:2x–08:56: criterios propios a–d en verde. Regresión 151 casos, 4 rojos: INC-146-purga d/e (ajenos, INC-151) y REQ-INV2-4-1-interfaz b y c: zonas zz-verif-L-145-r-* repetidas de las corridas anteriores de L-145 (el guion solo las desactivaba en limpiar()), b muere por strict mode antes de revocar «ficha» y c cae en cascada; c lee zonas por api/col (Alcance) → LM-47b no aplica. REQ-INV2-4-2 y REQ-OP-1 en verde. Juez 08:56: no aceptado, campo herramienta. Cruce veredicto/pruebas hecho por Desarrollo (4/4). Causa: INC-154 (guion). Siguiente: limpieza de zonas zz-verif-L-145-r- (Arquitecto) + L-149 (guion borra por id) → reprueba.",
+   "aceptacion": {
+    "lote": "L-145",
+    "hash": "25e21df",
+    "fecha": "2026-10-18",
+    "horaBogota": "08:56",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: zz-verif-Propiedad: encontrada | si: turno de hace 120 días (2026-06-20): 200 | si: incidentes del turno viejo: 200 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: datos de la corrida: creados en a | si: turno viejo: soloHoras true · campos que no debían llegar: ninguno · titular yo · horas sí | si: el colaborador guarda el turno viejo: 200 · después sigue reducido y sin notas: sí | si: incidentes del turno viejo: abierto llega · resuelto no llega | si: «Mi dinero»: meses para elegir 3 | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b (N1: A1–A5, A3b, B1–B13, C1–C5)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (ya en verde con este commit a las 20:43:00; no se repite, LM-45)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: turno viejo para el operador: con notas · tareas 1 | si: incidentes para el operador: sí · sí"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (ya en verde con este commit a las 20:43:00; no se repite, LM-45)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "REQ-INV2-4-1-interfaz b y c caen por zonas zz-verif-L-145-r-* repetidas de corridas anteriores del lote",
+      "nivel": "medio",
+      "causa": "El guion REQ-INV2-4-1-interfaz.spec.js crea sus zonas con nombre fijo por lote (zz-verif-L-145-r-privada/base/ajena/revocada/ficha, sin sufijo de corrida) y su limpiar() no las borra cuando hay repetidas; tras las corridas anteriores de L-145 quedaron duplicadas, el locator de la ficha encuentra 2 elementos (strict mode de pw) y b muere antes de revocar el acceso a la zona «ficha»; c es cascada: el colaborador recibe «ficha» porque nunca se revocó. Arnés/entorno, no la lectura de zonas del lote (L-145 no toca `_colZonasContexto`). Dueño Desarrollo: sufijo de corrida en los nombres y limpiar() que borre por id; borrar a mano lo que empiece por zz-verif-L-145-r-.",
+      "observado": "b (admin, /str-inventario.html, orden 1, 08:36:57): «error: locator.uncheck: Error: strict mode violation: locator('[data-inv-zona]').filter({ hasText: 'zz-verif-L-145-r-ficha' }).locator('[data-inv-acceso-zona]') resolved to 2 elements»; captura: ficha de zz-verif-Propiedad con «zz-verif-L-145-r-privada/base/revocada/ficha» listadas dos veces en «Zonas que sirven a esta propiedad». c (colab, /portal.html, orden 3, 08:37:29): «NO: zonas que no debían llegar: zz-verif-L-145-r-ficha»; captura: portal del colaborador con sesión, sin error. limpiar(): «strict mode violation … 'zz-verif-L-145-r-privada' … resolved to 3 elements (borrar a mano lo que empiece por zz-verif-L-145-r-)». En L-144 (15:08) b y c pasaron con nombres de L-144.",
+      "ajeno": true
+     },
+     {
+      "titulo": "La guardia de pw corta los POST de purga que INC-146-purga d y e necesitan para probar el 400/403",
+      "nivel": "bajo",
+      "causa": "Conflicto entre INC-146-purga.spec.js y la guardia de la cola: la guardia corta antes del servidor el POST /api/purga-prueba/movimientos sin confirmo «zz-verif-» (d) y el del operador sobre un movimiento que la corrida no creó (e) y responde 409, así que el guion nunca ve el 400/403 del servidor. Herramienta, no del lote (dueño Desarrollo: probarlo por N1, como DT-42 con LM-43, o dejar pasar esos casos negativos en la guardia).",
+      "observado": "d: «NO: POST sin confirmo: 409 | aviso: la guardia corto 1 peticion(es) … (purga sin confirmo «zz-verif-»)»; e: «NO: operador: GET 403 · POST 409 | aviso: la guardia corto 1 peticion(es) … (purga de 1 movimiento(s) que esta corrida no creó como zz-verif-)». Capturas: Inventario › Zonas, sin error en pantalla. Igual en L-148 (d 20:51:00, e 20:51:15).",
+      "ajeno": true
+     }
+    ],
+    "regresionAjena": [
+     {
+      "guion": "INC-146-purga.spec.js",
+      "c": "d",
+      "motivo": "a",
+      "evidencia": "guardia de pw: «la guardia corto 1 peticion(es): POST …/api/purga-prueba/movimientos (purga sin confirmo «zz-verif-»)» → 409 del arnés; también preexistente (b): log/L-148-pruebas.json, hora 20:51:00. Página /str-inventario.html y /api/purga-prueba fuera del Alcance",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "INC-146-purga.spec.js",
+      "c": "e",
+      "motivo": "a",
+      "evidencia": "guardia de pw: «la guardia corto 1 peticion(es): POST …/api/purga-prueba/movimientos (purga de 1 movimiento(s) que esta corrida no creó como zz-verif-)» → 409 del arnés; también preexistente (b): log/L-148-pruebas.json, hora 20:51:15. Página /str-inventario.html fuera del Alcance",
+      "inc": "nuevo"
+     },
+     {
+      "guion": "REQ-INV2-4-1-interfaz.spec.js",
+      "c": "b",
+      "motivo": "a",
+      "evidencia": "error del propio pw: «strict mode violation … resolved to 2 elements» por zonas zz-verif-L-145-r-* repetidas de corridas anteriores (la captura muestra la ficha con cada zona dos veces). Página /str-inventario.html fuera del Alcance",
+      "inc": "nuevo"
+     }
+    ],
+    "herramienta": "Los 4 rojos de regresión son del arnés o del entorno: la guardia de pw corta los POST de purga de INC-146-purga d y e, y REQ-INV2-4-1-interfaz b cae por «strict mode violation» al encontrar zonas zz-verif-L-145-r-* repetidas de corridas anteriores, con c en cascada",
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado «rojo»; causa «fallan: INC-146-purga.spec.js d, INC-146-purga.spec.js e, REQ-INV2-4-1-interfaz.spec.js b, REQ-INV2-4-1-interfaz.spec.js c». Fase «completa» (lote crítico), sin diferidos. Los criterios propios del lote (a, b y c en N2; b y d en N1) están todos en verde; la instrucción no trae N3 ni N4 (n3Preparados vacío). No aplica la regresión ajena (LM-47b) a todo: INC-146-purga d y e y REQ-INV2-4-1-interfaz b la cumplen (van en regresionAjena), pero REQ-INV2-4-1-interfaz c no cumple la condición 4: corre como colaborador en /portal.html y lee las zonas por api/col/index.php, y los dos archivos están en el Alcance. Aunque la evidencia apunta a una cascada de b (la zona «ficha» nunca se revocó porque b murió antes), la regla no permite aceptarlo, así que el resultado es «no aceptado» con el campo herramienta: repetir la corrida después de borrar a mano las zonas zz-verif-L-145-r-* (limpiar() de REQ-INV2-4-1-interfaz falló por la misma duplicación) o de arreglar el guion. Sesiones: ninguna recuperada, perdida ni caída. Sin cortes de red registrados. Semilla «no concluyente» (zonas e inventario sin respuesta en la página de la semilla), sin efecto en los casos del lote. Deuda de cobertura de la ruta (no cambia el resultado): huecos REL-30 (HK→KN) y reglas RT-10, RT-11, RT-15; a declarar REL-20. No corren 4 guiones fuera de la ruta (INC-117, REQ-TB-3, REQ-TB-4, REQ-TB-5): no son evidencia."
+   }
   }
  ],
  "esquema": {
@@ -16186,11 +16289,11 @@
    "resumen": "INC-120 capas 1 y 2 (DA-45): gestión del colaborador 90 días (lo abierto sigue); turnos viejos reducidos a horas; propiedad mientras la opere; «Mi dinero» 3 meses",
    "estado": "no aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-18 08:21",
+   "desde": "2026-10-18 09:01",
    "grupo": "SRV",
-   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba. · 20:00 reprobar\\L-145.txt puesto (orden de M-664/M-665/M-666: L-146 arregló el almacenamiento; la purga no hace falta antes; LM-52 y LM-53 instalados 19:57). · 20:35 juez: no aceptado por INC-146-purga d/e (INC-151), REQ-MOD-6 g (INC-152) y REQ-OP-1 d (INC-153); criterios propios en verde. 20:41 registrado. · 20:43 orden de Diseño (M-669) y del Arquitecto (M-670): REQ-OP-1 aislado → reprueba de L-145 → L-149; INC-146-purga d/e y REQ-MOD-6 g serían ajenos (el juez ya lo dijo en el veredicto 2: motivo a). L-148 ya estaba en construcción (20:40), no se puede adelantar L-145 a él. · 20:59 Carlos cierra el día (M-672): L-148 en pruebas y correr\\op1 detrás; la reprueba se pone al volver si REQ-OP-1 sale verde. · 21:22 REQ-OP-1 aislado verde. 21:24 listo para reprobar; espero a que Carlos vuelva (la cola queda vacía para apagar, M-675). · 18-oct 08:19 sesiones s1–s4 OK (LENOVO de vuelta). 08:21 reprobar\\L-145.txt puesto.",
-   "espera": "reprueba (solo pruebas) y veredicto",
-   "esperaA": "Cola",
+   "nota": "15:43 redactado contra los archivos reales de main (LENOVO, sin lote corriendo): servidor (ventana de gestión en el contexto y el filtro; PUT no cambia turnos viejos), port, HK (lista sin soloHoras; al portal solo horas), portal (3 meses), doc; N1 lectura-gestion 24/0 con PHP real y STRApi.horas real; guion INC-120-c12 (admin → colab → oper). Revisión previa en curso. · 15:52 revisión previa (subagente) 15/17 → corregidos: PUT de turno viejo se ignora sin 403 y HK nunca sube un soloHoras (antes tumbaba el lote); el reducido conserva resId (si no, HK rearmaba el automático como atrasado); guion sin cerrar el turno viejo (un cierre creaba pendientes de la semilla); RT-7 y dependencias en la cabecera. Ok pedido a Diseño (M-649). · 15:56 ok de Diseño (M-649) con dos pedidos hechos: HK no abre el detalle de un soloHoras (criterio) y línea sin datos en el registro al ignorar; N1 25/0; encolado, cmp IGUAL. · 16:00 construido 3aa9592 (15:56–15:59): todos los apartados, sin busca fallido; ?v= p5c107; run.js 89/89; lectura-gestion 25/0, lectura-huesped 27/0. Aviso de la CLI: docs/claude/servidor-php.md queda en ~58 000 caracteres (límite 60 000). En pruebas. · 16:33 pruebas rojo: guion del lote verde; regresión con QuotaExceededError (localStorage lleno) en perfiles admin/oper y cascadas; consulta al Arquitecto (M-650). · 16:33 veredicto: no aceptado por la regresión (entorno: cuota de localStorage). INC-146. Espera limpieza de perfiles y reprueba. · 20:00 reprobar\\L-145.txt puesto (orden de M-664/M-665/M-666: L-146 arregló el almacenamiento; la purga no hace falta antes; LM-52 y LM-53 instalados 19:57). · 20:35 juez: no aceptado por INC-146-purga d/e (INC-151), REQ-MOD-6 g (INC-152) y REQ-OP-1 d (INC-153); criterios propios en verde. 20:41 registrado. · 20:43 orden de Diseño (M-669) y del Arquitecto (M-670): REQ-OP-1 aislado → reprueba de L-145 → L-149; INC-146-purga d/e y REQ-MOD-6 g serían ajenos (el juez ya lo dijo en el veredicto 2: motivo a). L-148 ya estaba en construcción (20:40), no se puede adelantar L-145 a él. · 20:59 Carlos cierra el día (M-672): L-148 en pruebas y correr\\op1 detrás; la reprueba se pone al volver si REQ-OP-1 sale verde. · 21:22 REQ-OP-1 aislado verde. 21:24 listo para reprobar; espero a que Carlos vuelva (la cola queda vacía para apagar, M-675). · 18-oct 08:19 sesiones s1–s4 OK (LENOVO de vuelta). 08:21 reprobar\\L-145.txt puesto. · 08:56 juez: no aceptado por zonas repetidas del guion REQ-INV2-4-1-interfaz (INC-154); purga d/e ajenos. 09:01 registrado.",
+   "espera": "limpieza de zonas zz-verif-L-145-r- (M-678); L-149; luego reprobar",
+   "esperaA": "Arquitecto",
    "hash": "3aa9592"
   },
   {
@@ -16248,7 +16351,7 @@
    "vista": "siguiente",
    "desde": "2026-10-17 20:44",
    "grupo": "HK",
-   "nota": "20:41 G1–G2 que no entraron en L-148: d sin el POST sin confirmo; e con un id de la corrida. Solo tests/e2e. · 20:44 redactado (claude/producto/borradores/L-149-instr-inc151-guion-purga-guardia.md): guion completo, cambian d y e. Revisión previa 16/17 → corregido el 11 (P3; va después de la reprueba de L-145) y la línea «Mapa:». La guardia v7 deja pasar todas sus escrituras (R e ids compartidos entre perfiles).",
+   "nota": "20:41 G1–G2 que no entraron en L-148: d sin el POST sin confirmo; e con un id de la corrida. Solo tests/e2e. · 20:44 redactado (claude/producto/borradores/L-149-instr-inc151-guion-purga-guardia.md): guion completo, cambian d y e. Revisión previa 16/17 → corregido el 11 (P3; va después de la reprueba de L-145) y la línea «Mapa:». La guardia v7 deja pasar todas sus escrituras (R e ids compartidos entre perfiles). · 09:01 amplío L-149 con el arreglo de INC-154 (REQ-INV2-4-1-interfaz borra sus zonas por id); revisión previa de nuevo.",
    "espera": "reprueba de L-145; luego encolar",
    "esperaA": "Cola"
   }

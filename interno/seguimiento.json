@@ -1034,11 +1034,11 @@
    "titulo": "L-150: _cpMover crea la cuenta «zz-verif-pruebas» con INSERT INTO cuenta (nombre), pero en producción cuenta.plan_id es NOT NULL sin defecto (clave foránea a plan): el primer «mover» dará 500 (rollback, sin daño)",
    "estado": "abierto",
    "severidad": "alto",
-   "prioridad": "P0",
+   "prioridad": "P3",
    "origen": "Desarrollo, al revisar L-137 tras aceptar L-150",
    "causaRaiz": "integración",
    "debioDetectarse": "revisión previa",
-   "nota": "15:03 Mismo defecto que INC-137 (restauracion.php:225, M-575: plan_id NOT NULL en la cuenta de producción). Las pruebas usan el esquema de migrate.php (sin plan_id) y por eso C5 pasó. Efecto: el POST mover del Arquitecto daría 500 y la transacción se revierte (nada cambia). Arreglo: L-153, la cuenta nueva lleva el plan_id de la cuenta de origen (como L-137), con N1 sobre una tabla cuenta como la de producción. Bloquea el movimiento de usuarios de DA-47."
+   "nota": "15:03 Mismo defecto que INC-137 (restauracion.php:225, M-575: plan_id NOT NULL en la cuenta de producción). Las pruebas usan el esquema de migrate.php (sin plan_id) y por eso C5 pasó. Efecto: el POST mover del Arquitecto daría 500 y la transacción se revierte (nada cambia). Arreglo: L-153, la cuenta nueva lleva el plan_id de la cuenta de origen (como L-137), con N1 sobre una tabla cuenta como la de producción. Bloquea el movimiento de usuarios de DA-47. · 15:05 Diseño (M-742): P3 de fábrica, primero por la regla 4 (destraba DA-47); L-153 cabe en DA-47 sin nuevo cruce si solo toma el plan_id de origen. Borrador L-153 listo; revisor previo en curso."
   }
  ],
  "dts": [
@@ -16943,6 +16943,20 @@
    "espera": "",
    "esperaA": "",
    "hash": "1341b82"
+  },
+  {
+   "lote": "L-153",
+   "req": "INC-156",
+   "categoria": "crítico",
+   "riesgo": "R-1",
+   "resumen": "La cuenta «zz-verif-pruebas» se crea con el plan_id de su cuenta de origen (cuenta.plan_id NOT NULL en producción)",
+   "estado": "redactado",
+   "vista": "siguiente",
+   "desde": "2026-10-18 15:05",
+   "grupo": "U",
+   "nota": "15:05 Destraba el movimiento de usuarios de DA-47. N1 36/0 (con el código de hoy caen A13 y C16 con «NOT NULL constraint failed: cuenta.plan_id»). Pide: revisor previo (subagente), revisión previa del Jefe de proyecto, ok de producto de Diseño (M-742).",
+   "espera": "revisor previo",
+   "esperaA": "CD"
   }
  ],
  "riesgos": [

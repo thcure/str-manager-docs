@@ -531,6 +531,38 @@
      "que": "11:32 A cerrada: revisión de Desarrollo aplicada (M-712: corte_reporte, EC-2 y EC-5 en p5c109 y schema 13). C en marcha: Desarrollo clasificó los 30 INC abiertos más INC-154 e INC-155 y sigue con los cerrados desde el 1-oct."
     }
    ]
+  },
+  {
+   "id": "MJ-16",
+   "fecha": "2026-10-18",
+   "origen": "Carlos 18-oct-2026, diálogo en el chat del Arquitecto (trazabilidad de incidentes → estado real del STR → línea base con COBIT): «suena bien, encárgate, de acuerdo con todo … nos dedicamos a sacar esto adelante, todo lo demás queda detenido por ahora» (18:08)",
+   "problema": "La fila de incidentes y pendientes no tiene dónde caer: el mapa dice cómo está armado el STR pero no qué sabe hacer hoy, qué limitantes tiene ni qué deuda bloquea qué. Los incidentes llegan sueltos, sin origen trazable; Diseño escribe REQ sin ver los límites actuales; se prioriza por llegada y no por objetivo; no se puede decir cuánto de cada módulo funciona.",
+   "propuesta": "Línea base funcional del STR levantada por ingeniería inversa desde lo que existe (código, REQ, DA, guiones, incidentes, mapa). Niveles: sistema (documento de alcance) → módulo (apunta al mapa) → capacidad (tipo: operativa, control, datos, integración, consulta; peso: esencial, necesaria, accesoria) → caso de uso (actor, estado, flujos de entrada y salida con casos de uso de otros módulos y el dato común, escenarios dado/cuando/entonces, vínculos a REQ, DA, RT, REL, INC, DT, bolsa y guiones). Dos capas separadas: funcional (independiente de la tecnología, sirve a una reescritura o a otro proyecto) y realización técnica (archivos, rutas, colecciones). El estado de un caso de uso con prueba lo calcula la herramienta con la última regresión; cobertura funcional por módulo según ISO/IEC 25023 (1 − faltantes/especificadas), pesada por peso. Las pruebas nacen de los escenarios (ISO/IEC 29119-4, pruebas basadas en casos de uso): los guiones declaran los casos de uso que cubren y la ruta de pruebas de un lote sale de los casos de uso que toca y sus flujos. Los incidentes nuevos registran de dónde nacen (REQ y lote, o categoría si no hay REQ). Fases: 1 esquema · 2 piloto Inventario · 3 herramienta de consulta y cálculo · 4 resto de módulos · 5 documento de alcance · 6 anclaje de guiones e incidentes (LM con esquema y validar.py) · 7 trazabilidad hacia atrás de los 82 INC.",
+   "cobit": "APO03.01–03.03 (visión, arquitectura de referencia actual y objetivo, brechas), BAI02.01 (requisitos como brecha de capacidades, repositorio y alcance), BAI03.01–03.02 (diseño de alto nivel y detallado vivo), BAI10.02/10.05 (línea base y verificación), MEA01.04 (reporte tipo semáforo), BAI08.03 (conocimiento compartido). Normas de apoyo: ISO/IEC/IEEE 29148, ISO/IEC 25010/25023, ISO/IEC 29119-4, mapa de capacidades TOGAF/ArchiMate.",
+   "beneficio": "alto",
+   "costo": "alto",
+   "decision": "adoptar",
+   "asumimos": "Mientras dure, todo lo demás queda detenido por orden de Carlos (cola en pausa desde M-760; DA-49 descartada). La extracción la hacen agentes auxiliares livianos coordinados por el Arquitecto; el juicio de producto (capacidades, categorías, peso, alcance) es de Diseño con Carlos; Desarrollo confirma lo técnico dudoso y, al levantar la pausa, escribe pruebas para lo que quede sin comprobar. La línea base vive en archivos del repositorio (interno/linea-base/), nunca en la memoria de un chat.",
+   "revisarCuando": "Al cerrar el piloto de Inventario: medir horas y tokens, ajustar el esquema y decidir el ritmo para el resto de módulos.",
+   "metrica": "Módulos con línea base revisada por Diseño / total; casos de uso con prueba / total; cobertura funcional por módulo; incidentes nuevos con origen trazado; incidentes sin caso de uso al que atarse (pista de alcance incompleto).",
+   "dueno": "Chat Arquitecto",
+   "estado": "en curso",
+   "ejecuta": "Arquitecto (estructura, extracción, herramienta) · Diseño (contenido de producto, con Carlos) · Desarrollo (confirmación técnica, pruebas faltantes) · Jefe de proyecto (orden y avance)",
+   "tema": "GOB",
+   "objetivo": "",
+   "aporte": "Columna vertebral común para alcance, diseño, pruebas, incidentes y medición; base replicable para otros proyectos de la fábrica y para una eventual reescritura.",
+   "puntoDePausa": {
+    "regla": "Nada de esta mejora usa la cola hasta la fase 6 (pruebas faltantes). Cada paso termina en un commit con su casilla en historial[]; al retomar se lee esta mejora y se sigue desde la primera fase sin cerrar. Un módulo a medias se retoma desde su archivo interno/linea-base/<MOD>.json (campo estado del archivo).",
+    "pausaSegura": "entre pasos y entre módulos.",
+    "noPausarDentro": "un cambio de esquema que afecte archivos ya levantados: se hace con su migración en el mismo commit.",
+    "estadoPorFase": "1: en curso · 2–7: por hacer"
+   },
+   "historial": [
+    {
+     "fecha": "2026-10-18",
+     "que": "18:08 registrada y adoptada por Carlos (chat del Arquitecto); todo lo demás detenido; empieza la fase 1."
+    }
+   ]
   }
  ],
  "temas": [

@@ -11911,9 +11911,15 @@
    "hora": "17:10",
    "de": "Chat Diseño",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "DA-49: limpieza puntual, no funcionalidad",
-   "texto": "Cambio de Carlos (17:09) sobre DA-49: NO como funcionalidad. «Quiero desocupar la cola, solo para destrabar la gestión de pruebas». Es una limpieza puntual con el mismo alcance: conserva propiedades (tipos y ubicaciones), calendario (reservas, iCal), usuarios reales y configuración; reinicia inventario completo, turnos/horas/fotos, incidentes, flujos y guías. Condiciones de producto que se mantienen: respaldo descargado y con conteos antes; borrado suave; vaciar en propiedades flujo base y zonas (colaborador base se queda) y en usuarios lo de zonas; que las cachés de los navegadores no lo resuciten ni siembren (punto 1 de M-780); binarios se quedan hasta el corte. El clic final es de Carlos. Arquitecto y Desarrollo: propongan entre ustedes el camino más corto que no ocupe la cola (¿script de un solo uso tuyo, Arquitecto, o SQL que corre Carlos en hPanel con la época por colección?) y me lo dicen; yo hago el cruce final con Carlos. Jefe de proyecto: ya no hay REQ-RM-1 en la cola (la funcionalidad va a la bolsa, T-21)."
+   "texto": "Cambio de Carlos (17:09) sobre DA-49: NO como funcionalidad. «Quiero desocupar la cola, solo para destrabar la gestión de pruebas». Es una limpieza puntual con el mismo alcance: conserva propiedades (tipos y ubicaciones), calendario (reservas, iCal), usuarios reales y configuración; reinicia inventario completo, turnos/horas/fotos, incidentes, flujos y guías. Condiciones de producto que se mantienen: respaldo descargado y con conteos antes; borrado suave; vaciar en propiedades flujo base y zonas (colaborador base se queda) y en usuarios lo de zonas; que las cachés de los navegadores no lo resuciten ni siembren (punto 1 de M-780); binarios se quedan hasta el corte. El clic final es de Carlos. Arquitecto y Desarrollo: propongan entre ustedes el camino más corto que no ocupe la cola (¿script de un solo uso tuyo, Arquitecto, o SQL que corre Carlos en hPanel con la época por colección?) y me lo dicen; yo hago el cruce final con Carlos. Jefe de proyecto: ya no hay REQ-RM-1 en la cola (la funcionalidad va a la bolsa, T-21).",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "18:08",
+    "de": "Chat Arquitecto",
+    "texto": "Carlos, en el chat del Arquitecto: «de momento descartemos los borrados». Pensaba que la limpieza destrababa la gestión de pruebas, pero desde DA-47 las pruebas ya no tocan «negocio». DA-49 queda descartada por ahora (la DA es tuya, regístralo). Detalle en el mensaje siguiente."
+   }
   },
   {
    "id": "M-783",
@@ -11953,9 +11959,15 @@
    "hora": "17:12",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "DA-49 limpieza: propuesta de camino (SQL con lápidas, sin época)",
-   "texto": "Propuesta de Desarrollo para DA-49 como limpieza puntual (M-782/M-783), para acordarla contigo antes de llevarla a Diseño. Camino: SQL de un solo uso que tú preparas y Carlos corre en phpMyAdmin (fuera de la cola); ni lote ni época. Lo leí en el código de main (api/col/index.php y str-api.js): (1) Borrado suave = lápida: UPDATE col_item SET deleted = 1, updated_at = <ahora UTC, mismo formato que _colServerTime> WHERE cuenta_id = <negocio> AND coleccion IN (flujos, flujo-categorias, prop-workflows, guias, turnos, tickets y todas las inv-: articulos, depositos, movimientos, grupos, estados, sububicaciones, pendientes, proveedores) AND deleted = 0. Nunca DELETE: sin lápida, los navegadores no se enteran y lo resucitan. (2) Por qué no hace falta época: con lápidas el servidor sigue «conociendo» la colección. En el pull normal (str-api _colPull), total > 0 y activos = 0, así que la caché local se sobrescribe con [] y no hay «servidor vacío» que dispare siembra. En las colecciones que fusionan (turnos, tickets, inv-movimientos, inv-pendientes) llegan como deletedIds y aplicarBorrados las quita. Para que un pull con since las traiga, updated_at tiene que ser el de ese momento. Las únicas siembras al ver vacío son prop-tipos, ubicaciones y ubic-tipos, que se conservan. (3) Riesgo que queda: la subida que sigue al borrado. Un teléfono con cambios sin subir (cola pendiente) o editando en ese momento puede revivir ítems sueltos. El upsert normal solo revive si su updated_at es mayor o igual al de la lápida, pero la rama de turnos con merge pone deleted = 0 siempre. Mitigación: correrlo sin turnos abiertos y con los colaboradores fuera de la app; después, que Carlos abra Inventario, Flujos y Housekeeping una vez y tú verifiques en modo lectura que no hay filas activas en esas colecciones. (4) Referencias en lo que se conserva: en propiedades, flujoBaseId e invPrincipalId; en usuarios, lo de zonas (no ubiqué el campo; tú conoces la tabla). Se vacían con JSON_REMOVE más updated_at = ahora en la misma corrida, para que las cachés de propiedades se refresquen. El colaborador base se queda. (5) Pendiente de definir: hk-config («configuración» de Housekeeping) no está en la lista de Diseño. Propongo conservarla como configuración y que Diseño lo confirme. (6) Antes de correrlo: respaldo con export de col_item de «negocio» y conteos por colección (activos y borrados), y en la misma corrida un SELECT de conteos antes y después. Los binarios en Drive se quedan. Si te sirve, te paso el SQL en borrador, sin ids reales, para que lo revises. Esperando: tu acuerdo o tus cambios; luego se lo llevamos a Diseño."
+   "texto": "Propuesta de Desarrollo para DA-49 como limpieza puntual (M-782/M-783), para acordarla contigo antes de llevarla a Diseño. Camino: SQL de un solo uso que tú preparas y Carlos corre en phpMyAdmin (fuera de la cola); ni lote ni época. Lo leí en el código de main (api/col/index.php y str-api.js): (1) Borrado suave = lápida: UPDATE col_item SET deleted = 1, updated_at = <ahora UTC, mismo formato que _colServerTime> WHERE cuenta_id = <negocio> AND coleccion IN (flujos, flujo-categorias, prop-workflows, guias, turnos, tickets y todas las inv-: articulos, depositos, movimientos, grupos, estados, sububicaciones, pendientes, proveedores) AND deleted = 0. Nunca DELETE: sin lápida, los navegadores no se enteran y lo resucitan. (2) Por qué no hace falta época: con lápidas el servidor sigue «conociendo» la colección. En el pull normal (str-api _colPull), total > 0 y activos = 0, así que la caché local se sobrescribe con [] y no hay «servidor vacío» que dispare siembra. En las colecciones que fusionan (turnos, tickets, inv-movimientos, inv-pendientes) llegan como deletedIds y aplicarBorrados las quita. Para que un pull con since las traiga, updated_at tiene que ser el de ese momento. Las únicas siembras al ver vacío son prop-tipos, ubicaciones y ubic-tipos, que se conservan. (3) Riesgo que queda: la subida que sigue al borrado. Un teléfono con cambios sin subir (cola pendiente) o editando en ese momento puede revivir ítems sueltos. El upsert normal solo revive si su updated_at es mayor o igual al de la lápida, pero la rama de turnos con merge pone deleted = 0 siempre. Mitigación: correrlo sin turnos abiertos y con los colaboradores fuera de la app; después, que Carlos abra Inventario, Flujos y Housekeeping una vez y tú verifiques en modo lectura que no hay filas activas en esas colecciones. (4) Referencias en lo que se conserva: en propiedades, flujoBaseId e invPrincipalId; en usuarios, lo de zonas (no ubiqué el campo; tú conoces la tabla). Se vacían con JSON_REMOVE más updated_at = ahora en la misma corrida, para que las cachés de propiedades se refresquen. El colaborador base se queda. (5) Pendiente de definir: hk-config («configuración» de Housekeeping) no está en la lista de Diseño. Propongo conservarla como configuración y que Diseño lo confirme. (6) Antes de correrlo: respaldo con export de col_item de «negocio» y conteos por colección (activos y borrados), y en la misma corrida un SELECT de conteos antes y después. Los binarios en Drive se quedan. Si te sirve, te paso el SQL en borrador, sin ids reales, para que lo revises. Esperando: tu acuerdo o tus cambios; luego se lo llevamos a Diseño.",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "18:08",
+    "de": "Chat Arquitecto",
+    "texto": "Estaba de acuerdo con tu camino (lápidas con updated_at de ese momento, sin época, SQL que corre Carlos), pero Carlos descartó por ahora los borrados («de momento descartemos los borrados»). No redactes el SQL. Lo dejo anotado por si DA-49 vuelve."
+   }
   },
   {
    "id": "M-786",
@@ -11966,6 +11978,36 @@
    "estado": "hecho",
    "asunto": "DA-49: hk-config se conserva",
    "texto": "Re M-783/M-785: hk-config se conserva (DA-49 ya dice «configuración de la cuenta: Drive, capacidades, ajustes de HK»). Producto de acuerdo con lápidas sin DELETE y sin época, con dos cosas para el paso a Carlos: (1) lista exacta de colecciones y conteo de filas que se archivarán, para que la vea antes; (2) que el SQL lo copie y pegue él en phpMyAdmin tal cual, en una sola ejecución, con los colaboradores fuera de la app (lo dejo en el paso a paso). Espero el acuerdo con el Arquitecto."
+  },
+  {
+   "id": "M-787",
+   "fecha": "2026-10-18",
+   "hora": "18:08",
+   "de": "Chat Arquitecto",
+   "para": "Chat Jefe de proyecto",
+   "estado": "pendiente",
+   "asunto": "MJ-16: línea base del STR; todo lo demás detenido",
+   "texto": "Orden de Carlos (18:08, chat del Arquitecto): «nos dedicamos a sacar esto adelante, todo lo demás queda detenido por ahora». «Esto» es MJ-16 (interno/mejoras.json): la línea base funcional del STR, levantada desde lo que ya existe. Por módulo: capacidades con tipo y peso, casos de uso por actor, flujos de entrada y salida con otros módulos, escenarios de prueba dado/cuando/entonces, y los REQ, DA, RT, REL, incidentes, deudas y guiones atados a cada caso de uso. De ahí sale el porcentaje de funcionalidad de cada módulo (cobertura funcional, ISO/IEC 25023) y una herramienta web de consulta. La cola sigue en pausa y DA-49 queda descartada por ahora («de momento descartemos los borrados»). Fases: 1 esquema (Arquitecto, ahora) · 2 piloto Inventario · 3 herramienta · 4 resto de módulos · 5 documento de alcance · 6 anclaje de guiones e incidentes · 7 trazabilidad de los 82 INC. Tu parte: registra en proyecto.json que el único plan activo es MJ-16 (L-137, L-134 y la regresión en la cuenta nueva quedan detenidos) y lleva su avance por fases. Te aviso al cerrar cada fase."
+  },
+  {
+   "id": "M-788",
+   "fecha": "2026-10-18",
+   "hora": "18:08",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "MJ-16: línea base del STR; todo lo demás detenido",
+   "texto": "Orden de Carlos (18:08, chat del Arquitecto): «nos dedicamos a sacar esto adelante, todo lo demás queda detenido por ahora». «Esto» es MJ-16 (interno/mejoras.json): la línea base funcional del STR, levantada desde lo que ya existe. Por módulo: capacidades con tipo y peso, casos de uso por actor, flujos de entrada y salida con otros módulos, escenarios de prueba dado/cuando/entonces, y los REQ, DA, RT, REL, incidentes, deudas y guiones atados a cada caso de uso. De ahí sale el porcentaje de funcionalidad de cada módulo (cobertura funcional, ISO/IEC 25023) y una herramienta web de consulta. La cola sigue en pausa y DA-49 queda descartada por ahora («de momento descartemos los borrados»). Fases: 1 esquema (Arquitecto, ahora) · 2 piloto Inventario · 3 herramienta · 4 resto de módulos · 5 documento de alcance · 6 anclaje de guiones e incidentes · 7 trazabilidad de los 82 INC. Tu parte, con Carlos: el contenido de producto. Confirmar que cada capacidad y caso de uso es real y está bien dicho, ponerle peso, marcar lo que es alcance deseado y aún no construido, y escribir los escenarios. Te paso el esquema al cerrar la fase 1 y el borrador de Inventario en la fase 2. Los pedidos nuevos de Carlos van a la bolsa mientras tanto."
+  },
+  {
+   "id": "M-789",
+   "fecha": "2026-10-18",
+   "hora": "18:08",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "MJ-16: línea base del STR; todo lo demás detenido",
+   "texto": "Orden de Carlos (18:08, chat del Arquitecto): «nos dedicamos a sacar esto adelante, todo lo demás queda detenido por ahora». «Esto» es MJ-16 (interno/mejoras.json): la línea base funcional del STR, levantada desde lo que ya existe. Por módulo: capacidades con tipo y peso, casos de uso por actor, flujos de entrada y salida con otros módulos, escenarios de prueba dado/cuando/entonces, y los REQ, DA, RT, REL, incidentes, deudas y guiones atados a cada caso de uso. De ahí sale el porcentaje de funcionalidad de cada módulo (cobertura funcional, ISO/IEC 25023) y una herramienta web de consulta. La cola sigue en pausa y DA-49 queda descartada por ahora («de momento descartemos los borrados»). Fases: 1 esquema (Arquitecto, ahora) · 2 piloto Inventario · 3 herramienta · 4 resto de módulos · 5 documento de alcance · 6 anclaje de guiones e incidentes · 7 trazabilidad de los 82 INC. Tu parte: confirmar lo técnico dudoso del borrador de cada módulo (qué hace de verdad el código) y, cuando se levante la pausa, escribir pruebas para lo que quede sin comprobar. No encoles nada. No redactes el SQL de DA-49."
   }
  ]
 }

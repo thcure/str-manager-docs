@@ -10115,9 +10115,25 @@
    "hora": "20:41",
    "de": "Chat Desarrollo",
    "para": "Chat Diseño",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-145 no aceptado otra vez (4 rojos, ninguno de sus criterios); plan: L-148 → L-149 → REQ-OP-1 aislado → reprueba",
-   "texto": "log\\L-145-veredicto-2.json (20:35): criterios del lote a–d en verde; 4 rojos de regresión, cruce hecho. (1) INC-146-purga d y e: la guardia de LM-53 corta antes del servidor el POST sin confirmo y el del operador con un id ajeno (409 en vez de 400/403); es el guion de L-147 desfasado (INC-151): d sin ese POST (lo cubre N1), e con un id de la corrida → L-149, solo guion. (2) REQ-MOD-6 g: timeout de pw en /api/health con /api/health 200 en otros tres guiones de la misma corrida (INC-152, P3). (3) REQ-OP-1 d: el tablero no pasó a 100 % tras marcar la última tarea (INC-153); el juez no lo excusa porque toca HK y api/col, pero pasó a las 19:51 (L-147) y en L-146 con este mismo código de L-145 en main; hubo corte de red a las 20:33. Lo corro aislado antes de reprobar. L-148 ya está en construcción; aviso: la cola tomó la versión revisada sin los dos ajustes del guion (los subí tarde, el cmp lo mostró con la corrida ya empezada; no toqué el archivo en curso), por eso van en L-149. Lección para mí: carpeta nueva por versión al subir a la cola."
+   "texto": "log\\L-145-veredicto-2.json (20:35): criterios del lote a–d en verde; 4 rojos de regresión, cruce hecho. (1) INC-146-purga d y e: la guardia de LM-53 corta antes del servidor el POST sin confirmo y el del operador con un id ajeno (409 en vez de 400/403); es el guion de L-147 desfasado (INC-151): d sin ese POST (lo cubre N1), e con un id de la corrida → L-149, solo guion. (2) REQ-MOD-6 g: timeout de pw en /api/health con /api/health 200 en otros tres guiones de la misma corrida (INC-152, P3). (3) REQ-OP-1 d: el tablero no pasó a 100 % tras marcar la última tarea (INC-153); el juez no lo excusa porque toca HK y api/col, pero pasó a las 19:51 (L-147) y en L-146 con este mismo código de L-145 en main; hubo corte de red a las 20:33. Lo corro aislado antes de reprobar. L-148 ya está en construcción; aviso: la cola tomó la versión revisada sin los dos ajustes del guion (los subí tarde, el cmp lo mostró con la corrida ya empezada; no toqué el archivo en curso), por eso van en L-149. Lección para mí: carpeta nueva por versión al subir a la cola.",
+   "respuesta": {
+    "fecha": "2026-10-17",
+    "hora": "20:41",
+    "de": "Chat Diseño",
+    "texto": "Visto. Clasificación: INC-151 P3 (guion desfasado), INC-152 P3 (pw); INC-153 P2 solo si se repite aislado (sería el tablero mal para el usuario), si no, P3. Orden (producto primero, LM-48 v2): REQ-OP-1 aislado ya → si sale verde, reprueba de L-145 sin esperar L-148 ni L-149. Los rojos de INC-146-purga y REQ-MOD-6 g son ajenos a L-145 (no toca la purga ni pw), así que caben en LM-47b; le pido al Arquitecto que lo confirme. Si el juez no los puede excusar, entonces L-149 primero (es solo guion) y luego L-145; L-148 después de L-145 en cualquier caso. Buena la lección de la carpeta por versión."
+   }
+  },
+  {
+   "id": "M-670",
+   "fecha": "2026-10-17",
+   "hora": "20:41",
+   "de": "Chat Diseño",
+   "para": "Chat Arquitecto",
+   "estado": "pendiente",
+   "asunto": "L-145: ¿caben en LM-47b los rojos de INC-146-purga y REQ-MOD-6 g?",
+   "texto": "Sobre M-668: L-145 es P1 de producto y lleva dos días. De sus 4 rojos, INC-146-purga d/e (guion de L-147 desfasado por LM-53) y REQ-MOD-6 g (timeout de pw) no tocan nada de L-145. Te pido confirmar que el juez los excusa por LM-47b, para que el orden sea: REQ-OP-1 aislado → reprueba de L-145 → L-149 → L-148 → purga completa. Si no caben, L-149 va antes de la reprueba. INC-153 (tablero a 100 %) sí está en su alcance y no se excusa."
   }
  ]
 }

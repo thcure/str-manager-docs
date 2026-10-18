@@ -967,10 +967,10 @@
    "id": "INC-150",
    "fecha": "2026-10-17",
    "titulo": "Purga de prueba (L-147): las propiedades se reconocen solo por `nombre`, pero guardan el nombre en `name`; los turnos de zz-verif-Propiedad no cuentan como de prueba y 4517 movimientos zz se quedan («turno»)",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "prioridad": "P3",
-   "nota": "Ensayo real del guion a de L-147 (19:3x): borraría 280 de 4859; excluidos autor 15, referencia 45, turno 4517. _pgContexto mira `$d->nombre` de propiedades; drive-copia (_dcClasificar) ya mira nombre o name. Falla hacia lo seguro (purga menos, nunca algo real). Arreglo: lote L-148 (propiedad: nombre o name; test N1 con una propiedad con `name`). 19:57 registrado. · 20:00 P3 (Diseño M-665: fábrica, no toca nada real). Visto bueno técnico del Arquitecto a L-148 (M-664). · 21:16 el arreglo funciona en el motor real (turno 0; borraría 5112 de 5129); L-148 no aceptado solo por INC-151.",
+   "nota": "Ensayo real del guion a de L-147 (19:3x): borraría 280 de 4859; excluidos autor 15, referencia 45, turno 4517. _pgContexto mira `$d->nombre` de propiedades; drive-copia (_dcClasificar) ya mira nombre o name. Falla hacia lo seguro (purga menos, nunca algo real). Arreglo: lote L-148 (propiedad: nombre o name; test N1 con una propiedad con `name`). 19:57 registrado. · 20:00 P3 (Diseño M-665: fábrica, no toca nada real). Visto bueno técnico del Arquitecto a L-148 (M-664). · 21:16 el arreglo funciona en el motor real (turno 0; borraría 5112 de 5129); L-148 no aceptado solo por INC-151. · 11:41 L-148 aceptado: se quedan por «turno» 0 (antes 4517). Cerrado.",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa"
   },
@@ -14479,6 +14479,50 @@
    "motivo": "MJ-15 fase C",
    "estado": "cruzado",
    "observacion": "Construido 11:28 (juez v13, esquema, validar.py, rol-desarrollo v2.2). El juez se instala en LENOVO con la cola vacía, junto con LM-54."
+  },
+  {
+   "lote": "L-148",
+   "fecha": "2026-10-18",
+   "req": "INC-150",
+   "categoria": "normal",
+   "resumen": "Purga de prueba: propiedad por nombre o name; turno sin propiedad por propName",
+   "estado": "aceptado",
+   "hash": "1341b82",
+   "observacion": "Reprueba 11:0x–11:41 sobre main 1341b82 (tras L-152). Pruebas verde, causa null; fase completa (41 guiones, 113 casos por ruta, sin rojos). Guion INC-150 a: se quedan por «turno» 0 (antes 4517); borraría 5636 de 5653; excluidos {autor:15}. N1 91/91. Juez 11:41: ACEPTADO; cruce veredicto/pruebas hecho por Desarrollo (sin rojos). Veredicto en log\\L-148-veredicto-3.json. Antes: no aceptado por INC-151 (guion purga d/e) e INC-155 (guion REQ-OP-1 c).",
+   "aceptacion": {
+    "lote": "L-148",
+    "hash": "1341b82",
+    "fecha": "2026-10-18",
+    "horaBogota": "11:41",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: ensayo (GET): 200 | si: se quedan por «turno»: 0 (antes de L-148: 4517; tope 450) · borraría 5636 de 5653 · excluidos {\"autor\":15} · muestra [\"mv_muzr68wh8blrw\",\"mv_muzr68whu38n6\",\"mv_mv4fppabokyzq\",\"mv_mv4fqp238nb37\",\"mv_mv4fr3ga9a7xg\"]"
+     },
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (ya en verde con este commit a las 10:55:14; no se repite, LM-45)"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 91/91 archivos OK (ya en verde con este commit a las 10:55:14; no se repite, LM-45)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json › resultado: verde; causa: null. Sin casos \"ok\": false en entrada, n2 ni regresion (fase completa, 41 guiones/113 casos por ruta SRV; huecos: 0 relaciones, 0 reglas). Sin N3 en la instrucción (solo N1 y N2); sin red ni sesiones caídas."
+   }
   }
  ],
  "esquema": {
@@ -16694,14 +16738,14 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "Purga de prueba: la propiedad cuenta como zz-verif- por `nombre` o `name` (como drive-copia)",
-   "estado": "no aceptado",
+   "estado": "aceptado",
    "vista": "siguiente",
    "desde": "2026-10-17 21:22",
    "grupo": "HK",
-   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado. · 10:02 L-145 aceptado: va la reprueba de L-148. reprobar\\L-148.txt puesto (cmp IGUAL). · 10:40 juez: no aceptado por REQ-OP-1 c (regresión). 10:46 registrado: causa INC-155 (guion). Siguiente: L-152 (guion) → reprueba. · 11:04 L-152 aceptado: reprobar\\L-148.txt puesto (cmp IGUAL).",
-   "espera": "reprueba y veredicto",
-   "esperaA": "Cola",
-   "hash": "25e21df"
+   "nota": "19:57 del ensayo real de L-147: 4517 movimientos de turnos de zz-verif-Propiedad quedan fuera porque la propiedad guarda el nombre en `name`. Cambio de una línea en _pgContexto + test. Va antes de la purga completa del Arquitecto; se encola tras su confirmación de LM-52/LM-53 (M-663). · 20:00 redactado (pares sobre los archivos reales de main ee2b1fc, IGUAL; N1 23/0; con el código de L-147 caen 8). Visto bueno técnico del Arquitecto (M-664). Orden: reprueba L-145 → L-148 → purga completa. · 20:06 revisión previa (subagente) 16/17 → corregidos el 17 (huecos; Regresión: SRV para incluir INC-146-purga) y 8 defectos: P3 y orden; propName solo si la propiedad no existe; test C con turno sin propiedad; m25/m26 por turno; umbral del guion relativo (≤ 450); zona SRV. · 20:09 visto bueno del Arquitecto a la regla de propName (M-667); foto de guiones al día: INC-146-purga entra por la ruta, «Regresión:» quitado. 20:11 listo para encolar. · 20:41 encolado. OJO: la cola tomó la versión sin G1–G2 (el archivo subido salió de una copia vieja; el cmp lo mostró cuando ya había .corriendo); esa versión es la revisada 17/17 y vale sola. G1–G2 pasan a L-149. · 20:42 construido 25e21df (20:40–20:42): P1–P5, T1–T6, D1, guion INC-150; 4 declarados = tocados; run.js 91/91; test 23/0; ?v= igual. En pruebas; después corre correr\\op1. · 21:16 juez: no aceptado solo por INC-146-purga d/e (INC-151); el arreglo de INC-150 funciona (turno 0). 21:22 registrado. · 10:02 L-145 aceptado: va la reprueba de L-148. reprobar\\L-148.txt puesto (cmp IGUAL). · 10:40 juez: no aceptado por REQ-OP-1 c (regresión). 10:46 registrado: causa INC-155 (guion). Siguiente: L-152 (guion) → reprueba. · 11:04 L-152 aceptado: reprobar\\L-148.txt puesto (cmp IGUAL). · 11:41 juez: ACEPTADO (veredicto-3). 11:45 registrado.",
+   "espera": "",
+   "esperaA": "",
+   "hash": "1341b82"
   },
   {
    "lote": "L-149",
@@ -16728,7 +16772,7 @@
    "vista": "siguiente",
    "desde": "2026-10-18 09:14",
    "grupo": "U",
-   "nota": "09:14 DA-47 decidida por Carlos (M-681/M-682, cruce). P3, después de L-149 → L-145 → L-148 → purga y del barrido zz-verif- del Arquitecto. Diseño propuesto en la respuesta a M-682; borrador con ok previo de Diseño. · 09:15 M-683: ruta /api/cuenta-pruebas; guion sin mover; reversión (a) SQL o (b) tabla con origen, pendiente. · 09:16 M-684 (Diseño): ok al diseño con ajustes: crones excluyen la cuenta de pruebas (export no); reversión por la API acotada → tabla cuenta_movimiento (migración 14) con origen registrado; a–c como dependencias; test: un usuario sin zz-verif- nunca se mueve. · 09:36 borrador redactado (claude/producto/borradores/L-150-instr-da47-cuenta-pruebas.md); revisor previo 17/17 tras corregir 12 defectos (carrera al crear la cuenta, LIKE sin acentos, guardia de pw como dependencia, K3b/K3c y DT-42 como dependientes). Pide ok previo a Diseño (M-688) y regla de guardia al Arquitecto (M-689). Pares a reconfirmar contra LENOVO con la cola libre. · 09:38 M-688: ok previo de Diseño (y ok a excluir la cuenta de la copia a Drive hasta el lote de K3). · 09:43 M-689 (Arquitecto): visto bueno técnico; regla de guardia = LM-54 (pendiente de su cruce con Carlos). Sus dos notas aplicadas al borrador: tablas con cuenta y usuario revisadas (solo drive_oauth_state y drive_conexion.conectado_por; el cierre lo confirma con grep) y «revertir lo pide cualquier admin de las dos cuentas» escrito en usuarios-y-roles.md. Orden: reprueba L-148 → purga completa → inventario y barrido → LM-54 instalada → L-150 → movimiento del Arquitecto. · Pares reconfirmados contra los archivos reales de LENOVO con la cola libre (8 archivos; solo CLAUDE.md difiere en la línea de versión p5c109, cada busca sigue único). · 10:59 M-703 al Jefe de proyecto (revisión previa y orden). · 11:07 M-703 (Jefe de proyecto): revisión previa ok 17/17; orden: L-151 primero y luego L-150, tras la cadena de DA-47. Al aceptarse, el Arquitecto anota la excepción de DA-47 en RT-1/RT-2 (M-710).",
+   "nota": "09:14 DA-47 decidida por Carlos (M-681/M-682, cruce). P3, después de L-149 → L-145 → L-148 → purga y del barrido zz-verif- del Arquitecto. Diseño propuesto en la respuesta a M-682; borrador con ok previo de Diseño. · 09:15 M-683: ruta /api/cuenta-pruebas; guion sin mover; reversión (a) SQL o (b) tabla con origen, pendiente. · 09:16 M-684 (Diseño): ok al diseño con ajustes: crones excluyen la cuenta de pruebas (export no); reversión por la API acotada → tabla cuenta_movimiento (migración 14) con origen registrado; a–c como dependencias; test: un usuario sin zz-verif- nunca se mueve. · 09:36 borrador redactado (claude/producto/borradores/L-150-instr-da47-cuenta-pruebas.md); revisor previo 17/17 tras corregir 12 defectos (carrera al crear la cuenta, LIKE sin acentos, guardia de pw como dependencia, K3b/K3c y DT-42 como dependientes). Pide ok previo a Diseño (M-688) y regla de guardia al Arquitecto (M-689). Pares a reconfirmar contra LENOVO con la cola libre. · 09:38 M-688: ok previo de Diseño (y ok a excluir la cuenta de la copia a Drive hasta el lote de K3). · 09:43 M-689 (Arquitecto): visto bueno técnico; regla de guardia = LM-54 (pendiente de su cruce con Carlos). Sus dos notas aplicadas al borrador: tablas con cuenta y usuario revisadas (solo drive_oauth_state y drive_conexion.conectado_por; el cierre lo confirma con grep) y «revertir lo pide cualquier admin de las dos cuentas» escrito en usuarios-y-roles.md. Orden: reprueba L-148 → purga completa → inventario y barrido → LM-54 instalada → L-150 → movimiento del Arquitecto. · Pares reconfirmados contra los archivos reales de LENOVO con la cola libre (8 archivos; solo CLAUDE.md difiere en la línea de versión p5c109, cada busca sigue único). · 10:59 M-703 al Jefe de proyecto (revisión previa y orden). · 11:07 M-703 (Jefe de proyecto): revisión previa ok 17/17; orden: L-151 primero y luego L-150, tras la cadena de DA-47. Al aceptarse, el Arquitecto anota la excepción de DA-47 en RT-1/RT-2 (M-710). · 11:45 L-148 aceptado: falta la purga completa y el barrido (Arquitecto).",
    "espera": "cadena de DA-47 (reprueba de L-148 → purga → barrido), L-151 y LM-54 instalada",
    "esperaA": "Cola"
   },
@@ -16742,7 +16786,7 @@
    "vista": "siguiente",
    "desde": "2026-10-18 10:20",
    "grupo": "SH",
-   "nota": "10:20 M-693 (Arquitecto, LM-57 cruzado por Carlos 10:13): lote estándar. Páginas: str-seg-proyecto.html (pestaña Diseño: prioridades; Tablero e Ítems: planes, bolsa, plan activo, y objetivos que cruzan planes) y str-nomenclatura.html (texto fijo de roles y archivos). str-lo-que-viene.html solo lee reqs: no cambia. Tests: diseno, tablero, tablero-items, base-conocimiento-diagrama; guiones REQ-TB-3/TB-4. Va detrás de L-148 → purga → barrido; el orden frente a L-150 lo pone el Jefe de proyecto. · 10:29 M-695: encargos instalados; objetivos[] y bolsa[] se quedan en diseno.json; en proyecto.json: planes, prioridades, lecciones de seguimiento y traspaso. Redactando. str-nomenclatura.html no se edita (copia de la fuente del Arquitecto): M-696. · 10:33 M-696: fuente de Nomenclatura actualizada (6fa2bb5, 43 <tr>); va en L-151 (traer la fuente, reponer [STR], huellas nuevas). Falta: pares y ?v= contra LENOVO con la cola libre (L-148 en pruebas) y revisor previo. · 10:54 borrador listo (claude/producto/borradores/L-151-instr-lm57-seg-proyecto-json.md): pares contra los archivos reales de LENOVO; ?v= p5c109 → p5c110; Nomenclatura con la fuente 6fa2bb5 (43 <tr>, huellas nuevas). Revisor previo 17/17 tras corregir 5. Se encola tras la cadena (L-152 → reprueba de L-148 → purga → barrido), salvo que el Jefe de proyecto ordene otra cosa. · 10:59 M-703 al Jefe de proyecto (orden). · 11:07 M-703: orden confirmado por el Jefe de proyecto: L-151 va primero tras la cadena de DA-47.",
+   "nota": "10:20 M-693 (Arquitecto, LM-57 cruzado por Carlos 10:13): lote estándar. Páginas: str-seg-proyecto.html (pestaña Diseño: prioridades; Tablero e Ítems: planes, bolsa, plan activo, y objetivos que cruzan planes) y str-nomenclatura.html (texto fijo de roles y archivos). str-lo-que-viene.html solo lee reqs: no cambia. Tests: diseno, tablero, tablero-items, base-conocimiento-diagrama; guiones REQ-TB-3/TB-4. Va detrás de L-148 → purga → barrido; el orden frente a L-150 lo pone el Jefe de proyecto. · 10:29 M-695: encargos instalados; objetivos[] y bolsa[] se quedan en diseno.json; en proyecto.json: planes, prioridades, lecciones de seguimiento y traspaso. Redactando. str-nomenclatura.html no se edita (copia de la fuente del Arquitecto): M-696. · 10:33 M-696: fuente de Nomenclatura actualizada (6fa2bb5, 43 <tr>); va en L-151 (traer la fuente, reponer [STR], huellas nuevas). Falta: pares y ?v= contra LENOVO con la cola libre (L-148 en pruebas) y revisor previo. · 10:54 borrador listo (claude/producto/borradores/L-151-instr-lm57-seg-proyecto-json.md): pares contra los archivos reales de LENOVO; ?v= p5c109 → p5c110; Nomenclatura con la fuente 6fa2bb5 (43 <tr>, huellas nuevas). Revisor previo 17/17 tras corregir 5. Se encola tras la cadena (L-152 → reprueba de L-148 → purga → barrido), salvo que el Jefe de proyecto ordene otra cosa. · 10:59 M-703 al Jefe de proyecto (orden). · 11:07 M-703: orden confirmado por el Jefe de proyecto: L-151 va primero tras la cadena de DA-47. · 11:45 L-148 aceptado: falta la purga completa y el barrido (Arquitecto).",
    "espera": "la cadena de DA-47 (L-152 → reprueba de L-148 → purga → barrido)",
    "esperaA": "Cola"
   },

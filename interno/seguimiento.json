@@ -879,16 +879,16 @@
    "estado": "abierto",
    "severidad": "medio",
    "prioridad": "P0",
-   "nota": "Veredicto L-145 (16:30). Desde 16:14 HK del admin/oper no puede escribir su copia local: Inventario con 4474 movimientos zz-verif- acumulados de las corridas del día, más str-col-backup-v1 y lastpush. Entorno de pruebas (frena un lote de producto: P1 por la regla 4 de LM-48). Ojo de producto: el mismo tope lo alcanzaría un admin u operador real si los movimientos crecen así (HK guarda todos en el teléfono); vale una DT para acotar la copia local. Consulta al Arquitecto M-650. · 16:38 cache-perfiles (Arquitecto 16:36) bajó admin/oper a ~5 MB, pero str-inv-movimientos-v1 queda en ~4,6 MB y lastpush guarda otra copia completa (HK ~L3534): se vuelve a llenar en la primera corrida. Propuesta de DT de producto (lastpush de movimientos solo con ids; copia local acotada) en M-651. · 16:46 Diseño: P0 (M-652). Lote L-146 redactado (copia de diff de movimientos solo con ids + aviso de almacenamiento lleno); revisión previa en curso."
+   "nota": "Veredicto L-145 (16:30). Desde 16:14 HK del admin/oper no puede escribir su copia local: Inventario con 4474 movimientos zz-verif- acumulados de las corridas del día, más str-col-backup-v1 y lastpush. Entorno de pruebas (frena un lote de producto: P1 por la regla 4 de LM-48). Ojo de producto: el mismo tope lo alcanzaría un admin u operador real si los movimientos crecen así (HK guarda todos en el teléfono); vale una DT para acotar la copia local. Consulta al Arquitecto M-650. · 16:38 cache-perfiles (Arquitecto 16:36) bajó admin/oper a ~5 MB, pero str-inv-movimientos-v1 queda en ~4,6 MB y lastpush guarda otra copia completa (HK ~L3534): se vuelve a llenar en la primera corrida. Propuesta de DT de producto (lastpush de movimientos solo con ids; copia local acotada) en M-651. · 16:46 Diseño: P0 (M-652). Lote L-146 redactado (copia de diff de movimientos solo con ids + aviso de almacenamiento lleno); revisión previa en curso. · 19:13 L-146 aceptado (copia de diff solo ids; aviso de cuota). Queda la purga de movimientos zz-verif- (L-147 y la purga completa del Arquitecto)."
   },
   {
    "id": "INC-147",
    "fecha": "2026-10-17",
    "titulo": "Regresión de L-146 cortada por caída de internet en LENOVO (net::ERR_INTERNET_DISCONNECTED en page.goto, 17:11–17:13); antes, puerta bloqueada por DNS (17:00)",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "menor",
    "prioridad": "P3",
-   "nota": "Entorno, no producto: ningún caso llegó a ejecutar código. Dos cortes de red en 15 min. Se cierra con la reprueba de L-146 en verde. Si se repite, pedir a Carlos revisar la conexión de LENOVO."
+   "nota": "Entorno, no producto: ningún caso llegó a ejecutar código. Dos cortes de red en 15 min. Se cierra con la reprueba de L-146 en verde. Si se repite, pedir a Carlos revisar la conexión de LENOVO. · 19:13 L-146 aceptado (regresión completa sin rojos). Cerrado."
   },
   {
    "id": "INC-148",
@@ -903,10 +903,10 @@
    "id": "INC-149",
    "fecha": "2026-10-17",
    "titulo": "INC-131.spec.js b: page.goto de HK (admin) sin cargar en 45 s en la regresión de L-146 (18:15); c en cascada",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "bajo",
    "prioridad": "P3",
-   "nota": "Veredicto L-146-3 (juez: medio, revisar si el aviso de cuota demora HK). Evidencia de intermitencia: misma corrida, 20/21 casos de HK verdes (INC-132 b, misma página y perfil, a las 18:15:09); mismo commit c035328 pasó INC-131 en la corrida de las 17:25; [CUOTA] solo envuelve setItem en try/catch (sin espera ni bucle). 18:42: INC-131 aislado puesto (correr\\inc131.txt, pw\\inc131.spec.js, cmp IGUAL). · 18:43 INC-131 aislado: b y c verdes, limpiar sin error (log\\INC131-guion.json). 18:44 reprobar\\L-146.txt puesto. · 18:45 P3 por Diseño (M-660: aislado verde = fragilidad de la prueba; si HK vuelve a tardar 45 s, P2). Arquitecto (M-659): si se repite, mirar la captura: en blanco = red o servidor; a medio pintar = HK."
+   "nota": "Veredicto L-146-3 (juez: medio, revisar si el aviso de cuota demora HK). Evidencia de intermitencia: misma corrida, 20/21 casos de HK verdes (INC-132 b, misma página y perfil, a las 18:15:09); mismo commit c035328 pasó INC-131 en la corrida de las 17:25; [CUOTA] solo envuelve setItem en try/catch (sin espera ni bucle). 18:42: INC-131 aislado puesto (correr\\inc131.txt, pw\\inc131.spec.js, cmp IGUAL). · 18:43 INC-131 aislado: b y c verdes, limpiar sin error (log\\INC131-guion.json). 18:44 reprobar\\L-146.txt puesto. · 18:45 P3 por Diseño (M-660: aislado verde = fragilidad de la prueba; si HK vuelve a tardar 45 s, P2). Arquitecto (M-659): si se repite, mirar la captura: en blanco = red o servidor; a medio pintar = HK. · 19:13 L-146 aceptado (regresión completa sin rojos). Cerrado."
   }
  ],
  "dts": [
@@ -13743,6 +13743,56 @@
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "pruebas.json › resultado: «rojo» · causa: «fallan: INC-131.spec.js b, INC-131.spec.js c». No aplica la regla de regresión ajena (LM-47b): aunque INC-131.spec.js no está en el Alcance ni en los guiones N2 de este lote, el caso b corre sobre /str-m1-housekeeping.html, que sí está en el Alcance (H1–H7) — la condición 4 lo excluye de forma explícita (mismo ejemplo que da la regla). Tampoco aplica motivo (b) preexistente (en L-144 y L-145 el mismo caso pasó en segundos) ni (c) intermitente (en esta corrida no hay otro caso de INC-131 con el mismo perfil para comparar). No se marca campo 'herramienta': la captura no trae pantalla de login ni net::ERR_* que lo sustenten. Fase: completa (LM-49, el Alcance toca la capa común). Sesiones: pruebas.json › sesiones sin perfiles recuperados, perdidos ni caídos. Huecos de cobertura de la ruta (REL-08, REL-15, REL-21, REL-22, REL-30; RT-10, RT-11, RT-15): deuda de cobertura ya señalada por la instrucción, no cambian el resultado. n3Preparados viene vacío porque la instrucción no tiene criterios N3."
    }
+  },
+  {
+   "lote": "L-146",
+   "fecha": "2026-10-17",
+   "req": "INC-146",
+   "categoria": "normal",
+   "resumen": "INC-146 (P0): la copia de diff de HK guarda de los movimientos solo el id; aviso de almacenamiento lleno en la capa común",
+   "estado": "aceptado",
+   "hash": "c035328",
+   "observacion": "Tercera reprueba 18:45–19:13: verde, causa null; regresión completa por ruta (33 guiones) sin rojos; sesiones sin pérdidas. Copia de diff 538–603 KB con 4721 movimientos (antes ~4,9 MB); sin aviso. Juez 19:13: ACEPTADO, criterios a–d; cruce veredicto/pruebas hecho por Desarrollo. Veredicto en log\\L-146-veredicto-4.json. Antes: no aceptado por red (INC-147), turnos zz sin limpiar (INC-148) e INC-131 intermitente (INC-149).",
+   "aceptacion": {
+    "lote": "L-146",
+    "hash": "c035328",
+    "fecha": "2026-10-17",
+    "horaBogota": "19:13",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: admin: copia de diff de movimientos solo con ids: sí (4721 movimientos) | si: admin: almacenamiento 6267 KB en total · copia de diff 603 KB · movimientos 4849 KB | si: admin: aviso de almacenamiento lleno en la página: no — más N1 (A1, A2, B1–B5): ver criterio c (node tests/run.js 90/90 OK)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: operador: copia de diff de movimientos solo con ids: sí (4721 movimientos) | si: operador: almacenamiento 6183 KB en total · copia de diff 538 KB · movimientos 4835 KB | si: operador: aviso de almacenamiento lleno en la página: no"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 90/90 archivos OK (ya en verde con este commit a las 16:57:39; no se repite, LM-45)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "cumplido (A3, C1, C2 incluidos en los 90/90 de node tests/run.js — ver criterio c, no se repite)"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json › resultado: «verde», causa: null — regresión completa por ruta (fase.fase: «completa»; 33 guiones, 138 casos) sin ningún ok:false. sesiones: sin recuperadas/perdidas/caidos. n3Preparados vacío porque la instrucción no tiene letras N3 (a y b son N2, c y d son N1)."
+   }
   }
  ],
  "esquema": {
@@ -15928,13 +15978,13 @@
    "categoria": "normal",
    "riesgo": "R-2",
    "resumen": "INC-146 (P0): la copia de diff de HK guarda de los movimientos solo el id; aviso de almacenamiento lleno en la capa común",
-   "estado": "no aceptado",
+   "estado": "aceptado",
    "vista": "siguiente",
-   "desde": "2026-10-17 18:44",
+   "desde": "2026-10-17 19:15",
    "grupo": "HK",
-   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto. · 17:58 juez (reprueba): no aceptado; propios a–d en verde; 22 rojos por turnos de hoy que dejó la corrida de L-145 (INC-148). 18:05 cruce hecho; limpieza pedida al Arquitecto. · 18:07 limpiar-zz del Arquitecto: 8 turnos zz-verif- de hoy en zz-verif-Propiedad borrados (los 4 de INC-148 incluidos), 0 quedan. 18:08 reprobar\\L-146.txt puesto. · 18:37 juez (2.ª reprueba): no aceptado por INC-131 b/c (goto de HK 45 s), INC-149; INC-148 resuelto. 18:42 cruce hecho; INC-131 aislado puesto. · 18:43 INC-131 aislado verde. 18:44 reprobar\\L-146.txt puesto.",
-   "espera": "reprueba (solo pruebas) y veredicto",
-   "esperaA": "Cola",
+   "nota": "16:46 redactado contra los archivos reales de main: _lpCopia y diff por id nuevo en HK; [CUOTA] en str-api.js; aviso en HK e Inventario; N1 lastpush-movimientos 12/0 (con _persistCol real); guion INC-146 (admin, oper; solo lectura). La copia local de movimientos acotada a 90 días queda fuera hasta confirmar qué la usa (revisión previa). Va antes de la reprueba de L-145 (M-651). · 16:51 revisión previa (subagente) 17/17; corregidos: guion mide en la 2.ª carga (falso fallo con perfil lleno), RT-4 en vez de RT-2, toast más corto, § 5, dependencias. Recorte a 90 días confirmado fuera (existencias por último conteo, préstamos y lavandería abiertos). Ok pedido a Diseño (M-654). · 16:54 ok de Diseño (M-654); encolado, cmp IGUAL. · 16:57 construido c035328 (16:54–16:57): H1–H7, A1, I1, D1; ?v= p5c108; run.js 90/90; test 12/0. En pruebas. · 17:00 puerta de pruebas bloqueada: el admin no resolvió el nombre del sitio (ERR_NAME_NOT_RESOLVED, red o DNS de LENOVO; no es el lote). reprobar\\L-146.txt puesto (solo pruebas). · 17:13 juez: no aceptado por la caída de red a mitad de la regresión (INC-147); criterios propios a–d en verde. 17:24 cruce hecho; reprobar\\L-146.txt puesto. · 17:58 juez (reprueba): no aceptado; propios a–d en verde; 22 rojos por turnos de hoy que dejó la corrida de L-145 (INC-148). 18:05 cruce hecho; limpieza pedida al Arquitecto. · 18:07 limpiar-zz del Arquitecto: 8 turnos zz-verif- de hoy en zz-verif-Propiedad borrados (los 4 de INC-148 incluidos), 0 quedan. 18:08 reprobar\\L-146.txt puesto. · 18:37 juez (2.ª reprueba): no aceptado por INC-131 b/c (goto de HK 45 s), INC-149; INC-148 resuelto. 18:42 cruce hecho; INC-131 aislado puesto. · 18:43 INC-131 aislado verde. 18:44 reprobar\\L-146.txt puesto. · 19:13 juez: ACEPTADO (log\\L-146-veredicto-4.json). 19:15 registrado.",
+   "espera": "—",
+   "esperaA": "CD",
    "hash": "c035328"
   },
   {
@@ -15945,11 +15995,11 @@
    "resumen": "Purga de movimientos de inventario de prueba (zz-verif-): borrado suave solo admin, con ensayo; HK e Inventario sueltan los borrados al leer",
    "estado": "redactado",
    "vista": "siguiente",
-   "desde": "2026-10-17 18:00",
+   "desde": "2026-10-17 19:15",
    "grupo": "HK",
-   "nota": "17:30 pedido del Arquitecto (M-656): producto, lo redacta Desarrollo y el Arquitecto da el visto bueno técnico; Diseño sin DA. Condiciones: (1) solo movimientos de un usuario zz-verif- y con todo lo que referencian de prueba; (2) deleted=1 y updated_at nuevo, sin DELETE; (3) solo admin, con ensayo que cuenta y una línea sin datos en el log; (4) un movimiento sigue dando 409; (5) después de L-146 aceptado y antes de reprobar L-145. Hallazgo al leer el código: Inventario y HK no aplican los borrados de inv-movimientos (nunca los hubo); el lote lo añade. · 17:56 redactado (claude/producto/borradores/L-147-instr-inc146-purga-movimientos-prueba.md): GET ensayo / POST con confirmo e ids; regla en api/lib/purga-prueba.php (autor zz Y artículo o juego, lugares, turno, pendiente y responsable de prueba; referencias cerradas); tandas con hora de milisegundos reales (el cursor since truncado a .000 no las perdería); HK e Inventario aplican deletedIds. N1 21/0 (regla real en php; _pgPurgarBD real sobre SQLite). Guion INC-146-purga: purga solo sus 2 compras. Revisión previa (subagente) 15/17 → corregidos 5 y 14 y 12 defectos. Pares contra la copia de main de L-146; se rehacen contra los archivos reales de LENOVO al encolar (sin lote corriendo). · 17:58 visto bueno técnico del Arquitecto (M-657) con condición: sin JSON_OBJECT/JSON_EXTRACT anidado (MariaDB 11.8). 18:00 aplicada: data completo de catálogos y un JSON_EXTRACT suelto de propId para turnos, normalizado en PHP (_pgEscalarSql); N1 23/0. Guardia de pw: LM-53 del Arquitecto (crítico, a Carlos), no frena L-147. Orden: L-146 → L-147 → purga completa (script del Arquitecto) → reprueba L-145.",
-   "espera": "L-146 aceptado (reprueba en curso); luego rehacer los pares contra los archivos reales de LENOVO y encolar",
-   "esperaA": "Cola"
+   "nota": "17:30 pedido del Arquitecto (M-656): producto, lo redacta Desarrollo y el Arquitecto da el visto bueno técnico; Diseño sin DA. Condiciones: (1) solo movimientos de un usuario zz-verif- y con todo lo que referencian de prueba; (2) deleted=1 y updated_at nuevo, sin DELETE; (3) solo admin, con ensayo que cuenta y una línea sin datos en el log; (4) un movimiento sigue dando 409; (5) después de L-146 aceptado y antes de reprobar L-145. Hallazgo al leer el código: Inventario y HK no aplican los borrados de inv-movimientos (nunca los hubo); el lote lo añade. · 17:56 redactado (claude/producto/borradores/L-147-instr-inc146-purga-movimientos-prueba.md): GET ensayo / POST con confirmo e ids; regla en api/lib/purga-prueba.php (autor zz Y artículo o juego, lugares, turno, pendiente y responsable de prueba; referencias cerradas); tandas con hora de milisegundos reales (el cursor since truncado a .000 no las perdería); HK e Inventario aplican deletedIds. N1 21/0 (regla real en php; _pgPurgarBD real sobre SQLite). Guion INC-146-purga: purga solo sus 2 compras. Revisión previa (subagente) 15/17 → corregidos 5 y 14 y 12 defectos. Pares contra la copia de main de L-146; se rehacen contra los archivos reales de LENOVO al encolar (sin lote corriendo). · 17:58 visto bueno técnico del Arquitecto (M-657) con condición: sin JSON_OBJECT/JSON_EXTRACT anidado (MariaDB 11.8). 18:00 aplicada: data completo de catálogos y un JSON_EXTRACT suelto de propId para turnos, normalizado en PHP (_pgEscalarSql); N1 23/0. Guardia de pw: LM-53 del Arquitecto (crítico, a Carlos), no frena L-147. Orden: L-146 → L-147 → purga completa (script del Arquitecto) → reprueba L-145. · 19:15 L-146 aceptado: libre para encolar.",
+   "espera": "rehacer los pares contra los archivos reales de LENOVO y encolar",
+   "esperaA": "CD"
   }
  ],
  "riesgos": [

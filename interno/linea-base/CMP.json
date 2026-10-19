@@ -1,7 +1,7 @@
 {
  "modulo": "CMP",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "requerimientos-cmp1-compras-2026-10.md (REQ-CMP-1: qué hace, tres supuestos y 11 criterios; vive en el Proyecto, no en el repositorio)",
@@ -10,7 +10,13 @@
   "interno/linea-base: INV, PG, HK, U, SRV (ids reales de los casos de uso con los que CMP se une)",
   "No hay código ni guiones e2e de CMP (no construido)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-847)",
+   "que": "Pesos (esenciales 1, 2 y 3; necesaria 4) y decisiones a, c–e; INV-10.2 y 10.3 pasan aquí; b espera a Carlos (P-15)."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Avisar al operador cuando un consumible baja de su mínimo y proponer la lista de compra (ideal menos actual).",
@@ -34,28 +40,28 @@
    "id": "CAP-CMP-1",
    "nombre": "Alerta y lista de compra",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Avisar al operador cuando un consumible baja de su mínimo y proponer qué comprar, para que él ajuste la lista."
   },
   {
    "id": "CAP-CMP-2",
    "nombre": "Encargo de compra en el turno",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que el operador encargue la compra al colaborador como una actividad de su turno, con adelanto, y que el colaborador la vea y registre lo comprado con la foto de la factura."
   },
   {
    "id": "CAP-CMP-3",
    "nombre": "Compra aprobada y entrada al inventario",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que la compra aprobada entre al inventario en la zona del encargo y apague la alerta, y que una compra sin encargo quede marcada para el operador."
   },
   {
    "id": "CAP-CMP-4",
    "nombre": "Permisos y respaldo de compras",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que solo quien tiene permiso cree encargos y adelantos, que el colaborador no apruebe nada y que mínimos, encargos y entradas queden en el respaldo."
   }
  ],
@@ -70,7 +76,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Hoy el mínimo y el ideal se fijan en Inventario (CU-INV-10.1, parcial), pero nada avisa cuando se baja de él (CU-INV-10.2, no construido).",
-    "El requerimiento no dice si el mínimo es por zona o por negocio, ni cómo cuenta cuando la unidad es una presentación (P-15): queda como pregunta para Diseño."
+    "El requerimiento no dice si el mínimo es por zona o por negocio, ni cómo cuenta cuando la unidad es una presentación (P-15): queda como pregunta para Diseño.",
+    "Mínimo por zona o por negocio, y con presentaciones: pendiente de Carlos (P-15)."
    ],
    "entradas": [
     {
@@ -90,10 +97,6 @@
     {
      "a": "CU-CMP-1.2",
      "dato": "artículos que están bajo el mínimo"
-    },
-    {
-     "a": "CU-INV-10.2",
-     "dato": "alerta de reposición del artículo bajo el mínimo"
     }
    ],
    "escenarios": [
@@ -154,16 +157,16 @@
     {
      "de": "CU-CMP-1.1",
      "dato": "artículos que están bajo el mínimo"
+    },
+    {
+     "de": "CU-INC1-3.5",
+     "dato": "artículo a comprar, para la lista de compra"
     }
    ],
    "salidas": [
     {
      "a": "CU-CMP-1.3",
      "dato": "lista de compra sugerida"
-    },
-    {
-     "a": "CU-INV-10.2",
-     "dato": "lista de compra sugerida (ideal menos actual)"
     }
    ],
    "escenarios": [
@@ -268,7 +271,8 @@
    "limitantes": [
     "Crítico (dinero, RT-23): no entra a la cola sin DA-n y cruce con Carlos. DA-38 lo decidió «como está escrito, después de PG1-2».",
     "Depende del adelanto de PG1-2 (CU-PG-3.1), que tampoco está construido.",
-    "El requerimiento no dice qué pasa si la propiedad no tiene turno siguiente, ni si un encargo no cumplido se arrastra al turno que sigue: pregunta para Diseño."
+    "El requerimiento no dice qué pasa si la propiedad no tiene turno siguiente, ni si un encargo no cumplido se arrastra al turno que sigue: pregunta para Diseño.",
+    "Sin tope fijo de adelanto en esta versión: el operador digita el monto y el saldo queda visible (Diseño, M-847 d)."
    ],
    "entradas": [
     {
@@ -458,7 +462,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "La compra queda «por aprobar» hasta que el operador la acepte (CU-PG-3.3).",
-    "La foto de la factura desde un celular real es una prueba N4 que hace Carlos (T-7, criterio 11)."
+    "La foto de la factura desde un celular real es una prueba N4 que hace Carlos (T-7, criterio 11).",
+    "Un encargo no cumplido pasa como pendiente al siguiente turno de esa propiedad; en una compra parcial se registra lo comprado y el resto sigue pendiente; sin turno siguiente, el operador recibe un aviso (Diseño, M-847 e)."
    ],
    "entradas": [
     {
@@ -616,7 +621,8 @@
    "que": "Marcar «sin encargo» una compra que el colaborador registra sin encargo previo, para que el operador la vea",
    "declarado": "no-construido",
    "limitantes": [
-    "La compra sin encargo se puede registrar; solo queda marcada (supuesto 1). Que baje la calificación del colaborador es de REQ-PG2 y no se cuenta aquí."
+    "La compra sin encargo se puede registrar; solo queda marcada (supuesto 1). Que baje la calificación del colaborador es de REQ-PG2 y no se cuenta aquí.",
+    "El colaborador también puede proponer una compra desde el portal; queda «por aprobar» y el operador decide (Diseño, M-847 c)."
    ],
    "entradas": [
     {
@@ -797,26 +803,6 @@
   }
  ],
  "sinAtar": [
-  {
-   "id": "INC-83",
-   "porque": "Es del editor de flujos (mínimo de fotos de una tarea). Salió por buscar «compra» en el texto; no toca a CMP. Cerrado."
-  },
-  {
-   "id": "INC-155",
-   "porque": "Es de un guion de REQ-OP-1 (Tablero) que lee mal un motivo de atraso. No toca a CMP."
-  },
-  {
-   "id": "INC-178",
-   "porque": "Es de un incidente escalado sin salida (Incidentes). No toca a CMP."
-  },
-  {
-   "id": "DA-22",
-   "porque": "Es de inventario: quién resuelve una diferencia de conteo y el consumo deducido del conteo de cierre (CU-INV-10.4). CMP solo usa el conteo ya declarado."
-  },
-  {
-   "id": "DA-42",
-   "porque": "Es del valor de compra de un activo (Inventario, CU-INV-11.1). No es de las compras de consumibles."
-  },
   {
    "id": "DA-59",
    "porque": "Es de los accesos del colaborador a archivos y configuración (INC-192 e INC-193). Aplica a la foto de la factura cuando se construya, pero no es de CMP."

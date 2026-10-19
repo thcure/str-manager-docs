@@ -1,7 +1,7 @@
 {
  "modulo": "PC1",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "requerimientos-pc1-1-actividades-guiadas-2026-10.md (REQ-PC1-1: qué hace, tres supuestos y 13 criterios; vive en el Proyecto, no en el repositorio)",
@@ -10,7 +10,13 @@
   "interno/linea-base: HK, FL, PR, INV, INC1 (ids reales de los casos de uso con los que PC1 se une)",
   "No hay código ni guiones e2e de PC1 (no construido)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-847)",
+   "que": "Pesos (esencial 2; el resto necesarias) y decisión f."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Los dos ajustes de cada actividad (cuándo empieza y cómo se registra) y la actividad que se abre sola.",
@@ -32,35 +38,35 @@
    "id": "CAP-PC1-1",
    "nombre": "Ajustes por actividad",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que cada actividad de un flujo diga cuándo empieza y cómo se registra, y que los flujos de hoy sigan igual."
   },
   {
    "id": "CAP-PC1-2",
    "nombre": "Registro guiado por cámara",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que el colaborador recorra las zonas del apartamento con foto en vivo y una calificación rápida, con antes y después, y una foto general de llegada."
   },
   {
    "id": "CAP-PC1-3",
    "nombre": "Puntos de control con QR",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que el turno empiece cuando el colaborador escanea el QR del depósito o del apartamento con el lector del STR, y que cada QR siguiente abra la parte del turno de ese lugar."
   },
   {
    "id": "CAP-PC1-4",
    "nombre": "Respaldo cuando el QR no lee",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que el trabajo no se detenga si el QR no lee: el colaborador sube una foto del punto y el sistema la valida con sus datos de captura; el operador vigila cuántos respaldos hay."
   },
   {
    "id": "CAP-PC1-5",
    "nombre": "Línea de tiempo y accesos",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que el operador vea con hora lo que pasó en el turno y que el colaborador lea solo los puntos de sus propiedades."
   }
  ],
@@ -564,7 +570,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Con los puntos apagados todo funciona como hoy; apagarlos devuelve el turno al inicio manual sin tocar datos (reversión de REQ-PC1-2).",
-    "Crítico (RT-23): el turno puede empezar por un registro nuevo del colaborador. DA-36 lo decidió «como está escrito»."
+    "Crítico (RT-23): el turno puede empezar por un registro nuevo del colaborador. DA-36 lo decidió «como está escrito».",
+    "Se activan con el flujo que los usa (Diseño, M-847 f)."
    ],
    "entradas": [],
    "salidas": [
@@ -619,7 +626,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Quién los crea (solo el administrador o también el operador) no está dicho: pregunta para Diseño.",
-    "Es el caso de uso que Housekeeping llamaba CU-PC1-1.1 («punto de control con su código QR y su propiedad»)."
+    "Es el caso de uso que Housekeeping llamaba CU-PC1-1.1 («punto de control con su código QR y su propiedad»).",
+    "Los crean el administrador o el operador, por propiedad y zona (Diseño, M-847 f)."
    ],
    "entradas": [
     {
@@ -1431,7 +1439,9 @@
    ],
    "que": "Dar al colaborador solo los puntos de control de sus propiedades y rechazar que cree o edite puntos",
    "declarado": "no-construido",
-   "limitantes": [],
+   "limitantes": [
+    "Escanean el titular del turno y los apoyos asignados a ese turno (Diseño, M-847 f)."
+   ],
    "entradas": [
     {
      "de": "CU-INV-7.3",
@@ -1477,20 +1487,8 @@
  ],
  "sinAtar": [
   {
-   "id": "REQ-INV2-6",
-   "porque": "Activos (Inventario). PC1 solo usa el activo por QR dentro de la actividad guiada (CU-PC1-3.7); la ficha del activo es de INV."
-  },
-  {
-   "id": "REQ-INV2-6-2",
-   "porque": "Ficha y valor del activo (Inventario). No es de PC1."
-  },
-  {
    "id": "REQ-INV2-7",
    "porque": "Foto al cierre por ubicación (Inventario); está descartado y reemplazado por REQ-INV2-7-1 y REQ-INV2-7-2."
-  },
-  {
-   "id": "REQ-INV2-7-2",
-   "porque": "Foto al cierre en celular real (Inventario). Comparte con PC1 la prueba N4 de T-7, pero el caso de uso es de Inventario."
   }
  ]
 }

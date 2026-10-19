@@ -1,7 +1,7 @@
 {
  "modulo": "MOD",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 3,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "modelo/api/index.php (251 líneas), config/acceso.php, carga.php, credenciales.php, lectura.php y secrets.example.php: leídos completos",
@@ -11,7 +11,18 @@
   "ADR-006, interno/lotes-modelo/LM-34.md, claude/marco/requerimientos-modelo-2026-10.md (documentos del proyecto), mapa-modulos.json y seguimiento.json (INC-123, INC-124, INC-152, DT-36, DT-37)",
   "No leído: modelo/api/config/database.php (clase ModeloDb: conexión, migrar y schema_version) y modelo/secrets.php (secretos, no se leen); tests/*.test.js y tests/lib/port-*.js (no venían en la copia); el alojamiento (cron y cuentas)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-844)",
+   "que": "Pesos de orden (acceso, lectura, migración y carga necesarias), decisiones e–h; REQ-MOD re-anclados."
+  },
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Desarrollo (M-845)",
+   "que": "DT-53, INC-198, INC-199 e INC-200 atados; DT-36 ya cubría el vencimiento."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Decir si el servicio está sano y qué versión de los documentos tiene cargada",
@@ -27,42 +38,42 @@
    "Validar los documentos del proyecto y armar el paquete (validar.py y paquete.py): quedan citados dentro de CU-MOD-5.1 como parte del flujo",
    "El servidor del STR (api/): es de SRV"
   ],
-  "nota": "MOD es una API aparte en el sitio de la fábrica, con base de datos propia, que usan la cola del Arquitecto y los flujos de GitHub; ningún usuario del STR la usa y no toca datos del negocio. Todos sus casos de uso son de fábrica y no cuentan en la cobertura de producto. Los guiones de hoy solo prueban la salud y los rechazos sin clave: la carga, la lectura y el acceso por rol con clave valida no tienen prueba."
+  "nota": "MOD es una API aparte en el sitio de la fábrica, con base de datos propia, que usan la cola del Arquitecto y los flujos de GitHub; ningún usuario del STR la usa y no toca datos del negocio. Todos sus casos de uso son de fábrica y no cuentan en la cobertura de producto. Los guiones de hoy solo prueban la salud y los rechazos sin clave: la carga, la lectura y el acceso por rol con clave valida no tienen prueba. REQ-MOD-1 a 5 y 7 a 10 se re-anclan al modelo de operación v2 (Diseño, M-844 e): salen de aquí."
  },
  "capacidades": [
   {
    "id": "CAP-MOD-1",
    "nombre": "Salud y rastro del servicio",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Decir si el servicio está vivo, con su base y qué versión de los documentos tiene cargada; probar que una llamada llega; y dejar rastro de los fallos internos sin mostrar datos."
   },
   {
    "id": "CAP-MOD-2",
    "nombre": "Acceso por rol",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Decidir quién puede llamar a cada ruta del servicio: el Arquitecto con su clave propia y cuatro roles de menos poder con claves que vencen; y registrar esas claves."
   },
   {
    "id": "CAP-MOD-3",
    "nombre": "Lectura del modelo",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Leer lo cargado: una tabla o una fila, un resumen del estado y los documentos del proyecto rehechos igual que en Git."
   },
   {
    "id": "CAP-MOD-4",
    "nombre": "Migración y carga",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Dejar la base de datos del servicio al día y reemplazar su contenido, tabla por tabla y en una sola operación, con el paquete del proyecto."
   },
   {
    "id": "CAP-MOD-5",
    "nombre": "Quién llama al servicio",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Las tres formas en que el servicio se alimenta y se vigila: la carga automática desde Git, la comparación diaria contra Git y las llamadas a mano del Arquitecto desde su cola."
   }
  ],
@@ -79,7 +90,8 @@
    "limitantes": [
     "Es pública: cualquiera puede ver que el servicio existe, si tiene base, su versión de esquema, la versión del programa que lo ejecuta y qué versión de los documentos tiene cargada (nunca quién la cargó).",
     "Si la base falla, dice «sin base» pero no dice por qué; el motivo solo queda en el registro del servidor.",
-    "La versión de los documentos y su hora solo salen si el esquema es 3 o más; con uno anterior salen vacías."
+    "La versión de los documentos y su hora solo salen si el esquema es 3 o más; con uno anterior salen vacías.",
+    "Muestra sin clave el esquema, la versión de PHP y la última carga. No se acepta (Diseño, M-844 g): sin clave, solo «ok» o «con falla»; va a la bolsa con /health (T-31)."
    ],
    "entradas": [
     {
@@ -131,7 +143,8 @@
     "RT-18"
    ],
    "pendientes": [
-    "INC-124"
+    "INC-124",
+    "T-31"
    ],
    "pruebas": [
     {
@@ -257,7 +270,8 @@
    "limitantes": [
     "La respuesta solo dice el tipo de fallo, el archivo y la línea; no repite el texto del error ni lo que se envió.",
     "El registro guarda un solo respaldo: al pasar de 1 MB se reemplaza el anterior.",
-    "Que nadie de afuera pueda leer el registro depende de la configuración del alojamiento, no del programa."
+    "Que nadie de afuera pueda leer el registro depende de la configuración del alojamiento, no del programa.",
+    "El registro guarda el mensaje de la excepción (DT-53)."
    ],
    "entradas": [],
    "salidas": [],
@@ -283,7 +297,9 @@
    "reglas": [
     "RT-18"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "DT-53"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -316,7 +332,8 @@
     "El token de un rol vence a las 19:00 de Colombia del día de vencimiento, porque la fecha se compara en hora universal (DT-36, ya pagada).",
     "No hay tope de intentos fallidos.",
     "La clave del Arquitecto no vence y vive en un archivo de secretos fuera del repositorio.",
-    "Cada ruta pide la clave antes de leer el cuerpo y antes de tocar la base; solo si la clave no es la del Arquitecto se consulta la base."
+    "Cada ruta pide la clave antes de leer el cuerpo y antes de tocar la base; solo si la clave no es la del Arquitecto se consulta la base.",
+    "Sin límite de intentos: cada clave falsa cuesta una consulta a la base (RT-19) (INC-200, abierto, bajo). El vencimiento de la clave de rol en UTC ya es DT-36."
    ],
    "entradas": [],
    "salidas": [
@@ -391,7 +408,8 @@
     "RT-18"
    ],
    "pendientes": [
-    "DT-36"
+    "DT-36",
+    "INC-200"
    ],
    "pruebas": [
     {
@@ -565,7 +583,8 @@
     "Cada respuesta trae como máximo 2000 filas (500 por omisión); se pagina con «desde».",
     "El filtro «desde una hora» compara con la hora en que se escribió la fila, y cada carga reescribe todas las filas de cada tabla que trae: no sirve para saber qué cambió entre dos cargas.",
     "La tabla de complemento no tiene lectura de una fila.",
-    "El rol carga no puede leer tablas."
+    "El rol carga no puede leer tablas.",
+    "Buscar una fila por su valor usa otra columna y no el identificador (INC-199, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -628,7 +647,9 @@
    "reglas": [
     "RT-14"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-199"
+   ],
    "pruebas": [
     {
      "guion": "REQ-MOD-6-lectura",
@@ -877,7 +898,8 @@
     "Solo el Arquitecto puede hacerlo.",
     "Se pide con una llamada de lectura que sin embargo cambia la base: solo la protege la clave del Arquitecto.",
     "No hay forma de volver a un esquema anterior.",
-    "No se pudo leer cómo decide qué esquemas faltan (la clase de conexión no venía en la copia)."
+    "No se pudo leer cómo decide qué esquemas faltan (la clase de conexión no venía en la copia).",
+    "Migrar es un GET que cambia la base (DT-53)."
    ],
    "entradas": [
     {
@@ -931,7 +953,9 @@
    "reglas": [
     "RT-20"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "DT-53"
+   ],
    "pruebas": [
     {
      "guion": "REQ-MOD-6",
@@ -981,7 +1005,9 @@
     "Lo guardado en el campo «extra» y en el valor del complemento queda tal como llegó (INC-123, cerrado).",
     "No hay tope al tamaño del paquete: lo limita el alojamiento.",
     "La constancia de la carga solo se guarda con el esquema 3 o más; el complemento exige el esquema 2.",
-    "El modelo es copia: la fuente de verdad es Git (RT-4)."
+    "El modelo es copia: la fuente de verdad es Git (RT-4).",
+    "La carga reescribe todas las filas de cada tabla que trae, y el registro guarda el mensaje de la excepción (DT-53).",
+    "Sin tope de tamaño del paquete, lo decodifica dos veces, y un paquete con tablas vacías pasa y escribe la constancia de carga (INC-198, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -1059,7 +1085,9 @@
    ],
    "pendientes": [
     "INC-123",
-    "DT-36"
+    "DT-36",
+    "DT-53",
+    "INC-198"
    ],
    "pruebas": [
     {
@@ -1277,7 +1305,8 @@
     "Las claves viven en el equipo del Arquitecto y no se escriben en el registro ni en la salida; el registro solo guarda códigos.",
     "Las claves de rol se generan al azar si faltan y vencen a los 180 días.",
     "Exportar deja cada documento en una copia local con el mismo formato que Git.",
-    "El Arquitecto puede hacer a mano lo mismo que hacen los flujos automáticos."
+    "El Arquitecto puede hacer a mano lo mismo que hacen los flujos automáticos.",
+    "Faltan guiones con clave (carga completa, rechazo 422, lectura, roles): van a la bolsa como T-32, de fábrica y baja (Diseño, M-844 f)."
    ],
    "entradas": [
     {
@@ -1346,7 +1375,8 @@
     "RT-18"
    ],
    "pendientes": [
-    "DT-37"
+    "DT-37",
+    "T-32"
    ],
    "pruebas": [],
    "tecnica": {
@@ -1375,42 +1405,6 @@
   {
    "id": "INC-152",
    "porque": "Abierto, pero es del guion REQ-MOD-6 caso g, que pide la salud del STR (CU-SRV-7.1) y no la del modelo; el juez lo dejó como entorno. No cuelga de ningún caso de uso de MOD."
-  },
-  {
-   "id": "REQ-MOD-1",
-   "porque": "El mapa lo ancla a MOD como requerimiento raíz, pero REQ-MOD-1 a 5 y 7 a 10 son del modelo de operación v2 (la forma de trabajar del proyecto), no del servicio HTTP. Solo REQ-MOD-6 (B7-1 a B7-6) describe lo que hace /modelo/api."
-  },
-  {
-   "id": "REQ-MOD-2",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-3",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-4",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-5",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-7",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-8",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-9",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
-  },
-  {
-   "id": "REQ-MOD-10",
-   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
   },
   {
    "id": "DA-26",

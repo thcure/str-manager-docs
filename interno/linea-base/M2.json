@@ -1,7 +1,7 @@
 {
  "modulo": "M2",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "requerimientos-consolidado.md del Proyecto: REQ-M2.1 (registro del huésped, TRA y SIRE, valor pagado, el operador completa), REQ-M2.x (portería), REQ-F5 y REQ-F5.1 (hora real de llegada y salida), REQ-U6.1 (datos del huésped en el turno)",
@@ -10,7 +10,13 @@
   "interno/linea-base: CAL, PR, SRV, HK (ids reales de los casos de uso con los que M2 se une)",
   "No hay código ni guiones e2e de M2 (no construido)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-847)",
+   "que": "Pesos (esenciales 1, 3 y 7; el resto necesarias) y decisiones g–l; j espera a Carlos."
+  }
+ ],
  "alcance": {
   "dentro": [
    "El registro del huésped por un enlace sin cuenta: datos del TRA y del SIRE, el operador que los completa o reenvía el enlace, el estado y el valor pagado.",
@@ -35,49 +41,49 @@
    "id": "CAP-M2-1",
    "nombre": "Registro del huésped (TRA y SIRE)",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Pedir al huésped, por un enlace sin cuenta, los datos que exigen el TRA y el SIRE, y dejar que el operador los vea, los complete y reenvíe el enlace."
   },
   {
    "id": "CAP-M2-2",
    "nombre": "Hora real de llegada y de salida",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Preguntar al huésped a qué hora llega y a qué hora sale, guardar su respuesta como confirmada por él y avisar si la llegada queda fuera del rango."
   },
   {
    "id": "CAP-M2-3",
    "nombre": "Reportes TRA y SIRE",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Sacar el formulario TRA de cada reserva y el archivo SIRE de entradas y salidas por periodo, con los campos completos."
   },
   {
    "id": "CAP-M2-4",
    "nombre": "Portería del edificio",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Armar y enviar a portería los datos del huésped de cada reserva, y que el operador autorice el ingreso en los casos especiales."
   },
   {
    "id": "CAP-M2-5",
    "nombre": "Llegada y salida",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Confirmar que el huésped llegó y que salió, con la hora real y las observaciones."
   },
   {
    "id": "CAP-M2-6",
    "nombre": "Acceso e información de llegada",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Configurar cómo se entra a cada propiedad y armar la información que se le manda al huésped antes de llegar."
   },
   {
    "id": "CAP-M2-7",
    "nombre": "Privacidad y retención de datos del huésped",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que los datos de identidad vivan solo en la base y solo los vean quienes deben, y que se conserven un plazo definido."
   }
  ],
@@ -94,7 +100,8 @@
     "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
     "El enlace es uno por reserva y se puede reusar hasta el check-out.",
     "Cuándo se manda no está claro: REQ-M2.1 dice «al confirmar la reserva» y el diseño viejo (M2.md) dice «X días antes del check-in, por propiedad»: pregunta para Diseño.",
-    "El calendario de Airbnb no trae el correo ni el teléfono completo del huésped: hoy el operador es quien le manda el enlace."
+    "El calendario de Airbnb no trae el correo ni el teléfono completo del huésped: hoy el operador es quien le manda el enlace.",
+    "El enlace sale al confirmar la reserva, con recordatorio 3 días antes; el administrador edita los días (Diseño, M-847 g)."
    ],
    "entradas": [
     {
@@ -461,7 +468,8 @@
    "limitantes": [
     "Mientras no esté cargado, el valor pagado se escribe a mano.",
     "Claude evaluará después si hay una mejor alternativa (una conexión directa) (REQ-M2.1).",
-    "La reserva ya tiene un total (CU-CAL-2.1); falta decidir si el valor pagado del TRA es ese total o el que trae el archivo de Airbnb."
+    "La reserva ya tiene un total (CU-CAL-2.1); falta decidir si el valor pagado del TRA es ese total o el que trae el archivo de Airbnb.",
+    "El valor pagado del TRA sale del valor de la reserva y el operador lo puede corregir (Diseño, M-847 k)."
    ],
    "entradas": [],
    "salidas": [
@@ -629,7 +637,8 @@
    "limitantes": [
     "Hoy solo el operador acuerda la hora, con la fuente «operador» (CU-CAL-4.2); la del huésped sería una fuente nueva (REQ-T1 ya la prevé).",
     "Si el operador ya había puesto una hora y el huésped responde otra, no está dicho cuál manda: pregunta para Diseño.",
-    "Quienes la usan: el portal del colaborador, la ventana real del turno, las alertas y portería."
+    "Quienes la usan: el portal del colaborador, la ventana real del turno, las alertas y portería.",
+    "Manda la hora que registra el operador o el colaborador en el turno; si no hay, rige la de salida de la reserva (Diseño, M-847 i)."
    ],
    "entradas": [
     {
@@ -1003,7 +1012,8 @@
    "limitantes": [
     "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
     "La recepción exige el número de identificación y los datos de todos los huéspedes para habilitar el ingreso; por eso portería sí recibe el documento. La restricción de privacidad es para el colaborador de limpieza (REQ-M2.x).",
-    "De dónde sale la placa no está dicho (no es un campo del TRA): pregunta para Diseño."
+    "De dónde sale la placa no está dicho (no es un campo del TRA): pregunta para Diseño.",
+    "La placa del vehículo va, opcional (Diseño, M-847 h)."
    ],
    "entradas": [
     {
@@ -1510,7 +1520,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Sin plazo definido: es una decisión pendiente (15-oct, M-489), a definir al redactar el requerimiento de M2 con la Ley 1581 y la norma de Migración.",
-    "Hoy estos datos no existen en el sistema."
+    "Hoy estos datos no existen en el sistema.",
+    "Retención y aviso de la Ley 1581: los decide Carlos. Propuesta de Diseño: aviso de privacidad en el enlace, aceptado antes de enviar los datos, y retener lo que pida la norma (M-847 j)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1533,50 +1544,5 @@
    "confianza": "baja"
   }
  ],
- "sinAtar": [
-  {
-   "id": "INC-79",
-   "porque": "Es de Housekeeping: calcula «hoy» en UTC y las alertas de la tarde no salen. Aplica a la víspera y al mismo día de M2, pero el caso de uso es de HK. Cerrado."
-  },
-  {
-   "id": "INC-93",
-   "porque": "Es de permisos del operador antes de cargar /api/me (Identidad). No toca a M2. Cerrado."
-  },
-  {
-   "id": "INC-108",
-   "porque": "Es de usuarios con dos roles (Identidad). No toca a M2. Cerrado."
-  },
-  {
-   "id": "INC-115",
-   "porque": "Es del texto «3:00 PM» fijo en el turno y en el aviso de turnover (Housekeeping y Calendario). M2-2.2 le daría la hora confirmada por el huésped, pero el defecto es de ellos."
-  },
-  {
-   "id": "INC-142",
-   "porque": "Es del ticket de huésped que sigue en la unidad (Housekeeping). No toca a M2."
-  },
-  {
-   "id": "INC-157",
-   "porque": "Es del permiso dinero.tarifas al editar horas por turno (Propiedades). No toca a M2."
-  },
-  {
-   "id": "INC-161",
-   "porque": "Es de reinvitar a un usuario activo con «Invitar» (Identidad). No toca a M2."
-  },
-  {
-   "id": "INC-162",
-   "porque": "Es de «Cerrar sesión» del shell (Shell). No toca a M2."
-  },
-  {
-   "id": "INC-170",
-   "porque": "Es de la importación del calendario que no restaura una reserva de canal cancelada (Calendario). M2 recibiría esa reserva, pero el defecto es de CAL."
-  },
-  {
-   "id": "INC-182",
-   "porque": "Es de Conocimiento (guías). No toca a M2."
-  },
-  {
-   "id": "DA-35",
-   "porque": "Es de los reclamos por daños de huéspedes (Incidentes, INC1-2). Salió por buscar «huésped». No toca a M2."
-  }
- ]
+ "sinAtar": []
 }

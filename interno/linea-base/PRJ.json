@@ -1,7 +1,7 @@
 {
  "modulo": "PRJ",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 3,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-seg-proyecto.html (1851 líneas; leído de la 221 a la 1851, sin el CSS 1-220), str-marco-trabajo.html, str-instrucciones.html, str-cobit.html, str-elementos.html, str-base-conocimiento.html y str-nomenclatura.html: leídos",
@@ -11,7 +11,18 @@
   "seguimiento.json: INC-82, 102, 105, 106, 108, 118, 119, 136 y 139; diseno.json: REQ-BC-1, REQ-BC-2, REQ-TB-1 a 6, REQ-SP-3, REQ-U-8, DA-39 y la bolsa",
   "No leído: str-lo-que-viene.html (es CU-SH-6.1); el CSS de Seg. Proyecto; tests/*.test.js (réplicas de reglas puras: no venían en la copia); las páginas no se abrieron en un navegador"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-844)",
+   "que": "Pesos de orden (acceso y lectura necesarias; el resto accesorias), decisiones a–d."
+  },
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Desarrollo (M-845)",
+   "que": "INC-197 y DT-52 atados."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Control de acceso de las siete páginas del grupo Proyecto (solo administrador)",
@@ -34,63 +45,63 @@
    "id": "CAP-PRJ-1",
    "nombre": "Acceso solo para el administrador",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Dejar ver las páginas del grupo Proyecto solo al administrador (el superadministrador cuenta como administrador)."
   },
   {
    "id": "CAP-PRJ-2",
    "nombre": "Datos del proyecto al día",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Cada página lee los documentos del proyecto de la última versión publicada, dice de cuándo son, se puede actualizar sin recargar y nunca escribe nada."
   },
   {
    "id": "CAP-PRJ-3",
    "nombre": "Seguimiento del proyecto",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Ver cómo va el proyecto: indicadores del ciclo de verificación, agentes, objetivos, planes y bolsa, plan de trabajo, diseño, ítems y cambios por lote."
   },
   {
    "id": "CAP-PRJ-4",
    "nombre": "Marco de trabajo",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Ver los pasos del ciclo de un lote: quién los hace, con qué herramienta y cuánto cuestan."
   },
   {
    "id": "CAP-PRJ-5",
    "nombre": "Instrucciones",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Buscar las instrucciones de los chats y copiar su texto."
   },
   {
    "id": "CAP-PRJ-6",
    "nombre": "Tablero COBIT",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Ver los 40 objetivos de COBIT 2019 con su estado en el proyecto y abrir cada uno con sus prácticas y la posición propia."
   },
   {
    "id": "CAP-PRJ-7",
    "nombre": "Elementos del proyecto",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Buscar y filtrar los elementos del proyecto (documentos, archivos de datos, páginas, herramientas, chats) y ver su ficha."
   },
   {
    "id": "CAP-PRJ-8",
    "nombre": "Base de conocimiento",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Ver el mapa de actores, mecanismos y lugares, su diagrama, las fichas de cada pieza y las líneas base del proyecto; buscar en ellos."
   },
   {
    "id": "CAP-PRJ-9",
    "nombre": "Nomenclatura",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Leer cómo se llaman las cosas del proyecto: roles, identificadores, entidades, camino de un lote, buzón, archivos y vocabulario."
   }
  ],
@@ -108,7 +119,9 @@
     "Seis páginas repiten su propia copia del control (con un comentario «temporal» de INC-76); solo Nomenclatura usa el control común.",
     "El superadministrador cuenta como administrador.",
     "Es de la fábrica de software, no del negocio: no cuenta en la cobertura de producto.",
-    "Transitorio: el proyecto saldrá del STR a un sitio aparte (plan D4, ADR-009)."
+    "Transitorio: el proyecto saldrá del STR a un sitio aparte (plan D4, ADR-009).",
+    "El acceso se cierra solo en pantalla y los documentos son públicos. No se acepta (Diseño, M-844 a): lo decide el servidor (RT-14); Desarrollo lo confirma como incidente.",
+    "Seis páginas copian el control de acceso con la marca provisional de INC-76; Nomenclatura usa el común (DT-52)."
    ],
    "entradas": [
     {
@@ -183,7 +196,9 @@
     "RT-13",
     "RT-14"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "DT-52"
+   ],
    "pruebas": [
     {
      "guion": "REQ-SH-2",
@@ -487,7 +502,8 @@
     "Cuenta solo los lotes aceptados en los últimos 7 días que tienen la hora de construido y de aceptado; los que no la tienen se cuentan aparte, como «fuera».",
     "El semáforo se pone en rojo si un lote lleva en verificación más de la meta de atasco; muestra su número y los minutos.",
     "Sin datos muestra «Sin datos todavía» y la página sigue pintada.",
-    "En una regresión larga los indicadores llegaron a pintarse tarde (INC-139, abierto)."
+    "En una regresión larga los indicadores llegaron a pintarse tarde (INC-139, abierto).",
+    "El aviso de cobertura no se oculta tras Actualizar (INC-197)."
    ],
    "entradas": [
     {
@@ -537,7 +553,8 @@
     "RT-4"
    ],
    "pendientes": [
-    "INC-139"
+    "INC-139",
+    "INC-197"
    ],
    "pruebas": [
     {
@@ -607,7 +624,8 @@
     "La ficha toma la hora de «etapa actual» de una fuente y la del evento «aceptado» de otra: pueden salir horas distintas (INC-105, abierto).",
     "A 390 px las tablas del tablero conservan varias columnas dentro de un contenedor con desplazamiento, en vez de una columna (INC-106, abierto).",
     "Los planes y las prioridades se leen de proyecto.json cuando existe; si no, de diseno.json (L-151).",
-    "Los mensajes de un ítem se piden solo al abrir su ficha, una vez por carga de la página."
+    "Los mensajes de un ítem se piden solo al abrir su ficha, una vez por carga de la página.",
+    "La bolsa oculta los ítems sin ref (5 de 69). Decidido (Diseño, M-844 c): la pantalla los muestra y el validador exige la ref (INC-197, abierto, bajo)."
    ],
    "entradas": [],
    "salidas": [],
@@ -643,7 +661,8 @@
    ],
    "pendientes": [
     "INC-105",
-    "INC-106"
+    "INC-106",
+    "INC-197"
    ],
    "pruebas": [],
    "tecnica": {
@@ -905,7 +924,8 @@
    "declarado": "construido",
    "limitantes": [
     "Los lotes que se llaman «LM-n» (lotes del modelo) cuentan como 0 al ordenar: quedan al final, mezclados con los que no tienen número.",
-    "El color del estado existe para aceptado, no aceptado, revertido, registrado y cerrado; un estado nuevo en los datos saldría sin color (como pasó en INC-82)."
+    "El color del estado existe para aceptado, no aceptado, revertido, registrado y cerrado; un estado nuevo en los datos saldría sin color (como pasó en INC-82).",
+    "Los lotes del modelo (LM-n) ordenan como 0 y quedan al final (INC-197)."
    ],
    "entradas": [],
    "salidas": [],
@@ -939,7 +959,8 @@
    "reglas": [],
    "pendientes": [
     "INC-82",
-    "INC-118"
+    "INC-118",
+    "INC-197"
    ],
    "pruebas": [
     {
@@ -979,7 +1000,8 @@
     "Entregado a Desarrollo, aún sin construir: no existe en el servidor del STR el paso intermedio de lectura ni la clave «tablero» pegada en sus secretos.",
     "Depende de que Carlos pegue la clave «tablero» en el archivo de secretos del STR cuando Desarrollo encole el lote (T-8).",
     "Por ahora las páginas leen los documentos de GitHub (CU-PRJ-2.1).",
-    "Decisión DA-39 (crítica): solo lectura, con sesión de administrador y una clave que solo vive en el servidor."
+    "Decisión DA-39 (crítica): solo lectura, con sesión de administrador y una clave que solo vive en el servidor.",
+    "Sigue en alcance como no construido, de fábrica y prioridad baja; su REQ no está entregado (Diseño, M-844 d)."
    ],
    "entradas": [
     {
@@ -1231,7 +1253,8 @@
    "limitantes": [
     "El filtro «Solo objetivos de interés» se recuerda en el navegador.",
     "Sin objetivos, dice que todavía no hay.",
-    "La leyenda de estados sale de los datos; un estado que los datos no declaran no se dibuja."
+    "La leyenda de estados sale de los datos; un estado que los datos no declaran no se dibuja.",
+    "Las prácticas «par» salen como «fuera de alcance» (INC-197)."
    ],
    "entradas": [
     {
@@ -1267,7 +1290,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-197"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1358,7 +1383,8 @@
    "limitantes": [
     "Los filtros se combinan con «y»; cada grupo de chips es de elección única y se recuerda en el navegador.",
     "Los elementos de tipo «registro» (2 hoy) no tienen chip de tipo: la lista de tipos de los datos no lo incluye y no se pueden aislar.",
-    "Las cuentas de cada chip salen de aplicar los demás filtros."
+    "Las cuentas de cada chip salen de aplicar los demás filtros.",
+    "Los elementos «registro» no tienen chip y «chat» no tiene icono (INC-197)."
    ],
    "entradas": [
     {
@@ -1401,7 +1427,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-197"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1660,7 +1688,8 @@
    "declarado": "construido",
    "limitantes": [
     "No es la línea base funcional del STR (la de los casos de uso): son las líneas base de proceso del archivo de conocimiento.",
-    "Si el nombre de la línea coincide con la búsqueda se ven todas sus filas; si no, solo las que coinciden."
+    "Si el nombre de la línea coincide con la búsqueda se ven todas sus filas; si no, solo las que coinciden.",
+    "La pestaña «Líneas base» se renombra con un nombre que diga qué contiene; «Línea base funcional» queda para MJ-16 (Diseño, M-844 b)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1758,7 +1787,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Entregado a Desarrollo, aún sin construir: la página solo tiene las pestañas Mapa, Diagrama, Fichas y Líneas base.",
-    "No se sabe de qué documento saldría (conocimiento.json no tiene esa sección)."
+    "No se sabe de qué documento saldría (conocimiento.json no tiene esa sección).",
+    "Sigue en alcance como no construido, de fábrica y prioridad baja; su REQ no está entregado (Diseño, M-844 d)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1802,7 +1832,8 @@
    "declarado": "construido",
    "limitantes": [
     "Es texto fijo dentro de la página: no lee los documentos del proyecto, así que no tiene encabezado de datos ni botón Actualizar y puede quedar viejo respecto de lo vigente (un dato, una fuente).",
-    "Se abre desde el enlace «Nomenclatura» de Seg. Proyecto o desde el menú."
+    "Se abre desde el enlace «Nomenclatura» de Seg. Proyecto o desde el menú.",
+    "Es texto fijo y no sale de los documentos (RT-4) (DT-52)."
    ],
    "entradas": [
     {
@@ -1833,7 +1864,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "DT-52"
+   ],
    "pruebas": [
     {
      "guion": "REQ-TB-5",

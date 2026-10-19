@@ -57,6 +57,11 @@
    "fecha": "2026-10-18",
    "por": "Chat Arquitecto",
    "que": "Flujos con INC1, PG y K3 enlazados a sus ids reales; pares completados."
+  },
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-847)",
+   "que": "CU-INV-10.2 y 10.3 pasan a Compras (CU-CMP-1.2 y 2.1)."
   }
  ],
  "alcance": {
@@ -149,7 +154,7 @@
    "nombre": "Reposición y compras",
    "tipo": "operativa",
    "peso": "necesaria",
-   "que": "Saber cuándo y cuánto reponer: mínimos e ideales, alerta, lista de compra, encargo con adelanto, compra con factura y consumo deducido del conteo."
+   "que": "Mínimos e ideales por zona y consumo deducido del conteo. La alerta, la lista de compra, el encargo y la compra pasaron a Compras (CMP) para que cada dato tenga una sola fuente (Diseño, M-847 a)."
   },
   {
    "id": "CAP-INV-11",
@@ -3978,7 +3983,8 @@
    "limitantes": [
     "Hoy hay un único mínimo por artículo y solo se compara con la zona principal; no existe el ideal ni el mínimo por zona.",
     "La dotación ideal por tipo de propiedad está pendiente (fase 2/3 y REQ-INV2-6-3).",
-    "El mínimo debe ir en presentaciones (existencia mínima requerida, decisión de Carlos en P-15) y separado de la cantidad por apto de activos y ropa. Pendiente de Carlos: mínimo por negocio o por zona."
+    "El mínimo debe ir en presentaciones (existencia mínima requerida, decisión de Carlos en P-15) y separado de la cantidad por apto de activos y ropa. Pendiente de Carlos: mínimo por negocio o por zona.",
+    "Pendiente de Carlos (P-15): mínimo por zona o por negocio, y en presentaciones (Diseño, M-847 b)."
    ],
    "entradas": [],
    "salidas": [
@@ -4025,116 +4031,6 @@
     "notas": "Hoy artículo.minimo y bajo = existencia < minimo solo en d.tipo === 'principal' (renderExistencias)."
    },
    "confianza": "alta"
-  },
-  {
-   "id": "CU-INV-10.2",
-   "capacidad": "CAP-INV-10",
-   "actor": [
-    "admin",
-    "operador"
-   ],
-   "que": "Recibir una alerta de reposición y una lista de compra sugerida",
-   "declarado": "no-construido",
-   "limitantes": [
-    "Aprobado en DA-38 (a) «como está escrito»; falta construirlo, después de PG1-2."
-   ],
-   "entradas": [
-    {
-     "de": "CU-INC1-3.5",
-     "dato": "artículo a reponer o comprar, para la alerta de reposición y la lista de compra"
-    },
-    {
-     "de": "CU-CMP-1.1",
-     "dato": "alerta de reposición del artículo bajo el mínimo"
-    },
-    {
-     "de": "CU-CMP-1.2",
-     "dato": "lista de compra sugerida (ideal menos actual)"
-    }
-   ],
-   "salidas": [],
-   "escenarios": [
-    {
-     "id": "E1",
-     "tipo": "principal",
-     "dado": "varios artículos por debajo de su mínimo",
-     "cuando": "el operador abre la lista de compra",
-     "entonces": "ve cada artículo con lo que falta para llegar al ideal (hoy solo se pinta en rojo la celda)"
-    }
-   ],
-   "origen": [
-    "REQ-CMP-1",
-    "DA-38"
-   ],
-   "reglas": [
-    "RT-14"
-   ],
-   "pendientes": [],
-   "pruebas": [],
-   "tecnica": {
-    "paginas": [
-     "str-inventario.html"
-    ],
-    "rutas": [],
-    "colecciones": [],
-    "notas": "Sin código."
-   },
-   "confianza": "media"
-  },
-  {
-   "id": "CU-INV-10.3",
-   "capacidad": "CAP-INV-10",
-   "actor": [
-    "admin",
-    "operador"
-   ],
-   "que": "Encargar una compra como actividad del turno con adelanto y registrar la compra con factura y aprobación para que entre al inventario",
-   "declarado": "no-construido",
-   "limitantes": [
-    "Es de dinero: reutiliza adelantos y legalización de pagos (PG1-2); aprobado en DA-38 (a), crítico.",
-    "La foto de la factura se probará en celular real (T-7 de Carlos)."
-   ],
-   "entradas": [
-    {
-     "de": "CU-PG-3.3",
-     "dato": "adelanto y legalización de un gasto de compra"
-    }
-   ],
-   "salidas": [
-    {
-     "a": "CU-PG-3.1",
-     "dato": "encargo de compra de un turno con el monto del adelanto"
-    }
-   ],
-   "escenarios": [
-    {
-     "id": "E1",
-     "tipo": "principal",
-     "dado": "una lista de compra sugerida",
-     "cuando": "el operador crea el encargo con adelanto para el turno de un colaborador",
-     "entonces": "el colaborador ve solo el encargo de su turno, compra, sube la factura y, tras la aprobación, la compra entra a la zona principal (hoy la compra se registra a mano sin factura)"
-    }
-   ],
-   "origen": [
-    "REQ-CMP-1",
-    "DA-38",
-    "DA-29"
-   ],
-   "reglas": [
-    "RT-14",
-    "RT-23"
-   ],
-   "pendientes": [],
-   "pruebas": [],
-   "tecnica": {
-    "paginas": [
-     "str-inventario.html"
-    ],
-    "rutas": [],
-    "colecciones": [],
-    "notas": "Sin código; hoy la compra la registra a mano el administrador o el operador (CU-INV-3.1)."
-   },
-   "confianza": "media"
   },
   {
    "id": "CU-INV-10.4",

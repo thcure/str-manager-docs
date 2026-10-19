@@ -1,7 +1,7 @@
 {
  "modulo": "M6",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "requerimientos-consolidado.md del Proyecto: REQ-F5 (alcance precisado 10-sep, DA-1), REQ-F5.1, REQ-M2.1 y REQ-M2.x",
@@ -11,7 +11,13 @@
   "interno/linea-base: HK, INC1, U, K3, CAL (ids reales de los casos de uso con los que M6 se une)",
   "No hay código ni guiones e2e de M6 (no existe como módulo)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-19",
+   "por": "Chat Diseño (M-847)",
+   "que": "Pesos (esencial 2; accesoria 6; el resto necesarias) y decisiones m–p; m espera a Carlos; o a Desarrollo."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Las plantillas de mensajes con variables, por propiedad y por canal, y el momento de envío.",
@@ -34,42 +40,42 @@
    "id": "CAP-M6-1",
    "nombre": "Plantillas de mensajes",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que el administrador escriba los mensajes una vez, con variables, los ajuste por propiedad y decida cuándo se mandan."
   },
   {
    "id": "CAP-M6-2",
    "nombre": "Envío manual",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que el operador arme el mensaje con la plantilla y los datos de la reserva y lo copie o abra WhatsApp con el texto listo."
   },
   {
    "id": "CAP-M6-3",
    "nombre": "Envío por canal",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Mandar los mensajes solos por WhatsApp Business o por correo, por el canal que elija cada propiedad, y dejar registro de lo enviado."
   },
   {
    "id": "CAP-M6-4",
    "nombre": "Mensajes al huésped y a portería",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Los mensajes de cada reserva: confirmación, enlace de registro, pregunta de hora, información de llegada, portería, salida y reseña."
   },
   {
    "id": "CAP-M6-5",
    "nombre": "Avisos del STR a su equipo y a proveedores",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que los avisos de turno, mantenimiento, incidentes urgentes y reclamos lleguen por WhatsApp o correo, además de verse en el STR."
   },
   {
    "id": "CAP-M6-6",
    "nombre": "Agente que atiende las comunicaciones",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Un agente (modelo de lenguaje) que redacta y envía o propone los mensajes, con tope de costo. Bloqueado: pedido P-13."
   }
  ],
@@ -425,7 +431,9 @@
    ],
    "que": "Elegir por propiedad el canal de comunicación con el huésped: WhatsApp, correo o los dos",
    "declarado": "no-construido",
-   "limitantes": [],
+   "limitantes": [
+    "El canal tiene costo y lo decide Carlos. Propuesta de Diseño: primero correo y «copiar»; número propio de WhatsApp después (M-847 m)."
+   ],
    "entradas": [],
    "salidas": [
     {
@@ -1106,7 +1114,8 @@
    "declarado": "fuera-de-alcance",
    "limitantes": [
     "Bloqueado: pedido P-13 (13-oct), borrador sin cruce con Carlos; el Arquitecto lo detuvo en M-314 (13-oct 19:23). No va a la cola.",
-    "Propuesta del borrador: lo que va «solo, con plantilla aprobada»."
+    "Propuesta del borrador: lo que va «solo, con plantilla aprobada».",
+    "P-13 no se retoma mientras dure la pausa (Diseño, M-847 n)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1252,26 +1261,5 @@
    "confianza": "media"
   }
  ],
- "sinAtar": [
-  {
-   "id": "INC-161",
-   "porque": "Es de reinvitar a un usuario activo con «Invitar» (Identidad). La invitación se comparte por WhatsApp a mano (CU-U-4.2), no por M6."
-  },
-  {
-   "id": "INC-162",
-   "porque": "Es de «Cerrar sesión» del shell (Shell). No toca a M6."
-  },
-  {
-   "id": "REQ-K3-3",
-   "porque": "Es del aviso del corte y de los recordatorios (Copias y corte). Los avisos por WhatsApp o correo están en la bolsa de Diseño (CU-K3-4.6), no en M6."
-  },
-  {
-   "id": "REQ-PC1-2",
-   "porque": "Salió por buscar «mensaje» (aviso al operador al pasar el umbral de respaldos). Ese aviso es interno de PC1 (CU-PC1-4.7)."
-  },
-  {
-   "id": "DA-24",
-   "porque": "Es del usuario de prueba zz-verif-colab. No toca a M6."
-  }
- ]
+ "sinAtar": []
 }

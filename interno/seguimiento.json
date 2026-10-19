@@ -1758,12 +1758,12 @@
    "modulo": "Inventario (guion de pruebas)",
    "fecha": "2026-10-19",
    "titulo": "REQ-INV2-3-4 a falla en los trenes: el nombre de prueba de un estado pasa de los 40 caracteres de #esNombre con el prefijo largo del tren, se corta y la fila no se encuentra al recargar",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "bajo",
    "origen": "log/TREN-20261019-1213.json (LM-49 fase 2; 138/139 casos en verde)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "12:37 Los tres PUT de inv-estados dieron 200; el caso se agota después de recargar, al leer la marca de cada fila: si la fila no aparece, cada inputValue espera hasta el tope y el caso pasa de 90 s. Ninguno de los tres lotes toca Inventario (L-149 y L-152 solo guiones; L-155 solo el guion de INC-190) y el mismo caso salió verde en la regresión completa de las 11:35 (130411a es el mismo código de Inventario). Causa probable: entorno (lectura lenta tras recargar). Encolada la repetición del guion (correr/tren-inv234); si sale verde, se cierra como entorno; si repite, se mira la recarga de Inventario. Abierto por Desarrollo; el Arquitecto revisa el tren. · 12:39 Arquitecto (M-890): si la repetición sale verde y el caso vuelve a caer en otro tren, se le pasa con las dos corridas para pw/cuarentena.json (suyo); si sale rojo, es de Desarrollo y el Jefe de proyecto lo clasifica con Diseño (M-891). · 12:57 Cerrado como entorno: el mismo caso salió verde a las 12:41 en la regresión completa de L-137 (152/152, mismo código de Inventario). La repetición encolada (correr/tren-inv234) queda como segunda corrida; si cae en otro tren, va al Arquitecto para cuarentena (M-890). · 12:58 Reabierto: la repetición (correr/tren-inv234, 12:57) salió roja en a con otro síntoma: «marca tras recargar: Secando turno · Sucia — · Lista nada» (la fila «Sucia por lavar» no aparece tras recargar; los tres PUT 200). Verde en L-137 a las 12:41: falla intermitente, no del tren. Hipótesis: el nombre se escribe antes de que el diálogo enfoque «Nombre» (L-120) o un pull entre guardados deja la copia local sin la fila. Encolado un diagnóstico de solo lectura (correr/diag-estados) que lee del servidor los estados zz de esas corridas. Causa provisional «construcción» (página o guion); se confirma con el diagnóstico. · 13:03 Diagnóstico (correr/diag-estados, solo lectura): en el servidor los estados quedaron con el nombre cortado en 40 («…-TREN-20261019-1213-r-Sucia por», «…-r-Secando-ir», «…-TREN-INV234-Sucia por lavar-k2w»), con su marca bien guardada. No es pérdida de datos: es el guion (h.dato con el prefijo del tren + maxlength=40 de la página). Arreglo: L-157, solo guion (nombres cortos y recortados a 40). Quedan cuatro estados zz activos de los trenes para la purga del Arquitecto."
+   "nota": "12:37 Los tres PUT de inv-estados dieron 200; el caso se agota después de recargar, al leer la marca de cada fila: si la fila no aparece, cada inputValue espera hasta el tope y el caso pasa de 90 s. Ninguno de los tres lotes toca Inventario (L-149 y L-152 solo guiones; L-155 solo el guion de INC-190) y el mismo caso salió verde en la regresión completa de las 11:35 (130411a es el mismo código de Inventario). Causa probable: entorno (lectura lenta tras recargar). Encolada la repetición del guion (correr/tren-inv234); si sale verde, se cierra como entorno; si repite, se mira la recarga de Inventario. Abierto por Desarrollo; el Arquitecto revisa el tren. · 12:39 Arquitecto (M-890): si la repetición sale verde y el caso vuelve a caer en otro tren, se le pasa con las dos corridas para pw/cuarentena.json (suyo); si sale rojo, es de Desarrollo y el Jefe de proyecto lo clasifica con Diseño (M-891). · 12:57 Cerrado como entorno: el mismo caso salió verde a las 12:41 en la regresión completa de L-137 (152/152, mismo código de Inventario). La repetición encolada (correr/tren-inv234) queda como segunda corrida; si cae en otro tren, va al Arquitecto para cuarentena (M-890). · 12:58 Reabierto: la repetición (correr/tren-inv234, 12:57) salió roja en a con otro síntoma: «marca tras recargar: Secando turno · Sucia — · Lista nada» (la fila «Sucia por lavar» no aparece tras recargar; los tres PUT 200). Verde en L-137 a las 12:41: falla intermitente, no del tren. Hipótesis: el nombre se escribe antes de que el diálogo enfoque «Nombre» (L-120) o un pull entre guardados deja la copia local sin la fila. Encolado un diagnóstico de solo lectura (correr/diag-estados) que lee del servidor los estados zz de esas corridas. Causa provisional «construcción» (página o guion); se confirma con el diagnóstico. · 13:03 Diagnóstico (correr/diag-estados, solo lectura): en el servidor los estados quedaron con el nombre cortado en 40 («…-TREN-20261019-1213-r-Sucia por», «…-r-Secando-ir», «…-TREN-INV234-Sucia por lavar-k2w»), con su marca bien guardada. No es pérdida de datos: es el guion (h.dato con el prefijo del tren + maxlength=40 de la página). Arreglo: L-157, solo guion (nombres cortos y recortados a 40). Quedan cuatro estados zz activos de los trenes para la purga del Arquitecto. · 13:14 Cerrado: L-157 aceptado (199a5d6). Si el próximo tren vuelve a fallar en a, se reabre."
   }
  ],
  "dts": [
@@ -15644,6 +15644,51 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "pruebas.json › resultado: \"verde\" · causa: null (sin casos en rojo en entrada, n1, n2 ni regresion). fase.fase: \"completa\" (no aplica la regla de Fase 1). regresionSeleccion.ruta.huecos: sin relaciones ni reglas (0,0), sin deuda de cobertura que anotar. sesiones: sin recuperadas/perdidas/caidos; sin cortes de red reportados. Instrucción sin criterios N3 ni N4 (n3Preparados viene vacío, consistente)."
    }
+  },
+  {
+   "lote": "L-157",
+   "fecha": "2026-10-19",
+   "req": "INC-204",
+   "categoria": "normal",
+   "resumen": "Guion REQ-INV2-3-4: nombres de estado que caben en los 40 caracteres del campo",
+   "estado": "aceptado",
+   "observacion": "Encolado 13:05 (cmp IGUAL). Revisor previo 17/17 (tres defectos de texto corregidos). Construido 199a5d6 13:07 (run.js 93/93). Juez 13:11: ACEPTADO (a: «Secando turno · Sucia operador · Lista nada»). La prueba con el prefijo largo la da el próximo tren.",
+   "hash": "199a5d6",
+   "version": "p5c110",
+   "aceptacion": {
+    "lote": "L-157",
+    "hash": "199a5d6",
+    "fecha": "2026-10-19",
+    "horaBogota": "13:11",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "n1",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK"
+     },
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estados creados: 200, 200, 200 | si: marca tras recargar: Secando turno · Sucia operador · Lista nada | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "humo",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "OK s1 si: /api/me 200 · rol admin | OK w si: alta de zz-verif-humo-pw: 200 | si: baja de zz-verif-humo-pw: 200 | escrituras en serie (máx. 1 en vuelo) | OK s2 si: /api/me 200 · rol operador | OK s3 si: /api/me 200 · rol colaborador"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "Pruebas derivadas de la instrucción solo declara el criterio «a» (N2); los casos b, c, i y j del guion no cambian con este lote (lo dice el propio Riesgo de la instrucción) y no se juzgan como criterio aparte. Fase 1 (LM-49): regresión diferida al tren: DA-47-cuenta-pruebas.spec.js, DT-41.spec.js, DT-42.spec.js, INC-120-c12.spec.js, INC-120-c3.spec.js, INC-125.spec.js, INC-126.spec.js, INC-127.spec.js, INC-128-b.spec.js, INC-130.spec.js, INC-131.spec.js, INC-132.spec.js, INC-140.spec.js, INC-141.spec.js, INC-146-purga.spec.js, INC-146.spec.js, INC-150.spec.js, INC-190-respaldo.spec.js, L-108.spec.js, REQ-INV2-3-4-hk.spec.js, REQ-INV2-4-1-interfaz.spec.js, REQ-INV2-4-2-dif.spec.js, REQ-INV2-7-1-hk.spec.js, REQ-INV2-7-1.spec.js, REQ-K3b-aviso.spec.js, REQ-K3b.spec.js, REQ-K3c-vista.spec.js, REQ-K3c.spec.js, REQ-OP-1.spec.js, REQ-OP-1b.spec.js, REQ-SH-2.spec.js. Centinelas en ruta (REQ-INV2-4-2.spec.js, REQ-INV2-7-1-hk-turno.spec.js): todos sus casos en true, sin ok:false. pruebas.json › resultado: «verde», causa: null. No hay letra N3 en «Pruebas derivadas»: no se juzgan las capturas de 'i' (fuera del alcance declarado por la instrucción). Huecos y «A declarar» de la ruta de INV (REL-30, RT-10, RT-11, RT-15) son deuda de cobertura preexistente de la ruta, no de este lote."
+   }
   }
  ],
  "esquema": {
@@ -17987,9 +18032,9 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Guion REQ-INV2-3-4: nombres de estado que caben en los 40 caracteres del campo (estable en los trenes)",
-   "estado": "construido",
+   "estado": "aceptado",
    "desde": "2026-10-19 13:03",
-   "nota": "13:03 Solo guion; pasa e2e-esquema 20/0 y drive-copia A8. En revisión previa del subagente. · 13:05 Revisor previo 17/17 (tres defectos de texto corregidos). Encolado (cmp IGUAL). · 13:07 Construido (199a5d6; run.js 93/93). Pruebas y juez en la cola."
+   "nota": "13:03 Solo guion; pasa e2e-esquema 20/0 y drive-copia A8. En revisión previa del subagente. · 13:05 Revisor previo 17/17 (tres defectos de texto corregidos). Encolado (cmp IGUAL). · 13:07 Construido (199a5d6; run.js 93/93). Pruebas y juez en la cola. · 13:11 Aceptado (veredicto L-157: N1 93/93, N2 a en verde con nombres de 40, humo en verde; regresión al tren)."
   },
   {
    "vista": "siguiente",

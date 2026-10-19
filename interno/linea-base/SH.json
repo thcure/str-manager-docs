@@ -1,7 +1,7 @@
 {
  "modulo": "SH",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-app-shell.html (1804 líneas, leído completo; cliente p5c110): menú de 4 grupos y Favoritos, _aplicarRolesMenu / _inicioElegir, openModule / navSub / nav, favoritos por usuario, panel de Configuración, aviso fijo y aviso breve, renderApiSession, oyente de «str:sin-sesion», _strRenewApiSession, temas, menú del celular",
@@ -14,7 +14,18 @@
   "sh-guiones.json, guiones-e2e.json y los .spec.js de REQ-SH-2 (12 casos), INC-134 (2), REQ-OP-1b (a y d citados; h, de la lectura del Tablero, y los demás son de OP) y REQ-K3b-aviso (e y e2 citados; f, una captura sin aserción, no); descartados como no ejercitadores del marco: REQ-MOD-6 (6 guiones), R-3-db-config, REQ-K3b b a f, REQ-K3b-aviso b a d y g, REQ-K3c-vista",
   "interno/linea-base/esquema.json, sistema.json, U.json, K3.json, CAL.json, FL.json y HK.json (estilo y flujos hacia CU-SH-… provisionales), y los archivos de mapeo U-mapeo.json y K3-mapeo.json"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-832)",
+   "que": "Pesos (esenciales CAP-1, 3, 4 y 7; necesarias 2 y 10; accesorias 5, 8 y 9; CAP-6 de fábrica) y decisiones h–k: «Lo que viene» de fábrica; campana y ayuda se quitan; 3.4 fuera y se corrige REL-02; estrella siempre visible en el celular."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-833)",
+   "que": "INC-184 (abrir sin revisar roles) en 3.1 y 5.2, INC-185 (la estrella abre el módulo) en 5.1 e INC-186 (volver al módulo de origen) en 3.4; 3.4 confirmado."
+  }
+ ],
  "alcance": {
   "dentro": [
    "El marco de la aplicación: barra superior, menú de grupos plegables (Favoritos, Operación del día, Configurar el negocio, Lo que viene y Proyecto) y el área donde se abre cada módulo sin salir de él.",
@@ -43,70 +54,70 @@
    "id": "CAP-SH-1",
    "nombre": "Menú por rol y pantalla de inicio",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Mostrar a cada persona solo los grupos y las entradas de menú que su rol puede abrir, todas con una pantalla real, y llevarla al entrar a la primera pantalla de trabajo (el Tablero)."
   },
   {
    "id": "CAP-SH-2",
    "nombre": "Avisos del marco",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Alojar el aviso fijo que el servidor entrega bajo la barra superior (hoy, el del próximo corte) y mostrar avisos breves cuando una acción del marco termina o falla."
   },
   {
    "id": "CAP-SH-3",
    "nombre": "Abrir módulos y moverse en el marco",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Abrir cada módulo dentro del marco sin salir de él, plegar los grupos del menú, usar el menú en el celular y pasar de un módulo a otro."
   },
   {
    "id": "CAP-SH-4",
    "nombre": "Barra superior y sesión en el marco",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Mostrar quién tiene sesión (o «Entrar» si no hay) y decidir qué hace el marco cuando un módulo abierto se queda sin sesión."
   },
   {
    "id": "CAP-SH-5",
    "nombre": "Favoritos",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Anclar entradas del menú en Favoritos, por persona, verlas arriba al entrar y limpiar las que ya no existen."
   },
   {
    "id": "CAP-SH-6",
    "nombre": "Lo que viene",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Una página solo para el administrador con lo que falta del STR por área: qué es, para qué sirve, en qué etapa va (idea, definido, en construcción) y en qué orden; la etapa se calcula, no se escribe."
   },
   {
    "id": "CAP-SH-7",
    "nombre": "Configuración del negocio",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "El panel de Configuración como sitio del marco donde se aloja la tarjeta de copia en Google Drive (que es de Copia a Drive); incluye lo definido y pospuesto: reiniciar módulos."
   },
   {
    "id": "CAP-SH-8",
    "nombre": "Grupo Proyecto en el menú",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Dar al administrador, plegado al final del menú, el acceso a las siete páginas internas del proyecto. Es de la fábrica de software, no del negocio."
   },
   {
    "id": "CAP-SH-9",
    "nombre": "Apariencia del marco",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Cambiar entre tema oscuro y claro y que los módulos abiertos lo sigan."
   },
   {
    "id": "CAP-SH-10",
    "nombre": "Respaldo de la cuenta",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Descargar desde el marco un respaldo con los datos del negocio (viene de K3 por decisión de Diseño, M-824)."
   }
  ],
@@ -539,7 +550,7 @@
     "El módulo se carga la primera vez que se abre y se queda cargado: volver a abrirlo lo muestra tal como se dejó, sin recargarlo (cada módulo se refresca por su cuenta).",
     "«Flujos de trabajo» es distinto: su pantalla se carga al arrancar el STR y su entrada solo la muestra; Configuración también es un panel propio del marco y no un módulo cargado aparte.",
     "Los módulos ya abiertos siguen vivos aunque no estén a la vista; el marco no les avisa si están o no a la vista (el Tablero lo resuelve por su cuenta y deja de leer cuando no está a la vista).",
-    "Abrir no revisa el rol: una entrada oculta no se puede tocar, pero un favorito heredado de otro rol sí abre el módulo (CU-SH-5.2) y el módulo responde «Sin permiso para este módulo» (CU-U-2.5, E3). Posible incidente nuevo.",
+    "Abrir no revisa el rol (a diferencia de la navegación del menú): un favorito de una entrada que el rol no ve abre el módulo, que responde «Sin permiso para este módulo» (CU-U-2.5, E3) (INC-184, abierto, bajo).",
     "Cada módulo se pide con la versión de la aplicación que tenga el marco en ese momento (RT-20), para no recibir una copia vieja.",
     "Abierto sin marco (con su botón «← Shell»), el módulo funciona igual; eso es de cada módulo."
    ],
@@ -576,7 +587,9 @@
     "RT-14",
     "RT-20"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-184"
+   ],
    "pruebas": [
     {
      "guion": "REQ-SH-2",
@@ -729,13 +742,14 @@
     "operador"
    ],
    "que": "Pasar de un módulo a otro desde un botón del propio módulo (por ejemplo, de Propiedades a Flujos o de Calendario a Housekeeping) sin salir del marco",
-   "declarado": "parcial",
+   "declarado": "fuera-de-alcance",
    "limitantes": [
     "Funciona: el módulo cambia su propia pantalla por la del destino y la persona sigue dentro del marco.",
     "Pero el menú no se entera: la entrada marcada sigue siendo la del módulo de origen.",
-    "Si después toca en el menú la entrada de origen, ve la pantalla del destino y no la de origen hasta recargar el STR, porque el módulo ya cargado se reutiliza (CU-SH-3.1, E2). Posible incidente nuevo, leído en el código y sin probar.",
+    "Si después toca en el menú la entrada de origen, ve la pantalla del destino hasta recargar el STR, porque el módulo ya cargado se reutiliza sin restaurar su dirección (INC-186, abierto, bajo).",
     "El mapa técnico y la relación REL-02 dicen que el módulo le pide al marco marcar el destino, pero ningún módulo lo hace hoy: la función del marco que lo haría (navToWorkflows) no tiene quién la llame.",
-    "Cada módulo manda a su destino con la versión de la aplicación escrita a mano en su propio código, que hay que cambiar a la vez que la del marco (RT-20)."
+    "Cada módulo manda a su destino con la versión de la aplicación escrita a mano en su propio código, que hay que cambiar a la vez que la del marco (RT-20).",
+    "No se pide (Diseño, M-832 j): se corrige el mapa (REL-02 sin «navegar a otro módulo»). Si algún módulo ya lo hace, el defecto de volver al módulo de origen (M-833, 8) aplica igual."
    ],
    "entradas": [],
    "salidas": [],
@@ -768,7 +782,9 @@
    "reglas": [
     "RT-20"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-186"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -783,7 +799,7 @@
     "colecciones": [],
     "notas": "_irAFlujos(url) de cada módulo hace window.location.href = url + ?v=p5c110 dentro de su propio iframe; no llama a window.top.navSub (docs/claude/shell-y-api.md y REL-02 lo describen así). openModule reutiliza #panel-mod-<key> sin tocar su src. No hay guion que recorra este camino."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de _irAFlujos en Propiedades, Calendario, Flujos, Guías y Housekeeping, de openModule/navSub/navToWorkflows en str-app-shell.html y búsqueda de llamadas a navSub desde los módulos (ninguna)"
@@ -803,8 +819,8 @@
     "Hay dos botones de salir con el mismo símbolo: uno cierra solo la cuenta de Google y otro solo la sesión del sistema; ninguno borra la copia del aparato (INC-162, CU-U-3.8).",
     "El rol se ve solo al pasar el puntero por el avatar de la cuenta de Google.",
     "En 768 px o menos no se ve el nombre; en 480 px o menos se ocultan además la campana, la ayuda, el respaldo y el botón de salir del sistema (queda el de Google).",
-    "La campana (con un punto rojo fijo) y el signo de ayuda no hacen nada: son adornos que parecen funciones (posible incidente nuevo).",
-    "El respaldo ⬇ de la barra es de Copia a Drive (CU-K3-6.1) y solo lo ve el administrador."
+    "El respaldo ⬇ de la barra es de Copia a Drive (CU-K3-6.1) y solo lo ve el administrador.",
+    "La campana (con un punto rojo fijo) y el signo de ayuda no hacen nada. Decidido (Diseño, M-832 i): se quitan mientras no tengan función; no se muestran controles que no hacen nada."
    ],
    "entradas": [],
    "salidas": [],
@@ -968,9 +984,9 @@
    "limitantes": [
     "Los Favoritos son de cada persona y se guardan en el aparato, no en la cuenta: no pasan de un equipo o navegador a otro.",
     "Sin la sesión cargada no se puede anclar: avisa «Espera a que cargue tu sesión para guardar favoritos».",
-    "La estrella solo se ve al pasar el puntero por la entrada, o cuando ya está marcada; en un celular, sin puntero, no se ofrece a la vista (por confirmar).",
-    "Tocar la estrella también abre el módulo de esa entrada: el clic de la entrada actúa antes de que la estrella lo detenga (leído en el código, sin prueba; posible incidente nuevo).",
-    "Se puede anclar cualquier entrada que la persona vea, incluida Configuración."
+    "Tocar la estrella también abre el módulo de esa entrada: el clic de la entrada actúa antes que el de la estrella (INC-185, abierto, bajo).",
+    "Se puede anclar cualquier entrada que la persona vea, incluida Configuración.",
+    "La estrella solo se ve al pasar el puntero o cuando ya está marcada. Decidido (Diseño, M-832 k): en el celular se muestra siempre en cada entrada, sin depender del puntero."
    ],
    "entradas": [],
    "salidas": [],
@@ -1001,7 +1017,9 @@
     "REQ-SH-2"
    ],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-185"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1031,7 +1049,7 @@
    "limitantes": [
     "Cada persona tiene los suyos: una persona nueva empieza sin ninguno. Los guardados antes de separarlos por persona pasaron, una sola vez, al primer usuario que abrió el STR en ese navegador (la clave vieja no se borra).",
     "Se vuelven a pintar cuando la sesión llega o se renueva (si al cargar aún no había sesión salían vacíos).",
-    "No se filtran por rol: el favorito de una entrada que el rol no ve (por ejemplo, el heredado de un administrador en el mismo navegador) se muestra y al tocarlo abre el módulo, que responde «Sin permiso para este módulo» (CU-SH-3.1). Posible incidente nuevo.",
+    "No se filtran por rol: los favoritos ya son por usuario (REQ-SH-2), salvo la migración única de la clave vieja, pero abrir uno no comprueba los roles de la entrada (INC-184, abierto, bajo).",
     "El guion solo lee el estado de Favoritos y la coherencia con las estrellas; no ancla ni abre favoritos."
    ],
    "entradas": [],
@@ -1063,7 +1081,9 @@
     "REQ-SH-2"
    ],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-184"
+   ],
    "pruebas": [
     {
      "guion": "REQ-SH-2",
@@ -1163,7 +1183,8 @@
     "Lee los documentos de seguimiento y diseño del proyecto, de la última versión publicada, y dice de cuál; permite actualizarlos. No lee nada del negocio ni escribe nada.",
     "Si no se puede leer el diseño o el seguimiento, la lista sale con un aviso y las áreas con requerimientos quedan «Sin etapa»; si no se puede leer la lista misma, ofrece «Reintentar».",
     "Es transitoria: cuando el proyecto salga a su propio sitio (D4) pasa a Proyectos › P01 › Alcance.",
-    "Pregunta de alcance: el mapa asigna esta pantalla a Grupo Proyecto (PRJ, relación REL-24); aquí se cuenta porque REQ-SH-2 la trata como entrada del menú. Al levantar PRJ debe quedar en un solo módulo. El guion c no puede cambiar el estado de un requerimiento: el cambio de etapa (E2) se prueba aparte, con pruebas de las reglas de cálculo."
+    "Pregunta de alcance: el mapa asigna esta pantalla a Grupo Proyecto (PRJ, relación REL-24); aquí se cuenta porque REQ-SH-2 la trata como entrada del menú. Al levantar PRJ debe quedar en un solo módulo. El guion c no puede cambiar el estado de un requerimiento: el cambio de etapa (E2) se prueba aparte, con pruebas de las reglas de cálculo.",
+    "Es de fábrica (Diseño, M-832 h; ADR-009: Proyectos); no cuenta en la cobertura de producto."
    ],
    "entradas": [],
    "salidas": [],
@@ -1248,7 +1269,8 @@
     "colecciones": [],
     "notas": "Lee interno/lo-que-viene.json, interno/diseno.json e interno/seguimiento.json del repositorio de documentos con STRApi.docs (commit() y url(), REL-24) y calcula la etapa con las funciones puras entre [LQV-inicio] y [LQV-fin] (_lqvEtapaDe, _lqvAreas, _lqvResumen; tests/menu-sh2.test.js). Guarda de acceso: admin o superadmin, si no, «Sin permiso para este módulo» dentro del marco o vuelta al inicio. El caso c compara la etapa mostrada con la que recalcula con los tres JSON del mismo commit; el caso j es una captura a 390 px sin aserción."
    },
-   "confianza": "alta"
+   "confianza": "alta",
+   "ambito": "fabrica"
   },
   {
    "id": "CU-SH-7.1",

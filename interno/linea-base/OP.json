@@ -1,7 +1,7 @@
 {
  "modulo": "OP",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-tablero.html (526 líneas, leído completo: funciones puras de la página, cifras, cuadro «Turnos de hoy», alertas, «Sin turno hoy», lectura por minuto, aviso de falla)",
@@ -14,7 +14,18 @@
   "op-guiones.json y guiones-e2e.json: REQ-OP-1 (a, c, d, e, f, g, i; el b es de Housekeeping y Portal), REQ-OP-1b (a a d y f a h) y REQ-SH-2 (e), con sus campos «que» y «cubre»; los .spec.js no se leyeron",
   "interno/linea-base/esquema.json, sistema.json y HK, PR, FL, CAL, INC1, INV, U, POR, K3 y PG .json (para espejar los flujos con sus REL-n)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-832)",
+   "que": "Pesos (esenciales CAP-1 y 3; necesarias 2, 4, 5 y 6) y decisiones e–g: mantenimiento como un turno más con etiqueta, contado aparte; 2.9 y 2.8 en alcance sin construir (T-29, T-16); zona horaria del negocio; «Sin empezar» distinto de HK a propósito."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-833)",
+   "que": "1.6 y 2.9 confirmados (2.9: el estado del canal ya está en el servidor, falta la alerta); 5.2: zona del aparato como presentación, por cerrar con Diseño; 1.4 a propósito (M-614)."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Los turnos de hoy de todas las propiedades como bloques en una línea de tiempo, con un tramo por flujo, su avance real y esperado, el color por atención, la cola con su puesto y el motivo en palabras.",
@@ -42,42 +53,42 @@
    "id": "CAP-OP-1",
    "nombre": "Turnos de hoy en vivo",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Ver los turnos de hoy de todas las propiedades como bloques por flujo, con su avance real y esperado, su color y su puesto en la cola por atención, y la salida y la entrada del huésped."
   },
   {
    "id": "CAP-OP-2",
    "nombre": "Cifras y alertas",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Ver cuatro cifras del día y las alertas por urgencia (salida tardía, incidente, turno atrasado o sin empezar, propiedad sin reserva y ropa pendiente), y lo definido que falta: alertas con acción y aviso de canal caído."
   },
   {
    "id": "CAP-OP-3",
    "nombre": "Propiedades sin turno hoy",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Ver las propiedades que hoy no tienen turno, en cola por atención: sin reserva, próxima entrada u ocupada."
   },
   {
    "id": "CAP-OP-4",
    "nombre": "Inicio y acceso",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Abrir el STR en el Tablero como página de inicio del administrador y del operador, y cerrárselo al colaborador y a cualquier otro rol."
   },
   {
    "id": "CAP-OP-5",
    "nombre": "Lectura agrupada y frescura",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Leer del servidor, en una sola lectura agrupada por minuto y solo de lectura, todo lo que el Tablero muestra; mantenerlo al día sin recargar y dejar de leer cuando no se ve."
   },
   {
    "id": "CAP-OP-6",
    "nombre": "Presentación en pantalla ancha y en celular",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Ver el Tablero con la paleta del boceto aprobado en pantalla ancha y en celular, en el tema claro o el oscuro."
   }
  ],
@@ -439,7 +450,8 @@
     "Es solo presentación (Diseño, M-614): el reloj del avance no cambia y sigue corriendo desde la salida real o el inicio real.",
     "Su atraso se mide en minutos de retraso sobre la duración del turno, con tope de 100 y como mínimo uno más que el umbral (6 puntos); por eso ordena y se pinta como atrasado.",
     "Sin hora de inicio planificada el turno dice solo «Sin empezar», en gris, y ordena junto a los que van al día.",
-    "Bloqueado, cerrado o ya empezado (con tareas hechas o inicio real) mandan sobre «sin empezar». Housekeeping avisa «no iniciado» recién a los 15 minutos de la ventana; el Tablero, apenas pasa la hora."
+    "Bloqueado, cerrado o ya empezado (con tareas hechas o inicio real) mandan sobre «sin empezar». Housekeeping avisa «no iniciado» recién a los 15 minutos de la ventana; el Tablero, apenas pasa la hora.",
+    "La diferencia con Housekeeping es a propósito (Diseño, M-614 y M-832): el Tablero puede decir «Sin empezar» al pasar la hora y el aviso «no iniciado» sale a los 15 minutos."
    ],
    "entradas": [],
    "salidas": [
@@ -616,7 +628,7 @@
    "declarado": "no-construido",
    "limitantes": [
     "REQ-OP-1 pide «una fila por propiedad con turno hoy (limpieza, mantenimiento o bloqueado)» y supone que el mantenimiento se muestra cuando exista como turno (etapa 2, REQ-MI1-3: integrar el flujo del evento al turno); hoy solo se ve lo que Housekeeping ya tiene, y el mantenimiento no es turno.",
-    "Sin decidir cómo se pinta (color, tramos) ni si entra en las cifras y en la cola."
+    "Decidido (Diseño, M-832 e): se pinta como un turno más con la etiqueta «Mantenimiento»; entra en la lista y en la cola del día, pero en las cifras se cuenta aparte y no suma a las limpiezas."
    ],
    "entradas": [
     {
@@ -649,7 +661,7 @@
     "colecciones": [],
     "notas": "Sin código: la página solo dibuja los turnos que arma Housekeeping."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de REQ-OP-1 (decisión 1 y supuestos) y de la página: no hay turnos de mantenimiento; Diseño debe confirmar si entra en el alcance"
@@ -1249,7 +1261,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Hoy las alertas no llevan enlaces de acción: OP-1b salió sin ellos (L-143).",
-    "Idea de la bolsa (T-16, prioridad media); sin requerimiento ni decisión de cómo se abre cada clase."
+    "Idea de la bolsa (T-16, prioridad media); sin requerimiento ni decisión de cómo se abre cada clase.",
+    "Sigue en alcance como no construido; su turno lo da T-16 (Diseño, M-832 g)."
    ],
    "entradas": [],
    "salidas": [
@@ -1308,8 +1321,8 @@
    "que": "Ver una alerta cuando el calendario de un canal (Airbnb, Booking y otros) falla o deja de responder",
    "declarado": "no-construido",
    "limitantes": [
-    "Hoy no avisa a nadie: el estado de cada canal solo queda en el aparato desde el que se importó (CU-CAL-6.3).",
-    "Propuesta de la bolsa (T-29, prioridad media; M-820): alerta en el Tablero para administrador y operador, y estado del canal guardado en el servidor. Riesgo: sobreventa si pasa sin que nadie lo vea. Diseño debe decidir si entra."
+    "Hoy no avisa a nadie en el Tablero. El estado de cada canal sí queda en el servidor: el cron guarda el resultado de cada calendario (últimas 200 corridas) y el Calendario lo muestra en «☁ iCal servidor»; falta solo la alerta, lo que abarata T-29 (Desarrollo, M-833).",
+    "En alcance como no construido; su turno lo da la bolsa (T-29) (Diseño, M-832 f). Riesgo: sobreventa si un canal falla sin que nadie lo vea."
    ],
    "entradas": [
     {
@@ -1341,7 +1354,7 @@
     "colecciones": [],
     "notas": "Sin código en el Tablero. Requiere guardar el estado de cada canal en el servidor (hoy queda en el aparato que importó)."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura del código de la página (_tabAlertas solo tiene 5 clases) y de CU-CAL-6.3"
@@ -1700,7 +1713,8 @@
    "limitantes": [
     "La primera lectura es completa; después trae solo lo cambiado, y cada 15 lecturas o al cambiar el día vuelve a traer todo. Un cambio puede tardar hasta un minuto en verse.",
     "El reloj («hoy · H»), la raya de la hora y los atrasos se calculan con la hora y la zona del aparato que mira, como en Housekeeping.",
-    "INC-153 (abierto, intermitente): el guion REQ-OP-1 d vio una vez que el Tablero no pasaba a 100 % tras marcar la última tarea."
+    "INC-153 (abierto, intermitente): el guion REQ-OP-1 d vio una vez que el Tablero no pasaba a 100 % tras marcar la última tarea.",
+    "Diseño (M-832) pide que el Tablero y Housekeeping usen la zona horaria del negocio y no la del aparato; Desarrollo (M-833) lo ve como decisión de presentación (RT-7 rige las horas que se guardan) y no lo registró: queda por cerrar entre los dos. INC-153 no tiene que ver (es la relectura tras el guardado)."
    ],
    "entradas": [],
    "salidas": [],

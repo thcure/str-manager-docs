@@ -1,7 +1,7 @@
 {
  "modulo": "KN",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-conocimiento.html (664 líneas, leída entera: lista y filtros, editor, etiquetas, adjuntos, guardar y eliminar, «¿Dónde se usa?», arranque y sincronización)",
@@ -13,7 +13,18 @@
   "interno/arquitectura/guiones-e2e.json: ningún guion ejerce Conocimiento ni el visor; solo REQ-SH-2 caso h abre la entrada «Guías» como administrador (se cita en CU-KN-6.1); el .spec.js de REQ-SH-2 se leyó para ver qué comprueba",
   "interno/linea-base/esquema.json, sistema.json, FL.json, HK.json, U.json, K3.json y los mapeos de FL, K3, CAL, PG e INC1 (estilo, flujos con ids provisionales hacia CU-KN-… y precedentes de «reiniciar» fuera de alcance)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-832)",
+   "que": "Pesos (esenciales CAP-1, 2, 4, 5 y 6; necesaria 3; accesoria 7) y decisiones a–d: aviso de título repetido a la bolsa con T-28; 4.5 no construido, en la bolsa con T-25; guías por DA-45 capa 2 (sin propiedad, del negocio); 7.1–7.3 fuera."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-833)",
+   "que": "INC-182 (guardado que dice éxito y se pierde) en 6.3 e INC-183 («¿Dónde se usa?» con la copia local) en 3.1 y 2.9; 4.5 y 6.4 confirmados; INC-96 e INC-97 reclasificados a Copia a Drive (salen de sinAtar)."
+  }
+ ],
  "alcance": {
   "dentro": [
    "La biblioteca de guías del negocio: ver las guías, buscarlas por texto y filtrarlas por categoría.",
@@ -39,49 +50,49 @@
    "id": "CAP-KN-1",
    "nombre": "Consulta de la biblioteca",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Ver las guías del negocio, buscarlas por título, etiqueta o texto y filtrarlas por categoría."
   },
   {
    "id": "CAP-KN-2",
    "nombre": "Redacción de guías",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Crear, editar y eliminar guías: título, categoría, etiquetas, texto con formato, imágenes y enlaces."
   },
   {
    "id": "CAP-KN-3",
    "nombre": "Dónde se usa cada guía",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Saber en qué flujos, actividades y tareas está enlazada una guía y llegar a ese flujo."
   },
   {
    "id": "CAP-KN-4",
    "nombre": "Lectura de la guía en el turno",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "El visor que abre la guía de una tarea: texto, imágenes a pantalla completa y enlaces; también amplía las fotos del turno."
   },
   {
    "id": "CAP-KN-5",
    "nombre": "Entrega a Flujos y Housekeeping",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Entregar la biblioteca a quien arma flujos y a quien está en el turno, y recibir la guía que se crea desde el editor de flujos."
   },
   {
    "id": "CAP-KN-6",
    "nombre": "Acceso y sincronización",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Quién entra y quién escribe, cómo se guardan las guías y se mantienen al día en cada equipo, y qué lee el colaborador."
   },
   {
    "id": "CAP-KN-7",
    "nombre": "Previsto y aún no construido",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Catálogo de la plataforma por plan, PDF y video propios, guías en los tipos de incidente, vista previa y el reinicio de guías."
   }
  ],
@@ -223,8 +234,8 @@
    "declarado": "construido",
    "limitantes": [
     "Sin título no se guarda; el título no tiene largo máximo.",
-    "No se avisa si ya existe otra guía con el mismo título; la importación de flujos desde Excel busca la guía por título y toma la primera (CU-FL-8.3). Diseño decide si se pide el aviso, como se pidió para los flujos (T-28).",
-    "La guía nace con categoría «General»; no hay plantillas de guía."
+    "La guía nace con categoría «General»; no hay plantillas de guía.",
+    "No avisa si ya hay otra guía con el mismo título; la importación de flujos desde Excel busca la guía por título y toma la primera (CU-FL-8.3). Decidido (Diseño, M-832 a): al guardar con un título repetido en el negocio, avisa y pide confirmar; queda en la bolsa con T-28."
    ],
    "entradas": [],
    "salidas": [],
@@ -757,7 +768,8 @@
     "RT-5"
    ],
    "pendientes": [
-    "DT-44"
+    "DT-44",
+    "INC-183"
    ],
    "pruebas": [],
    "tecnica": {
@@ -792,7 +804,8 @@
     "Lee los flujos que el equipo ya tiene guardados; Conocimiento no los pide por su cuenta. Entrando por el menú sirve (Flujos se carga al abrir el menú), pero con la página suelta, o con flujos cambiados en otro equipo después, puede decir «Sin uso todavía» sin que sea cierto, y el aviso al eliminar no listaría usos (Desarrollo lo confirma).",
     "Una tarea de un flujo general con copias por propiedad aparece una vez por el flujo general y una por cada copia, con el nombre de la propiedad (o su código si no se encuentra).",
     "En una guía nueva, aún sin guardar, la sección no aparece.",
-    "Solo cuenta los usos en flujos: hoy no hay otro lugar donde se enlace una guía (CU-KN-7.3)."
+    "Solo cuenta los usos en flujos: hoy no hay otro lugar donde se enlace una guía (CU-KN-7.3).",
+    "Lee la copia local de los flujos y la página solo pide las guías: con la página suelta o con flujos cambiados en otro equipo puede decir «Sin uso todavía» (INC-183, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -838,7 +851,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-183"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1195,8 +1210,7 @@
    "que": "Previsualizar la guía como la verá el colaborador, desde el editor y antes de guardarla",
    "declarado": "no-construido",
    "limitantes": [
-    "El visor se carga en la página de Conocimiento y su cabecera dice que sirve para previsualizar, pero ningún botón del editor lo llama: la guía se ve por primera vez en el turno.",
-    "No hay un REQ ni una decisión que lo pida; la única huella es ese comentario del código. Diseño decide si se quiere."
+    "No entra ahora: va a la bolsa junto con T-25 (vista previa del portal) (Diseño, M-832 b)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1224,7 +1238,7 @@
     "colecciones": [],
     "notas": "Sin implementación: str-conocimiento.html carga str-guia-visor.js pero nunca llama a STRGuiaVisor.abrir; el comentario de cabecera del visor y docs/claude/housekeeping.md hablan de «previsualizar»."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de STRGuiaVisor en la página de Conocimiento: solo la carga del script, ninguna llamada"
@@ -1578,7 +1592,7 @@
    "limitantes": [
     "Las guías se piden al abrir la página y no se refrescan mientras está abierta: lo que otra persona cambie desde otro equipo se ve al volver a abrirla.",
     "Si dos personas editan la misma guía, gana la última que guarda y no se avisa del choque.",
-    "Si el sistema rechaza el guardado (por ejemplo, un cuerpo demasiado grande o un fallo), la pantalla igual dice que se guardó, solo queda un aviso interno, y el cambio se pierde en la siguiente sincronización. Posible incidente nuevo (Desarrollo lo confirma).",
+    "Si el sistema rechaza el guardado (por ejemplo, un cuerpo demasiado grande o un fallo), la pantalla igual dice que se guardó, solo queda un aviso interno, y el cambio se pierde en la siguiente sincronización (INC-182, abierto, medio).",
     "Un cambio hecho sin conexión se envía cuando vuelve la conexión."
    ],
    "entradas": [],
@@ -1613,7 +1627,9 @@
     "RT-4",
     "RT-21"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-182"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1644,7 +1660,8 @@
    "declarado": "construido",
    "limitantes": [
     "DA-45 (capa 2) pone «guías» entre lo que el colaborador ve de la propiedad mientras tenga un turno próximo o un incidente abierto ahí. El filtro de lectura del colaborador solo descarta una guía si trae propiedad y no es de las suyas; las guías no traen propiedad, así que le llegan todas las de la cuenta, siempre.",
-    "Diseño decide si las guías son del negocio entero y todas visibles (lo probable, por REQ-K2: «el colaborador puede leer todas las guías de su cuenta») o si hay que acotarlas; es la misma regla de lectura que INC-158 revela para las ubicaciones."
+    "Regla (Diseño, M-832 c; DA-45 capa 2, REQ-K2): una guía sin propiedad es del negocio entero y la ven todos los colaboradores; una ligada a una propiedad, solo quien tiene acceso a ella. Es la misma regla de INC-158. Hoy las guías no traen propiedad, así que todas son del negocio entero.",
+    "Desarrollo (M-833): todas las guías son del negocio entero (sin propiedad), así que el colaborador las recibe todas; es por diseño y distinto de INC-158. Guías por propiedad serían un pedido."
    ],
    "entradas": [],
    "salidas": [],
@@ -1692,7 +1709,7 @@
     ],
     "notas": "_colFiltrarLecturaColaborador, case \"guias\": `if (isset($d->propId) && $d->propId !== \"\" && !$enMisProps($d)) continue 2;` Las guías no llevan propId (modelo: {id, titulo, categoria, texto, adjuntos, etiquetas, ambito, version, …}), así que siempre pasan; el contexto _colLecturaContextoBD se calcula igual aunque no filtre guías."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de api/col/index.php (filtro de lectura del colaborador) y del modelo de la guía; el efecto real no se probó con un colaborador"
@@ -1706,10 +1723,11 @@
     "operador"
    ],
    "que": "Ver el catálogo de guías de la plataforma que corresponde al plan del negocio y usarlas por referencia o copiarlas a la biblioteca propia para personalizarlas",
-   "declarado": "no-construido",
+   "declarado": "fuera-de-alcance",
    "limitantes": [
     "Cada guía ya trae un campo de ámbito (hoy siempre «cuenta»), pero no existe el catálogo, ni los planes, ni la pestaña «Catálogo STR».",
-    "Depende de que haya planes de suscripción y un administrador de la plataforma (REQ-U8-superadmin, definir cuando haya clientes reales)."
+    "Depende de que haya planes de suscripción y un administrador de la plataforma (REQ-U8-superadmin, definir cuando haya clientes reales).",
+    "Fuera de esta línea base (Diseño, M-832 d): el catálogo por plan es de la plataforma; el PDF o video propio y el enlace a incidentes y soporte se piden cuando hagan falta."
    ],
    "entradas": [],
    "salidas": [],
@@ -1759,10 +1777,11 @@
     "operador"
    ],
    "que": "Adjuntar a una guía un PDF o un video propio",
-   "declarado": "no-construido",
+   "declarado": "fuera-de-alcance",
    "limitantes": [
     "Hoy solo se adjuntan imágenes subidas y enlaces. REQ-K2 dejó pendiente la interfaz de PDF.",
-    "El sistema ya sabe guardar PDF como documentos de otro uso, pero Conocimiento no lo ofrece."
+    "El sistema ya sabe guardar PDF como documentos de otro uso, pero Conocimiento no lo ofrece.",
+    "Fuera de esta línea base (Diseño, M-832 d): el catálogo por plan es de la plataforma; el PDF o video propio y el enlace a incidentes y soporte se piden cuando hagan falta."
    ],
    "entradas": [],
    "salidas": [],
@@ -1815,10 +1834,11 @@
     "operador"
    ],
    "que": "Enlazar guías a los tipos de incidente y a las actividades de soporte, para que quien reporta un incidente vea el protocolo",
-   "declarado": "no-construido",
+   "declarado": "fuera-de-alcance",
    "limitantes": [
     "Hoy una guía solo se enlaza desde las tareas y las actividades sin tareas de un flujo (CU-FL-2.7).",
-    "REQ-S4 («Conocimiento vía flujos») sigue en el historial como «con Bloque C»; no hay REQ vigente ni decisión que lo ponga en cola."
+    "REQ-S4 («Conocimiento vía flujos») sigue en el historial como «con Bloque C»; no hay REQ vigente ni decisión que lo ponga en cola.",
+    "Fuera de esta línea base (Diseño, M-832 d): el catálogo por plan es de la plataforma; el PDF o video propio y el enlace a incidentes y soporte se piden cuando hagan falta."
    ],
    "entradas": [],
    "salidas": [],
@@ -1932,14 +1952,6 @@
   {
    "id": "INC-101",
    "porque": "El respaldo diario no incluía guías ni grupos de inventario: del respaldo (K3). Cerrado por el lote 56."
-  },
-  {
-   "id": "INC-96",
-   "porque": "Google bloqueaba el permiso de Drive: es de la Copia a Drive (K3); el seguimiento lo clasificó como «Conocimiento» por error. Cerrado."
-  },
-  {
-   "id": "INC-97",
-   "porque": "Conectar Drive sin marcar la casilla de permiso: es de la Copia a Drive (K3); el seguimiento lo clasificó como «Conocimiento» por error. Cerrado."
   },
   {
    "id": "INC-112",

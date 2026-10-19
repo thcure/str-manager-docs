@@ -1,0 +1,4529 @@
+{
+ "modulo": "HK",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-m1-housekeeping.html (7341 líneas, leído por funciones: turnos, estados, cierre, fotos, incidentes, salida real, alertas, horas, inventario del turno, puente al portal)",
+  "str-cola-subida.js, str-guia-visor.js y str-avance.js (por referencia desde la página; la cola se revisó por INC-132 e INC-133)",
+  "portal.html (entrega y recepción de mensajes con Housekeeping, enlace de turno, sesión embebida)",
+  "api/col/index.php (lectura del colaborador, ventana de 90 días, datos del huésped, ventana de 2 h, primerCierreAt, pendientes al cierre, tickets propios INC-141)",
+  "docs/claude/housekeeping.md y housekeeping-2.md (mapa técnico del módulo)",
+  "hk-fuentes.json: 11 REQ, 17 DA, 5 de la bolsa, 5 DT, 31 INC, módulos, relaciones del mapa, actores y reglas transversales",
+  "hk-guiones.json: 26 guiones e2e que tocan Housekeeping con sus casos (campos «que» y «cubre»; los .spec.js se miraron solo para saber si un caso crea el turno por la interfaz)",
+  "interno/linea-base/esquema.json, sistema.json e INV.json (para espejar los flujos con Inventario con sus REL-n)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Turnos automáticos desde las reservas y turnos manuales: lista, estado, titular, apoyos, flujos del turno, bloqueo y eliminación.",
+   "La pantalla del turno del colaborador: iniciar, marcar y omitir tareas, procesos con espera, guías, cerrar la limpieza, cerrar y reabrir el turno.",
+   "Fotos del turno y cola de subida del teléfono, con su estado, la insignia de copia en Drive y la foto eliminada en el corte.",
+   "Incidentes del turno con evidencia (fotos y videos), resolución, escalamiento, anulación de evidencia y expediente.",
+   "Salida real del huésped, «Huésped aún en la unidad», alertas del turno y avance esperado y real.",
+   "Horas planificadas y reales de cada persona del turno, apoyos, ajustes con motivo, valor estimado y configuración del negocio en Housekeeping.",
+   "Lo de Inventario que ocurre dentro del turno: conteos y niveles, recepción y entrega de zona, fotos de lugar y artículo, pendientes de ropa y préstamos.",
+   "Entrega de los turnos al portal del colaborador y al Calendario, sincronización y copia local del teléfono.",
+   "Límites de lectura y de escritura del colaborador sobre turnos, incidentes y datos del huésped.",
+   "Lo definido y aún por construir dentro del turno: flujo de evento propuesto, inicio por código QR, duración llamada del apoyo y bolsa de tiempo."
+  ],
+  "fuera": [
+   "El editor de Flujos y sus plantillas (Flujos): aquí solo se cuenta cómo el turno las usa.",
+   "La ficha de la propiedad, su horario base, su tolerancia y su zona principal (Propiedades).",
+   "El Calendario y sus reservas, y el cálculo de lo que muestra (Calendario).",
+   "El Tablero de operación en vivo (OP): aquí solo se cuenta el avance que Housekeeping comparte con él.",
+   "El portal del colaborador como contenedor (Portal): aquí solo se cuenta lo que Housekeeping le entrega y recibe.",
+   "El catálogo, las zonas, los lugares, los estados y las diferencias de inventario (Inventario): aquí solo se cuentan sus cruces con el turno.",
+   "La copia a Drive, el corte mensual y la retención (Copia a Drive y retención): aquí solo se cuenta lo que el turno ve de ellos.",
+   "La liquidación y el pago del colaborador (Pagos): aquí solo se cuenta la estimación de horas y valor del turno.",
+   "Identidad, equipo y permisos (Identidad) y el servidor con su almacén de colecciones."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde la página de Housekeeping (7341 líneas), su mapa técnico, el portal, el servidor de colecciones, las fuentes del módulo y los guiones e2e (campos «que» y «cubre»; algunos .spec.js se miraron solo para saber si un caso crea el turno por la interfaz). En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Lo de los módulos vecinos que no tienen línea base (Calendario, Propiedades, Flujos, Identidad, Portal, Copia a Drive, Incidentes, Conocimiento, Tablero, Pagos, Servidor, Puntos de control) usa identificadores provisionales de caso de uso que su dueño debe confirmar. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-HK-1",
+   "nombre": "Armado y gestión de turnos",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Armar los turnos (automáticos desde las reservas o manuales), verlos, asignarles titular, ajustar sus flujos, bloquearlos, eliminarlos y compartir su mensaje."
+  },
+  {
+   "id": "CAP-HK-2",
+   "nombre": "Ejecución del turno",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Hacer el turno: iniciarlo, marcar u omitir tareas, seguir procesos con espera, abrir guías, cerrar la limpieza, cerrar y reabrir el turno, y el trabajo de los apoyos."
+  },
+  {
+   "id": "CAP-HK-3",
+   "nombre": "Fotos del turno y cola de subida",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Tomar las fotos que piden las tareas y subirlas sin perderlas, aun sin señal, con su estado visible y su copia en Drive."
+  },
+  {
+   "id": "CAP-HK-4",
+   "nombre": "Incidentes y evidencia",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Reportar incidentes del turno con fotos y videos, verlos, resolverlos o escalarlos, anular evidencia con motivo y descargar el expediente."
+  },
+  {
+   "id": "CAP-HK-5",
+   "nombre": "Salida del huésped, alertas y avance",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Registrar la salida real del huésped y avisar lo que se atrasa: sin colaborador, no iniciado, retraso y checkout tardío, con el avance del turno."
+  },
+  {
+   "id": "CAP-HK-6",
+   "nombre": "Horas, apoyos y valor del turno",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Planificar y medir las horas de cada persona del turno, agregar apoyos, ajustar con motivo, estimar el valor y configurar el negocio."
+  },
+  {
+   "id": "CAP-HK-7",
+   "nombre": "Inventario dentro del turno",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Recibir de Inventario lo que el turno necesita y declarar conteos y niveles, con fotos de lugar o artículo y movimientos rechazados."
+  },
+  {
+   "id": "CAP-HK-8",
+   "nombre": "Entrega y recepción de zona",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Registrar a ciegas la recepción de la zona al empezar y la entrega precargada al terminar, con fotos, solo por el titular y sin poder cerrar sin ellas."
+  },
+  {
+   "id": "CAP-HK-9",
+   "nombre": "Pendientes de ropa entre turnos",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Dejar y recibir los pendientes del circuito de la ropa entre un turno y el siguiente: ver, marcar hecho y avisar al cerrar."
+  },
+  {
+   "id": "CAP-HK-10",
+   "nombre": "Portal, sincronización y copia local",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Entregar los turnos al portal y al Calendario, mantener la sesión, sincronizar sin pisar lo marcado y cuidar la copia local del teléfono."
+  },
+  {
+   "id": "CAP-HK-11",
+   "nombre": "Límites y accesos del colaborador",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Limitar lo que el colaborador ve y cambia: 90 días de gestión, datos del huésped de hoy y mañana, solo el titular registra inventario, plazo de 2 horas y solo sus incidentes."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-HK-1.1",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver la lista de turnos con su propiedad, hora, colaborador y estado",
+   "declarado": "construido",
+   "limitantes": [
+    "El colaborador solo ve sus turnos; el resto lo filtra el sistema por permisos, no la pantalla."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "turnos de hoy en momentos distintos: uno sin empezar, otro con tareas marcadas, otro con la limpieza cerrada, otro completado y otro bloqueado",
+     "cuando": "se abre la lista de turnos",
+     "entonces": "cada turno muestra su estado (pendiente, en curso, limpieza cerrada, completado o bloqueado) y el bloqueado manda sobre los demás"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador con turnos propios y de otras personas en la misma propiedad",
+     "cuando": "abre su lista",
+     "entonces": "ve solo los suyos, como titular o como apoyo"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14",
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/turnos"
+    ],
+    "colecciones": [
+     "turnos"
+    ],
+    "notas": "_renderList/_buildShifts; estado calculado bloqueado › completado › limpieza_cerrada › en_curso › pendiente. Sin origen documentado: anterior a los REQ vigentes."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: orden de precedencia del estado del turno y filtro del colaborador"
+   }
+  },
+  {
+   "id": "CU-HK-1.2",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Armar el turno automático de cada reserva que sale, con su ventana, su flujo base y su colaborador base",
+   "declarado": "construido",
+   "limitantes": [
+    "El Calendario no crea ni calcula turnos: los arma Housekeeping a partir de las reservas."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-2.1",
+     "dato": "reserva que sale, con su ventana de salida y de entrada y la hora acordada con el huésped",
+     "rel": "REL-03"
+    },
+    {
+     "de": "CU-PR-1.1",
+     "dato": "horario base, tolerancia de salida, horas del turno, flujo base y colaborador base de la propiedad",
+     "rel": "REL-06"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva que sale hoy en una propiedad con flujo base y colaborador base",
+     "cuando": "se abre la lista de turnos",
+     "entonces": "existe un turno de esa propiedad y fecha, con el flujo base y el colaborador base ya puestos y la ventana entre la salida y la próxima entrada"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una reserva cancelada o un bloqueo del calendario",
+     "cuando": "se arman los turnos",
+     "entonces": "no se crea ningún turno"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "ya existe un turno de esa propiedad y de esa fecha",
+     "cuando": "llega otra reserva que sale el mismo día",
+     "entonces": "no se duplica: queda un solo turno por propiedad y fecha"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1",
+    "REQ-PR1-5",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-74"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "reservas",
+     "propiedades",
+     "turnos"
+    ],
+    "notas": "_turnosDesde: dedupe por propId+fecha; bloqueos y canceladas no generan turno; el turno automático se materializa al guardarse algo en él."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (generación de turnos desde reservas)"
+   }
+  },
+  {
+   "id": "CU-HK-1.3",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear un turno manual para una propiedad, con fecha, hora, flujo y titular",
+   "declarado": "construido",
+   "limitantes": [
+    "El turno manual se identifica aparte del automático y no se vincula a una reserva."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con flujo y colaboradores activos",
+     "cuando": "se crea un turno con fecha, hora, flujo y titular",
+     "entonces": "el turno queda guardado como turno manual, asignado al titular, y se ofrece el mensaje con el enlace para enviárselo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "dos horas distintas del mismo día en la misma propiedad",
+     "cuando": "se crean dos turnos manuales",
+     "entonces": "ambos existen como turnos independientes, cada uno con su titular y su hora"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "a"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-4-2-dif",
+     "casos": [
+      "a"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-3-4-hk",
+     "casos": [
+      "a"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-7-1-hk-turno",
+     "casos": [
+      "a"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "b"
+     ]
+    },
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "b"
+     ]
+    },
+    {
+     "guion": "REQ-K3c",
+     "casos": [
+      "b"
+     ]
+    },
+    {
+     "guion": "INC-131",
+     "casos": [
+      "b"
+     ]
+    },
+    {
+     "guion": "INC-132",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/turnos"
+    ],
+    "colecciones": [
+     "turnos"
+    ],
+    "notas": "Modal «Crear turno y enviar link»; id de turno manual con prefijo sh-m-. Los guiones lo usan de preparación y comprueban la respuesta 200 y el id."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-1.4",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Asignar o cambiar el titular de un turno, con aviso si el colaborador no tiene experiencia en limpieza",
+   "declarado": "construido",
+   "limitantes": [
+    "Un turno tiene un solo titular; los demás van como apoyo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.1",
+     "dato": "colaboradores activos del equipo con su nombre, color y capacidades",
+     "rel": "REL-14"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno sin colaborador",
+     "cuando": "el operador elige a un colaborador del equipo",
+     "entonces": "el colaborador queda como titular, el turno aparece en su portal y la alerta de «sin colaborador» desaparece"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con colaborador base",
+     "cuando": "se arma el turno automático",
+     "entonces": "el colaborador base viene como titular y se puede cambiar"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un colaborador sin capacidad de limpieza o con nivel «nuevo»",
+     "cuando": "se abre la lista para asignarlo",
+     "entonces": "su fila muestra «nuevo en limpieza» como aviso y aun así se puede asignar"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-17",
+    "RT-15"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "a"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "usuarios"
+    ],
+    "notas": "_assignCollab/_doAssign; el aviso sale si falta la capacidad «limpieza» o su nivel es «nuevo». La prueba solo comprueba que el titular elegido aparece en la lista y queda asignado."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-1.5",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Copiar el mensaje del turno para enviárselo al colaborador",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo copia el texto; el envío por mensajería lo hace la persona (la mensajería automática es del módulo de comunicaciones, no construido)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con titular, fecha y ventana",
+     "cuando": "el operador pulsa «Copiar mensaje»",
+     "entonces": "se copia un texto con el nombre del titular, la propiedad, el día, la ventana, el flujo y el enlace directo al turno"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_copiarMensajeTurno; enlace con ?turno=<id>."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-1.6",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Bloquear un turno con un motivo y volver a desbloquearlo",
+   "declarado": "construido",
+   "limitantes": [
+    "Un bloqueo del calendario no genera turno; aquí se bloquea un turno ya existente."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno pendiente",
+     "cuando": "el operador lo bloquea eligiendo un motivo",
+     "entonces": "el turno pasa a «bloqueado», con su motivo a la vista, y deja de contar como pendiente"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el bloqueo de un turno",
+     "cuando": "el operador elige «otro» como motivo",
+     "entonces": "debe escribir el motivo con sus palabras; los otros motivos fijos son «colaborador ausente sin reemplazo» y «propiedad no disponible»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno bloqueado",
+     "cuando": "el operador lo desbloquea",
+     "entonces": "el turno vuelve al estado que le corresponde según su avance"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Botón de bloqueo del panel; motivos fijos. Estado «bloqueado» prima en el cálculo de estado."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-1.7",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar un turno manual que no se usó",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo se elimina un turno manual, sin reserva, sin incidente abierto y sin pago.",
+    "La eliminación marca el turno como borrado, no lo quita del almacén; no es borrado duro."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno manual sin reserva, sin incidente abierto y sin pago",
+     "cuando": "el operador pulsa «Eliminar turno» y confirma",
+     "entonces": "el turno deja de verse en la lista"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un turno automático, o uno manual con incidente abierto o con pago",
+     "cuando": "se mira su panel",
+     "entonces": "no se ofrece eliminar"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [
+    "INC-89"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Botón visible solo para sh-m- sin resId; borrado suave del turno."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (condiciones del botón y marca de borrado)"
+   }
+  },
+  {
+   "id": "CU-HK-1.8",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ajustar los flujos de un turno: incluir o quitar flujos y sumar flujos extra",
+   "declarado": "construido",
+   "limitantes": [
+    "El orden del flujo base no se edita desde el turno.",
+    "Editar la plantilla del flujo no cambia las copias ya tomadas por turnos existentes."
+   ],
+   "entradas": [
+    {
+     "de": "CU-FL-1.1",
+     "dato": "flujos con sus actividades, tareas, subflujos, zonas, fotos exigidas, tiempos, emoji y nombre corto",
+     "rel": "REL-07"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con flujo base",
+     "cuando": "el operador marca un flujo extra para incluirlo",
+     "entonces": "el turno suma las tareas del flujo extra después de las del flujo base"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno con un flujo incluido",
+     "cuando": "el operador lo desmarca",
+     "entonces": "sus tareas dejan de verse en el turno; el flujo base mantiene su orden y no se reordena"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "turnos"
+    ],
+    "notas": "Casilla de inclusión por flujo; flujos extra con id «extra:<id>». INC-83 es del editor de flujos, no de este caso."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-1.9",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Abrir el detalle de un turno con su ventana, su próxima entrada, sus alertas y sus acciones",
+   "declarado": "construido",
+   "limitantes": [
+    "Si la reserva que entra tiene hora acordada, el texto «La limpieza debe completarse antes de…» no la usa y muestra una hora fija; falta diagnóstico."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno en curso con una reserva que entra después",
+     "cuando": "se abre su detalle",
+     "entonces": "se ven la propiedad, el titular, la ventana de limpieza, la próxima entrada con su hora, el avance y las acciones que corresponden al rol"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que abre el enlace directo de uno de sus turnos",
+     "cuando": "entra",
+     "entonces": "el detalle de ese turno se abre sin pasar por la lista"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-115"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_openDetail; actualiza el avance cada 60 s mientras el turno está en curso."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-1.10",
+   "capacidad": "CAP-HK-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Proponer al turno el flujo de un evento de mantenimiento o inventario para que el operador lo acepte o lo asigne a mano",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo, pero no está en la página de Housekeeping: no existe propuesta de flujo de evento ni marca de «realizado»."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-12.2",
+     "dato": "flujo del evento de inventario propuesto al turno"
+    },
+    {
+     "de": "CU-CAL-1.1",
+     "dato": "evento de mantenimiento o inventario con su recurrencia, su responsable y su flujo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un evento de inventario programado con su flujo asignado",
+     "cuando": "llega el día del evento",
+     "entonces": "el sistema propone el flujo al turno de esa propiedad y el operador lo acepta o lo asigna a otro colaborador"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno que llama un flujo sin evento asociado",
+     "cuando": "el flujo se ejecuta",
+     "entonces": "se crea el registro del evento como «realizado»"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-3",
+    "DA-21"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin rastro en el código de la página (búsqueda de evento/mantenimiento en el turno sin resultados). «Entregado» en REQ-MI1-3 significa pasado a Desarrollo, no construido."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código de la página: sin evento de mantenimiento ni de inventario dentro del turno"
+   }
+  },
+  {
+   "id": "CU-HK-2.1",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Iniciar el turno asignado",
+   "declarado": "construido",
+   "limitantes": [
+    "No existe inicio por lectura de código QR en la propiedad (ver CU-HK-2.10)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy asignado al colaborador",
+     "cuando": "abre el turno y lo inicia",
+     "entonces": "el turno pasa a «en curso», queda sellada la hora de inicio y se muestran sus tareas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno ya iniciado",
+     "cuando": "el colaborador lo vuelve a abrir y lo retoma",
+     "entonces": "conserva la hora de inicio original, no la reemplaza"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-17",
+    "RT-14",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "b"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "c"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_changeStatus(en_curso) sella iniciadoEn con hora del cliente y luego el servidor sella su hora. "
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-2.2",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Marcar una tarea del turno como hecha, con la foto que pide si la exige",
+   "declarado": "construido",
+   "limitantes": [
+    "Si una marca recién hecha coincide con una lectura de turnos en vuelo, la lectura no debe pisarla (INC-130, cerrado)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno en curso con una tarea sin foto exigida",
+     "cuando": "el colaborador marca la tarea",
+     "entonces": "la tarea queda hecha con su hora y el avance sube"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una tarea que exige un mínimo de fotos",
+     "cuando": "el colaborador intenta marcarla sin completar las fotos",
+     "entonces": "el sistema no la da por hecha hasta tener el mínimo de fotos"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un colaborador de apoyo y una tarea de inventario",
+     "cuando": "intenta marcarla",
+     "entonces": "no puede: las tareas de inventario las marca el titular"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-11",
+    "RT-17"
+   ],
+   "pendientes": [
+    "INC-92",
+    "INC-130"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "b"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-7-1-hk-turno",
+     "casos": [
+      "d"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_toggleTask; la fusión con lectura (_m1TurnosSinPisar) evita pisar la marca (INC-130). Las pruebas marcan una tarea de limpieza y una de conteo."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-2.3",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Omitir una tarea con un motivo, y una foto si hace falta",
+   "declarado": "construido",
+   "limitantes": [
+    "La foto de omisión queda dentro del propio turno, sin pasar por la cola de subida ni por la copia en Drive (diferente al resto de las fotos)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea pendiente que no se puede hacer",
+     "cuando": "el colaborador la omite eligiendo un motivo",
+     "entonces": "la tarea queda omitida con su motivo y no cuenta como hecha"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un motivo que pide foto",
+     "cuando": "el colaborador adjunta la foto",
+     "entonces": "la foto se reduce y queda guardada junto al turno"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Foto reducida a 800 px y embebida en el registro del turno; motivos fijos."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-2.4",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Seguir una tarea con espera (proceso) y cerrar con ella lo que sigue",
+   "declarado": "construido",
+   "limitantes": [
+    "No hay aviso fuera de la página cuando la cuenta termina."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea con tiempo de espera (por ejemplo un secado o un lavado)",
+     "cuando": "el colaborador la inicia",
+     "entonces": "corre una cuenta regresiva y, al terminar el tiempo, se ofrece «Marcar terminado»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una tarea de espera que cierra con otra tarea del mismo flujo",
+     "cuando": "el colaborador la cierra",
+     "entonces": "la tarea de espera queda hecha y la tarea con la que cierra se marca junto con ella (botón «Cerrar →»)"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_startProcesosCountdown; campos espera y cierraCon del flujo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-2.5",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Abrir la guía de una tarea sin salir del turno",
+   "declarado": "construido",
+   "limitantes": [
+    "En el portal del colaborador la guía se abre encima del panel (INC-131, cerrado)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-KN-1.1",
+     "dato": "guía de la tarea que se abre en el checklist",
+     "rel": "REL-30"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea con guía asociada",
+     "cuando": "el colaborador pulsa 📖",
+     "entonces": "la guía se abre encima del turno y al cerrarla vuelve a la tarea"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [
+    "INC-131"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-guia-visor.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Visor compartido str-guia-visor.js."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-2.6",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Cerrar la limpieza con sus pendientes, fotos en cola, préstamos y una nota",
+   "declarado": "construido",
+   "limitantes": [
+    "Cerrar igual deja constancia de lo pendiente; no lo resuelve."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con todas las tareas hechas",
+     "cuando": "el colaborador pulsa «Cerrar limpieza»",
+     "entonces": "queda sellada la hora de cierre de la limpieza y el turno pasa a «limpieza cerrada»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "tareas pendientes, fotos que aún no suben o préstamos abiertos",
+     "cuando": "el colaborador pulsa «Cerrar limpieza»",
+     "entonces": "el sistema muestra un diálogo con esos pendientes, deja escribir una nota y permite cerrar igual"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un teléfono pequeño con el diálogo abierto",
+     "cuando": "el colaborador mira la pantalla",
+     "entonces": "el diálogo queda por encima del turno y se puede tocar"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [
+    "INC-90",
+    "INC-131",
+    "INC-132"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-131",
+     "casos": [
+      "c",
+      "d"
+     ]
+    },
+    {
+     "guion": "INC-132",
+     "casos": [
+      "d"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_cerrarLimpieza; hora de cierre sellada por el servidor (INC-90: hora aún sin resolver al formatear)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-2.7",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Cerrar el turno y dejar los pendientes de ropa del circuito",
+   "declarado": "construido",
+   "limitantes": [
+    "Cerrar con tareas pendientes se permite con una nota; las fotos sin subir y los préstamos abiertos solo se avisan (DT-31, cerrado)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-5.8",
+     "dato": "cierre del turno con los juegos cuyo estado deja pendiente",
+     "rel": "REL-11"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con la limpieza cerrada y, si la propiedad lo pide, recepción y entrega de zona registradas",
+     "cuando": "el titular pulsa «Cerrar turno»",
+     "entonces": "el turno queda completado, con la hora oficial del cierre, y el sistema crea los pendientes de ropa que dejan los estados de los juegos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno con tareas obligatorias sin hacer o con procesos de espera abiertos",
+     "cuando": "el titular pulsa «Cerrar turno»",
+     "entonces": "un diálogo lista lo pendiente y pide una nota para cerrar de todas formas; las fotos aún sin subir y los préstamos abiertos también se avisan antes de cerrar"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un turno sin recepción o sin entrega de zona registrada",
+     "cuando": "el titular intenta cerrar",
+     "entonces": "no puede: debe registrar ambas primero"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2",
+    "REQ-INV2-3-4",
+    "DA-33"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-17"
+   ],
+   "pendientes": [
+    "DT-31"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "c",
+      "i",
+      "k",
+      "m"
+     ]
+    },
+    {
+     "guion": "INC-132",
+     "casos": [
+      "e"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-3-4-hk",
+     "casos": [
+      "c",
+      "g"
+     ],
+     "fiable": false,
+     "nota": "INC-143: espera fija de 800 ms antes del botón «Cerrar turno»; el caso g (y h, j en cascada) puede salir rojo por el guion, no por la página (abierto)"
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/turnos"
+    ],
+    "colecciones": [
+     "turnos",
+     "inv-pendientes"
+    ],
+    "notas": "_cerrarTurno; el servidor sella primerCierreAt y crea los pendientes en la misma operación (REL-11). Los casos c y g de REQ-INV2-3-4-hk dependen de una espera fija del guion (INC-143)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-2.8",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Reabrir un turno cerrado mientras siga abierta la ventana de modificación",
+   "declarado": "construido",
+   "limitantes": [
+    "Reabrir no amplía la ventana de 2 horas contada desde el primer cierre."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cerrado hace menos de 2 horas",
+     "cuando": "el titular lo reabre",
+     "entonces": "el turno vuelve a «en curso» y puede corregirse"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un turno cerrado hace más de 2 horas",
+     "cuando": "el colaborador intenta modificarlo",
+     "entonces": "el sistema lo rechaza: ya no se puede cambiar"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "La ventana se cuenta desde primerCierreAt y la hace cumplir el servidor."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del servidor (api/col)"
+   }
+  },
+  {
+   "id": "CU-HK-2.9",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Iniciar y terminar su parte como apoyo de un turno",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con un apoyo asignado",
+     "cuando": "el apoyo inicia y luego termina su parte",
+     "entonces": "quedan registradas sus horas de entrada y salida, separadas de las del titular"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un apoyo ante una tarea de inventario o la recepción o entrega de zona",
+     "cuando": "intenta registrarla",
+     "entonces": "no puede: la registra el titular"
+    }
+   ],
+   "origen": [
+    "DA-30"
+   ],
+   "reglas": [
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Campos del apoyo dentro del turno (apoyos[uid].iniciadoEn/terminadoEn)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-2.10",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Iniciar el turno leyendo el código QR del punto de control de la propiedad",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Decidido pero no hay lectura de QR ni foto de respaldo en la página de turnos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PC1-1.1",
+     "dato": "punto de control con su código QR y su propiedad"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con puntos de control con código QR",
+     "cuando": "el colaborador lee el código con la cámara",
+     "entonces": "el turno se inicia en ese punto, con respaldo por foto si el código no funciona"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un código que no se puede leer",
+     "cuando": "el colaborador sube una foto del punto",
+     "entonces": "la foto se valida por su fecha y hora y queda como respaldo"
+    }
+   ],
+   "origen": [
+    "DA-36"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin rastro en el código de la página (búsqueda de QR y punto de control sin resultados)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código de la página: sin lectura de QR"
+   }
+  },
+  {
+   "id": "CU-HK-3.1",
+   "capacidad": "CAP-HK-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Tomar la foto que pide una tarea del turno y ver sus miniaturas",
+   "declarado": "construido",
+   "limitantes": [
+    "La foto reducida queda primero en el teléfono; su subida y su copia en Drive las gobierna la cola (CU-HK-3.2)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea que exige un mínimo de fotos",
+     "cuando": "el colaborador toma las fotos con la cámara",
+     "entonces": "cada foto se reduce en el teléfono, aparece como miniatura en la tarea y cuenta para el mínimo exigido"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto mal tomada",
+     "cuando": "el colaborador la quita antes de que suba",
+     "entonces": "la foto desaparece de la tarea y no se sube"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un teléfono sin espacio para guardar fotos",
+     "cuando": "el colaborador toma una foto",
+     "entonces": "la foto se conserva solo mientras la página siga abierta y el sistema lo avisa"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-cola-subida.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Reducción a ~1600 px y ~300 KB en el teléfono (DA-25); sin almacenamiento la cola trabaja en modo memoria."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de la cola de subida"
+   }
+  },
+  {
+   "id": "CU-HK-3.2",
+   "capacidad": "CAP-HK-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Subir las fotos y la evidencia desde la cola del teléfono sin perder ninguna",
+   "declarado": "construido",
+   "limitantes": [
+    "Para admin y operador la cola solo reintenta cuando abren Housekeeping: si abren el Tablero primero, las fotos esperan (T-17)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-1.1",
+     "dato": "fotos, evidencia y videos del turno para copiarlos al Drive del negocio",
+     "rel": "REL-16"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto tomada con señal",
+     "cuando": "termina de guardarse en el teléfono",
+     "entonces": "sube sola, queda en el turno con la hora oficial del sistema y sale de la cola"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto tomada sin señal",
+     "cuando": "vuelve la conexión",
+     "entonces": "sube sola tras reintentos espaciados (5 s, 15 s, 45 s y más) hasta 8 intentos; un video espera una red wifi salvo que se pida subirlo con datos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una foto agregada mientras se termina de guardar la anterior",
+     "cuando": "corre un ciclo de subida",
+     "entonces": "ninguna foto se sube antes de estar guardada: ninguna se pierde ni queda como fallida sin remedio"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-9",
+    "RT-11"
+   ],
+   "pendientes": [
+    "INC-133",
+    "T-17"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-7-1-hk-turno",
+     "casos": [
+      "c"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "c"
+     ]
+    },
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "c"
+     ]
+    },
+    {
+     "guion": "REQ-K3c",
+     "casos": [
+      "c"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-cola-subida.js"
+    ],
+    "rutas": [
+     "/api/upload"
+    ],
+    "colecciones": [
+     "turnos"
+    ],
+    "notas": "str-cola-subida.js: persistencia local, estados en-telefono/subiendo/fallida/subida, reintento 5s/15s/45s…, 8 intentos. INC-133: agregar() ponía el ítem en la lista antes de guardar el archivo. Las pruebas comprueban la subida de la foto general de la recepción."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-3.3",
+   "capacidad": "CAP-HK-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el estado de las fotos que faltan por subir, reintentarlas o quitarlas",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "fotos que no pudieron subir",
+     "cuando": "el colaborador abre el turno",
+     "entonces": "ve un aviso fijo «N fotos no se pudieron subir», sus miniaturas marcadas con «!» y un chip de cámara con la cuenta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto marcada como fallida",
+     "cuando": "el colaborador la toca",
+     "entonces": "un menú le deja reintentarla o quitarla"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un aviso fijo a la vista en un teléfono pequeño o en pantalla ancha",
+     "cuando": "el colaborador quiere cerrar la limpieza o el turno",
+     "entonces": "los botones del pie del turno siguen libres y el cierre avisa de las fotos pendientes"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [
+    "INC-132",
+    "INC-131"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-132",
+     "casos": [
+      "c",
+      "g"
+     ]
+    },
+    {
+     "guion": "INC-131",
+     "casos": [
+      "c"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-cola-subida.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Chip 📷 por turno, menú de la cola (reintentar/quitar) y barra fija de aviso; sin fotos fallidas la barra desaparece."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-3.4",
+   "capacidad": "CAP-HK-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver si cada foto del turno ya tiene su copia en el Drive del negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "La copia en Drive la conecta solo el administrador; sin conexión no hay estado de copia."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-1.2",
+     "dato": "estado de la copia de cada foto en el Drive del negocio (pendiente, copiada, sin copia)",
+     "rel": "REL-16"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto del turno ya copiada a Drive",
+     "cuando": "el operador abre el registro del turno",
+     "entonces": "la miniatura lleva una insignia ☁ con el estado de su copia, sin tapar la foto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que abre el mismo turno",
+     "cuando": "mira la foto",
+     "entonces": "no ve la insignia: el estado de la copia es de admin y operador"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "d",
+      "g"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/drive/copias"
+    ],
+    "colecciones": [],
+    "notas": "Insignia ☁ pintada por drive/copias; los datos de prueba nunca salen como «copiado» ni «pendiente»."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-3.5",
+   "capacidad": "CAP-HK-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver «Eliminado en el corte del …» en la foto que el corte mensual ya quitó del sistema",
+   "declarado": "construido",
+   "limitantes": [
+    "La app muestra el archivo desde Drive solo cuando existe la copia; si no, queda el cartel."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-1.3",
+     "dato": "foto eliminada en el corte, con su fecha de corte, su huella y su copia en Drive",
+     "rel": "REL-17"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto del turno que el corte mensual ya borró del sistema",
+     "cuando": "el operador abre el turno",
+     "entonces": "la miniatura dice «Eliminado en el corte del <fecha>» y mantiene su insignia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que abre el turno después del corte",
+     "cuando": "mira la foto",
+     "entonces": "ve el mismo cartel con la fecha del corte y la página no pide nada a Drive por su cuenta"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "d",
+      "e",
+      "i"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [
+     "/api/archivo"
+    ],
+    "colecciones": [],
+    "notas": "La lectura del archivo borrado responde 410 con la fecha del corte; el registro conserva fecha, huella y corte."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-4.1",
+   "capacidad": "CAP-HK-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Reportar un incidente desde el turno, con tipo, descripción, zona y evidencia",
+   "declarado": "construido",
+   "limitantes": [
+    "Un video cuya duración no se puede leer se registra con 0 s (DT-28).",
+    "Adjuntar evidencia exige sesión iniciada."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno en curso",
+     "cuando": "se reporta un incidente eligiendo su tipo, escribiendo la descripción y la zona",
+     "entonces": "queda un incidente abierto ligado al turno y a la propiedad, con el nombre de quien lo reportó"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente con evidencia",
+     "cuando": "se adjuntan hasta 20 fotos y 2 videos",
+     "entonces": "los archivos suben por la cola y se agregan al incidente al llegar"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un incidente sin descripción",
+     "cuando": "se intenta guardar",
+     "entonces": "el sistema pide la descripción y no lo guarda"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-10",
+    "RT-6"
+   ],
+   "pendientes": [
+    "DT-28"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "_guardarTicket; 10 tipos de incidente; fotos originales desde la galería y cámara en Android; evidencia por la cola con clave ticket:<id>."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-4.2",
+   "capacidad": "CAP-HK-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver la evidencia de un incidente con sus fechas, su huella y su original",
+   "declarado": "construido",
+   "limitantes": [
+    "El video solo se ve completo mediante «Ver video»; no hay miniatura."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con fotos y un video ya subidos",
+     "cuando": "se abre el turno",
+     "entonces": "se ven las miniaturas y el video, con «Tomada» (hora del teléfono), «Recibida» (hora del sistema) y los últimos dígitos de su huella"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto de evidencia",
+     "cuando": "se pide el original",
+     "entonces": "se abre la foto sin reducir"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/archivo"
+    ],
+    "colecciones": [],
+    "notas": "_tkEvidenciasHTML; sha256, exif y recibidoEn vienen de la subida."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-4.3",
+   "capacidad": "CAP-HK-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Resolver un incidente en el sitio con una nota, o escalarlo",
+   "declarado": "construido",
+   "limitantes": [
+    "Un incidente de checkout tardío se resuelve solo al registrar la salida real (CU-HK-5.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente abierto sin archivos pendientes de subir",
+     "cuando": "se resuelve con una nota",
+     "entonces": "queda «resuelto en sitio» con la hora y la nota"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente abierto",
+     "cuando": "se escala",
+     "entonces": "queda «escalado» para quien lo atiende"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un incidente con archivos que aún no suben desde este teléfono",
+     "cuando": "se intenta resolver o escalar",
+     "entonces": "el sistema no deja y avisa cuántos archivos faltan por subir"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-10"
+   ],
+   "pendientes": [
+    "INC-142"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "_resolverTicketModal/_escalarTicket; _tkBloqueaCierre."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-4.4",
+   "capacidad": "CAP-HK-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Anular una evidencia con un motivo, sin borrarla",
+   "declarado": "construido",
+   "limitantes": [
+    "El motivo es obligatorio y nada se borra."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una evidencia subida a un incidente",
+     "cuando": "el operador la anula escribiendo el motivo",
+     "entonces": "la evidencia queda tachada, con la fecha y el motivo, y sigue en el expediente"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "mira la evidencia",
+     "entonces": "no ve la opción de anular"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-5",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [],
+    "notas": "_tkAnularModal; el colaborador no anula (INC-91)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-4.5",
+   "capacidad": "CAP-HK-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Descargar el expediente de un incidente, o ver su resumen, con el nombre del huésped si hace falta",
+   "declarado": "construido",
+   "limitantes": [
+    "La línea de tiempo lista solo la generación actual de la evidencia (DT-29)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INC1-1.1",
+     "dato": "expediente de evidencia del incidente (originales, huellas, línea de tiempo)",
+     "rel": "REL-20"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con evidencia",
+     "cuando": "el operador pide el expediente",
+     "entonces": "recibe un archivo con los originales, sus huellas y la línea de tiempo, y el incidente anota que se generó"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente de un turno con reserva",
+     "cuando": "el operador marca «con nombre»",
+     "entonces": "el expediente incluye el nombre del huésped; sin marcar, no lo incluye"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el mismo incidente",
+     "cuando": "el operador pide solo el resumen",
+     "entonces": "ve el resumen en pantalla sin descargar nada"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-10"
+   ],
+   "pendientes": [
+    "INC-85",
+    "DT-29"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "_tkExpModal/_tkExpDescargar; descarga ZIP; el servidor anota ticket.expedientes[]. INC-85 se verificó en producción con un incidente de prueba."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-5.1",
+   "capacidad": "CAP-HK-5",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar que el huésped salió con «Unidad desocupada»",
+   "declarado": "construido",
+   "limitantes": [
+    "Un incidente de checkout tardío se resuelve solo con la salida real; si lo resuelve el colaborador, la autorresolución de tickets ajenos falla en modo colaborador (INC-142)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy con la unidad ocupada",
+     "cuando": "el titular pulsa «Unidad desocupada»",
+     "entonces": "queda la hora de salida oficial, se calcula la espera del colaborador contra el inicio de la ventana y se resuelven solos los incidentes de checkout tardío abiertos del turno"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una ventana restante más corta que la limpieza",
+     "cuando": "se registra la salida",
+     "entonces": "el sistema avisa «ventana corta: faltan N min» y lista las tareas que se pueden omitir"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador de apoyo",
+     "cuando": "mira la salida del huésped",
+     "entonces": "solo lee: «La salida la registra el titular del turno»"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-4",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-17"
+   ],
+   "pendientes": [
+    "INC-142"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "tickets"
+    ],
+    "notas": "_registrarCheckoutReal: checkoutReal.at con hora del servidor, esperaColaborador en minutos, autorresuelve checkout-tardio y huesped-en-unidad. La prueba comprueba el registro desde el colaborador."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-5.2",
+   "capacidad": "CAP-HK-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Corregir a mano la hora de salida del huésped ya registrada",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una salida ya registrada",
+     "cuando": "el operador cambia la hora",
+     "entonces": "la nueva hora queda guardada y se muestra la diferencia contra lo planificado"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "mira la hora de salida",
+     "entonces": "la ve pero no puede editarla"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-7",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_editarCheckoutReal; INC-63: fijar la hora a mano es solo del operador."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-5.3",
+   "capacidad": "CAP-HK-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Avisar «Huésped aún en la unidad» para abrir un incidente de checkout tardío",
+   "declarado": "parcial",
+   "limitantes": [
+    "En modo colaborador el aviso falla: el incidente se crea firmado como «operador» y el sistema lo rechaza (INC-142, abierto)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una unidad que el huésped no ha desocupado a la hora de la ventana",
+     "cuando": "se pulsa «Huésped aún en la unidad»",
+     "entonces": "se crea un incidente de checkout tardío abierto, el turno espera la salida y, si ese día entra otro huésped, la alerta pasa a crítica"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el mismo aviso hecho desde el portal del colaborador",
+     "cuando": "el colaborador lo pulsa",
+     "entonces": "el sistema rechaza el incidente porque va firmado como «operador» y el envío de incidentes del teléfono falla"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-4"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-142"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_huespedAunEnUnidad crea el ticket con creadoPor:'operador'; el servidor lo rechaza con 403 al colaborador y el rechazo tumba el envío completo de incidentes."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del servidor (api/col)"
+   }
+  },
+  {
+   "id": "CU-HK-5.4",
+   "capacidad": "CAP-HK-5",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver las alertas del turno: sin colaborador, no iniciado, retraso y checkout tardío",
+   "declarado": "construido",
+   "limitantes": [
+    "La hora de referencia del checkout tardío es la salida acordada con el huésped; si no la hay, el inicio de la ventana.",
+    "Las alertas se calculan con la hora local del negocio, no la de otra zona (INC-79)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-1.1",
+     "dato": "tolerancia de salida por propiedad y horarios",
+     "rel": "REL-06"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno sin titular que empieza en menos de 24 horas",
+     "cuando": "se abre la lista",
+     "entonces": "el turno muestra «sin colaborador»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno de hoy que no se ha iniciado 15 minutos después del comienzo de su ventana",
+     "cuando": "se abre la lista",
+     "entonces": "muestra «no iniciado»; y si está en curso y atrasado más de 5 puntos respecto al avance esperado, «retraso»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una salida sin registrar pasada la tolerancia de la propiedad",
+     "cuando": "se abre la lista",
+     "entonces": "muestra «checkout tardío» de atención; pasa a crítico solo si hay un aviso de huésped aún en la unidad y ese día entra otro huésped"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-4",
+    "REQ-PR1-5",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-79"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_alertasTurno; la tolerancia se lee de _getTolerancia(propiedad) y de ⚙ de Housekeeping."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: reglas de cada alerta"
+   }
+  },
+  {
+   "id": "CU-HK-5.5",
+   "capacidad": "CAP-HK-5",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver el avance esperado y real del turno y si va al día, atrás o adelante",
+   "declarado": "construido",
+   "limitantes": [
+    "La definición de «atrasado» es la misma que usa el Tablero: se comparte el cálculo y se vigila con una prueba de igualdad."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-1.1",
+     "dato": "avance esperado y real del turno en minutos y estado del tramo (al día, atrás, adelante, bloqueado)",
+     "rel": "REL-34"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno en curso con tareas hechas",
+     "cuando": "se abre su detalle",
+     "entonces": "se ve el porcentaje de avance y si va al día, atrás o adelante respecto de lo esperado para la hora"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno atrasado",
+     "cuando": "se abre la lista",
+     "entonces": "el turno lleva la alerta de retraso, igual que en el Tablero"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-avance.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_hkAvance con str-avance.js; bloques de HK copiados con prueba de igualdad."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de str-avance.js"
+   }
+  },
+  {
+   "id": "CU-HK-6.1",
+   "capacidad": "CAP-HK-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver las horas planificadas y reales de cada persona del turno y su valor estimado",
+   "declarado": "construido",
+   "limitantes": [
+    "Para cambiar horas, valor hora o ajustes se necesita el permiso de tarifas; sin él los campos aparecen bloqueados.",
+    "El valor es una estimación del turno: la liquidación y el pago son de Pagos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.1",
+     "dato": "perfil de pago y tarifa vigente de cada colaborador",
+     "rel": "REL-14"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PG-1.1",
+     "dato": "horas del turno de cada persona y su valor estimado, para la liquidación"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con titular y horas planificadas",
+     "cuando": "el operador abre el detalle",
+     "entonces": "ve las horas planificadas, las reales (inicio y fin), la diferencia y el valor estimado del titular"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno de una propiedad sin horas propias",
+     "cuando": "se calcula",
+     "entonces": "se usa el valor por defecto del negocio (7 horas)"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un colaborador con tarifa propia",
+     "cuando": "se calcula el valor",
+     "entonces": "usa su valor hora vigente; si el operador fijó un valor especial para el turno, usa ese"
+    }
+   ],
+   "origen": [
+    "REQ-F11-5-2",
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_renderHorasSection; cálculo en STRApi.horas.calcular (compartido). Valor especial solo con permiso dinero.tarifas."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-6.2",
+   "capacidad": "CAP-HK-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Agregar o quitar un apoyo en un turno, con sus horas planificadas",
+   "declarado": "construido",
+   "limitantes": [
+    "Las horas por defecto del apoyo salen de la configuración de Housekeeping (4 h si no hay), cosa que DA-20 descartó; la duración elegida por el operador está en CU-HK-6.6, no construido."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con titular",
+     "cuando": "el operador agrega a otro colaborador como apoyo",
+     "entonces": "el apoyo queda en el turno con 4 horas planificadas por defecto y su propio inicio y fin"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un apoyo agregado",
+     "cuando": "el operador lo quita con un segundo toque de confirmación",
+     "entonces": "el apoyo sale del turno"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "no queda ningún colaborador activo distinto del titular y de los apoyos",
+     "cuando": "se pide agregar un apoyo",
+     "entonces": "el sistema avisa que no hay más colaboradores para agregar"
+    }
+   ],
+   "origen": [
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "a"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_agregarApoyo/_doAgregarApoyo; apoyoHorasPorDefecto de ⚙, 4 h si no hay."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-6.3",
+   "capacidad": "CAP-HK-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ajustar las horas de una persona con un motivo",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo con el permiso de tarifas."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cerrado con horas reales",
+     "cuando": "el operador ajusta las horas escribiendo el motivo",
+     "entonces": "las horas efectivas toman el ajuste, se marcan como «ajuste» y el motivo queda guardado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno con un ajuste",
+     "cuando": "el operador lo quita",
+     "entonces": "las horas vuelven a las reales del reloj"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_abrirAjusteHoras/_guardarAjusteHoras; ajuste con motivo en horas.ajuste."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-6.4",
+   "capacidad": "CAP-HK-6",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver mis horas del turno, solo las mías, con mi rol en el turno",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno donde el colaborador es titular o apoyo",
+     "cuando": "abre el turno desde su portal",
+     "entonces": "ve «Mis horas» con su rol (titular o apoyo), planificadas, valor hora, reales, diferencia y valor estimado, sin poder cambiarlas"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un turno donde hay otras personas con horas",
+     "cuando": "el colaborador mira sus horas",
+     "entonces": "no ve las horas ni el valor de las demás personas"
+    }
+   ],
+   "origen": [
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Modo colaborador de _renderHorasSection; el perfil de pago propio sale del perfil de la sesión."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-6.5",
+   "capacidad": "CAP-HK-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Configurar la tolerancia de salida, las horas por defecto y el valor hora general del negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "La tolerancia general vive en ⚙ de Housekeeping; la de cada propiedad se fija en su ficha (Propiedades)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-1.1",
+     "dato": "tolerancia de salida y horas del turno de cada propiedad",
+     "rel": "REL-06"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la configuración de Housekeeping",
+     "cuando": "el administrador cambia la tolerancia de salida, las horas del apoyo o el valor hora general",
+     "entonces": "los cambios rigen para los turnos que se calculen desde ese momento"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con su propia tolerancia",
+     "cuando": "se calcula la alerta de checkout tardío",
+     "entonces": "manda la tolerancia de la propiedad sobre la general"
+    }
+   ],
+   "origen": [
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_abrirConfigHK/_guardarConfigHK; claves tolerancia, apoyoHorasPorDefecto, valorHoraGeneral."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-6.6",
+   "capacidad": "CAP-HK-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir la duración del turno de un apoyo que se llama a un sub-flujo y mandar a la bolsa de tiempo lo no trabajado",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido (DA-20 decidida) y entregado a Desarrollo, pero hoy el apoyo parte siempre de las horas por defecto del negocio (4 h), cosa que la decisión descartó; no hay duración recomendada, ni atajos de 5 h y 7 h, ni bolsa de tiempo en la página."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un sub-flujo que llama a un colaborador de apoyo",
+     "cuando": "el operador asigna al apoyo",
+     "entonces": "el sistema recomienda una duración según el tiempo estimado de los sub-flujos del apoyo, redondeada hacia arriba a la hora, con atajos de 5 h y 7 h, y el operador elige 7 h, 5 h o una duración libre"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un apoyo que trabajó menos horas que las del turno llamado",
+     "cuando": "se cierra el turno",
+     "entonces": "se paga el turno llamado completo y las horas de menos se anotan en la bolsa de tiempo del colaborador para compensarlas con trabajo futuro"
+    }
+   ],
+   "origen": [
+    "REQ-F11-5-2",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin rastro en el código de la página (búsqueda de bolsa de tiempo y de duración del apoyo sin resultados). Las opciones 7 h, 5 h y libre y la recomendación salen del texto del REQ y de la decisión DA-20."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código de la página: sin duración de apoyo propuesta ni bolsa de tiempo"
+   }
+  },
+  {
+   "id": "CU-HK-7.1",
+   "capacidad": "CAP-HK-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Recibir de Inventario lo que el turno necesita: artículos, zonas, lugares, estados, proveedores y pendientes",
+   "declarado": "construido",
+   "limitantes": [
+    "El colaborador solo recibe las zonas de un turno de hoy, en curso o cerrado hace 2 horas o menos, y lo de las propiedades donde tiene turno dentro de la ventana de gestión (ver CU-HK-11.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-1.1",
+     "dato": "artículos activos del catálogo con su clase, unidad y mínimo, para armar los conteos del turno",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-1.5",
+     "dato": "kits (recetas de tareas) y juegos que el turno nombra en las tareas y en los pendientes",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-2.1",
+     "dato": "zonas con su uso (principal, del apto, otra, móvil), propiedades y lugares de ubicación",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-2.4",
+     "dato": "zona principal efectiva de la propiedad para recepción, entrega y conteos",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-7.3",
+     "dato": "zonas y lugares visibles al colaborador de la propiedad del turno",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-9.1",
+     "dato": "catálogo, zona principal y del apto, lugares, estados, proveedores y pendientes",
+     "rel": "REL-09"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con zona principal, lugares y artículos asignados a ellos",
+     "cuando": "el colaborador abre el turno",
+     "entonces": "recibe solo las zonas y los lugares de su propiedad, con el catálogo, los estados del circuito de la ropa y los proveedores"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una zona privada del propietario o una zona con acceso revocado al colaborador",
+     "cuando": "el colaborador abre el turno",
+     "entonces": "esas zonas y sus lugares no le llegan"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una propiedad con zona del apto además de la principal",
+     "cuando": "se arma el turno",
+     "entonces": "el turno conoce las dos zonas y usa la principal para la recepción, la entrega y los conteos"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-1",
+    "REQ-INV2-7-1",
+    "DA-30",
+    "DA-34"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-1-interfaz",
+     "casos": [
+      "c"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-7-1",
+     "casos": [
+      "f"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-7-1-hk",
+     "casos": [
+      "h"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/inv-articulos",
+     "/api/col/inv-depositos",
+     "/api/col/inv-sububicaciones",
+     "/api/col/inv-pendientes"
+    ],
+    "colecciones": [
+     "inv-articulos",
+     "inv-depositos",
+     "inv-sububicaciones",
+     "inv-estados",
+     "inv-proveedores",
+     "inv-pendientes"
+    ],
+    "notas": "[INV-puras] y [SUB-puras] copiadas de Inventario; el servidor filtra zonas privadas y revocadas por colaborador."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-7.2",
+   "capacidad": "CAP-HK-7",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Declarar el conteo o el nivel de un artículo al marcar una tarea de inventario",
+   "declarado": "construido",
+   "limitantes": [
+    "Un colaborador de apoyo no puede marcar la tarea de inventario ni registrar conteos.",
+    "En los turnos de una propiedad con zona principal, la tarea de conteo de la zona la reemplaza la entrega de zona (CU-HK-7.3).",
+    "Un movimiento ya registrado no se edita: se corrige con otro movimiento que lo anula."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-4.1",
+     "dato": "conteo o nivel que el colaborador declara al marcar una tarea de inventario",
+     "rel": "REL-10"
+    },
+    {
+     "a": "CU-INV-9.2",
+     "dato": "conteo, nivel o dotación declarados al marcar la tarea de inventario del turno",
+     "rel": "REL-10"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea de conteo con artículos y cantidades esperadas",
+     "cuando": "el titular escribe las cantidades y marca la tarea",
+     "entonces": "queda registrado un conteo por artículo a su nombre y a la hora oficial del sistema"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una tarea de nivel",
+     "cuando": "el titular elige el nivel (porcentaje) de cada artículo y marca la tarea",
+     "entonces": "queda registrado un nivel por artículo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un artículo cuya cantidad esperada es 0",
+     "cuando": "el titular abre la tarea",
+     "entonces": "el campo muestra 0, no vacío, para que el titular vea lo que se va a registrar"
+    }
+   ],
+   "origen": [
+    "DA-22"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-17"
+   ],
+   "pendientes": [
+    "INC-88",
+    "INC-128"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/inv-movimientos"
+    ],
+    "colecciones": [
+     "inv-movimientos",
+     "turnos"
+    ],
+    "notas": "_hkInvRowHTML; borrador de cantidades antes de marcar. INC-88: el 0 se pintaba vacío. INC-128 (abierto): errores de base de datos al enviar turnos y movimientos al marcar el conteo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-7.3",
+   "capacidad": "CAP-HK-7",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver que la entrega de zona reemplaza la tarea de conteo del turno",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de una propiedad con zona principal y una tarea de conteo en su flujo",
+     "cuando": "el titular abre el turno",
+     "entonces": "la tarea de conteo muestra «Lo cuenta la entrega de zona (arriba)» y la recepción de zona aparece al iniciar"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "esa tarea de conteo",
+     "cuando": "el titular la marca",
+     "entonces": "se marca como hecha y no sube conteos de este turno: los sube la entrega de zona"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2",
+    "REQ-INV2-7-1",
+    "DA-43"
+   ],
+   "reglas": [
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "e"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-7-1-hk-turno",
+     "casos": [
+      "b",
+      "d"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Un solo conteo por zona y turno: la tarea del flujo se reemplaza para que no se cuente dos veces."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-7.4",
+   "capacidad": "CAP-HK-7",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Tomar la foto que la zona pide al contar: del lugar o de cada artículo",
+   "declarado": "construido",
+   "limitantes": [
+    "La foto por lugar y por artículo se pide en la entrega; la recepción pide solo la foto general."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-2.8",
+     "dato": "marca de foto al cierre por lugar y por artículo (ninguna, lugar, artículo)",
+     "rel": "REL-09"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un lugar con marca de «foto del lugar»",
+     "cuando": "el titular registra la entrega de la zona",
+     "entonces": "debe adjuntar la foto del lugar antes de poder registrarla"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un lugar con marca de «una por artículo» o un artículo con marca de foto",
+     "cuando": "el titular registra la entrega",
+     "entonces": "debe adjuntar una foto por cada artículo marcado"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una zona sin ninguna marca de foto",
+     "cuando": "el titular registra la entrega",
+     "entonces": "solo se exige la foto general de la zona"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-7-1",
+    "DA-34"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Fotos por la cola con clave inv::entrega::<zona> y marcas por lugar y artículo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-7.5",
+   "capacidad": "CAP-HK-7",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver los movimientos de inventario que el sistema rechazó, sin que se reenvíen",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un movimiento que el sistema rechaza (por ejemplo por no ser el titular)",
+     "cuando": "el colaborador lo envía",
+     "entonces": "el movimiento queda marcado como rechazado con su motivo y se avisa en el turno cuántos hay"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "varios movimientos pendientes de envío y uno rechazado",
+     "cuando": "se reintenta el envío",
+     "entonces": "los demás se envían y el rechazado no se reenvía"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_hkInvTras403: el rechazo marca el movimiento solo en la copia local y se descarta del envío."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-7.6",
+   "capacidad": "CAP-HK-7",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el aviso de préstamos abiertos al cerrar la limpieza",
+   "declarado": "parcial",
+   "limitantes": [
+    "El colaborador no recibe los préstamos que registró otra persona: el aviso solo funciona completo cuando cierra admin u operador (INC-107, abierto)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un titular o un apoyo con un préstamo abierto a su nombre",
+     "cuando": "el titular cierra la limpieza",
+     "entonces": "el diálogo avisa qué préstamos siguen abiertos y deja cerrar igual"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un préstamo que registró otra persona y que sigue abierto",
+     "cuando": "el colaborador cierra su turno",
+     "entonces": "el aviso no lo incluye, porque su lectura de movimientos no trae los de otras personas"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-3-4"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-107"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Préstamos abiertos calculados con los movimientos que el colaborador alcanza a leer."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de la lectura del colaborador en api/col"
+   }
+  },
+  {
+   "id": "CU-HK-8.1",
+   "capacidad": "CAP-HK-8",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar la recepción de la zona al empezar, contando a ciegas y con una foto general",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el titular registra la recepción; el apoyo la ve como «La registra el titular»."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-2.5",
+     "dato": "lugares de la zona en su orden, para agrupar la recepción y la entrega",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-2.6",
+     "dato": "artículos agrupados por lugar para contarlos juntos",
+     "rel": "REL-09"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INV-6.1",
+     "dato": "recepción de zona a ciegas con sus conteos y su foto general",
+     "rel": "REL-10"
+    },
+    {
+     "a": "CU-INV-7.5",
+     "dato": "recepción de zona del turno, que solo vale si la registra el titular",
+     "rel": "REL-10"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno iniciado de una propiedad con zona principal y lugares con artículos",
+     "cuando": "el titular abre «Recepción de zona»",
+     "entonces": "ve los artículos agrupados por lugar en su orden, sin lugares vacíos y sin cantidades precargadas, y una foto general obligatoria"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la recepción llena",
+     "cuando": "el titular la registra",
+     "entonces": "queda un conteo de «recepción» por artículo a su nombre, con la hora oficial del sistema"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una recepción sin foto general",
+     "cuando": "el titular intenta registrarla",
+     "entonces": "no se registra hasta adjuntar la foto"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2",
+    "REQ-INV2-7-1",
+    "DA-43"
+   ],
+   "reglas": [
+    "RT-17",
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "b",
+      "e",
+      "f",
+      "g",
+      "l"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-7-1-hk-turno",
+     "casos": [
+      "b",
+      "e"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/inv-movimientos"
+    ],
+    "colecciones": [
+     "inv-movimientos",
+     "turnos"
+    ],
+    "notas": "#hkTraspaso; movimientos con traspaso:'recepcion'; foto general con clave inv::@recepcion::<zona>."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-8.2",
+   "capacidad": "CAP-HK-8",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar la entrega de la zona al terminar, con lo recibido ya cargado y sus fotos",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el titular registra la entrega."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-4.1",
+     "dato": "conteo de entrega de zona del turno",
+     "rel": "REL-10"
+    },
+    {
+     "a": "CU-INV-4.3",
+     "dato": "conteo de entrega y de recepción de zona a nombre del titular",
+     "rel": "REL-10"
+    },
+    {
+     "a": "CU-INV-6.1",
+     "dato": "entrega de zona precargada con sus conteos y sus fotos",
+     "rel": "REL-10"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cuya recepción ya se registró",
+     "cuando": "el titular abre «Entrega de zona»",
+     "entonces": "la entrega aparece precargada con lo recibido y pide una foto general obligatoria"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una entrega con cantidades corregidas y fotos de lugar o de artículo cuando la zona las pide",
+     "cuando": "el titular la registra",
+     "entonces": "queda un conteo de «entrega» por artículo a su nombre y las fotos quedan en el turno"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un turno cuya recepción aún no se registró",
+     "cuando": "el titular abre el turno",
+     "entonces": "la entrega no aparece hasta registrar la recepción"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2",
+    "DA-43",
+    "DA-22"
+   ],
+   "reglas": [
+    "RT-17",
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "c",
+      "h",
+      "k",
+      "m"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/inv-movimientos"
+    ],
+    "colecciones": [
+     "inv-movimientos",
+     "turnos"
+    ],
+    "notas": "Movimientos con traspaso:'entrega'; fotos con clave inv::entrega::<zona>."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-8.3",
+   "capacidad": "CAP-HK-8",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Corregir la recepción o la entrega ya registrada",
+   "declarado": "construido",
+   "limitantes": [
+    "Corregir no borra ni edita el movimiento anterior."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una entrega ya registrada",
+     "cuando": "el titular cambia una cantidad y la registra de nuevo",
+     "entonces": "se agrega solo el movimiento de lo que cambió, y el registro anterior queda como estaba"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Solo se envían los movimientos de los artículos cuya cantidad cambió."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-8.4",
+   "capacidad": "CAP-HK-8",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "No poder cerrar el turno sin haber registrado la recepción y la entrega",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un titular que no registró la entrega de zona",
+     "cuando": "pulsa «Cerrar turno»",
+     "entonces": "el turno no se cierra y se le dice qué falta registrar"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la recepción y la entrega registradas",
+     "cuando": "el titular pulsa «Cerrar turno»",
+     "entonces": "el turno se cierra"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un administrador, un operador o un apoyo",
+     "cuando": "cierran o terminan su parte",
+     "entonces": "no los frena la recepción ni la entrega"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2",
+    "DA-30"
+   ],
+   "reglas": [
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "h",
+      "i"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Verificación en _cerrarTurno solo para el titular en modo colaborador."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-8.5",
+   "capacidad": "CAP-HK-8",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar la recepción y la entrega sin conexión y que suban al volver la señal",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con la recepción lista y sin conexión",
+     "cuando": "el titular la registra",
+     "entonces": "queda guardada en el teléfono, marcada como pendiente de subir, y el turno sigue"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la conexión que vuelve",
+     "cuando": "pasa un momento",
+     "entonces": "la recepción sube sola con la hora oficial del sistema y deja de estar pendiente"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-2"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "j"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Movimientos con at '__server__' hasta que el servidor los sella; el envío reintenta al volver la red."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-9.1",
+   "capacidad": "CAP-HK-9",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver los pendientes de ropa que dejó el turno anterior",
+   "declarado": "construido",
+   "limitantes": [
+    "Los tipos de tarea son organizar, lavar, llevar y decidir; los pendientes nunca se borran."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-5.1",
+     "dato": "estados con su marca de pendiente (nada, siguiente turno, operador)",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-5.4",
+     "dato": "proveedores activos para la tarea «Llevar a…» de un pendiente",
+     "rel": "REL-09"
+    },
+    {
+     "de": "CU-INV-5.7",
+     "dato": "tarea lavar/llevar y proveedor que verá el siguiente turno en «Pendientes del turno anterior»",
+     "rel": "REL-12"
+    },
+    {
+     "de": "CU-INV-5.8",
+     "dato": "pendientes del turno que el siguiente turno lee (estado, sitio, tarea)",
+     "rel": "REL-09"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno anterior de la propiedad que cerró con juegos de ropa pendientes (secando, por organizar, sucia sin tiempo)",
+     "cuando": "el titular abre su turno",
+     "entonces": "la sección «Pendientes del turno anterior» lista cada juego con su estado, su sitio y su tarea (por ejemplo «secando · tendedero · Recoger y organizar»)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un pendiente que el operador reasignó a «lavar en el siguiente turno» o a «llevar a la lavandería»",
+     "cuando": "el titular abre su turno",
+     "entonces": "ve la tarea reasignada y, si es llevar, el proveedor"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador de apoyo",
+     "cuando": "abre el turno",
+     "entonces": "no tiene la sección de pendientes"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-3-4",
+    "DA-33"
+   ],
+   "reglas": [
+    "RT-17",
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-3-4-hk",
+     "casos": [
+      "h",
+      "i"
+     ],
+     "fiable": false,
+     "nota": "INC-143: espera fija de 800 ms antes del botón «Cerrar turno»; este caso corre en cascada del caso g y puede salir rojo por el guion, no por la página (abierto)"
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "inv-pendientes",
+     "inv-estados",
+     "inv-proveedores"
+    ],
+    "notas": "Sección «Pendientes del turno anterior» del detalle del turno; el servidor los crea al cerrar el turno anterior (REL-11)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-9.2",
+   "capacidad": "CAP-HK-9",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Marcar hecho un pendiente de ropa con el destino que corresponde",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el titular marca hecho; un reintento reutiliza el movimiento ya registrado en vez de crear otro."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-5.9",
+     "dato": "marca «hecho» de un pendiente con el movimiento resultante",
+     "rel": "REL-10"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un juego pendiente «Recoger y organizar»",
+     "cuando": "el titular lo marca hecho pasándolo a una zona y un lugar permitidos",
+     "entonces": "se registra un movimiento del juego y el pendiente queda cerrado con la hora y quién lo hizo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un pendiente «Llevar a…» de un proveedor",
+     "cuando": "el titular lo marca hecho",
+     "entonces": "el juego sale hacia la lavandería externa elegida y el pendiente se cierra"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un pendiente «Lavar»",
+     "cuando": "el titular lo cumple",
+     "entonces": "el juego queda listo en la zona principal y el pendiente se cierra"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-3-4",
+    "DA-33"
+   ],
+   "reglas": [
+    "RT-17",
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-3-4-hk",
+     "casos": [
+      "j",
+      "k",
+      "l"
+     ],
+     "fiable": false,
+     "nota": "INC-143: espera fija de 800 ms antes del botón «Cerrar turno»; este caso corre en cascada del caso g y puede salir rojo por el guion, no por la página (abierto)"
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/inv-pendientes",
+     "/api/col/inv-movimientos"
+    ],
+    "colecciones": [
+     "inv-pendientes",
+     "inv-movimientos"
+    ],
+    "notas": "Los destinos permitidos salen de las zonas que el colaborador recibe."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-9.3",
+   "capacidad": "CAP-HK-9",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver al cerrar el turno qué pendientes de ropa quedaron para el siguiente",
+   "declarado": "construido",
+   "limitantes": [
+    "El aviso solo informa: los pendientes los crea el sistema al cerrar, no el colaborador."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno que cierra con un juego secando en el tendedero",
+     "cuando": "el titular lo cierra",
+     "entonces": "el sistema le avisa que quedó el pendiente «secando · tendedero · Recoger y organizar» para el siguiente turno"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno que cierra un operador",
+     "cuando": "el operador lo cierra",
+     "entonces": "los pendientes quedan para el operador y el aviso lo dice"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-3-4",
+    "DA-33"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-3-4-hk",
+     "casos": [
+      "c",
+      "g"
+     ],
+     "fiable": false,
+     "nota": "INC-143: espera fija de 800 ms antes del botón «Cerrar turno»; el caso g (y h, j en cascada) puede salir rojo por el guion, no por la página (abierto)"
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Aviso de pendientes con el resultado del cierre (_hkPendTrasCierre). Mismos casos que prueban el cierre de turno."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-10.1",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar al portal del colaborador sus turnos con horas, procesos, fotos pendientes, alertas y pago",
+   "declarado": "construido",
+   "limitantes": [
+    "El portal nunca reimplementa Housekeeping: solo pinta lo que este le entrega."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-POR-1.1",
+     "dato": "turnos del colaborador con horas, procesos, fotos pendientes, alertas y pago",
+     "rel": "REL-05"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador que entra al portal con turnos asignados",
+     "cuando": "el portal abre Housekeeping dentro de su pantalla",
+     "entonces": "el portal recibe la lista de sus turnos con sus horas, procesos, fotos pendientes y alertas, y la pinta sin que Housekeeping repita su pantalla"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un arranque con la lista de turnos ya en el teléfono",
+     "cuando": "el portal pide abrir un turno antes de que Housekeeping esté listo",
+     "entonces": "la orden no se pierde: Housekeeping avisa que está listo y abre el turno pedido"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-127"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-127",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Mensajes hk:turnos y hk:cerrar hacia el portal; puente _hkPortalBridge y señal de «puente listo» (INC-127)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-10.2",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Abrir un turno propio desde el portal con el enlace que le enviaron",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-POR-1.2",
+     "dato": "orden de abrir un turno y de refrescar la lista, con el enlace del turno",
+     "rel": "REL-05"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno recién asignado al colaborador",
+     "cuando": "abre el enlace del turno en el portal",
+     "entonces": "el portal abre ese turno sin decir que no es suyo"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el enlace de un turno ajeno o inexistente",
+     "cuando": "el colaborador lo abre",
+     "entonces": "el portal avisa antes de 30 segundos que ese turno no es suyo y no abre Housekeeping"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el portal",
+     "cuando": "pide refrescar los turnos",
+     "entonces": "Housekeeping vuelve a leer y entrega la lista actualizada"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14",
+    "RT-17"
+   ],
+   "pendientes": [
+    "INC-126"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-126",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Mensajes portal:abrir y portal:refrescar; INC-126: el enlace se resolvía contra una lista sin el turno nuevo."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-10.3",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar todos los turnos al Calendario para su carril de operación y el panel de la reserva",
+   "declarado": "construido",
+   "limitantes": [
+    "El Calendario no crea ni calcula turnos: solo los muestra (INC-71)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-CAL-3.1",
+     "dato": "todos los turnos con su estado y su colaborador, para el carril de operación y el panel de la reserva",
+     "rel": "REL-04"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el Calendario abierto",
+     "cuando": "carga la operación del día",
+     "entonces": "recibe todos los turnos de Housekeeping, con su estado y su colaborador, para mostrarlos en el carril de operación y en el panel de la reserva"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno que cambia de estado",
+     "cuando": "se vuelve a leer",
+     "entonces": "el Calendario muestra el nuevo estado sin calcular él mismo ningún turno"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-127"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-127",
+     "casos": [
+      "c"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Housekeeping se abre oculto con ?modo=datos y manda hk:turnos al Calendario."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-10.4",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Mantener la sesión del portal dentro de Housekeeping sin pasar por el inicio de sesión",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con sesión abierta en el portal",
+     "cuando": "abre el portal varias veces seguidas en menos de 30 segundos",
+     "entonces": "Housekeeping carga cada vez y ninguna pasa por la pantalla de inicio de sesión"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "Housekeeping dentro del portal sin sesión al arrancar",
+     "cuando": "no obtiene la identidad",
+     "entonces": "avisa al portal que no hay sesión en vez de saltar al inicio de sesión"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [
+    "INC-140"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-140",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Mensaje str:sin-sesion (REL-02); INC-140: el HK incrustado navegaba a login y disparaba el freno de inicios automáticos."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-10.5",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Sincronizar los turnos, los incidentes y los movimientos del turno con el sistema sin pisar lo recién marcado",
+   "declarado": "construido",
+   "limitantes": [
+    "Al enviar turnos y movimientos de conteo del colaborador el sistema ha respondido con error de guardado (INC-128, abierto).",
+    "El envío por diferencias depende de la copia del último envío guardada en el teléfono."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.1",
+     "dato": "cambios de turnos, incidentes y movimientos de inventario con su sello de hora, como diferencia contra el último envío",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador que marca una tarea con conexión",
+     "cuando": "se guarda la marca",
+     "entonces": "el sistema recibe solo lo que cambió y la tarea queda hecha para quien mire el turno"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una lectura de turnos pedida antes de la marca que llega después",
+     "cuando": "se une con la copia del teléfono",
+     "entonces": "la marca recién hecha se conserva y no vuelve a «pendiente»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una escritura que el sistema no puede guardar por un fallo temporal",
+     "cuando": "el colaborador sigue marcando",
+     "entonces": "los cambios quedan en el teléfono y se reintentan en el siguiente envío"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4",
+    "RT-7",
+    "RT-21"
+   ],
+   "pendientes": [
+    "INC-128",
+    "INC-130"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/turnos",
+     "/api/col/tickets",
+     "/api/col/inv-movimientos"
+    ],
+    "colecciones": [
+     "turnos",
+     "tickets",
+     "inv-movimientos"
+    ],
+    "notas": "_persistCol (diff contra lastpush, tombstones explícitos) y fusión _m1TurnosSinPisar tras INC-130. Hora de cada escritura sellada por el servidor."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página"
+   }
+  },
+  {
+   "id": "CU-HK-10.6",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mantener acotada la copia local de movimientos de inventario para que no llene el teléfono",
+   "declarado": "parcial",
+   "limitantes": [
+    "La copia completa de movimientos sigue creciendo sin tope: acotarla a 90 días rompería el último conteo, los préstamos y la lavandería abiertos y las anulaciones (T-18, propuesta de guardar el último conteo y lo abierto)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un perfil con miles de movimientos de inventario acumulados",
+     "cuando": "Housekeeping guarda la copia local",
+     "entonces": "de cada movimiento guarda solo su identificador en la copia de diferencias y el almacenamiento queda lejos del tope, sin aviso"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un almacenamiento del teléfono que se llena",
+     "cuando": "se intenta guardar",
+     "entonces": "el sistema avisa una sola vez que el almacenamiento está lleno"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-146",
+    "T-18"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-146",
+     "casos": [
+      "a",
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "str-col-lastpush-v1 guarda solo ids; aviso de cuota en str-api.js ([CUOTA])."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-10.7",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Soltar de la copia local los movimientos de inventario que se purgaron",
+   "declarado": "construido",
+   "limitantes": [
+    "Existe solo para limpiar los datos de prueba; no es una función del negocio."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un movimiento de prueba que se purgó en el sistema",
+     "cuando": "Housekeeping lee los movimientos",
+     "entonces": "lo suelta de su copia local y deja de contarlo"
+    }
+   ],
+   "origen": [
+    "DA-47",
+    "DA-49"
+   ],
+   "reglas": [
+    "RT-3"
+   ],
+   "pendientes": [
+    "INC-146"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-146-purga",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Movimiento marcado deleted=1 en el servidor; HK lo quita de su copia al leer."
+   },
+   "confianza": "media",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-HK-10.8",
+   "capacidad": "CAP-HK-10",
+   "actor": [
+    "admin"
+   ],
+   "que": "Reiniciar los turnos, las horas, las tareas, las fotos y los incidentes para dejar el sistema limpio",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-49 está pospuesta por Carlos el 18-oct («de momento descartemos los borrados»); vuelve al alcance si se retoma.",
+    "Sería una excepción explícita a la inmutabilidad de los movimientos, solo para el reinicio."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con datos de ensayo",
+     "cuando": "el administrador pide reiniciar Housekeeping y escribe el nombre de confirmación",
+     "entonces": "se hace un respaldo, los turnos, horas, tareas, fotos e incidentes se archivan y se conservan las propiedades, el calendario y los usuarios"
+    }
+   ],
+   "origen": [
+    "DA-49"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "T-21"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin implementación. Contraparte en Inventario: CU-INV-8.5."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-HK-11.1",
+   "capacidad": "CAP-HK-11",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver su gestión de los últimos 90 días y, de lo anterior, solo las horas",
+   "declarado": "construido",
+   "limitantes": [
+    "La ventana de 90 días es móvil; el colaborador necesita volver a la propiedad por un incidente y ver el detalle de su gestión, no el historial completo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno del colaborador de hace 120 días, con notas y tareas",
+     "cuando": "el colaborador lo consulta",
+     "entonces": "ve solo las horas de ese turno; si lo guarda, el sistema ignora el cambio"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "dos incidentes de ese turno, uno resuelto y otro abierto",
+     "cuando": "el colaborador los consulta",
+     "entonces": "ve el abierto y no el resuelto"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el mismo turno",
+     "cuando": "lo consulta el operador",
+     "entonces": "lo ve completo, con sus notas y tareas, y lo que guardó el colaborador no lo cambió"
+    }
+   ],
+   "origen": [
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-94",
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-120-c12",
+     "casos": [
+      "b",
+      "c"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [
+     "/api/col/turnos",
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "turnos",
+     "tickets"
+    ],
+    "notas": "api/col: _colLecturaContexto con ventana gestion (soloHoras); el servidor ignora la escritura de un turno reducido."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-11.2",
+   "capacidad": "CAP-HK-11",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver los datos del huésped solo de hoy y de mañana, y de los demás días solo el código y las fechas",
+   "declarado": "construido",
+   "limitantes": [
+    "El operador siempre ve los nombres completos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva que sale hoy y otra que entra en 5 días",
+     "cuando": "el colaborador las consulta",
+     "entonces": "ve el nombre del huésped de la de hoy y de la lejana solo el código y las fechas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno dentro de 7 días con nombres",
+     "cuando": "el colaborador lo consulta o lo guarda",
+     "entonces": "no ve los nombres, ni los pierde el operador al guardar el colaborador, y la tarjeta explica por qué no hay nombre"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una copia del teléfono con datos de un huésped fuera de la ventana",
+     "cuando": "el colaborador abre Housekeeping",
+     "entonces": "la copia se purga ese mismo día"
+    }
+   ],
+   "origen": [
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14",
+    "RT-1"
+   ],
+   "pendientes": [
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-120-c3",
+     "casos": [
+      "b",
+      "c"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "reservas",
+     "turnos"
+    ],
+    "notas": "api/col: datos del huésped solo para hoy y mañana en la lectura del colaborador."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-11.3",
+   "capacidad": "CAP-HK-11",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Que el inventario del turno lo registre solo el titular",
+   "declarado": "construido",
+   "limitantes": [
+    "El administrador y el operador no están limitados por esta regla."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con un titular y un apoyo",
+     "cuando": "el apoyo abre la recepción y la entrega de zona",
+     "entonces": "ve «La registra el titular», sin campos ni botón"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un apoyo que logra enviar un conteo",
+     "cuando": "el sistema lo recibe",
+     "entonces": "lo rechaza con el motivo «El apoyo no registra inventario; lo hace el titular del turno»"
+    }
+   ],
+   "origen": [
+    "DA-30",
+    "DA-43"
+   ],
+   "reglas": [
+    "RT-17",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "d"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "La pantalla oculta los campos al apoyo y el servidor valida que el conteo venga del titular."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-HK-11.4",
+   "capacidad": "CAP-HK-11",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Modificar un turno propio solo hasta 2 horas después de su primer cierre",
+   "declarado": "construido",
+   "limitantes": [
+    "El plazo se cuenta desde el primer cierre; reabrir el turno no lo extiende. El operador no tiene este plazo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cerrado hace menos de 2 horas",
+     "cuando": "el colaborador corrige una tarea",
+     "entonces": "el cambio se guarda"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un turno cerrado hace más de 2 horas",
+     "cuando": "el colaborador intenta cambiarlo",
+     "entonces": "el sistema no lo guarda y le dice que pida la corrección al operador"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-7",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "primerCierreAt lo sella el servidor al primer cierre; la ventana la hace cumplir api/col."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor (api/col)"
+   }
+  },
+  {
+   "id": "CU-HK-11.5",
+   "capacidad": "CAP-HK-11",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Reescribir solo sus propios incidentes, no los de otras personas",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente que el colaborador reportó",
+     "cuando": "lo actualiza (por ejemplo al subir evidencia)",
+     "entonces": "el cambio se guarda"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un incidente que reportó otra persona",
+     "cuando": "el colaborador intenta guardarlo con ese identificador",
+     "entonces": "el sistema no lo cambia ni se lo devuelve completo"
+    }
+   ],
+   "origen": [
+    "DA-46"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-6"
+   ],
+   "pendientes": [
+    "INC-141"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "api/col valida contra la fila guardada, no contra el creadoPor que manda el colaborador. Existe el guion INC-141 en tests/e2e, que no está entre los guiones de Housekeeping del extracto."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor (api/col, INC-141)"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-83",
+   "porque": "Es del editor de Flujos (el mínimo de fotos de una tarea queda activo e invisible); Housekeeping solo recibe el flujo. Cerrado."
+  },
+  {
+   "id": "INC-95",
+   "porque": "Es del Calendario (no ofrecía cancelar una reserva directa); ningún caso de uso de Housekeeping lo ejerce. Cerrado."
+  },
+  {
+   "id": "INC-109",
+   "porque": "Es del menú del shell (el operador veía el Dashboard); no es función de Housekeeping. Cerrado."
+  },
+  {
+   "id": "INC-114",
+   "porque": "Es del chip de atraso del panel del Calendario (no miraba la salida acordada); el cálculo de Housekeeping ya la usa (CU-HK-5.4). Cerrado."
+  },
+  {
+   "id": "INC-143",
+   "porque": "Defecto del guion REQ-INV2-3-4-hk (espera fija de 800 ms): se usa en las notas de «prueba no fiable», no como pendiente de un caso de uso. Abierto."
+  },
+  {
+   "id": "INC-145",
+   "porque": "Rojos intermitentes de sesión del entorno de pruebas (abarca INC-143 e INC-144); no es función de Housekeeping. Abierto."
+  },
+  {
+   "id": "INC-148",
+   "porque": "Turnos de prueba que dejó una corrida y rompen guiones de entrega y recepción; es entorno de pruebas, no producto. Cerrado."
+  },
+  {
+   "id": "INC-149",
+   "porque": "Intermitencia de carga de la página en el guion INC-131 b; es de la regresión, no de un caso de uso. Cerrado."
+  },
+  {
+   "id": "INC-150",
+   "porque": "Es de la purga de datos de prueba de Inventario (reconoce las propiedades por un campo equivocado); sin caso de uso propio de Housekeeping. Cerrado."
+  },
+  {
+   "id": "INC-153",
+   "porque": "Es del Tablero (no pasa a 100 % tras marcar la última tarea, intermitente); el marcado de Housekeeping funciona. Abierto."
+  },
+  {
+   "id": "INC-155",
+   "porque": "Defecto del guion REQ-OP-1 c (orden de «sin empezar»); es del Tablero y de su guion. Cerrado."
+  },
+  {
+   "id": "DT-30",
+   "porque": "Es de Inventario (indicador «sin subir» de Movimientos y desactivar la zona principal); lo cuelga CU-INV-4.3."
+  },
+  {
+   "id": "DT-47",
+   "porque": "Es del anclaje de guiones: los de REQ-INV2-4-2 citan REL-10 y no REL-11; es de documentación de pruebas, no de un caso de uso. Abierta."
+  },
+  {
+   "id": "REQ-INV2-7",
+   "porque": "Pedido descartado como contenedor (partido en INV2-7-1 y INV2-7-2); sus casos de uso cuelgan de los hijos."
+  },
+  {
+   "id": "REQ-TB-5",
+   "porque": "Es de la métrica del seguimiento del Proyecto; no es función de Housekeeping."
+  },
+  {
+   "id": "DA-11",
+   "porque": "Es la colaboradora de base de una propiedad (dato del negocio), no una función; la elección de colaborador base la cubre CU-HK-1.4."
+  },
+  {
+   "id": "DA-23",
+   "porque": "Autoriza al verificador a crear datos de prueba en producción; es de la fábrica, no del producto."
+  },
+  {
+   "id": "DA-37",
+   "porque": "Es de Pagos (adelantos, compras, liquidación); Housekeeping solo entrega las horas del turno."
+  },
+  {
+   "id": "DA-38",
+   "porque": "Es de Compras y reposición (CMP); Housekeeping solo aparece como el turno donde se encarga una compra, aún sin construir."
+  },
+  {
+   "id": "DA-40",
+   "porque": "Es del calendario del portal con eventos del colaborador (CU-INV-12.3, no construido); no es función de Housekeeping."
+  },
+  {
+   "id": "T-16",
+   "porque": "Es del Tablero (alertas con acción: abrir el turno o el incidente); no es de Housekeeping."
+  },
+  {
+   "id": "T-19",
+   "porque": "Es del Tablero (desempate entre turnos «sin empezar»); no es de Housekeeping."
+  }
+ ]
+}

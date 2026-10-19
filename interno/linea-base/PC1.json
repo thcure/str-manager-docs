@@ -1,0 +1,1496 @@
+{
+ "modulo": "PC1",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "requerimientos-pc1-1-actividades-guiadas-2026-10.md (REQ-PC1-1: qué hace, tres supuestos y 13 criterios; vive en el Proyecto, no en el repositorio)",
+  "requerimientos-pc1-2-puntos-control-2026-10.md (REQ-PC1-2: qué hace, tres supuestos y 16 criterios; Proyecto)",
+  "pc1-fuentes.json: módulo PC1 del mapa, REQ-PC1-1, REQ-PC1-2, REQ-INV2-6, REQ-INV2-6-2, REQ-INV2-7 y REQ-INV2-7-2, DA-20, DA-29 y DA-36, la bolsa (REQ-PC1-1, REQ-PC1-2 y T-7)",
+  "interno/linea-base: HK, FL, PR, INV, INC1 (ids reales de los casos de uso con los que PC1 se une)",
+  "No hay código ni guiones e2e de PC1 (no construido)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Los dos ajustes de cada actividad (cuándo empieza y cómo se registra) y la actividad que se abre sola.",
+   "El registro guiado por cámara: zonas con foto y calificación, antes y después, foto general, propiedad sin zonas, tiempo por zona y zona «muy sucia».",
+   "Los puntos de control con QR: activarlos, crearlos, el lector del STR, iniciar el turno al escanear, la actividad «al escanear» y los activos por QR.",
+   "El respaldo cuando el QR no lee: foto con validación de ±15 minutos, instrucción, sin internet, sin cámara, aprobación, contador y umbral, y ubicación opcional.",
+   "La línea de tiempo del turno y los accesos del colaborador a los puntos."
+  ],
+  "fuera": [
+   "Iniciar el turno y su estado «en curso» (Housekeeping, CU-HK-2.10), la cola de fotos y la subida (CU-HK-3.2).",
+   "El editor de flujos, las copias por propiedad y las zonas de la propiedad (Flujos y Propiedades).",
+   "Los activos, su código y su etiqueta QR (Inventario, CU-INV-11.2) y el incidente interno (Incidentes).",
+   "La copia a Drive y el corte de las fotos (Copias y corte, RT-11)."
+  ],
+  "nota": "Levantado el 2026-10-18 solo desde los requerimientos (REQ-PC1-1 con 13 criterios, DA-20; REQ-PC1-2 con 16 criterios, DA-36). No hay código. Nada de esto existe hoy: el turno empieza a mano y las actividades se registran en lista. Pesos por confirmar con Diseño."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-PC1-1",
+   "nombre": "Ajustes por actividad",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Que cada actividad de un flujo diga cuándo empieza y cómo se registra, y que los flujos de hoy sigan igual."
+  },
+  {
+   "id": "CAP-PC1-2",
+   "nombre": "Registro guiado por cámara",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que el colaborador recorra las zonas del apartamento con foto en vivo y una calificación rápida, con antes y después, y una foto general de llegada."
+  },
+  {
+   "id": "CAP-PC1-3",
+   "nombre": "Puntos de control con QR",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que el turno empiece cuando el colaborador escanea el QR del depósito o del apartamento con el lector del STR, y que cada QR siguiente abra la parte del turno de ese lugar."
+  },
+  {
+   "id": "CAP-PC1-4",
+   "nombre": "Respaldo cuando el QR no lee",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Que el trabajo no se detenga si el QR no lee: el colaborador sube una foto del punto y el sistema la valida con sus datos de captura; el operador vigila cuántos respaldos hay."
+  },
+  {
+   "id": "CAP-PC1-5",
+   "nombre": "Línea de tiempo y accesos",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Que el operador vea con hora lo que pasó en el turno y que el colaborador lea solo los puntos de sus propiedades."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-PC1-1.1",
+   "capacidad": "CAP-PC1-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir en el editor de flujos cuándo empieza cada actividad: a mano (por defecto) o al terminar la anterior",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La opción «al escanear un punto de control» solo aparece cuando el negocio activa los puntos de control (CU-PC1-3.1); hoy no se muestra."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad nueva en el editor de flujos",
+     "cuando": "el administrador la crea",
+     "entonces": "queda con «Cuándo empieza: manual» por defecto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad con «manual»",
+     "cuando": "el administrador elige «al terminar la anterior» y guarda",
+     "entonces": "el ajuste se conserva al recargar el editor"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "los puntos de control apagados",
+     "cuando": "el administrador abre el editor",
+     "entonces": "la opción «al escanear» no aparece"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-1.2",
+   "capacidad": "CAP-PC1-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir en el editor de flujos cómo se registra cada actividad: lista (por defecto) o guiada por cámara, con sus fuentes (zonas o foto general) y la opción antes y después",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La guiada por cámara tiene dos fuentes en este requerimiento: las zonas de la propiedad por nombre y la foto general. Los activos por QR son de CU-PC1-3.7."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad nueva en el editor de flujos",
+     "cuando": "el administrador la crea",
+     "entonces": "queda con «Cómo se registra: lista» por defecto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad con «lista»",
+     "cuando": "el administrador elige «guiada por cámara · zonas · antes y después» y guarda",
+     "entonces": "el ajuste se conserva al recargar el editor"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-1.3",
+   "capacidad": "CAP-PC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Conservar los dos ajustes cuando el flujo se copia para una propiedad, y dejar los flujos que ya existen en «manual» y «lista», con el turno igual que hoy",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Cuando el negocio no usa nada de esto, todo funciona como hoy (supuesto 3 de REQ-PC1-2)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-FL-10.3",
+     "dato": "flujos guardados con formato viejo, que quedan en manual y lista"
+    },
+    {
+     "de": "CU-FL-3.1",
+     "dato": "copia por propiedad de un flujo, con los dos ajustes de cada actividad"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad con «al terminar la anterior» y «guiada por cámara · zonas · antes y después»",
+     "cuando": "se copia el flujo a zz-verif-Propiedad-2 con «Personalizar para…»",
+     "entonces": "la copia conserva los dos ajustes"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "los flujos que ya existían antes del cambio",
+     "cuando": "se abre un turno que los usa",
+     "entonces": "quedan «manual» y «lista» y el turno se ve igual que hoy"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-1.4",
+   "capacidad": "CAP-PC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Abrir sola la actividad que está marcada «al terminar la anterior» cuando la anterior queda completa",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-HK-2.2",
+     "dato": "actividad del turno que quedó completa"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos actividades seguidas en un turno, la segunda con «al terminar la anterior»",
+     "cuando": "el colaborador completa la primera",
+     "entonces": "la segunda se abre sola"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-2.1",
+   "capacidad": "CAP-PC1-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Recorrer las zonas de la propiedad en la actividad guiada: por cada zona, foto en vivo y una calificación «normal», «sucia» o «muy sucia»",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Las zonas son las que tiene la ficha de la propiedad. No hay opción de galería: la foto es en vivo, con hora del servidor.",
+    "La calificación no bloquea nada: queda en el turno para el operador."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-8.1",
+     "dato": "zonas de la propiedad para recorrerlas"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-3.2",
+     "dato": "fotos en vivo y calificación de cada zona, para subirlas con la cola"
+    },
+    {
+     "a": "CU-PC1-2.5",
+     "dato": "tiempo real de cada zona"
+    },
+    {
+     "a": "CU-PC1-2.6",
+     "dato": "calificación de cada zona"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno en zz-verif-Propiedad con 3 zonas y una actividad guiada por zonas",
+     "cuando": "el colaborador abre la actividad",
+     "entonces": "recorre las 3 zonas en orden, con foto en vivo y calificación en cada una, sin opción de galería"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la misma actividad en un celular de 390 px de ancho",
+     "cuando": "el colaborador la recorre",
+     "entonces": "se lee bien, los botones son grandes y no hay desplazamiento horizontal"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-11",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. Las zonas de la propiedad ya las entrega Propiedades al turno (CU-PR-8.1)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-2.2",
+   "capacidad": "CAP-PC1-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Tomar dos fotos por zona, al empezarla y al terminarla («antes y después»), con la hora del servidor",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Esa evidencia sirve para sustentar el sobreesfuerzo (DA-20) y como «antes» de un reclamo por daños."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-3.2",
+     "dato": "fotos de antes y después de cada zona, para subirlas con la cola"
+    },
+    {
+     "a": "CU-INC1-5.5",
+     "dato": "fotos del «antes» como evidencia posible del reclamo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad guiada con «antes y después» y 3 zonas",
+     "cuando": "el colaborador recorre las zonas",
+     "entonces": "se le piden 2 fotos por zona, una al iniciar y otra al terminar, cada una con la hora del servidor"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-11",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-2.3",
+   "capacidad": "CAP-PC1-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Tomar una foto general en vivo al empezar la actividad guiada («foto de llegada»)",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-3.2",
+     "dato": "foto general de llegada, para subirla con la cola"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad guiada con foto general",
+     "cuando": "el colaborador la empieza",
+     "entonces": "se le pide una foto general en vivo y queda en el turno"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-11",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-2.4",
+   "capacidad": "CAP-PC1-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mostrar «sin zonas: agrega zonas en la ficha» cuando la propiedad no tiene zonas y dejar seguir con la foto general",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "una propiedad sin zonas (zz-verif-Propiedad-2) y una actividad guiada por zonas",
+     "cuando": "el colaborador la abre",
+     "entonces": "ve el mensaje «sin zonas: agrega zonas en la ficha» y puede seguir con la foto general"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-2.5",
+   "capacidad": "CAP-PC1-2",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Ver el tiempo real de cada zona contra el tiempo estimado",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-2.1",
+     "dato": "tiempo real de cada zona"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con una actividad guiada ya recorrida",
+     "cuando": "el operador abre el turno en Housekeeping",
+     "entonces": "ve el tiempo real de cada zona junto al estimado"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-2.6",
+   "capacidad": "CAP-PC1-2",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Ver marcadas las zonas que el colaborador calificó «muy sucia», sin que eso detenga el turno",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-2.1",
+     "dato": "calificación de cada zona"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una zona calificada «muy sucia» por el colaborador",
+     "cuando": "el operador abre el turno",
+     "entonces": "la zona aparece marcada y el turno no se bloquea"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-1",
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-3.1",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Activar los puntos de control del negocio (vienen apagados), para que aparezcan «al escanear» y el lector",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Con los puntos apagados todo funciona como hoy; apagarlos devuelve el turno al inicio manual sin tocar datos (reversión de REQ-PC1-2).",
+    "Crítico (RT-23): el turno puede empezar por un registro nuevo del colaborador. DA-36 lo decidió «como está escrito»."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PC1-3.2",
+     "dato": "puntos de control activados"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con los puntos de control apagados",
+     "cuando": "el administrador los activa",
+     "entonces": "el editor de flujos ofrece «al escanear» y el portal ofrece el lector"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "puntos de control activados",
+     "cuando": "el administrador los apaga",
+     "entonces": "el turno vuelve al inicio manual y los datos no se tocan"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-23",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. El requerimiento dice «apagados por defecto, por negocio» pero no dice dónde está el interruptor (supuesto: Inventario › puntos)."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-PC1-3.2",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Crear un punto de control (depósito principal, apartamento, carreta o zona específica) y obtener su código QR y su hoja para imprimir",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Quién los crea (solo el administrador o también el operador) no está dicho: pregunta para Diseño.",
+    "Es el caso de uso que Housekeeping llamaba CU-PC1-1.1 («punto de control con su código QR y su propiedad»)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PC1-3.1",
+     "dato": "puntos de control activados"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-2.10",
+     "dato": "punto de control con su código QR y su propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "puntos de control activados",
+     "cuando": "el administrador crea el punto «zz-verif-Depósito»",
+     "entonces": "el sistema genera su QR y su hoja para imprimir"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-23",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-3.3",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Abrir el lector de códigos QR dentro del STR, en Android y en iPhone (en iPhone puede pedir un toque para abrir la cámara)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El lector va dentro del portal, con el colaborador ya identificado; no se usa la cámara del celular por fuera.",
+    "La prueba en un celular físico es de Carlos (T-7, criterio 15, nivel N4); la cola no puede probarla.",
+    "Lo comparte con CU-INV-2.10 (escanear el QR de un lugar de inventario): Inventario no tiene lector propio."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-2.10",
+     "dato": "lector de códigos QR del STR, para escanear el QR de un lugar"
+    },
+    {
+     "a": "CU-PC1-3.4",
+     "dato": "código QR leído"
+    },
+    {
+     "a": "CU-PC1-3.5",
+     "dato": "código QR leído"
+    },
+    {
+     "a": "CU-PC1-3.6",
+     "dato": "código QR leído"
+    },
+    {
+     "a": "CU-PC1-3.7",
+     "dato": "código QR leído"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con sesión en el portal, en un iPhone o en un Android",
+     "cuando": "abre el lector",
+     "entonces": "se abre la cámara (en iPhone con un toque) y lee el código QR"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36",
+    "DA-29"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "T-7"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-3.4",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Avisar «este punto no es de tu turno» cuando el QR es de otra propiedad, y no avanzar",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-3.3",
+     "dato": "código QR leído"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un turno de una propiedad y el QR de un punto de otra propiedad",
+     "cuando": "el colaborador lo escanea",
+     "entonces": "ve el aviso «este punto no es de tu turno» y el turno no avanza"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-3.5",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Iniciar el turno escaneando el QR del depósito: queda la llegada con la hora del servidor, se pide la foto general en vivo y el turno pasa a «en curso»",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Los QR siguientes abren la actividad de ese lugar (CU-PC1-3.6)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PC1-3.3",
+     "dato": "código QR leído"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-2.10",
+     "dato": "llegada con la hora del servidor y foto general, que inician el turno"
+    },
+    {
+     "a": "CU-PC1-5.1",
+     "dato": "escaneo con su hora"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno sin iniciar en zz-verif-Propiedad y el punto «zz-verif-Depósito»",
+     "cuando": "el colaborador escanea el QR del depósito",
+     "entonces": "queda la llegada con la hora del servidor, se le pide la foto general en vivo y el turno pasa a «en curso»"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. Housekeeping lo cuenta como «iniciar el turno por QR» (CU-HK-2.10); aquí queda el lector, la llegada y la foto."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-3.6",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Abrir la actividad «al escanear el apto» solo cuando se escanea el QR del apartamento, no antes",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-3.3",
+     "dato": "código QR leído"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad con «Cuándo empieza: al escanear» ligada al apartamento",
+     "cuando": "el colaborador escanea el QR del apartamento",
+     "entonces": "la actividad se abre en ese momento y no estaba abierta antes"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36",
+    "REQ-PC1-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-3.7",
+   "capacidad": "CAP-PC1-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar un activo por QR en la actividad guiada: escanear, tomar la foto y marcar «OK» o «novedad»; una novedad abre un incidente interno con el activo y la foto",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El activo y su QR son de Inventario (CU-INV-11.2, no construido); el incidente interno es de Incidentes."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-11.2",
+     "dato": "activo con su código QR"
+    },
+    {
+     "de": "CU-PC1-3.3",
+     "dato": "código QR leído"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-4.1",
+     "dato": "novedad de un activo, con el activo y la foto, para abrir un incidente interno"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un activo con su QR dentro de una actividad guiada",
+     "cuando": "el colaborador lo escanea, toma la foto y marca «novedad»",
+     "entonces": "se abre un incidente interno con el activo y la foto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo activo",
+     "cuando": "el colaborador marca «OK»",
+     "entonces": "queda la foto y el OK, sin incidente"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36",
+    "REQ-INV2-6",
+    "REQ-INC1-1"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-4.1",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Subir una foto de respaldo del punto cuando el QR no lee, tomada con la cámara del celular (la galería se permite)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El respaldo evita que se detenga el turno cuando falla el lector en un modelo de celular.",
+    "Cada negocio decide qué respaldos permite (CU-PC1-4.8)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PC1-4.2",
+     "dato": "foto de respaldo subida"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un QR que el lector no puede leer",
+     "cuando": "el colaborador pulsa «No lee el QR» y sube una foto del punto",
+     "entonces": "el sistema recibe la foto y la valida (CU-PC1-4.2)"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-4.2",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Validar la foto de respaldo con sus datos de captura: hasta 15 minutos de diferencia con la hora del servidor vale la hora de captura; más, o sin datos, queda «por revisar» con la hora del servidor",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El inicio queda marcado «por respaldo».",
+    "Los datos de captura de la foto (fecha, hora y ubicación si viene) se leen con el mismo mecanismo que la evidencia de S2.1."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PC1-4.1",
+     "dato": "foto de respaldo subida"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-2.10",
+     "dato": "inicio «por respaldo» con la hora de captura, o «por revisar» con la hora del servidor"
+    },
+    {
+     "a": "CU-PC1-4.7",
+     "dato": "respaldo contado"
+    },
+    {
+     "a": "CU-PC1-5.1",
+     "dato": "respaldo con su hora"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto de respaldo cuya captura fue 10 minutos antes de subirla",
+     "cuando": "el sistema la valida",
+     "entonces": "el inicio queda «por respaldo» con la hora de captura"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto de respaldo cuya captura fue 40 minutos antes",
+     "cuando": "el sistema la valida",
+     "entonces": "queda «por revisar» con la hora del servidor"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una foto de respaldo sin datos de captura",
+     "cuando": "el sistema la valida",
+     "entonces": "queda «por revisar» con la hora del servidor"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-4.3",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mostrar la instrucción del respaldo según el sistema del celular (Android o iPhone): tomarla con la cámara, sin pasarla por WhatsApp ni captura de pantalla, y subirla dentro de 15 minutos",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador en la pantalla de respaldo",
+     "cuando": "abre la pantalla desde un Android o desde un iPhone",
+     "entonces": "ve la instrucción de su sistema"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-4.4",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Guardar el respaldo en el celular cuando no hay internet y subirlo después, con la hora de captura y la hora de subida",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Usa la cola de fotos del celular que ya existe para el turno (CU-HK-3.2)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-3.2",
+     "dato": "foto de respaldo guardada en el celular, con sus dos horas"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador sin internet que hace un respaldo",
+     "cuando": "vuelve la conexión",
+     "entonces": "la foto sube desde la cola con sus dos horas y queda para validar"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36",
+    "REQ-U6.3"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-PC1-4.5",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar el inicio sin foto con un motivo cuando el celular no tiene cámara, a la espera de que el operador lo apruebe",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PC1-4.6",
+     "dato": "registro sin foto, con motivo, pendiente"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un celular sin cámara que funcione",
+     "cuando": "el colaborador registra el inicio con un motivo",
+     "entonces": "queda un registro sin foto, con el motivo, pendiente de aprobación del operador"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-4.6",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Aprobar o rechazar un inicio sin foto que el colaborador dejó pendiente",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-4.5",
+     "dato": "registro sin foto, con motivo, pendiente"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un registro sin foto, con motivo, pendiente",
+     "cuando": "el operador lo aprueba",
+     "entonces": "el inicio queda válido"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un registro sin foto, con motivo, pendiente",
+     "cuando": "el operador lo rechaza",
+     "entonces": "el inicio no cuenta y queda constancia"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "El requerimiento dice «el operador aprueba o rechaza» sin decir qué pasa tras rechazar (supuesto: queda constancia)."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-PC1-4.7",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Contar los respaldos de cada colaborador y avisar al operador cuando pasan el umbral del negocio (3 en el mes por defecto)",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-4.2",
+     "dato": "respaldo contado"
+    },
+    {
+     "de": "CU-PC1-4.8",
+     "dato": "umbral y respaldos permitidos"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el umbral del negocio en 3 al mes",
+     "cuando": "un colaborador hace su tercer respaldo del mes",
+     "entonces": "el operador recibe un aviso"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo colaborador con dos respaldos en el mes",
+     "cuando": "se mira el contador",
+     "entonces": "el contador marca 2 y no hay aviso"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-4.8",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "admin"
+   ],
+   "que": "Decidir qué respaldos permite el negocio y cambiar el umbral de avisos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El requerimiento dice «umbral editable por el negocio» y «cada negocio decide qué respaldos permite»; no dice quién lo edita (supuesto: el administrador)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PC1-4.7",
+     "dato": "umbral y respaldos permitidos"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un umbral de 3 respaldos al mes",
+     "cuando": "el administrador lo cambia a 5",
+     "entonces": "el aviso se da al quinto respaldo del mes"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-PC1-4.9",
+   "capacidad": "CAP-PC1-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Compartir la ubicación del celular en el respaldo, solo si lo permite, sin que eso bloquee",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Es dato personal del colaborador; es opcional y con su permiso (supuesto 1 de REQ-PC1-2)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador que sube un respaldo",
+     "cuando": "permite la ubicación",
+     "entonces": "la ubicación se guarda con la foto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que sube un respaldo",
+     "cuando": "no permite la ubicación",
+     "entonces": "el respaldo se acepta igual"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-PC1-5.1",
+   "capacidad": "CAP-PC1-5",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Ver la línea de tiempo del turno: escaneos, respaldos y fotos, cada uno con su hora",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-PC1-3.5",
+     "dato": "escaneo con su hora"
+    },
+    {
+     "de": "CU-PC1-4.2",
+     "dato": "respaldo con su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con escaneos, un respaldo y fotos",
+     "cuando": "el operador abre el turno en Housekeeping",
+     "entonces": "ve la línea de tiempo con cada evento y su hora"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PC1-5.2",
+   "capacidad": "CAP-PC1-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dar al colaborador solo los puntos de control de sus propiedades y rechazar que cree o edite puntos",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-INV-7.3",
+     "dato": "propiedades y zonas que le tocan al colaborador (reglas de acceso de INV2-4-1)"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el colaborador zz-verif-colab",
+     "cuando": "pide los puntos de control",
+     "entonces": "recibe solo los de las propiedades de su turno"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el colaborador zz-verif-colab",
+     "cuando": "intenta crear o editar un punto",
+     "entonces": "el servidor responde 403"
+    }
+   ],
+   "origen": [
+    "REQ-PC1-2",
+    "DA-36",
+    "REQ-INV2-4-1"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-INV2-6",
+   "porque": "Activos (Inventario). PC1 solo usa el activo por QR dentro de la actividad guiada (CU-PC1-3.7); la ficha del activo es de INV."
+  },
+  {
+   "id": "REQ-INV2-6-2",
+   "porque": "Ficha y valor del activo (Inventario). No es de PC1."
+  },
+  {
+   "id": "REQ-INV2-7",
+   "porque": "Foto al cierre por ubicación (Inventario); está descartado y reemplazado por REQ-INV2-7-1 y REQ-INV2-7-2."
+  },
+  {
+   "id": "REQ-INV2-7-2",
+   "porque": "Foto al cierre en celular real (Inventario). Comparte con PC1 la prueba N4 de T-7, pero el caso de uso es de Inventario."
+  }
+ ]
+}

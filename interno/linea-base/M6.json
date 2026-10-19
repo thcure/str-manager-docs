@@ -1,0 +1,1277 @@
+{
+ "modulo": "M6",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "requerimientos-consolidado.md del Proyecto: REQ-F5 (alcance precisado 10-sep, DA-1), REQ-F5.1, REQ-M2.1 y REQ-M2.x",
+  "requerimientos-comunicaciones-agente-2026-10.md (borrador de P-13, bloqueado; Proyecto)",
+  "str-manager-docs/modulos/M6-mensajes.md y arquitectura/integraciones/whatsapp.md (diseño viejo de agosto, 26-ago): lista de plantillas, configuración y variables; solo para lo que los requerimientos nuevos no dicen",
+  "m6-fuentes.json: módulo M6 del mapa, REQ-PC1-2 y REQ-K3-3, DA-24, DA-27 y DA-45, INC-161 e INC-162 (ruido de la búsqueda) y las relaciones generales",
+  "interno/linea-base: HK, INC1, U, K3, CAL (ids reales de los casos de uso con los que M6 se une)",
+  "No hay código ni guiones e2e de M6 (no existe como módulo)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Las plantillas de mensajes con variables, por propiedad y por canal, y el momento de envío.",
+   "El envío manual: armar el mensaje y copiarlo o abrir WhatsApp.",
+   "El canal por propiedad, el correo y el registro de lo enviado.",
+   "Los mensajes al huésped y a portería: confirmación, enlace de registro, pregunta de hora, información de llegada, portería, salida y reseña.",
+   "El envío externo de los avisos del turno, del mantenimiento, de los incidentes urgentes y de los reclamos."
+  ],
+  "fuera": [
+   "El envío automático por WhatsApp Business y la conexión del número: pospuestos (DA-1).",
+   "El agente que atiende las comunicaciones: bloqueado (P-13, M-314).",
+   "Centralizar las alertas internas: decidido que cada módulo tiene las suyas (DA-1).",
+   "Lo que dicen los mensajes de M2 (el registro del huésped, la hora real, portería): es de M2; aquí queda solo preparar y enviar.",
+   "Los avisos del corte mensual por WhatsApp o correo (bolsa de Diseño, CU-K3-4.6)."
+  ],
+  "nota": "Levantado el 2026-10-18 solo desde los requerimientos (REQ-F5 y DA-1 del consolidado, el borrador de comunicaciones atendidas por un agente, P-13, y el diseño viejo M6-mensajes.md y whatsapp.md de agosto). No hay código: hoy no existe como módulo, solo hay enlaces manuales a WhatsApp suelto en el equipo y el turno. No hay criterios de aceptación; lo que viene solo del diseño viejo va con confianza baja. Pesos por confirmar con Diseño."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-M6-1",
+   "nombre": "Plantillas de mensajes",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que el administrador escriba los mensajes una vez, con variables, los ajuste por propiedad y decida cuándo se mandan."
+  },
+  {
+   "id": "CAP-M6-2",
+   "nombre": "Envío manual",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que el operador arme el mensaje con la plantilla y los datos de la reserva y lo copie o abra WhatsApp con el texto listo."
+  },
+  {
+   "id": "CAP-M6-3",
+   "nombre": "Envío por canal",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Mandar los mensajes solos por WhatsApp Business o por correo, por el canal que elija cada propiedad, y dejar registro de lo enviado."
+  },
+  {
+   "id": "CAP-M6-4",
+   "nombre": "Mensajes al huésped y a portería",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Los mensajes de cada reserva: confirmación, enlace de registro, pregunta de hora, información de llegada, portería, salida y reseña."
+  },
+  {
+   "id": "CAP-M6-5",
+   "nombre": "Avisos del STR a su equipo y a proveedores",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que los avisos de turno, mantenimiento, incidentes urgentes y reclamos lleguen por WhatsApp o correo, además de verse en el STR."
+  },
+  {
+   "id": "CAP-M6-6",
+   "nombre": "Agente que atiende las comunicaciones",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Un agente (modelo de lenguaje) que redacta y envía o propone los mensajes, con tope de costo. Bloqueado: pedido P-13."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-M6-1.1",
+   "capacidad": "CAP-M6-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Crear y editar una plantilla de mensaje con variables del huésped, de la reserva y de la propiedad",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy no hay plantillas: los mensajes se arman a mano o con textos fijos (copiar el mensaje del turno, CU-HK-1.5; invitación al equipo, CU-U-4.2).",
+    "Variables del diseño viejo: nombre del huésped, nombre de la propiedad, fechas y horas de check-in y check-out, código de acceso, clave del wifi, dirección, nombre y teléfono del operador, enlace de registro.",
+    "Los mensajes automáticos de WhatsApp Business necesitan plantillas aprobadas por Meta (CU-M6-3.1, pospuesto)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M6-1.2",
+     "dato": "plantilla con sus variables"
+    },
+    {
+     "a": "CU-M6-2.1",
+     "dato": "plantilla con sus variables, para armar el mensaje"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador creando la plantilla «Bienvenida»",
+     "cuando": "escribe «Hola {{nombre_huesped}}, te esperamos en {{nombre_propiedad}} el {{fecha_checkin}}» y la guarda",
+     "entonces": "la plantilla queda guardada con sus tres variables"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la plantilla «Bienvenida» y la reserva de María García en el Apto 1708 que llega el 26 de agosto de 2026",
+     "cuando": "se arma el mensaje",
+     "entonces": "queda «Hola María García, te esperamos en Apto 1708 el 26 de agosto de 2026»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una plantilla con una variable que la reserva no tiene (por ejemplo el código de acceso sin configurar)",
+     "cuando": "se arma el mensaje",
+     "entonces": "el sistema avisa qué dato falta y no lo deja salir con el hueco"
+    }
+   ],
+   "origen": [
+    "REQ-F5",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-1.2",
+   "capacidad": "CAP-M6-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Usar las plantillas globales del negocio o personalizarlas por propiedad, y activar o desactivar cada una",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Viene del diseño viejo (M6-mensajes.md, whatsapp.md y M2.md): cada propiedad tiene sus plantillas o hereda las globales del cliente, y cada una se activa o desactiva por propiedad."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-1.1",
+     "dato": "plantilla con sus variables"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una plantilla global y el Apto 1708 sin plantilla propia",
+     "cuando": "se arma un mensaje para una reserva del Apto 1708",
+     "entonces": "se usa la global"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el Apto 1708 con una plantilla propia de «Bienvenida»",
+     "cuando": "se arma el mensaje",
+     "entonces": "se usa la del apartamento y no la global"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una plantilla desactivada",
+     "cuando": "llega el momento de enviarla",
+     "entonces": "no se arma ni se envía"
+    }
+   ],
+   "origen": [
+    "REQ-F5",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-1.3",
+   "capacidad": "CAP-M6-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Tener una plantilla distinta según el canal de la reserva (Airbnb, directa)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Viene del diseño viejo (M6-mensajes.md): plantillas distintas para Airbnb y Booking, porque el tono puede variar. Los requerimientos nuevos solo hablan de «plantilla del canal» en el reclamo (CU-INC1-5.9)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una plantilla de «Bienvenida» para reservas de Airbnb y otra para reservas directas",
+     "cuando": "se arma el mensaje de una reserva directa",
+     "entonces": "se usa la de reservas directas"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-1.4",
+   "capacidad": "CAP-M6-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Decidir cuándo se manda cada mensaje: cuántos días u horas antes o después del check-in o del check-out",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy el momento lo decide quien envía a mano.",
+    "Ejemplos del diseño viejo: el formulario X días antes; el código el día del check-in; el recordatorio de salida la noche antes; la reseña 24 horas después."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M6-4.2",
+     "dato": "momento de envío de la confirmación"
+    },
+    {
+     "a": "CU-M6-4.3",
+     "dato": "momento de envío de la pregunta de hora"
+    },
+    {
+     "a": "CU-M6-4.4",
+     "dato": "momento de envío de la información de llegada"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el mensaje del código de acceso",
+     "cuando": "el administrador lo programa para «día del check-in»",
+     "entonces": "el mensaje se arma ese día para cada reserva que llega"
+    }
+   ],
+   "origen": [
+    "REQ-F5",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-2.1",
+   "capacidad": "CAP-M6-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Armar el mensaje con la plantilla y los datos de la reserva y copiarlo, o abrir WhatsApp con el texto listo, para enviarlo a mano",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Es el envío manual de hoy en el diseño: copiar el mensaje o abrir WhatsApp (DA-1).",
+    "Hoy existen dos pedazos sueltos, sin plantillas: copiar el mensaje del turno (CU-HK-1.5) y abrir WhatsApp con la invitación al equipo (CU-U-4.2). El mapa dice que el Calendario también abre WhatsApp, pero su línea base no lo muestra: pregunta para Diseño."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-1.1",
+     "dato": "plantilla con sus variables, para armar el mensaje"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la plantilla «Bienvenida» y la reserva de María García",
+     "cuando": "el operador pulsa «Copiar mensaje»",
+     "entonces": "el texto armado queda copiado, listo para pegarlo en WhatsApp"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la misma reserva con teléfono registrado",
+     "cuando": "el operador pulsa «Abrir WhatsApp»",
+     "entonces": "se abre WhatsApp con el mensaje escrito para ese número"
+    }
+   ],
+   "origen": [
+    "REQ-F5",
+    "DA-1"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M6-3.1",
+   "capacidad": "CAP-M6-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Enviar los mensajes por WhatsApp Business, solos y en el momento programado, con plantillas aprobadas por Meta",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Pospuesto: DA-1 (10-sep) dice «API de WhatsApp Business después».",
+    "Necesita un número de teléfono propio y un proveedor de la API; solo se puede responder fuera de plantilla dentro de las 24 horas del último mensaje del huésped.",
+    "El pedido P-13 (13-oct) lo retoma con un agente, pero está bloqueado (M-314)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "REQ-F5",
+    "DA-1",
+    "P-13"
+   ],
+   "reglas": [
+    "RT-18",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M6-3.2",
+   "capacidad": "CAP-M6-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Enviar los mensajes por correo electrónico",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Los buzones saldrían del plan Unlimited de Hostinger (gratis el primer año), según el borrador de P-13.",
+    "Es inferencia: ningún requerimiento aprobado lo define aparte del «WhatsApp y/o correo» del diseño viejo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-3.3",
+     "dato": "canal elegido para la propiedad"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M6-3.4",
+     "dato": "mensaje enviado por correo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con canal «correo» y un huésped con correo registrado",
+     "cuando": "llega el momento de enviar la confirmación de la reserva",
+     "entonces": "el huésped recibe el correo con el texto de la plantilla"
+    }
+   ],
+   "origen": [
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M6-3.3",
+   "capacidad": "CAP-M6-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Elegir por propiedad el canal de comunicación con el huésped: WhatsApp, correo o los dos",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M6-3.2",
+     "dato": "canal elegido para la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el Apto 1708 sin canal elegido",
+     "cuando": "el administrador elige «WhatsApp y correo»",
+     "entonces": "los mensajes de ese apartamento salen por los dos canales"
+    }
+   ],
+   "origen": [
+    "REQ-F5",
+    "REQ-M2.1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-3.4",
+   "capacidad": "CAP-M6-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el registro de lo enviado: texto, a quién, por qué canal, cuándo y quién lo aprobó",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Sale del borrador de P-13 («todo lo que envía queda registrado»); sirve también sin agente. Mientras el envío sea manual, el sistema no sabe si el operador lo mandó."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-3.2",
+     "dato": "mensaje enviado por correo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un mensaje enviado ayer a un huésped",
+     "cuando": "el operador abre el registro",
+     "entonces": "ve el texto, el destinatario, el canal y la hora"
+    }
+   ],
+   "origen": [
+    "P-13"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M6-3.5",
+   "capacidad": "CAP-M6-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Conectar el número de WhatsApp del negocio a la API",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Pospuesto junto con la API (DA-1). El número puede ser propio del cliente o del sistema: pregunta abierta de P-13."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "DA-1",
+    "P-13"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M6-4.1",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preparar el mensaje con el enlace de registro de la reserva, para que el huésped llene sus datos",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-M2-1.1",
+     "dato": "enlace de registro de la reserva, para enviarlo al huésped"
+    },
+    {
+     "de": "CU-M2-1.5",
+     "dato": "enlace de registro de la reserva, para reenviarlo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la reserva de María García en el Apto 1708 con su enlace de registro",
+     "cuando": "se prepara el mensaje de registro",
+     "entonces": "el mensaje lleva su nombre, el apartamento y el enlace {{link_precheckin}}"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M6-4.2",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preparar el mensaje de confirmación de la reserva, con el código de confirmación",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-CAL-2.1",
+     "dato": "reserva directa nueva, con su código, sus fechas y su propiedad"
+    },
+    {
+     "de": "CU-CAL-6.1",
+     "dato": "reserva nueva importada, con su código, sus fechas y su propiedad"
+    },
+    {
+     "de": "CU-M6-1.4",
+     "dato": "momento de envío de la confirmación"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva nueva, importada o creada a mano",
+     "cuando": "se prepara su confirmación",
+     "entonces": "el mensaje lleva el código de confirmación, las fechas y el apartamento"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. Cuándo se manda depende de la pregunta de CU-M2-1.1 (al confirmar o días antes)."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-4.3",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preguntar al huésped a qué hora llega y a qué hora sale, y volver a preguntar la víspera y el mismo día",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La respuesta la recibe y la guarda M2 (CU-M2-2.1 y 2.2)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-1.4",
+     "dato": "momento de envío de la pregunta de hora"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-2.1",
+     "dato": "pregunta de la hora de llegada y de salida, enviada al huésped"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva que llega mañana",
+     "cuando": "se prepara la pregunta de la víspera",
+     "entonces": "el mensaje le pregunta al huésped su hora de llegada y su hora de salida"
+    }
+   ],
+   "origen": [
+    "REQ-F5.1",
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M6-4.4",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preparar la información de llegada el día del check-in, con el código de acceso solo ese día y solo para el huésped de esa reserva",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Códigos de acceso solo el día del check-in (supuesto 4 del borrador de P-13; el diseño viejo lo decía igual)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-6.2",
+     "dato": "información de llegada armada, para enviarla el día del check-in"
+    },
+    {
+     "de": "CU-M6-1.4",
+     "dato": "momento de envío de la información de llegada"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el día del check-in de María García en el Apto 1708 con código 4721",
+     "cuando": "se prepara la información de llegada",
+     "entonces": "el mensaje lleva la dirección, cómo entrar y el código 4721"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "dos días antes del check-in",
+     "cuando": "se pide la información de llegada",
+     "entonces": "el mensaje sale sin el código de acceso"
+    }
+   ],
+   "origen": [
+    "REQ-F5",
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-4.5",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preparar el mensaje a portería de cada reserva y mandarlo de nuevo si la reserva cambia",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Lleva el documento de los huéspedes: solo portería lo recibe (REQ-M2.x)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-4.2",
+     "dato": "mensaje a portería y su destinatario, para enviarlo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-4.3",
+     "dato": "mensaje recibido por portería"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el mensaje armado por M2 para una reserva",
+     "cuando": "se prepara con la plantilla de portería",
+     "entonces": "el mensaje queda listo para la portería del edificio"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva con mensaje ya enviado",
+     "cuando": "cambian las fechas",
+     "entonces": "se prepara de nuevo con los datos nuevos"
+    }
+   ],
+   "origen": [
+    "REQ-M2.x",
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-4.6",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Recordar al huésped su salida la noche anterior",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Solo viene del diseño viejo (whatsapp.md); no está en los requerimientos nuevos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva que sale mañana",
+     "cuando": "llega la noche anterior",
+     "entonces": "se prepara el recordatorio con la hora de salida"
+    }
+   ],
+   "origen": [
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M6-4.7",
+   "capacidad": "CAP-M6-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Pedir la reseña al huésped 24 horas después de la salida",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Solo viene del diseño viejo (whatsapp.md) y del borrador de P-13; no está en un requerimiento aprobado."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva que salió ayer",
+     "cuando": "pasan 24 horas",
+     "entonces": "se prepara el mensaje que pide la reseña"
+    }
+   ],
+   "origen": [
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M6-5.1",
+   "capacidad": "CAP-M6-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preparar el aviso del turno para el colaborador, con el enlace para abrir su turno",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy el operador copia el mensaje del turno (CU-HK-1.5) y el colaborador abre el turno por su enlace (CU-HK-2.11)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-1.5",
+     "dato": "mensaje del turno armado para el colaborador"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno asignado a un colaborador",
+     "cuando": "se prepara el aviso",
+     "entonces": "el mensaje lleva la propiedad, la hora y el enlace del turno"
+    }
+   ],
+   "origen": [
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-5.2",
+   "capacidad": "CAP-M6-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Preparar el recordatorio al proveedor de un evento de mantenimiento",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hasta que M6 exista, el recordatorio es un texto para copiar (REQ-S3, CU-INC1-4.5)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-4.5",
+     "dato": "evento de mantenimiento con su proveedor y su fecha"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un evento de mantenimiento programado con un proveedor",
+     "cuando": "se acerca la fecha",
+     "entonces": "se prepara el recordatorio con la propiedad, el día y el trabajo"
+    }
+   ],
+   "origen": [
+    "REQ-S3",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-5.3",
+   "capacidad": "CAP-M6-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Avisar por WhatsApp o correo al operador cuando se reporta un incidente urgente",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El aviso en el STR es de Incidentes (CU-INC1-3.9); aquí queda solo el envío externo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-3.9",
+     "dato": "incidente urgente reportado"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente marcado urgente",
+     "cuando": "se reporta",
+     "entonces": "el operador recibe el aviso por su canal"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-1",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-5.4",
+   "capacidad": "CAP-M6-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Avisar por WhatsApp o correo cuando el plazo de un reclamo está por vencer, con dos días de anticipación",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El aviso en el STR es de Incidentes (CU-INC1-5.6); aquí queda solo el envío externo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-5.6",
+     "dato": "reclamo cuyo plazo está por vencer"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo de Airbnb al que le quedan 2 días",
+     "cuando": "llega ese momento",
+     "entonces": "el operador recibe el aviso por su canal"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-5.5",
+   "capacidad": "CAP-M6-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Enviar el mensaje del reclamo preparado con la plantilla del canal",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El mensaje lo prepara Incidentes (CU-INC1-5.9); el envío por WhatsApp o correo es de M6."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-5.9",
+     "dato": "mensaje del reclamo preparado con la plantilla del canal"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el mensaje de un reclamo ya preparado",
+     "cuando": "el operador pide enviarlo",
+     "entonces": "sale por el canal elegido y queda en el registro"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-5.6",
+   "capacidad": "CAP-M6-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Centralizar en M6 todas las alertas internas del STR",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Decidido que no (DA-1, 10-sep): las alertas internas viven dentro de cada módulo (Housekeeping, Soporte); M6 solo lleva el envío externo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M6-6.1",
+   "capacidad": "CAP-M6-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Redactar y enviar solo, con plantilla aprobada, los mensajes de rutina: confirmación, enlace de registro, víspera, hora, llegada, portería y recordatorios",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Bloqueado: pedido P-13 (13-oct), borrador sin cruce con Carlos; el Arquitecto lo detuvo en M-314 (13-oct 19:23). No va a la cola.",
+    "Propuesta del borrador: lo que va «solo, con plantilla aprobada»."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "P-13",
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-6.2",
+   "capacidad": "CAP-M6-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Proponer al operador la respuesta a lo que el huésped escribe libre y esperar su aprobación: cambios, reclamos, cobros, quejas, cancelaciones y todo lo de dinero",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Bloqueado: pedido P-13 (13-oct), borrador sin cruce con Carlos; el Arquitecto lo detuvo en M-314 (13-oct 19:23). No va a la cola.",
+    "Pregunta abierta de P-13: si el agente responde mensajes libres o solo deriva al operador."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "P-13"
+   ],
+   "reglas": [
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-6.3",
+   "capacidad": "CAP-M6-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "No aceptar ni cancelar reservas, no cambiar precios, no prometer reembolsos ni compartir datos de otro huésped",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Bloqueado: pedido P-13 (13-oct), borrador sin cruce con Carlos; el Arquitecto lo detuvo en M-314 (13-oct 19:23). No va a la cola.",
+    "Es el límite que el borrador pone al agente («nunca»)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "P-13"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-6.4",
+   "capacidad": "CAP-M6-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Vigilar el gasto de la API (tope de 100 dólares al mes) y, al 80 %, avisar al administrador y pasar a «solo plantillas» hasta el mes siguiente",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Bloqueado: pedido P-13 (13-oct), borrador sin cruce con Carlos; el Arquitecto lo detuvo en M-314 (13-oct 19:23). No va a la cola."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "P-13"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M6-6.5",
+   "capacidad": "CAP-M6-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Hablar con el huésped, el colaborador, el operador, el administrador, portería y los proveedores, pero no con el propietario tercero",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Bloqueado: pedido P-13 (13-oct), borrador sin cruce con Carlos; el Arquitecto lo detuvo en M-314 (13-oct 19:23). No va a la cola.",
+    "El propietario no tiene cuenta (DA-8); a lo sumo el informe periódico de REQ-PP-1."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "P-13",
+    "DA-8"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-161",
+   "porque": "Es de reinvitar a un usuario activo con «Invitar» (Identidad). La invitación se comparte por WhatsApp a mano (CU-U-4.2), no por M6."
+  },
+  {
+   "id": "INC-162",
+   "porque": "Es de «Cerrar sesión» del shell (Shell). No toca a M6."
+  },
+  {
+   "id": "REQ-K3-3",
+   "porque": "Es del aviso del corte y de los recordatorios (Copias y corte). Los avisos por WhatsApp o correo están en la bolsa de Diseño (CU-K3-4.6), no en M6."
+  },
+  {
+   "id": "REQ-PC1-2",
+   "porque": "Salió por buscar «mensaje» (aviso al operador al pasar el umbral de respaldos). Ese aviso es interno de PC1 (CU-PC1-4.7)."
+  },
+  {
+   "id": "DA-24",
+   "porque": "Es del usuario de prueba zz-verif-colab. No toca a M6."
+  }
+ ]
+}

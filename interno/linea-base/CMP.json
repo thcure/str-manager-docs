@@ -1,0 +1,825 @@
+{
+ "modulo": "CMP",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "requerimientos-cmp1-compras-2026-10.md (REQ-CMP-1: qué hace, tres supuestos y 11 criterios; vive en el Proyecto, no en el repositorio)",
+  "requerimientos-pg1-2-adelantos-liquidacion-2026-10.md (REQ-PG1-2: adelanto, compra con factura, saldo; Proyecto)",
+  "cmp-fuentes.json: módulo CMP del mapa, REQ-CMP-1 y REQ-PG1-2, DA-22, DA-29, DA-37, DA-38, DA-42 y DA-59, la bolsa (REQ-CMP-1 y T-7), INC-83, INC-155 e INC-178 y las relaciones generales",
+  "interno/linea-base: INV, PG, HK, U, SRV (ids reales de los casos de uso con los que CMP se une)",
+  "No hay código ni guiones e2e de CMP (no construido)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Avisar al operador cuando un consumible baja de su mínimo y proponer la lista de compra (ideal menos actual).",
+   "Ajustar la lista y encargar la compra al colaborador como una actividad del turno, con adelanto opcional.",
+   "Que el colaborador vea el encargo en su turno y registre lo comprado con la foto de la factura.",
+   "Que la compra aprobada entre al inventario en la zona del encargo, apague la alerta y deje marcada la compra sin encargo.",
+   "Los permisos del encargo y del adelanto, y el respaldo de mínimos, encargos y entradas."
+  ],
+  "fuera": [
+   "El adelanto, la compra con factura, su aprobación, el saldo y la liquidación (Pagos del equipo, CU-PG-3.1 a 3.4).",
+   "Fijar el mínimo y el ideal de cada artículo (Inventario, CU-INV-10.1).",
+   "Sumar la actividad al turno y el turno mismo (Housekeeping, CU-HK-1.8).",
+   "Sumar las unidades al inventario (Inventario, CU-INV-3.1).",
+   "La compra de emergencia fuera de turno: decidido que no (DA-29).",
+   "Bajar la calificación del colaborador por comprar sin encargo (REQ-PG2)."
+  ],
+  "nota": "Levantado el 2026-10-18 solo desde los requerimientos (REQ-CMP-1, con sus 11 criterios, DA-38 y REQ-PG1-2). No hay código. Hoy el módulo es una frontera: la alerta, la lista y el encargo no existen, y lo que sí existe (mínimo e ideal, entrada de una compra a mano) está en Inventario. Pesos por confirmar con Diseño."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-CMP-1",
+   "nombre": "Alerta y lista de compra",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Avisar al operador cuando un consumible baja de su mínimo y proponer qué comprar, para que él ajuste la lista."
+  },
+  {
+   "id": "CAP-CMP-2",
+   "nombre": "Encargo de compra en el turno",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que el operador encargue la compra al colaborador como una actividad de su turno, con adelanto, y que el colaborador la vea y registre lo comprado con la foto de la factura."
+  },
+  {
+   "id": "CAP-CMP-3",
+   "nombre": "Compra aprobada y entrada al inventario",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Que la compra aprobada entre al inventario en la zona del encargo y apague la alerta, y que una compra sin encargo quede marcada para el operador."
+  },
+  {
+   "id": "CAP-CMP-4",
+   "nombre": "Permisos y respaldo de compras",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Que solo quien tiene permiso cree encargos y adelantos, que el colaborador no apruebe nada y que mínimos, encargos y entradas queden en el respaldo."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-CMP-1.1",
+   "capacidad": "CAP-CMP-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Avisar al operador que un consumible bajó del mínimo de su zona, después de un conteo o de un movimiento, y apagar el aviso cuando vuelve al mínimo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy el mínimo y el ideal se fijan en Inventario (CU-INV-10.1, parcial), pero nada avisa cuando se baja de él (CU-INV-10.2, no construido).",
+    "El requerimiento no dice si el mínimo es por zona o por negocio, ni cómo cuenta cuando la unidad es una presentación (P-15): queda como pregunta para Diseño."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-3.1",
+     "dato": "existencia nueva, para apagar la alerta"
+    },
+    {
+     "de": "CU-INV-10.1",
+     "dato": "mínimo e ideal de cada artículo por zona"
+    },
+    {
+     "de": "CU-INV-9.2",
+     "dato": "conteo que el colaborador declara al marcar una tarea de inventario"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-1.2",
+     "dato": "artículos que están bajo el mínimo"
+    },
+    {
+     "a": "CU-INV-10.2",
+     "dato": "alerta de reposición del artículo bajo el mínimo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "zz-verif-Papel con mínimo 4 e ideal 10 en su zona",
+     "cuando": "un conteo deja 3 unidades",
+     "entonces": "el operador recibe la alerta «bajo el mínimo: zz-verif-Papel 3/4»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "zz-verif-Papel con mínimo 4 y existencia de 5 en su zona",
+     "cuando": "se registra un movimiento (por ejemplo un préstamo) que la deja en 3",
+     "entonces": "el operador recibe la misma alerta: vale el conteo o el movimiento"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una alerta abierta de zz-verif-Papel (3/4)",
+     "cuando": "entra una compra de 6 unidades y la existencia queda en 9",
+     "entonces": "la alerta se apaga porque 9 es mayor o igual que el mínimo 4"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "REQ-INV2-4"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. El mínimo y el ideal por artículo y zona ya los guarda Inventario (CU-INV-10.1). La alerta sería nueva."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-1.2",
+   "capacidad": "CAP-CMP-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Calcular la lista de compra sugerida de una propiedad: para cada consumible bajo el mínimo, el ideal menos lo que hay",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Cuenta solo los consumibles que están bajo el mínimo; lo que está sobre el mínimo no entra a la lista."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-1.1",
+     "dato": "artículos que están bajo el mínimo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-1.3",
+     "dato": "lista de compra sugerida"
+    },
+    {
+     "a": "CU-INV-10.2",
+     "dato": "lista de compra sugerida (ideal menos actual)"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "zz-verif-Papel con mínimo 4, ideal 10 y existencia de 3",
+     "cuando": "el sistema arma la lista sugerida",
+     "entonces": "la lista dice «zz-verif-Papel: comprar 7» (10 menos 3)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un consumible con existencia igual o mayor que su mínimo",
+     "cuando": "el sistema arma la lista sugerida",
+     "entonces": "ese consumible no aparece en la lista"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-1.3",
+   "capacidad": "CAP-CMP-1",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Ajustar la lista de compra sugerida: cambiar la cantidad de cada artículo, quitar o agregar artículos, antes de encargarla",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El requerimiento dice «el operador la ajusta» pero no dice si puede agregar artículos que no estaban bajo el mínimo (supuesto: sí)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-1.2",
+     "dato": "lista de compra sugerida"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-2.1",
+     "dato": "lista ajustada por el operador"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la lista sugerida dice «zz-verif-Papel: comprar 7»",
+     "cuando": "el operador cambia la cantidad a 6",
+     "entonces": "la lista queda en 6 y es la que se encarga"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una lista sugerida con dos artículos",
+     "cuando": "el operador quita uno",
+     "entonces": "solo el otro pasa al encargo"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-2.1",
+   "capacidad": "CAP-CMP-2",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Crear el encargo de compra desde la lista, para el turno en curso o el siguiente de la propiedad, con el tiempo que le da y un adelanto opcional",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (dinero, RT-23): no entra a la cola sin DA-n y cruce con Carlos. DA-38 lo decidió «como está escrito, después de PG1-2».",
+    "Depende del adelanto de PG1-2 (CU-PG-3.1), que tampoco está construido.",
+    "El requerimiento no dice qué pasa si la propiedad no tiene turno siguiente, ni si un encargo no cumplido se arrastra al turno que sigue: pregunta para Diseño."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-1.3",
+     "dato": "lista ajustada por el operador"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-2.2",
+     "dato": "encargo con lista, adelanto y tiempo"
+    },
+    {
+     "a": "CU-PG-3.1",
+     "dato": "monto del adelanto del encargo y su motivo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una lista ajustada a 6 de zz-verif-Papel y un operador con inventario.editar y dinero.adelantos",
+     "cuando": "crea el encargo para el siguiente turno con adelanto de 30.000",
+     "entonces": "se crea la actividad «Compra» en ese turno con la lista y el adelanto, y queda el movimiento de adelanto en las cuentas del colaborador (PG1-2)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno en curso en la propiedad",
+     "cuando": "el operador crea el encargo para ese turno",
+     "entonces": "la actividad «Compra» aparece en el turno en curso"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una lista ajustada",
+     "cuando": "el operador crea el encargo sin adelanto",
+     "entonces": "se crea la actividad sin ningún movimiento de adelanto"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "REQ-PG1-2",
+    "DA-29",
+    "DA-37"
+   ],
+   "reglas": [
+    "RT-23",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. El adelanto lo crea PG1-2 (CU-PG-3.1): CMP solo le entrega el monto y el motivo."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-2.2",
+   "capacidad": "CAP-CMP-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Poner la actividad «Compra» en el turno con la lista, el adelanto y el tiempo del encargo, como una actividad más del flujo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La compra es una actividad de flujo, nunca una compra de emergencia (DA-29).",
+    "Hoy el operador ya puede sumar flujos extra a un turno (CU-HK-1.8); falta que exista el tipo de actividad «Compra» con su lista y su adelanto."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-2.1",
+     "dato": "encargo con lista, adelanto y tiempo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-2.3",
+     "dato": "encargo dentro del turno"
+    },
+    {
+     "a": "CU-HK-1.8",
+     "dato": "actividad «Compra» para sumarla al turno"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un encargo creado para el siguiente turno de la propiedad",
+     "cuando": "el sistema arma el turno",
+     "entonces": "el turno incluye la actividad «Compra» con la lista, el adelanto y el tiempo del encargo"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "DA-29"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. Punto de unión con Housekeeping: hoy los flujos extra se suman en el turno (CU-HK-1.8)."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-CMP-2.3",
+   "capacidad": "CAP-CMP-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el encargo de compra en su turno: la lista, el monto del adelanto y el tiempo, sin precios de otros",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El colaborador ve el encargo solo dentro de su turno (R-2); no ve precios de otros encargos ni de otros colaboradores."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-2.2",
+     "dato": "encargo dentro del turno"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-2.4",
+     "dato": "lista, adelanto y tiempo del encargo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con el encargo de zz-verif-Papel (lista de 6, adelanto 30.000)",
+     "cuando": "el colaborador zz-verif-colab abre su turno en el portal",
+     "entonces": "ve la lista, el adelanto y el tiempo del encargo"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "otro encargo de otro colaborador o de otra propiedad",
+     "cuando": "el colaborador abre su turno",
+     "entonces": "no ve ese encargo ni sus precios"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "DA-27",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-2.4",
+   "capacidad": "CAP-CMP-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Registrar lo comprado por artículo contra el encargo, con la foto de la factura y su valor",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La compra queda «por aprobar» hasta que el operador la acepte (CU-PG-3.3).",
+    "La foto de la factura desde un celular real es una prueba N4 que hace Carlos (T-7, criterio 11)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CMP-2.3",
+     "dato": "lista, adelanto y tiempo del encargo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PG-3.2",
+     "dato": "compra «por aprobar» con la foto de la factura y el detalle por artículo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el encargo de zz-verif-Papel en el turno del colaborador",
+     "cuando": "registra la compra con la foto de la factura, valor 24.000 y 6 unidades",
+     "entonces": "queda una compra «por aprobar» con la factura y el detalle de lo comprado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el celular del colaborador",
+     "cuando": "toma la foto de la factura con la cámara desde el portal",
+     "entonces": "la foto se toma y se sube desde el portal"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "REQ-PG1-2"
+   ],
+   "reglas": [
+    "RT-11",
+    "RT-7"
+   ],
+   "pendientes": [
+    "T-7"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. El registro de la compra con factura lo cuenta PG1-2 (CU-PG-3.2): CMP le suma el detalle por artículo del encargo."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-2.5",
+   "capacidad": "CAP-CMP-2",
+   "actor": [
+    "operador",
+    "admin"
+   ],
+   "que": "Encargar una compra de emergencia fuera de un turno",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Decidido: la compra se asigna como actividad de flujo, nunca de emergencia (DA-29, 9-oct)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "DA-29",
+    "REQ-CMP-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-3.1",
+   "capacidad": "CAP-CMP-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Registrar la entrada al inventario de lo comprado cuando el operador aprueba la compra, en la zona del encargo, y apagar la alerta si se llega al mínimo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Lo comprado de más va a la misma zona; el operador puede trasladarlo después (supuesto 2 de REQ-CMP-1).",
+    "La diferencia entre el adelanto y la factura va al saldo del colaborador (PG1-2); aquí solo se cuenta la entrada al inventario.",
+    "Una compra parcial (menos de lo encargado) no está definida: pregunta para Diseño."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PG-3.3",
+     "dato": "compra aprobada con su encargo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CMP-1.1",
+     "dato": "existencia nueva, para apagar la alerta"
+    },
+    {
+     "a": "CU-INV-3.1",
+     "dato": "entrada de lo comprado en la zona del encargo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un adelanto de 30.000 y una compra «por aprobar» de 24.000 con 6 unidades de zz-verif-Papel (había 3)",
+     "cuando": "el operador aprueba la compra",
+     "entonces": "entran 6 unidades en la zona del encargo (quedan 9), el saldo del adelanto del colaborador es 6.000 y la alerta se apaga porque 9 es mayor o igual que 4"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una compra aprobada de 9 unidades para un encargo de 6",
+     "cuando": "el operador aprueba la compra",
+     "entonces": "las 9 unidades entran en la misma zona del encargo y el operador puede trasladarlas después"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "REQ-PG1-2"
+   ],
+   "reglas": [
+    "RT-23",
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. Hoy una compra se registra a mano en la zona principal (CU-INV-3.1); aquí entraría sola, en la zona del encargo."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-3.2",
+   "capacidad": "CAP-CMP-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Marcar «sin encargo» una compra que el colaborador registra sin encargo previo, para que el operador la vea",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La compra sin encargo se puede registrar; solo queda marcada (supuesto 1). Que baje la calificación del colaborador es de REQ-PG2 y no se cuenta aquí."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PG-3.2",
+     "dato": "compra registrada por el colaborador, con o sin encargo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PG-3.3",
+     "dato": "marca «sin encargo» para el operador"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador sin ningún encargo de compra en su turno",
+     "cuando": "registra una compra con factura",
+     "entonces": "la compra se registra marcada «sin encargo» y llega al operador para aprobarla"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "REQ-PG2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-inventario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-CMP-4.1",
+   "capacidad": "CAP-CMP-4",
+   "actor": [
+    "operador"
+   ],
+   "que": "Crear encargos y adelantos solo con los permisos de inventario y de adelantos; sin ellos el servidor lo rechaza",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hace falta inventario.editar para el encargo y dinero.adelantos para el adelanto; el administrador siempre puede (RT-14)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.3",
+     "dato": "permisos inventario.editar y dinero.adelantos del operador"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un operador sin inventario.editar",
+     "cuando": "intenta crear un encargo",
+     "entonces": "el servidor responde 403 y no se crea"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un operador sin dinero.adelantos",
+     "cuando": "intenta crear un encargo con adelanto",
+     "entonces": "el servidor responde 403 y no se crea el adelanto"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38",
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-4.2",
+   "capacidad": "CAP-CMP-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "No poder crear encargos ni aprobar compras: el servidor rechaza al colaborador",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "el colaborador zz-verif-colab",
+     "cuando": "intenta crear un encargo o aprobar una compra",
+     "entonces": "el servidor responde 403 y no cambia nada"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-CMP-4.3",
+   "capacidad": "CAP-CMP-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Incluir los mínimos, los encargos y las entradas de compra en el respaldo del negocio, sin cambiar existencias ni cuentas",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Los datos quedan en la base y el código viejo los ignora si se revierte (reversión de REQ-CMP-1)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SRV-8.1",
+     "dato": "mínimos, encargos y entradas de compra para el respaldo diario"
+    },
+    {
+     "a": "CU-SRV-8.2",
+     "dato": "mínimos, encargos y entradas de compra para el respaldo descargable"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "mínimos, encargos y entradas creados por CMP",
+     "cuando": "se pide el respaldo del negocio",
+     "entonces": "el respaldo los trae, y las existencias y las cuentas de PG1-2 quedan iguales"
+    }
+   ],
+   "origen": [
+    "REQ-CMP-1",
+    "DA-38"
+   ],
+   "reglas": [
+    "RT-12"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-83",
+   "porque": "Es del editor de flujos (mínimo de fotos de una tarea). Salió por buscar «compra» en el texto; no toca a CMP. Cerrado."
+  },
+  {
+   "id": "INC-155",
+   "porque": "Es de un guion de REQ-OP-1 (Tablero) que lee mal un motivo de atraso. No toca a CMP."
+  },
+  {
+   "id": "INC-178",
+   "porque": "Es de un incidente escalado sin salida (Incidentes). No toca a CMP."
+  },
+  {
+   "id": "DA-22",
+   "porque": "Es de inventario: quién resuelve una diferencia de conteo y el consumo deducido del conteo de cierre (CU-INV-10.4). CMP solo usa el conteo ya declarado."
+  },
+  {
+   "id": "DA-42",
+   "porque": "Es del valor de compra de un activo (Inventario, CU-INV-11.1). No es de las compras de consumibles."
+  },
+  {
+   "id": "DA-59",
+   "porque": "Es de los accesos del colaborador a archivos y configuración (INC-192 e INC-193). Aplica a la foto de la factura cuando se construya, pero no es de CMP."
+  }
+ ]
+}

@@ -1,0 +1,1582 @@
+{
+ "modulo": "M2",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "requerimientos-consolidado.md del Proyecto: REQ-M2.1 (registro del huésped, TRA y SIRE, valor pagado, el operador completa), REQ-M2.x (portería), REQ-F5 y REQ-F5.1 (hora real de llegada y salida), REQ-U6.1 (datos del huésped en el turno)",
+  "str-manager-docs/modulos/M2-checkin-checkout.md (diseño viejo de agosto, no es vigente en todo; solo para lo que los requerimientos nuevos no dicen: check-in virtual, acceso por propiedad e información de llegada) y definiciones-proyecto.md (resumen de M2)",
+  "m2-fuentes.json: módulo M2 del mapa, REQ-PR1-1 y REQ-PR1-4, DA-16, DA-27 y DA-35, la bolsa (horario base y retención TRA/SIRE), 10 INC, REL-32 y reglas RT-5, RT-6, RT-7, RT-14 y RT-23",
+  "interno/linea-base: CAL, PR, SRV, HK (ids reales de los casos de uso con los que M2 se une)",
+  "No hay código ni guiones e2e de M2 (no construido)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "El registro del huésped por un enlace sin cuenta: datos del TRA y del SIRE, el operador que los completa o reenvía el enlace, el estado y el valor pagado.",
+   "La hora real de llegada y de salida respondida por el huésped y el aviso si la llegada queda fuera del rango.",
+   "El formulario TRA por reserva y el archivo SIRE por periodo, con la revisión de campos.",
+   "El mensaje a portería, su envío y la autorización del operador en casos especiales.",
+   "La confirmación de llegada y de salida, el acceso por propiedad y la información de llegada.",
+   "La privacidad de los datos del huésped y su retención."
+  ],
+  "fuera": [
+   "Enviar los textos al huésped, a portería y al operador, y sus plantillas (Comunicaciones, M6).",
+   "La reserva, su calendario y las horas acordadas por el operador (Calendario, CU-CAL-4.1 y 4.2).",
+   "El horario base de check-in y check-out de la propiedad (Propiedades, CU-PR-3.1).",
+   "El turno de limpieza que sale de cada reserva y la alerta del mismo día de salida (Housekeeping CU-HK-1.2 y Calendario CU-CAL-7.4).",
+   "El recorte de lo que el colaborador lee del huésped (Servidor, CU-SRV-2.2).",
+   "Enviar los reportes directo al TRA y al SIRE y el panel de portería por enlace: pospuestos."
+  ],
+  "nota": "Levantado el 2026-10-18 solo desde los requerimientos (REQ-M2.1, REQ-F5.1 y REQ-M2.x del consolidado, el diseño viejo M2-checkin-checkout.md de agosto y DA-1, DA-27, DA-35 y DA-45). No hay código ni criterios de aceptación escritos: casi todo sale de notas y decisiones (confianza media) y lo que viene solo del diseño viejo va con confianza baja. Los plazos y formatos del TRA y del SIRE se validan con la norma antes de construir. Pesos por confirmar con Diseño."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-M2-1",
+   "nombre": "Registro del huésped (TRA y SIRE)",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Pedir al huésped, por un enlace sin cuenta, los datos que exigen el TRA y el SIRE, y dejar que el operador los vea, los complete y reenvíe el enlace."
+  },
+  {
+   "id": "CAP-M2-2",
+   "nombre": "Hora real de llegada y de salida",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Preguntar al huésped a qué hora llega y a qué hora sale, guardar su respuesta como confirmada por él y avisar si la llegada queda fuera del rango."
+  },
+  {
+   "id": "CAP-M2-3",
+   "nombre": "Reportes TRA y SIRE",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Sacar el formulario TRA de cada reserva y el archivo SIRE de entradas y salidas por periodo, con los campos completos."
+  },
+  {
+   "id": "CAP-M2-4",
+   "nombre": "Portería del edificio",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Armar y enviar a portería los datos del huésped de cada reserva, y que el operador autorice el ingreso en los casos especiales."
+  },
+  {
+   "id": "CAP-M2-5",
+   "nombre": "Llegada y salida",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Confirmar que el huésped llegó y que salió, con la hora real y las observaciones."
+  },
+  {
+   "id": "CAP-M2-6",
+   "nombre": "Acceso e información de llegada",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Configurar cómo se entra a cada propiedad y armar la información que se le manda al huésped antes de llegar."
+  },
+  {
+   "id": "CAP-M2-7",
+   "nombre": "Privacidad y retención de datos del huésped",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Que los datos de identidad vivan solo en la base y solo los vean quienes deben, y que se conserven un plazo definido."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-M2-1.1",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Generar el enlace de registro de cada reserva, que funciona sin cuenta y desde el celular, y entregarlo para mandárselo al huésped",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "El enlace es uno por reserva y se puede reusar hasta el check-out.",
+    "Cuándo se manda no está claro: REQ-M2.1 dice «al confirmar la reserva» y el diseño viejo (M2.md) dice «X días antes del check-in, por propiedad»: pregunta para Diseño.",
+    "El calendario de Airbnb no trae el correo ni el teléfono completo del huésped: hoy el operador es quien le manda el enlace."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-2.1",
+     "dato": "reserva directa nueva, con su código, sus fechas y su propiedad"
+    },
+    {
+     "de": "CU-CAL-6.1",
+     "dato": "reserva nueva importada, con su código, sus fechas y su propiedad"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-1.2",
+     "dato": "enlace de registro de la reserva"
+    },
+    {
+     "a": "CU-M6-4.1",
+     "dato": "enlace de registro de la reserva, para enviarlo al huésped"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva nueva, importada de un canal o creada a mano, con su código, sus fechas y su propiedad",
+     "cuando": "el sistema la procesa",
+     "entonces": "queda un enlace de registro propio de esa reserva, listo para enviarse por WhatsApp o correo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva que ya tiene enlace",
+     "cuando": "el huésped lo abre más de una vez antes del check-out",
+     "entonces": "el mismo enlace sigue sirviendo, sin pedir cuenta"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1",
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. Entrega el enlace a Comunicaciones (CU-M6-4.1) para enviarlo."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-1.2",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "huesped"
+   ],
+   "que": "Llenar sus datos de registro desde el enlace: los del TRA para todos los huéspedes y los del SIRE si es extranjero",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "TRA, por cada huésped (el principal y cada acompañante): tipo y número de identificación, nombres, apellidos, país y ciudad de residencia, país y ciudad de procedencia. Solo el principal: motivo del viaje y número de acompañantes.",
+    "SIRE, solo extranjeros: nacionalidad, primer apellido y nombre, fecha de nacimiento, procedencia y destino. Sin campos vacíos.",
+    "El diseño viejo (M2.md) pide además cantidad y tipo (adultos, niños, bebés), mascotas y la firma del huésped; REQ-M2.1 no los menciona: pregunta para Diseño.",
+    "Los plazos y formatos exactos hay que validarlos con la norma vigente antes de construir (REQ-M2.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-1.1",
+     "dato": "enlace de registro de la reserva"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-1.4",
+     "dato": "datos de registro llenados por el huésped"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva de un huésped colombiano con 2 acompañantes, y su enlace",
+     "cuando": "el huésped llena su identificación, su residencia y su procedencia, y la de cada acompañante",
+     "entonces": "quedan guardados los datos del TRA de los 3 huéspedes y la reserva pasa a «registro completo»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva de un huésped extranjero",
+     "cuando": "el huésped llena además nacionalidad, fecha de nacimiento, procedencia y destino",
+     "entonces": "quedan guardados también los datos del SIRE"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un huésped extranjero que deja un campo del SIRE vacío",
+     "cuando": "intenta enviar el formulario",
+     "entonces": "el formulario no se envía y le dice qué campo falta"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1",
+    "DA-27"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código. REQ-M2.1 solo registró los campos; no trae criterios de aceptación."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-1.3",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver y completar a mano los datos del huésped de una reserva, cuando no los envió o llegan distintos a los de recepción",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "Hoy el operador solo puede escribir el nombre y la cantidad de huéspedes de la reserva (CU-CAL-4.1); el resto de los datos no se guarda en ninguna parte.",
+    "Es el operador quien finalmente autoriza o no el ingreso ante portería (CU-M2-4.4)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M2-1.4",
+     "dato": "datos digitados o corregidos por el operador"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva cuyo huésped no respondió el formulario",
+     "cuando": "el operador digita sus datos desde la reserva",
+     "entonces": "quedan guardados igual que si el huésped los hubiera llenado y la recepción puede validar"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva con datos que no coinciden con los de recepción",
+     "cuando": "el operador corrige los datos",
+     "entonces": "el dato corregido reemplaza al anterior y queda vigente"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1",
+    "REQ-U6.1"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-calendario.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-1.4",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar los datos de cada huésped de la reserva (principal y acompañantes) solo en la base y entregárselos al Calendario",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "El huésped principal da el nombre de la reserva y la cantidad de huéspedes es el número de personas registradas (compatibilidad con REQ-U6.1).",
+    "Es el caso de uso que el Calendario llamaba CU-M2-1.1 («datos del huésped por reserva», REL-32)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-1.2",
+     "dato": "datos de registro llenados por el huésped"
+    },
+    {
+     "de": "CU-M2-1.3",
+     "dato": "datos digitados o corregidos por el operador"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CAL-4.3",
+     "dato": "datos del huésped por reserva (registro de viajeros y portería)",
+     "rel": "REL-32"
+    },
+    {
+     "a": "CU-M2-1.6",
+     "dato": "registro completo de la reserva"
+    },
+    {
+     "a": "CU-M2-3.1",
+     "dato": "datos TRA de cada huésped"
+    },
+    {
+     "a": "CU-M2-3.2",
+     "dato": "datos SIRE de los huéspedes extranjeros"
+    },
+    {
+     "a": "CU-M2-4.1",
+     "dato": "nombre y documento de cada huésped de la reserva"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "los datos de 3 huéspedes recibidos del formulario o digitados por el operador",
+     "cuando": "se guardan",
+     "entonces": "la reserva queda con 3 personas, el principal da el nombre y la cantidad de huéspedes es 3"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "la lista de reservas que lee el colaborador",
+     "cuando": "se arma con esta reserva",
+     "entonces": "no lleva documento, nacionalidad ni acompañantes (DA-27, DA-45)"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1",
+    "REQ-U6.1",
+    "DA-27",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "reservas.huespedes[] (definido)"
+    ],
+    "notas": "Sin código. El mapa dice: campos definidos en reservas.huespedes[], sin construir."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M2-1.5",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Reenviar al huésped el mismo enlace de registro cuando no respondió",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M6-4.1",
+     "dato": "enlace de registro de la reserva, para reenviarlo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva cuyo huésped no ha llenado el formulario y la llegada se acerca",
+     "cuando": "el operador pide reenviar el enlace",
+     "entonces": "sale el mismo enlace de esa reserva, no uno nuevo"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-1.6",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en el panel el estado del registro de cada reserva: pendiente o completado",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-M2-1.4",
+     "dato": "registro completo de la reserva"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos reservas próximas, una con el formulario lleno y otra sin llenar",
+     "cuando": "el operador abre el panel",
+     "entonces": "ve la primera «completado» y la segunda «pendiente»"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-1.7",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "operador",
+    "airbnb"
+   ],
+   "que": "Cargar el valor pagado de cada reserva desde el archivo plano (CSV) que entrega Airbnb, cruzando por el código de confirmación",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Mientras no esté cargado, el valor pagado se escribe a mano.",
+    "Claude evaluará después si hay una mejor alternativa (una conexión directa) (REQ-M2.1).",
+    "La reserva ya tiene un total (CU-CAL-2.1); falta decidir si el valor pagado del TRA es ese total o el que trae el archivo de Airbnb."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M2-3.1",
+     "dato": "valor pagado de la reserva"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el archivo de transacciones de Airbnb y una reserva con el mismo código de confirmación",
+     "cuando": "el operador lo carga",
+     "entonces": "la reserva queda con el valor pagado que dice el archivo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva sin fila en el archivo",
+     "cuando": "el operador revisa el valor pagado",
+     "entonces": "queda editable a mano"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-1.8",
+   "capacidad": "CAP-M2-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Guardar en la cuenta el RNT del establecimiento y los códigos del SIRE (código del establecimiento y de la ciudad)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Sin el RNT no se puede completar el TRA; sin los códigos no se puede armar el SIRE."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M2-3.1",
+     "dato": "RNT del establecimiento"
+    },
+    {
+     "a": "CU-M2-3.2",
+     "dato": "código del establecimiento y de la ciudad en el SIRE"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una cuenta sin RNT",
+     "cuando": "el administrador lo guarda con el código del SIRE y el de la ciudad",
+     "entonces": "quedan en la cuenta y se usan en cada reporte"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una cuenta sin RNT",
+     "cuando": "se intenta sacar un reporte TRA",
+     "entonces": "el sistema dice que falta el RNT y no lo saca"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "cuenta: rnt, codigoSire, codigoCiudad (definido)"
+    ],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-2.1",
+   "capacidad": "CAP-M2-2",
+   "actor": [
+    "huesped"
+   ],
+   "que": "Responder a qué hora llega y a qué hora sale, y volver a confirmarlo la víspera y el mismo día si cambia",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La pregunta la manda Comunicaciones (CU-M6-4.3).",
+    "Cambia con frecuencia: se reconfirma la víspera y el mismo día (REQ-F5.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-4.3",
+     "dato": "pregunta de la hora de llegada y de salida, enviada al huésped"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-2.2",
+     "dato": "hora de llegada y de salida respondida por el huésped"
+    },
+    {
+     "a": "CU-M2-2.3",
+     "dato": "hora de llegada respondida por el huésped"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva que llega el 26 de agosto de 2026 y la pregunta de hora",
+     "cuando": "el huésped responde que llega a las 4:30 PM y sale a las 11:00 AM",
+     "entonces": "el sistema recibe las dos horas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una hora ya confirmada",
+     "cuando": "el huésped responde el mismo día con otra hora",
+     "entonces": "se recibe la nueva hora"
+    }
+   ],
+   "origen": [
+    "REQ-F5.1",
+    "REQ-F5",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-2.2",
+   "capacidad": "CAP-M2-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar la hora respondida por el huésped como «confirmada por el huésped», para que la usen el turno, el portal y las alertas",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy solo el operador acuerda la hora, con la fuente «operador» (CU-CAL-4.2); la del huésped sería una fuente nueva (REQ-T1 ya la prevé).",
+    "Si el operador ya había puesto una hora y el huésped responde otra, no está dicho cuál manda: pregunta para Diseño.",
+    "Quienes la usan: el portal del colaborador, la ventana real del turno, las alertas y portería."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-2.1",
+     "dato": "hora de llegada y de salida respondida por el huésped"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CAL-4.2",
+     "dato": "hora de llegada y de salida confirmada por el huésped"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el huésped respondió que llega a las 4:30 PM",
+     "cuando": "el sistema la guarda",
+     "entonces": "la reserva muestra la llegada «✔ confirmada» con fuente huésped"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva sin respuesta del huésped",
+     "cuando": "se mira la hora de llegada",
+     "entonces": "sigue «por confirmar» con el horario de la propiedad o el del canal"
+    }
+   ],
+   "origen": [
+    "REQ-F5.1",
+    "REQ-U6.1",
+    "DA-1"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-2.3",
+   "capacidad": "CAP-M2-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Avisar al operador cuando la hora de llegada del huésped queda fuera del rango de check-in de la propiedad",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Es una alerta interna de M2 y no va por Comunicaciones (DA-1: las alertas internas viven en cada módulo).",
+    "El rango es el que fija la propiedad (por ejemplo de 3:00 PM a 9:00 PM) (CU-PR-3.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-2.1",
+     "dato": "hora de llegada respondida por el huésped"
+    },
+    {
+     "de": "CU-PR-3.1",
+     "dato": "rango de check-in de la propiedad"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con check-in de 3:00 PM a 9:00 PM",
+     "cuando": "el huésped dice que llega a las 11:30 PM",
+     "entonces": "el operador recibe un aviso para coordinar con el huésped"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la misma propiedad",
+     "cuando": "el huésped dice que llega a las 5:00 PM",
+     "entonces": "no hay aviso"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1",
+    "REQ-PR1-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-3.1",
+   "capacidad": "CAP-M2-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Sacar el formulario TRA completo de una reserva, con todos sus huéspedes",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "Por ahora se exporta para cargarlo a mano; la conexión directa es para después (REQ-M2.1).",
+    "Incluye fechas de llegada y salida, unidad, tipo de alojamiento y valor pagado, además de los datos de cada huésped."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-1.4",
+     "dato": "datos TRA de cada huésped"
+    },
+    {
+     "de": "CU-M2-1.7",
+     "dato": "valor pagado de la reserva"
+    },
+    {
+     "de": "CU-M2-1.8",
+     "dato": "RNT del establecimiento"
+    },
+    {
+     "de": "CU-M2-3.3",
+     "dato": "campos que faltan"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-3.4",
+     "dato": "reporte TRA sacado"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva con el registro completo de 3 huéspedes y el RNT en la cuenta",
+     "cuando": "el operador pide el formulario TRA",
+     "entonces": "sale el formulario con los 3 huéspedes y los datos de la reserva"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una reserva con el registro incompleto",
+     "cuando": "el operador pide el formulario TRA",
+     "entonces": "el sistema dice qué falta (CU-M2-3.3)"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-3.2",
+   "capacidad": "CAP-M2-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Sacar el archivo SIRE de entradas y salidas de los huéspedes extranjeros de un periodo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "Formato de carga: archivo de texto plano (.txt) o registro a mano. Sin campos vacíos.",
+    "Por ahora se exporta; la conexión directa es para después (REQ-M2.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-1.4",
+     "dato": "datos SIRE de los huéspedes extranjeros"
+    },
+    {
+     "de": "CU-M2-1.8",
+     "dato": "código del establecimiento y de la ciudad en el SIRE"
+    },
+    {
+     "de": "CU-M2-3.3",
+     "dato": "campos que faltan"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-3.4",
+     "dato": "reporte SIRE sacado"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos huéspedes extranjeros con entrada y salida en octubre de 2026",
+     "cuando": "el operador pide el archivo SIRE de octubre",
+     "entonces": "sale un archivo de texto con un movimiento de entrada y uno de salida por cada uno"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "huéspedes nacionales en el mismo periodo",
+     "cuando": "el operador pide el archivo SIRE",
+     "entonces": "no aparecen: el SIRE es solo de extranjeros"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-3.3",
+   "capacidad": "CAP-M2-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Revisar que los campos exigidos estén completos antes de sacar el formulario TRA o el archivo SIRE, y decir cuáles faltan",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Los plazos y formatos exactos se validan con la norma vigente antes de construir (REQ-M2.1)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M2-3.1",
+     "dato": "campos que faltan"
+    },
+    {
+     "a": "CU-M2-3.2",
+     "dato": "campos que faltan"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un huésped extranjero sin fecha de nacimiento",
+     "cuando": "el operador pide el archivo SIRE",
+     "entonces": "el sistema no lo arma y dice que a ese huésped le falta la fecha de nacimiento"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-3.4",
+   "capacidad": "CAP-M2-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el registro de los reportes sacados, por propiedad y por reserva: cuándo, de qué tipo y en qué estado",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Viene del diseño viejo (M2.md), que hablaba de envío y radicado; con solo exportar, el registro sería de lo exportado. Por confirmar con Diseño."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-3.1",
+     "dato": "reporte TRA sacado"
+    },
+    {
+     "de": "CU-M2-3.2",
+     "dato": "reporte SIRE sacado"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un formulario TRA sacado ayer de una reserva",
+     "cuando": "el operador abre el registro de la propiedad",
+     "entonces": "ve el reporte TRA con su fecha y su estado"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M2-3.5",
+   "capacidad": "CAP-M2-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Enviar directamente el reporte a las páginas del TRA y del SIRE",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Pospuesto: REQ-M2.1 dice «exportar; integración directa después». El diseño viejo (M2.md) lo tenía como envío automático."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "REQ-M2.1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M2-4.1",
+   "capacidad": "CAP-M2-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Armar el mensaje a portería de cada reserva: propiedad, fechas, código de confirmación, y nombre y documento de cada huésped, con la placa",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "La recepción exige el número de identificación y los datos de todos los huéspedes para habilitar el ingreso; por eso portería sí recibe el documento. La restricción de privacidad es para el colaborador de limpieza (REQ-M2.x).",
+    "De dónde sale la placa no está dicho (no es un campo del TRA): pregunta para Diseño."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-1.4",
+     "dato": "nombre y documento de cada huésped de la reserva"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-4.2",
+     "dato": "mensaje armado para portería"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la reserva de María García en el Apto 1708 del 26 al 29 de agosto, con 2 huéspedes y su registro completo",
+     "cuando": "el sistema arma el mensaje",
+     "entonces": "el mensaje lleva la propiedad, las fechas, el código de confirmación, el nombre y el documento de cada huésped y la placa"
+    }
+   ],
+   "origen": [
+    "REQ-M2.x",
+    "REQ-M2.1",
+    "DA-27"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-4.2",
+   "capacidad": "CAP-M2-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Enviar el mensaje a portería, y reenviarlo si la reserva cambia",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy sería copiar el mensaje; el envío automático depende del canal de Comunicaciones (CU-M6-4.5)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-4.1",
+     "dato": "mensaje armado para portería"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M6-4.5",
+     "dato": "mensaje a portería y su destinatario, para enviarlo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el mensaje armado de una reserva",
+     "cuando": "el operador lo envía a la portería del edificio",
+     "entonces": "queda enviado y la portería lo recibe"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva con mensaje enviado",
+     "cuando": "cambian las fechas o los huéspedes",
+     "entonces": "el operador reenvía el mensaje actualizado"
+    }
+   ],
+   "origen": [
+    "REQ-M2.x",
+    "REQ-F5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-4.3",
+   "capacidad": "CAP-M2-4",
+   "actor": [
+    "porteria"
+   ],
+   "que": "Recibir los datos del huésped y habilitar su ingreso con el documento",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Portería no tiene cuenta en el STR: solo recibe el mensaje."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M6-4.5",
+     "dato": "mensaje recibido por portería"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M2-4.4",
+     "dato": "consulta de portería sobre un ingreso"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el mensaje de una reserva recibido por portería",
+     "cuando": "el huésped llega y muestra su documento",
+     "entonces": "la recepción lo compara con el mensaje y le da ingreso"
+    }
+   ],
+   "origen": [
+    "REQ-M2.x"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-4.4",
+   "capacidad": "CAP-M2-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Autorizar o no el ingreso ante portería en los casos especiales: huésped que llega antes, datos que no coinciden o huésped que no envió sus datos",
+   "declarado": "no-construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-M2-4.3",
+     "dato": "consulta de portería sobre un ingreso"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un huésped que no envió sus datos y está en la puerta",
+     "cuando": "el operador le reenvía el enlace o digita sus datos y avisa a portería",
+     "entonces": "la recepción valida y da ingreso"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un huésped que llega antes de la hora",
+     "cuando": "portería consulta al operador",
+     "entonces": "el operador decide si autoriza el ingreso"
+    }
+   ],
+   "origen": [
+    "REQ-M2.x",
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-M2-4.5",
+   "capacidad": "CAP-M2-4",
+   "actor": [
+    "porteria"
+   ],
+   "que": "Ver las llegadas del día en un panel de portería por enlace",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Opción futura (REQ-M2.x); por ahora portería recibe el mensaje."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "REQ-M2.x"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M2-5.1",
+   "capacidad": "CAP-M2-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Confirmar el check-in cuando el huésped llega, con la hora real frente a la estimada",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Viene del diseño viejo (M2.md, agosto). El estado de la reserva en el Calendario hoy sigue las fechas (CU-CAL-7.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un huésped que había dicho que llegaba a las 4:30 PM y llega a las 4:50 PM",
+     "cuando": "el operador confirma el check-in",
+     "entonces": "queda la hora real 4:50 PM junto a la estimada 4:30 PM"
+    }
+   ],
+   "origen": [
+    "REQ-F5.1",
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M2-5.2",
+   "capacidad": "CAP-M2-5",
+   "actor": [
+    "huesped"
+   ],
+   "que": "Hacer el check-in virtual: confirmar la llegada por WhatsApp sin que el operador esté presente",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Es opcional en el diseño viejo (M2.md); no aparece en los requerimientos nuevos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un huésped que llega con el código ya enviado",
+     "cuando": "confirma su llegada por WhatsApp",
+     "entonces": "la llegada queda confirmada sin intervención del operador"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M2-5.3",
+   "capacidad": "CAP-M2-5",
+   "actor": [
+    "operador",
+    "huesped"
+   ],
+   "que": "Confirmar la salida: hora real, estado de la propiedad al salir (con fotos si el operador está) y observaciones",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El diseño viejo disparaba aquí el turno de limpieza; hoy el turno sale solo de la reserva (CU-HK-1.2) y aquí no se dispara nada.",
+    "Quién manda en la salida real (el huésped, el operador o el colaborador al limpiar) no está dicho: pregunta para Diseño."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un huésped que sale a las 11:20 AM",
+     "cuando": "el operador (o el huésped) confirma la salida",
+     "entonces": "queda la hora real de salida con las observaciones"
+    }
+   ],
+   "origen": [
+    "REQ-F5.1",
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M2-6.1",
+   "capacidad": "CAP-M2-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Configurar por propiedad cómo se entra (código, llave o cerradura inteligente), el código o las instrucciones, los días de anticipación del formulario y el canal",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El código de acceso es un secreto de la propiedad: lo ve el operador, no el colaborador.",
+    "El horario de check-in y check-out ya se fija en la ficha de la propiedad (CU-PR-3.1); no se repite aquí."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-M2-6.2",
+     "dato": "forma de acceso, código e instrucciones de la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el Apto 1708 sin configuración de acceso",
+     "cuando": "el operador elige «código» y escribe 4721",
+     "entonces": "queda guardado para la información de llegada"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M2-6.2",
+   "capacidad": "CAP-M2-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Armar la información de llegada del huésped: dirección con mapa, cómo entrar al edificio, código de la cerradura, reglas, áreas sociales, basuras, manuales, inventario básico y contacto de emergencia",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Se arma con lo que la propiedad ya tiene (ubicación, torre, apto, dirección) y lo que se configura en CU-M2-6.1.",
+    "Es la lista del diseño viejo (M2.md, agosto): Diseño decide cuáles piezas se mantienen."
+   ],
+   "entradas": [
+    {
+     "de": "CU-M2-6.1",
+     "dato": "forma de acceso, código e instrucciones de la propiedad"
+    },
+    {
+     "de": "CU-PR-2.4",
+     "dato": "ubicación, torre, apto y dirección de la propiedad"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-M6-4.4",
+     "dato": "información de llegada armada, para enviarla el día del check-in"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el Apto 1708 con su dirección, su acceso por código 4721 y sus reglas",
+     "cuando": "el sistema arma la información de llegada",
+     "entonces": "sale un texto con la dirección y el mapa, cómo entrar, el código y las reglas, listo para enviar el día del check-in"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "REQ-F5"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-M2-7.1",
+   "capacidad": "CAP-M2-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar los datos de identidad del huésped solo en la base, nunca en el navegador ni en el turno, y mostrarle al colaborador solo nombre y cantidad",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Crítico (RT-23): dato personal del huésped y obligación legal. No entra a la cola sin DA-n y cruce con Carlos.",
+    "El operador y el administrador ven el dato completo; portería recibe el documento por el mensaje (CU-M2-4.1).",
+    "Falta decidir si el huésped debe aceptar un aviso de tratamiento de sus datos al llenar el formulario (Ley 1581): pregunta para Diseño."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SRV-2.2",
+     "dato": "datos del huésped completos solo para el operador y el administrador"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva con el registro completo",
+     "cuando": "el colaborador abre su turno",
+     "entonces": "ve el nombre y la cantidad de huéspedes, y no ve documentos ni nacionalidad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la misma reserva",
+     "cuando": "el operador la abre",
+     "entonces": "ve todos los datos"
+    }
+   ],
+   "origen": [
+    "REQ-M2.1",
+    "DA-27",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-M2-7.2",
+   "capacidad": "CAP-M2-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Conservar los datos TRA y SIRE por un plazo definido y luego borrarlos o anonimizarlos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Sin plazo definido: es una decisión pendiente (15-oct, M-489), a definir al redactar el requerimiento de M2 con la Ley 1581 y la norma de Migración.",
+    "Hoy estos datos no existen en el sistema."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [],
+   "origen": [
+    "REQ-M2.1"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-79",
+   "porque": "Es de Housekeeping: calcula «hoy» en UTC y las alertas de la tarde no salen. Aplica a la víspera y al mismo día de M2, pero el caso de uso es de HK. Cerrado."
+  },
+  {
+   "id": "INC-93",
+   "porque": "Es de permisos del operador antes de cargar /api/me (Identidad). No toca a M2. Cerrado."
+  },
+  {
+   "id": "INC-108",
+   "porque": "Es de usuarios con dos roles (Identidad). No toca a M2. Cerrado."
+  },
+  {
+   "id": "INC-115",
+   "porque": "Es del texto «3:00 PM» fijo en el turno y en el aviso de turnover (Housekeeping y Calendario). M2-2.2 le daría la hora confirmada por el huésped, pero el defecto es de ellos."
+  },
+  {
+   "id": "INC-142",
+   "porque": "Es del ticket de huésped que sigue en la unidad (Housekeeping). No toca a M2."
+  },
+  {
+   "id": "INC-157",
+   "porque": "Es del permiso dinero.tarifas al editar horas por turno (Propiedades). No toca a M2."
+  },
+  {
+   "id": "INC-161",
+   "porque": "Es de reinvitar a un usuario activo con «Invitar» (Identidad). No toca a M2."
+  },
+  {
+   "id": "INC-162",
+   "porque": "Es de «Cerrar sesión» del shell (Shell). No toca a M2."
+  },
+  {
+   "id": "INC-170",
+   "porque": "Es de la importación del calendario que no restaura una reserva de canal cancelada (Calendario). M2 recibiría esa reserva, pero el defecto es de CAL."
+  },
+  {
+   "id": "INC-182",
+   "porque": "Es de Conocimiento (guías). No toca a M2."
+  },
+  {
+   "id": "DA-35",
+   "porque": "Es de los reclamos por daños de huéspedes (Incidentes, INC1-2). Salió por buscar «huésped». No toca a M2."
+  }
+ ]
+}

@@ -1,6 +1,6 @@
 {
  "modulo": "INV",
- "version": 4,
+ "version": 5,
  "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
@@ -27,6 +27,11 @@
    "fecha": "2026-10-18",
    "por": "Chat Arquitecto",
    "que": "Flujos con HK enlazados a los ids reales de HK.json (antes provisionales CU-HK-1.x)."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Arquitecto",
+   "que": "Flujos con PR enlazados a los ids reales de PR.json; pares completados con HK y PR."
   }
  ],
  "alcance": {
@@ -590,8 +595,13 @@
    ],
    "entradas": [
     {
-     "de": "CU-PR-1.1",
+     "de": "CU-PR-1.2",
      "dato": "propiedades activas (con su nombre) a las que puede servir cada zona",
+     "rel": "REL-13"
+    },
+    {
+     "de": "CU-PR-6.4",
+     "dato": "propiedad que pasa a ser servida por una zona, elegida desde la ficha de la propiedad",
      "rel": "REL-13"
     }
    ],
@@ -600,6 +610,16 @@
      "a": "CU-HK-7.1",
      "dato": "zonas con su uso (principal, del apto, otra, móvil), propiedades y lugares de ubicación",
      "rel": "REL-09"
+    },
+    {
+     "a": "CU-PR-6.2",
+     "dato": "zonas principales activas con las propiedades a las que sirven, sin las privadas",
+     "rel": "REL-13"
+    },
+    {
+     "a": "CU-PR-6.3",
+     "dato": "zonas activas con su uso, las propiedades a las que sirven y si son privadas",
+     "rel": "REL-13"
     }
    ],
    "escenarios": [
@@ -792,7 +812,7 @@
    ],
    "entradas": [
     {
-     "de": "CU-PR-1.1",
+     "de": "CU-PR-6.2",
      "dato": "zona principal de inventario elegida a mano en la ficha de la propiedad",
      "rel": "REL-13"
     }
@@ -2735,9 +2755,20 @@
      "de": "CU-HK-8.2",
      "dato": "entrega de zona precargada con sus conteos y sus fotos",
      "rel": "REL-10"
+    },
+    {
+     "de": "CU-HK-8.3",
+     "dato": "conteos corregidos del mismo traspaso, como movimientos nuevos solo de lo que cambió; la existencia toma el último conteo",
+     "rel": "REL-10"
     }
    ],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-6.2",
+     "dato": "recepción y entregas registradas por turno y zona",
+     "rel": null
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -3017,7 +3048,7 @@
    "limitantes": [],
    "entradas": [
     {
-     "de": "CU-PR-1.1",
+     "de": "CU-PR-6.2",
      "dato": "zona principal elegida en la ficha de la propiedad, que no puede ser privada",
      "rel": "REL-13"
     }
@@ -3093,7 +3124,7 @@
    ],
    "entradas": [
     {
-     "de": "CU-PR-1.2",
+     "de": "CU-PR-6.5",
      "dato": "acceso revocado a un colaborador desde la ficha de la propiedad",
      "rel": "REL-13"
     }

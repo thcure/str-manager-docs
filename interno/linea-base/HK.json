@@ -1,6 +1,6 @@
 {
  "modulo": "HK",
- "version": 2,
+ "version": 3,
  "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
@@ -18,6 +18,11 @@
    "fecha": "2026-10-18",
    "por": "Chat Diseño (M-799)",
    "que": "Peso: esenciales 1, 2, 3, 5 y 10; necesarias 4, 6, 7, 8, 9 y 11. CU-HK-6.6 con E3 (DA-41) y origen DA-20, DA-41, REQ-F11-5-2; CU-HK-7.2 con la limitante de P-15. Alcance, separación de 9.1/9.2 e ids provisionales de acuerdo."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-800) y Chat Arquitecto",
+   "que": "INC-128 solo en CU-HK-10.5 (en 7.2 queda INC-88); INC-141 citado en 11.5; CU-HK-8.3 corrige con movimientos nuevos, par con CU-INV-6.1. Flujos con PR enlazados y pares completados."
   }
  ],
  "alcance": {
@@ -200,7 +205,7 @@
      "rel": "REL-03"
     },
     {
-     "de": "CU-PR-1.1",
+     "de": "CU-PR-8.1",
      "dato": "horario base, tolerancia de salida, horas del turno, flujo base y colaborador base de la propiedad",
      "rel": "REL-06"
     }
@@ -1720,7 +1725,13 @@
     "Un video cuya duración no se puede leer se registra con 0 s (DT-28).",
     "Adjuntar evidencia exige sesión iniciada."
    ],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-PR-8.1",
+     "dato": "zonas de la propiedad para elegir la zona del incidente",
+     "rel": "REL-06"
+    }
+   ],
    "salidas": [],
    "escenarios": [
     {
@@ -2204,7 +2215,7 @@
    ],
    "entradas": [
     {
-     "de": "CU-PR-1.1",
+     "de": "CU-PR-8.1",
      "dato": "tolerancia de salida por propiedad y horarios",
      "rel": "REL-06"
     }
@@ -2569,7 +2580,7 @@
    ],
    "entradas": [
     {
-     "de": "CU-PR-1.1",
+     "de": "CU-PR-8.1",
      "dato": "tolerancia de salida y horas del turno de cada propiedad",
      "rel": "REL-06"
     }
@@ -2851,8 +2862,7 @@
     "RT-17"
    ],
    "pendientes": [
-    "INC-88",
-    "INC-128"
+    "INC-88"
    ],
    "pruebas": [],
    "tecnica": {
@@ -3301,10 +3311,17 @@
    "que": "Corregir la recepción o la entrega ya registrada",
    "declarado": "construido",
    "limitantes": [
-    "Corregir no borra ni edita el movimiento anterior."
+    "Corregir no borra ni edita el movimiento anterior.",
+    "Corregir no anula: emite movimientos nuevos del mismo traspaso solo de los artículos que cambiaron; la existencia toma el último conteo (M-800)."
    ],
    "entradas": [],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-6.1",
+     "dato": "conteos corregidos del mismo traspaso, como movimientos nuevos solo de lo que cambió; la existencia toma el último conteo",
+     "rel": "REL-10"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -4432,7 +4449,16 @@
    "pendientes": [
     "INC-141"
    ],
-   "pruebas": [],
+   "pruebas": [
+    {
+     "guion": "INC-141",
+     "casos": [
+      "a",
+      "b",
+      "c"
+     ]
+    }
+   ],
    "tecnica": {
     "paginas": [
      "str-m1-housekeeping.html"

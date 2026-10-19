@@ -1,0 +1,3053 @@
+{
+ "modulo": "PR",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-propiedades.html (3599 líneas, leída por funciones: lista, ficha, horarios, ubicaciones, subtipos, zonas, plano, flujo base, colaborador base, depósito, inventario, canales, exportación a Airbnb, sincronización)",
+  "docs/claude/propiedades.md (mapa técnico del módulo, fuente principal)",
+  "api/col/index.php (colecciones válidas, lista blanca de propiedades del colaborador, contexto de lectura INC-120, escritura solo de admin y operador, conservación de la zona principal del operador sin permiso)",
+  "str-api.js (exigirRol, icalExport, regla de exportación de disponibilidad, dirección de la propiedad, cálculo de horas del turno)",
+  "portal.html y str-m1-housekeeping.html (solo búsquedas: usos de horario, tolerancia, horas, flujo base, colaborador base, zonas, plano y dirección de la propiedad)",
+  "pr-fuentes.json: módulo PR del mapa, 12 REQ, 16 DA, 5 de la bolsa, 14 INC, relaciones REL-06, REL-13, REL-21 y las generales, actores y reglas transversales",
+  "pr-guiones.json: 4 guiones e2e que pasan por Propiedades (INC-117, INC-120-c12, INC-120-c3, REQ-INV2-4-1-interfaz); los .spec.js se leyeron para ver qué comprueba cada caso",
+  "interno/linea-base/esquema.json, INV.json y HK.json (estilo y flujos con ids reales)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "La ficha de la propiedad: crear, ver, buscar, editar y eliminar, con ciudad y color.",
+   "Ubicaciones comunes y su catálogo de tipos, subtipos de propiedad con sus zonas típicas, torre, apto, dirección e indicaciones de llegada.",
+   "Horario base de la propiedad: check-in, check-out, ingreso 24/7 u hora límite, tolerancia de salida y horas del turno.",
+   "Zonas de la propiedad (agregar, quitar, traer de otra propiedad o del subtipo) y plano con marcadores.",
+   "Flujo base del turno (con sus etapas a la vista) y colaborador base de cada propiedad.",
+   "Lo de Inventario que se fija o se ve desde la ficha: depósito, zona principal, zonas que sirven a la propiedad, usar una zona y acceso del colaborador base.",
+   "Calendarios de canales conectados a la propiedad, su estado y la exportación de disponibilidad a Airbnb (enlace secreto, regenerar, día de limpieza y lectura de Airbnb).",
+   "Lo que Propiedades entrega a Housekeeping, al Calendario y al colaborador, y a Inventario.",
+   "Acceso de administrador y operador, traída y envío de los datos al sistema.",
+   "Lo definido y aún por construir: casa completa y sus habitaciones, horario de la propiedad en el portal, plano al colaborador y operador con propiedades limitadas; y lo fuera de alcance: pasar propiedades a otro negocio y limpiar referencias al reiniciar el negocio."
+  ],
+  "fuera": [
+   "La importación de las reservas de los canales y el cálculo de lo que muestra el Calendario (Calendario): aquí solo se cuenta el calendario del canal que se conecta y el horario que se entrega.",
+   "El editor de Flujos y sus plantillas (Flujos): aquí solo se cuenta elegir el flujo base y abrir el editor.",
+   "Las zonas de inventario, sus lugares, artículos, movimientos y diferencias (Inventario): aquí solo se cuenta lo que se fija o se ve desde la ficha.",
+   "Los turnos, sus alertas y sus horas (Housekeeping): aquí solo se cuenta lo que Propiedades le entrega.",
+   "El equipo, los roles y los permisos (Identidad): aquí solo se cuenta quién puede entrar a Propiedades.",
+   "El portal del colaborador como contenedor (Portal).",
+   "La copia a Drive y el corte mensual (Copia a Drive y retención).",
+   "El servidor con su almacén de colecciones y la lectura pública del enlace de disponibilidad (Servidor): solo se cuenta su efecto visible en la ficha."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde la página de Propiedades (3599 líneas), su mapa técnico (docs/claude/propiedades.md), el servidor de colecciones (reglas de propiedades, lista blanca del colaborador y contexto de lectura), el cliente compartido (exportación de disponibilidad, dirección, horas) y los guiones e2e que pasan por Propiedades. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Propiedades tiene pocas pruebas e2e (INC-117 y REQ-INV2-4-1-interfaz); las pruebas unitarias de tests/ (horarios, siembra, exportación) no cuentan como prueba de la línea base. La lectura pública del enlace de disponibilidad (api/lib/ical-export.php y su ruta) y el Calendario no estaban entre las fuentes: sus casos de uso quedan con confianza media o baja. Los casos de uso de módulos vecinos sin línea base (Calendario CAL, Flujos FL, Identidad U, Portal POR, Servidor SRV) usan identificadores provisionales que su dueño debe confirmar. Los flujos con Inventario y Housekeeping usan los identificadores reales de INV.json y HK.json. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-PR-1",
+   "nombre": "Fichas de propiedades",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Crear, ver, buscar, editar y eliminar las propiedades del negocio con sus datos básicos."
+  },
+  {
+   "id": "CAP-PR-2",
+   "nombre": "Ubicaciones, subtipos y dirección",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Llevar las ubicaciones comunes (edificio, conjunto, casa…) con sus tipos, los subtipos de propiedad con sus zonas típicas y la dirección de cada propiedad."
+  },
+  {
+   "id": "CAP-PR-3",
+   "nombre": "Horario base y horas del turno",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Fijar por propiedad el check-in y el check-out, el ingreso 24/7 o con hora límite, la tolerancia de salida y las horas del turno; vacío significa las del negocio."
+  },
+  {
+   "id": "CAP-PR-4",
+   "nombre": "Zonas de la propiedad y plano",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Definir las áreas de cada propiedad (sala, baño…), traerlas de otra propiedad o del subtipo, y subir un plano donde ubicarlas."
+  },
+  {
+   "id": "CAP-PR-5",
+   "nombre": "Flujo base y colaborador base",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Elegir qué flujo arma el turno de la propiedad y qué colaborador es su responsable por defecto, con las etapas del flujo a la vista."
+  },
+  {
+   "id": "CAP-PR-6",
+   "nombre": "Inventario desde la ficha",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Describir el depósito, elegir la zona principal de inventario, ver las zonas que sirven a la propiedad, hacer que una zona la sirva y quitar o devolver el acceso del colaborador base."
+  },
+  {
+   "id": "CAP-PR-7",
+   "nombre": "Canales y exportación de disponibilidad a Airbnb",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Conectar los calendarios de los canales a cada propiedad, ver su estado y exportar la disponibilidad hacia Airbnb con un enlace secreto y un día de limpieza opcional."
+  },
+  {
+   "id": "CAP-PR-8",
+   "nombre": "Entrega de los datos de la propiedad a otros módulos",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Dar a Housekeeping, al Calendario y al colaborador los datos de la propiedad que cada uno necesita, acotados a lo permitido."
+  },
+  {
+   "id": "CAP-PR-9",
+   "nombre": "Acceso, sincronización y reinicio",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Dejar ver y editar propiedades solo al administrador y al operador, traer y enviar los datos sin subir ejemplos ni pisar lo del sistema, y lo definido sobre límites y reinicio."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-PR-1.1",
+   "capacidad": "CAP-PR-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver la lista de propiedades, buscarlas por nombre, ciudad o departamento y filtrarlas por ubicación",
+   "declarado": "construido",
+   "limitantes": [
+    "No hay estado activa o inactiva: una propiedad existe o se elimina; lo que Inventario llama «propiedades activas» son las que no se han eliminado.",
+    "La búsqueda mira solo nombre, ciudad y departamento; no filtra por canal, subtipo ni estado de sincronización."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "propiedades guardadas en el sistema y un aparato que nunca abrió Propiedades",
+     "cuando": "se abre Propiedades",
+     "entonces": "la lista muestra las propiedades del negocio, cada una con su nombre, su ubicación y subtipo, las habitaciones, el estado de su sincronización (sin calendario, con error o sincronizado), sus canales y sus reservas, y ninguna propiedad de ejemplo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "propiedades en distintas ubicaciones y ciudades",
+     "cuando": "se escribe en el buscador o se toca una ubicación de la franja",
+     "entonces": "la lista deja solo las que coinciden con el nombre, la ciudad o el departamento, o las de esa ubicación"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una propiedad con colaborador base activo y otra con colaborador base inactivo",
+     "cuando": "se miran sus tarjetas",
+     "entonces": "la primera muestra las iniciales del colaborador base (y su nombre al pasar el cursor) y la segunda no muestra ninguno"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-117"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-117",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/propiedades"
+    ],
+    "colecciones": [
+     "propiedades",
+     "ubicaciones",
+     "str-usuarios-v1"
+    ],
+    "notas": "renderList, renderEdifChips/filterByEdif; la franja de ubicaciones se oculta sin ubicaciones. El guion comprueba que la lista trae zz-verif-Propiedad y zz-verif-Propiedad-2 y ninguna de ejemplo (Apto Centro, Casa Laureles)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PR-1.2",
+   "capacidad": "CAP-PR-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear una propiedad con su nombre, subtipo, habitaciones, departamento y ciudad, ubicación y color",
+   "declarado": "construido",
+   "limitantes": [
+    "La propiedad nace sin flujo base, sin colaborador base y sin horario propio: se completan después en la ficha.",
+    "No avisa si ya existe otra propiedad con el mismo nombre."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INV-2.1",
+     "dato": "propiedades activas (con su nombre) a las que puede servir cada zona",
+     "rel": "REL-13"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un nombre, un departamento y una ciudad",
+     "cuando": "se crea la propiedad",
+     "entonces": "queda guardada con las zonas típicas de su subtipo (o Sala, Cocina, Baño y Habitación si el subtipo no tiene), se abre su ficha y el aviso invita a agregar el calendario del canal"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "falta el nombre o falta la ciudad",
+     "cuando": "se intenta crear",
+     "entonces": "no se crea y se avisa qué falta"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "openNewDrawer/createProp; _defaultZonasForProp; id prop-<ts>. El dato sale hacia Inventario porque la zona elige entre las propiedades guardadas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: createProp exige nombre y ciudad, usa las zonas del subtipo o las cuatro básicas, y no compara nombres"
+   }
+  },
+  {
+   "id": "CU-PR-1.3",
+   "capacidad": "CAP-PR-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Editar los datos básicos de la ficha (nombre, habitaciones, subtipo, departamento y ciudad, color) y guardarlos",
+   "declarado": "construido",
+   "limitantes": [
+    "Nada se guarda hasta pulsar «Guardar cambios»: tocar otra propiedad de la lista descarta lo editado (solo la zona principal avisa antes de salir, CU-PR-6.2)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.2",
+     "dato": "nombre, color, subtipo y ciudad de la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la ficha de una propiedad abierta",
+     "cuando": "se cambian el nombre y las habitaciones y se pulsa «Guardar cambios»",
+     "entonces": "la lista y la ficha muestran los cambios y se avisa «Cambios guardados»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad cuyo subtipo guardado ya no está en el catálogo",
+     "cuando": "se guarda la ficha sin tocar el subtipo",
+     "entonces": "el subtipo no cambia y la ficha lo marca «fuera del catálogo»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el nombre queda vacío o las habitaciones no son un número",
+     "cuando": "se guarda",
+     "entonces": "se conserva el valor anterior de ese campo"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "savePropEdit/renderDetail; buildTipoOptions conserva el subtipo fuera del catálogo (INC-30, cerrado). Ciudad: si no se elige, se conserva la anterior."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: savePropEdit conserva nombre y habitaciones previos si el campo viene vacío o inválido"
+   }
+  },
+  {
+   "id": "CU-PR-1.4",
+   "capacidad": "CAP-PR-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar una propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "No se puede desactivar ni archivar: solo eliminar (en el sistema queda dada de baja, sin borrado físico); contradice «no se borra, se desactiva» (RT-5) y deja sin propiedad a lo que la usaba.",
+    "No avisa si la propiedad tiene turnos, reservas, zonas de inventario o incidentes ligados."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad abierta",
+     "cuando": "se pulsa «Eliminar» y se vuelve a pulsar dentro de 4 segundos",
+     "entonces": "la propiedad desaparece de la lista, la ficha se cierra y se pierden sus calendarios de canales"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad abierta",
+     "cuando": "se pulsa «Eliminar» una sola vez",
+     "entonces": "solo se avisa que se perderán sus calendarios; pasados 4 segundos, no se elimina nada"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "deleteProp: segundo toque en 4 s (_delPropPend); saveProps → _persistCol calcula la baja por ausencia contra str-col-lastpush-v1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: deleteProp solo advierte de los calendarios y quita la propiedad; no revisa referencias"
+   }
+  },
+  {
+   "id": "CU-PR-1.5",
+   "capacidad": "CAP-PR-1",
+   "actor": [
+    "propietario",
+    "admin"
+   ],
+   "que": "Pasar las propiedades de un propietario que se autogestiona a otro negocio",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-6 (14-oct): no se permite por ahora, no hay demanda; se reabre si aparece un caso real."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un propietario que quiere gestionar sus propiedades por su cuenta",
+     "cuando": "el administrador pide pasar sus propiedades a otro negocio",
+     "entonces": "hoy no existe esa función: el propietario sigue como contacto y sus propiedades siguen en el negocio"
+    }
+   ],
+   "origen": [
+    "DA-6"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: la ficha no guarda propietario ni tiene traslado a otro negocio."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de la página: sin campo de propietario ni acción de traslado"
+   }
+  },
+  {
+   "id": "CU-PR-2.1",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Registrar o editar una ubicación común (edificio, condominio, conjunto, casa, finca u otro) con su dirección, barrio, indicaciones de llegada y pisos",
+   "declarado": "construido",
+   "limitantes": [
+    "La indicación de llegada admite hasta 300 caracteres.",
+    "La ubicación no tiene plano propio: el plano es de cada propiedad (CU-PR-4.4)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "ninguna ubicación registrada",
+     "cuando": "se registra un edificio con su ciudad, dirección, barrio, indicaciones y número de pisos",
+     "entonces": "queda en la franja de ubicaciones y en la lista de ubicaciones con el conteo de propiedades que la usan"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un tipo de ubicación que no lleva pisos (casa o finca)",
+     "cuando": "se registra una ubicación de ese tipo",
+     "entonces": "no pide ni guarda el número de pisos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una ubicación sin nombre",
+     "cuando": "se intenta guardar",
+     "entonces": "no se guarda y se avisa que falta el nombre"
+    }
+   ],
+   "origen": [
+    "REQ-P1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "ubicaciones"
+    ],
+    "notas": "openEdifModal/saveEdif (nombres viejos de «edificio» conservados); id ubic-<ts>; REQ-P1.1 / INC-73. El campo de plano de la ubicación existe pero queda siempre nulo."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: saveEdif exige nombre, guarda pisos solo si el tipo los lleva y limita indicaciones a 300"
+   }
+  },
+  {
+   "id": "CU-PR-2.2",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar una ubicación y soltar de ella a las propiedades que la usaban",
+   "declarado": "construido",
+   "limitantes": [
+    "Eliminar no pide revisar cuántas propiedades la usan: las suelta sin más."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una ubicación con propiedades",
+     "cuando": "se pulsa eliminar y se vuelve a pulsar dentro de 4 segundos",
+     "entonces": "la ubicación desaparece y esas propiedades quedan sin ubicación común, con su dirección propia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una ubicación con propiedades",
+     "cuando": "se pulsa eliminar una sola vez",
+     "entonces": "solo se avisa; pasados 4 segundos, no se elimina"
+    }
+   ],
+   "origen": [
+    "REQ-P1"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "ubicaciones",
+     "propiedades"
+    ],
+    "notas": "deleteEdif limpia ubicacionId y edificioId de las propiedades y sube ambas colecciones."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: deleteEdif con segundo toque y limpieza de referencias en las propiedades"
+   }
+  },
+  {
+   "id": "CU-PR-2.3",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Administrar el catálogo de tipos de ubicación (nombre, icono y si lleva pisos)",
+   "declarado": "construido",
+   "limitantes": [
+    "El icono de un tipo nuevo no llega al Calendario: allí la cabecera por ciudad usa iconos fijos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el catálogo con los tipos de arranque",
+     "cuando": "se agrega un tipo, se le cambia el nombre y el icono y se marca que lleva pisos",
+     "entonces": "el tipo queda disponible al registrar ubicaciones y en la franja"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un tipo que alguna ubicación usa, o el último tipo que queda",
+     "cuando": "se intenta eliminar",
+     "entonces": "no se elimina y se avisa por qué"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un tipo existente",
+     "cuando": "se deja vacío su nombre o su icono",
+     "entonces": "se conserva el anterior"
+    }
+   ],
+   "origen": [
+    "REQ-P1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "ubic-tipos"
+    ],
+    "notas": "_toggleUbicTiposPanel/_ubicTipoEditar/_ubicTipoAgregar/_ubicTipoEliminar; REQ-P1.3 (parcial); la semilla solo se escribe en la copia local y se sube si el sistema no tiene ninguno."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _ubicTipoEliminar rechaza un tipo en uso y el último; _ubicTipoEditar ignora vacíos"
+   }
+  },
+  {
+   "id": "CU-PR-2.4",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Asignar la ubicación a una propiedad y completar su torre y apto, dirección propia e indicaciones propias",
+   "declarado": "construido",
+   "limitantes": [
+    "Torre y apto solo aparecen con edificio, conjunto cerrado o condominio; con otro tipo se conservan ocultos.",
+    "Una ubicación eliminada en otro aparato se conserva con el aviso «ubicación no encontrada» en vez de perderse.",
+    "El campo único «interior» anterior no se migró a torre y apto: sigue leyéndose como respaldo de la dirección."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.2",
+     "dato": "ubicación, torre, apto y dirección de la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad y una ubicación tipo edificio",
+     "cuando": "se elige esa ubicación en la ficha",
+     "entonces": "aparecen los campos torre y apto, la dirección propia se oculta y se muestra la de la ubicación; al guardar queda asignada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la ficha abierta",
+     "cuando": "se elige «Nueva ubicación…» y se registra una",
+     "entonces": "la ficha no se cierra, la ubicación nueva queda seleccionada y la propiedad se guarda solo al pulsar «Guardar cambios»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una propiedad con ubicación",
+     "cuando": "se quita la ubicación a propósito y se guarda",
+     "entonces": "la propiedad queda sin ubicación y no recupera la anterior"
+    }
+   ],
+   "origen": [
+    "REQ-P1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "ubicaciones"
+    ],
+    "notas": "_onUbicSelect/_ubicDesdeFicha/_ubicConTorreApto; savePropEdit escribe ubicacionId y deja edificioId salvo que se quite a propósito (REQ-P1.1/P1.3). STRApi.propiedades.direccion arma la línea de dirección que usan Housekeeping, portal y portería."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _onUbicSelect, _ubicConTorreApto y la regla de edificioId en savePropEdit"
+   }
+  },
+  {
+   "id": "CU-PR-2.5",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Administrar el catálogo de subtipos de propiedad con las zonas típicas de cada uno",
+   "declarado": "construido",
+   "limitantes": [
+    "La propiedad guarda el subtipo por su nombre: renombrarlo o eliminarlo la deja «fuera del catálogo» sin avisar.",
+    "Eliminar un subtipo no revisa si lo usan propiedades (a diferencia de los tipos de ubicación)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el catálogo de subtipos",
+     "cuando": "se crea un subtipo con su nombre, su icono y una lista de zonas típicas",
+     "entonces": "el subtipo aparece al crear o editar propiedades y sus zonas se pueden traer a la propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un subtipo en uso por propiedades",
+     "cuando": "se le cambia el nombre o se elimina",
+     "entonces": "las propiedades que lo guardaban quedan «fuera del catálogo» y conservan su subtipo anterior"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un subtipo sin nombre",
+     "cuando": "se intenta guardar",
+     "entonces": "no se guarda y se avisa que falta el nombre"
+    }
+   ],
+   "origen": [
+    "REQ-P1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "prop-tipos"
+    ],
+    "notas": "openTiposModal/saveTipoForm/deleteTipo; comparación por t.nombre === p.tipo (INC-30 conserva el valor). Semilla de negocios nuevos: Apartamento, Casa completa, Habitación, Suite, Estudio, Apartaestudio, Apartasuite."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: saveTipoForm cambia nombre sin propagarlo a las propiedades; deleteTipo no revisa uso"
+   }
+  },
+  {
+   "id": "CU-PR-2.6",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Convertir en ubicaciones los edificios que solo estaban guardados en un aparato, una sola vez",
+   "declarado": "construido",
+   "limitantes": [
+    "Los edificios del aparato quedan sin borrar; es una migración de arranque que ya no debería ocurrir con datos nuevos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el sistema sin ninguna ubicación (ni eliminada) y edificios guardados en el aparato",
+     "cuando": "se abre Propiedades con sesión",
+     "entonces": "los edificios se registran como ubicaciones tipo edificio con su mismo identificador y se avisa cuántos pasaron"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el sistema con ubicaciones, o con todas eliminadas a propósito",
+     "cuando": "se abre Propiedades",
+     "entonces": "no se migra nada: eliminar todas las ubicaciones no resucita los edificios viejos"
+    }
+   ],
+   "origen": [
+    "REQ-P1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "ubicaciones"
+    ],
+    "notas": "_migrarEdificiosAUbicaciones desde _syncColFromApi; confirma con un GET crudo que el sistema no tiene ninguna (ni borrada). INC-73."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: la migración exige servidor vacío y confirma con lectura cruda; no se probó con datos"
+   }
+  },
+  {
+   "id": "CU-PR-2.7",
+   "capacidad": "CAP-PR-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Bloquear entre sí la casa completa y sus habitaciones cuando una de ellas se renta",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Borrador de prioridad baja: se define cuando haya una casa real (Carlos, 11-oct).",
+    "DA-17: las propiedades «Casa» se pasan a mano al modelo de casa independiente desde la ficha; no hay migración automática, y «casa independiente ⇒ ubicación tipo casa y subtipo casa completa» quedó fuera."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-CAL-2.2",
+     "dato": "bloqueo de los demás anuncios de la casa mientras se renta uno completo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una ubicación tipo casa con la casa completa y dos habitaciones, cada una con anuncio propio",
+     "cuando": "se renta la casa completa en unas fechas",
+     "entonces": "los anuncios de las habitaciones quedan bloqueados en esas fechas, también hacia el canal"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una habitación reservada en unas fechas",
+     "cuando": "se intenta rentar la casa completa en las mismas fechas",
+     "entonces": "la casa completa no está disponible en esas fechas"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-2",
+    "DA-17"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: la ubicación tipo casa no ata propiedades entre sí y la exportación no cruza anuncios de una misma casa."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de la página: sin vínculo entre las propiedades de una misma ubicación ni bloqueo cruzado"
+   }
+  },
+  {
+   "id": "CU-PR-3.1",
+   "capacidad": "CAP-PR-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Fijar el check-in y el check-out base de la propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "Es el único lugar donde se editan las horas: el engranaje del Calendario se retiró (DA-16).",
+    "La hora acordada con el huésped en cada reserva manda sobre la de la propiedad (REQ-PR1-4 y REQ-PR1-5)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.1",
+     "dato": "check-in y check-out base de la propiedad"
+    },
+    {
+     "a": "CU-PR-8.2",
+     "dato": "check-in y check-out base de la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con check-in 15:00 y check-out 11:00",
+     "cuando": "se cambian a 14:00 y 10:00 y se guarda",
+     "entonces": "la lectura de la ficha dice «Check-in desde 14:00» y «Check-out 10:00» y esas horas son las que usan las reservas sin hora acordada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad sin horas propias guardadas",
+     "cuando": "se abre su ficha",
+     "entonces": "se muestran 15:00 y 11:00 sin escribirlas hasta que se guarde"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una hora vacía o inválida",
+     "cuando": "se guarda",
+     "entonces": "se conserva la hora que ya tenía"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1",
+    "DA-16",
+    "REQ-PR1-4",
+    "REQ-PR1-5"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "Bloque «🕒 Horarios» (#edit-checkin/#edit-checkout), _hrActualizar; funciones puras [PR1-horarios-inicio] con prueba unitaria propia (tests/horarios-propiedad.test.js, no cuenta). Sin default escrito: 15:00 y 11:00 se aplican al leer."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: savePropEdit solo escribe una hora si es válida; los valores por defecto se aplican al mostrar"
+   }
+  },
+  {
+   "id": "CU-PR-3.2",
+   "capacidad": "CAP-PR-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Marcar el ingreso 24/7 o fijar una hora límite de ingreso",
+   "declarado": "construido",
+   "limitantes": [
+    "Hoy solo se guarda y se muestra en la ficha: Housekeeping, el portal e Inventario no lo usan y el colaborador no lo recibe (REQ-PR1-3, CU-PR-3.5)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.2",
+     "dato": "ingreso 24/7 u hora límite de ingreso"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con check-in 15:00",
+     "cuando": "se marca «Ingreso 24/7» y se guarda",
+     "entonces": "la hora límite se oculta y no se guarda, y la lectura dice «Check-in desde 15:00 · 24/7»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad sin ingreso 24/7",
+     "cuando": "se fija una hora límite posterior al check-in",
+     "entonces": "la lectura dice «Check-in 15:00 a 22:00» y se guarda la hora límite"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una hora límite igual o anterior al check-in",
+     "cuando": "se pulsa «Guardar cambios»",
+     "entonces": "no se guarda nada de la ficha y se avisa «La hora límite de ingreso debe ser posterior al check-in.»"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1",
+    "DA-16"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "ingreso24h (bool) y horaLimiteIngreso; _hrValidarLimite valida antes de tocar nada; no están en la lista blanca de lectura del colaborador. Calendario no estaba entre las fuentes leídas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _hrValidarLimite corta el guardado completo; búsqueda de ingreso24h en Housekeeping, portal, Inventario y servidor sin usos"
+   }
+  },
+  {
+   "id": "CU-PR-3.3",
+   "capacidad": "CAP-PR-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Fijar la tolerancia de salida de la propiedad, o dejar la del negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "La tolerancia general del negocio se fija en Housekeeping (CU-HK-6.5); aquí solo se anula por propiedad."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.1",
+     "dato": "tolerancia de salida de la propiedad, o la del negocio"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con check-out 10:00",
+     "cuando": "se escribe una tolerancia de 45 minutos y se guarda",
+     "entonces": "la lectura dice «Check-out 10:00 · tolerancia 45 min (hasta 10:45)» y la alerta de checkout tardío espera hasta esa hora"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad sin tolerancia propia",
+     "cuando": "se deja el campo vacío",
+     "entonces": "se usa la tolerancia del negocio y la lectura lo dice «(del negocio)»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un valor fuera de 0 a 120 minutos",
+     "cuando": "se guarda",
+     "entonces": "la propiedad queda sin tolerancia propia y usa la del negocio"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "hk-config"
+    ],
+    "notas": "#edit-tolerancia-salida → toleranciaSalidaMin (REQ-T9.2); _hrTolNegocio lee hk-config y, sin él, 30. Mismo orden que _tolSalidaMin del Calendario."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: savePropEdit guarda null si el valor no está entre 0 y 120; _hrTolNegocio cae en 30"
+   }
+  },
+  {
+   "id": "CU-PR-3.4",
+   "capacidad": "CAP-PR-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Fijar las horas planificadas de un turno en la propiedad, o dejar las del negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "Cambiar las horas por turno no pide el permiso de dinero: un operador sin permiso de tarifas puede cambiarlas, y con ellas las horas que se pagan (Desarrollo y Diseño lo confirman)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.1",
+     "dato": "horas planificadas del turno en la propiedad, o las del negocio"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad sin horas propias",
+     "cuando": "se escriben 5 horas por turno y se guarda",
+     "entonces": "los turnos nuevos de esa propiedad parten de 5 horas planificadas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con horas propias",
+     "cuando": "se borra el campo y se guarda",
+     "entonces": "vuelven a usarse las horas por defecto del negocio"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un valor fuera de 0,5 a 24 horas",
+     "cuando": "se guarda",
+     "entonces": "la propiedad queda sin horas propias"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "#edit-horas-turno → horasTurno (REQ-PG1 B1); orden de cálculo en STRApi: horas del turno › horas de la propiedad › horas por defecto del negocio › 7. El servidor no exige dinero.tarifas al guardar propiedades (solo en hk-config y turnos)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor: el guardado de propiedades solo exige dinero.tarifas en hk-config y en turnos; en propiedades solo cuida la zona principal"
+   }
+  },
+  {
+   "id": "CU-PR-3.5",
+   "capacidad": "CAP-PR-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver en su portal el horario de la propiedad (check-in 24/7 o con hora límite, y check-out)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Es crítico (amplía lo que lee el colaborador): necesita decisión y cruce con Carlos; en la bolsa con prioridad baja.",
+    "Hoy el colaborador recibe check-in y check-out de la propiedad, pero no el ingreso 24/7 ni la hora límite, y el portal no muestra ninguno."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con ingreso 24/7 y check-out 11:00",
+     "cuando": "el colaborador abre su turno en el portal",
+     "entonces": "ve «Check-in 24/7» y «Check-out 11:00» de esa propiedad"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-3",
+    "REQ-PR1-1"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: búsqueda de checkinTime, checkoutTime, ingreso24h y horaLimiteIngreso en portal.html sin resultados; la lista blanca del servidor deja pasar solo las dos horas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código del portal y de la lista blanca de lectura del colaborador: el portal no muestra el horario"
+   }
+  },
+  {
+   "id": "CU-PR-4.1",
+   "capacidad": "CAP-PR-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Agregar una zona a la propiedad sin duplicarla",
+   "declarado": "construido",
+   "limitantes": [
+    "Las zonas no se renombran: se quitan y se agregan de nuevo.",
+    "Las zonas de la propiedad son las áreas del apartamento (sala, baño…); no son las zonas de inventario."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-8.1",
+     "dato": "zonas de la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con las zonas Sala y Cocina",
+     "cuando": "se escribe «Balcón» y se agrega",
+     "entonces": "la zona queda como una ficha más de la propiedad y se avisa «Zona añadida»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una propiedad que ya tiene la zona «Baño»",
+     "cuando": "se intenta agregar «baño» (otra escritura del mismo nombre)",
+     "entonces": "no se agrega y se avisa «Ya existe como 'Baño'»"
+    }
+   ],
+   "origen": [
+    "REQ-P4"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "addZona con comparación normalizada (_normZona/_zonaExistente: sin mayúsculas ni tildes). Housekeeping las usa para elegir la zona de un incidente."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: addZona rechaza el nombre equivalente con otra grafía y no agrega el idéntico"
+   }
+  },
+  {
+   "id": "CU-PR-4.2",
+   "capacidad": "CAP-PR-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Quitar una zona de la propiedad, o quitarlas todas",
+   "declarado": "construido",
+   "limitantes": [
+    "No se encontró en la página una revisión de si algún flujo o incidente usa la zona que se quita."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una zona con marcador en el plano",
+     "cuando": "se quita la zona",
+     "entonces": "desaparece de la propiedad y también su marcador del plano"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con varias zonas",
+     "cuando": "se pulsa «Quitar todas» y se vuelve a pulsar dentro de 4 segundos",
+     "entonces": "se vacían las zonas y los marcadores, el plano se conserva y se avisa cuántas zonas se quitaron"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una propiedad sin zonas",
+     "cuando": "se mira el botón «Quitar todas»",
+     "entonces": "está deshabilitado"
+    }
+   ],
+   "origen": [
+    "REQ-P4"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "removeZona y _zonasQuitarTodas (REQ-P4.1; segundo toque en 4 s con _zonasQuitarPend); saveProps limpia marcadores huérfanos."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: removeZona quita también el marcador; _zonasQuitarTodas pide segundo toque y deja el plano"
+   }
+  },
+  {
+   "id": "CU-PR-4.3",
+   "capacidad": "CAP-PR-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Traer a la propiedad las zonas de otra propiedad o las típicas de su subtipo",
+   "declarado": "construido",
+   "limitantes": [
+    "Nunca borra ni renombra zonas: solo agrega las que faltan."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos propiedades y la segunda con zonas que la primera no tiene",
+     "cuando": "se elige traer de la segunda y se marcan algunas",
+     "entonces": "solo se agregan las marcadas; las que la primera ya tenía salen atenuadas «ya la tienes» y no se tocan"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un subtipo con zonas típicas definidas",
+     "cuando": "se pulsa «Traer del tipo»",
+     "entonces": "se agregan las zonas típicas que faltan y se avisa cuántas; si el subtipo no tiene zonas, el botón está deshabilitado"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una propiedad que ya tiene todas las zonas del subtipo",
+     "cuando": "se pulsa «Traer del tipo»",
+     "entonces": "no cambia nada y se avisa «Ya tienes todas las zonas del tipo»"
+    }
+   ],
+   "origen": [
+    "REQ-P4"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos"
+    ],
+    "notas": "abrirTraerZonas/_tzCargar/confirmarTraerZonas y traerZonasTipo (_zonasDelTipo: nunca la lista básica)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _tzCargar marca como «ya» las equivalentes normalizadas y confirmarTraerZonas solo agrega las marcadas"
+   }
+  },
+  {
+   "id": "CU-PR-4.4",
+   "capacidad": "CAP-PR-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Subir el plano de la propiedad y quitarlo",
+   "declarado": "construido",
+   "limitantes": [
+    "El archivo del plano queda guardado aunque se quite: no hay forma de borrarlo.",
+    "Solo se sube con la sesión iniciada y se aceptan imágenes png, jpeg y webp."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad sin plano y una imagen del plano",
+     "cuando": "se sube la imagen",
+     "entonces": "el plano se muestra en la ficha con sus zonas ubicables y se avisa «Plano guardado»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con plano y zonas ubicadas",
+     "cuando": "se pulsa «Quitar plano» y se vuelve a pulsar dentro de 4 segundos",
+     "entonces": "el plano y los marcadores se quitan y las zonas se conservan"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una subida que falla",
+     "cuando": "se intenta subir el plano",
+     "entonces": "se avisa el error y el botón vuelve a quedar disponible para reintentar"
+    }
+   ],
+   "origen": [
+    "REQ-P3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/upload (plano)"
+    ],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "_planoSubir: STRApi.upload('plano', propId, file); la imagen se pide siempre por STRApi.archivoUrl (blob con sesión), nunca por <img src> directo."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _planoSubir y _planoQuitar (el archivo no se borra del almacén)"
+   }
+  },
+  {
+   "id": "CU-PR-4.5",
+   "capacidad": "CAP-PR-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ubicar las zonas en el plano: crear una zona tocando el plano, ubicar una existente, moverla y quitar su marcador",
+   "declarado": "construido",
+   "limitantes": [
+    "Las zonas del plano son siempre un subconjunto de las zonas de la propiedad: un marcador sin zona se descarta al guardar.",
+    "Escribir una zona que ya está en el plano avisa «ya está en el plano» y no la duplica."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con plano",
+     "cuando": "se toca un punto del plano y se escribe el nombre de la zona",
+     "entonces": "se crea la zona (o se ubica si ya existía) con un marcador numerado en ese punto y aparece en la leyenda"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una zona sin marcador",
+     "cuando": "se toca su ficha y luego un punto del plano, o se arrastra un marcador",
+     "entonces": "la zona queda ubicada en ese punto o el marcador se mueve y se guarda al soltar"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una zona con marcador",
+     "cuando": "se quita el marcador con clic derecho o con pulsación larga",
+     "entonces": "la zona sigue en la propiedad y queda «sin ubicar»"
+    }
+   ],
+   "origen": [
+    "REQ-P3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "_planoClickImg/_planoChipClick/_planoMkDown/_planoMenu; coordenadas en % con un decimal (zonasPlano); eventos de puntero con setPointerCapture; _planoRepintar solo repinta zonas y plano."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _planoCrearZona aplica la misma regla de nombres que addZona y saveProps limpia marcadores huérfanos"
+   }
+  },
+  {
+   "id": "CU-PR-4.6",
+   "capacidad": "CAP-PR-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el plano de la propiedad con sus zonas durante su turno",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Pendiente anotado en el mapa técnico (P3.1): el plano y sus marcadores ya llegan al colaborador, pero ninguna pantalla los muestra."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con plano y zonas ubicadas",
+     "cuando": "el colaborador abre su turno",
+     "entonces": "ve el plano con las zonas ubicadas para orientarse"
+    }
+   ],
+   "origen": [
+    "REQ-P3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: búsqueda de planoUrl y zonasPlano en Housekeeping y portal sin resultados; sí están en la lista blanca de lectura del colaborador."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código de Housekeeping y del portal: ninguno usa el plano"
+   }
+  },
+  {
+   "id": "CU-PR-5.1",
+   "capacidad": "CAP-PR-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir el flujo base del turno de la propiedad (simple o compuesto) y ver sus etapas, con aviso si no hay o ya no existe",
+   "declarado": "construido",
+   "limitantes": [
+    "Se retiraron las etapas por categoría: sin flujo base no hay tareas en el turno automático.",
+    "Elegir el flujo en el selector solo repinta las etapas; no se guarda hasta pulsar «Guardar cambios»."
+   ],
+   "entradas": [
+    {
+     "de": "CU-FL-1.1",
+     "dato": "flujos generales, simples o compuestos, con sus etapas, tiempos, colaborador sugerido y copias por propiedad"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PR-8.1",
+     "dato": "flujo base del turno"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo general compuesto de varios sub-flujos",
+     "cuando": "se elige como flujo base de la propiedad",
+     "entonces": "la ficha muestra las etapas del turno con su nombre, si son generales o copia de la propiedad, sus minutos, cuáles van en paralelo y el colaborador sugerido, y el total de «manos» y de duración; se guarda con «Guardar cambios»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad sin flujo base",
+     "cuando": "se abre su ficha",
+     "entonces": "un aviso dice que el turno automático de esa propiedad no tendrá tareas hasta elegir un flujo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un flujo base que ya fue eliminado",
+     "cuando": "se abre la ficha",
+     "entonces": "el selector conserva la opción «el flujo base ya no existe — elige otro» en vez de perderla"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "_flujoBaseOptionsHTML/_onFlujoBaseChange/_renderPropFlujos/_etapasDesdeFlujoBase (bloque [F11-base-inicio] copiado idéntico de Housekeeping). Sin REQ entre los del mapa: viene de REQ-F11 (fases 3c, 4 y 5a) anotados en el mapa técnico. Relacionado: INC-77 (Flujos): borrar un flujo que es base de una propiedad no avisaba; la ficha ya marca el flujo ausente."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: selector con flujo ausente, aviso sin flujo base y filas de etapas con minutos y paralelo"
+   }
+  },
+  {
+   "id": "CU-PR-5.2",
+   "capacidad": "CAP-PR-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir el editor de Flujos desde una etapa del flujo base: editar el flujo, editar su copia o crear una copia solo para esta propiedad",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-FL-1.2",
+     "dato": "flujo que se edita, o flujo general que se copia para esta propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una etapa que es un flujo general",
+     "cuando": "se pulsa «Personalizar para esta propiedad»",
+     "entonces": "se abre el editor de Flujos con una copia de ese flujo lista para esta propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una etapa que ya es copia de la propiedad",
+     "cuando": "se pulsa «Editar copia»",
+     "entonces": "se abre el editor de Flujos con esa copia"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_irAFlujos('str-flujos.html?edit=<id>' | '?copiar=<id>&prop=<propId>'); la navegación sale de Propiedades."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _renderPropFlujos arma los botones y las rutas de edición y copia"
+   }
+  },
+  {
+   "id": "CU-PR-5.3",
+   "capacidad": "CAP-PR-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir el colaborador base de la propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "Cada propiedad tiene un solo colaborador base; hay un solo acceso por zona para él (CU-PR-6.5)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.1",
+     "dato": "colaboradores activos del equipo con su nombre y su color"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PR-8.1",
+     "dato": "colaborador base de la propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "colaboradores activos en el equipo",
+     "cuando": "se elige uno como colaborador base de la propiedad y se guarda",
+     "entonces": "la tarjeta de la propiedad muestra sus iniciales y los turnos automáticos de esa propiedad le quedan asignados por defecto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con colaborador base y se elige «— ninguno —»",
+     "cuando": "se guarda",
+     "entonces": "la propiedad queda sin colaborador base y sus turnos nuevos salen «Sin asignar»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador base que ya no existe o está inactivo",
+     "cuando": "se abre la ficha",
+     "entonces": "el selector lo conserva con «colaborador no encontrado» para que se corrija, en vez de mostrar «ninguno»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "str-usuarios-v1"
+    ],
+    "notas": "_populateCollabBaseSelect (INC-46: comparar siempre como texto, String(a) === String(b)); colaboradorBaseId es el id numérico de /api/usuarios. Sin REQ propio entre los del mapa."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _populateCollabBaseSelect conserva el id inexistente con aviso; renderList pinta las iniciales solo si está activo"
+   }
+  },
+  {
+   "id": "CU-PR-6.1",
+   "capacidad": "CAP-PR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Describir el depósito físico de la propiedad (si tiene, número y dónde está)",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo describe el depósito: no crea zonas de inventario; las zonas se crean en Inventario.",
+    "El número admite 20 caracteres y la ubicación 120."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad sin depósito",
+     "cuando": "se marca «Tiene depósito», se escribe su número y dónde está y se guarda",
+     "entonces": "la ficha conserva el número y la ubicación del depósito"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con depósito descrito",
+     "cuando": "se desmarca «Tiene depósito»",
+     "entonces": "los campos de número y ubicación se ocultan y la propiedad queda sin depósito"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "_depositoPropHTML (#edit-dep-tiene, #edit-dep-numero, #edit-dep-ubic); se guarda con «Guardar cambios». No está en la lista blanca del colaborador."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: savePropEdit guarda el depósito con sus topes; ningún módulo leído lo usa para crear zonas"
+   }
+  },
+  {
+   "id": "CU-PR-6.2",
+   "capacidad": "CAP-PR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir la zona principal de inventario de la propiedad, o dejarla automática",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo la cambia el administrador o el operador con permiso de editar inventario; el resto la ve como texto.",
+    "No ofrece zonas privadas ni zonas sin propiedad; una zona elegida que luego se desactiva se conserva con aviso y se usa la automática.",
+    "Salir de la ficha por el menú del sistema no avisa del cambio sin guardar.",
+    "INC-122 (pospuesto, latente): una zona principal privada guardada por datos viejos rechaza el conteo del colaborador; hoy no hay zonas reales."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-2.1",
+     "dato": "zonas principales activas con las propiedades a las que sirven, sin las privadas",
+     "rel": "REL-13"
+    },
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario y permiso de editar inventario del operador"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INV-2.4",
+     "dato": "zona principal de inventario elegida a mano en la ficha de la propiedad",
+     "rel": "REL-13"
+    },
+    {
+     "a": "CU-INV-7.1",
+     "dato": "zona principal elegida en la ficha de la propiedad, que no puede ser privada",
+     "rel": "REL-13"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "zonas principales activas que sirven a la propiedad",
+     "cuando": "se elige una y se guarda",
+     "entonces": "el conteo de inventario de esa propiedad se hace en esa zona; la opción «Automática» muestra cuál sería la que resulta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una zona principal elegida y sin guardar",
+     "cuando": "se toca otra propiedad de la lista",
+     "entonces": "aparece «Sin guardar» y un aviso con cuenta de 6 segundos: un segundo toque descarta el cambio"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador sin permiso de editar inventario",
+     "cuando": "abre la ficha y la guarda",
+     "entonces": "ve la zona principal como texto y la que estaba guardada se conserva aunque intente cambiarla"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-1",
+    "REQ-INV2-4-1",
+    "DA-29"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-98",
+    "INC-103",
+    "INC-121",
+    "INC-122"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "inv-depositos"
+    ],
+    "notas": "_invPropHTML/#edit-inv-principal → invPrincipalId; _invPrincipalPendiente/_invAvisoSalir (INC-103); _invPuedeEditar; el servidor conserva invPrincipalId guardado si quien escribe es un operador sin inventario.editar (_colPropConservarInvPrincipal, decisión 6). Bloque [INV-puras] copiado idéntico de Inventario y Housekeeping."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del servidor: opciones sin privadas, chip «Sin guardar», segundo toque de 6 s y conservación de invPrincipalId para el operador sin permiso"
+   }
+  },
+  {
+   "id": "CU-PR-6.3",
+   "capacidad": "CAP-PR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver las zonas de inventario que sirven a la propiedad y saltar a Inventario para verlas",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo lectura: las zonas se crean y editan en Inventario."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-2.1",
+     "dato": "zonas activas con su uso, las propiedades a las que sirven y si son privadas",
+     "rel": "REL-13"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "zonas de inventario que sirven a la propiedad",
+     "cuando": "se abre la ficha",
+     "entonces": "se listan con su nombre, su tipo y su uso (principal, del apto, otra o móvil), marcando las privadas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ninguna zona de inventario sirve a la propiedad",
+     "cuando": "se abre la ficha",
+     "entonces": "dice «Ninguna zona de inventario le sirve todavía»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "la ficha abierta",
+     "cuando": "se pulsa «Ver en Inventario»",
+     "entonces": "se abre Inventario en su pestaña de zonas"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "inv-depositos"
+    ],
+    "notas": "_invPropHTML (data-inv-zona); _invVerEnInventario deja str-inv-tab=depositos y navega a str-inventario.html. No lista las zonas con propiedades vacías (L-86, DA-30)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _invPropHTML lista las zonas que sirven con la marca de privada y sin las de propiedades vacías"
+   }
+  },
+  {
+   "id": "CU-PR-6.4",
+   "capacidad": "CAP-PR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Hacer que una zona de inventario sirva a la propiedad («Usar zona de inventario»)",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo para el administrador o el operador con permiso de editar inventario.",
+    "Solo ofrece zonas de uso «otra» o «principal» que ya sirven a alguna propiedad; las del apto y las móviles no."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario y permiso de editar inventario del operador"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INV-2.1",
+     "dato": "propiedad que pasa a ser servida por una zona, elegida desde la ficha de la propiedad",
+     "rel": "REL-13"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una zona principal o «otra» que hoy no sirve a la propiedad",
+     "cuando": "se elige en «Usar zona de inventario»",
+     "entonces": "la propiedad se agrega a las que esa zona sirve, se avisa «ahora sirve a esta propiedad» y se guarda solo esa zona"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el sistema rechaza el guardado de la zona (sin permiso o sin conexión)",
+     "cuando": "se intenta usar la zona",
+     "entonces": "vuelve la zona como estaba y se avisa que no se pudo guardar"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "ninguna zona candidata",
+     "cuando": "se abre la ficha",
+     "entonces": "no aparece el selector de «Usar zona de inventario»"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/inv-depositos"
+    ],
+    "colecciones": [
+     "inv-depositos"
+    ],
+    "notas": "_invUsarZona: sube solo esa zona con STRApi.col.push('inv-depositos', [zona], []) (no por _persistCol de Propiedades, que calcularía bajas por ausencia) y actualiza str-col-lastpush-v1; si falla, revierte las dos copias. Flujo sin par: Inventario no lo declara como entrada de CU-INV-2.1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _invUsarZona agrega la propiedad al propIds de la zona, sube solo esa zona y revierte si el sistema la rechaza"
+   }
+  },
+  {
+   "id": "CU-PR-6.5",
+   "capacidad": "CAP-PR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Quitar o devolver a un colaborador base el acceso a una zona, desde la ficha de la propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo existe para el colaborador base de la propiedad: sin colaborador base no hay interruptores.",
+    "El acceso se quita por zona y por colaborador base; no hay acceso por persona a propiedades sin colaborador base."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario y permiso de editar inventario del operador"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INV-7.2",
+     "dato": "acceso revocado a un colaborador desde la ficha de la propiedad",
+     "rel": "REL-13"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con colaborador base y una zona que la sirve",
+     "cuando": "se desmarca el acceso del colaborador base en esa zona",
+     "entonces": "se guarda solo esa zona y el colaborador deja de recibirla"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una zona con el acceso quitado",
+     "cuando": "se vuelve a marcar el acceso",
+     "entonces": "el colaborador base vuelve a recibir la zona"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador sin permiso de editar inventario",
+     "cuando": "abre la ficha de la propiedad",
+     "entonces": "no ve interruptores de acceso"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-1",
+    "DA-29",
+    "DA-30"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-1-interfaz",
+     "casos": [
+      "b",
+      "d"
+     ],
+     "escenarios": [
+      "E1",
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/inv-depositos"
+    ],
+    "colecciones": [
+     "inv-depositos"
+    ],
+    "notas": "_invAccesoZona(zonaId, conAcceso) agrega o quita el id en revocados y sube solo esa zona (data-inv-acceso-zona); el servidor exige inventario.editar al operador. El guion b comprueba que el sistema responde 200 al desmarcar y que la casilla queda desmarcada; el d, que sin permiso hay 0 interruptores."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PR-7.1",
+   "capacidad": "CAP-PR-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Conectar a la propiedad el calendario de un canal (Airbnb, Booking.com, VRBO, HomeAway, directo u otro) y desconectarlo",
+   "declarado": "construido",
+   "limitantes": [
+    "Quitar un canal no pide confirmación.",
+    "Hay una ayuda por canal (el botón «?») que explica dónde copiar la dirección del calendario en Airbnb, Booking.com y VRBO.",
+    "La importación de las reservas no es de Propiedades: la hace el Calendario cada 15 minutos."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-CAL-6.1",
+     "dato": "canal del calendario de cada propiedad con su dirección de importación y su nombre"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad sin canales",
+     "cuando": "se elige el canal, se pega la dirección de su calendario y se pulsa «Conectar»",
+     "entonces": "el canal queda en la propiedad como «Pendiente» y el Calendario lo importará en breve"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una dirección vacía o que no parece la de un calendario de canal",
+     "cuando": "se intenta conectar",
+     "entonces": "no se conecta y se avisa qué falta o que no parece válida"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una propiedad con un canal conectado",
+     "cuando": "se pulsa quitarlo",
+     "entonces": "el canal se desconecta de inmediato, sin segundo toque, y se avisa «Canal desconectado»"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "toggleAddIcal/addIcal/removeIcal; icals[{id, url, channel, icon, status, lastSync, events}]; la sincronización cada 15 min es /sync-ical llamado por hPanel (cron), fuera de esta página."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: addIcal valida «.ics» o «ical», fija estado pendiente; removeIcal quita sin confirmar"
+   }
+  },
+  {
+   "id": "CU-PR-7.2",
+   "capacidad": "CAP-PR-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el estado de los canales de la propiedad: reservas activas, canales conectados y estado de la sincronización",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo muestra el estado que deja el Calendario: la ficha no fuerza ni reintenta la importación."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-6.1",
+     "dato": "estado de la importación de cada canal: última vez, reservas importadas y si hubo error"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un canal que ya se importó",
+     "cuando": "se abre la ficha",
+     "entonces": "muestra «Activo», cuánto hace de la última sincronización y cuántas reservas importó, y el resumen suma reservas y canales"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un canal cuya importación falló",
+     "cuando": "se abre la ficha o se mira la lista",
+     "entonces": "el canal dice «Error», el resumen cuenta el error y la tarjeta de la lista dice «Error sync»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una propiedad sin canales",
+     "cuando": "se abre la ficha",
+     "entonces": "dice «Sin canales conectados» y la tarjeta de la lista indica que no tiene calendario conectado"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "renderDetail (Resumen e iCal & Canales) y renderList (insignias); el estado se lee de icals[].status/lastSync/events que la sincronización escribe en la propiedad."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: insignias y resumen salen de status, lastSync y events de cada canal; quién los escribe (la importación) no estaba entre las fuentes"
+   }
+  },
+  {
+   "id": "CU-PR-7.3",
+   "capacidad": "CAP-PR-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Obtener el enlace secreto de disponibilidad de la propiedad, copiarlo, regenerarlo y ver la última lectura de Airbnb",
+   "declarado": "construido",
+   "limitantes": [
+    "El enlace es público y secreto: quien lo tenga lee las fechas bloqueadas.",
+    "Hay que pegarlo a mano en cada anuncio de Airbnb de la propiedad; Airbnb lo lee cada pocas horas."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-7.5",
+     "dato": "enlace secreto de la propiedad que Airbnb lee",
+     "rel": "REL-21"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con sesión iniciada",
+     "cuando": "se abre la sección «Exportar disponibilidad a Airbnb» y se pulsa «Copiar»",
+     "entonces": "se copia el enlace de la propiedad y se muestran los pasos para pegarlo en cada anuncio de Airbnb y cuándo lo leyó Airbnb por última vez (o «nunca»)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un enlace ya pegado en Airbnb",
+     "cuando": "se pulsa «Regenerar link» y se confirma en la ventana",
+     "entonces": "se crea un enlace nuevo, el anterior deja de servir y se avisa que hay que pegarlo de nuevo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "sin sesión o con un error al leerlo",
+     "cuando": "se abre la sección",
+     "entonces": "dice «Disponible al iniciar sesión» y no muestra el enlace"
+    }
+   ],
+   "origen": [
+    "REQ-P2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/ical-export/{propId}",
+     "/ical-export/{propId}/regenerar"
+    ],
+    "colecciones": [],
+    "notas": "_expCargar/_expPintar/_expCopiar/_expPedirRegenerar/_expConfirmarRegenerar vía STRApi.icalExport.leer/regenerar; ruta pública /api/ical/salida/<prop>/<token>.ics. El archivo del servidor (api/lib/ical-export.php) no estaba entre las fuentes leídas."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del cliente (str-api.js): llamadas de leer y regenerar y textos de la sección; el servidor no se leyó"
+   }
+  },
+  {
+   "id": "CU-PR-7.4",
+   "capacidad": "CAP-PR-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Agregar un día de limpieza después de cada salida en la disponibilidad que se exporta",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PR-7.5",
+     "dato": "«día de limpieza» después de cada salida, si la opción está marcada",
+     "rel": "REL-21"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con el enlace de disponibilidad",
+     "cuando": "se marca «Agregar un día de limpieza después de cada salida»",
+     "entonces": "Airbnb también bloquea el día siguiente a cada salida y se avisa que se agregará el día de limpieza"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la opción marcada",
+     "cuando": "se desmarca",
+     "entonces": "se avisa «Sin día de limpieza extra» y deja de bloquearse ese día"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un cambio que no se puede guardar",
+     "cuando": "se marca o desmarca la opción",
+     "entonces": "se avisa «No se pudo guardar» y la casilla vuelve a su valor anterior"
+    }
+   ],
+   "origen": [
+    "REQ-P2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/ical-export/{propId}/colchon"
+    ],
+    "colecciones": [],
+    "notas": "_expCambiarColchon → STRApi.icalExport.colchon(propId, valor); el evento exportado se llama «Limpieza (STR Manager)». Servidor no leído."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del cliente (str-api.js, _resIcsDe): el día de limpieza sale solo con la opción marcada; el servidor no se leyó"
+   }
+  },
+  {
+   "id": "CU-PR-7.5",
+   "capacidad": "CAP-PR-7",
+   "actor": [
+    "airbnb"
+   ],
+   "que": "Leer la disponibilidad de una propiedad desde su enlace secreto",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo exporta fechas: no precios ni datos del huésped.",
+    "La lectura pública del enlace no estaba entre las fuentes: lo descrito sale de la página y de su documentación (Desarrollo lo confirma)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-7.3",
+     "dato": "enlace secreto de la propiedad que Airbnb lee",
+     "rel": "REL-21"
+    },
+    {
+     "de": "CU-PR-7.4",
+     "dato": "«día de limpieza» después de cada salida, si la opción está marcada",
+     "rel": "REL-21"
+    },
+    {
+     "de": "CU-CAL-2.2",
+     "dato": "reservas directas y bloqueos de la propiedad con sus fechas"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "reservas directas y bloqueos con fechas en la propiedad",
+     "cuando": "Airbnb lee el enlace de la propiedad",
+     "entonces": "recibe cada reserva directa o bloqueo como «No disponible (STR Manager)», solo con fechas y sin datos del huésped"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "reservas que vinieron de Airbnb, canceladas o finalizadas",
+     "cuando": "Airbnb lee el enlace",
+     "entonces": "no se reenvían: lo que viene de Airbnb no se exporta de vuelta, y tampoco lo cancelado ni lo finalizado"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un enlace regenerado",
+     "cuando": "Airbnb lee el enlace anterior",
+     "entonces": "el enlace anterior ya no entrega nada"
+    }
+   ],
+   "origen": [
+    "REQ-P2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/ical/salida/<prop>/<token>.ics"
+    ],
+    "colecciones": [],
+    "notas": "Ruta pública con token aleatorio por propiedad (regenerar lo invalida); regla de referencia en STRApi (_resExportables, _resIcsDe: ventana desde ayer, sin canceladas ni finalizadas, sin eco de Airbnb) que el PHP api/lib/ical-export.php debe repetir; ninguno de los dos se probó aquí."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de la regla de referencia en el cliente (str-api.js); el archivo del servidor y la ruta pública no estaban entre las fuentes"
+   }
+  },
+  {
+   "id": "CU-PR-8.1",
+   "capacidad": "CAP-PR-8",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar a Housekeeping los datos de la propiedad que arman y vigilan el turno",
+   "declarado": "construido",
+   "limitantes": [
+    "Propiedades no arma ni calcula turnos: solo guarda estos datos; los lee Housekeeping.",
+    "Las zonas de la propiedad también las usa Housekeeping para elegir la zona de un incidente (flujo sin par en CU-HK-4.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-3.1",
+     "dato": "check-in y check-out base de la propiedad"
+    },
+    {
+     "de": "CU-PR-3.3",
+     "dato": "tolerancia de salida de la propiedad, o la del negocio"
+    },
+    {
+     "de": "CU-PR-3.4",
+     "dato": "horas planificadas del turno en la propiedad, o las del negocio"
+    },
+    {
+     "de": "CU-PR-5.1",
+     "dato": "flujo base del turno"
+    },
+    {
+     "de": "CU-PR-5.3",
+     "dato": "colaborador base de la propiedad"
+    },
+    {
+     "de": "CU-PR-4.1",
+     "dato": "zonas de la propiedad"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-1.2",
+     "dato": "horario base, tolerancia de salida, horas del turno, flujo base y colaborador base de la propiedad",
+     "rel": "REL-06"
+    },
+    {
+     "a": "CU-HK-5.4",
+     "dato": "tolerancia de salida por propiedad y horarios",
+     "rel": "REL-06"
+    },
+    {
+     "a": "CU-HK-6.5",
+     "dato": "tolerancia de salida y horas del turno de cada propiedad",
+     "rel": "REL-06"
+    },
+    {
+     "a": "CU-HK-4.1",
+     "dato": "zonas de la propiedad para elegir la zona del incidente",
+     "rel": "REL-06"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con horario base, tolerancia, horas del turno, flujo base y colaborador base fijados",
+     "cuando": "Housekeeping arma el turno automático de una reserva que sale",
+     "entonces": "recibe esos datos de la propiedad para la ventana del turno, su flujo, su titular y su alerta de checkout tardío; la hora acordada con el huésped manda sobre la de la propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad sin tolerancia ni horas del turno propias",
+     "cuando": "Housekeeping calcula la alerta y las horas del turno",
+     "entonces": "usa la tolerancia y las horas por defecto del negocio"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una propiedad cuyo flujo base se eliminó o cuyo colaborador base ya no existe",
+     "cuando": "Housekeeping arma el turno",
+     "entonces": "el turno sale sin tareas o «Sin asignar» y no falla"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1",
+    "REQ-PR1-4",
+    "REQ-PR1-5",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "Housekeeping lee la propiedad guardada: _turnoverInfo, _buildShifts (windowStart), _tolSalidaMin, _datosHuesped, etapas desde flujoBaseId y titular desde colaboradorBaseId; las horas pasan por STRApi._horasCalcular. REL-06 también nombra invPrincipalId, que llega a Housekeeping por Inventario (CU-INV-2.4)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de Housekeeping y del cliente: usos de checkinTime/checkoutTime, toleranciaSalidaMin, horasTurno, flujoBaseId, colaboradorBaseId y zonas de la propiedad"
+   }
+  },
+  {
+   "id": "CU-PR-8.2",
+   "capacidad": "CAP-PR-8",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar al Calendario el horario base y los datos de cada propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "El Calendario no estaba entre las fuentes leídas: lo descrito sale del mapa técnico de Propiedades (Calendario y Desarrollo lo confirman)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-3.1",
+     "dato": "check-in y check-out base de la propiedad"
+    },
+    {
+     "de": "CU-PR-3.2",
+     "dato": "ingreso 24/7 u hora límite de ingreso"
+    },
+    {
+     "de": "CU-PR-2.4",
+     "dato": "ubicación, torre, apto y dirección de la propiedad"
+    },
+    {
+     "de": "CU-PR-1.3",
+     "dato": "nombre, color, subtipo y ciudad de la propiedad"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CAL-2.1",
+     "dato": "horario base de la propiedad (check-in y check-out) para la hora de las reservas manuales y de las alertas"
+    },
+    {
+     "a": "CU-CAL-5.1",
+     "dato": "propiedades con su nombre, color, subtipo, ubicación y ciudad para las columnas del calendario"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva manual sin hora acordada con el huésped",
+     "cuando": "el Calendario calcula su entrada y su salida",
+     "entonces": "toma el check-in y el check-out base de la propiedad; si la reserva trae hora acordada, esa manda"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "propiedades con ubicación, subtipo y ciudad",
+     "cuando": "el Calendario arma sus columnas y cabeceras",
+     "entonces": "las muestra con el nombre, el color, la ubicación y la ciudad de cada propiedad"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-1",
+    "REQ-PR1-4",
+    "REQ-PR1-5",
+    "DA-16"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "ubicaciones",
+     "ubic-tipos"
+    ],
+    "notas": "Según docs/claude/propiedades.md: Calendario (checkoutFraction/checkinFraction; la hora de la reserva manda) y su cabecera por ciudad (UBIC_ICON fijo, REQ-C10.b). El archivo del Calendario no estaba entre las fuentes."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del mapa técnico de Propiedades; el código del Calendario no se leyó"
+   }
+  },
+  {
+   "id": "CU-PR-8.3",
+   "capacidad": "CAP-PR-8",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar al colaborador, acotados, los datos de las propiedades donde trabaja",
+   "declarado": "construido",
+   "limitantes": [
+    "No recibe los calendarios de canales, el depósito, el ingreso 24/7 ni la hora límite.",
+    "Las ubicaciones comunes (con su dirección e indicaciones) parecen llegar sin acotar a sus propiedades, a diferencia de las propiedades: Desarrollo lo confirma.",
+    "Admin y operador no cambian: ven todas las propiedades."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-POR-1.3",
+     "dato": "datos de las propiedades donde trabaja el colaborador (lista permitida), con su ventana de 90 días"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con un turno de los últimos 90 días en una propiedad, o que es su colaborador base, o con un incidente abierto de un turno suyo",
+     "cuando": "abre su portal",
+     "entonces": "recibe de esa propiedad el nombre, la ubicación y dirección, las zonas, el plano, el flujo base, el colaborador base, las horas del turno, la tolerancia y el check-in y check-out"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad donde el colaborador no tuvo turno en 90 días, ni es su base, ni tiene incidente abierto",
+     "cuando": "abre su portal",
+     "entonces": "no recibe esa propiedad"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un dato nuevo agregado a la ficha de la propiedad",
+     "cuando": "el colaborador abre su portal",
+     "entonces": "no lo recibe hasta que se autorice expresamente: llegan solo los datos de una lista permitida"
+    }
+   ],
+   "origen": [
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-94",
+    "INC-120"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/col/propiedades"
+    ],
+    "colecciones": [
+     "propiedades",
+     "ubicaciones"
+    ],
+    "notas": "api/col/index.php: _colCamposPropiedadColaborador (lista blanca), _colLecturaContexto/_colLecturaContextoBD (base ∪ turno reciente ∪ incidente abierto, INC-120 capas 1 y 2) y _colFiltrarLecturaColaborador; case «ubicaciones» solo filtra si la fila trae propId y las ubicaciones no lo traen."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor: lista blanca de campos y contexto de propiedades del colaborador; no se probó con un colaborador"
+   }
+  },
+  {
+   "id": "CU-PR-9.1",
+   "capacidad": "CAP-PR-9",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Permitir ver y editar las propiedades solo al administrador y al operador",
+   "declarado": "construido",
+   "limitantes": [
+    "Un operador ve y edita todas las propiedades; limitarlo a las suyas está solo como idea (CU-PR-9.4)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario con sesión"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con sesión",
+     "cuando": "abre Propiedades",
+     "entonces": "ve y edita todas las propiedades y sus fichas; solo la zona principal exige además el permiso de editar inventario"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador con sesión",
+     "cuando": "abre Propiedades",
+     "entonces": "ve «Sin permiso para este módulo» (o vuelve a su inicio) y no se cargan datos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador que intenta guardar propiedades por fuera de la pantalla",
+     "cuando": "se envía el guardado",
+     "entonces": "el sistema lo rechaza por falta de permiso"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/propiedades"
+    ],
+    "colecciones": [
+     "propiedades"
+    ],
+    "notas": "STRApi.exigirRol(['admin', 'operador']) (INC-108 / REQ-U8) antes de cargar datos; en el servidor $rolesEscritura deja las colecciones de propiedades solo a admin y operador (PUT; el GET del colaborador va filtrado, CU-PR-8.3)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del servidor: exigirRol al inicio y rolesEscritura sin colaborador para propiedades"
+   }
+  },
+  {
+   "id": "CU-PR-9.2",
+   "capacidad": "CAP-PR-9",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Traer del sistema, al abrir Propiedades, las propiedades, subtipos, ubicaciones, tipos de ubicación y zonas de inventario, sin subir datos de ejemplo",
+   "declarado": "construido",
+   "limitantes": [
+    "Es «el sistema manda»: lo que trae el sistema reemplaza lo local; las semillas de arranque solo se escriben en el aparato y se envían si el sistema no tiene ninguna."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-1.1",
+     "dato": "propiedades, subtipos, ubicaciones, tipos de ubicación y zonas de inventario con su sello, para el aparato",
+     "rel": "REL-26"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un aparato sin datos guardados y un negocio con propiedades y subtipos",
+     "cuando": "se abre Propiedades",
+     "entonces": "no se envía ningún guardado de propiedades ni de subtipos y se ven las propiedades del sistema, sin ninguna de ejemplo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio nuevo sin subtipos ni tipos de ubicación",
+     "cuando": "se abre Propiedades",
+     "entonces": "se envían los subtipos y los tipos de ubicación de arranque, una sola vez"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un aparato con una versión vieja de la página",
+     "cuando": "se abre Propiedades",
+     "entonces": "se avisa «Actualiza la página» y no se sincroniza"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [
+    "INC-117"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-117",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/propiedades",
+     "/api/col/prop-tipos",
+     "/api/col/ubicaciones",
+     "/api/col/ubic-tipos",
+     "/api/col/inv-depositos"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-depositos"
+    ],
+    "notas": "_syncColFromApi (pull de cinco colecciones y STRApi.me); getProps sin caché devuelve [] (_semillaPropsVacia); _tiposTrasPull decide servidor, sembrar o error; guion INC-117 d con espera fija de 6 s (no marcada como no fiable: solo mide ausencia de PUT). Bloque [PROP-siembra-inicio] con prueba unitaria propia (no cuenta)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-PR-9.3",
+   "capacidad": "CAP-PR-9",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Enviar al sistema solo lo cambiado en las propiedades, subtipos, ubicaciones y tipos, y sus bajas",
+   "declarado": "construido",
+   "limitantes": [
+    "Las zonas de inventario se envían aparte, una por una, para no calcular bajas por ausencia (CU-PR-6.4 y CU-PR-6.5)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.1",
+     "dato": "cambios de propiedades, subtipos, ubicaciones y tipos con su baja, como diferencia contra el último envío",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad cambiada en la ficha",
+     "cuando": "se guardan los cambios",
+     "entonces": "se envía solo esa propiedad cambiada y no las demás"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad abierta",
+     "cuando": "se elimina",
+     "entonces": "se envía su baja y las demás no se tocan"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una versión vieja de la página en el aparato",
+     "cuando": "se guarda una propiedad",
+     "entonces": "se avisa «Actualiza la página» y no se envía nada"
+    }
+   ],
+   "origen": [
+    "REQ-P0"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/propiedades",
+     "/api/col/prop-tipos",
+     "/api/col/ubicaciones",
+     "/api/col/ubic-tipos"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "ubicaciones",
+     "ubic-tipos"
+    ],
+    "notas": "_persistCol compara contra str-col-lastpush-v1 (cambiados y ausentes = bajas); saveProps limpia marcadores huérfanos antes. Qué ocurre sin conexión depende de STRApi.col (no leído)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _persistCol envía cambiados y bajas por ausencia; el reintento sin conexión está en STRApi y no se leyó"
+   }
+  },
+  {
+   "id": "CU-PR-9.4",
+   "capacidad": "CAP-PR-9",
+   "actor": [
+    "operador"
+   ],
+   "que": "Limitar a un operador a las propiedades que le tocan",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Idea de la bolsa (salió de OP-1, criterio 10, 17-oct): hoy el operador ve todo; si se quiere limitar, es un REQ aparte."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador asignado solo a algunas propiedades",
+     "cuando": "abre Propiedades",
+     "entonces": "ve y edita solo esas propiedades"
+    }
+   ],
+   "origen": [
+    "T-15"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: la ficha y el servidor no distinguen propiedades por operador."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de la página y del servidor: el operador escribe y lee todas las propiedades de la cuenta"
+   }
+  },
+  {
+   "id": "CU-PR-9.5",
+   "capacidad": "CAP-PR-9",
+   "actor": [
+    "admin"
+   ],
+   "que": "Limpiar de las propiedades las referencias a lo reiniciado (flujo base y zona principal) cuando se reinicia el negocio",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-49 pospuesta por Carlos el 18-oct («de momento descartemos los borrados»); vuelve al alcance si se retoma.",
+    "Se pidió solo como limpieza puntual sin pantalla nueva; «reiniciar módulo» queda en la bolsa (T-21)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio que se reinicia conservando sus propiedades, con tipos y ubicaciones",
+     "cuando": "se reinician los flujos y el inventario",
+     "entonces": "las propiedades se conservan y se les vacían el flujo base y la zona principal que ya no existen"
+    }
+   ],
+   "origen": [
+    "DA-49"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-12"
+   ],
+   "pendientes": [
+    "T-21"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código en el producto. Contrapartes: CU-INV-8.5 y CU-HK-10.8."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de DA-49 y de la página: la ficha no tiene acción de reinicio"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-PC1-2",
+   "porque": "Es de Puntos de control (lector QR y respaldo por foto); no hay punto de control en la ficha de la propiedad. Entregado a Desarrollo."
+  },
+  {
+   "id": "REQ-K3-2",
+   "porque": "Es de Copia a Drive y retención (copia de fotos); ningún caso de uso de Propiedades la ejerce. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-7",
+   "porque": "Pedido descartado como contenedor (partido en INV2-7-1 y INV2-7-2); sus casos de uso cuelgan de los hijos y son de Inventario."
+  },
+  {
+   "id": "REQ-INV2-7-1",
+   "porque": "Son los lugares dentro de la zona de inventario (repisas, contenedores), no las zonas de la propiedad; es de Inventario y Housekeeping. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-7-2",
+   "porque": "Código QR por lugar de la zona de inventario (CU-INV-2.10); es de Inventario y espera al lector de Puntos de control. Borrador."
+  },
+  {
+   "id": "REQ-INV2-9",
+   "porque": "Es de Inventario (a qué propiedad pertenece un juego de ropa); Propiedades solo ofrece las propiedades entre las que se elige. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-6-3",
+   "porque": "Es la plantilla de dotación por tipo de propiedad de Inventario (CU-INV-11.3, sin construir); usará el subtipo que Propiedades ya guarda. Entregado."
+  },
+  {
+   "id": "DA-23",
+   "porque": "Autoriza al verificador a crear datos de prueba en producción (incluida una propiedad de prueba); es de la fábrica, no del producto."
+  },
+  {
+   "id": "DA-24",
+   "porque": "Autoriza un usuario colaborador de prueba para verificar los criterios «como colaborador»; es de la fábrica, no del producto."
+  },
+  {
+   "id": "DA-25",
+   "porque": "Política de fotos y de copia a Drive (Copia a Drive y retención); ningún caso de uso de Propiedades la ejerce. Si el plano debe entrar en esa política es duda para Diseño."
+  },
+  {
+   "id": "DA-28",
+   "porque": "Autoriza al verificador a crear reservas de prueba en la propiedad de prueba; es de la fábrica y del Calendario."
+  },
+  {
+   "id": "DA-32",
+   "porque": "Cruce del corte mensual y la copia a Drive (Copia a Drive y retención); ningún caso de uso de Propiedades la ejerce."
+  },
+  {
+   "id": "DA-33",
+   "porque": "Pendientes de ropa entre turnos (Inventario); ningún caso de uso de Propiedades la ejerce."
+  },
+  {
+   "id": "DA-34",
+   "porque": "Lugares de la zona de inventario y su foto al cierre (Inventario y Housekeeping); no son las zonas de la propiedad."
+  },
+  {
+   "id": "DA-36",
+   "porque": "Puntos de control con código QR y respaldo por foto (Puntos de control y Housekeeping); ningún caso de uso de Propiedades la ejerce."
+  },
+  {
+   "id": "DA-43",
+   "porque": "Entrega y recepción de zona de inventario entre turnos (Inventario y Housekeeping); ningún caso de uso de Propiedades la ejerce."
+  },
+  {
+   "id": "DA-48",
+   "porque": "Anulación de movimientos de inventario de prueba; es de la fábrica y de Inventario, sustituida por DA-49 (que sí cuelga de CU-PR-9.5)."
+  },
+  {
+   "id": "INC-75",
+   "porque": "Es del Calendario (logos de canal en la columna de propiedades); ningún caso de uso de Propiedades lo ejerce. Cerrado."
+  },
+  {
+   "id": "INC-77",
+   "porque": "Es de Flujos (borrar un flujo que era base de una propiedad no avisaba; ya avisa y la ficha marca el flujo ausente en CU-PR-5.1). Cerrado."
+  },
+  {
+   "id": "INC-83",
+   "porque": "Es del editor de Flujos (el mínimo de fotos de una tarea queda activo e invisible); Propiedades solo muestra las etapas del flujo. Cerrado."
+  },
+  {
+   "id": "INC-89",
+   "porque": "Es de Housekeeping (no se podía eliminar un turno manual); ningún caso de uso de Propiedades lo ejerce. Cerrado."
+  },
+  {
+   "id": "INC-95",
+   "porque": "Es del Calendario (no ofrecía cancelar una reserva directa); ningún caso de uso de Propiedades lo ejerce. Cerrado."
+  },
+  {
+   "id": "INC-148",
+   "porque": "Turnos de prueba que dejó una corrida y rompen guiones de entrega y recepción; es entorno de pruebas, no producto. Cerrado."
+  },
+  {
+   "id": "INC-150",
+   "porque": "Es de la purga de datos de prueba de Inventario (reconocía las propiedades por un campo equivocado del nombre); no es una función de Propiedades. Cerrado."
+  }
+ ]
+}

@@ -98,7 +98,8 @@ table.matriz .corte{border-left:2px solid var(--tinta)} table.matriz tr.corte>*{
 .diagrama text{fill:var(--tinta);font-family:var(--f-txt);font-size:12px}
 .diagrama .t2{fill:var(--tenue);font-size:11px;font-family:var(--f-dat)}
 .diagrama .nodo{cursor:pointer} .diagrama .nodo:hover rect{stroke:var(--acento);stroke-width:2}
-.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center} .filtros .salto{flex-basis:100%;height:0}
+.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center} .filtros .filtros[hidden]{display:none}
+.cap.elegida{border-color:var(--acento);box-shadow:0 0 0 1px var(--acento) inset} .filtros .salto{flex-basis:100%;height:0}
 .tabla{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow:auto;max-height:70vh}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--linea);vertical-align:top}
@@ -415,62 +416,92 @@ ${esc(relsArista(o, d))}"` : ''}>${n || ''}</td>`; });
 }
 
 /* ---------- Módulo ---------- */
+/* Filtros del módulo: los comparten la gráfica (contexto y capacidades) y la tabla de casos de uso */
+let MF = {m: null};
+function filtrosLimpios(m){ return {m, vista: (MF.vista || 'contexto'), cap: '', tipo: '', act: '', est: '', dir: ''}; }
 function vistaModulo(m){
   migas([['sistema','STR · sistema'], [m, m + ' · ' + nMod(m)]]);
   const A = D.modulos[m].archivo, I = D.modulos[m].informe, c = I.cobertura;
+  if (MF.m !== m) MF = filtrosLimpios(m);
   const acts = [...new Set(A.casosUso.flatMap((u) => u.actor))];
+  const tipos = [...new Set(A.capacidades.map((x) => x.tipo))];
   $('#vista').innerHTML = `
    <header class="cab"><div class="izq"><span class="etq">Módulo ${m} · ${esc(A.estadoArchivo)} · v${A.version} · levantado ${esc(A.levantadoEn)}</span><h1>${esc(nMod(m))}</h1>
      <span class="tenue">${I.capacidades} capacidades · ${I.casosUso} casos de uso</span></div>
      <div class="cifras"><div class="cifra"><span class="etq">Cobertura funcional</span><b class="dat">${fmtPct(c.simple)}</b><span class="tenue">${c.alcance - c.faltan} de ${c.alcance} comprobados</span></div>
        <div class="cifra"><span class="etq">Pesada por importancia</span><b class="dat">${fmtPct(c.pesada)}</b><span class="tenue">esencial 3 · necesaria 2 · accesoria 1</span></div></div></header>
    <section class="sec">${barra(I.porEstado, true)}</section>
-   <section class="sec"><div class="fila"><div><h2>Contexto del módulo</h2><span class="tenue">¿Quién usa este módulo, qué hace y con quién intercambia?</span></div><div class="filtros">
+   <section class="sec"><div class="fila"><div><h2>Contexto del módulo</h2><span class="tenue">¿Quién usa este módulo, qué hace y con quién intercambia?</span></div>
+       <div class="pestanas" role="tablist">${[['contexto', 'Contexto'], ['capacidades', 'Capacidades']].map(([k, t]) => `<button role="tab" data-mv="${k}" aria-selected="${MF.vista === k}">${t}</button>`).join('')}</div></div>
+     <div class="filtros">
+       <label class="etq" for="mCap">Capacidad</label><select id="mCap"><option value="">Todas</option>${A.capacidades.map((x) => `<option value="${x.id}">${x.id.split('-').pop()} · ${esc(corta(x.nombre, 40))}</option>`).join('')}</select>
+       <label class="etq" for="mTipo">Tipo</label><select id="mTipo"><option value="">Todos</option>${tipos.map((t) => `<option value="${t}">${esc(TIPOS[t] || t)}</option>`).join('')}</select>
        <label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
        <label class="etq" for="cEst">Estado</label><select id="cEst"><option value="">Todos</option><option value="alcance">En alcance (sin lo de fuera)</option>${ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<option value="${e}">${esc(n)} (${I.porEstado[e]})</option>`).join('')}</select>
-       <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que entrega</option><option value="entra">Solo lo que recibe</option><option value="-">Ninguna</option></select>
-       <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select></div></div>
-     <p class="tenue" style="margin:0">Izquierda: quién lo usa. Centro: sus capacidades; los cuadritos son sus casos de uso, con el color de su estado. Derecha: los módulos con los que intercambia datos, por medio de las relaciones del mapa. Línea gris: el actor usa casos de uso de esa capacidad (más gruesa = más casos). Verde azulado: la capacidad entrega a ese módulo; naranja: recibe de él. Las líneas aparecen al señalar un elemento: señala cualquier cosa para ver qué es; toca un módulo dos veces para ir a él.</p>
+       <span class="salto"></span>
+       <span class="filtros" id="mRel"><label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que entrega</option><option value="entra">Solo lo que recibe</option><option value="-">Ninguna</option></select>
+       <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select></span>
+       <button class="enl" id="mLimpiar" hidden>Quitar filtros</button></div>
+     <p class="tenue" style="margin:0" id="mAyuda"></p>
      <div class="diagrama" id="dg"></div></section>
-   <section class="sec"><div class="fila"><h2>Capacidades</h2><span class="tenue">Cada cuadro es un caso de uso: tócalo para abrirlo. El título filtra la lista.</span></div><div class="calor" id="calor"></div></section>
-   <section class="sec"><div class="fila"><h2>Casos de uso</h2><div class="filtros">
-       <label class="etq" for="fCap">Capacidad</label><select id="fCap"><option value="">Todas</option>${A.capacidades.map((x) => `<option value="${x.id}">${x.id.split('-').pop()} · ${esc(corta(x.nombre, 40))}</option>`).join('')}</select>
-       <label class="etq" for="fAct">Actor</label><select id="fAct"><option value="">Todos</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
-       <label class="etq" for="fEst">Estado</label><select id="fEst"><option value="">Todos</option>${ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<option value="${e}">${esc(n)}</option>`).join('')}</select>
-       <label class="etq" for="fTipo">Tipo</label><select id="fTipo"><option value="">Todos</option>${Object.entries(TIPOS).map(([t, n]) => `<option value="${t}">${n}</option>`).join('')}</select></div></div>
+   <section class="sec"><div class="fila"><h2>Casos de uso</h2><span class="tenue" id="cuResumen"></span></div>
      <div class="tabla"><table><thead><tr><th>Id</th><th>Caso de uso</th><th>Actor</th><th>Estado</th><th>Flujos</th><th>Pruebas</th></tr></thead><tbody id="filas"></tbody></table></div></section>
    <section class="alcance">
      <div class="caja"><span class="etq">Dentro del alcance</span><ul>${(A.alcance.dentro || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
      <div class="caja"><span class="etq">Fuera del alcance</span><ul>${(A.alcance.fuera || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div></section>
    <section class="sec"><div class="fila"><h2>Sin atar y avisos</h2><span class="tenue">Pendientes que no cuelgan de ningún caso de uso y flujos por completar.</span></div><ul class="avisos" id="avisos"></ul></section>`;
-  $('#calor').innerHTML = A.capacidades.map((cp) => {
-    const cus = A.casosUso.filter((u) => u.capacidad === cp.id);
-    const alc = cus.filter((u) => est(u.id) !== 'fuera-de-alcance' && u.ambito !== 'fabrica');
-    const ok = alc.filter((u) => ['comprobado','parcial'].includes(est(u.id))).length;
-    return `<article class="cap"><div class="fila2"><span class="etq">${cp.id}</span><span class="pct">${alc.length ? Math.round(100 * ok / alc.length) + ' %' : '–'}</span></div>
-      <h3><button class="enl" data-cap="${cp.id}">${esc(cp.nombre)}</button></h3>
-      <div class="fila2"><span class="chip">${TIPOS[cp.tipo] || cp.tipo}</span><span class="chip">${esc(cp.peso)}</span></div>
-      <div class="teselas">${cus.map((u) => `<button class="tesela e-${est(u.id)}" data-id="${u.id}" title="${u.id} · ${esc(u.que)} · ${esc(NOMBRE_EST[est(u.id)])}" aria-label="${u.id}: ${esc(NOMBRE_EST[est(u.id)])}"></button>`).join('')}</div></article>`;
-  }).join('');
-  $$('.tesela').forEach((b) => b.onclick = () => ir(b.dataset.id));
-  $$('[data-cap]').forEach((b) => b.onclick = () => { $('#fCap').value = b.dataset.cap; tabla(m); $('#fCap').scrollIntoView({behavior:'smooth', block:'center'}); });
-  ['#fCap','#fAct','#fEst','#fTipo'].forEach((s) => $(s).onchange = () => tabla(m));
-  diagramaModulo(m); tabla(m);
+  [['#mCap', 'cap'], ['#mTipo', 'tipo'], ['#cAct', 'act'], ['#cEst', 'est'], ['#cDir', 'dir']].forEach(([sel, k]) => { $(sel).value = MF[k]; $(sel).onchange = (e) => { MF[k] = e.target.value; refrescarModulo(m); }; });
+  $('#fRel').onchange = (e) => { guardarRel(e.target.value); refrescarModulo(m); };
+  $('#mLimpiar').onclick = () => { MF = filtrosLimpios(m); guardarRel(''); vistaModulo(m); };
+  $$('[data-mv]').forEach((bt) => bt.onclick = () => { MF.vista = bt.dataset.mv; $$('[data-mv]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.mv === MF.vista))); refrescarModulo(m); });
+  refrescarModulo(m);
   const sin = (A.sinAtar || []).map((s) => `<li><b class="dat">${esc(s.id || s)}</b> ${esc(s.porque || '')}</li>`);
   const av = D.avisos.filter((a) => (a.startsWith(m + '.json') || a.startsWith('CU-' + m + '-')) && !/sin atar/.test(a)).map((a) => `<li>${esc(a)}</li>`);
   $('#avisos').innerHTML = sin.concat(av).join('') || '<li class="vacio">Nada pendiente de atar.</li>';
   window.scrollTo({top:0});
 }
-function tabla(m){
-  const A = D.modulos[m].archivo;
-  const fc = $('#fCap').value, fa = $('#fAct').value, fe = $('#fEst').value, ft = $('#fTipo').value;
+/* Qué casos de uso pasan los filtros del módulo (sin contar el actor, o con él) */
+function pasaMF(A){
   const tipo = Object.fromEntries(A.capacidades.map((c) => [c.id, c.tipo]));
-  const filas = A.casosUso.filter((u) => (!fc || u.capacidad === fc) && (!fa || u.actor.includes(fa)) && (!fe || est(u.id) === fe) && (!ft || tipo[u.capacidad] === ft));
+  const estado = (u) => !MF.est || (MF.est === 'alcance' ? est(u.id) !== 'fuera-de-alcance' : est(u.id) === MF.est);
+  const sinActor = (u) => (!MF.cap || u.capacidad === MF.cap) && (!MF.tipo || tipo[u.capacidad] === MF.tipo) && estado(u);
+  const actor = (u) => !MF.act || MF.act === '-' || u.actor.includes(MF.act);
+  return {sinActor, actor, estado, todo: (u) => sinActor(u) && actor(u)};
+}
+function elegirCapacidad(m, id){ MF.cap = MF.cap === id ? '' : id; $('#mCap').value = MF.cap; refrescarModulo(m); }
+function refrescarModulo(m){
+  const A = D.modulos[m].archivo, P = pasaMF(A);
+  $('#mRel').hidden = MF.vista !== 'contexto';
+  $('#mLimpiar').hidden = !(MF.cap || MF.tipo || MF.act || MF.est || MF.dir || FILTRO_REL);
+  if (MF.vista === 'capacidades') vistaCapacidades(m, A, P); else diagramaModulo(m);
+  tabla(m, A, P);
+}
+function tabla(m, A, P){
+  const filas = A.casosUso.filter(P.todo);
+  const act = [MF.cap && 'capacidad ' + MF.cap.split('-').pop(), MF.tipo && (TIPOS[MF.tipo] || MF.tipo).toLowerCase(), MF.act && MF.act !== '-' && ACT(MF.act), MF.est && (MF.est === 'alcance' ? 'en alcance' : NOMBRE_EST[MF.est].toLowerCase())].filter(Boolean);
+  $('#cuResumen').textContent = `${filas.length} de ${A.casosUso.length}` + (act.length ? ' · filtrado por ' + act.join(', ') + ' (los mismos filtros de la gráfica)' : ' · se filtra con los filtros de la gráfica');
   $('#filas').innerHTML = filas.map((u) => `<tr tabindex="0" data-id="${u.id}"><td class="dat">${u.id}</td><td>${esc(u.que)}</td><td>${u.actor.map((a) => esc(ACT(a))).join(', ')}</td>
     <td class="est"><span class="punto e-${est(u.id)}"></span>${esc(NOMBRE_EST[est(u.id)])}</td><td class="dat">↓${(u.entradas || []).length} ↑${(u.salidas || []).length}</td><td class="dat">${(u.pruebas || []).length || '–'}</td></tr>`).join('')
     || '<tr><td colspan="6" class="vacio">Ningún caso de uso con esos filtros.</td></tr>';
   $$('#filas tr[data-id]').forEach((tr) => { tr.onclick = () => ir(tr.dataset.id); tr.onkeydown = (e) => { if (e.key === 'Enter') ir(tr.dataset.id); }; });
 }
+/* Vista Capacidades: una tarjeta por capacidad con sus casos de uso como cuadros */
+function vistaCapacidades(m, A, P){
+  $('#mAyuda').textContent = 'Cada cuadro es un caso de uso, con el color de su estado: tócalo para abrirlo. Toca el nombre de una capacidad para elegirla: la tabla de abajo muestra solo sus casos de uso (otra vez para soltarla). El porcentaje es lo comprobado de lo que está en alcance.';
+  $('#dg').innerHTML = `<div class="calor" style="padding:12px">${A.capacidades.map((cp) => {
+    const cus = A.casosUso.filter((u) => u.capacidad === cp.id);
+    const alc = cus.filter((u) => est(u.id) !== 'fuera-de-alcance' && u.ambito !== 'fabrica');
+    const ok = alc.filter((u) => ['comprobado','parcial'].includes(est(u.id))).length;
+    const pasan = cus.filter(P.todo).length, elegida = MF.cap === cp.id;
+    return `<article class="cap${elegida ? ' elegida' : ''}" ${!pasan ? 'style="opacity:.4"' : ''}><div class="fila2"><span class="etq">${cp.id}</span><span class="pct">${alc.length ? Math.round(100 * ok / alc.length) + ' %' : '–'}</span></div>
+      <h3><button class="enl" data-cap="${cp.id}" aria-pressed="${elegida}">${esc(cp.nombre)}</button></h3>
+      <div class="fila2"><span class="chip">${TIPOS[cp.tipo] || cp.tipo}</span><span class="chip">${esc(cp.peso)}</span>${pasan !== cus.length ? `<span class="tenue">${pasan} de ${cus.length}</span>` : ''}</div>
+      <div class="teselas">${cus.map((u) => `<button class="tesela e-${est(u.id)}" data-id="${u.id}" ${P.todo(u) ? '' : 'style="opacity:.2"'} title="${u.id} · ${esc(u.que)} · ${esc(NOMBRE_EST[est(u.id)])}" aria-label="${u.id}: ${esc(NOMBRE_EST[est(u.id)])}"></button>`).join('')}</div></article>`;
+  }).join('')}</div>`;
+  $$('#dg .tesela').forEach((bt) => bt.onclick = () => ir(bt.dataset.id));
+  $$('#dg [data-cap]').forEach((bt) => bt.onclick = () => elegirCapacidad(m, bt.dataset.cap));
+}
+
 const MARCAS = `<defs>
     <marker id="cS" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker>
     <marker id="cE" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--entra)"/></marker></defs>`;
@@ -484,12 +515,11 @@ function lineaRelDir(dir, lado){ return dir === 'sale' ? [`url(#cS)`, '--acento'
 
 /* Contexto del módulo: actores → capacidades → otros módulos */
 function diagramaModulo(m){
-  const A = D.modulos[m].archivo, caps = A.capacidades;
+  const A = D.modulos[m].archivo, caps = A.capacidades, P = pasaMF(A);
+  $('#mAyuda').textContent = 'Izquierda: quién lo usa. Centro: sus capacidades; los cuadritos son sus casos de uso, con el color de su estado. Derecha: los módulos con los que intercambia datos, por medio de las relaciones del mapa. Línea gris: el actor usa casos de uso de esa capacidad (más gruesa = más casos). Verde azulado: la capacidad entrega a ese módulo; naranja: recibe de él. Las líneas aparecen al señalar un elemento. Toca una capacidad para elegirla (filtra la tabla de abajo); toca un módulo dos veces para ir a él.';
   const acts = [...new Set(A.casosUso.flatMap((u) => u.actor))];
-  const fA = $('#cAct').value, fD = $('#cDir').value, fE = $('#cEst').value;
-  const pasaEst = (u) => !fE || (fE === 'alcance' ? est(u.id) !== 'fuera-de-alcance' : est(u.id) === fE);
-  const pasaAct = (u) => !fA || fA === '-' || u.actor.includes(fA);
-  const cusF = A.casosUso.filter((u) => pasaAct(u) && pasaEst(u));
+  const fA = MF.act, fD = MF.dir;
+  const cusF = A.casosUso.filter(P.todo);
   const cm = {}, cuentaTipo = {};
   cusF.forEach((u) => [['salidas', 'sale', 'a'], ['entradas', 'entra', 'de']].forEach(([l, dir, k]) => (u[l] || []).forEach((f) => {
     const o = modDe(f[k]); if (!o || o === m) return;
@@ -511,10 +541,11 @@ function diagramaModulo(m){
     const [mk, col] = lineaRelDir(x.dir);
     s += `<line class="cl" data-c="${x.cap}" data-o="${x.o}" data-dir="${x.dir}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(${col})" stroke-opacity=".6" stroke-width="${Math.min(1.2 + x.fl.length * .4, 5)}" marker-end="${mk}"/>`; });
   acts.forEach((a, i) => { s += `<g class="cn" data-k="a" data-id="${a}" tabindex="0" ${fA && fA !== '-' && a !== fA ? 'opacity=".35"' : ''}><rect x="20" y="${y(i, acts.length) - 14}" width="130" height="28" rx="14" fill="var(--papel)" stroke="var(--linea)"/><text x="85" y="${y(i, acts.length) + 4}" text-anchor="middle">${esc(ACT(a))}</text></g>`; });
-  caps.forEach((c, i) => { const cus = A.casosUso.filter((u) => u.capacidad === c.id), yy = y(i, caps.length);
-    const vacia = (fE || (fA && fA !== '-')) && !cus.some((u) => pasaAct(u) && pasaEst(u));
-    s += `<g class="cn" data-k="c" data-id="${c.id}" tabindex="0" ${vacia ? 'opacity=".35"' : ''}><rect x="300" y="${yy - 15}" width="380" height="30" rx="5" fill="var(--hoja)" stroke="var(--linea)"/><text x="312" y="${yy + 4}">${esc(corta(c.nombre, 40))}</text>`;
-    cus.forEach((u, k) => { const fuera = !pasaAct(u) || !pasaEst(u); s += `<rect x="${592 + (k % 12) * 7}" y="${yy - 9 + Math.floor(k / 12) * 7}" width="5" height="5" fill="${COLOR_EST[est(u.id)]}" ${fuera ? 'fill-opacity=".2"' : ''}/>`; });
+  const filtrado = MF.cap || MF.tipo || MF.est || (fA && fA !== '-');
+  caps.forEach((c, i) => { const cus = A.casosUso.filter((u) => u.capacidad === c.id), yy = y(i, caps.length), elegida = MF.cap === c.id;
+    const vacia = filtrado && !cus.some(P.todo);
+    s += `<g class="cn" data-k="c" data-id="${c.id}" tabindex="0" ${vacia ? 'opacity=".35"' : ''}><rect x="300" y="${yy - 15}" width="380" height="30" rx="5" fill="${elegida ? 'var(--acentof)' : 'var(--hoja)'}" stroke="${elegida ? 'var(--acento)' : 'var(--linea)'}" ${elegida ? 'stroke-width="2"' : ''}/><text x="312" y="${yy + 4}" ${elegida ? 'style="font-weight:700"' : ''}>${esc(corta(c.nombre, 40))}</text>`;
+    cus.forEach((u, k) => { s += `<rect x="${592 + (k % 12) * 7}" y="${yy - 9 + Math.floor(k / 12) * 7}" width="5" height="5" fill="${COLOR_EST[est(u.id)]}" ${P.todo(u) ? '' : 'fill-opacity=".2"'}/>`; });
     s += '</g>'; });
   om.forEach((o, i) => { const l = !!D.modulos[o], yy = y(i, om.length), xs = Object.values(cm).filter((x) => x.o === o);
     const sa = xs.filter((x) => x.dir === 'sale').reduce((t, x) => t + x.fl.length, 0), en = xs.filter((x) => x.dir === 'entra').reduce((t, x) => t + x.fl.length, 0);
@@ -527,15 +558,15 @@ function diagramaModulo(m){
     if (ln) { const {a, c, o, dir} = ln.dataset;
       if (a) return `<h4>${esc(ACT(a))} → ${esc(corta(capN(c), 50))}</h4>` + lim(cusF.filter((u) => u.capacidad === c && u.actor.includes(a)).map(lineaCU), 8, '(lista completa abajo)');
       return `<h4>${esc(corta(capN(c), 40))} ${dir === 'sale' ? '→' : '←'} ${esc(o)}</h4>` + lineaRel(cm[c + '|' + o + '|' + dir]); }
-    if (k === 'a') { const cus = A.casosUso.filter((u) => u.actor.includes(id) && pasaEst(u)); return `<h4>${esc(ACT(id))} · ${cus.length} caso${cus.length === 1 ? '' : 's'} de uso en ${esc(m)}</h4>` + lim(cus.map(lineaCU), 8, '(fíltralo en la tabla de abajo)'); }
-    if (k === 'c') { const c = A.capacidades.find((x) => x.id === id), cus = A.casosUso.filter((u) => u.capacidad === id && pasaEst(u)), xs = Object.values(cm).filter((x) => x.cap === id);
-      return `<h4>${esc(id)} · ${esc(c.nombre)}</h4><div class="tenue">${esc(TIPOS[c.tipo] || c.tipo)} · ${esc(c.peso)} · ${cus.length} caso${cus.length === 1 ? '' : 's'} de uso${fE ? ' con este estado' : ''}</div>` + lim(cus.map(lineaCU), 5, 'casos de uso') + (xs.length ? '<div class="mas">Relaciones con otros módulos:</div>' + lim(xs.map(lineaRel), 4, 'relaciones') : ''); }
+    if (k === 'a') { const cus = A.casosUso.filter((u) => u.actor.includes(id) && P.sinActor(u)); return `<h4>${esc(ACT(id))} · ${cus.length} caso${cus.length === 1 ? '' : 's'} de uso en ${esc(m)}</h4>` + lim(cus.map(lineaCU), 8, '(míralos en la tabla de abajo)'); }
+    if (k === 'c') { const c = A.capacidades.find((x) => x.id === id), cus = A.casosUso.filter((u) => u.capacidad === id && P.actor(u) && P.estado(u)), xs = Object.values(cm).filter((x) => x.cap === id);
+      return `<h4>${esc(id)} · ${esc(c.nombre)}</h4><div class="tenue">${esc(TIPOS[c.tipo] || c.tipo)} · ${esc(c.peso)} · ${cus.length} caso${cus.length === 1 ? '' : 's'} de uso${MF.est ? ' con este estado' : ''}</div>` + lim(cus.map(lineaCU), 5, 'casos de uso') + (xs.length ? '<div class="mas">Relaciones con otros módulos:</div>' + lim(xs.map(lineaRel), 4, 'relaciones') : '') + `<div class="mas">${MF.cap === id ? 'Clic para soltarla.' : 'Clic para elegirla y filtrar la tabla.'}</div>`; }
     const xs = Object.values(cm).filter((x) => x.o === id);
     return `<h4>${esc(m)} ↔ ${esc(id)} · ${esc(corta(nMod(id), 30))}</h4>` + lim(xs.map((x) => `<div class="tenue" style="margin-top:4px">${esc(corta(capN(x.cap), 50))}</div>` + lineaRel(x)), 5, 'capacidades') + (D.modulos[id] ? '<div class="mas">Clic (o segundo toque) para ir al módulo.</div>' : '');
   };
-  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'o' && D.modulos[g.dataset.id] ? g.dataset.id : null, fA && fA !== '-' ? `.cn[data-k="a"][data-id="${fA}"]` : null);
-  $('#cAct').onchange = $('#cDir').onchange = $('#cEst').onchange = () => diagramaModulo(m);
-  $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaModulo(m); };
+  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'o' && D.modulos[g.dataset.id] ? g.dataset.id : null,
+    MF.cap ? `.cn[data-k="c"][data-id="${MF.cap}"]` : fA && fA !== '-' ? `.cn[data-k="a"][data-id="${fA}"]` : null,
+    (g) => { if (g.dataset.k !== 'c') return false; elegirCapacidad(m, g.dataset.id); return true; });
 }
 const lineaCU = (u) => `<div class="l"><b>${esc(u.id)}</b> <span class="punto e-${est(u.id)}"></span>${esc(corta(u.que, 80))} <span class="tenue">· ${esc(NOMBRE_EST[est(u.id)])}</span></div>`;
 const lim = (arr, k, txt) => arr.slice(0, k).join('') + (arr.length > k ? `<div class="mas">y ${arr.length - k} más ${txt}</div>` : '');
@@ -545,7 +576,7 @@ function lineaRel(x){
     return `<div class="l"><span class="${x.dir === 'sale' ? 's' : 'e'}">${x.dir === 'sale' ? '→' : '←'} ${esc(x.o)}</span> <b>${esc(r)}</b>: ${esc(corta(I ? I.dato : [...v.datos][0], 100))}<div class="tenue">${[...v.cus].join(', ')}${I && I.mec && !/^por precisar/.test(I.mec) ? (v.cus.size ? ' · ' : '') + esc(corta(I.mec, 80)) : ''}</div></div>`; }).join('');
 }
 /* Resaltado y tarjeta comunes a los dos contextos. Nodos: .cn[data-k=a|c|o][data-id]; líneas: line.cl con data-a, data-c, data-o. */
-function interactivo(svg, html, destino, inicial){
+function interactivo(svg, html, destino, inicial, alClic){
   let activo = null, tactil = false, tiempo = null;
   const quedarse = () => clearTimeout(tiempo), soltar = () => { quedarse(); tiempo = setTimeout(() => marcar(null), 350); };
   svg.addEventListener('pointerdown', (e) => { tactil = e.pointerType === 'touch'; }, true);
@@ -562,7 +593,7 @@ function interactivo(svg, html, destino, inicial){
   nodos.forEach((g) => {
     g.addEventListener('mouseenter', () => { if (!tactil) { quedarse(); marcar(g); } }); g.addEventListener('focus', () => { if (!tactil) marcar(g); });
     g.addEventListener('mouseleave', () => { if (!tactil) soltar(); });
-    g.addEventListener('click', (e) => { e.stopPropagation(); const key = g.dataset.k + ':' + g.dataset.id, dst = destino(g);
+    g.addEventListener('click', (e) => { e.stopPropagation(); if (alClic && alClic(g)) return; const key = g.dataset.k + ':' + g.dataset.id, dst = destino(g);
       if (dst && (!tactil || activo === key)) return ir(dst);
       marcar(g); });
     g.addEventListener('keydown', (e) => { const dst = destino(g); if (e.key === 'Enter' && dst) ir(dst); }); });

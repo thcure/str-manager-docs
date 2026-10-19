@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 22:30",
+ "actualizadoEn": "2026-10-19 06:52",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1650,6 +1650,58 @@
    "nota": "22:29 api/index.php _strFatalJson ≈L25–38: {error, tipo, archivo: basename, linea}. El mensaje no sale (bien), pero tipo, archivo y línea dan pistas del código. Arreglo: solo error e id de registro; el detalle queda en api/logs/error.log. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P3. Regla: el 500 muestra solo un mensaje genérico; el detalle va al registro del servidor. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "normal",
    "prioridad": "P3"
+  },
+  {
+   "id": "INC-197",
+   "tipo": "INC",
+   "modulo": "Seguimiento del proyecto",
+   "fecha": "2026-10-19",
+   "titulo": "Páginas internas del proyecto, defectos de presentación: Seg. Proyecto no muestra los ítems de la bolsa sin ref (5 de 69), el aviso de cobertura no se oculta tras Actualizar y los cambios LM-n ordenan como 0 (al final); COBIT muestra las prácticas «par» como «fuera de alcance»; Elementos no da chip a «registro» ni icono a «chat»",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 PRJ (M-845); ámbito fábrica",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "tests",
+   "nota": "06:52 str-seg-proyecto.html _tbBolsa ≈L1100 (filter(b => _tbVal(b.ref) …)), _tb5NumLote ≈L450 (/^(?:L-)?(\\d+)$/: LM-57 → null → 0; INC-118 solo cubrió L-n); str-cobit.html _tabStr (estado par); str-elementos.html (mapas de chip e icono). Solo lectura de interno/*.json; no toca datos. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-198",
+   "tipo": "INC",
+   "modulo": "Modelo (fábrica)",
+   "fecha": "2026-10-19",
+   "titulo": "Carga del modelo: POST cargar no tiene tope de tamaño del cuerpo y lo decodifica dos veces, y un paquete con tablas vacías pasa la validación y escribe la constancia de carga como si hubiera cargado",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 MOD (M-845); ámbito fábrica",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "06:52 modelo/api/index.php case cargar y modelo/api/config/carga.php (validación por tabla sin mínimo de filas). Arreglo: tope (p. ej. 5 MB), un solo json_decode y rechazar tablas obligatorias vacías. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-199",
+   "tipo": "INC",
+   "modulo": "Modelo (fábrica)",
+   "fecha": "2026-10-19",
+   "titulo": "GET evento/<valor> del modelo busca por la columna n, no por id",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 MOD (M-845); ámbito fábrica",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "tests",
+   "nota": "06:52 modelo/api/index.php (ruta evento). Arreglo: buscar por id (o aceptar los dos con prefijo). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-200",
+   "tipo": "INC",
+   "modulo": "Modelo (fábrica)",
+   "fecha": "2026-10-19",
+   "titulo": "La API del modelo no limita los intentos de token: cada token falso cuesta una consulta a credencial y se puede probar sin freno (RT-19)",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 MOD (M-845); ámbito fábrica",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "06:52 modelo/api/config/acceso.php ≈L30–45 (SELECT de hasta 8 filas por petición, hash_equals; responde 403 igual). Arreglo: contador por IP con espera creciente o bloqueo temporal. Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -1886,6 +1938,22 @@
    "titulo": "Migrate::run sin candado: dos peticiones simultáneas tras subir una versión pueden ejecutar dos veces el cuerpo de la misma migración (la segunda falla al insertar schema_version por la clave primaria y devuelve 500)",
    "estado": "abierta",
    "nota": "22:29 api/config/migrate.php: lee schema_version, ejecuta y luego inserta (version INT PRIMARY KEY, así que no se duplica la fila). Riesgo: un ALTER no idempotente corre dos veces. DT-39 (correr Migrate solo si cambia la versión) lo reduce. Visto en MJ-16 SRV (M-840)."
+  },
+  {
+   "id": "DT-52",
+   "tipo": "DT",
+   "fecha": "2026-10-19",
+   "titulo": "Páginas internas: seis copian el control de acceso con el comentario «INC-76» en vez del común (Nomenclatura sí usa el común), y Nomenclatura es texto fijo que no sale de los documentos (RT-4)",
+   "estado": "abierta",
+   "nota": "06:52 str-base-conocimiento, str-cobit, str-elementos, str-instrucciones, str-marco-trabajo y str-seg-proyecto llevan la marca INC-76. Unificar en el control común y generar Nomenclatura desde instrucciones.json/mapa (la deja el Arquitecto como fuente). Visto en MJ-16 PRJ (M-845)."
+  },
+  {
+   "id": "DT-53",
+   "tipo": "DT",
+   "fecha": "2026-10-19",
+   "titulo": "API del modelo: migrar es un GET que cambia la base, la lectura con since no sirve porque cada carga reescribe todas las filas, y el registro de errores guarda el mensaje de la excepción",
+   "estado": "abierta",
+   "nota": "06:52 modelo/api/index.php case migrar (exige GET), carga que reescribe todo (updated_at nuevo en cada fila) y _modeloLog. Pasar migrar a POST, conservar updated_at de filas sin cambio y registrar solo tipo/archivo/línea (el mensaje puede llevar datos). Visto en MJ-16 MOD (M-845)."
   }
  ],
  "cambios": [

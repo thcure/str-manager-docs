@@ -56,6 +56,12 @@ input[type=search]{width:min(320px,80vw)}
 .tesela:hover{transform:scale(1.15)} @media (prefers-reduced-motion:reduce){.tesela:hover{transform:none}}
 .pct{font:700 .9rem/1 var(--f-dat);white-space:nowrap}
 .diagrama{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow-x:auto}
+.relpanel{margin-top:10px;background:var(--hoja);border:1px solid var(--linea);border-radius:8px;padding:12px 14px}
+.relpanel h3{margin:0 0 6px;font-size:1rem} .relpanel .grupo{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.relpanel ul{list-style:none;margin:0;padding:0} .relpanel li{padding:6px 0;border-top:1px solid var(--linea)} .relpanel li:first-child{border-top:0}
+.relpanel .dir{font:700 .72rem/1 var(--f-dat);letter-spacing:.06em;text-transform:uppercase;margin:4px 0 4px}
+.relpanel .dir.sale{color:var(--acento)} .relpanel .dir.entra{color:var(--entra)}
+.relpanel .mec{display:block;font-size:.8rem;color:var(--tenue);overflow-wrap:anywhere}
 .pestanas{display:flex;gap:6px;flex-wrap:wrap}
 .pestanas button{font:600 .85rem/1 var(--f-txt);padding:7px 12px;border-radius:6px;border:1px solid var(--linea);background:var(--hoja);color:var(--tinta);cursor:pointer}
 .pestanas button[aria-selected="true"]{background:var(--acento);border-color:var(--acento);color:var(--hoja)}
@@ -169,7 +175,8 @@ function vistaSistema(){
        <div class="pestanas" role="tablist"><button role="tab" data-dg="capas" aria-selected="${VISTA_DG === 'capas'}">Mapa por capas</button><button role="tab" data-dg="matriz" aria-selected="${VISTA_DG === 'matriz'}">Matriz de dependencias</button></div></div>
      <div class="filtros"><label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span></div>
      <span class="tenue" id="dgAyuda"></span>
-     <div class="diagrama" id="dg"></div></section>`;
+     <div class="diagrama" id="dg"></div>
+     <div class="relpanel" id="dgRel" aria-live="polite"></div></section>`;
   $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
   $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
   $$('[data-dg]').forEach((b) => b.onclick = () => { VISTA_DG = b.dataset.dg; try { localStorage.setItem('lb-vista-dg', VISTA_DG); } catch (e) {}
@@ -219,6 +226,32 @@ function recorrerFlujos(fn){
     (u.entradas || []).forEach((f) => { const o = modDe(f.de); if (o && o !== mod && !D.modulos[o]) fn(o, mod, f); });
   });
 }
+function relacionesDe(m){
+  const r = {sale: {}, entra: {}};
+  recorrerFlujos((o, d, f) => { if (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL) return; if (o !== m && d !== m) return;
+    const lado = o === m ? 'sale' : 'entra', otro = o === m ? d : o, k = (f.rel || 'sin-rel') + '|' + otro;
+    (r[lado][k] = r[lado][k] || {rel: f.rel, otro, n: 0, datos: new Set()}).n++; r[lado][k].datos.add(f.dato); });
+  return r;
+}
+function itemRel(x, lado){
+  const I = (D.relInfo || {})[x.rel], flecha = lado === 'sale' ? '→ ' : '← ';
+  const desc = I ? I.dato : [...x.datos].slice(0, 2).join('; ');
+  const extra = I ? [I.mec && !/^por precisar/.test(I.mec) ? I.mec : '', I.regla ? 'Regla: ' + I.regla : '', I.estado && I.estado !== 'vigente' ? I.estado : ''].filter(Boolean).join(' · ') : 'sin relación del mapa';
+  return `<li><b>${esc(x.rel || '—')}</b> ${flecha}<b>${esc(x.otro)}</b> <span class="tenue">(${x.n} flujo${x.n > 1 ? 's' : ''})</span><br>${esc(desc)}${extra ? `<span class="mec">${esc(extra)}</span>` : ''}</li>`;
+}
+function panelRel(m){
+  const el = $('#dgRel'); if (!el) return;
+  if (!m) { el.innerHTML = '<span class="tenue">Pasa el puntero por un módulo (o selecciónalo con Tab) para ver aquí de qué se trata cada una de sus relaciones.</span>'; return; }
+  const r = relacionesDe(m), lista = (lado) => Object.values(r[lado]).sort((a, b) => b.n - a.n);
+  const sal = lista('sale'), ent = lista('entra');
+  el.innerHTML = `<h3>${esc(m)} · ${esc(nMod(m))}${FILTRO_REL ? ` <span class="tenue">· ${esc(nombreTipoRel(FILTRO_REL))}</span>` : ''}</h3>
+    <div class="grupo"><div><div class="dir sale">Entrega a (${sal.length})</div><ul>${sal.map((x) => itemRel(x, 'sale')).join('') || '<li class="tenue">Nada.</li>'}</ul></div>
+    <div><div class="dir entra">Recibe de (${ent.length})</div><ul>${ent.map((x) => itemRel(x, 'entra')).join('') || '<li class="tenue">Nada.</li>'}</ul></div></div>`;
+}
+function relsArista(o, d){
+  const v = {}; recorrerFlujos((a, b, f) => { if (a !== o || b !== d || (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL)) return; v[f.rel || '—'] = (v[f.rel || '—'] || 0) + 1; });
+  return Object.entries(v).sort((a, b) => b[1] - a[1]).map(([r]) => `${r}: ${corta(((D.relInfo || {})[r] || {}).dato || '', 90)}`).join('\n');
+}
 let VISTA_DG = (() => { try { return localStorage.getItem('lb-vista-dg') || 'capas'; } catch (e) { return 'capas'; } })();
 const CAPAS = [
   ['Lo que ve la gente', ['SH', 'OP', 'POR']],
@@ -243,10 +276,10 @@ function capasOrden(){
 function soloPlan(m){ const A = D.modulos[m] && D.modulos[m].archivo; return !!A && A.casosUso.length > 0 && A.casosUso.every((u) => u.declarado === 'no-construido' || u.declarado === 'fuera-de-alcance'); }
 function diagramaSistema(){
   const ar = flujosModulo();
-  $('#fRelDesc').textContent = descTipoRel(FILTRO_REL);
+  $('#fRelDesc').textContent = descTipoRel(FILTRO_REL); panelRel(null);
   if (!Object.keys(ar).length) { $('#dgAyuda').textContent = ''; $('#dg').innerHTML = '<p class="tenue">Ningún flujo entre módulos con ese tipo de relación.</p>'; return; }
   if (VISTA_DG === 'matriz') return matrizSistema(ar);
-  $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir.';
+  $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Debajo del mapa se explica cada relación del módulo señalado.';
   const capas = capasOrden();
   const W = 1000, filaH = 104, top = 26, nodoW = 128, nodoH = 56, H = top + capas.length * filaH, pos = {};
   capas.forEach(([t, ms], r) => {
@@ -266,7 +299,8 @@ function diagramaSistema(){
     const misma = Math.abs(dy) < 1;
     const cx = (x1 + x2) / 2 + (misma ? 0 : dy * .12), cy = (y1 + y2) / 2 + (misma ? -Math.max(40, Math.abs(dx) * .18) : 0) - dx * .06;
     const [ax, ay] = borde(x1, y1, cx - x1, cy - y1), [bx, by] = borde(x2, y2, cx - x2, cy - y2);
-    s += `<path class="arista" data-o="${o}" data-d="${d}" d="M${ax},${ay} Q${cx},${cy} ${bx},${by}" fill="none" stroke-width="${Math.min(1 + n * .35, 7)}" marker-end="url(#flN)"><title>${o} → ${d}: ${n} flujo(s)</title></path>
+    s += `<path class="arista" data-o="${o}" data-d="${d}" d="M${ax},${ay} Q${cx},${cy} ${bx},${by}" fill="none" stroke-width="${Math.min(1 + n * .35, 7)}" marker-end="url(#flN)"><title>${o} → ${d}: ${n} flujo(s)
+${esc(relsArista(o, d))}</title></path>
       <text class="cuenta" data-o="${o}" data-d="${d}" x="${(ax + 2 * cx + bx) / 4}" y="${(ay + 2 * cy + by) / 4 - 3}" text-anchor="middle">${n}</text>`; });
   capas.forEach(([t, ms]) => ms.forEach((m) => { const [x, y] = pos[m], l = !!D.modulos[m];
     const I = l ? D.modulos[m].informe : null, pe = I ? I.porEstado : {}, tot = Object.values(pe).reduce((a, b) => a + b, 0) || 1;
@@ -280,7 +314,7 @@ function diagramaSistema(){
       <text x="${x - nodoW / 2 + 8}" y="${y + 8}" class="t2">${esc(corta(nMod(m), 19))}</text>${barra}</g>`; }));
   $('#dg').innerHTML = s + '</svg>';
   const svg = $('#svgCapas');
-  const marcar = (m) => { svg.classList.toggle('foco', !!m);
+  const marcar = (m) => { svg.classList.toggle('foco', !!m); if (m) panelRel(m);
     svg.querySelectorAll('.arista, .cuenta').forEach((el) => { const sale = el.dataset.o === m, entra = el.dataset.d === m;
       el.classList.toggle('sale', !!m && sale); el.classList.toggle('entra', !!m && entra);
       if (el.tagName === 'path') el.setAttribute('marker-end', m && sale ? 'url(#flS)' : m && entra ? 'url(#flE)' : 'url(#flN)'); });
@@ -301,11 +335,13 @@ function matrizSistema(ar){
   let h = `<table class="matriz"><thead><tr><th class="esq">entrega ↓ · recibe →</th>${ms.map((d) => `<th class="col${ini.has(d) ? ' corte' : ''}" data-m="${d}" title="${esc(nMod(d))}"><span>${d}</span></th>`).join('')}<th class="col tot"><span>sale</span></th></tr></thead><tbody>`;
   ms.forEach((o) => { h += `<tr class="${ini.has(o) ? 'corte' : ''}"><th class="fil" data-m="${o}" title="${esc(nMod(o))}">${o} <span class="tenue">${esc(corta(nMod(o), 18))}</span></th>`;
     ms.forEach((d) => { const n = ar[o + '>' + d] || 0;
-      h += o === d ? `<td class="diag${ini.has(d) ? ' corte' : ''}"></td>` : `<td class="${ini.has(d) ? 'corte' : ''}" ${n ? `style="--a:${(.15 + .85 * n / max).toFixed(2)}" title="${o} → ${d}: ${n} flujo(s)"` : ''}>${n || ''}</td>`; });
+      h += o === d ? `<td class="diag${ini.has(d) ? ' corte' : ''}"></td>` : `<td class="${ini.has(d) ? 'corte' : ''}" ${n ? `style="--a:${(.15 + .85 * n / max).toFixed(2)}" title="${o} → ${d}: ${n} flujo(s)
+${esc(relsArista(o, d))}"` : ''}>${n || ''}</td>`; });
     h += `<td class="tot">${sale(o) || ''}</td></tr>`; });
   h += `<tr class="tot"><th class="fil">entra</th>${ms.map((d) => `<td class="tot${ini.has(d) ? ' corte' : ''}">${entra(d) || ''}</td>`).join('')}<td></td></tr></tbody></table>`;
   $('#dg').innerHTML = h;
   $$('#dg [data-m]').forEach((el) => { if (D.modulos[el.dataset.m]) { el.style.cursor = 'pointer'; el.onclick = () => ir(el.dataset.m); } });
+  $$('#dg th[data-m]').forEach((el) => el.addEventListener('mouseenter', () => panelRel(el.dataset.m)));
 }
 
 /* ---------- Módulo ---------- */

@@ -1,0 +1,1130 @@
+{
+ "modulo": "API",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-api.js (versión p5c110, 1114 líneas): leído completo (cuota, pedido con renovación, subida, archivoUrl y descarga, colecciones con copia local y cola, sesión, funciones puras de horas, reservas, turnos, direcciones y fechas, permisos, documentos del proyecto, atajos de usuarios, invitación y exportación de calendario)",
+  "api-fuentes.json: 1 REQ, 3 DA, 2 de la bolsa, 13 INC, 2 DT, REL-01/02/23/26, actores y reglas",
+  "api-guiones.json y guiones-e2e.json: 3 guiones (INC-134, INC-146 y el que usa el aviso de cuota), casos y escenarios; los .spec.js no se leyeron",
+  "docs/claude/shell-y-api.md (mapa técnico de str-api.js, en gran parte) y, para la mitad del servidor de cada flujo, api/col/index.php, upload/index.php y archivo/index.php (leídos al levantar SRV)",
+  "interno/linea-base/esquema.json y los archivos ya levantados (K3, SH, U, HK, INV, INC1, CAL, FL, PR, KN, OP, PG, POR) para espejar los flujos con sus REL-n",
+  "No leído: los tests de unidad de str-api.js (tests/*.test.js no vienen en la copia del código) y la parte de str-app-shell.html que define _strRenewApiSession y _descargarRespaldo"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Hablar con el servidor desde cualquier pantalla con la sesión de la persona, renovándola una vez ante un rechazo",
+   "Traer y enviar las colecciones con copia local, un envío en vuelo por colección, cola de reintento sin conexión y aviso de almacenamiento lleno",
+   "Subir archivos y pedirlos o descargarlos con la sesión",
+   "Los cálculos compartidos de horas y saldo, reservas, estado y noches, clase de turno, dirección de propiedad y fecha local",
+   "Decir en pantalla si la persona puede una acción",
+   "Leer los documentos del proyecto del repositorio (pantallas internas)"
+  ],
+  "fuera": [
+   "Decidir y guardar en el servidor: Servidor (SRV)",
+   "Renovar la sesión con la cuenta de Google, el aviso de sesión vencida, cerrar sesión y llevar a cada rol a su inicio: Identidad (CU-U-3.6, 3.7, 3.8, 3.10, 2.5)",
+   "Qué se envía y cuándo, y la diferencia contra el último envío (lastpush): lo lleva cada módulo dueño de la colección (REL-26)",
+   "Invitar a una persona, anular una tarifa, aceptar una invitación y pedir el enlace de exportación del calendario: el cliente solo trae el atajo de la llamada (Identidad, CU-U-4.x; Calendario, CU-CAL-8.x)",
+   "La cola de subida de fotos del teléfono (Housekeeping, CU-HK-3.2)"
+  ],
+  "nota": "API es lo que corre en el navegador para todos los módulos. Los casos de uso de los módulos apuntan al servidor (CU-SRV-1.1 y 1.2) y no al cliente; los flujos de este archivo describen el vehículo. Los cálculos compartidos no llevan flujos: sus usuarios los nombran Pagos, Calendario, Propiedades y Housekeeping en sus propios casos de uso (falta una relación del mapa para «función compartida», ver el mapeo)."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-API-1",
+   "nombre": "Hablar con el servidor con la sesión de la persona",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Que cualquier pantalla pida cosas al servidor con la sesión de quien la usa, y que una sesión vencida se renueve sola una vez antes de rendirse."
+  },
+  {
+   "id": "CAP-API-2",
+   "nombre": "Colecciones con copia local",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Traer del servidor las colecciones de datos y enviarle los cambios, con una copia en el aparato, un solo envío a la vez por colección y una cola de reintento cuando no hay conexión."
+  },
+  {
+   "id": "CAP-API-3",
+   "nombre": "Subir y pedir archivos",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Subir fotos, guías y demás archivos, y pedirlos o descargarlos con la sesión de la persona, que un enlace normal no puede mandar."
+  },
+  {
+   "id": "CAP-API-4",
+   "nombre": "Cálculos compartidos de horas, reservas, turnos y fechas",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Una sola forma de calcular las horas y el valor de un turno, el estado y las noches de una reserva, la clase de un turno, la dirección de una propiedad y la fecha local, para que todas las pantallas digan lo mismo."
+  },
+  {
+   "id": "CAP-API-5",
+   "nombre": "Permisos a la vista en pantalla",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Decirle a cada pantalla si la persona puede una acción, para mostrarla u ocultarla (el servidor decide de verdad, RT-14)."
+  },
+  {
+   "id": "CAP-API-6",
+   "nombre": "Documentos del proyecto",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Leer, sin credenciales, los documentos del repositorio del proyecto para las pantallas internas."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-API-1.1",
+   "capacidad": "CAP-API-1",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Pedir algo al servidor con la sesión de la persona y, si lo rechaza por sesión vencida, renovarla y repetir el pedido una sola vez",
+   "declarado": "construido",
+   "limitantes": [
+    "Si la renovación no se logra, borra la sesión del aparato, muestra la franja roja «Sesión vencida · Entrar» y el pedido falla; no hay un segundo intento (el aviso lo describe CU-U-3.7).",
+    "La renovación la hace el menú principal o la propia pantalla con la cuenta de Google; una pantalla embebida usa la del marco que la contiene (CU-U-3.6).",
+    "Solo el pedido genérico adjunta al error los datos que el servidor devolvió (por ejemplo el motivo detallado de un rechazo); la subida y la descarga de archivos solo dejan el mensaje.",
+    "Un fallo de red rechaza el pedido sin reintento: cada módulo decide qué hacer (la cola de CU-API-2.3 solo cubre el envío de colecciones)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-3.6",
+     "dato": "sesión renovada, con la que se repite el pedido"
+    },
+    {
+     "de": "CU-SRV-3.1",
+     "dato": "respuesta del servidor o rechazo (sin sesión, sin permiso), para que la pantalla lo muestre"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-3.6",
+     "dato": "pedido rechazado por sesión vencida, que pide renovarla"
+    },
+    {
+     "a": "CU-U-3.7",
+     "dato": "pedido rechazado otra vez tras renovar, o sin renovación posible, que obliga a avisar"
+    },
+    {
+     "a": "CU-SRV-3.1",
+     "dato": "pedido con la sesión de la persona, para que el servidor decida si puede"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión vigente",
+     "cuando": "una pantalla pide algo al servidor",
+     "entonces": "el pedido sale con su sesión y la pantalla recibe la respuesta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una sesión vencida (dura 24 horas) y la cuenta de Google todavía abierta",
+     "cuando": "el servidor rechaza el pedido por sesión",
+     "entonces": "la sesión se renueva y el pedido se repite una sola vez, sin que la persona lo note"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una sesión vencida que no se puede renovar",
+     "cuando": "el servidor rechaza el pedido",
+     "entonces": "se borra la sesión del aparato, se muestra la franja roja con «Entrar» y el pedido falla"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [
+    "INC-134"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-134",
+     "casos": [
+      "a",
+      "b"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "request() con reintento una sola vez tras un 401 mediante window._strRenewApiSession (de la página o de window.top); _giveUp borra str-token, str-user y los permisos y muestra showExpiredBanner. STRApi.get/post/put/del. Los errores HTTP llevan isHttpError, status y, solo en request(), datos (L-125)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-2.1",
+   "capacidad": "CAP-API-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Traer una colección del servidor, completa o solo lo cambiado desde la última lectura, aplicar las bajas y decidir si lo traído reemplaza la copia local",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin conexión o ante un rechazo no rompe: devuelve un aviso de error y la pantalla sigue con su copia local.",
+    "Las colecciones de reservas, turnos, incidentes, configuración de Housekeeping y movimientos y pendientes de inventario nunca reemplazan la copia por su cuenta: devuelve lo traído y cada módulo lo fusiona (una lectura parcial solo trae lo que cambió).",
+    "Una baja nunca se deduce por ausencia: solo se aplica la lista de bajas que el servidor entrega.",
+    "En las demás colecciones el servidor manda si conoce la colección; solo se conserva lo local cuando el servidor no tiene nada, hay datos locales y la colección nunca se alineó con el servidor.",
+    "Guarda la hora del servidor de cada lectura y una sola copia de la copia local previa a un reemplazo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-1.1",
+     "dato": "colección completa o lo cambiado desde la última lectura, con las bajas y la hora del servidor",
+     "rel": "REL-26"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.1",
+     "dato": "pedido de una colección, completa o desde una hora",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una colección que no es de fusión propia y un servidor que la conoce",
+     "cuando": "una pantalla la trae",
+     "entonces": "la copia local queda igual a la del servidor y se anota la hora de la lectura"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una colección de fusión propia, como las reservas o los turnos",
+     "cuando": "una pantalla la trae, completa o desde una hora",
+     "entonces": "recibe los datos vivos y la lista de bajas y la copia local no se toca: el módulo fusiona"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el servidor sin ningún dato de la colección, datos en el aparato y la colección nunca alineada",
+     "cuando": "una pantalla la trae",
+     "entonces": "la copia local se conserva y no se pisa con una lista vacía"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "sin conexión o con un rechazo del servidor",
+     "cuando": "una pantalla la trae",
+     "entonces": "devuelve un aviso de error y no cambia la copia local"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [
+    "INC-78",
+    "INC-117"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "GET /api/col/{colección}"
+    ],
+    "colecciones": [],
+    "notas": "STRApi.col.pull (_colPull), _colDecidirPull, _colAplicarBorrados (deletedIds no enumerable), COL_KEYS (20 colecciones con su clave str-<col>-v1), COL_MERGE_ONLY, str-col-sync-v1 (hora del servidor por colección), str-col-backup-v1 (una copia previa), str-col-migrated-v1. NO lleva lastpush: lo llevan los módulos que envían."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); sin guion propio (los módulos lo ejercen)"
+   }
+  },
+  {
+   "id": "CU-API-2.2",
+   "capacidad": "CAP-API-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Enviar al servidor los cambios y las bajas de una colección, con un solo envío en vuelo por colección y cada uno con su propia respuesta",
+   "declarado": "construido",
+   "limitantes": [
+    "Los envíos de una misma colección esperan su turno uno tras otro: no se juntan ni se reintentan solos (corrige el 500 de INC-128 en el lado del aparato; el servidor sigue sin resolver su causa).",
+    "Cada cambio sale con la hora del aparato en el momento del envío, y esa hora decide los conflictos en el servidor (CU-SRV-1.2).",
+    "Solo se envía lo que la pantalla entrega: la diferencia contra el último envío la calculan los módulos, no este cliente; enviar toda la copia (reenvío total) es posible y puede revivir un dato que otro dio de baja.",
+    "Sin sesión, el envío no sale ni se encola: responde que no hay conexión.",
+    "Un envío vacío (sin cambios ni bajas) no llega al servidor."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-1.2",
+     "dato": "respuesta del guardado: lo escrito, lo omitido y la hora del servidor",
+     "rel": "REL-26"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.2",
+     "dato": "cambios y bajas de una colección enviados uno a la vez",
+     "rel": "REL-26"
+    },
+    {
+     "a": "CU-API-2.3",
+     "dato": "envío que no llegó por un fallo de red, para dejarlo en la cola"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una pantalla con un cambio en una colección y sin envío en curso",
+     "cuando": "lo envía",
+     "entonces": "el cambio sale de inmediato con su propia respuesta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "dos pantallas que envían a la vez la misma colección",
+     "cuando": "ambas envían",
+     "entonces": "el segundo envío espera a que termine el primero y cada uno recibe su respuesta"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un envío sin cambios ni bajas",
+     "cuando": "una pantalla lo manda",
+     "entonces": "no sale nada al servidor y responde que no hubo cambios"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una persona sin sesión",
+     "cuando": "intenta enviar",
+     "entonces": "el envío no sale y responde que no hay conexión"
+    }
+   ],
+   "origen": [
+    "REQ-D1",
+    "INC-128"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "PUT /api/col/{colección}"
+    ],
+    "colecciones": [],
+    "notas": "_colCola (COLA: una subida en vuelo por colección, probada por tests/col-cola-subida.test.js que no está en la copia del código), _colPush, _colPushAll, _colItemId (prop-workflows: propId|tipo). El cuerpo lleva items [{id, data, updated_at, stamp?, merge?, remove?}] y deleted []."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); sin guion propio"
+   }
+  },
+  {
+   "id": "CU-API-2.3",
+   "capacidad": "CAP-API-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Guardar en el aparato el envío que no llegó por falta de conexión y reenviarlo cuando vuelva",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo se encola el fallo de red de un envío ya intentado; el envío sin sesión no se encola (CU-API-2.2 E4).",
+    "Al reenviar, descarta de la cola todo envío cuyo error trae respuesta del servidor: también el rechazo por sesión vencida y los fallos transitorios del servidor (500), sin haberlos enviado, de modo que esos cambios se pierden (leído en el código, no comprobado).",
+    "Cada envío queda en la cola con la hora en que se intentó por primera vez, no con la de su reenvío.",
+    "Quién llama al reenvío y cuándo lo decide cada módulo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-API-2.2",
+     "dato": "envío que no llegó por un fallo de red, para dejarlo en la cola"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.2",
+     "dato": "envíos pendientes reenviados uno a uno al volver la conexión",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un envío que falló por falta de red",
+     "cuando": "vuelve la conexión y se pide el reenvío",
+     "entonces": "los envíos pendientes salen uno a uno y se quitan de la cola cuando el servidor los acepta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un envío en la cola que el servidor rechaza (400 o 403)",
+     "cuando": "se reenvía",
+     "entonces": "se quita de la cola, porque reintentar lo mismo no tiene sentido"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un envío en la cola y una sesión vencida que no se renueva, o un error transitorio del servidor",
+     "cuando": "se reenvía",
+     "entonces": "se quita de la cola sin haberse guardado y el cambio se pierde"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "str-col-pending-v1 (por colección), _colFlush y _colRemoveFromPending (compara por referencia y, si no, por JSON). El descarte usa err.isHttpError, que _giveUp también pone (Sesión vencida)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); el descarte ante 401 o 5xx se leyó, no se probó"
+   }
+  },
+  {
+   "id": "CU-API-2.4",
+   "capacidad": "CAP-API-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Avisar a la persona cuando el almacenamiento del aparato se llena y no se pudo guardar una copia local",
+   "declarado": "construido",
+   "limitantes": [
+    "El aviso sale una sola vez por sesión del navegador y lo muestra cada pantalla que lo escucha; el cliente solo emite el evento y registra una advertencia.",
+    "La causa de fondo se redujo guardando de los movimientos de inventario solo el identificador en la copia de diferencias (INC-146); acotar la copia local sigue pendiente (T-18)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un aparato con espacio libre",
+     "cuando": "una pantalla guarda su copia local",
+     "entonces": "se guarda y no hay aviso"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un aparato con el almacenamiento lleno",
+     "cuando": "una pantalla intenta guardar su copia local",
+     "entonces": "se emite el aviso de almacenamiento lleno, una sola vez, con el nombre de lo que no cupo"
+    }
+   ],
+   "origen": [
+    "INC-146",
+    "T-18"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-146"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-146",
+     "casos": [
+      "a",
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "[CUOTA] _vigilarCuota envuelve Storage.prototype.setItem y emite str:almacen-lleno ({clave}); win._strAlmacenLleno. Los guiones INC-146 a y b comprueban que sin llenarse no hay aviso; el aviso real con el almacenamiento lleno no tiene guion."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-3.1",
+   "capacidad": "CAP-API-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Subir un archivo con su tipo y su referencia al servidor y, si lo rechaza por sesión vencida, renovarla y repetir la subida una vez",
+   "declarado": "construido",
+   "limitantes": [
+    "La subida no pasa por el pedido genérico: si el servidor la rechaza, el error lleva solo el mensaje, no los datos del rechazo.",
+    "Acepta un archivo sin nombre (la cola de subida del teléfono guarda el archivo sin su nombre) y campos extra, como la duración de un video.",
+    "La cola de subida del teléfono con sus fotos pendientes es de Housekeeping (CU-HK-3.2); aquí solo la subida de un archivo.",
+    "Los límites de tamaño y de tipo los decide el servidor (CU-SRV-4.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-4.1",
+     "dato": "dirección del archivo guardado, con su tamaño y su tipo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-4.1",
+     "dato": "archivo, tipo y referencia a guardar"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión y un archivo permitido",
+     "cuando": "lo sube",
+     "entonces": "el servidor lo guarda y la pantalla recibe su dirección"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una sesión vencida",
+     "cuando": "sube un archivo",
+     "entonces": "se renueva la sesión y la subida se repite una sola vez"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una sesión vencida que no se renueva o un rechazo del servidor",
+     "cuando": "sube un archivo",
+     "entonces": "la subida falla con el mensaje del servidor y, sin sesión, se muestra la franja de sesión vencida"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "POST /api/upload"
+    ],
+    "colecciones": [],
+    "notas": "_upload(tipo, ref, file, nombre, extra, _retried): multipart con tipo, ref, archivo y extra; mismo reintento del 401 que request()."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); sin guion propio"
+   }
+  },
+  {
+   "id": "CU-API-3.2",
+   "capacidad": "CAP-API-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Pedir al servidor un archivo guardado con la sesión de la persona y mostrarlo en pantalla",
+   "declarado": "construido",
+   "limitantes": [
+    "Un enlace normal de imagen no puede mandar la sesión: el archivo se trae aparte y se muestra desde la memoria de la pestaña; no se guarda en el aparato.",
+    "A diferencia del pedido genérico, no renueva la sesión ante un rechazo por sesión vencida: la imagen falla y se vuelve a pedir en la siguiente llamada (leído en el código, no comprobado).",
+    "Un archivo que ya no existe porque el corte de almacenamiento lo borró responde «eliminado en el corte»; el cliente no lo recuerda como definitivo ni deja de reintentarlo (DT-45)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-4.2",
+     "dato": "archivo guardado del mismo negocio, entero o por tramos"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-4.2",
+     "dato": "pedido de un archivo con la sesión de la persona"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión y un archivo de su negocio",
+     "cuando": "una pantalla lo pide",
+     "entonces": "recibe el archivo y lo muestra"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo archivo pedido otra vez en la misma pestaña",
+     "cuando": "una pantalla lo pide",
+     "entonces": "se muestra el ya traído, sin pedirlo de nuevo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un archivo que no existe, o una sesión vencida",
+     "cuando": "una pantalla lo pide",
+     "entonces": "falla con el estado del servidor, sin guardar el fallo, y se puede reintentar"
+    }
+   ],
+   "origen": [
+    "REQ-D1",
+    "REQ-K3-3"
+   ],
+   "reglas": [
+    "RT-1"
+   ],
+   "pendientes": [
+    "DT-45"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "GET /api/archivo/{ruta}"
+    ],
+    "colecciones": [],
+    "notas": "_archivoUrl(url): fetch con Authorization → blob → URL.createObjectURL; _archivoBlobCache solo en memoria; un fallo borra la entrada de la caché. REQ-K3c-vista i prueba el 410 desde la pantalla de Housekeeping."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); sin guion propio de esta función"
+   }
+  },
+  {
+   "id": "CU-API-3.3",
+   "capacidad": "CAP-API-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Descargar a la computadora un archivo que exige sesión, con el nombre que da el servidor",
+   "declarado": "construido",
+   "limitantes": [
+    "Hoy lo usa la descarga del expediente de un incidente; el respaldo de la cuenta lo descarga el menú principal por su cuenta (CU-SH-10.1).",
+    "Mismo reintento de sesión que el pedido genérico, una sola vez.",
+    "Si el servidor rechaza la descarga, el error lleva su mensaje y se avisa en la pantalla."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión y un archivo descargable",
+     "cuando": "pide la descarga",
+     "entonces": "el navegador guarda el archivo con su nombre"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una sesión vencida",
+     "cuando": "pide la descarga",
+     "entonces": "se renueva y se repite una sola vez"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un rechazo del servidor",
+     "cuando": "pide la descarga",
+     "entonces": "falla con el mensaje del servidor y no se descarga nada"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_descargar(ruta, nombre): fetch → blob → enlace temporal con download, revoca la URL a los 30 s. Usado por str-m1-housekeeping.html para /expediente/<id>."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-4.1",
+   "capacidad": "CAP-API-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Calcular las horas planificadas y reales de una persona en un turno, su valor con la tarifa vigente a la fecha y el saldo del banco de horas",
+   "declarado": "construido",
+   "limitantes": [
+    "Es la única implementación: Pagos la usa para el valor del turno y el saldo (CU-PG-1.1, CU-PG-2.1) y Housekeeping para mostrarlo (CU-HK-6.1).",
+    "La tarifa se escoge por fecha (la anulada o reemplazada no cuenta), pero la política de horas (banco o reales) y la modalidad de pago se leen de la ficha de pago de hoy, no de la vigente en la fecha del turno: cambiarlas recalcula todos los turnos pasados (INC-181, abierto).",
+    "Sin hora de fin o sin tarifa, el valor queda sin calcular y el turno figura en curso.",
+    "Un ajuste de horas hecho por el operador manda sobre la hora real; el apoyo toma sus horas planificadas de su propio registro o de un valor por defecto de 4."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cerrado con hora real de inicio y de fin, y una persona con tarifa vigente",
+     "cuando": "se calculan sus horas",
+     "entonces": "devuelve las horas planificadas, las efectivas, la diferencia y el valor, según su política de horas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona que figura como apoyo del turno",
+     "cuando": "se calculan sus horas",
+     "entonces": "usa su propio registro del turno y no el del titular"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "varias tarifas con fechas distintas, una anulada",
+     "cuando": "se pide la tarifa de una fecha",
+     "entonces": "devuelve la de mayor fecha anterior que no esté anulada ni reemplazada"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un turno sin hora de fin",
+     "cuando": "se calculan sus horas",
+     "entonces": "queda «en curso» y sin valor ni diferencia"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "REQ-U7"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-181"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRApi.horas: calcular, saldo, tarifaVigente, fmtCOP, fmtHoras (_horasCalcular, _horasSaldo, _tarifaVigente). Sin guion en tests/e2e; los tests de unidad de str-api.js no están en la copia del código."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-4.2",
+   "capacidad": "CAP-API-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Derivar de una reserva o bloqueo sus noches, su canal, el nombre del huésped y su estado según las fechas, y comprobar si un rango de noches se puede reservar o bloquear",
+   "declarado": "construido",
+   "limitantes": [
+    "El estado sale solo de las fechas: lo guardado manda únicamente si es «cancelada»; los estados viejos se ignoran.",
+    "Un turnover exacto (sale uno, entra otro el mismo día) no cuenta como solape; una reserva cancelada no cuenta; un bloqueo sobre otro bloqueo se avisa pero no se impide.",
+    "Es lógica pura: no cambia ni guarda nada; la fuente sigue siendo el servidor.",
+    "Calendario ya lo describe desde la pantalla (CU-CAL-7.1, CU-CAL-7.3, CU-CAL-5.6); aquí está la implementación común."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una reserva con entrada y salida",
+     "cuando": "se derivan sus datos",
+     "entonces": "devuelve noches, canal, nombre del huésped y estado (confirmada, en curso o finalizada)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva con estado guardado «cancelada»",
+     "cuando": "se pide su estado",
+     "entonces": "sigue cancelada aunque las fechas ya pasaron"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un rango que empieza el día en que sale otra reserva",
+     "cuando": "se evalúa si se puede bloquear",
+     "entonces": "se puede: el cambio de huésped el mismo día no solapa"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un rango que solapa una reserva viva",
+     "cuando": "se evalúa si se puede bloquear",
+     "entonces": "no se puede y dice con qué reserva choca"
+    }
+   ],
+   "origen": [
+    "INC-67",
+    "REQ-C4",
+    "REQ-C6"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRApi.reservas: noches, canal, huesped, derivar, estado, etiquetaEstado, evaluarRango (_resNoches, _resCanal, _resHuesped, _resDerivar, _resEstado, _resEtiquetaEstado, _resEvaluarRango)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-4.3",
+   "capacidad": "CAP-API-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Armar la lista de noches ocupadas de una propiedad que se entregan a Airbnb y su archivo de calendario, sin repetir lo que viene de Airbnb",
+   "declarado": "construido",
+   "limitantes": [
+    "Excluye las reservas que vienen de un canal Airbnb, las canceladas y las ya finalizadas, y solo mira desde un día antes de hoy; con el colchón activo agrega un día de limpieza después de cada salida.",
+    "La regla debe decir lo mismo que la del servidor que atiende el enlace de exportación (CU-CAL-8.2); un test de unidad (fuera de la copia del código) las compara.",
+    "Es lógica pura: la entrega al canal es del Calendario."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con reservas directas y bloqueos manuales",
+     "cuando": "se piden las noches a exportar",
+     "entonces": "devuelve entrada y salida de cada una por fecha de entrada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva que vino de un canal Airbnb",
+     "cuando": "se piden las noches a exportar",
+     "entonces": "no aparece, para no devolverle a Airbnb lo suyo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una fecha de hoy inválida",
+     "cuando": "se piden las noches a exportar",
+     "entonces": "devuelve una lista vacía"
+    }
+   ],
+   "origen": [
+    "REQ-P2.1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRApi.reservas.exportables e icsDe (_resExportables, _resIcsDe); su par PHP es api/lib/ical-export.php (de CAL, no leído aquí)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-4.4",
+   "capacidad": "CAP-API-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Dar a todas las pantallas la misma clase y etiqueta de un turno, la misma dirección de una propiedad y la fecha de hoy en hora local",
+   "declarado": "construido",
+   "limitantes": [
+    "La clase de un turno solo ordena por prioridad para pintar (bloqueado, completado, vencido, atrasado o crítico, en curso, asignado, sin asignar); no calcula estados ni alertas.",
+    "La fecha de hoy es la local del navegador, nunca la de UTC: entre las 19:00 y las 24:00 de Bogotá la de UTC ya es la del día siguiente (INC-79, cerrado).",
+    "La dirección une la de la ubicación o la propia, torre y apto, barrio y ciudad, más las indicaciones; Propiedades la describe desde su pantalla (CU-PR-2.4)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy asignado",
+     "cuando": "se pide su clase y su etiqueta",
+     "entonces": "devuelve «asignado»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno de un día pasado sin cerrar",
+     "cuando": "se pide su clase con la fecha de hoy",
+     "entonces": "devuelve «vencido» y no crítico"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "las 8 p. m. de Bogotá",
+     "cuando": "se pide la fecha de hoy",
+     "entonces": "devuelve el día de Bogotá y no el siguiente"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "una propiedad con torre «1» y apto «1901»",
+     "cuando": "se pide su dirección",
+     "entonces": "devuelve «Torre 1, Apto 1901» después de la dirección base"
+    }
+   ],
+   "origen": [
+    "REQ-C5",
+    "REQ-P1.1",
+    "INC-79"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-79"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRApi.turnos.clase y etiqueta (_turnoClase, _turnoEtiqueta), STRApi.propiedades.direccion (_propDireccion), STRApi.fechas.ymdLocal."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas)"
+   }
+  },
+  {
+   "id": "CU-API-5.1",
+   "capacidad": "CAP-API-5",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Decirle a una pantalla si la persona puede una acción, sin dar por hecho que sí mientras no hayan llegado sus permisos",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo es ayuda de pantalla: el servidor decide de verdad en cada petición (CU-U-2.6).",
+    "El administrador puede todo; el operador, según sus permisos delegados (todo, salvo que se hayan limitado uno a uno); el colaborador nunca.",
+    "Mientras los permisos del operador no se conocen responde que no, en vez de dar un sí provisional (INC-93, cerrado); usa los del último ingreso guardados en el aparato solo si son del mismo usuario y del mismo negocio, y la pantalla puede preguntar si ya están listos.",
+    "Los permisos propios los trae y los guarda CU-U-2.1; las pantallas que ocultan lo que no se puede son CU-U-2.4."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol y permisos de la persona con sesión"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-2.4",
+     "dato": "si la persona puede la acción, o si todavía no se sabe"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "una pantalla pregunta si puede editar",
+     "entonces": "responde que sí"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador sin el permiso de editar inventario",
+     "cuando": "una pantalla pregunta si puede editarlo",
+     "entonces": "responde que no"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador cuyos permisos aún no se han traído",
+     "cuando": "una pantalla pregunta si puede",
+     "entonces": "responde que no hasta que se conozcan, de la respuesta del servidor o de la copia de su último ingreso"
+    }
+   ],
+   "origen": [
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-93"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "GET /api/me"
+    ],
+    "colecciones": [],
+    "notas": "STRApi.me (_me), puede (_puede), permisosListos (_permisosListos), caché str-me-permisos; INC-93 hizo que sin _meCache un operador no pase."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); sin guion propio"
+   }
+  },
+  {
+   "id": "CU-API-6.1",
+   "capacidad": "CAP-API-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Leer los documentos del proyecto del último commit del repositorio, sin credenciales, y mostrar su encabezado con la fecha y la versión",
+   "declarado": "construido",
+   "limitantes": [
+    "Lee de GitHub de forma anónima: si el servicio de GitHub no contesta o limita las peticiones, los documentos no cargan (intermitente al final de una regresión larga, INC-139, abierto).",
+    "Existe para las pantallas internas del grupo Proyecto y «Lo que viene»; DA-39 las movería a una lectura por el servicio del modelo (cuando esté listo).",
+    "Solo lee: no escribe nada en el repositorio."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SH-6.1",
+     "dato": "documentos del proyecto y su encabezado con la fecha del último commit"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un repositorio de documentos con un último commit",
+     "cuando": "una pantalla interna pide un documento",
+     "entonces": "recibe el contenido del commit más reciente y su encabezado con la fecha"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el servicio de GitHub sin responder",
+     "cuando": "una pantalla interna pide un documento",
+     "entonces": "falla sin dañar la pantalla y se puede reintentar"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3",
+    "DA-39"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-139"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "[TB3] _docsCommit, _docsUrl, _docsEncabezado (hora de Bogotá), _docsShaOk; STRApi.docs.commit/url/encabezado."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de str-api.js (versión p5c110, 1114 líneas); el servicio de GitHub no se probó"
+   },
+   "ambito": "fabrica"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-149",
+   "porque": "Es de un guion de regresión (INC-131 b cargaba HK sin terminar en 45 s) y ni del cliente ni del servidor; ya figura sin atar en Housekeeping e Incidentes. Cerrado."
+  },
+  {
+   "id": "bolsa: Copia a Drive de guías, documentos y planos",
+   "porque": "Decisión pendiente que decide si CU-K3-2.8 entra al alcance; el servidor solo guarda esos archivos (CU-SRV-4.1)."
+  }
+ ]
+}

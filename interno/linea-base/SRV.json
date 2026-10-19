@@ -1,0 +1,2590 @@
+{
+ "modulo": "SRV",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "api/index.php (router), api/.htaccess, api/lib/session.php, col-lectura.php, upload-limites.php, restauracion.php, purga-prueba.php y cuenta-pruebas.php, api/config/secrets.example.php y migrate.php (migraciones 1 a 14): leídos completos",
+  "api/col/index.php (1966 líneas): leído casi completo (lectura y escritura, unión de turnos, filtros del colaborador, zonas, pendientes, movimientos, listas blancas)",
+  "api/health, diagnostico, me, capacidades, auth/login, setup, export, restauracion, purga-prueba, cuenta-pruebas, tablero, archivo y upload (con evidencia.php): leídos completos",
+  "docs/claude/servidor-php.md y shell-y-api.md (mapa técnico), en gran parte",
+  "srv-fuentes.json: 8 REQ, 17 DA, 6 de la bolsa, 47 INC, 15 DT, REL-01/02/11/23/26/27/33, actores y reglas",
+  "srv-guiones.json y guiones-e2e.json: 38 guiones con sus casos; los .spec.js no se leyeron salvo el encabezado de restauracion-ensayo, purga-movimientos y diagnostico de herramientas/pw",
+  "interno/linea-base/por-levantar/SRV.json (CU-K3-6.2 y CU-K3-6.3, integrados aquí como CU-SRV-8.1 y 8.3) y los archivos ya levantados: K3, SH, U, HK, INV, INC1, CAL, FL, PR, KN, OP, PG, POR",
+  "No leído: api/config/cors.php, database.php, jwt.php y firebase.php; los .htaccess de backups/, logs/, uploads/ y de la raíz; la tarea programada de las 03:00 en el alojamiento; api/drive, ical, sync-ical, expediente, usuarios e invitacion (de otros módulos); tests/*.test.js (no vienen en la copia del código)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Guardar y entregar las 20 colecciones del negocio con baja lógica, unión de turnos y última escritura",
+   "Lo que el colaborador recibe y puede cambiar: 90 días de gestión, huésped de hoy y mañana, incidentes propios, inventario de sus zonas y turno hasta 2 horas tras el cierre",
+   "Sesión, permisos por rol y por operador, y aislamiento por negocio en cada petición",
+   "Recibir y entregar guías, documentos, planos y fotos",
+   "Migraciones, conexión con la base de datos y errores con rastro",
+   "La lectura agrupada del Tablero, con su rechazo antes de leer",
+   "Salud del servicio",
+   "Respaldo de la noche, respaldo descargable y ensayo de restauración",
+   "Fábrica: diagnóstico de conexiones, purga de movimientos de prueba y cuenta de pruebas"
+  ],
+  "fuera": [
+   "Copia a Drive, corte mensual y servir un archivo borrado en el corte: Copia a Drive (K3, CU-K3-3.2)",
+   "Importar calendarios de los canales y exportar la disponibilidad: Calendario (CAL)",
+   "La pantalla del Tablero, sus alertas y sus cifras: Tablero (OP)",
+   "Entrar con Google o con contraseña, invitaciones, equipo, capacidades, ficha de pago, crear el negocio y los permisos que define el administrador: Identidad (U)",
+   "El expediente del incidente, su evidencia y que la evidencia solo crece: Incidentes (INC1)",
+   "Las reglas de negocio del inventario (traslados, préstamos, circuito de la ropa, pendientes de ropa): Inventario (INV, CU-INV-5.8)",
+   "Las pantallas del colaborador: Housekeeping (CU-HK-11.x) y Portal (POR)",
+   "Respaldo completo de los archivos antes del primer corte: CU-K3-6.4"
+  ],
+  "nota": "SRV es lo que decide y guarda en el servidor. Los casos de uso de los módulos (CAL-9.1, FL-10.2, HK-10.5, PR-9.2 y 9.3) apuntan a CU-SRV-1.1 (entregar) y CU-SRV-1.2 (guardar). Lo del colaborador se describe aquí como cumplimiento en el servidor y en Housekeeping como experiencia de pantalla; ver la pregunta 1 del mapeo."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-SRV-1",
+   "nombre": "Almacén de datos del negocio",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Guardar y entregar las colecciones de datos del negocio (propiedades, reservas, turnos, incidentes, inventario, guías, flujos) a todos los aparatos, sin pisar lo de otro y sin borrar nada de verdad."
+  },
+  {
+   "id": "CAP-SRV-2",
+   "nombre": "Lectura y escritura acotada del colaborador",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Que el colaborador reciba y pueda cambiar solo lo que le corresponde: su gestión de 90 días, los datos del huésped de hoy y de mañana, sus incidentes, su inventario y su turno hasta dos horas después de cerrarlo."
+  },
+  {
+   "id": "CAP-SRV-3",
+   "nombre": "Sesión, permisos y aislamiento por negocio",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Decidir en el servidor, en cada petición, quién es la persona, qué puede hacer y de qué negocio es, y rechazar lo demás."
+  },
+  {
+   "id": "CAP-SRV-4",
+   "nombre": "Archivos del negocio",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Recibir y entregar guías, documentos, planos y fotos con sus límites, siempre dentro del negocio de la sesión."
+  },
+  {
+   "id": "CAP-SRV-5",
+   "nombre": "Arranque, migraciones y conexión",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Dejar la base de datos al día sola, abrir las conexiones sin agotar el tope del alojamiento y dejar rastro claro cuando algo falla por dentro."
+  },
+  {
+   "id": "CAP-SRV-6",
+   "nombre": "Lectura agrupada del Tablero",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Entregar al Tablero de operación todo lo que muestra en una sola lectura, solo a quien puede verlo."
+  },
+  {
+   "id": "CAP-SRV-7",
+   "nombre": "Salud y diagnóstico del servicio",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Decir si el servicio está sano y, para la fábrica, medir las conexiones a la base de datos."
+  },
+  {
+   "id": "CAP-SRV-8",
+   "nombre": "Respaldo y restauración",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Guardar cada noche un respaldo de cada negocio, entregárselo al administrador y ensayar su restauración en una cuenta temporal antes de confiar en él (RT-12)."
+  },
+  {
+   "id": "CAP-SRV-9",
+   "nombre": "Datos de prueba de la fábrica",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Limpiar los movimientos de inventario de prueba y mantener la cuenta de pruebas aparte, solo para la fábrica de pruebas y nunca con datos reales."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-SRV-1.1",
+   "capacidad": "CAP-SRV-1",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Entregar a un aparato una colección completa, o solo lo cambiado desde su última lectura, con las bajas aparte y la hora del servidor",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo conoce las 20 colecciones del negocio; pedir otra se rechaza. Lo vivo y lo dado de baja salen separados para que el aparato quite lo que ya no existe.",
+    "Puede pedir las reservas por una ventana de fechas y por estado, además de «desde una hora».",
+    "«Lo cambiado desde la última lectura» se compara con la hora que el aparato puso al guardar, no con la que anotó el servidor: un cambio guardado con la hora atrasada o tras mucho tiempo sin conexión puede no llegar nunca a otro aparato que pide solo cambios; el Tablero lo cubre con un solape de 5 minutos y Housekeeping, Calendario e Inventario con una lectura completa diaria (leído en el código, no comprobado).",
+    "Todo rol con sesión del negocio puede leer, pero al colaborador se le entrega recortado (CAP-SRV-2); el administrador legado «superadmin» lee y no escribe.",
+    "Con muchas lecturas a la vez no debe agotar las conexiones del alojamiento (RT-19; DT-40, INC-128)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-API-2.1",
+     "dato": "pedido de una colección, completa o desde una hora",
+     "rel": "REL-26"
+    },
+    {
+     "de": "CU-SRV-1.3",
+     "dato": "baja registrada con su hora, para entregarla como baja"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-API-2.1",
+     "dato": "colección completa o lo cambiado desde la última lectura, con las bajas y la hora del servidor",
+     "rel": "REL-26"
+    },
+    {
+     "a": "CU-CAL-9.1",
+     "dato": "reservas y bajas cambiadas desde la última traída, con su sello",
+     "rel": "REL-26"
+    },
+    {
+     "a": "CU-FL-10.2",
+     "dato": "flujos, categorías y guías del sistema, con lo cambiado desde la última lectura",
+     "rel": "REL-26"
+    },
+    {
+     "a": "CU-PR-9.2",
+     "dato": "propiedades, subtipos, ubicaciones, tipos de ubicación y zonas de inventario con su sello, para el aparato",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con reservas guardadas desde dos aparatos",
+     "cuando": "un aparato pide las reservas",
+     "entonces": "recibe todas las vivas de su negocio y la hora del servidor para su próxima lectura"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un aparato que ya leyó antes",
+     "cuando": "pide solo lo cambiado desde su hora",
+     "entonces": "recibe lo nuevo y lo modificado, y aparte los identificadores dados de baja"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una colección que el servidor no conoce",
+     "cuando": "un aparato la pide",
+     "entonces": "el servidor la rechaza"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "doce lecturas de colecciones pedidas a la vez",
+     "cuando": "el servidor las atiende",
+     "entonces": "todas responden y ninguna falla por conexión"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-7",
+    "RT-19",
+    "RT-21"
+   ],
+   "pendientes": [
+    "DT-40",
+    "INC-94"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-40",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E4"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php",
+     "api/lib/col-lectura.php"
+    ],
+    "rutas": [
+     "GET /api/col/{colección}"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "flujos",
+     "flujo-categorias",
+     "prop-workflows",
+     "reservas",
+     "turnos",
+     "tickets",
+     "hk-config",
+     "guias",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-articulos",
+     "inv-depositos",
+     "inv-movimientos",
+     "inv-grupos",
+     "inv-estados",
+     "inv-sububicaciones",
+     "inv-pendientes",
+     "inv-proveedores"
+    ],
+    "notas": "_colLeerFilas(since, desde, hasta, estado) y _colServerTime (hora del servidor en milisegundos); tabla col_item (PK cuenta_id, coleccion, item_id; data JSON; updated_at DATETIME(3); deleted). La lectura del colaborador pasa por _colFiltrarLecturaColaborador (CAP-SRV-2). Las 20 colecciones son la lista blanca de api/col; api/export y api/tablero guardan copias de la lista."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php; un solo guion (DT-40 b, carga a la vez)"
+   }
+  },
+  {
+   "id": "CU-SRV-1.2",
+   "capacidad": "CAP-SRV-1",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Guardar los cambios que envía un aparato sin pisar lo que otro guardó después, con la hora del servidor y sin salirse de las colecciones y los límites permitidos",
+   "declarado": "construido",
+   "limitantes": [
+    "Cada cambio lleva la hora del aparato que lo envía y solo se guarda si no es anterior a la del dato ya guardado; si pierde, el servidor responde que todo salió bien aunque no haya escrito nada y el aparato no se entera (leído en el código, no comprobado).",
+    "Decide la hora del aparato, no la del servidor: un aparato con el reloj atrasado pierde todos los conflictos y uno adelantado los gana, y un aparato desactualizado que reenvía toda su copia puede revivir lo que otro dio de baja (leído en el código, no comprobado).",
+    "Un cambio cuyo identificador no coincide con el del dato se omite en silencio; cada envío pesa como máximo 2 MB y solo acepta las 20 colecciones conocidas.",
+    "Solo turnos, incidentes, movimientos de inventario y pendientes de inventario aceptan al colaborador; el resto exige administrador u operador, y el administrador legado «superadmin» no escribe (CU-SRV-3.1).",
+    "Los movimientos de inventario, la evidencia y los expedientes solo crecen: la regla de cada colección es de su módulo (CU-INV, CU-INC1) y aquí se cumple al guardar.",
+    "Con las conexiones del alojamiento saturadas responde 500 «base de datos no disponible» (INC-128, abierto); el aparato ya no manda dos envíos a la vez por colección (CU-API-2.2)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-API-2.2",
+     "dato": "cambios y bajas de una colección enviados uno a la vez",
+     "rel": "REL-26"
+    },
+    {
+     "de": "CU-API-2.3",
+     "dato": "envíos pendientes reenviados uno a uno al volver la conexión",
+     "rel": "REL-26"
+    },
+    {
+     "de": "CU-CAL-9.1",
+     "dato": "reservas nuevas, cambiadas y bajas con su sello de hora, como diferencia contra el último envío",
+     "rel": "REL-26"
+    },
+    {
+     "de": "CU-FL-10.2",
+     "dato": "flujos, categorías y guías cambiados, con sus bajas",
+     "rel": "REL-26"
+    },
+    {
+     "de": "CU-HK-10.5",
+     "dato": "cambios de turnos, incidentes y movimientos de inventario con su sello de hora, como diferencia contra el último envío",
+     "rel": "REL-26"
+    },
+    {
+     "de": "CU-PR-9.3",
+     "dato": "cambios de propiedades, subtipos, ubicaciones y tipos con su baja, como diferencia contra el último envío",
+     "rel": "REL-26"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-API-2.2",
+     "dato": "respuesta del guardado: lo escrito, lo omitido y la hora del servidor",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un aparato con un cambio nuevo en una propiedad",
+     "cuando": "lo envía",
+     "entonces": "queda guardado con la hora del servidor y otro aparato lo recibe en su próxima lectura"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "dos aparatos que cambiaron el mismo dato",
+     "cuando": "ambos lo envían",
+     "entonces": "queda el cambio de hora más reciente"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un envío de más de 2 MB o de una colección que el servidor no conoce",
+     "cuando": "el aparato lo envía",
+     "entonces": "el servidor lo rechaza y no guarda nada"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un cambio cuyo identificador no coincide con el del dato",
+     "cuando": "el aparato lo envía",
+     "entonces": "ese cambio se omite y los demás se guardan"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-4",
+    "RT-5",
+    "RT-7",
+    "RT-19",
+    "RT-21"
+   ],
+   "pendientes": [
+    "INC-128",
+    "DT-38"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "PUT /api/col/{colección}"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "flujos",
+     "flujo-categorias",
+     "prop-workflows",
+     "reservas",
+     "turnos",
+     "tickets",
+     "hk-config",
+     "guias",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-articulos",
+     "inv-depositos",
+     "inv-movimientos",
+     "inv-grupos",
+     "inv-estados",
+     "inv-sububicaciones",
+     "inv-pendientes",
+     "inv-proveedores"
+    ],
+    "notas": "INSERT … ON DUPLICATE KEY UPDATE con IF(VALUES(updated_at) >= updated_at …); rolesEscritura por colección; tope de 2 MB (413); respuesta {ok, upserted, deleted, server_time}. Sin guion que ejerza el conflicto de horas; INC-141 b solo prueba que lo propio se guarda. Defectos de lectura en las notas del mapeo."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php; sin guion propio de este caso"
+   }
+  },
+  {
+   "id": "CU-SRV-1.3",
+   "capacidad": "CAP-SRV-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Dar de baja un dato sin borrarlo, dejando el rastro para que los demás aparatos lo quiten",
+   "declarado": "construido",
+   "limitantes": [
+    "El colaborador no puede dar de baja nada; solo el administrador y el operador.",
+    "Una baja de un identificador que no existe cuenta como hecha y no avisa.",
+    "No hay forma de borrar de verdad un dato desde la aplicación (RT-5); la baja conserva el dato y su historia.",
+    "Los archivos subidos no se pueden borrar desde la aplicación (CU-SRV-4.3)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.1",
+     "dato": "baja registrada con su hora, para entregarla como baja"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad guardada",
+     "cuando": "el administrador la da de baja",
+     "entonces": "deja de entregarse en las lecturas completas y aparece como baja en las lecturas por cambios"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "otro aparato con la propiedad en su copia local",
+     "cuando": "pide los cambios",
+     "entonces": "recibe el identificador de la baja y la quita de su copia"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "intenta dar de baja un dato",
+     "entonces": "el servidor lo rechaza"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "PUT /api/col/{colección} (deleted: [ids])"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "flujos",
+     "flujo-categorias",
+     "prop-workflows",
+     "reservas",
+     "turnos",
+     "tickets",
+     "hk-config",
+     "guias",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-articulos",
+     "inv-depositos",
+     "inv-movimientos",
+     "inv-grupos",
+     "inv-estados",
+     "inv-sububicaciones",
+     "inv-pendientes",
+     "inv-proveedores"
+    ],
+    "notas": "UPDATE deleted=1, updated_at=hora del servidor; cuenta como borrado aunque el id no exista; el colaborador no borra (sale en el conjunto de roles de escritura)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php"
+   }
+  },
+  {
+   "id": "CU-SRV-1.4",
+   "capacidad": "CAP-SRV-1",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Unir en un solo turno lo que dos aparatos marcaron por separado (tareas hechas u omitidas, procesos, etapas, apoyos, fotos) en vez de quedarse con el último",
+   "declarado": "construido",
+   "limitantes": [
+    "La unión nunca quita lo que el otro lado ya tenía: quitar una marca hay que pedirlo expresamente y se aplica después de unir.",
+    "Solo se une en los turnos; en las demás colecciones se queda el último que guardó.",
+    "Las horas de inicio y de fin que llegan sin resolver («las fija el servidor») se sellan con la hora del servidor, no con la del aparato (RT-7).",
+    "La primera hora de cierre del turno solo la sella el servidor (CU-SRV-2.5 la usa)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos aparatos que marcan tareas distintas del mismo turno sin conexión",
+     "cuando": "los dos envían",
+     "entonces": "el turno guardado tiene las marcas de los dos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un aparato que pide quitar una marca",
+     "cuando": "envía el turno",
+     "entonces": "la marca se quita después de unir y no vuelve con lo que traía el otro"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una hora de inicio que el aparato deja por fijar",
+     "cuando": "envía el turno",
+     "entonces": "el servidor la sella con su hora"
+    }
+   ],
+   "origen": [
+    "REQ-D1",
+    "REQ-INV2-3-4"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "PUT /api/col/turnos (merge: true, remove: […], stamp: […])"
+    ],
+    "colecciones": [
+     "turnos"
+    ],
+    "notas": "Unión de tareasDone, omitidas, procesos, etapasEstado, apoyos y fotos; `remove` explícito se aplica después del merge; `stamp` con «__server__»; primerCierreAt solo del servidor. Se vigila con tests/e2e de Housekeeping, sin guion propio de la unión."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php"
+   }
+  },
+  {
+   "id": "CU-SRV-2.1",
+   "capacidad": "CAP-SRV-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Dar al colaborador su gestión de los últimos 90 días y, de lo anterior, solo las horas, e ignorar lo que reescriba de un turno viejo",
+   "declarado": "construido",
+   "limitantes": [
+    "Un turno de más de 90 días llega reducido a sus horas; si el colaborador lo guarda de vuelta, el servidor lo ignora y el operador lo ve completo.",
+    "Un colaborador recién asignado a una propiedad no recibe lo viejo que pasa a ser suyo hasta su lectura completa diaria; con «solo lo cambiado» no le llega (leído en el código, no comprobado).",
+    "La configuración de Housekeeping le llega completa, con el valor de la hora general (leído en el código, no comprobado; es una pregunta para Diseño).",
+    "Lo que ve de las demás colecciones se limita a las propiedades donde tiene turno, con listas de campos permitidos."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-11.1",
+     "dato": "turnos y reservas de sus 90 días, con los más antiguos reducidos a horas"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con un turno de hace 120 días y otro de hace 10",
+     "cuando": "pide sus turnos",
+     "entonces": "el viejo llega solo con sus horas y el de hace 10 días, completo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo colaborador con el turno viejo en su aparato",
+     "cuando": "lo guarda de vuelta",
+     "entonces": "el servidor lo ignora y el operador lo sigue viendo completo"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un colaborador con un incidente abierto y otro resuelto, ambos de un turno viejo",
+     "cuando": "los pide",
+     "entonces": "recibe el abierto y no el resuelto"
+    }
+   ],
+   "origen": [
+    "DA-45",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-94",
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-120-c12",
+     "casos": [
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "GET /api/col/turnos",
+     "GET /api/col/tickets",
+     "PUT /api/col/turnos"
+    ],
+    "colecciones": [
+     "turnos",
+     "tickets",
+     "reservas",
+     "propiedades",
+     "hk-config"
+    ],
+    "notas": "_colLecturaContexto con ventana «gestión» (90 días, _colTurnoSoloHoras); el PUT ignora un turno reducido de más de 90 días. Listas blancas de campos para reservas y propiedades del colaborador. Tablero y Housekeeping lo describen desde su pantalla (CU-HK-11.1)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php; INC-120 c12 lo ejerce"
+   }
+  },
+  {
+   "id": "CU-SRV-2.2",
+   "capacidad": "CAP-SRV-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Dar al colaborador los datos del huésped solo de hoy y de mañana y, de los demás días, únicamente el código y las fechas",
+   "declarado": "construido",
+   "limitantes": [
+    "La ventana de hoy y mañana usa el día de Bogotá; fuera de ella, la reserva llega sin nombres ni contacto.",
+    "Lo mismo se aplica al turno: el turno lejano llega sin los nombres y al guardarlo no los borra.",
+    "El operador y el administrador ven siempre el dato completo (RT-6)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-11.2",
+     "dato": "reservas y turnos del colaborador con los datos del huésped solo de hoy y de mañana"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con una reserva que sale hoy y otra que entra en 5 días",
+     "cuando": "pide sus reservas",
+     "entonces": "ve el nombre del huésped de la reserva de hoy y de la lejana solo el código y las fechas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo colaborador con el turno lejano",
+     "cuando": "lo guarda",
+     "entonces": "el servidor no borra los nombres que el operador tenía"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "pide las mismas reservas",
+     "entonces": "ve todos los datos"
+    }
+   ],
+   "origen": [
+    "DA-45",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-120-c3",
+     "casos": [
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E2",
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "GET /api/col/reservas",
+     "GET /api/col/turnos"
+    ],
+    "colecciones": [
+     "reservas",
+     "turnos"
+    ],
+    "notas": "_colFiltrarLecturaColaborador: ventana huésped hoy+mañana en hora de Bogotá; listas blancas de campos. Mismo mecanismo que CU-SRV-2.1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php; INC-120 c3 lo ejerce"
+   }
+  },
+  {
+   "id": "CU-SRV-2.3",
+   "capacidad": "CAP-SRV-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Dar al colaborador solo sus incidentes y dejarle reescribir únicamente los suyos ya guardados",
+   "declarado": "construido",
+   "limitantes": [
+    "Valida contra el incidente guardado y no contra el autor que manda el colaborador: con el identificador de un incidente ajeno no puede leerlo completo ni pisarlo (INC-141).",
+    "Un colaborador no puede dar de baja un incidente ni quitar evidencia: la evidencia y el expediente solo crecen.",
+    "Los incidentes resueltos de turnos de más de 90 días ya no le llegan; los abiertos sí (INC-120)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-11.5",
+     "dato": "incidentes propios del colaborador, y rechazo al intentar leer o pisar uno ajeno"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente del administrador y otro del colaborador",
+     "cuando": "el colaborador los pide y guarda",
+     "entonces": "ve y guarda el suyo y no recibe el del administrador"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el colaborador manda el identificador del incidente del administrador",
+     "cuando": "intenta guardarlo",
+     "entonces": "el servidor responde 403 sin devolver la fila"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el operador",
+     "cuando": "mira el incidente del administrador",
+     "entonces": "sigue igual: descripción y dueño"
+    }
+   ],
+   "origen": [
+    "DA-46",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-10",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-141"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-141",
+     "casos": [
+      "a",
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E2",
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "GET /api/col/tickets",
+     "PUT /api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "INC-141: el PUT lee la fila guardada con FOR UPDATE y compara el creadoPor guardado; la evidencia y los expedientes solo crecen."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php; INC-141 lo ejerce"
+   }
+  },
+  {
+   "id": "CU-SRV-2.4",
+   "capacidad": "CAP-SRV-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Dar al colaborador del inventario solo lo de sus zonas y sus propios movimientos, y aceptarle los conteos únicamente del titular del turno",
+   "declarado": "parcial",
+   "limitantes": [
+    "Las zonas llegan filtradas por las propiedades del colaborador, pero los artículos de zonas privadas o con acceso revocado siguen llegando (INC-129, abierto).",
+    "Del inventario solo se le entregan los movimientos propios; los movimientos guardados no se pueden cambiar ni borrar (CU-INV).",
+    "Una zona privada ya activa como principal de una propiedad todavía se toma como escribible (INC-122, pospuesto)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-11.3",
+     "dato": "inventario y movimientos del turno visibles y escribibles por el titular"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador titular de un turno con una zona asignada",
+     "cuando": "registra el conteo",
+     "entonces": "el servidor lo acepta y lo guarda con su nombre"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que no es el titular",
+     "cuando": "intenta registrar el conteo",
+     "entonces": "el servidor no lo acepta"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una zona privada o con acceso revocado",
+     "cuando": "el colaborador pide los artículos",
+     "entonces": "no debería recibirlos (hoy los recibe)"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-4-1",
+    "REQ-INV2-7-1",
+    "DA-34"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-99",
+    "INC-122",
+    "INC-129"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-4-2",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "GET /api/col/inv-articulos",
+     "GET /api/col/inv-movimientos",
+     "PUT /api/col/inv-movimientos"
+    ],
+    "colecciones": [
+     "inv-articulos",
+     "inv-depositos",
+     "inv-movimientos",
+     "inv-sububicaciones",
+     "inv-pendientes"
+    ],
+    "notas": "_colZonaEscribible, _colZonasVisiblesColab, _colInvColabConPendiente y _colInvPendSanear. Housekeeping lo describe desde su pantalla (CU-HK-11.3)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php; no se leyeron las reglas de inventario de api/col que dependen de Inventario"
+   }
+  },
+  {
+   "id": "CU-SRV-2.5",
+   "capacidad": "CAP-SRV-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Dejar al colaborador modificar un turno propio solo hasta 2 horas después de su primer cierre, con la hora de cierre que sella el servidor",
+   "declarado": "construido",
+   "limitantes": [
+    "La primera hora de cierre la sella el servidor, nunca el aparato; pasadas 2 horas el servidor rechaza los cambios del colaborador en ese turno.",
+    "Al cerrar el turno, el mismo guardado crea los pendientes de ropa; el circuito de la ropa es de Inventario (CU-INV-5.8, REL-11).",
+    "Un turno de más de 90 días se ignora cuando lo escribe el colaborador (CU-SRV-2.1)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-11.4",
+     "dato": "turno propio modificable hasta 2 horas después de su primer cierre"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno recién cerrado por su titular",
+     "cuando": "el colaborador lo corrige dentro de las 2 horas",
+     "entonces": "el servidor acepta el cambio"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un turno cerrado hace más de 2 horas",
+     "cuando": "el colaborador intenta cambiarlo",
+     "entonces": "el servidor lo rechaza"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el operador",
+     "cuando": "cambia el mismo turno pasadas las 2 horas",
+     "entonces": "el servidor lo acepta"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-3-4",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "PUT /api/col/turnos"
+    ],
+    "colecciones": [
+     "turnos",
+     "inv-pendientes"
+    ],
+    "notas": "_colVentanaAbierta (2 h desde primerCierreAt); pendientes de ropa creados en la misma transacción. Sin guion que ejerza la ventana de 2 h."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php"
+   }
+  },
+  {
+   "id": "CU-SRV-3.1",
+   "capacidad": "CAP-SRV-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Decidir en cada petición quién es la persona y qué puede hacer según su rol y sus permisos, y rechazar lo demás",
+   "declarado": "construido",
+   "limitantes": [
+    "El rol viaja en la sesión, que dura 24 horas y no se puede revocar: una baja, una inactivación o un cambio de rol no se aplican hasta que venza (DT-49). Solo los permisos del operador se leen de su ficha en cada petición.",
+    "Cada ruta fija sus roles: respaldo, restauración, diagnóstico, purga y cuenta de pruebas solo para el administrador; el Tablero para administrador y operador; las colecciones por rol de lectura y de escritura.",
+    "Hay rutas sin comprobar el rol: las capacidades del negocio las puede crear, renombrar o borrar cualquiera con sesión (INC-160, abierto; es de Identidad).",
+    "Sin sesión o con sesión inválida responde 401 sin leer nada; con sesión sin permiso, 403.",
+    "No se leyó el código que firma y valida la sesión."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.6",
+     "dato": "rol de la sesión y permisos efectivos del operador, para permitir o rechazar la petición",
+     "rel": "REL-27"
+    },
+    {
+     "de": "CU-API-1.1",
+     "dato": "pedido con la sesión de la persona, para que el servidor decida si puede"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-2.6",
+     "dato": "cada petición a algo protegido, que pide decidir si la persona puede",
+     "rel": "REL-27"
+    },
+    {
+     "a": "CU-API-1.1",
+     "dato": "respuesta del servidor o rechazo (sin sesión, sin permiso), para que la pantalla lo muestre"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión vigente y rol permitido",
+     "cuando": "pide algo propio de su rol",
+     "entonces": "el servidor lo atiende"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "pide algo reservado al administrador, como ensayar una restauración",
+     "entonces": "el servidor responde 403"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una petición sin sesión o con la sesión vencida",
+     "cuando": "llega al servidor",
+     "entonces": "responde 401 y no entrega ningún dato"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "el administrador cambia los permisos de un operador",
+     "cuando": "el operador hace su siguiente petición",
+     "entonces": "el servidor ya aplica los permisos nuevos"
+    }
+   ],
+   "origen": [
+    "REQ-D1",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-14",
+    "RT-16"
+   ],
+   "pendientes": [
+    "DT-49"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-42",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "DT-41",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "INC-146-purga",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "DA-47-cuenta-pruebas",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/index.php",
+     "api/lib/session.php"
+    ],
+    "rutas": [
+     "todas las rutas protegidas"
+    ],
+    "colecciones": [],
+    "notas": "_puede() lee usuario.permisos del operador en cada petición; _permisosEfectivos, _emitirSesion, _invitarRolPermitido. JWT::fromRequest (api/config/jwt.php, no leído). Router único api/index.php con la lista de rutas. Los guiones prueban el 403 del operador en rutas del administrador, no cada ruta."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/index.php, api/lib/session.php y de las comprobaciones de rol de cada ruta; api/config/jwt.php no se leyó"
+   }
+  },
+  {
+   "id": "CU-SRV-3.2",
+   "capacidad": "CAP-SRV-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mantener los datos de cada negocio separados: toda lectura, escritura, archivo o respaldo se hace solo sobre el negocio de la sesión",
+   "declarado": "construido",
+   "limitantes": [
+    "El negocio sale de la sesión, nunca de lo que manda el pedido; un archivo de otro negocio se rechaza con 403 aunque exista.",
+    "Los negocios de prueba y de ensayo (zz-verif-…) son negocios aparte, para que lo de prueba no se mezcle con lo real (RT-24).",
+    "Cada ruta de archivo valida sus segmentos y que el camino real siga dentro de la carpeta de archivos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos negocios con propiedades distintas",
+     "cuando": "una persona del primero pide propiedades",
+     "entonces": "solo recibe las de su negocio"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una persona de un negocio",
+     "cuando": "pide un archivo de la carpeta de otro",
+     "entonces": "el servidor responde 403"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una ruta de archivo con «..» o caracteres no permitidos",
+     "cuando": "se pide el archivo",
+     "entonces": "el servidor responde 400 y no toca el disco"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/index.php",
+     "api/col/index.php",
+     "api/archivo/index.php"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "cuenta_id en la PK de col_item y en cada consulta; el borrado del ensayo repite la guarda cuenta_id en SQL sobre 12 tablas; archivo compara la cuenta de la ruta con la de la sesión. Sin guion que pruebe el aislamiento entre dos negocios."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/col, archivo, restauración y purga; sin prueba entre dos negocios reales"
+   }
+  },
+  {
+   "id": "CU-SRV-3.3",
+   "capacidad": "CAP-SRV-3",
+   "actor": [
+    "operador"
+   ],
+   "que": "Limitar lo que escribe un operador sin el permiso delegado: inventario sin «Editar inventario» y horas o tarifas sin «Tarifas y horas»",
+   "declarado": "parcial",
+   "limitantes": [
+    "Sin «Editar inventario» el operador queda limitado en las colecciones de inventario y en la zona principal de una propiedad.",
+    "Sin «Tarifas y horas» no puede cambiar las horas ni las tarifas dentro de un turno ni en la configuración de Housekeeping; sí puede cambiar las horas por turno de una propiedad, porque guardar propiedades no lo exige (INC-157, abierto).",
+    "Los demás permisos delegados (equipo, invitar, valor de activos, copia a Drive) los decide Identidad (CU-U-2.3, CU-U-2.8)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.3",
+     "dato": "permisos «Tarifas y horas» y «Editar inventario» del operador"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-2.7",
+     "dato": "cambio de horas o tarifas rechazado o ignorado, para el operador sin el permiso"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con el permiso «Editar inventario»",
+     "cuando": "crea un artículo",
+     "entonces": "el servidor lo guarda"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador sin «Tarifas y horas»",
+     "cuando": "cambia las horas de un turno",
+     "entonces": "el servidor ignora ese cambio"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador sin «Tarifas y horas»",
+     "cuando": "cambia las horas por turno de una propiedad",
+     "entonces": "hoy el servidor lo guarda y cambia las horas que se pagan"
+    }
+   ],
+   "origen": [
+    "REQ-U7",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-157"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "PUT /api/col/{colección}"
+    ],
+    "colecciones": [
+     "inv-articulos",
+     "inv-depositos",
+     "inv-grupos",
+     "turnos",
+     "hk-config",
+     "propiedades"
+    ],
+    "notas": "Permisos inventario.editar y dinero.tarifas leídos de usuario.permisos con _puede(); invPrincipalId de propiedades se protege con inventario.editar; horasTurno de propiedades no (INC-157). Sin guion."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (1966 líneas, casi completo), api/lib/col-lectura.php y api/lib/session.php"
+   }
+  },
+  {
+   "id": "CU-SRV-4.1",
+   "capacidad": "CAP-SRV-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Recibir una guía, un documento, un plano o una foto, comprobar su tipo y su tamaño, guardarlos en la carpeta del negocio y devolver su dirección",
+   "declarado": "construido",
+   "limitantes": [
+    "Tope de 8 MB; el PDF solo vale como documento; las imágenes se reducen a 1600 px de lado y calidad 82 (no se guardan tal cual).",
+    "Guía, documento y plano solo los suben administrador y operador; la foto también el colaborador.",
+    "La evidencia y el video de un incidente entran por la misma ruta pero se guardan tal cual, con su huella y los datos de captura: eso es de Incidentes (CU-INC1-2.1).",
+    "La referencia del archivo solo se valida por su forma: un colaborador puede subir una foto, evidencia o video a una referencia que no es de su turno ni de su incidente (leído en el código, no comprobado).",
+    "Los archivos viven solo en el servidor, sin copia fuera de él hasta el respaldo y la copia a Drive (CU-K3-6.4, CU-K3-2.8; T-12)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-API-3.1",
+     "dato": "archivo, tipo y referencia a guardar"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-API-3.1",
+     "dato": "dirección del archivo guardado, con su tamaño y su tipo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con una foto grande",
+     "cuando": "la sube",
+     "entonces": "el servidor la reduce, la guarda en su negocio y devuelve su dirección"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un administrador con un PDF",
+     "cuando": "lo sube como documento",
+     "entonces": "se guarda tal cual"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "sube una guía",
+     "entonces": "el servidor responde 403"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un archivo de más de 8 MB o de un tipo no permitido",
+     "cuando": "se sube",
+     "entonces": "el servidor lo rechaza"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1",
+    "REQ-K2",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/upload/index.php",
+     "api/lib/upload-limites.php"
+    ],
+    "rutas": [
+     "POST /api/upload"
+    ],
+    "colecciones": [],
+    "notas": "Tipos guia, foto, doc, plano, evidencia y video; rolesPermitidos por tipo; re-muestreo con GD (1600 px, calidad 82); evidencia y video los atiende upload/evidencia.php (25 MB y min(100 MB, upload_max_filesize, post_max_size)). Archivos en api/uploads/<cuenta>/<tipo>/<ref>/. Sin guion propio."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/upload/index.php, evidencia.php y upload-limites.php"
+   }
+  },
+  {
+   "id": "CU-SRV-4.2",
+   "capacidad": "CAP-SRV-4",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Entregar un archivo guardado a quien tenga sesión en el mismo negocio, entero o por un tramo, y decir si ya no existe",
+   "declarado": "construido",
+   "limitantes": [
+    "Cualquier rol del negocio puede pedir cualquier archivo del negocio, sin comprobar que sea de su turno o de su incidente (leído en el código, no comprobado).",
+    "Atiende un solo tramo por pedido, para ver un video mientras llega.",
+    "Si el archivo ya no está: 404, o, si pasó por un corte de almacenamiento, lo entrega desde la copia en Drive o responde «eliminado en el corte» (CU-K3-3.2).",
+    "Las rutas con segmentos no permitidos se rechazan con 400 y las de otro negocio con 403."
+   ],
+   "entradas": [
+    {
+     "de": "CU-API-3.2",
+     "dato": "pedido de un archivo con la sesión de la persona"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-API-3.2",
+     "dato": "archivo guardado del mismo negocio, entero o por tramos"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión y un archivo de su negocio",
+     "cuando": "lo pide",
+     "entonces": "lo recibe"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un video",
+     "cuando": "el aparato pide un tramo",
+     "entonces": "recibe solo ese tramo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un archivo que no existe",
+     "cuando": "se pide",
+     "entonces": "el servidor responde 404"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un archivo que el corte ya borró",
+     "cuando": "se pide",
+     "entonces": "se entrega desde Drive o se responde que fue eliminado en el corte"
+    }
+   ],
+   "origen": [
+    "REQ-K2",
+    "REQ-K3-3"
+   ],
+   "reglas": [
+    "RT-1"
+   ],
+   "pendientes": [
+    "DT-45"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "i"
+     ],
+     "escenarios": [
+      "E4"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/archivo/index.php"
+    ],
+    "rutas": [
+     "GET /api/archivo/{cuenta}/{tipo}/{ref}/{archivo}"
+    ],
+    "colecciones": [],
+    "notas": "Valida cuatro segmentos con regex y realpath dentro de api/uploads; Accept-Ranges y un solo Range; la rama sin archivo usa api/lib/archivo-corte.php (de K3). REQ-K3c-vista i solo ejerce el 410 desde la pantalla."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/archivo/index.php"
+   }
+  },
+  {
+   "id": "CU-SRV-4.3",
+   "capacidad": "CAP-SRV-4",
+   "actor": [
+    "admin"
+   ],
+   "que": "Borrar un archivo subido que ya no hace falta, fuera del corte, dejando huella",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy ningún archivo se puede borrar desde la aplicación: solo el corte mensual los quita, y tampoco hay forma de quitar un archivo subido por error (DT-44).",
+    "Debe ser solo del administrador, con su huella en el registro y respetando que la evidencia de incidentes nunca se borra (RT-10)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un archivo subido por error",
+     "cuando": "el administrador lo borra",
+     "entonces": "deja de entregarse y queda constancia de quién lo borró"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una evidencia de un incidente",
+     "cuando": "alguien intenta borrarla",
+     "entonces": "el servidor lo rechaza"
+    }
+   ],
+   "origen": [
+    "DT-44"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-10",
+    "RT-12"
+   ],
+   "pendientes": [
+    "DT-44"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: DT-44 está abierta."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Comprobado leyendo api/upload y api/archivo: no hay ruta de borrado"
+   }
+  },
+  {
+   "id": "CU-SRV-5.1",
+   "capacidad": "CAP-SRV-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dejar la base de datos al día sola cuando llega una versión nueva, sin repetir lo ya aplicado",
+   "declarado": "construido",
+   "limitantes": [
+    "Corre en cada proceso nuevo, con las consultas de comprobación del esquema después de abrir la conexión (DT-39, programada).",
+    "No tiene candado: dos procesos que arrancan a la vez pueden duplicar el registro de la versión aplicada (leído en el código, no comprobado).",
+    "Hay 14 migraciones, todas escritas para repetirse sin dañar; ninguna se deshace."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una base de datos en la versión anterior",
+     "cuando": "llega el primer pedido tras el despliegue",
+     "entonces": "se aplican las migraciones pendientes y el esquema queda en la última versión"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una base de datos ya al día",
+     "cuando": "llega un pedido",
+     "entonces": "no cambia nada"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-19",
+    "RT-20"
+   ],
+   "pendientes": [
+    "DT-39"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/config/migrate.php"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Migrate::run con 14 migraciones y schema_version; lo llama Database::connect. api/health informa la versión del esquema (CU-SRV-7.1). Sin guion de migración."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/config/migrate.php (migraciones 1 a 14); Database::connect no se leyó"
+   }
+  },
+  {
+   "id": "CU-SRV-5.2",
+   "capacidad": "CAP-SRV-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Abrir las conexiones a la base de datos sin agotar el tope del alojamiento y reintentar cuando el alojamiento la rechaza",
+   "declarado": "construido",
+   "limitantes": [
+    "El alojamiento compartido limita las conexiones simultáneas (75 en total, DT-41); abrir de más devuelve «base de datos no disponible» (RT-19).",
+    "Se probó dejar la conexión abierta entre peticiones y medir cuántas quedan abiertas; la medición vive en el diagnóstico (CU-SRV-7.2).",
+    "El 500 del colaborador al marcar el conteo (conexión 2002) sigue abierto como INC-128.",
+    "No se leyó el código de la conexión: lo de esta ficha sale del mapa técnico y de los guiones."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "doce lecturas de colecciones a la vez",
+     "cuando": "el servidor las atiende",
+     "entonces": "ninguna responde 500 por conexión"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el alojamiento rechaza una conexión",
+     "cuando": "llega un pedido",
+     "entonces": "el servidor reintenta y, si no logra abrirla, responde que la base no está disponible"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [
+    "RT-19"
+   ],
+   "pendientes": [
+    "INC-128",
+    "DT-40",
+    "DT-41"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-40",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/config/database.php"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Conexión persistente con reintentos (DT-40, pagada; L-118). api/config/database.php no estaba entre las fuentes."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Solo docs/claude/servidor-php.md, DT-40/41 y el guion DT-40 b; api/config/database.php no se leyó"
+   }
+  },
+  {
+   "id": "CU-SRV-5.3",
+   "capacidad": "CAP-SRV-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Responder con un error legible y dejar rastro cuando algo falla por dentro, en vez de una página rota",
+   "declarado": "construido",
+   "limitantes": [
+    "Un fallo inesperado responde 500 con el tipo del fallo, el archivo y la línea, y deja una línea en el registro del servidor; la respuesta revela el interior a quien llame (leído en el código, no comprobado).",
+    "Los fallos del guardado de colecciones deben escribirse también en el registro del servidor y no solo en el del alojamiento, que no se ve (DT-38, programada)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un fallo inesperado en una ruta",
+     "cuando": "llega un pedido",
+     "entonces": "el servidor responde 500 con un mensaje legible y deja una línea en su registro"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una ruta que no existe",
+     "cuando": "llega un pedido",
+     "entonces": "responde 404 con un mensaje legible"
+    }
+   ],
+   "origen": [
+    "REQ-D1"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "DT-38"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/index.php"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Manejador de fatales y excepciones en api/index.php: {error: «Error interno», tipo, archivo, linea} y escritura en api/logs/error.log. Los .htaccess de logs/ no se leyeron."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/index.php"
+   }
+  },
+  {
+   "id": "CU-SRV-6.1",
+   "capacidad": "CAP-SRV-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Entregar al Tablero, en una sola lectura, todo lo que muestra: turnos, reservas con lo mínimo del huésped, incidentes, pendientes, propiedades, flujos y equipo mínimo, con lo cambiado desde la última lectura",
+   "declarado": "construido",
+   "limitantes": [
+    "De la reserva solo entrega los campos de una lista permitida: nombre y fechas del huésped, nada más (RT-6).",
+    "Pedir «lo cambiado» retrocede 5 minutos para cubrir los cambios con la hora atrasada de otro aparato.",
+    "Una sola conexión por lectura (RT-19); el administrador legado «superadmin» también puede leerlo.",
+    "El Tablero no la usa si hay otro módulo a la vista (CU-OP-5.1)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-OP-5.1",
+     "dato": "turnos, reservas con lo mínimo del huésped, incidentes, pendientes, propiedades, flujos y equipo mínimo, en una sola respuesta y con lo cambiado desde la última lectura",
+     "rel": "REL-33"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con el Tablero abierto",
+     "cuando": "pide la lectura",
+     "entonces": "recibe turnos, reservas, incidentes, pendientes, propiedades, flujos y equipo en una sola respuesta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una lectura anterior hace un minuto",
+     "cuando": "pide solo lo cambiado",
+     "entonces": "recibe lo cambiado, con 5 minutos de solape"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una reserva con todos los datos del huésped",
+     "cuando": "se entrega al Tablero",
+     "entonces": "solo llegan el nombre y las fechas"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-4",
+    "RT-6",
+    "RT-14",
+    "RT-19",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "a",
+      "d"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/tablero/index.php"
+    ],
+    "rutas": [
+     "GET /api/tablero?since="
+    ],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "tickets",
+     "inv-pendientes",
+     "propiedades",
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "_colLeerFilas de api/lib/col-lectura.php, _tabCamposReserva (lista blanca), since menos 5 minutos. REQ-OP-1 d prueba una lectura agrupada por minuto desde la pantalla."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/tablero/index.php y api/lib/col-lectura.php"
+   }
+  },
+  {
+   "id": "CU-SRV-6.2",
+   "capacidad": "CAP-SRV-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Rechazar la lectura del Tablero a quien no es administrador ni operador, antes de abrir la base de datos y de leer ningún dato",
+   "declarado": "construido",
+   "limitantes": [
+    "Rechaza con 403 al colaborador y a cualquier otro rol, sin abrir la conexión (RT-19).",
+    "No hay guion que ejerza el 403 del servidor: lo prueba solo un test de unidad que no viene en la copia del código."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-OP-4.2",
+     "dato": "rechazo por falta de permiso, antes de leer ningún dato (al colaborador y a todo rol que no sea administrador u operador)",
+     "rel": "REL-33"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con sesión",
+     "cuando": "pide la lectura del Tablero",
+     "entonces": "el servidor responde 403 sin leer nada"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una petición sin sesión",
+     "cuando": "pide la lectura del Tablero",
+     "entonces": "el servidor responde 401"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-19"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/tablero/index.php"
+    ],
+    "rutas": [
+     "GET /api/tablero"
+    ],
+    "colecciones": [],
+    "notas": "Comprueba el rol antes de Database::connect. Probado por tests/tablero-op.test.js (no está en la copia del código)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/tablero/index.php"
+   }
+  },
+  {
+   "id": "CU-SRV-7.1",
+   "capacidad": "CAP-SRV-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Decir, a quien lo pregunte sin sesión, si el servicio y la base de datos están sanos, con la versión del esquema y las piezas con que cuenta",
+   "declarado": "construido",
+   "limitantes": [
+    "Es público: no pide sesión, y cuenta qué piezas tiene el servicio (secretos presentes, soporte de imágenes, de datos de captura, de archivos comprimidos, tamaño máximo de subida, conexión a Drive y configuración de la base de datos), sin entregar sus valores.",
+    "Sirve de señal de despliegue a las pruebas: comprueban que el esquema y la versión de la interfaz sean los esperados.",
+    "A veces no responde en 30 segundos al final de una regresión larga (INC-152, abierto)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el servicio sano",
+     "cuando": "alguien pregunta por su salud",
+     "entonces": "responde ok con la base conectada y la versión del esquema"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una pregunta sin sesión",
+     "cuando": "llega al servidor",
+     "entonces": "responde igual"
+    }
+   ],
+   "origen": [
+    "DT-35"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [
+    "INC-152"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-35",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "R-3-db-config",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "INC-128",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/health/index.php"
+    ],
+    "rutas": [
+     "GET /api/health"
+    ],
+    "colecciones": [],
+    "notas": "Devuelve db, schema_version, secrets, gd, exif, zip, uploadMaxMB, drive y dbConfig, sin valores."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/health/index.php"
+   }
+  },
+  {
+   "id": "CU-SRV-7.2",
+   "capacidad": "CAP-SRV-7",
+   "actor": [
+    "admin",
+    "cola-arquitecto"
+   ],
+   "que": "Medir, solo leyendo, cuántas conexiones usa la aplicación en la base de datos y cuántas están dormidas",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo para el administrador y solo lee: entrega los totales de conexiones (persistentes, dormidas, máximo por usuario) y la hora, sin consultas, máquinas ni identificadores.",
+    "Sirve para vigilar que la aplicación quede muy por debajo del tope de 75 conexiones simultáneas del alojamiento (DT-40, DT-41)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador de la fábrica",
+     "cuando": "pide el diagnóstico",
+     "entonces": "recibe los totales de conexiones y la hora, sin otras claves"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un operador",
+     "cuando": "pide el diagnóstico",
+     "entonces": "el servidor responde 403"
+    }
+   ],
+   "origen": [
+    "DT-41"
+   ],
+   "reglas": [
+    "RT-19"
+   ],
+   "pendientes": [
+    "DT-41"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-41",
+     "casos": [
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "guion": "herramientas/pw/diagnostico",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/diagnostico/index.php"
+    ],
+    "rutas": [
+     "GET /api/diagnostico"
+    ],
+    "colecciones": [],
+    "notas": "Lee la lista de procesos de la base de datos sin los valores de las consultas; solo admin."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/diagnostico/index.php"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-SRV-8.1",
+   "capacidad": "CAP-SRV-8",
+   "actor": [
+    "cron"
+   ],
+   "que": "Guardar cada noche en el servidor un respaldo de cada cuenta y conservar los últimos 30",
+   "declarado": "construido",
+   "limitantes": [
+    "Deja fuera las cuentas de ensayo de restauración (L-131); la cuenta de pruebas «zz-verif-pruebas» sí entra en el respaldo (CU-U-7.3).",
+    "El respaldo trae los datos vivos de las 20 colecciones, los usuarios sin contraseña y las capacidades; no trae la ficha de pago ni los permisos de los operadores, ni la cuenta, la retención, la copia a Drive y la exportación de calendario (DT-43), ni los archivos (CU-K3-6.4).",
+    "No se pudo comprobar que la tarea programada de las 03:00 exista en el servicio de alojamiento: solo hay su descripción en el mapa técnico y el código que la atiende.",
+    "El nombre del respaldo diario usa la fecha UTC y entre las 19:00 y las 24:00 de Bogotá sale con la fecha del día siguiente (INC-81, pospuesto por decisión del dueño; cosmético).",
+    "Si no puede armar el archivo, responde que salió bien y deja el del día vacío o sin escribir (leído en el código, no comprobado).",
+    "Guarda el respaldo en el mismo servidor que los datos: no es una copia fuera de él."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SRV-8.3",
+     "dato": "respaldo diario guardado de la cuenta, para ensayar su restauración"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "varias cuentas",
+     "cuando": "corre la tarea de las 03:00",
+     "entonces": "cada cuenta tiene su archivo de respaldo del día y solo se conservan los últimos 30"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una cuenta de ensayo de restauración",
+     "cuando": "corre la tarea",
+     "entonces": "no se respalda"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una llamada sin la clave de la tarea programada",
+     "cuando": "llega al servidor",
+     "entonces": "el servidor la rechaza"
+    }
+   ],
+   "origen": [
+    "DT-43",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-12",
+    "RT-22"
+   ],
+   "pendientes": [
+    "DT-43",
+    "INC-81",
+    "INC-84",
+    "INC-101"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/export/index.php"
+    ],
+    "rutas": [
+     "POST /api/export/cron"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "flujos",
+     "flujo-categorias",
+     "prop-workflows",
+     "reservas",
+     "turnos",
+     "tickets",
+     "hk-config",
+     "guias",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-articulos",
+     "inv-depositos",
+     "inv-movimientos",
+     "inv-grupos",
+     "inv-estados",
+     "inv-sububicaciones",
+     "inv-pendientes",
+     "inv-proveedores"
+    ],
+    "notas": "api/backups/<cuenta>/<AAAA-MM-DD UTC>.json con .htaccess de denegación (no leído); cabecera X-Cron-Key comparada con hash_equals; excluye cuentas zz-verif-restauracion-%; conserva 30; _exportCuenta solo lee filas con deleted=0 y los usuarios sin password_hash, perfil_pago ni permisos. $COLECCIONES es copia de la lista blanca (INC-84, INC-101; vigilada por tests/export-colecciones.test.js, que no viene en la copia del código)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/export/index.php; la tarea programada de las 03:00 no se vio en el alojamiento"
+   },
+   "idAnterior": "CU-K3-6.2"
+  },
+  {
+   "id": "CU-SRV-8.2",
+   "capacidad": "CAP-SRV-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Entregar al administrador un respaldo descargable de su cuenta con los datos del negocio",
+   "declarado": "parcial",
+   "limitantes": [
+    "Solo el administrador (el administrador legado «superadmin» no puede pedirlo).",
+    "Trae lo mismo que el respaldo de la noche: datos vivos de las colecciones, usuarios sin contraseña ni ficha de pago ni permisos, y capacidades; no trae archivos ni, hoy, la cuenta, la retención, el registro de la copia a Drive ni la exportación de calendario (DT-43).",
+    "Es solo de descarga: nada lo importa de vuelta desde la aplicación.",
+    "La lista de colecciones del respaldo es una copia de la del almacén y puede desfasarse (INC-84 y INC-101 ya pasaron)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SH-10.1",
+     "dato": "archivo de respaldo de la cuenta, con la fecha del día"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión",
+     "cuando": "pide el respaldo",
+     "entonces": "recibe un archivo con los datos vivos de su negocio, sus usuarios sin contraseñas y sus capacidades"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un operador o un colaborador",
+     "cuando": "pide el respaldo",
+     "entonces": "el servidor responde 403"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una petición sin sesión",
+     "cuando": "pide el respaldo",
+     "entonces": "el servidor responde 401"
+    }
+   ],
+   "origen": [
+    "DT-43",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-12",
+    "RT-14"
+   ],
+   "pendientes": [
+    "DT-43",
+    "INC-84",
+    "INC-101"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/export/index.php"
+    ],
+    "rutas": [
+     "GET /api/export"
+    ],
+    "colecciones": [
+     "propiedades",
+     "prop-tipos",
+     "flujos",
+     "flujo-categorias",
+     "prop-workflows",
+     "reservas",
+     "turnos",
+     "tickets",
+     "hk-config",
+     "guias",
+     "ubicaciones",
+     "ubic-tipos",
+     "inv-articulos",
+     "inv-depositos",
+     "inv-movimientos",
+     "inv-grupos",
+     "inv-estados",
+     "inv-sububicaciones",
+     "inv-pendientes",
+     "inv-proveedores"
+    ],
+    "notas": "_exportCuenta de la cuenta de la sesión; exige rol admin. Sin guion que descargue el respaldo."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/export/index.php; sin guion"
+   }
+  },
+  {
+   "id": "CU-SRV-8.3",
+   "capacidad": "CAP-SRV-8",
+   "actor": [
+    "admin",
+    "cola-arquitecto"
+   ],
+   "que": "Ensayar la restauración de un respaldo en una cuenta de pruebas nueva y temporal, sin tocar el negocio, y dejar constancia de conteos y huellas",
+   "declarado": "construido",
+   "limitantes": [
+    "El ensayo real del 16-oct falló con un error al crear la cuenta de ensayo (INC-137, abierto): el código sigue creándola sin su plan, que en producción es obligatorio; hasta que se corrija no se ha restaurado nunca un respaldo real.",
+    "Solo ensaya las colecciones vivas y las capacidades: los usuarios del respaldo se cuentan y se comparan, pero no se restauran; la constancia dice «igual» aunque el respaldo no traiga la ficha de pago ni los permisos.",
+    "No existe una restauración real sobre el negocio: solo este ensayo en una cuenta temporal.",
+    "Una sola copia de ensayo por cuenta a la vez; el respaldo no puede pasar de 12 MB; todo se hace como una sola operación que se deshace si algo no cuadra; la copia se borra al terminar y queda constancia del borrado.",
+    "Existe para la fábrica (antes del primer corte, MJ-6); es del Servidor y aquí se cita por RT-12."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-8.1",
+     "dato": "respaldo diario guardado de la cuenta, para ensayar su restauración"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un respaldo diario del negocio",
+     "cuando": "el administrador ensaya la restauración",
+     "entonces": "se crea una cuenta de prueba temporal con las colecciones del respaldo, se devuelve la constancia y el negocio queda intacto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "intenta ensayar",
+     "entonces": "el sistema se lo niega"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una fecha imposible, una ruta o una cuenta que no existe",
+     "cuando": "el administrador pide ensayar, ver la constancia o borrar",
+     "entonces": "el servidor responde 400 o 404 y no cambia nada"
+    }
+   ],
+   "origen": [
+    "DA-44",
+    "DT-42"
+   ],
+   "reglas": [
+    "RT-2",
+    "RT-12",
+    "RT-24"
+   ],
+   "pendientes": [
+    "INC-137",
+    "DT-42"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-42",
+     "casos": [
+      "a",
+      "b",
+      "c",
+      "d"
+     ],
+     "escenarios": [
+      "E2",
+      "E3"
+     ]
+    },
+    {
+     "guion": "herramientas/pw/restauracion-ensayo",
+     "casos": [
+      "a",
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/restauracion/index.php",
+     "api/lib/restauracion.php"
+    ],
+    "rutas": [
+     "POST /api/restauracion/ensayo",
+     "GET /api/restauracion/constancia",
+     "POST /api/restauracion/borrar"
+    ],
+    "colecciones": [
+     "cuenta",
+     "col_item",
+     "capacidad"
+    ],
+    "notas": "_resEnsayo copia colecciones (deleted=0) y capacidades a la cuenta zz-verif-restauracion-<origen>-<AAAA-MM-DD>-<HHMMSS>; compara conteos y huellas sha256 canónicas; 409 si ya hay una, 413 si pasa de 12 MB. restauracion.php:225 hace INSERT INTO cuenta (nombre) sin plan_id (INC-137); cuenta-pruebas.php:120 ya lo corrige (INC-156) y api/setup/index.php:36 tiene el mismo patrón pero no corre en producción. «borrar» repite la guarda de cuenta_id en SQL sobre 12 tablas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/lib/restauracion.php y api/restauracion/index.php; INC-137 sigue en el código"
+   },
+   "ambito": "fabrica",
+   "idAnterior": "CU-K3-6.3"
+  },
+  {
+   "id": "CU-SRV-9.1",
+   "capacidad": "CAP-SRV-9",
+   "actor": [
+    "admin",
+    "cola-arquitecto"
+   ],
+   "que": "Limpiar los movimientos de inventario de prueba con un ensayo previo y una confirmación, dándolos de baja y sin tocar nada real",
+   "declarado": "construido",
+   "limitantes": [
+    "Un movimiento se da de baja solo si su autor y todo lo que toca (artículo, zona, propiedad) son de prueba; los que tocan datos reales se quedan: 17 en el negocio hoy (DA-48).",
+    "Solo movimientos de inventario: los pendientes de inventario de prueba no se purgan (T-20).",
+    "Solo el administrador; el ensayo no toca nada y la purga pide la confirmación «zz-verif-»; repetirla no hace nada.",
+    "Un movimiento dado de baja sigue siendo inmutable."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-8.3",
+     "dato": "orden de ensayar y purgar los movimientos de prueba, con confirmación"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INV-8.4",
+     "dato": "identificadores de los movimientos dados de baja, para soltarlos de la copia local"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "movimientos de prueba en el negocio",
+     "cuando": "el administrador ensaya",
+     "entonces": "recibe la cuenta de lo que se purgaría sin tocar nada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo ensayo",
+     "cuando": "el administrador confirma con «zz-verif-»",
+     "entonces": "los movimientos quedan dados de baja con sus datos y un segundo ensayo da 0"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador",
+     "cuando": "pide el ensayo o la purga",
+     "entonces": "el servidor responde 403"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una purga sin confirmación, o un movimiento ya dado de baja",
+     "cuando": "se pide purgar o cambiarlo",
+     "entonces": "responde 400 sin confirmar y 409 al cambiar uno dado de baja"
+    }
+   ],
+   "origen": [
+    "DA-47",
+    "DA-48"
+   ],
+   "reglas": [
+    "RT-2",
+    "RT-3",
+    "RT-5",
+    "RT-24"
+   ],
+   "pendientes": [
+    "INC-146",
+    "INC-150",
+    "INC-151",
+    "T-20"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-146-purga",
+     "casos": [
+      "a",
+      "b",
+      "d",
+      "e"
+     ],
+     "escenarios": [
+      "E1",
+      "E2",
+      "E3",
+      "E4"
+     ]
+    },
+    {
+     "guion": "herramientas/pw/purga-movimientos",
+     "casos": [
+      "p"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/purga-prueba/index.php",
+     "api/lib/purga-prueba.php"
+    ],
+    "rutas": [
+     "GET /api/purga-prueba/movimientos",
+     "POST /api/purga-prueba/movimientos"
+    ],
+    "colecciones": [
+     "inv-movimientos"
+    ],
+    "notas": "Solo admin; GET ensayo, POST {confirmo: «zz-verif-»} con ids de 1 a 200; la regla doble [PURGA-PURO]; baja por tandas de 200 con deleted=1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/purga-prueba/index.php y api/lib/purga-prueba.php"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-SRV-9.2",
+   "capacidad": "CAP-SRV-9",
+   "actor": [
+    "admin",
+    "cola-arquitecto"
+   ],
+   "que": "Mantener la cuenta de pruebas «zz-verif-pruebas» aparte: crearla con el plan de la cuenta de origen, mover a ella los usuarios de prueba y devolverlos, en una sola operación que se deshace si algo no cuadra",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo mueve usuarios cuyo nombre empieza por «zz-verif-» y que son exactamente los pedidos; si no cuadra, se deshace todo.",
+    "Crea la cuenta con las capacidades de la de origen y mueve solo usuarios; no mueve los datos de prueba que ya están en el negocio (artículos, pendientes, turnos): quedan donde están (DA-47, T-20).",
+    "El ensayo lista solo nombres de prueba y sin correos; solo el administrador.",
+    "Cada movimiento queda registrado para poder revertirlo y deja una línea en el registro del servidor.",
+    "En producción solo se dispara desde el guion de la fábrica, por una guardia de la herramienta de pruebas, no del servidor."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-7.3",
+     "dato": "orden de mover los usuarios de prueba a la cuenta de pruebas, con confirmación y la lista de usuarios"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-7.4",
+     "dato": "movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "cuatro usuarios de prueba en el negocio",
+     "cuando": "el administrador ensaya y mueve",
+     "entonces": "los usuarios quedan en la cuenta de pruebas y el movimiento queda registrado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el último movimiento",
+     "cuando": "el administrador lo revierte",
+     "entonces": "los usuarios vuelven a su cuenta de origen"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador",
+     "cuando": "pide el ensayo",
+     "entonces": "el servidor responde 403"
+    }
+   ],
+   "origen": [
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-2",
+    "RT-24"
+   ],
+   "pendientes": [
+    "INC-156"
+   ],
+   "pruebas": [
+    {
+     "guion": "DA-47-cuenta-pruebas",
+     "casos": [
+      "a",
+      "b"
+     ],
+     "escenarios": [
+      "E1",
+      "E3"
+     ]
+    },
+    {
+     "guion": "herramientas/pw/cuenta-pruebas",
+     "casos": [
+      "m"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "herramientas/pw/cuenta-pruebas-revertir",
+     "casos": [
+      "r"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/cuenta-pruebas/index.php",
+     "api/lib/cuenta-pruebas.php"
+    ],
+    "rutas": [
+     "GET /api/cuenta-pruebas",
+     "POST /api/cuenta-pruebas"
+    ],
+    "colecciones": [
+     "cuenta",
+     "usuario",
+     "capacidad",
+     "cuenta_movimiento"
+    ],
+    "notas": "_cpMover en una transacción: crea la cuenta con el plan_id de la de origen (cuenta-pruebas.php:120, INC-156), copia capacidades, UPDATE usuario … AND nombre zz-verif- AND id IN (…) y exige que mueva exactamente esos; fila en cuenta_movimiento (migración 14). Es el mismo trabajo que CU-U-7.2 a 7.4 describen desde Identidad."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/cuenta-pruebas/index.php y api/lib/cuenta-pruebas.php"
+   },
+   "ambito": "fabrica"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-PC1-2",
+   "porque": "Puntos de control con QR y respaldo por foto (módulo PC1), entregado a Desarrollo y no construido; el servidor solo recibiría otro archivo por la subida existente (CU-SRV-4.1)."
+  },
+  {
+   "id": "REQ-INV2-7",
+   "porque": "Descartado y reemplazado por REQ-INV2-7-1 (sub-ubicaciones y foto al cierre), que es de Inventario; el servidor solo las entrega (CU-SRV-2.4)."
+  },
+  {
+   "id": "DT-36",
+   "porque": "Es de la carga del modelo (carga.php fija actualizado_en con la hora de MySQL): servicio del modelo (MOD). Pagada."
+  },
+  {
+   "id": "DT-37",
+   "porque": "Es del espejo de la cola del modelo (exportar reescribe los números sin el .0): servicio del modelo (MOD), no del servidor del STR. Pagada."
+  },
+  {
+   "id": "DT-47",
+   "porque": "Los guiones de REQ-INV2-4-2 citan REL-10 donde probarían REL-11 (cierre de turno, que el servidor cumple en el guardado de turnos): es del cubrimiento de los guiones, no de un caso de uso. Abierta."
+  },
+  {
+   "id": "INC-80",
+   "porque": "Lote que falló sin commit por el límite de sesión de la CLI del laptop: proceso de la fábrica. Cerrado."
+  },
+  {
+   "id": "INC-87",
+   "porque": "Cambio de equipo de ASUS a LENOVO (configuración del equipo de trabajo): entorno de la fábrica, no del producto. Cerrado."
+  },
+  {
+   "id": "INC-100",
+   "porque": "Es del log de la CLI de un lote (archivos declarados contra tocados): proceso de la fábrica, no una función del servidor ni del cliente. Cerrado."
+  },
+  {
+   "id": "INC-124",
+   "porque": "Un secrets.php del servicio del modelo se editó por error durante la migración M4: proceso de despliegue, no una función. Cerrado."
+  },
+  {
+   "id": "INC-149",
+   "porque": "Es de un guion de regresión (INC-131 b cargaba HK sin terminar en 45 s) y ni del cliente ni del servidor; ya figura sin atar en Housekeeping e Incidentes. Cerrado."
+  },
+  {
+   "id": "bolsa: Copia a Drive de guías, documentos y planos",
+   "porque": "Decisión pendiente que decide si CU-K3-2.8 entra al alcance; el servidor solo guarda esos archivos (CU-SRV-4.1)."
+  },
+  {
+   "id": "bolsa: Texto claro para una foto perdida en el teléfono",
+   "porque": "Es de la miniatura «!» de la cola de subida (Housekeeping y Portal); el servidor no interviene."
+  }
+ ]
+}

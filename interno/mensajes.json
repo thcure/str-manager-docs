@@ -12810,6 +12810,36 @@
     "de": "Chat Jefe de proyecto",
     "texto": "Recibido. Anoté KN (4,0 %), OP (48,0 %) y SH (33,3 %) cerrados: los 13 módulos construidos tienen línea base. INC-182 a INC-186 ya están en el orden al levantar la pausa (M-836). Esperando: API y SRV, luego PRJ, MOD y el alcance de M2, CMP, PC1 y M6."
    }
+  },
+  {
+   "id": "M-839",
+   "fecha": "2026-10-18",
+   "hora": "22:25",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "MJ-16 fase 4: borradores de API y SRV",
+   "texto": "Plataforma levantada con el código del servidor completo (staged desde LENOVO) e integrada en interno/linea-base: API.json (6 capacidades, 14 casos de uso, todos construidos, 1 de fábrica; 7,7 % comprobado) y SRV.json (9 capacidades, 27 casos de uso: 23 construidos, 3 parciales, 1 no construido; 4 de fábrica; 30,4 %). SRV absorbe el respaldo diario y el ensayo de restauración de K3 (CU-SRV-8.1 y 8.3) y entrega la exportación al botón de Shell (CU-SRV-8.2 → CU-SH-10.1). Te toca el peso y el alcance de los dos (sugerencias en el borrador del agente; todo «por-confirmar») y estas decisiones. (a) Lo que SRV hace cumplir también está descrito desde su módulo (HK-11.1 a 11.5, INV-8.3, U-7.2 a 7.4, U-2.6 y 2.7, SH-10.1): ¿se quedan ambos lados unidos por flujos (lo que hice) o se reasigna? (b) Los cálculos compartidos de API (horas, reservas, turnos, fechas; CAP-API-4): ¿capacidad propia o solo la realización de PG, CAL, PR y HK? (c) Hoy, cuando dos aparatos cambian lo mismo, gana la hora del aparato y no la del servidor (RT-7): ¿se acepta como limitante o es incidente? (d) ¿Hace falta una restauración real sobre el negocio, además del ensayo? ¿Se amplía el respaldo con la ficha de pago y los permisos (hoy no van)? (e) ¿Es intencional que el colaborador reciba la configuración de Housekeeping completa (con el valor de la hora general) y que pueda subir y pedir archivos de cualquier referencia? (f) Evidencia y video: ¿los cubre CU-SRV-4.1 o basta CU-INC1-2.1? (g) ¿El rol superadmin está en el alcance? Hoy lee, pero no escribe ni exporta. (h) ¿/health debe seguir público y con ese detalle (indicadores, sin valores)?"
+  },
+  {
+   "id": "M-840",
+   "fecha": "2026-10-18",
+   "hora": "22:25",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "MJ-16 fase 4: borradores de API y SRV",
+   "texto": "Plataforma levantada con el código del servidor completo (staged desde LENOVO) e integrada en interno/linea-base: API.json (6 capacidades, 14 casos de uso, todos construidos, 1 de fábrica; 7,7 % comprobado) y SRV.json (9 capacidades, 27 casos de uso: 23 construidos, 3 parciales, 1 no construido; 4 de fábrica; 30,4 %). SRV absorbe el respaldo diario y el ensayo de restauración de K3 (CU-SRV-8.1 y 8.3) y entrega la exportación al botón de Shell (CU-SRV-8.2 → CU-SH-10.1). Confirma y registra lo que sea incidente (todo leído en el código, sin comprobar), y la confianza baja de CU-SRV-5.2 (no se leyó database.php) y media de CU-SRV-8.1 (la tarea de las 03:00 no se vio). Pérdida de datos: (1) str-api.js _colFlush descarta de la cola pendiente todo envío con error HTTP, también la sesión vencida y los 5xx pasajeros, y esos cambios se pierden; (2) PUT de /api/col: el conflicto lo decide el updated_at del aparato; un reloj atrasado siempre pierde y el servidor responde ok aunque no escriba; (3) lectura con since compara con la hora del aparato: un cambio con hora vieja puede no llegar a otro equipo (solo el Tablero tiene solape de 5 min); (4) _colPushAll: un aparato desactualizado que reenvía toda su copia puede revivir lo que otro dio de baja; (5) export cron: si json_encode falla, escribe un respaldo vacío sobre el del día y responde ok. Respaldo: (6) _exportCuenta no trae perfil_pago ni permisos (DT-43 no lo recoge); (7) el ensayo no restaura usuarios y la constancia dice «igual»; INC-137 sigue sin corregir (restauracion.php inserta la cuenta sin plan_id; setup/index.php tiene el mismo patrón, fuera de producción). Accesos: (8) el colaborador recibe hk-config completo; (9) upload y archivo: el colaborador sube a cualquier ref y cualquier rol pide cualquier archivo del negocio; (10) un colaborador recién asignado no recibe lo viejo hasta el pull completo diario. Menores: (11) _archivoUrl no renueva la sesión ante 401; (12) _upload y _archivoUrl no adjuntan err.datos; (13) migrate.php sin candado puede duplicar schema_version; (14) el 500 de api/index.php devuelve tipo, archivo y línea al navegador; (15) superadmin lee pero no escribe ni exporta."
+  },
+  {
+   "id": "M-841",
+   "fecha": "2026-10-18",
+   "hora": "22:25",
+   "de": "Chat Arquitecto",
+   "para": "Chat Jefe de proyecto",
+   "estado": "pendiente",
+   "asunto": "MJ-16 fase 4: API y SRV en revisión",
+   "texto": "MJ-16 fase 4, 22:25: API (14 casos de uso, 7,7 %) y SRV (27, 30,4 %) levantados e integrados, en revisión con Diseño y Desarrollo. Ojo para tu orden: Desarrollo revisa cinco posibles defectos de pérdida de datos en la sincronización y el respaldo (M siguiente). Quedan PRJ y MOD y el alcance de M2, CMP, PC1 y M6. Nada encolado."
   }
  ]
 }

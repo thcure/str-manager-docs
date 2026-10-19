@@ -599,6 +599,10 @@
     {
      "a": "CU-KN-6.1",
      "dato": "rol del usuario con sesión"
+    },
+    {
+     "a": "CU-API-5.1",
+     "dato": "rol y permisos de la persona con sesión"
     }
    ],
    "escenarios": [
@@ -785,6 +789,10 @@
     {
      "a": "CU-PG-5.2",
      "dato": "permisos del operador definidos, con los de adelantos y de pagos"
+    },
+    {
+     "a": "CU-SRV-3.3",
+     "dato": "permisos «Tarifas y horas» y «Editar inventario» del operador"
     }
    ],
    "escenarios": [
@@ -853,7 +861,12 @@
     "Es solo la cara de la pantalla: quien decide es el sistema (CU-U-2.6).",
     "El botón «Editar» de Equipo sigue a la vista sin el permiso (CU-U-1.4, INC-110)."
    ],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-API-5.1",
+     "dato": "si la persona puede la acción, o si todavía no se sabe"
+    }
+   ],
    "salidas": [],
    "escenarios": [
     {
@@ -1158,7 +1171,12 @@
     "El sistema lo exige para los valores del negocio y para cada turno y apoyo, pero no para las horas por turno de una propiedad: un operador sin el permiso puede cambiarlas y con ellas lo que se paga (INC-157, abierto, crítico, P2).",
     "La ficha de la propiedad tampoco deshabilita el campo de horas por turno para ese operador."
    ],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-SRV-3.3",
+     "dato": "cambio de horas o tarifas rechazado o ignorado, para el operador sin el permiso"
+    }
+   ],
    "salidas": [],
    "escenarios": [
     {
@@ -1780,11 +1798,20 @@
     "La renovación pasa por la misma comprobación de la entrada: si la cuenta se desactivó o dejó de existir, ya no se renueva (así surte efecto una baja, hasta 24 horas después).",
     "La sesión dura 24 h sin revocación: una baja o un cambio de rol tarda hasta 24 h (DT-49)."
    ],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-API-1.1",
+     "dato": "pedido rechazado por sesión vencida, que pide renovarla"
+    }
+   ],
    "salidas": [
     {
      "a": "CU-U-3.7",
      "dato": "renovación fallida: la sesión no se pudo recuperar"
+    },
+    {
+     "a": "CU-API-1.1",
+     "dato": "sesión renovada, con la que se repite el pedido"
     }
    ],
    "escenarios": [
@@ -1868,6 +1895,10 @@
     {
      "de": "CU-U-3.6",
      "dato": "renovación fallida: la sesión no se pudo recuperar"
+    },
+    {
+     "de": "CU-API-1.1",
+     "dato": "pedido rechazado otra vez tras renovar, o sin renovación posible, que obliga a avisar"
     }
    ],
    "salidas": [
@@ -3145,6 +3176,10 @@
     {
      "a": "CU-U-7.5",
      "dato": "usuarios movidos a la cuenta de pruebas, que deben volver a entrar"
+    },
+    {
+     "a": "CU-SRV-9.2",
+     "dato": "orden de mover los usuarios de prueba a la cuenta de pruebas, con confirmación y la lista de usuarios"
     }
    ],
    "escenarios": [
@@ -3223,6 +3258,10 @@
    "entradas": [
     {
      "de": "CU-U-7.3",
+     "dato": "movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo"
+    },
+    {
+     "de": "CU-SRV-9.2",
      "dato": "movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo"
     }
    ],

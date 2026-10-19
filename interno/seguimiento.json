@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 18:32",
+ "actualizadoEn": "2026-10-18 19:28",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -25,7 +25,8 @@
    "fecha": "2026-09-25",
    "severidad": "medio",
    "causaRaiz": "construcción",
-   "debioDetectarse": "tests"
+   "debioDetectarse": "tests",
+   "estado": "cerrado"
   },
   {
    "id": "INC-75",
@@ -36,7 +37,8 @@
    "fecha": "2026-09-25",
    "severidad": "bajo",
    "causaRaiz": "construcción",
-   "debioDetectarse": "tests"
+   "debioDetectarse": "tests",
+   "estado": "cerrado"
   },
   {
    "id": "INC-77",
@@ -47,7 +49,8 @@
    "severidad": "bajo",
    "titulo": "Borrar un flujo que es flujo base de una propiedad no avisaba (hallado en lote 23); fix 26 (8bdabd4) verificado",
    "causaRaiz": "definición",
-   "debioDetectarse": "REQ"
+   "debioDetectarse": "REQ",
+   "estado": "cerrado"
   },
   {
    "id": "INC-78",
@@ -58,7 +61,8 @@
    "severidad": "medio",
    "titulo": "Caché vieja del STR en otro navegador resubía datos de prueba al servidor (laptop de viaje, f-test-001); fix 29 (ac865c1): el servidor manda si conoce la colección y las migraciones al leer se suben tras el primer pull; verificado en producción",
    "causaRaiz": "arquitectura",
-   "debioDetectarse": "revisión previa"
+   "debioDetectarse": "revisión previa",
+   "estado": "cerrado"
   },
   {
    "id": "INC-79",
@@ -71,7 +75,8 @@
    "pendiente": "",
    "observacion": "Fix lote 32 (1dcb0e5, p5c32): STRApi.fechas.ymdLocal en HK y en el respaldo del shell; guardia en tests/fecha-local.test.js. Verificado de noche real.",
    "causaRaiz": "construcción",
-   "debioDetectarse": "tests"
+   "debioDetectarse": "tests",
+   "estado": "cerrado"
   },
   {
    "id": "INC-80",
@@ -83,7 +88,8 @@
    "titulo": "Lote 31: primer intento 21:56 falló sin commit porque la CLI del laptop agotó su límite de sesión ('resets 10:50pm'). Causa: cupo compartido con los chats. Carlos reencoló el mismo archivo y salió OK a las 23:16.",
    "observacion": "Lección: si un lote falla sin commit, leer el log antes de tocar la instrucción; un fallo por cupo se reencola sin cambios. Además, la tarea 'STR cola CLI' no arrancaba por la condición 'No iniciar en modo Batería' (Carlos la quitó y dejó el laptop sin suspensión); confirmar que el próximo lote arranca solo. Confirmado el 28-sep 23:30: el lote 32 arrancó solo 19 s después de encolado.",
    "causaRaiz": "entorno",
-   "debioDetectarse": "solo en uso"
+   "debioDetectarse": "solo en uso",
+   "estado": "cerrado"
   },
   {
    "id": "INC-81",
@@ -791,7 +797,8 @@
    "causa": "Por confirmar en el código: el aviso de la cola de subida queda fijo abajo, a todo lo ancho, sobre el panel; el clic al botón de cierre no llega (Timeout). Se disparó porque una foto de la entrega no subió (en g0: fotos 200/200/200/—/200/200), probablemente por un corte de conexión.",
    "nota": "Origen: L-122-veredicto-2 (11:22), regresión REQ-INV2-3-4-hk g; h y j en cascada (pendiente de J2 no creado). Captura log\\capturas\\L-122\\REQ-INV2-3-4-hk-g-error.png. Pide lote fix tras K3-2. · 14:45 L-127: arreglo verificado (a–f); falta aceptación formal por g (guion) e INC-133 en la regresión. · cerrado con L-127 aceptado. Pendiente pedido de Diseño: anotarlo como corregido en REQ-U6.3 (es de Diseño).",
    "causaRaiz": "construcción",
-   "debioDetectarse": "verificación"
+   "debioDetectarse": "verificación",
+   "estado": "cerrado"
   },
   {
    "id": "INC-133",
@@ -804,7 +811,8 @@
    "causa": "str-cola-subida.js: agregar() pone el ítem en _items al instante (L255) y guarda el blob después (L258); _candidatos() (L133) no excluye los ítems de _sinPersistir; si _ciclo (L204) lo toma, _subirUno (L172-173) llama a _guardar sin blob, que escribe blob=null (L82) sobre el que guardaba agregar; agregar luego borra _blobs (L260) y _leerBlob devuelve null: «el archivo ya no está en el teléfono» (L177), sin fetch. Los reintentos fallan igual. Evidencia: L-126-pruebas regresion[49]: 5 de 6 POST /api/upload, hueco de 30 s = espera del guion; la bitácora de pw no ve el POST de B1.",
    "nota": "Origen: L-117-veredicto-3 (12:10). El juez lo cierra si la siguiente corrida da verde. · 14:15 L-117-veredicto-4: REQ-INV2-4-2 c en verde; cerrado (no se repitió). · 14:24 REABIERTO: se repitió en L-126-veredicto-2 (REQ-INV2-4-2 c, colab2, 1 de 5 fotos de «Foto al cierre» de la entrega sin respuesta de /api/upload). Dos de cuatro corridas: intermitente, no de entorno. · 14:32 diagnóstico (subagente, solo lectura): causa en la app, no en el arnés ni el servidor. Afecta a usuarios reales (pierden la foto). Arreglo propuesto: excluir _sinPersistir en _candidatos, re-procesar al terminar si llegó algo durante _procesando, y _guardar no escribe null si el blob sigue en memoria; prueba unitaria de la carrera. Lote fix pedido a Diseño. · 14:34 lectura del Arquitecto (M-503): en su cronología la foto sí subió +31 s después (hueco de 31 s entre la 3.ª y la 4.ª; servidor en 150–500 ms): la cola no toma la foto al acabar la anterior y la retoma con un disparador posterior. Mismo arreglo (excluir _sinPersistir + re-procesar al terminar + _guardar no escribe null). El lote fix añade al guion REQ-INV2-4-2 c el estado de la cola (listar: estado, intentos, ultimoError) cuando falte una foto. · 15:16 cerrado con L-128 aceptado (6 subidas seguidas, sin hueco).",
    "causaRaiz": "construcción",
-   "debioDetectarse": "tests"
+   "debioDetectarse": "tests",
+   "estado": "cerrado"
   },
   {
    "id": "INC-134",
@@ -1039,6 +1047,32 @@
    "causaRaiz": "integración",
    "debioDetectarse": "revisión previa",
    "nota": "15:03 Mismo defecto que INC-137 (restauracion.php:225, M-575: plan_id NOT NULL en la cuenta de producción). Las pruebas usan el esquema de migrate.php (sin plan_id) y por eso C5 pasó. Efecto: el POST mover del Arquitecto daría 500 y la transacción se revierte (nada cambia). Arreglo: L-153, la cuenta nueva lleva el plan_id de la cuenta de origen (como L-137), con N1 sobre una tabla cuenta como la de producción. Bloquea el movimiento de usuarios de DA-47. · 15:05 Diseño (M-742): P3 de fábrica, primero por la regla 4 (destraba DA-47); L-153 cabe en DA-47 sin nuevo cruce si solo toma el plan_id de origen. Borrador L-153 listo; revisor previo en curso. · 15:32 L-153 aceptado. Cerrado (la prueba real es el movimiento del Arquitecto)."
+  },
+  {
+   "id": "INC-157",
+   "tipo": "INC",
+   "modulo": "Propiedades",
+   "fecha": "2026-10-18",
+   "titulo": "Un operador sin el permiso dinero.tarifas puede cambiar las horas por turno de una propiedad (horasTurno) y con ellas las horas que se pagan: el PUT de propiedades no lo exige, a diferencia de hk-config (turnoHorasPorDefecto) y turnos (REQ-U7)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 PR (M-803, CU-PR-3.4)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "19:28 api/col/index.php: el control de REQ-U7 está en hk-config (≈L1587, turnoHorasPorDefecto/apoyoHorasPorDefecto/valorHoraGeneral) y en turnos (_colTurnoCambiaDinero, ≈L1825), pero no en propiedades; str-propiedades.html (#edit-horas-turno, ≈L1332 y L1575) tampoco lo pide. Efecto: los turnos sin horas propias se pagan con prop.horasTurno (STRApi _horasDeTurno: turno › propiedad › negocio › 7). Arreglo posible: en el PUT de propiedades, operador sin dinero.tarifas no cambia horasTurno (403 como en hk-config) y la ficha deshabilita el campo. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-158",
+   "tipo": "INC",
+   "modulo": "Propiedades",
+   "fecha": "2026-10-18",
+   "titulo": "El colaborador recibe todas las ubicaciones comunes del negocio (nombre, dirección, barrio e indicaciones de llegada), también las de propiedades donde no trabaja: el filtro de lectura de ubicaciones solo actúa si la fila trae propId, y las ubicaciones no lo traen",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 PR (M-803, CU-PR-8.3)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "19:28 api/col/index.php, _colFiltrarLecturaColaborador: case guias/ubicaciones/prop-workflows descarta solo si $d->propId existe y no es de sus propiedades; saveEdif (str-propiedades.html ≈L2477) guarda la ubicación sin propId (la relación va en la propiedad: ubicacionId/edificioId). Las propiedades sí van acotadas (lista blanca y contexto de INC-120). RT-14. Arreglo posible: para ubicaciones, dejar solo las que sean ubicacionId/edificioId de las propiedades que ve (el mismo $misProps). Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [

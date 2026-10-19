@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 21:56",
+ "actualizadoEn": "2026-10-18 22:29",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1500,6 +1500,136 @@
    "nota": "21:54 str-app-shell.html openModule ≈L1203–1214: si el panel panel-mod-<clave> existe, no toca el src del iframe. Arreglo: si el iframe no está en su url, volver a cargarla. Clase y prioridad: Diseño (LM-48). · 21:56 Diseño (M-835): normal, P3. Espera que se levante la pausa.",
    "categoria": "normal",
    "prioridad": "P3"
+  },
+  {
+   "id": "INC-187",
+   "tipo": "INC",
+   "modulo": "Plataforma (API)",
+   "fecha": "2026-10-18",
+   "titulo": "La subida de cambios descarta lo que el servidor rechaza con cualquier error HTTP, también 401 (sesión vencida) y 5xx pasajeros (MySQL 2002, INC-128): _colPush no lo encola (solo encola fallos de red) y _colFlush lo quita de la cola pendiente; esos cambios se pierden sin aviso",
+   "estado": "abierto",
+   "severidad": "alto",
+   "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 str-api.js _colPush ≈L414–437 («if (err && err.isHttpError) throw err», el llamador suele hacer console.warn) y _colFlush ≈L448–470 («El servidor lo rechazó (400/403/etc)… _colRemoveFromPending»). Arreglo: distinguir 4xx definitivos (400/403/409/422) de 401 y 5xx (408/429/5xx): estos últimos se encolan y se reintentan; avisar al usuario cuando se descarta algo. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-188",
+   "tipo": "INC",
+   "modulo": "Plataforma (API)",
+   "fecha": "2026-10-18",
+   "titulo": "El updated_at de cada ítem lo pone el reloj del aparato: en el PUT de /api/col un aparato atrasado pierde siempre la última-escritura-gana y el servidor responde ok (cuenta upserted aunque no escriba); y el pull con since compara ese updated_at con el cursor del servidor, así que un cambio escrito con hora vieja puede no llegar nunca a los otros equipos",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
+   "causaRaiz": "arquitectura",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 str-api.js _colPush ≈L418 (updated_at: new Date().toISOString()); api/col/index.php ≈L1740 (_colNormalizeDatetime($it->updated_at)), upsert ≈L1534–1540 (IF(VALUES(updated_at) >= updated_at …)) y $upserted++ ≈L1925 sin mirar rowCount; api/lib/col-lectura.php since → updated_at > cursor (server_time). Solo el Tablero tiene solape. RT-7. Arreglo de fondo: que el servidor selle updated_at con su hora al escribir (y use la del aparato solo para decidir conflictos, o versión por ítem). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-189",
+   "tipo": "INC",
+   "modulo": "Plataforma (API)",
+   "fecha": "2026-10-18",
+   "titulo": "_colPushAll reenvía la copia local completa con updated_at de ahora y el upsert pone deleted = 0: en las siembras de catálogos (prop-tipos y ubic-tipos con el servidor sin activos) revive los ítems que otro equipo dio de baja",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 str-api.js _colPushAll ≈L440; str-propiedades.html ≈L3533–3540 y ≈L3568–3574 (Array vacío = todo borrado → se resiembra con la semilla local, cuyos ids tp-1…/edificio… pueden ser los borrados). ubicaciones solo siembra con res.empty (sin ninguna fila), así que ahí no pasa. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-190",
+   "tipo": "INC",
+   "modulo": "Copia a Drive y corte",
+   "fecha": "2026-10-18",
+   "titulo": "El respaldo diario (POST /api/export modo cron) escribe un archivo vacío sobre el del día y responde ok si json_encode falla (por ejemplo UTF-8 inválido en un dato), y con 30 días de rotación un fallo repetido deja solo respaldos vacíos",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 api/export/index.php ≈L86–96: $json = json_encode(...) sin comprobar false; file_put_contents($archivo, false) escribe 0 bytes; $resultados[$cuentaId] = [ok => true]. Arreglo: JSON_THROW_ON_ERROR (o comprobar false), escribir a un temporal y renombrar, y no rotar si el del día falló. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-191",
+   "tipo": "INC",
+   "modulo": "Copia a Drive y corte",
+   "fecha": "2026-10-18",
+   "titulo": "El respaldo (/api/export) no trae de los usuarios la ficha de pago (perfil_pago: tarifas, política de horas, saldo desde) ni los permisos: restaurar desde él perdería el dinero y los permisos del equipo",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 api/export/index.php _exportCuenta ≈L38: SELECT id, nombre, email, rol, telefono, activo, capacidades, empresa, color, estado, es_cuenta, firebase_uid, created_at (sin perfil_pago ni permisos). DT-43 solo pide cuenta, cuenta_retencion, drive_copia e ical_export. El ensayo de restauración no inserta usuarios (por diseño, para no abrir sesión en la copia), así que tampoco lo detecta. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-192",
+   "tipo": "INC",
+   "modulo": "Plataforma (servidor)",
+   "fecha": "2026-10-18",
+   "titulo": "El colaborador recibe hk-config completo (incluido el valor hora general del negocio y las horas por defecto): la lectura del colaborador no tiene filtro para hk-config",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 api/col/index.php _colFiltrarLecturaColaborador: no hay case hk-config (sí para turnos, reservas, propiedades, tickets, inv-*). Hay que ver qué campos usa el portal (tolerancias, horas por defecto para «Mi dinero») y dar lista blanca; decide Diseño si el valor hora general puede verlo. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-193",
+   "tipo": "INC",
+   "modulo": "Plataforma (servidor)",
+   "fecha": "2026-10-18",
+   "titulo": "Archivos: un colaborador sube fotos, evidencias o videos a cualquier ref (no se comprueba que el turno o el incidente sean suyos) y cualquier rol del negocio pide cualquier archivo por su ruta (/api/archivo solo compara la cuenta)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 api/upload/index.php ≈L39–56 (ref libre con patrón; roles admin, operador y colaborador para foto/evidencia/video); api/archivo/index.php ≈L27–50 (solo cuenta === sesión). Los nombres son uuid de 32 hex (no se adivinan), pero las rutas viajan en turnos y tickets. RT-14. Arreglo: en upload, ref debe ser un turno o ticket que el colaborador ve; en archivo, mismo contexto de lectura del colaborador (INC-120). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-194",
+   "tipo": "INC",
+   "modulo": "Plataforma (API)",
+   "fecha": "2026-10-18",
+   "titulo": "Un colaborador recién asignado a una propiedad no recibe lo que ya existía de ella (turnos, zonas, reservas) hasta el siguiente pull completo: los pulls con since solo traen lo cambiado después del cursor",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
+   "causaRaiz": "arquitectura",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 api/lib/col-lectura.php (since → updated_at > cursor) y el filtro por contexto del colaborador (INC-120): al ganar acceso, las filas viejas no cambian y no entran en el since. Arreglo posible: el servidor marca un «reinicio de cursor» del colaborador al cambiar su contexto, o el cliente pide pull completo al detectar propiedades nuevas. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-195",
+   "tipo": "INC",
+   "modulo": "Plataforma (API)",
+   "fecha": "2026-10-18",
+   "titulo": "Detalles de str-api.js: _archivoUrl no renueva la sesión ante 401 (request y descargar sí) y _upload y _archivoUrl no adjuntan err.datos con el cuerpo del error (el 410 del corte no llega a la página)",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 str-api.js _archivoUrl ≈L160–175 (throw _httpError sin reintento de 401 ni datos); request ≈L110–123 sí reintenta y adjunta err.datos (L-125). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-196",
+   "tipo": "INC",
+   "modulo": "Plataforma (servidor)",
+   "fecha": "2026-10-18",
+   "titulo": "El 500 genérico de api/index.php devuelve al navegador la clase de la excepción, el archivo y la línea",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "22:29 api/index.php _strFatalJson ≈L25–38: {error, tipo, archivo: basename, linea}. El mensaje no sale (bien), pero tipo, archivo y línea dan pistas del código. Arreglo: solo error e id de registro; el detalle queda en api/logs/error.log. Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -1728,6 +1858,14 @@
    "titulo": "Código muerto en str-flujos.html: fetchFlujos (llama a /api/flujos, que no existe), toggleCrit, _buildUbOptions, timeToMin, SEED_CATS (vacío) y el evento str-flujos-updated que nadie escucha",
    "estado": "abierta",
    "nota": "20:36 Visto en MJ-16 FL (M-816). fetchFlujos ≈L2994, toggleCrit ≈L2440, _buildUbOptions ≈L1784, timeToMin ≈L2769, SEED_CATS ≈L608, dispatchEvent(str-flujos-updated) ≈L996 sin addEventListener en ninguna página. Retirar en un lote de limpieza (con prueba de que nada los llama)."
+  },
+  {
+   "id": "DT-51",
+   "tipo": "DT",
+   "fecha": "2026-10-18",
+   "titulo": "Migrate::run sin candado: dos peticiones simultáneas tras subir una versión pueden ejecutar dos veces el cuerpo de la misma migración (la segunda falla al insertar schema_version por la clave primaria y devuelve 500)",
+   "estado": "abierta",
+   "nota": "22:29 api/config/migrate.php: lee schema_version, ejecuta y luego inserta (version INT PRIMARY KEY, así que no se duplica la fila). Riesgo: un ALTER no idempotente corre dos veces. DT-39 (correr Migrate solo si cambia la versión) lo reduce. Visto en MJ-16 SRV (M-840)."
   }
  ],
  "cambios": [

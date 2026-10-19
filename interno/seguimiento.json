@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 21:07",
+ "actualizadoEn": "2026-10-18 21:27",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1308,6 +1308,97 @@
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
    "nota": "21:07 str-calendario.html ≈L2777–2778 (llegadaConfirmada/salidaConfirmada = {hora, fuente: operador, at: new Date()} en cada guardado), ≈L2744–2746 (voseo), panel de bloqueo con stat COP; api/col/index.php: los deletedIds de reservas solo los rechaza para el colaborador. La hora de cancelación ya usa la del servidor con conexión (canceladaEn «__server__», ≈L2943); solo sin conexión usa la del aparato. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-175",
+   "tipo": "INC",
+   "modulo": "Copia a Drive y corte",
+   "fecha": "2026-10-18",
+   "titulo": "Corte con la conexión de Drive revocada o sin claves de Google: el cron trata al negocio como «sin Drive» y el día 0 (23:00) borra todos los archivos hasta el corte como «sin copia», incluso los ya copiados y confirmados antes (conservan drive_id pero quedan con_copia = 0), y la app los muestra «Eliminado en el corte» sin copia",
+   "estado": "abierto",
+   "severidad": "alto",
+   "origen": "Desarrollo, revisión técnica de MJ-16 K3 (M-825)",
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 api/lib/corte.php _ckCron: $tieneDrive = _dcCuentasACopiar (estado activa|error con refresh) && _driveConfigurado(); _ckDecidir devuelve «sin-copia» si !$tieneDrive, sin mirar el día ni el estado «copiado». Un negocio que tuvo Drive y lo perdió (revocado, claves borradas en secrets.php) pierde sin aviso de 3 días lo no copiado y marca como sin copia lo que sí está en Drive. Necesita regla de producto: ¿negarse a correr el corte (o aplazar) si la conexión estuvo activa y ahora está revocada o sin claves, y para lo copiado confiar en el drive_id registrado? Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-176",
+   "tipo": "INC",
+   "modulo": "Copia a Drive y corte",
+   "fecha": "2026-10-18",
+   "titulo": "Si Google no responde al confirmar un archivo copiado (error de red o token que no renueva), el corte lo trata como «no está en Drive»: en los días 0 a 2 reCopiar le borra drive_id y enlace y lo vuelve a la cola, y el día 3 se borra «sin copia» aunque esté en Drive",
+   "estado": "abierto",
+   "severidad": "alto",
+   "origen": "Desarrollo, revisión técnica de MJ-16 K3 (M-825)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 api/lib/corte.php: _driveArchivoInfo devuelve null para cualquier estado ≠ 200/404 y _ckRedGoogle devuelve null si no renueva; en _ckCorteCuenta $conf = false en los dos casos, igual que un 404. _ckDecidir → aplazar → $repo[\"reCopiar\"] (drive_id = NULL, enlace = NULL, copiado_en = NULL). Arreglo: distinguir «no confirmado por error» (aplazar sin tocar drive_id; no borrar mientras no haya respuesta) de «no está» (404 o tamaño/md5 distintos). Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-177",
+   "tipo": "INC",
+   "modulo": "Copia a Drive y corte",
+   "fecha": "2026-10-18",
+   "titulo": "El aviso fijo del corte trata una conexión de Drive «con error» como «sin Drive» (dice que se eliminarán las fotos y pide conectar) aunque la copia y el corte la siguen tratando como conectada",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 K3 (M-825)",
+   "causaRaiz": "integración",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 api/drive/index.php ≈L161: conectado = estado === «activa»; api/lib/corte.php _ckAvisos y _dcCuentasACopiar aceptan «activa» y «error». str-app-shell.html _corteAvisoDebeVerse/_corteAvisoTexto usan e.conectado. Efecto: con «error» el admin ve el aviso equivocado y no ve los pendientes al corte. Arreglo: un solo criterio (activa|error con refresh) y un texto propio para «con error». Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-178",
+   "tipo": "INC",
+   "modulo": "Incidentes",
+   "fecha": "2026-10-18",
+   "titulo": "Un incidente escalado no tiene salida: HK solo ofrece Resolver y Escalar con estado «abierto» y nada escribe «cerrado»; queda activo para el Tablero, para el colaborador (contexto de lectura de INC-120) y para eliminar el turno. Además escaladoEn solo se lee (expediente) y nadie lo escribe, ni se guarda quién resolvió ni quién escaló",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 INC1 (M-825)",
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 str-m1-housekeeping.html _escalarTicket ≈L6140 (solo estado = escalado), acciones solo si estado === abierto ≈L6795; _doResolverTicket ≈L6127 (estado, resueltoEn, nota; sin resueltoPor). api/col/index.php ≈L1208 (_colTicketAbierto: abierto|escalado), api/tablero (abierto, escalado), api/expediente ≈L293 (lee escaladoEn). Necesita regla de producto: quién y cómo cierra un escalado. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-179",
+   "tipo": "INC",
+   "modulo": "Incidentes",
+   "fecha": "2026-10-18",
+   "titulo": "El PUT de tickets acepta bajas (deleted) de admin u operador: un incidente se puede borrar (lápida) con su evidencia y su expediente, contra RT-5 y RT-10",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 INC1 (M-825)",
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 api/col/index.php: para tickets los deletedIds solo se rechazan al colaborador (≈L1515); $delStmt marca deleted = 1. Las evidencias se anulan con anuladaEn/anuladaPor (_colMergeEvidencias), pero el ticket entero sí se da de baja. ¿Intencional? Si no: rechazar bajas de tickets para todos los roles (como inv-movimientos e inv-pendientes). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-180",
+   "tipo": "INC",
+   "modulo": "Incidentes",
+   "fecha": "2026-10-18",
+   "titulo": "La evidencia de un incidente guarda lo que manda el teléfono (huella, recibidoEn, EXIF, url) y el servidor no lo contrasta al unirla: solo el expediente recalcula la huella del archivo y avisa si difiere",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 INC1 (M-825)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 api/col/index.php _colMergeEvidencias ≈L425 (solo une y sella anulaciones con la hora del servidor); api/upload calcula SHA-256 y EXIF y los devuelve, pero el ticket guarda la copia que reenvía el teléfono. api/expediente ≈L229/L267 recalcula y marca «DIFIERE». Arreglo posible: al unir, tomar huella y EXIF del registro del servidor (o validarlos) y sellar recibidoEn con la hora del servidor (RT-7). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-181",
+   "tipo": "INC",
+   "modulo": "Pagos",
+   "fecha": "2026-10-18",
+   "titulo": "La política de horas (banco o reales) y la modalidad de pago se leen de la ficha de pago de hoy, no de la vigente en la fecha del turno: cambiarlas recalcula el valor y el saldo de todos los turnos pasados (la tarifa sí va por fecha)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 PG (M-825)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:27 str-api.js _horasDeTurno ≈L877–878 (perfilPago.politicaHoras y perfilPago.modalidad actuales) frente a _tarifaVigente(perfilPago, fecha) ≈L601. Arreglo posible: guardar política y modalidad con fecha de vigencia (como las tarifas) y leer la vigente en la fecha del turno. Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [

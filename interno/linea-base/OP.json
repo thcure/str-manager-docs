@@ -1,0 +1,2111 @@
+{
+ "modulo": "OP",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-tablero.html (526 líneas, leído completo: funciones puras de la página, cifras, cuadro «Turnos de hoy», alertas, «Sin turno hoy», lectura por minuto, aviso de falla)",
+  "str-avance.js (571 líneas: bloque [AV-puras] leído completo; las copias de Housekeeping, Flujos y [HK-turnos] por referencia)",
+  "api/tablero/index.php (109 líneas, leído completo: rol permitido, ventanas, proyección de reservas y turnos, since con margen de 5 minutos) y, solo para ver cómo se asigna el updated_at de un turno, api/col/index.php. api/lib/col-lectura.php no venía en la copia del código: la consulta común se dedujo de sus llamadores",
+  "str-app-shell.html (entrada de menú «Tablero» con data-inicio y elección de la página de inicio) y str-m1-housekeeping.html (uso de str-avance.js y alerta «no iniciado»), por referencia",
+  "docs/claude/operacion.md, servidor-php.md y shell-y-api.md (mapa técnico del módulo)",
+  "claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md (REQ-OP-1: 6 decisiones de Carlos y 12 criterios) y lectura-op1-tablero-2026-10.md (lectura de Desarrollo, 17-oct)",
+  "op-fuentes.json: módulo del mapa, 9 REQ (6 REQ-TB de Seg. Proyecto, REQ-SH-2, REQ-FL-12 y REQ-OP-1), 3 DA, 8 ítems de la bolsa, 8 INC, REL-33 y REL-34, actores y reglas",
+  "op-guiones.json y guiones-e2e.json: REQ-OP-1 (a, c, d, e, f, g, i; el b es de Housekeeping y Portal), REQ-OP-1b (a a d y f a h) y REQ-SH-2 (e), con sus campos «que» y «cubre»; los .spec.js no se leyeron",
+  "interno/linea-base/esquema.json, sistema.json y HK, PR, FL, CAL, INC1, INV, U, POR, K3 y PG .json (para espejar los flujos con sus REL-n)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Los turnos de hoy de todas las propiedades como bloques en una línea de tiempo, con un tramo por flujo, su avance real y esperado, el color por atención, la cola con su puesto y el motivo en palabras.",
+   "La salida real o esperada del huésped y la entrada del siguiente, como texto bajo la propiedad.",
+   "Cuatro cifras del día y el cuadro de alertas por urgencia, con sus cinco clases.",
+   "El cuadro «Sin turno hoy»: las propiedades sin turno, en cola por atención.",
+   "La página de inicio del administrador y del operador, y el rechazo al colaborador y a todo otro rol.",
+   "La lectura agrupada por minuto del servidor, solo de lectura, que se detiene cuando el Tablero no se ve, y su aviso de falla.",
+   "La presentación en pantalla ancha y en celular, en tema claro u oscuro.",
+   "Lo definido y aún por construir: turnos de mantenimiento, alertas con acción y aviso de canal de calendario caído."
+  ],
+  "fuera": [
+   "El cálculo del avance del turno y la regla de «atrasado»: viven en Housekeeping (CU-HK-5.5); aquí solo se cuenta cómo el Tablero los muestra, los ordena y los alerta (REL-34).",
+   "Armar, iniciar, marcar, bloquear o cerrar turnos, registrar la salida del huésped y reportar incidentes (Housekeeping): el Tablero solo lee, no escribe nada.",
+   "La lista de incidentes y su gestión (Incidentes) y los pendientes de ropa (Inventario): aquí solo se cuenta cómo el Tablero los alerta.",
+   "Reservas y canales (Calendario), datos de la propiedad (Propiedades), emoji y nombre corto de los flujos (Flujos) y equipo y permisos (Identidad): aquí solo se cuenta cómo el Tablero los consume.",
+   "El menú principal y el servidor con su almacén de datos: aquí solo la entrada del Tablero como inicio (REL-01) y la lectura que pide (REL-33).",
+   "El tablero de planes de trabajo de Seg. Proyecto (REQ-TB-1 a REQ-TB-6): es del grupo Proyecto (PRJ), aunque también se llame «tablero».",
+   "Limitar al operador a las propiedades que le toquen (T-15): su caso de uso vive en Identidad (CU-U-2.9) y Propiedades (CU-PR-9.4)."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde la página del Tablero (526 líneas), el bloque de avance compartido con Housekeeping, la ruta de lectura del servidor, el mapa técnico, REQ-OP-1 con su lectura, las fuentes del módulo y los guiones e2e (campos «que» y «cubre»). En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Los flujos con Housekeeping, Calendario, Flujos, Propiedades, Incidentes, Inventario e Identidad usan los identificadores reales de sus líneas base; los de Shell y menú y de Servidor usan identificadores provisionales (CU-SH-3.1, CU-SRV-6.1, CU-SRV-6.2) que su dueño debe confirmar. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-OP-1",
+   "nombre": "Turnos de hoy en vivo",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver los turnos de hoy de todas las propiedades como bloques por flujo, con su avance real y esperado, su color y su puesto en la cola por atención, y la salida y la entrada del huésped."
+  },
+  {
+   "id": "CAP-OP-2",
+   "nombre": "Cifras y alertas",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Ver cuatro cifras del día y las alertas por urgencia (salida tardía, incidente, turno atrasado o sin empezar, propiedad sin reserva y ropa pendiente), y lo definido que falta: alertas con acción y aviso de canal caído."
+  },
+  {
+   "id": "CAP-OP-3",
+   "nombre": "Propiedades sin turno hoy",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver las propiedades que hoy no tienen turno, en cola por atención: sin reserva, próxima entrada u ocupada."
+  },
+  {
+   "id": "CAP-OP-4",
+   "nombre": "Inicio y acceso",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Abrir el STR en el Tablero como página de inicio del administrador y del operador, y cerrárselo al colaborador y a cualquier otro rol."
+  },
+  {
+   "id": "CAP-OP-5",
+   "nombre": "Lectura agrupada y frescura",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Leer del servidor, en una sola lectura agrupada por minuto y solo de lectura, todo lo que el Tablero muestra; mantenerlo al día sin recargar y dejar de leer cuando no se ve."
+  },
+  {
+   "id": "CAP-OP-6",
+   "nombre": "Presentación en pantalla ancha y en celular",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver el Tablero con la paleta del boceto aprobado en pantalla ancha y en celular, en el tema claro o el oscuro."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-OP-1.1",
+   "capacidad": "CAP-OP-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el avance real y el esperado de cada turno de hoy y si va al día, atrasado, adelantado o bloqueado",
+   "declarado": "construido",
+   "limitantes": [
+    "Es el mismo cálculo de Housekeeping (CU-HK-5.5), compartido para que «atrasado» signifique lo mismo en los dos sitios: real = minutos de las tareas hechas u omitidas sobre los minutos de todas las tareas de los flujos incluidos (sin minutos, por número de tareas); esperado = minutos corridos desde el comienzo sobre la duración del turno, con tope de 100 %. El Tablero no lo recalcula aparte: lo mantiene una prueba de igualdad entre los dos.",
+    "El reloj del turno corre desde la salida real del huésped y, si no la hay, desde el inicio real; un turno que no ha empezado marca 0 % esperado (el que ya debía haber empezado se trata en CU-OP-1.4).",
+    "El umbral de 5 puntos para atrasado o adelantado es decisión de Carlos en REQ-OP-1 y está fijo en el programa; el REQ lo pedía como valor del negocio de arranque y hoy no se puede cambiar desde la configuración.",
+    "Un turno cerrado cuenta 100 % y nunca queda atrasado, aunque queden tareas no obligatorias sin marcar. Las tareas omitidas cuentan como hechas.",
+    "Bloqueado = el operador lo bloqueó en Housekeeping, o el huésped que sale hoy no ha salido pasada su hora de salida más la tolerancia (CU-OP-2.3 lo alerta); un turno sin reserva o ya empezado no se bloquea por la hora."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-2.2",
+     "dato": "tareas del turno marcadas como hechas, con las que sube el avance real"
+    },
+    {
+     "de": "CU-HK-5.1",
+     "dato": "salida real del huésped, desde la que corre el reloj del turno"
+    },
+    {
+     "de": "CU-HK-1.6",
+     "dato": "turno bloqueado por el operador, con su motivo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-1.2",
+     "dato": "avance real de cada turno y estado de cada tramo (hecho, en curso, por hacer)"
+    },
+    {
+     "a": "CU-OP-1.3",
+     "dato": "clase (bloqueado, atrasado, al día, adelantado) y atraso de cada turno, para ponerlo en la cola"
+    },
+    {
+     "a": "CU-OP-2.1",
+     "dato": "turnos en curso y turnos bloqueados de hoy"
+    },
+    {
+     "a": "CU-OP-2.3",
+     "dato": "turno bloqueado por la hora de salida del huésped"
+    },
+    {
+     "a": "CU-OP-2.5",
+     "dato": "avance real y minutos que faltan de cada turno atrasado"
+    },
+    {
+     "a": "CU-HK-5.5",
+     "dato": "avance esperado y real del turno en minutos y estado del tramo (al día, atrás, adelante, bloqueado)",
+     "rel": "REL-34"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy con su flujo, sin tareas marcadas y cuya hora de inicio todavía no llega",
+     "cuando": "el administrador abre el Tablero",
+     "entonces": "el turno aparece con el rótulo «colaborador · 0 %» y el motivo «Al día»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno en curso con más tareas hechas de las que pide el tiempo corrido, por más de 5 puntos",
+     "cuando": "el operador mira el Tablero",
+     "entonces": "el motivo dice «N % adelante» y el rótulo «colaborador · N %», con 0 < N < 100"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno en curso con menos tareas hechas de las que pide el tiempo corrido, por más de 5 puntos",
+     "cuando": "se mira el Tablero",
+     "entonces": "el motivo dice «N % atrás» y el turno se pinta como atrasado"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un turno cuyo huésped no ha salido pasada su hora de salida más la tolerancia, o un turno bloqueado a mano en Housekeeping",
+     "cuando": "se mira el Tablero",
+     "entonces": "el turno se pinta como bloqueado con el motivo «Bloqueado» y pasa al primer puesto"
+    },
+    {
+     "id": "E5",
+     "tipo": "alterno",
+     "dado": "un turno cerrado con tareas opcionales sin marcar, y otro con tareas omitidas",
+     "cuando": "se mira el Tablero",
+     "entonces": "el cerrado cuenta 100 % y no queda atrasado; las omitidas cuentan como hechas"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html",
+     "str-avance.js"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "propiedades",
+     "flujos",
+     "flujo-categorias",
+     "hk-config"
+    ],
+    "notas": "STRAvance.avance / clase / bloqueado (bloque [AV-puras] de str-avance.js), el mismo que _hkAvance de Housekeeping; AV_UMBRAL = 5. tests/avance.test.js compara los bloques copiados con su original y tests/tablero-op.test.js ejecuta las funciones puras de la página."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-1.2",
+   "capacidad": "CAP-OP-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver cada turno de hoy como un bloque en la línea de tiempo del día, con un tramo por flujo (emoji, nombre corto, zonas y minutos), el rótulo «colaborador · N %» y la raya de la hora actual",
+   "declarado": "construido",
+   "limitantes": [
+    "Una fila por turno de hoy: son los mismos turnos de Housekeeping (los automáticos de cada reserva que sale y los manuales). Los turnos de ayer se traen pero no se dibujan.",
+    "El bloque ocupa la línea desde el comienzo real del turno (mientras no ha empezado, desde el inicio de su ventana, 11:00 am si no tiene) y dura lo que el turno, con un mínimo de 15 minutos; cada tramo mide en proporción a sus minutos.",
+    "Cada tramo es un flujo hoja del flujo base de la propiedad, en su orden, más los flujos extra del turno al final. Un flujo sin emoji lleva un emoji neutro y sin nombre corto se rotula con su nombre completo.",
+    "La línea se ajusta sola: del primer inicio al último fin de los bloques del día, con marcas en las horas enteras de adentro y sin las de los bordes. La raya de la hora actual solo se dibuja si cae dentro de ese rango.",
+    "Solo hay turnos de limpieza: el mantenimiento como turno aún no existe (CU-OP-1.6)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-1.1",
+     "dato": "avance real de cada turno y estado de cada tramo (hecho, en curso, por hacer)"
+    },
+    {
+     "de": "CU-FL-7.1",
+     "dato": "emoji y nombre corto de cada flujo, para rotular su tramo"
+    },
+    {
+     "de": "CU-FL-10.1",
+     "dato": "flujos con sus actividades, tareas, tiempos y zonas, de los que salen los tramos y la duración"
+    },
+    {
+     "de": "CU-HK-1.2",
+     "dato": "turnos de hoy armados con la reserva que sale, su ventana y su colaborador base"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy de una propiedad con flujo base compuesto",
+     "cuando": "se abre el Tablero",
+     "entonces": "el turno es un bloque con un tramo por flujo, en su orden, cada uno con su emoji y nombre corto; el título del tramo trae el nombre completo, las zonas y los minutos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno con una etapa terminada, otra en curso y otra por hacer",
+     "cuando": "se mira el Tablero",
+     "entonces": "la terminada se ve tenue, la en curso llena y marcada, y la por hacer vacía"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno de una propiedad sin flujo base",
+     "cuando": "se mira el Tablero",
+     "entonces": "el bloque dice «sin flujo» y el turno sigue en la cola"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "turnos de hoy a distintas horas",
+     "cuando": "se mira el Tablero",
+     "entonces": "la línea abarca del primer inicio al último fin, con marcas por hora entera, y la raya amarilla de la hora actual solo si cae dentro"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "ningún turno hoy",
+     "cuando": "se abre el Tablero",
+     "entonces": "dice «No hay turnos hoy.» y no dibuja marcas ni raya"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1",
+    "REQ-FL-12"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html",
+     "str-avance.js"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "propiedades",
+     "flujos",
+     "flujo-categorias",
+     "hk-config"
+    ],
+    "notas": "_tabModelo y _pintar de la página; STRAvance.tramos / bloque / rango / pos; emoji y nombre corto con _fl12Emoji / _fl12Corto (copia de [FL12-puras]). Selectores: .tab-fila[data-turno][data-clase][data-puesto], .tab-tramo[data-paso][data-flujo], [data-rotulo], #tabAhora."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-1.3",
+   "capacidad": "CAP-OP-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver los turnos en cola por atención, con su puesto, su color y el motivo en palabras",
+   "declarado": "construido",
+   "limitantes": [
+    "Orden: bloqueados primero; luego los atrasados, el más atrasado primero; luego los que van al día y los «sin empezar» sin hora; al final los adelantados, el menos adelantado primero. El empate se resuelve por el nombre de la propiedad. Se recalcula cada minuto.",
+    "Color por atención: bloqueado rojo, atrasado naranja, al día azul, adelantado verde, sin empezar sin hora gris; además de otro tono, con otra luminosidad. El motivo siempre va en palabras.",
+    "Entre dos turnos «sin empezar» ya vencidos y empatados en 100 % el desempate es por nombre, no por los minutos de retraso (T-19; Carlos: «más tarde revisamos»). Ese empate no tiene prueba propia: el guion lo comprueba solo cuando se da (INC-155, cerrado)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-1.1",
+     "dato": "clase (bloqueado, atrasado, al día, adelantado) y atraso de cada turno, para ponerlo en la cola"
+    },
+    {
+     "de": "CU-OP-1.4",
+     "dato": "turno sin empezar con su hora vencida, que se ordena como atrasado"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "turnos de hoy bloqueado, atrasado, al día y adelantado",
+     "cuando": "el operador abre el Tablero",
+     "entonces": "se listan en ese orden con puesto 1, 2, 3… y cada uno con su motivo en palabras («Bloqueado», «N % atrás», «Al día», «N % adelante») y su color"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "dos turnos atrasados con distinto porcentaje de atraso",
+     "cuando": "se mira el Tablero",
+     "entonces": "va primero el de más atraso"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "dos turnos con el mismo atraso, o dos «sin empezar» vencidos al 100 %",
+     "cuando": "se mira el Tablero",
+     "entonces": "se ordenan por el nombre de la propiedad"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un turno al día y otro «sin empezar» sin hora de inicio planificada",
+     "cuando": "se mira el Tablero",
+     "entonces": "quedan en la misma clase, el segundo en gris, ordenados por atraso y nombre"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-155",
+    "T-19"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html",
+     "str-avance.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRAvance.orden (_avOrden, AV_RANGO_CLASE); el puesto lo pone _tabModelo. El guion REQ-OP-1 c compara el orden por clase y el porcentaje solo entre los turnos que dicen «N % atrás»; el orden fino lo cubre N1 de _avOrden en tests/. La lista de la clase usa .c-bloqueado / .c-atrasado / .c-al-dia / .c-adelantado / .c-sin-empezar."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-1.4",
+   "capacidad": "CAP-OP-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver como atrasado el turno que ya debía haber empezado y no ha empezado, con «Sin empezar · debía empezar H (+N min)»",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo presentación (Diseño, M-614): el reloj del avance no cambia y sigue corriendo desde la salida real o el inicio real.",
+    "Su atraso se mide en minutos de retraso sobre la duración del turno, con tope de 100 y como mínimo uno más que el umbral (6 puntos); por eso ordena y se pinta como atrasado.",
+    "Sin hora de inicio planificada el turno dice solo «Sin empezar», en gris, y ordena junto a los que van al día.",
+    "Bloqueado, cerrado o ya empezado (con tareas hechas o inicio real) mandan sobre «sin empezar». Housekeeping avisa «no iniciado» recién a los 15 minutos de la ventana; el Tablero, apenas pasa la hora."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-OP-1.3",
+     "dato": "turno sin empezar con su hora vencida, que se ordena como atrasado"
+    },
+    {
+     "a": "CU-OP-2.5",
+     "dato": "turno sin empezar con su hora vencida"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy que debió empezar hace una hora y no ha empezado",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale «Sin empezar · debía empezar H (+N min)» con el color y el orden de atrasado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno sin hora de inicio planificada y sin empezar",
+     "cuando": "se mira el Tablero",
+     "entonces": "dice solo «Sin empezar», en gris, y no cuenta como atrasado"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno cuya hora de inicio todavía no llega",
+     "cuando": "se mira el Tablero",
+     "entonces": "sigue como «Al día»"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un turno sin empezar cuyo huésped no ha salido pasada la tolerancia",
+     "cuando": "se mira el Tablero",
+     "entonces": "manda «Bloqueado»"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "i"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html",
+     "str-avance.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_tabSinEmpezar de la página (usa STRAvance.horaValida, minDelDia, UMBRAL); el campo clase pasa a «sin-empezar» (gris) o «atrasado»."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-1.5",
+   "capacidad": "CAP-OP-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver bajo cada propiedad cuándo salió el huésped (o cuándo debía salir) y a qué hora entra el siguiente",
+   "declarado": "construido",
+   "limitantes": [
+    "Va como texto bajo el nombre de la propiedad («Salió 10:00 am», «Sale 11:00 am», «Debió salir 11:00 am (+70 min)», «Entra 3:00 pm»); la salida y la entrada no se dibujan en la línea de tiempo (decisión de Carlos en REQ-OP-1).",
+    "La hora de salida es la acordada con el huésped o, si no, la del inicio de la ventana; la de entrada, la llegada acordada, la de la reserva, la de la ficha de la propiedad o las 3:00 pm. La entrada solo sale si ese mismo día llega otra reserva a la propiedad.",
+    "El servidor entrega nombre, fechas, noches, horas acordadas y canal de la reserva, pero la pantalla hoy solo usa las horas; nunca llegan teléfono, correo, montos, notas ni enlaces (RT-6)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-5.1",
+     "dato": "hora de salida real del huésped («Unidad desocupada»)"
+    },
+    {
+     "de": "CU-CAL-4.2",
+     "dato": "hora acordada de salida y de llegada de cada reserva"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.3",
+     "dato": "salida que debió ocurrir y entrada del siguiente, para el detalle de la alerta"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cuyo huésped ya registró «Unidad desocupada»",
+     "cuando": "el operador mira el Tablero",
+     "entonces": "bajo la propiedad dice «Salió H»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno cuya salida aún no se registra y no se ha pasado de la tolerancia",
+     "cuando": "se mira el Tablero",
+     "entonces": "dice «Sale H» con la hora acordada o la del inicio de la ventana"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno bloqueado porque el huésped no salió pasada la tolerancia",
+     "cuando": "se mira el Tablero",
+     "entonces": "dice «Debió salir H (+N min)»"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "una propiedad a la que ese día entra otro huésped",
+     "cuando": "se mira el Tablero",
+     "entonces": "agrega «Entra H»"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html",
+     "str-avance.js"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "propiedades"
+    ],
+    "notas": "_tabHuesped de la página con STRAvance.inicioMs / inicioCheckoutTardio / finVentana; texto en [data-huesped]."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-1.6",
+   "capacidad": "CAP-OP-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en el Tablero los turnos de mantenimiento junto a los de limpieza, cuando existan como turno",
+   "declarado": "no-construido",
+   "limitantes": [
+    "REQ-OP-1 pide «una fila por propiedad con turno hoy (limpieza, mantenimiento o bloqueado)» y supone que el mantenimiento se muestra cuando exista como turno (etapa 2, REQ-MI1-3: integrar el flujo del evento al turno); hoy solo se ve lo que Housekeeping ya tiene, y el mantenimiento no es turno.",
+    "Sin decidir cómo se pinta (color, tramos) ni si entra en las cifras y en la cola."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-4.1",
+     "dato": "evento de mantenimiento llevado al turno del colaborador el día del evento, con su flujo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un evento de mantenimiento llevado al turno de una propiedad (por confirmar con Diseño)",
+     "cuando": "se abre el Tablero",
+     "entonces": "aparece como un bloque más, con su flujo en tramos, ordenado por atención con los de limpieza"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1",
+    "REQ-MI1-3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: la página solo dibuja los turnos que arma Housekeeping."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de REQ-OP-1 (decisión 1 y supuestos) y de la página: no hay turnos de mantenimiento; Diseño debe confirmar si entra en el alcance"
+   }
+  },
+  {
+   "id": "CU-OP-2.1",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver cuatro cifras del día: turnos en curso, bloqueados, entradas de hoy y alertas",
+   "declarado": "construido",
+   "limitantes": [
+    "«Turnos en curso» cuenta los turnos en curso o con la limpieza cerrada, sobre el total de turnos de hoy. «Bloqueados» cuenta los bloqueados por la hora de salida y los bloqueados a mano por el operador, aunque el detalle de la cifra diga «esperando la salida del huésped».",
+    "«Entradas hoy» cuenta las reservas que llegan hoy y dice la hora de la primera («la primera a las …») o «ninguna».",
+    "«Alertas» es el total de las que se ven en el cuadro de alertas y dice cuántas son urgentes (las rojas)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-1.1",
+     "dato": "turnos en curso y turnos bloqueados de hoy"
+    },
+    {
+     "de": "CU-OP-2.2",
+     "dato": "alertas que se ven y cuántas son urgentes"
+    },
+    {
+     "de": "CU-CAL-9.1",
+     "dato": "reservas guardadas, de las que salen las entradas de hoy y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "turnos en curso y bloqueados, reservas que llegan hoy y alertas",
+     "cuando": "se abre el Tablero",
+     "entonces": "arriba hay cuatro cifras, cada una con su detalle"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "alertas en el cuadro de alertas",
+     "cuando": "se compara la cifra con el cuadro",
+     "entonces": "la cifra «Alertas» es igual a las alertas que se ven y dice cuántas son urgentes"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "ninguna reserva llega hoy",
+     "cuando": "se abre el Tablero",
+     "entonces": "«Entradas hoy» dice 0 y «ninguna»"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "ningún turno ni alerta",
+     "cuando": "se abre el Tablero",
+     "entonces": "las cifras dicen 0 y «de 0 turnos de hoy»"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "tickets",
+     "inv-pendientes"
+    ],
+    "notas": "_tabModelo().cifras y _pintar; selectores [data-cifra=en-curso|bloqueados|entradas|alertas]."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-2.2",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver las alertas del día ordenadas por urgencia, cada una con su propiedad, hace cuánto y su detalle",
+   "declarado": "construido",
+   "limitantes": [
+    "Cinco clases, de más a menos urgente: salida tardía que bloquea un turno · incidente abierto o escalado de una propiedad con turno o entrada hoy · turno atrasado frente a la entrada, o sin empezar con la hora vencida · propiedad sin reserva en 30 días · ropa pendiente. Rojo, naranja y azul; dentro de cada clase, por nombre de la propiedad.",
+    "El cuadro nunca es más alto que el de «Turnos de hoy»: si hay más alertas, se desplazan por dentro (a 390 px va debajo, con alto fijo).",
+    "Las alertas no se pueden tocar para abrir el turno o el incidente (CU-OP-2.8, T-16).",
+    "Los 30 días sin reserva son un valor fijo en el programa; REQ-OP-1 lo pedía como valor del negocio de arranque."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-2.3",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    },
+    {
+     "de": "CU-OP-2.4",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    },
+    {
+     "de": "CU-OP-2.5",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    },
+    {
+     "de": "CU-OP-2.6",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    },
+    {
+     "de": "CU-OP-2.7",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.1",
+     "dato": "alertas que se ven y cuántas son urgentes"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "alertas de distintas clases",
+     "cuando": "el administrador abre el Tablero",
+     "entonces": "salen por urgencia (rojas primero, luego naranja y azul) y, dentro de cada clase, por el nombre de la propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "más alertas de las que caben junto a los turnos",
+     "cuando": "se mira el Tablero",
+     "entonces": "el cuadro conserva la altura del de turnos y las alertas se desplazan por dentro"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "ninguna alerta",
+     "cuando": "se mira el Tablero",
+     "entonces": "el cuadro dice «Sin alertas.»"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "tickets",
+     "inv-pendientes",
+     "propiedades"
+    ],
+    "notas": "_tabAlertas de la página (clases 1 a 5, TAB_ALERTA_NIVEL); cuadro #tabAlertas con .tab-alertas-in absoluto que se desplaza; [data-alerta][data-nivel]."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-2.3",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ser avisado de la salida tardía que impide empezar un turno, con la hora en que debió salir el huésped",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo cuando el turno quedó bloqueado por la hora (el huésped no salió pasada la tolerancia); un bloqueo manual del operador no genera esta alerta.",
+    "Título «Salida tardía: {colaborador} no puede empezar» (o «el turno» si no tiene colaborador); el detalle trae la salida que debió ocurrir y la entrada del siguiente.",
+    "El incidente de checkout tardío o de huésped aún en la unidad de la misma propiedad no se suma: es el mismo hecho y se ve una sola alerta."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-1.1",
+     "dato": "turno bloqueado por la hora de salida del huésped"
+    },
+    {
+     "de": "CU-OP-1.5",
+     "dato": "salida que debió ocurrir y entrada del siguiente, para el detalle de la alerta"
+    },
+    {
+     "de": "CU-HK-5.3",
+     "dato": "aviso «Huésped aún en la unidad» (incidente de checkout tardío), que no se cuenta dos veces"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.2",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con huésped que debía salir hace más que la tolerancia y sin salida registrada",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale una alerta roja «Salida tardía: Nombre no puede empezar», hace N min, con «Debió salir H (+N min)» y la entrada del siguiente"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo turno bloqueado a mano por el operador",
+     "cuando": "se mira el Tablero",
+     "entonces": "no hay alerta de salida tardía"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "además hay un incidente de checkout tardío abierto en esa propiedad",
+     "cuando": "se mira el Tablero",
+     "entonces": "solo se ve la alerta de salida tardía"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "tickets"
+    ],
+    "notas": "_tabAlertas clase 1 (f.salidaTardia) y la exclusión de tipos checkout-tardio / huesped-en-unidad de la clase 2."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_tabAlertas, _tabModelo); el guion REQ-OP-1b c no dice qué clases de alerta crea"
+   }
+  },
+  {
+   "id": "CU-OP-2.4",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ser avisado de un incidente abierto o escalado en una propiedad que hoy tiene turno o entrada",
+   "declarado": "construido",
+   "limitantes": [
+    "El incidente no tiene urgencia propia: todo incidente abierto o escalado de una propiedad con turno hoy o con entrada hoy se avisa como urgente (Diseño, M-607).",
+    "El Tablero muestra el comienzo del texto del incidente (hasta 80 caracteres) y hace cuánto se reportó, pero no lo lista completo ni lo abre (CU-OP-2.8, CU-INC1-3.3, T-16).",
+    "La propiedad del incidente sale del propio incidente o del turno donde se reportó."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.1",
+     "dato": "incidentes reportados en el turno, con su tipo, descripción y estado"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.2",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente abierto en una propiedad con turno hoy",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale una alerta roja «Incidente abierto: …» con la propiedad y hace cuánto se reportó"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente escalado",
+     "cuando": "se mira el Tablero",
+     "entonces": "dice «Incidente escalado: …»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un incidente de una propiedad sin turno ni entrada hoy",
+     "cuando": "se mira el Tablero",
+     "entonces": "no sale en las alertas"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "el incidente se resuelve",
+     "cuando": "llega la siguiente lectura",
+     "entonces": "la alerta desaparece"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "tickets",
+     "turnos"
+    ],
+    "notas": "_tabAlertas clase 2; el servidor trae solo tickets abiertos o escalados y, con since, también los que se cerraron para sacarlos."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_tabAlertas clase 2) y de la ruta del servidor (_tabConsultas)"
+   }
+  },
+  {
+   "id": "CU-OP-2.5",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ser avisado de que un turno atrasado terminará después de la entrada de hoy, o de que un turno no ha empezado pasada su hora",
+   "declarado": "construido",
+   "limitantes": [
+    "Atrasado frente a la entrada (naranja): al ritmo planeado (los minutos que faltan según el avance) el turno termina después de la hora de entrada del siguiente huésped; solo si ese día entra otro huésped.",
+    "«Turno sin empezar» (naranja): se avisa aunque ese día no entre nadie (Diseño, M-614)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-OP-1.1",
+     "dato": "avance real y minutos que faltan de cada turno atrasado"
+    },
+    {
+     "de": "CU-OP-1.4",
+     "dato": "turno sin empezar con su hora vencida"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.2",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno atrasado cuyo fin estimado queda después de la entrada de hoy",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale una alerta naranja «{colaborador} va atrasado frente a la entrada» con el motivo, la hora estimada de fin y la hora de entrada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno que debía haber empezado y no ha empezado",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale «Turno sin empezar» con «Debía empezar H (+N min)» y, si hay entrada, «la entrada es a las H»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un turno atrasado que termina antes de la entrada",
+     "cuando": "se mira el Tablero",
+     "entonces": "no sale alerta"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "turnos",
+     "reservas"
+    ],
+    "notas": "_tabAlertas clase 3 con f.finEstimado, f.entraMin y f.sinEmpezarTarde de _tabModelo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_tabAlertas clase 3, _tabModelo)"
+   }
+  },
+  {
+   "id": "CU-OP-2.6",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ser avisado de la propiedad que no tiene reserva en los próximos 30 días",
+   "declarado": "construido",
+   "limitantes": [
+    "Cuenta como reserva la que está en casa o la próxima que entra dentro de 30 días; los bloqueos y las reservas canceladas no cuentan.",
+    "Se avisa para toda propiedad, tenga o no turno hoy. Dice «Revisa precio, calendario o anuncios.» (rojo)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-9.1",
+     "dato": "reservas guardadas, para saber qué propiedad no tiene reserva en 30 días"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.2",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad sin reserva en los próximos 30 días",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale una alerta roja «Sin reservas en los próximos 30 días»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con una reserva que entra dentro de 30 días",
+     "cuando": "se mira el Tablero",
+     "entonces": "no sale alerta"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una propiedad con solo bloqueos o reservas canceladas",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale la alerta"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "reservas",
+     "propiedades"
+    ],
+    "notas": "_tabAlertas clase 4 con _tabReservasDe; TAB_SIN_RESERVA_DIAS = 30."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_tabAlertas clase 4, _tabReservasDe)"
+   }
+  },
+  {
+   "id": "CU-OP-2.7",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ser avisado de la ropa pendiente de lavar, llevar a la lavandería o decidir, por propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "Agrupa por propiedad: «N por lavar · N por llevar a la lavandería · N por decidir», con hace cuánto está el pendiente más antiguo. Es la menos urgente (azul).",
+    "Los pendientes de tipo «organizar» no generan alerta. Un pendiente viejo sin tarea definida se lee como en Housekeeping: del operador es «decidir»; los demás, «organizar»."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-5.8",
+     "dato": "pendientes de ropa que deja el cierre de un turno"
+    },
+    {
+     "de": "CU-HK-9.2",
+     "dato": "pendiente de ropa marcado hecho, que sale del Tablero"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-OP-2.2",
+     "dato": "alerta con su urgencia, su propiedad, hace cuánto y su detalle"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "pendientes de ropa abiertos de una propiedad",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale una alerta azul «Ropa pendiente» con cuántos hay por lavar, por llevar y por decidir"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el pendiente se marca hecho",
+     "cuando": "llega la siguiente lectura",
+     "entonces": "la alerta baja o desaparece"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "solo hay pendientes de organizar",
+     "cuando": "se mira el Tablero",
+     "entonces": "no sale alerta"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "inv-pendientes"
+    ],
+    "notas": "_tabAlertas clase 5; lee pd.tarea.tipo (lavar, llevar, decidir) y, si falta, pd.para como _hkPendLeer de Housekeeping."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_tabAlertas clase 5)"
+   }
+  },
+  {
+   "id": "CU-OP-2.8",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Tocar una alerta para abrir el turno o el incidente que la causó",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy las alertas no llevan enlaces de acción: OP-1b salió sin ellos (L-143).",
+    "Idea de la bolsa (T-16, prioridad media); sin requerimiento ni decisión de cómo se abre cada clase."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-2.11",
+     "dato": "turno elegido en la alerta, para abrirlo por su enlace"
+    },
+    {
+     "a": "CU-INC1-3.3",
+     "dato": "incidente elegido en la alerta, para abrirlo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una alerta de salida tardía o de turno atrasado (propuesto)",
+     "cuando": "el operador la toca",
+     "entonces": "se abre ese turno en Housekeeping"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una alerta de incidente (propuesto)",
+     "cuando": "el operador la toca",
+     "entonces": "se abre ese incidente"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [
+    "T-16"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: .tab-alerta no tiene enlace ni clic. Los destinos posibles ya existen en Housekeeping (?turno=<id>, CU-HK-2.11)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: las alertas se dibujan sin enlaces"
+   }
+  },
+  {
+   "id": "CU-OP-2.9",
+   "capacidad": "CAP-OP-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver una alerta cuando el calendario de un canal (Airbnb, Booking y otros) falla o deja de responder",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy no avisa a nadie: el estado de cada canal solo queda en el aparato desde el que se importó (CU-CAL-6.3).",
+    "Propuesta de la bolsa (T-29, prioridad media; M-820): alerta en el Tablero para administrador y operador, y estado del canal guardado en el servidor. Riesgo: sobreventa si pasa sin que nadie lo vea. Diseño debe decidir si entra."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-6.3",
+     "dato": "estado de cada canal tras importar: última vez, reservas leídas y si falló"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un canal de calendario que dejó de responder (propuesto)",
+     "cuando": "se mira el Tablero",
+     "entonces": "sale una alerta para el administrador y el operador con la propiedad y el canal"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [
+    "T-29"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código en el Tablero. Requiere guardar el estado de cada canal en el servidor (hoy queda en el aparato que importó)."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_tabAlertas solo tiene 5 clases) y de CU-CAL-6.3"
+   }
+  },
+  {
+   "id": "CU-OP-3.1",
+   "capacidad": "CAP-OP-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver las propiedades sin turno hoy en cola por atención: sin reserva primero, luego las que van a recibir (la más lejana arriba) y al final las ocupadas",
+   "declarado": "construido",
+   "limitantes": [
+    "Cola y color: sin reserva en 30 días (rojo) → próxima entrada, la más lejana arriba (naranja si faltan más de 7 días, azul si es pronto) → ocupadas, la que sale antes arriba (verde); dentro del grupo, por nombre. Cada una lleva su puesto y su motivo en palabras.",
+    "Los 30 y los 7 días son valores fijos en el programa; REQ-OP-1 los pedía como valores del negocio de arranque.",
+    "Los bloqueos y las reservas canceladas no cuentan como ocupación ni como próxima entrada."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-9.1",
+     "dato": "reservas guardadas, de las que salen la ocupada y la próxima entrada de cada propiedad"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "propiedades sin turno hoy: una sin reserva, otra con próxima entrada y otra ocupada",
+     "cuando": "se abre el Tablero",
+     "entonces": "salen en ese orden con puesto 1, 2, 3… y su motivo en palabras («Sin reserva», «Entra en N días», «Ocupada»)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad con el huésped en casa",
+     "cuando": "se mira el cuadro",
+     "entonces": "dice «Huésped en casa · noche N de M · sale hoy, mañana o la fecha, con su hora»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una propiedad con próxima entrada",
+     "cuando": "se mira el cuadro",
+     "entonces": "dice «Lista · próxima entrada …» con las noches vacía y «Entra hoy», «Entra mañana» o «Entra en N días»"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "una propiedad sin reserva en 30 días",
+     "cuando": "se mira el cuadro",
+     "entonces": "dice «Lista · sin reservas en los próximos 30 días»"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "todas las propiedades tienen turno hoy",
+     "cuando": "se abre el Tablero",
+     "entonces": "el cuadro dice «Todas las propiedades tienen turno hoy.»"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "propiedades",
+     "reservas",
+     "turnos"
+    ],
+    "notas": "_tabSinTurno y _tabReservasDe; TAB_SIN_RESERVA_DIAS = 30, TAB_LEJANA_DIAS = 7. Selectores #tabSinLista .tab-sin-fila[data-grupo][data-dias][data-puesto]."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-4.1",
+   "capacidad": "CAP-OP-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Entrar al STR directamente en el Tablero, que es la primera entrada de «Operación del día»",
+   "declarado": "construido",
+   "limitantes": [
+    "El Tablero es la página de inicio del administrador y del operador; si el menú no tuviera su entrada, el inicio cae en Limpieza & HK (lo decide el menú, REQ-SH-2).",
+    "El operador ve todos los turnos, propiedades e incidentes del negocio, sin límite por propiedad (idea T-15; CU-U-2.9 y CU-PR-9.4)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.5",
+     "dato": "rol de la persona y módulos que puede abrir, para saber si ve la entrada «Tablero»"
+    },
+    {
+     "de": "CU-SH-1.2",
+     "dato": "entrada «Tablero» del menú como página de inicio, con su dirección y el tema",
+     "rel": "REL-01"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "queda abierto el Tablero, marcado en el menú, como único panel a la vista"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "ve la entrada «Tablero» y entra en él, con sus cuadros cargados"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1",
+    "REQ-SH-2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "T-15"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html",
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Entrada de menú tablero con data-inicio=\"1\" y data-roles=\"admin,operador\"; el menú elige como inicio la entrada visible de menor data-inicio (_inicioElegir)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-4.2",
+   "capacidad": "CAP-OP-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "No poder entrar al Tablero: el colaborador vuelve a su portal y el sistema le rechaza cualquier lectura",
+   "declarado": "construido",
+   "limitantes": [
+    "La pantalla solo cierra el paso; quien decide es el servidor, que rechaza al colaborador y a cualquier rol que no sea administrador u operador antes de abrir la base de datos (RT-14).",
+    "El rechazo del servidor lo comprueba una prueba propia del servidor (no es un guion e2e); el guion e2e prueba el lado de la pantalla."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.6",
+     "dato": "decisión, en cada petición, de qué puede hacer cada rol"
+    },
+    {
+     "de": "CU-SRV-6.2",
+     "dato": "rechazo por falta de permiso, antes de leer ningún dato (al colaborador y a todo rol que no sea administrador u operador)",
+     "rel": "REL-33"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con sesión",
+     "cuando": "abre el Tablero a mano",
+     "entonces": "vuelve a su portal sin que se lea ningún dato del Tablero"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una petición de lectura del Tablero hecha por un colaborador, por otro rol o sin sesión",
+     "cuando": "llega al servidor",
+     "entonces": "se rechaza por falta de permiso, antes de leer ningún dato"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "g"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [
+     "/api/tablero"
+    ],
+    "colecciones": [],
+    "notas": "STRApi.exigirRol(['admin','operador']) al cargar (embebido: «Sin permiso para este módulo.»; suelto: al inicio de su rol); _tabRolPermitido en api/tablero/index.php (admin, superadmin y operador) responde 403 antes de abrir la base; lo prueba tests/tablero-op.test.js con php, sin base."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-5.1",
+   "capacidad": "CAP-OP-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Leer, en una sola lectura agrupada por minuto, todo lo que el Tablero muestra, sin escribir nada ni mover la traída propia de Housekeeping",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo lee: no guarda nada. Usa su propio punto de lectura y nunca el de Housekeeping, que dejaría a Housekeeping sin cambios.",
+    "La lectura trae: turnos desde ayer, reservas de los próximos 30 días, incidentes abiertos o escalados, pendientes abiertos, propiedades, flujos y categorías, configuración de Housekeeping y el equipo mínimo (nombre, color y estado).",
+    "Del huésped solo llegan nombre, fechas, noches, horas acordadas y canal; nunca teléfono, correo, montos, notas ni enlaces (RT-6).",
+    "Una conexión por petición y a lo sumo una lectura por minuto por pantalla abierta (RT-19). La cuenta sale de la sesión (RT-1) y la consulta es la misma de la lectura general de datos del STR (RT-4, RT-21)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-6.1",
+     "dato": "turnos, reservas con lo mínimo del huésped, incidentes, pendientes, propiedades, flujos y equipo mínimo, en una sola respuesta y con lo cambiado desde la última lectura",
+     "rel": "REL-33"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con el Tablero abierto durante dos minutos",
+     "cuando": "pasa el tiempo",
+     "entonces": "el Tablero hace una lectura agrupada por minuto y ninguna de las lecturas generales de datos del STR"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reserva con huésped",
+     "cuando": "llega al Tablero",
+     "entonces": "trae solo nombre y fechas del huésped, no sus datos personales"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "se pide con la marca de la lectura anterior",
+     "cuando": "llega la respuesta",
+     "entonces": "trae solo las filas cambiadas desde entonces (con 5 minutos de margen), incluidas las borradas y las que se cerraron, para que el Tablero las saque"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-4",
+    "RT-6",
+    "RT-19",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [
+     "/api/tablero?since="
+    ],
+    "colecciones": [
+     "turnos",
+     "reservas",
+     "tickets",
+     "inv-pendientes",
+     "propiedades",
+     "flujos",
+     "flujo-categorias",
+     "hk-config",
+     "usuarios"
+    ],
+    "notas": "api/tablero/index.php (_tabConsultas, _tabSolape, _tabProyectar, _tabCamposReserva) sobre api/lib/col-lectura.php (_colLeerFilas). El mapa del módulo dice reservas «hoy y mañana»; el código trae hoy + 30 días desde OP-1b."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-OP-5.2",
+   "capacidad": "CAP-OP-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el Tablero al día sin recargar: se actualiza solo cada minuto y dice a qué hora se actualizó",
+   "declarado": "construido",
+   "limitantes": [
+    "La primera lectura es completa; después trae solo lo cambiado, y cada 15 lecturas o al cambiar el día vuelve a traer todo. Un cambio puede tardar hasta un minuto en verse.",
+    "El reloj («hoy · H»), la raya de la hora y los atrasos se calculan con la hora y la zona del aparato que mira, como en Housekeeping.",
+    "INC-153 (abierto, intermitente): el guion REQ-OP-1 d vio una vez que el Tablero no pasaba a 100 % tras marcar la última tarea."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador mirando el Tablero y un colaborador que marca la última tarea de un turno",
+     "cuando": "pasa hasta un minuto",
+     "entonces": "el tramo pasa a hecho y el rótulo a 100 %, sin recargar la pantalla"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el Tablero abierto de un día para otro",
+     "cuando": "cambia el día",
+     "entonces": "trae todo de nuevo y muestra los turnos del día nuevo"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "cada minuto",
+     "cuando": "no llega nada nuevo",
+     "entonces": "igual se repinta el reloj, la raya de la hora y el orden"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-19"
+   ],
+   "pendientes": [
+    "INC-153"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [
+     "/api/tablero?since="
+    ],
+    "colecciones": [
+     "turnos"
+    ],
+    "notas": "_leer, _tabUnir y _tabPlan (TAB_LECTURA_MS = 60000, TAB_COMPLETA_CADA = 15); selector #tabActualizado[data-tab-lecturas]. Hipótesis de INC-153 por confirmar: el cursor retrocede 5 minutos (_tabSolape), pero el servidor guarda el updated_at que manda el aparato (api/col/index.php ~1740); un teléfono atrasado más de 5 minutos deja el cambio por debajo del cursor hasta la siguiente lectura completa (cada 15 minutos)."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-OP-5.3",
+   "capacidad": "CAP-OP-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "No leer ni repintar cuando el Tablero no se ve: pestaña oculta, o con otro módulo a la vista dentro del menú",
+   "declarado": "construido",
+   "limitantes": [
+    "Al volver a verlo lee enseguida si pasó más de un minuto desde el último intento.",
+    "Como mucho una lectura por minuto, incluso si la anterior falló."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el Tablero dentro del menú con otro módulo a la vista",
+     "cuando": "pasan dos minutos",
+     "entonces": "no se hace ninguna lectura del Tablero"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la pestaña oculta",
+     "cuando": "vuelve a verse y pasó más de un minuto",
+     "entonces": "lee enseguida y repinta"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-19"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_oculta (document.hidden o frameElement.getClientRects() vacío), _tabPlan, _alVolver (revisión cada 5 s sin red) y _intento."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-5.4",
+   "capacidad": "CAP-OP-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Saber que no se pudo actualizar y que se reintenta en un minuto, sin perder lo que ya estaba a la vista",
+   "declarado": "construido",
+   "limitantes": [
+    "La hora «actualizado H» no avanza mientras falla; no hay otra marca de antigüedad de los datos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "falla la lectura (sin red o con el servidor caído)",
+     "cuando": "pasa el minuto",
+     "entonces": "sale «No se pudo actualizar: …. Se reintenta en un minuto.» y se sigue mostrando lo último que llegó"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la lectura vuelve a funcionar",
+     "cuando": "se actualiza",
+     "entonces": "el aviso se borra y la hora «actualizado» avanza"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-19"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "#tabAviso[role=status] en el .catch de _leer; la sesión vencida la maneja STRApi (renovación o aviso de sesión)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página (_leer)"
+   }
+  },
+  {
+   "id": "CU-OP-6.1",
+   "capacidad": "CAP-OP-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el Tablero completo en pantalla ancha: cifras arriba, turnos con las alertas a la derecha y «Sin turno hoy» debajo, con la paleta del boceto aprobado",
+   "declarado": "construido",
+   "limitantes": [
+    "La comprobación existente es visual (captura, N3). La paleta es la del boceto aprobado con Carlos (versión 19)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una pantalla ancha",
+     "cuando": "se abre el Tablero",
+     "entonces": "cuatro cifras arriba; «Turnos de hoy» con bloques, tramos, rótulos, raya de la hora, marcas por hora y leyenda; las alertas a la derecha, sin pasar la altura de los turnos; y «Sin turno hoy» debajo"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Estilos de la página (.tab-cifras, .tab-par, .tab-alertas, .tab-leyenda, clases c-*)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-6.2",
+   "capacidad": "CAP-OP-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el Tablero en el celular, a 390 px: cuadros uno debajo del otro y la línea de tiempo con desplazamiento de lado dentro de su cuadro",
+   "declarado": "construido",
+   "limitantes": [
+    "Las cifras van de a dos y el cuadro de alertas queda con alto fijo y su propio desplazamiento."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una pantalla de 390 px",
+     "cuando": "se abre el Tablero",
+     "entonces": "las cifras van de a dos y los cuadros de turnos, alertas y «Sin turno hoy» van uno debajo del otro; la línea de tiempo se desplaza de lado dentro de su cuadro y la pantalla no tiene barra lateral"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "g"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "@media (max-width: 640px); .tab-linea con min-width 760 px dentro de .tab-cuadro con overflow-x."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-OP-6.3",
+   "capacidad": "CAP-OP-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el Tablero en el tema claro o el oscuro que se eligió en el menú",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin elección usa el oscuro. Los colores por atención (bloqueado, atrasado, al día, adelantado) son los mismos en los dos temas, los de la paleta del boceto oscuro; la lectura en tema claro no se ha revisado."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el tema elegido en el menú",
+     "cuando": "se abre el Tablero",
+     "entonces": "el Tablero toma ese tema"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ninguna elección guardada",
+     "cuando": "se abre el Tablero",
+     "entonces": "usa el tema oscuro"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "data-theme tomado de localStorage str-theme (try/catch); variables en :root y :root[data-theme=\"light\"]."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: tema de str-theme; los colores .c-* no cambian con el tema"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-TB-1",
+   "porque": "Es del tablero de planes de trabajo de Seg. Proyecto (grupo Proyecto, PRJ), no del Tablero de operación aunque se llame «tablero». Aceptado."
+  },
+  {
+   "id": "REQ-TB-2",
+   "porque": "Tablero v2 de Seg. Proyecto (PRJ); no es función del Tablero de operación. Aceptado."
+  },
+  {
+   "id": "REQ-TB-3",
+   "porque": "Seg. Proyecto lee el último commit y muestra la hora real de los datos (PRJ). Aceptado."
+  },
+  {
+   "id": "REQ-TB-4",
+   "porque": "Seg. Proyecto lee cada tipo de su fuente única (PRJ). Aceptado."
+  },
+  {
+   "id": "REQ-TB-5",
+   "porque": "Métrica construido → aceptado de Seg. Proyecto (PRJ). Aceptado."
+  },
+  {
+   "id": "REQ-TB-6",
+   "porque": "Seg. Proyecto lee del servicio del modelo por un proxy (PRJ, DA-39); «entregado» es pasado a Desarrollo, no construido. No es del Tablero de operación."
+  },
+  {
+   "id": "DA-39",
+   "porque": "Decide el proxy de solo lectura del servicio del modelo para Seg. Proyecto (REQ-TB-6); es de Proyecto, no del Tablero de operación."
+  },
+  {
+   "id": "DA-45",
+   "porque": "Decide qué ve el colaborador y por cuánto tiempo (INC-120); lo cumplen Housekeeping y el servidor (CU-HK-11.1, CU-HK-11.2). Administrador y operador no cambian: el Tablero no se toca. Cumplida."
+  },
+  {
+   "id": "DA-46",
+   "porque": "Decide que el colaborador solo reescriba los incidentes que creó (INC-141); cuelga de CU-HK-11.5. El Tablero solo lee incidentes."
+  },
+  {
+   "id": "INC-105",
+   "porque": "Horas distintas en la ficha del tablero de Seg. Proyecto (PRJ); no es del Tablero de operación. Abierto."
+  },
+  {
+   "id": "INC-106",
+   "porque": "Las tablas del tablero de Seg. Proyecto no se apilan a 390 px (PRJ); el Tablero de operación a 390 px lo cubre CU-OP-6.2. Abierto."
+  },
+  {
+   "id": "INC-118",
+   "porque": "Seg. Proyecto ordena los lotes «L-n» como 0 (PRJ). Cerrado."
+  },
+  {
+   "id": "INC-136",
+   "porque": "Defecto del guion REQ-TB-3 g en la página de Cobit (PRJ), no de una página del negocio. Cerrado."
+  },
+  {
+   "id": "INC-139",
+   "porque": "Lectura intermitente de los documentos del repositorio desde las páginas de Proyecto (PRJ); entorno. Abierto."
+  },
+  {
+   "id": "INC-148",
+   "porque": "Turnos de prueba que dejó una corrida y rompieron el guion REQ-OP-1 c; es entorno de pruebas, no función del Tablero. Cerrado."
+  },
+  {
+   "id": "T-8",
+   "porque": "Tarea de Carlos para el token «tablero» de Seg. Proyecto (REQ-TB-6); no es del Tablero de operación."
+  },
+  {
+   "id": "T-17",
+   "porque": "Fotos de administrador u operador en la cola de subida sin reintento si no abren Housekeeping, porque el Tablero es el inicio (cola de subida, CU-HK-3.2). Un aviso «N fotos sin subir» en el Tablero sería un caso de uso nuevo, aún sin decidir."
+  }
+ ]
+}

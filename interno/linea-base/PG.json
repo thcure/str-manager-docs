@@ -1,7 +1,7 @@
 {
  "modulo": "PG",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-api.js (cálculo compartido de horas, valor y saldo: tarifa vigente, horas del turno, saldo del banco; leído por funciones)",
@@ -15,7 +15,18 @@
   "interno/linea-base/esquema.json, U.json, HK.json, POR.json, INV.json y PR.json (estilo y flujos con ids reales)",
   "No se leyeron los documentos de los REQ (claude/producto/requerimientos-pg1-2-…, f11-5-2-… y cmp1-…): los casos por construir salen de las decisiones, los cruces, los mensajes de entrega y las notas del REQ; sus criterios deben cotejarse"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-824)",
+   "que": "Pesos (esenciales CAP-1 y 4; necesarias 2, 3 y 5; accesoria 6), decisiones a–g y criterios de REQ-PG1-2, REQ-CMP-1 y REQ-F11-5-2 aplicados por el Arquitecto."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-825)",
+   "que": "INC-181 (política y modalidad de la ficha de hoy) atado; reabrir un turno queda como limitante hasta el candado de la liquidación."
+  }
+ ],
  "alcance": {
   "dentro": [
    "El cálculo único de las horas planificadas y efectivas de cada persona del turno y de su valor, con la tarifa vigente a la fecha del turno y la política de horas (banco de horas o solo horas reales).",
@@ -23,7 +34,8 @@
    "Los adelantos al colaborador (monto y medio digitados), las compras legalizadas con su factura y aprobación, y el saldo del adelanto.",
    "La liquidación de un periodo con el valor de los turnos pagados congelado, el registro del pago y la protección de lo ya liquidado.",
    "Los movimientos de dinero del colaborador (adelanto, compra, ajuste, pago y anulación) que no se editan ni se borran, los permisos de adelantos y de pagos, y lo que cada colaborador ve de lo suyo.",
-   "Lo pospuesto: el cargo al colaborador por el daño que causó (DA-12)."
+   "Lo pospuesto: el cargo al colaborador por el daño que causó (DA-12).",
+   "Decisiones de Diseño del 18-oct (M-824): la compra la registra el colaborador desde el portal y queda por aprobar; la diferencia a favor del colaborador va a su saldo; liquidación por periodo que elige el operador con pagos parciales; ajuste de saldo con dinero.pagos y motivo; turno liquidado congelado, corrección como ajuste; DA-20 no aplica a «solo horas reales»; Housekeeping registra duraciones y Pagos calcula valor y bolsa."
   ],
   "fuera": [
    "La ficha de pago de cada persona (modalidad, política, tarifas con su historial, anulación) y su saldo de horas en Equipo (Identidad: CAP-U-6): aquí se cuenta lo que se calcula con ella, no cómo se llena.",
@@ -40,42 +52,42 @@
    "id": "CAP-PG-1",
    "nombre": "Valor del turno",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Calcular con una sola regla, para Housekeeping, Equipo y el portal, las horas planificadas y efectivas de cada persona del turno y su valor según la tarifa vigente y la política de horas; y pagar el turno llamado completo al apoyo de un sub-flujo."
   },
   {
    "id": "CAP-PG-2",
    "nombre": "Saldo de horas (bolsa de tiempo)",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Llevar lo que cada colaborador debe o tiene a favor en horas frente a lo que se le llamó, sin límite ni plazo y sin descontar dinero; hoy se calcula, por construir su ajuste con un motivo."
   },
   {
    "id": "CAP-PG-3",
    "nombre": "Adelantos y compras",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Entregar adelantos al colaborador, legalizar sus compras con factura aprobada por el operador y llevar el saldo del adelanto. Por construir (REQ-PG1-2, DA-37)."
   },
   {
    "id": "CAP-PG-4",
    "nombre": "Liquidación y pago",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Liquidar un periodo congelando el valor de los turnos pagados, registrar el pago y no dejar cambiar lo ya liquidado. Por construir (REQ-PG1-2, DA-37)."
   },
   {
    "id": "CAP-PG-5",
    "nombre": "Movimientos de dinero, permisos y lo que ve el colaborador",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que los movimientos de dinero no se editen ni se borren (se anulan con motivo), que solo quien tiene el permiso los registre y que cada colaborador reciba únicamente lo suyo. Por construir (DA-37)."
   },
   {
    "id": "CAP-PG-6",
    "nombre": "Cargo por daño",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Cobrar al colaborador, con su consentimiento, el costo de un daño que causó. Pospuesto por Carlos hasta validarlo con un abogado o contador (DA-12)."
   }
  ],
@@ -93,7 +105,7 @@
     "Con la política «banco de horas» se paga lo planificado (horas planificadas por el valor hora); con «solo horas reales» se paga lo trabajado y mientras el turno siga abierto el valor queda vacío.",
     "La tarifa que cuenta es la de mayor fecha de inicio que no pase de la fecha del turno; las anuladas y las reemplazadas no cuentan. Un valor hora especial puesto a un turno manda sobre la ficha (solo lo fija quien tiene el permiso de tarifas).",
     "Sin tarifa vigente a la fecha del turno el valor queda vacío y se avisa «sin tarifa registrada»: el sistema no inventa una tarifa. Con la modalidad «sueldo fijo» tampoco hay valor por hora (CU-U-6.5, no construido).",
-    "La política y la modalidad se leen de la ficha de hoy, no de la que regía en la fecha del turno: cambiarlas recalcula el valor y el saldo de todos los turnos pasados, a diferencia de la tarifa, que sí se rige por fecha.",
+    "La política y la modalidad se leen de la ficha de hoy, no de la que regía en la fecha del turno: cambiarlas recalcula el valor y el saldo de todos los turnos pasados, a diferencia de la tarifa, que sí se rige por fecha. (INC-181, abierto, medio: riesgo de dinero).",
     "El valor se redondea al peso entero y las horas a dos decimales."
    ],
    "entradas": [
@@ -176,7 +188,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-181"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -210,7 +224,7 @@
    "limitantes": [
     "Horas planificadas del titular: las fijadas en el turno, luego las de la propiedad, luego las por defecto del negocio y, si nada está fijado, 7. Las del apoyo: las fijadas a él, luego las por defecto del apoyo y, si no hay, 4 (la duración llamada que decidió DA-20 no está: CU-PG-1.3).",
     "Horas efectivas: salen del inicio y del fin reales de la persona, con la hora oficial del sistema; si hay un ajuste con motivo, manda el ajuste. Un turno sin fin queda «en curso» y sin horas efectivas ni diferencia.",
-    "Reabrir un turno cerrado le quita el fin y lo vuelve a dejar «en curso»: sus horas, su diferencia, su valor y el saldo cambian. Nada lo impide hoy; lo impedirá la liquidación (CU-PG-4.3, no construido).",
+    "Reabrir un turno cerrado le quita el fin y lo vuelve a dejar «en curso»: sus horas, su diferencia, su valor y el saldo cambian. Al colaborador lo frena la ventana de 2 horas; al operador nada. Es limitante hasta que exista el candado de la liquidación (CU-PG-4.3) (Desarrollo, M-825).",
     "Un operador sin el permiso de tarifas puede cambiar las horas por turno de una propiedad y con ellas las horas que se pagan; para el negocio, el turno y el apoyo sí se le rechaza (INC-157, abierto, crítico, P2).",
     "Al colaborador los turnos de más de 90 días le llegan reducidos a lo que este cálculo necesita, con las horas de la propiedad si el turno no trae las suyas, para que su saldo cuadre (DA-45)."
    ],
@@ -292,7 +306,8 @@
     "RT-7"
    ],
    "pendientes": [
-    "INC-157"
+    "INC-157",
+    "INC-181"
    ],
    "pruebas": [],
    "tecnica": {
@@ -329,8 +344,9 @@
    "limitantes": [
     "Con la política «banco de horas» el valor ya sale de las horas planificadas y la diferencia con las efectivas ya va al saldo (CU-PG-2.1): el pago del turno llamado completo existe para quien tiene esa política.",
     "Falta lo que añade REQ-F11-5-2: la duración llamada del apoyo (7 h, 5 h o libre, recomendada con el tiempo de manos de sus sub-flujos y redondeada hacia arriba). Hoy el apoyo parte de las horas por defecto del apoyo (4 h), cosa que DA-20 descartó (CU-HK-6.6, no construido).",
-    "Con la política «solo horas reales» se paga lo trabajado y no el turno llamado; las decisiones no dicen si DA-20 aplica también a esa política.",
-    "REQ-F11-5-2 (crítico, dinero) figura «entregado», es decir, pasado a Desarrollo: no hay código del sub-flujo como apoyo con duración llamada."
+    "REQ-F11-5-2 (crítico, dinero) figura «entregado», es decir, pasado a Desarrollo: no hay código del sub-flujo como apoyo con duración llamada.",
+    "DA-20 no aplica a «solo horas reales»: ahí se paga lo trabajado y no genera bolsa (Diseño, M-824 f).",
+    "Reparto confirmado (Diseño, M-824 g): Housekeeping (CU-HK-6.6) registra la duración llamada y la ejecutada; Pagos calcula el valor (este caso de uso) y lleva la bolsa (CAP-PG-2)."
    ],
    "entradas": [
     {
@@ -369,10 +385,17 @@
     },
     {
      "id": "E3",
-     "tipo": "excepcion",
-     "dado": "un apoyo con política «solo horas reales» llamado por 7 horas que trabaja 6",
-     "cuando": "se cierra su parte",
-     "entonces": "hoy se le paga lo trabajado y no lleva saldo; DA-20 no dice si el turno llamado completo aplica a esta política"
+     "tipo": "alterno",
+     "dado": "un apoyo con la política «solo horas reales»",
+     "cuando": "trabaja 6 de 7 horas llamadas",
+     "entonces": "se le paga lo trabajado y no lleva bolsa (DA-20 no aplica)"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "el operador quita el apoyo antes de que empiece",
+     "cuando": "se mira el turno",
+     "entonces": "no hay pago ni bolsa"
     }
    ],
    "origen": [
@@ -526,7 +549,7 @@
    "limitantes": [
     "Está en REQ-PG1-2 («ajuste de saldo de horas con motivo», DA-37), entregado a Desarrollo, y no hay código: hoy el saldo solo cambia si cambia un turno; el ajuste de horas con motivo de CU-HK-6.3 es de un turno y no del saldo.",
     "El ajuste no borra nada: queda como un movimiento con su motivo que se ve en Equipo y en «Mi dinero», y se puede anular (CU-PG-5.1).",
-    "Por DA-41 nunca descuenta dinero: solo mueve horas. El permiso que lo gobierna (el de tarifas o el de pagos) no se pudo confirmar en las decisiones."
+    "Por DA-41 nunca descuenta dinero: solo mueve horas. Exige el permiso de pagos (dinero.pagos) y un motivo (Diseño, M-824 d)."
    ],
    "entradas": [],
    "salidas": [
@@ -581,7 +604,7 @@
     "colecciones": [],
     "notas": "Sin código. El permiso dinero.tarifas o dinero.pagos que lo gobierne lo define Desarrollo con REQ-PG1-2."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de ajuste de saldo, bolsa y movimientos de dinero en el cliente compartido, el servidor y las tres pantallas, sin resultados; criterios por cotejar con el REQ"
@@ -621,23 +644,23 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "un operador con el permiso de adelantos y un colaborador con el encargo de una compra",
-     "cuando": "registra el adelanto con el monto y el medio digitados",
-     "entonces": "el adelanto queda como un movimiento, sube el saldo del adelanto y el colaborador lo ve en «Mi dinero»"
+     "dado": "el administrador en la ficha de zz-verif-colab",
+     "cuando": "registra un adelanto de 100.000 por transferencia con referencia",
+     "entonces": "queda un movimiento con monto, medio, referencia, hora del sistema y quién, y sube el saldo del adelanto"
     },
     {
      "id": "E2",
      "tipo": "excepcion",
-     "dado": "un operador sin el permiso de adelantos",
-     "cuando": "intenta registrar un adelanto",
-     "entonces": "el sistema lo rechaza"
+     "dado": "el mismo formulario",
+     "cuando": "intenta guardar sin monto",
+     "entonces": "no deja guardar: no hay valor precargado"
     },
     {
      "id": "E3",
-     "tipo": "alterno",
-     "dado": "un negocio con un tope de adelanto y un monto mayor al tope",
-     "cuando": "se intenta registrar el adelanto",
-     "entonces": "el sistema no lo acepta con ese monto"
+     "tipo": "excepcion",
+     "dado": "un operador sin el permiso de adelantos",
+     "cuando": "intenta registrarlo",
+     "entonces": "el servidor lo rechaza (403)"
     }
    ],
    "origen": [
@@ -659,7 +682,7 @@
     "colecciones": [],
     "notas": "Sin código. DA-37 pide un cálculo en un solo lugar con pruebas de nivel 1 y movimientos que no se editan; los permisos nuevos son dinero.adelantos y dinero.pagos."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -671,12 +694,12 @@
    "actor": [
     "colaborador"
    ],
-   "que": "Legalizar una compra con el valor y la foto de su factura",
+   "que": "Registrar desde el portal una compra con el valor, el concepto, la propiedad y la foto de su factura, que queda «por aprobar»",
    "declarado": "no-construido",
    "limitantes": [
-    "Está en REQ-PG1-2 («compras con factura») y CMP-1 («el colaborador compra, sube la factura»), pasado a Desarrollo y sin código. Quién registra la compra con su factura, el colaborador desde el portal o el operador por él, no se pudo confirmar sin los criterios del REQ.",
-    "La foto de la factura se probará en celular real (T-7 de Carlos).",
-    "El colaborador solo registra compras de su propio encargo."
+    "Sin construir (REQ-PG1-2 y CMP-1, pasados a Desarrollo).",
+    "La registra el colaborador desde el portal y queda «por aprobar» (Diseño, M-824 a). Una compra sin encargo se puede registrar, pero queda marcada «sin encargo» (CMP-1).",
+    "La foto de la factura se probará en un celular real (N4)."
    ],
    "entradas": [],
    "salidas": [
@@ -689,23 +712,23 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "un colaborador con un adelanto y el encargo de una compra de su turno",
-     "cuando": "registra lo que gastó con la foto de la factura",
-     "entonces": "la compra queda pendiente de aprobación del operador"
+     "dado": "zz-verif-colab con un encargo y un adelanto de 30.000",
+     "cuando": "registra una compra de 24.000 con foto de la factura y 6 unidades",
+     "entonces": "la compra queda «por aprobar» con factura y detalle"
     },
     {
      "id": "E2",
-     "tipo": "excepcion",
-     "dado": "el colaborador registrando una compra",
-     "cuando": "la envía sin la foto de la factura",
-     "entonces": "el sistema no la acepta como legalizada"
+     "tipo": "alterno",
+     "dado": "el mismo colaborador sin encargo",
+     "cuando": "registra una compra",
+     "entonces": "queda «por aprobar» y marcada «sin encargo»"
     },
     {
      "id": "E3",
      "tipo": "excepcion",
      "dado": "un colaborador",
-     "cuando": "intenta registrar una compra de otra persona o sin encargo",
-     "entonces": "el sistema lo rechaza"
+     "cuando": "intenta registrar un adelanto o un pago",
+     "entonces": "el servidor lo rechaza (403): solo crea sus compras"
     }
    ],
    "origen": [
@@ -726,7 +749,7 @@
     "colecciones": [],
     "notas": "Sin código. La pantalla sería del portal (hoy «Mi dinero» solo muestra, CU-POR-4.3) o de Compras; por decidir."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -739,11 +762,11 @@
     "admin",
     "operador"
    ],
-   "que": "Aprobar una compra legalizada con su factura para que cuente contra el adelanto y entre al inventario",
+   "que": "Aprobar o rechazar con motivo una compra «por aprobar»; aprobada, cuenta contra el adelanto y entra al inventario",
    "declarado": "no-construido",
    "limitantes": [
-    "Está en REQ-PG1-2 («compras con factura que el operador aprueba», DA-37), pasado a Desarrollo y sin código; hoy la compra la registra a mano el administrador o el operador sin factura (CU-INV-3.1).",
-    "Requiere el permiso de adelantos (CU-PG-5.2). Qué pasa con una compra que el operador no aprueba (rechazo con motivo) no se pudo confirmar sin los criterios del REQ."
+    "Sin construir (REQ-PG1-2, DA-37); hoy la compra la registra a mano el administrador o el operador sin factura (CU-INV-3.1).",
+    "Requiere el permiso de adelantos (CU-PG-5.2). Rechazada, no descuenta y queda con su motivo (Diseño, M-824 a)."
    ],
    "entradas": [
     {
@@ -769,23 +792,23 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "una compra legalizada con su factura",
+     "dado": "un adelanto de 100.000 y una compra de 35.000 por aprobar",
      "cuando": "el operador la aprueba",
-     "entonces": "la compra cuenta contra el adelanto, entra al inventario y el colaborador la ve aprobada"
+     "entonces": "el saldo del adelanto queda en 65.000 y lo comprado entra al inventario en la zona del encargo"
     },
     {
      "id": "E2",
      "tipo": "excepcion",
-     "dado": "una compra con una factura que no se lee o no corresponde",
-     "cuando": "el operador no la aprueba",
-     "entonces": "la compra no cuenta contra el adelanto ni entra al inventario"
+     "dado": "la misma compra",
+     "cuando": "el operador la rechaza con motivo",
+     "entonces": "no descuenta del adelanto, no entra al inventario y queda con su motivo"
     },
     {
      "id": "E3",
      "tipo": "excepcion",
      "dado": "un operador sin el permiso de adelantos",
-     "cuando": "intenta aprobar una compra",
-     "entonces": "el sistema lo rechaza"
+     "cuando": "intenta aprobarla",
+     "entonces": "el servidor lo rechaza (403)"
     }
    ],
    "origen": [
@@ -807,7 +830,7 @@
     "colecciones": [],
     "notas": "Sin código. El flujo con Inventario es el de CU-INV-10.3 (la compra entra a la zona principal tras la aprobación)."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -822,9 +845,8 @@
    "que": "Calcular el saldo del adelanto de un colaborador: lo adelantado menos las compras aprobadas",
    "declarado": "no-construido",
    "limitantes": [
-    "Está en REQ-PG1-2 («saldo del adelanto visible para admin y colaborador», DA-37), pasado a Desarrollo y sin código.",
-    "Según el cruce de CMP-1, la diferencia entre el adelanto y la factura va al saldo del colaborador en su liquidación (CU-PG-4.1).",
-    "No se pudo confirmar en qué sentido va la diferencia cuando la factura supera el adelanto (si se le reconoce al colaborador en la liquidación).",
+    "Sin construir (REQ-PG1-2, DA-37).",
+    "Saldo del adelanto = adelantos − compras aprobadas − descuentos aplicados. Si la factura supera el adelanto, la diferencia es a favor del colaborador y va a su saldo (CMP-1); si es menor, queda como saldo por descontar (Diseño, M-824 b).",
     "Un movimiento anulado deja de contar."
    ],
    "entradas": [
@@ -855,22 +877,22 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "un adelanto y compras aprobadas por menos de lo adelantado",
-     "cuando": "se calcula el saldo del adelanto",
-     "entonces": "el saldo es la diferencia que el colaborador aún debe rendir o devolver"
+     "dado": "un adelanto de 100.000 y una compra aprobada de 35.000",
+     "cuando": "se mira el saldo",
+     "entonces": "es 65.000 por descontar; el administrador lo ve en Equipo y el colaborador en «Mi dinero»"
     },
     {
      "id": "E2",
      "tipo": "alterno",
-     "dado": "compras aprobadas por más de lo adelantado",
-     "cuando": "se calcula el saldo del adelanto",
-     "entonces": "la diferencia queda a favor del colaborador para su liquidación"
+     "dado": "un adelanto de 30.000 y una compra aprobada de 34.000",
+     "cuando": "se mira el saldo",
+     "entonces": "4.000 a favor del colaborador"
     },
     {
      "id": "E3",
      "tipo": "alterno",
-     "dado": "un adelanto que se anuló con un motivo",
-     "cuando": "se calcula el saldo",
+     "dado": "un adelanto anulado",
+     "cuando": "se mira el saldo",
      "entonces": "el adelanto anulado no cuenta"
     }
    ],
@@ -892,7 +914,7 @@
     "colecciones": [],
     "notas": "Sin código. DA-37 pide el cálculo en un solo lugar con pruebas de nivel 1."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -908,10 +930,10 @@
    "que": "Liquidar a un colaborador un periodo: reunir sus turnos, congelar el valor de cada turno pagado y cruzar el saldo del adelanto",
    "declarado": "no-construido",
    "limitantes": [
-    "Está en REQ-PG1-2 («liquidación que congela el valor de los turnos pagados», DA-37 decidida (a)), pasado a Desarrollo y sin código: hoy el valor es una estimación que se recalcula cada vez (CU-PG-1.1) y «pendiente de liquidar».",
-    "Requiere el permiso de pagos (CU-PG-5.2). No incluye cargos por daño (DA-12 pospuesta) ni los documentos del pago (PG1-3).",
-    "No se pudo confirmar cómo se elige el periodo (mes o rango libre) ni qué pasa con un turno cerrado sin tarifa.",
-    "Verificar en producción está limitado: el verificador no crea pagos ni liquidaciones (DA-23)."
+    "Sin construir (REQ-PG1-2, DA-37): hoy el valor es una estimación que se recalcula cada vez (CU-PG-1.1).",
+    "Por colaborador y por un periodo que elige el operador; el saldo del adelanto se descuenta (por defecto), se mantiene o se divide (Diseño, M-824 c).",
+    "Requiere el permiso de pagos (CU-PG-5.2). No incluye cargos por daño (DA-12) ni los documentos del colaborador (PG1-3); no calcula nómina ni prestaciones.",
+    "El verificador no crea pagos ni liquidaciones en producción (DA-23): se prueba con la cuenta de pruebas o en N1."
    ],
    "entradas": [
     {
@@ -945,30 +967,30 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "un colaborador por hora con turnos cerrados en el periodo y un operador con el permiso de pagos",
-     "cuando": "liquida el periodo",
-     "entonces": "cada turno pagado queda con su valor congelado y la liquidación suma lo que se le debe pagar"
+     "dado": "turnos pendientes de zz-verif-colab y un saldo del adelanto de 65.000",
+     "cuando": "el administrador liquida el periodo con «descontar»",
+     "entonces": "el neto es turnos − 65.000"
     },
     {
      "id": "E2",
      "tipo": "alterno",
-     "dado": "un colaborador con un adelanto cuyo saldo está pendiente",
-     "cuando": "se liquida su periodo",
-     "entonces": "el saldo del adelanto se cruza y la liquidación muestra lo que resulta a pagar"
+     "dado": "la misma liquidación",
+     "cuando": "elige «mantener»",
+     "entonces": "el neto no descuenta y el saldo sigue en 65.000"
     },
     {
      "id": "E3",
-     "tipo": "excepcion",
-     "dado": "un turno del periodo que sigue abierto o sin tarifa",
-     "cuando": "se liquida el periodo",
-     "entonces": "ese turno no se liquida y se avisa por qué"
+     "tipo": "alterno",
+     "dado": "la misma liquidación",
+     "cuando": "elige «dividir» 40.000 / 25.000",
+     "entonces": "descuenta 40.000 y el saldo queda en 25.000"
     },
     {
      "id": "E4",
      "tipo": "excepcion",
      "dado": "un operador sin el permiso de pagos",
      "cuando": "intenta liquidar",
-     "entonces": "el sistema lo rechaza"
+     "entonces": "el servidor lo rechaza (403)"
     }
    ],
    "origen": [
@@ -990,7 +1012,7 @@
     "colecciones": [],
     "notas": "Sin código. El cálculo del valor congelado reutiliza el único cálculo de B1 (nota de Housekeeping: el valor se congela al liquidar en B2, campo pagoCalculado); la guarda de eliminar turno ya mira pagoCalculado, liquidacion, liquidadoEn y pago."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -1003,11 +1025,11 @@
     "admin",
     "operador"
    ],
-   "que": "Registrar el pago de una liquidación con el monto y el medio digitados",
+   "que": "Registrar el pago de una liquidación, total o parcial, con fecha, medio, nota y soporte; congela el valor de cada turno pagado",
    "declarado": "no-construido",
    "limitantes": [
-    "El pago es uno de los movimientos de dinero de DA-37 (adelanto, compra, ajuste, pago y anulación); pasado a Desarrollo y sin código.",
-    "Requiere el permiso de pagos (CU-PG-5.2). No se pudo confirmar si se admiten pagos parciales ni cómo se concilia con un pago hecho fuera del sistema."
+    "Sin construir (DA-37).",
+    "Se permiten pagos parciales (Diseño, M-824 c). Requiere el permiso de pagos (CU-PG-5.2)."
    ],
    "entradas": [
     {
@@ -1025,23 +1047,23 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "una liquidación y un operador con el permiso de pagos",
-     "cuando": "registra el pago con el monto y el medio digitados",
-     "entonces": "el pago queda como un movimiento y el colaborador lo ve entre los pagos recibidos de «Mi dinero»"
+     "dado": "una liquidación con «descontar»",
+     "cuando": "el administrador registra el pago",
+     "entonces": "queda el movimiento de pago, cada turno pagado queda con su valor congelado y el saldo del adelanto queda en 0"
     },
     {
      "id": "E2",
-     "tipo": "excepcion",
-     "dado": "un operador sin el permiso de pagos",
-     "cuando": "intenta registrar un pago",
-     "entonces": "el sistema lo rechaza"
+     "tipo": "alterno",
+     "dado": "la misma liquidación",
+     "cuando": "registra un pago parcial",
+     "entonces": "queda el movimiento por ese monto y el resto sigue pendiente"
     },
     {
      "id": "E3",
-     "tipo": "alterno",
-     "dado": "un pago registrado con un monto equivocado",
-     "cuando": "se anula con un motivo",
-     "entonces": "el pago deja de contar y se registra el correcto"
+     "tipo": "excepcion",
+     "dado": "un operador sin el permiso de pagos",
+     "cuando": "intenta registrar el pago",
+     "entonces": "el servidor lo rechaza (403)"
     }
    ],
    "origen": [
@@ -1061,7 +1083,7 @@
     "colecciones": [],
     "notas": "Sin código."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -1073,11 +1095,11 @@
    "actor": [
     "sistema"
    ],
-   "que": "No dejar cambiar ni eliminar un turno ya liquidado: su valor congelado no se recalcula",
+   "que": "Congelar el turno ya liquidado: no se edita ni se recalcula, y su corrección entra como ajuste con motivo en la siguiente liquidación",
    "declarado": "no-construido",
    "limitantes": [
-    "Depende de la liquidación (CU-PG-4.1), que no existe. Hoy lo único construido es la guarda de Housekeeping que no ofrece eliminar un turno manual con pago o liquidación registrados (CU-HK-1.7), que nunca se activa porque nada marca un turno como liquidado.",
-    "No se pudo confirmar qué pasa si hay que corregir un turno ya liquidado (ajustar sus horas, reabrirlo): hoy reabrir quita el fin y cambia el valor y el saldo (CU-PG-1.2)."
+    "Depende de la liquidación (CU-PG-4.1), que no existe; la guarda de Housekeeping que no ofrece eliminar un turno con pago (CU-HK-1.7) nunca se activa porque nada marca un turno como liquidado.",
+    "Hasta entonces, reabrir un turno cerrado cambia su valor y el saldo (CU-PG-1.2)."
    ],
    "entradas": [
     {
@@ -1095,23 +1117,23 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "un turno incluido en una liquidación",
-     "cuando": "alguien intenta cambiar sus horas, su valor hora o su ajuste",
-     "entonces": "el sistema lo rechaza y el valor congelado no cambia"
+     "dado": "un turno pagado",
+     "cuando": "cambia la tarifa",
+     "entonces": "el valor del turno pagado no cambia"
     },
     {
      "id": "E2",
-     "tipo": "alterno",
-     "dado": "un turno manual ya liquidado",
-     "cuando": "se mira su panel",
-     "entonces": "no se ofrece eliminarlo"
+     "tipo": "excepcion",
+     "dado": "un turno liquidado",
+     "cuando": "el operador intenta editarlo, reabrirlo o eliminarlo",
+     "entonces": "el sistema no lo permite"
     },
     {
      "id": "E3",
-     "tipo": "excepcion",
-     "dado": "un turno ya liquidado",
-     "cuando": "alguien intenta reabrirlo",
-     "entonces": "no se permite sin una corrección registrada (por decidir)"
+     "tipo": "alterno",
+     "dado": "un turno liquidado con horas mal registradas",
+     "cuando": "el operador lo corrige",
+     "entonces": "la corrección entra como ajuste con motivo en la siguiente liquidación (Diseño, M-824 e)"
     }
    ],
    "origen": [
@@ -1134,7 +1156,7 @@
     ],
     "notas": "_puedeEliminarTurno mira shift.pagoCalculado, liquidacion, liquidadoEn y pago («B2 aún no existe; se miran por si llegan»); el servidor no tiene control equivalente para cambios de horas en turnos liquidados."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de _puedeEliminarTurno en Housekeeping y búsqueda de pagoCalculado o liquidación en el servidor de colecciones y el cliente compartido: solo el comentario de que el valor se congela al liquidar"
@@ -1151,7 +1173,7 @@
    "declarado": "no-construido",
    "limitantes": [
     "DA-37: los movimientos son inmutables; la anulación es otro movimiento que lleva el motivo. Pasado a Desarrollo y sin código. Es el mismo criterio que ya rige para las tarifas (CU-U-6.3).",
-    "Quién puede anular cada tipo de movimiento (permiso de adelantos o de pagos) no se pudo confirmar."
+    "Anula con el mismo permiso con que se registra: adelantos y compras con dinero.adelantos; ajustes y pagos con dinero.pagos (por confirmar con Diseño al construir)."
    ],
    "entradas": [],
    "salidas": [
@@ -1208,7 +1230,7 @@
     "colecciones": [],
     "notas": "Sin código. Referencia de estilo: anularTarifa (POST /usuarios/{id}/tarifas/anular, motivo obligatorio, hora del servidor)."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda de adelanto, liquidación, legalización, bolsa y movimientos de dinero en el cliente compartido, el servidor, los servicios de usuarios y las tres pantallas: sin código; solo la nota fija de «Mi dinero», la guarda de eliminar turno y el comentario de permisos de B2"
@@ -1280,7 +1302,7 @@
     ],
     "notas": "_permisosSanear acepta solo todo, dinero.tarifas, equipo.editar, equipo.invitar e inventario.editar; api/lib/session.php (_puede) ya prevé \"dinero.adelantos\"/\"dinero.pagos\" en su comentario; la sección Permisos de Equipo no tiene casillas para ellos."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de _permisosSanear, del comentario de permisos en la sesión y de la sección Permisos de Equipo: solo hay cuatro permisos"
@@ -1374,7 +1396,7 @@
     "colecciones": [],
     "notas": "Sin código. Cuando exista, el colaborador solo la lee (R-2 del cruce de DA-37) y la regla de 90 días móviles de DA-45 aplica a la liquidación."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de la nota fija de «Mi dinero» y búsqueda de los movimientos en el portal, el servidor y el cliente compartido, sin resultados"

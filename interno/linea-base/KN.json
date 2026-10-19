@@ -1,0 +1,1957 @@
+{
+ "modulo": "KN",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-conocimiento.html (664 líneas, leída entera: lista y filtros, editor, etiquetas, adjuntos, guardar y eliminar, «¿Dónde se usa?», arranque y sincronización)",
+  "str-guia-visor.js (161 líneas, leído entero: texto con formato, galería, pantalla completa, enlaces, ampliar fotos sueltas)",
+  "str-base-conocimiento.html (817 líneas, leída por búsquedas y cabecera): resulta ser documentación interna del proyecto, no del módulo; ver «alcance.fuera»",
+  "api/col/index.php (búsquedas «guias»: colección válida, roles de escritura y filtro de lectura del colaborador) y docs/claude/proyecto.md, shell-y-api.md, servidor-php.md, flujos.md y housekeeping.md (búsquedas «guía», «guias», visor, subida y archivo)",
+  "str-flujos.html y str-m1-housekeeping.html (solo búsquedas de guías: elegir, crear, migrar, importar, abrir el visor), str-api.js (subida, archivo con sesión, sincronización de colecciones) y str-app-shell.html (entrada «Guías» y carga de Flujos)",
+  "kn-fuentes.json: módulo KN del mapa, REQ-BC-1/BC-2/PC1-1 (salieron por coincidencia de palabra), DA-45 y DA-49, bolsa, 9 INC, REL-08 y REL-30 y las generales, actores y reglas transversales; REQ-K2 y REQ-S4 del historial y del consolidado de requerimientos (proyecto)",
+  "interno/arquitectura/guiones-e2e.json: ningún guion ejerce Conocimiento ni el visor; solo REQ-SH-2 caso h abre la entrada «Guías» como administrador (se cita en CU-KN-6.1); el .spec.js de REQ-SH-2 se leyó para ver qué comprueba",
+  "interno/linea-base/esquema.json, sistema.json, FL.json, HK.json, U.json, K3.json y los mapeos de FL, K3, CAL, PG e INC1 (estilo, flujos con ids provisionales hacia CU-KN-… y precedentes de «reiniciar» fuera de alcance)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "La biblioteca de guías del negocio: ver las guías, buscarlas por texto y filtrarlas por categoría.",
+   "Redactar guías: título, categoría, etiquetas, texto con negrita y listas, imágenes subidas y enlaces; crear, editar, descartar cambios y eliminar con el aviso de dónde se usa.",
+   "«¿Dónde se usa?»: los flujos, actividades y tareas que enlazan cada guía, y el salto al flujo.",
+   "El visor de la guía que comparten Conocimiento, Housekeeping y el portal del colaborador: texto, galería de imágenes a pantalla completa y enlaces; también ampliar las fotos del turno y de la evidencia de incidentes.",
+   "Lo que la biblioteca entrega a Flujos y Housekeeping y lo que recibe del editor de flujos (la guía creada allí).",
+   "Acceso (solo administrador y operador entran y escriben; el colaborador solo lee) y sincronización de las guías entre equipos.",
+   "Lo definido y aún por construir: catálogo de guías de la plataforma por plan, PDF y video propios, guías en los tipos de incidente y vista previa; y el reinicio de guías (fuera de alcance por ahora)."
+  ],
+  "fuera": [
+   "Cómo se elige y se crea una guía desde el editor de una tarea: Flujos (CU-FL-2.7 y CU-FL-2.8). Aquí solo se cuenta qué recibe y qué entrega la biblioteca.",
+   "Cómo el turno decide qué guía mostrar (botón de la tarea, nota corta y lista de guías): Housekeeping (CU-HK-2.5).",
+   "La «Base de conocimiento» del proyecto (mapa, diagrama, fichas, catálogo y líneas base del modelo de operación). Es documentación interna, solo para el administrador, que lee los documentos del proyecto; no usa las guías del negocio, ni el visor, ni la subida de archivos. Pertenece al Grupo Proyecto (PRJ), no a Conocimiento: no se le levantan casos de uso aquí. El parecido es solo de nombre y los mapas técnicos ya lo advierten («No confundir con la biblioteca de guías»).",
+   "El menú que lleva a «Guías» y la identidad y los permisos (Shell, Identidad).",
+   "El servidor de colecciones y de archivos subidos, el respaldo de la cuenta y la copia a Drive (Servidor, Copia a Drive): aquí solo se cuenta lo que Conocimiento necesita de ellos.",
+   "El portal del colaborador como contenedor del turno (Portal): el visor se abre dentro de Housekeeping."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde las dos fuentes principales (str-conocimiento.html y str-guia-visor.js, leídas enteras), las búsquedas en Flujos, Housekeeping, el shell y el servidor de colecciones, y los requerimientos REQ-K2 y REQ-S4 del historial. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido; lo construido se comprobó en el código. El módulo no tiene REQ vigente en el diseño: REQ-K2 y REQ-K1 están en el historial (archivados, K1 absorbido por K2). Los REQ que salieron en las fuentes (REQ-BC-1, REQ-BC-2, REQ-PC1-1) son de otros módulos y están en «sinAtar». Los casos de uso de los módulos vecinos sin línea base (Menú) usan identificadores provisionales que su dueño debe confirmar. Ningún guion de pruebas ejerce Conocimiento: lo construido va con «verificado» (lectura del código). El peso de cada capacidad lo decide el dueño del producto (por-confirmar). El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-KN-1",
+   "nombre": "Consulta de la biblioteca",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver las guías del negocio, buscarlas por título, etiqueta o texto y filtrarlas por categoría."
+  },
+  {
+   "id": "CAP-KN-2",
+   "nombre": "Redacción de guías",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Crear, editar y eliminar guías: título, categoría, etiquetas, texto con formato, imágenes y enlaces."
+  },
+  {
+   "id": "CAP-KN-3",
+   "nombre": "Dónde se usa cada guía",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Saber en qué flujos, actividades y tareas está enlazada una guía y llegar a ese flujo."
+  },
+  {
+   "id": "CAP-KN-4",
+   "nombre": "Lectura de la guía en el turno",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "El visor que abre la guía de una tarea: texto, imágenes a pantalla completa y enlaces; también amplía las fotos del turno."
+  },
+  {
+   "id": "CAP-KN-5",
+   "nombre": "Entrega a Flujos y Housekeeping",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Entregar la biblioteca a quien arma flujos y a quien está en el turno, y recibir la guía que se crea desde el editor de flujos."
+  },
+  {
+   "id": "CAP-KN-6",
+   "nombre": "Acceso y sincronización",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Quién entra y quién escribe, cómo se guardan las guías y se mantienen al día en cada equipo, y qué lee el colaborador."
+  },
+  {
+   "id": "CAP-KN-7",
+   "nombre": "Previsto y aún no construido",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Catálogo de la plataforma por plan, PDF y video propios, guías en los tipos de incidente, vista previa y el reinicio de guías."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-KN-1.1",
+   "capacidad": "CAP-KN-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver la biblioteca de guías con su categoría, sus adjuntos, sus etiquetas y en cuántas tareas se usa cada una",
+   "declarado": "construido",
+   "limitantes": [
+    "Las guías salen ordenadas por título; no hay otro orden.",
+    "Las categorías son cinco fijas (limpieza, alistamiento, mantenimiento, protocolo y general); el negocio no puede crear otras.",
+    "El conteo «usada en N tareas» sale de los flujos que el equipo ya tiene guardados y cuenta una vez el flujo general y una por cada copia por propiedad (CU-KN-3.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con guías guardadas",
+     "cuando": "se abre Conocimiento",
+     "entonces": "se ven las guías en tarjetas ordenadas por título, cada una con su categoría, cuántos adjuntos tiene, en cuántas tareas se usa y sus etiquetas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio sin ninguna guía",
+     "cuando": "se abre Conocimiento",
+     "entonces": "sale «Todavía no hay guías. Crea la primera.» con el botón para crear una"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una guía cuya categoría no es ninguna de las cinco",
+     "cuando": "se muestra en la lista",
+     "entonces": "aparece como «General» en vez de fallar"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "/api/col/guias"
+    ],
+    "colecciones": [
+     "guias",
+     "flujos"
+    ],
+    "notas": "renderFilterBar/renderLista; el conteo es _usosDeGuia(id).length; ordena con localeCompare por título; categoría desconocida → CATEGORIAS.general."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: pintado de tarjetas, mensaje de lista vacía, orden por título y conteo de usos"
+   }
+  },
+  {
+   "id": "CU-KN-1.2",
+   "capacidad": "CAP-KN-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Buscar guías escribiendo parte del título, de una etiqueta o del texto, y filtrarlas por categoría",
+   "declarado": "construido",
+   "limitantes": [
+    "La búsqueda distingue tildes: «lavandería» no encuentra «lavanderia».",
+    "No busca dentro de los títulos de los adjuntos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "varias guías guardadas",
+     "cuando": "se escribe una palabra en el buscador",
+     "entonces": "quedan solo las guías cuyo título, etiquetas o texto la contienen, sin importar mayúsculas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el filtro de categorías con «Todas» marcado",
+     "cuando": "se elige una categoría",
+     "entonces": "quedan solo las guías de esa categoría y el filtro se combina con lo escrito en el buscador"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una búsqueda o un filtro sin coincidencias",
+     "cuando": "se aplica",
+     "entonces": "sale «Sin resultados para este filtro/búsqueda.» y no se borra ninguna guía"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "renderLista (indexOf sobre titulo, etiquetas.join y texto en minúsculas) + setCatFiltro; sin normalizar tildes."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: condiciones de renderLista y mensaje de sin resultados"
+   }
+  },
+  {
+   "id": "CU-KN-2.1",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear una guía nueva con su título, su categoría, sus etiquetas y su texto, y guardarla",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin título no se guarda; el título no tiene largo máximo.",
+    "No se avisa si ya existe otra guía con el mismo título; la importación de flujos desde Excel busca la guía por título y toma la primera (CU-FL-8.3). Diseño decide si se pide el aviso, como se pidió para los flujos (T-28).",
+    "La guía nace con categoría «General»; no hay plantillas de guía."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de una guía nueva con el título «Uso de la lavadora»",
+     "cuando": "se pulsa «Guardar»",
+     "entonces": "sale «Guía creada», el editor se cierra, la guía aparece en la lista y sigue ahí al recargar la página"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una guía nueva sin título, o con solo espacios",
+     "cuando": "se pulsa «Guardar»",
+     "entonces": "sale «Escribe un título para la guía», el editor sigue abierto y no se guarda nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una guía nueva con categoría «Mantenimiento» y dos etiquetas",
+     "cuando": "se guarda",
+     "entonces": "la tarjeta muestra la categoría elegida y las dos etiquetas"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "/api/col/guias"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "nuevaGuia/guardarGuia/persistGuias: nace {id g-…, categoria:\"general\", ambito:\"cuenta\", version:1}; al guardar fija creadoEn, actualizadoEn y actualizadoPor (id del usuario)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: validación del título, mensajes «Guía creada» y «Escribe un título para la guía»"
+   }
+  },
+  {
+   "id": "CU-KN-2.2",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Editar una guía guardada y guardar sus cambios",
+   "declarado": "construido",
+   "limitantes": [
+    "Cada guardado sube el número de versión, pero no se conserva historial ni se muestra quién la cambió ni cuándo.",
+    "Si dos personas editan la misma guía a la vez, gana la última que guarda, sin aviso (CU-KN-6.3).",
+    "El cambio llega a todas las tareas y copias por propiedad que enlazan la guía, porque se enlaza por referencia y no se copia el texto (RT-4); no hay forma de cambiarla solo para una tarea."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía guardada abierta en el editor",
+     "cuando": "se cambia el texto y se pulsa «Guardar»",
+     "entonces": "sale «Guía actualizada» y el visor de las tareas que la enlazan muestra el texto nuevo en cuanto el equipo se sincroniza"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una guía guardada abierta en el editor",
+     "cuando": "se borra el título y se pulsa «Guardar»",
+     "entonces": "sale «Escribe un título para la guía» y la guía conserva el título y el texto de antes"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "/api/col/guias"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "editarGuia (copia profunda a editorData) → guardarGuia: version+1, actualizadoEn/actualizadoPor; persistGuias manda solo lo que cambió contra str-col-lastpush-v1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: copia de trabajo, aumento de versión y mensaje «Guía actualizada»"
+   }
+  },
+  {
+   "id": "CU-KN-2.3",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cerrar el editor sin guardar, con «Cancelar» o la ✕, y descartar los cambios",
+   "declarado": "construido",
+   "limitantes": [
+    "No pregunta antes de descartar: tampoco cuando se pulsa otra guía de la lista o «+ Nueva guía» con cambios sin guardar.",
+    "Las imágenes ya subidas antes de cancelar quedan guardadas sin guía (CU-KN-2.6, DT-44)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía abierta con cambios sin guardar",
+     "cuando": "se pulsa «Cancelar» o la ✕",
+     "entonces": "el editor se cierra y la guía queda como estaba; una guía nueva no se crea"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una guía abierta con cambios sin guardar",
+     "cuando": "se pulsa otra guía de la lista o «+ Nueva guía»",
+     "entonces": "el editor pasa a la otra guía y los cambios se pierden sin preguntar"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "DT-44"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "cerrarEditor() pone editingId y editorData en null; editarGuia/nuevaGuia reemplazan editorData sin comprobar cambios."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: cerrarEditor, editarGuia y nuevaGuia no comparan contra lo guardado"
+   }
+  },
+  {
+   "id": "CU-KN-2.4",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Dar formato al texto de la guía con negrita y listas",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo hay negrita y lista con guion; no hay títulos, cursiva, ni enlaces dentro del texto (los enlaces van como adjuntos).",
+    "No se acepta código de página: lo que parezca código se ve como texto (CU-KN-4.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un texto con una parte seleccionada",
+     "cuando": "se pulsa el botón de negrita",
+     "entonces": "la parte queda entre dobles asteriscos y en el visor se ve en negrita"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el cursor al final de una línea con texto",
+     "cuando": "se pulsa «≡ Lista»",
+     "entonces": "se agrega una línea nueva que empieza con un guion; las líneas con guion se ven como lista en el visor"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un texto con líneas en blanco entre bloques",
+     "cuando": "se guarda y se abre en el visor",
+     "entonces": "cada bloque es un párrafo y los saltos simples dentro de un bloque se respetan"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_envolverSeleccion(\"**\",\"**\") y _insertarLista() sobre el textarea #g-texto; el formato se interpreta en STRGuiaVisor.renderTexto."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del visor: mini-barra y reglas de renderTexto"
+   }
+  },
+  {
+   "id": "CU-KN-2.5",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Poner etiquetas a una guía para encontrarla después",
+   "declarado": "construido",
+   "limitantes": [
+    "Las etiquetas son texto libre: no hay lista de etiquetas del negocio ni sugerencias, y «Lavadora» y «lavadora» cuentan como distintas."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de una guía",
+     "cuando": "se escribe una palabra y se pulsa Enter o coma",
+     "entonces": "la palabra queda como etiqueta y el cuadro queda listo para otra"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una guía que ya tiene la etiqueta «lavadora»",
+     "cuando": "se escribe otra vez «lavadora» y se pulsa Enter",
+     "entonces": "no se agrega una segunda igual"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una guía con etiquetas",
+     "cuando": "se pulsa la ✕ de una etiqueta",
+     "entonces": "la etiqueta se quita de la guía"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_etiquetaKeydown (Enter o coma, trim, indexOf exacto) y _quitarEtiqueta; renderEtiquetas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: manejo de teclas y quitar etiqueta"
+   }
+  },
+  {
+   "id": "CU-KN-2.6",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Subir imágenes a una guía desde el equipo o la cámara",
+   "declarado": "construido",
+   "limitantes": [
+    "La imagen se sube al instante, antes de guardar la guía, y necesita conexión.",
+    "Si después se cancela la guía o se quita la imagen, el archivo queda guardado sin guía: no hay forma de borrarlo hoy (DT-44).",
+    "Solo imágenes (los PDF y los videos propios no se ofrecen, CU-KN-7.2); el sistema las reduce de tamaño al subirlas.",
+    "Las imágenes de las guías no tienen copia a Drive ni el corte las toca: depende de la decisión pendiente «¿entran en la copia a Drive, fuera del corte?» (bolsa; CU-K3-2.8).",
+    "En el celular el botón puede abrir la cámara en vez de la galería (depende del teléfono)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía abierta en el editor y conexión",
+     "cuando": "se elige una imagen",
+     "entonces": "sale «Subiendo imagen…», luego «Imagen agregada» y la imagen aparece con su miniatura al final de los adjuntos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una subida que falla (sin conexión o archivo no aceptado)",
+     "cuando": "se elige la imagen",
+     "entonces": "sale «No se pudo subir la imagen» con el motivo si lo hay y no se agrega ningún adjunto"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una imagen agregada y la guía guardada",
+     "cuando": "otra persona abre la guía en el visor",
+     "entonces": "la imagen se ve en la galería de la guía (CU-KN-4.2)"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-14"
+   ],
+   "pendientes": [
+    "DT-44"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "POST /api/upload (tipo guia)",
+     "GET /api/archivo/*"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_onSubirImagen → STRApi.upload(\"guia\", editorData.id, file); adjunto {id, tipo:\"imagen\", url, titulo, orden}; el original se reduce a 1600 px y calidad 82 según docs/claude/servidor-php.md (el endpoint no estaba en las fuentes leídas); archivos en api/uploads/<cuenta>/guia/<id>/."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de los mapas técnicos; el endpoint de subida no se leyó (api/index.php no estaba en las fuentes)"
+   }
+  },
+  {
+   "id": "CU-KN-2.7",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Agregar enlaces a una guía, con un título opcional",
+   "declarado": "construido",
+   "limitantes": [
+    "No comprueba que la dirección exista ni que sea válida: cualquier texto se guarda como enlace.",
+    "Solo los enlaces de YouTube muestran una miniatura; los demás llevan un ícono."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de una guía",
+     "cuando": "se escribe una dirección de YouTube con un título y se pulsa «+ Agregar enlace»",
+     "entonces": "el enlace queda en los adjuntos con la miniatura del video y el título escrito"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una dirección escrita sin «http»",
+     "cuando": "se agrega",
+     "entonces": "el sistema le antepone «https://»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el campo de la dirección vacío",
+     "cuando": "se pulsa «+ Agregar enlace»",
+     "entonces": "sale «Escribe la URL del enlace» y no se agrega nada"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_agregarEnlace (prefijo https:// si falta) y _youtubeId para la miniatura (img.youtube.com); adjunto {id, tipo:\"enlace\", url, titulo, orden}."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _agregarEnlace y la miniatura de YouTube"
+   }
+  },
+  {
+   "id": "CU-KN-2.8",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ordenar los adjuntos de una guía arrastrándolos, ponerles título o quitarlos",
+   "declarado": "construido",
+   "limitantes": [
+    "Para ordenar solo se arrastra con el ratón; en una pantalla táctil no hay otra forma de reordenar (por confirmar en un teléfono).",
+    "Quitar un adjunto no borra el archivo de la imagen (DT-44)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía con tres adjuntos",
+     "cuando": "se arrastra el tercero sobre el primero y se guarda",
+     "entonces": "el orden queda así al reabrir la guía y en el visor"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un adjunto de la lista",
+     "cuando": "se escribe un título en su campo",
+     "entonces": "el adjunto queda con ese título en el visor"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un adjunto de la lista",
+     "cuando": "se pulsa su ✕",
+     "entonces": "sale de la lista; la guía lo pierde al guardarse"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "DT-44"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_attachAdjuntoDrag (HTML5 drag & drop nativo, reasigna orden), _actualizarTituloAdjunto y _quitarAdjunto."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página; el arrastre en pantalla táctil no se probó"
+   }
+  },
+  {
+   "id": "CU-KN-2.9",
+   "capacidad": "CAP-KN-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar una guía confirmando, viendo antes en qué tareas se usa",
+   "declarado": "construido",
+   "limitantes": [
+    "Eliminar no quita el enlace de las tareas que la usaban: en Flujos se ve «(guía eliminada)» y en el turno el botón de la guía sigue, pero si la tarea no tiene nota ni otra guía no abre nada.",
+    "No hay papelera ni deshacer; la guía queda marcada como borrada en el almacén (RT-5) y solo un respaldo la devuelve.",
+    "El aviso de usos depende de los flujos que el equipo ya tiene guardados (CU-KN-3.1).",
+    "Los archivos de las imágenes de la guía quedan guardados (DT-44)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía sin uso",
+     "cuando": "se pulsa «Eliminar» y se confirma",
+     "entonces": "sale «Guía eliminada», desaparece de la lista y el editor se cierra"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una guía enlazada en dos tareas",
+     "cuando": "se pulsa «Eliminar»",
+     "entonces": "la confirmación dice «Se usa en 2 tareas» y lista cada una como flujo › actividad › tarea antes de dejar confirmar"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "la confirmación abierta",
+     "cuando": "se pulsa «Cancelar» o se toca fuera",
+     "entonces": "no se elimina nada"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una guía eliminada que una tarea todavía enlaza",
+     "cuando": "el colaborador pulsa el botón de la guía en el turno",
+     "entonces": "no se abre ninguna guía (si la tarea no tiene nota ni otras guías)"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-5"
+   ],
+   "pendientes": [
+    "DT-44"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "PUT /api/col/guias (deleted)"
+    ],
+    "colecciones": [
+     "guias",
+     "flujos"
+    ],
+    "notas": "confirmarEliminar → guias.filter + persistGuias (el diff contra str-col-lastpush-v1 manda el id borrado); en el servidor es un borrado suave (tombstone). HK: _verGuiasHK sale sin hacer nada si no queda ninguna guía ni nota."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de _verGuiasHK en Housekeeping"
+   }
+  },
+  {
+   "id": "CU-KN-3.1",
+   "capacidad": "CAP-KN-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver, al editar una guía guardada, en qué flujos, actividades y tareas se usa («¿Dónde se usa?»)",
+   "declarado": "construido",
+   "limitantes": [
+    "Lee los flujos que el equipo ya tiene guardados; Conocimiento no los pide por su cuenta. Entrando por el menú sirve (Flujos se carga al abrir el menú), pero con la página suelta, o con flujos cambiados en otro equipo después, puede decir «Sin uso todavía» sin que sea cierto, y el aviso al eliminar no listaría usos (Desarrollo lo confirma).",
+    "Una tarea de un flujo general con copias por propiedad aparece una vez por el flujo general y una por cada copia, con el nombre de la propiedad (o su código si no se encuentra).",
+    "En una guía nueva, aún sin guardar, la sección no aparece.",
+    "Solo cuenta los usos en flujos: hoy no hay otro lugar donde se enlace una guía (CU-KN-7.3)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-FL-2.7",
+     "dato": "guías enlazadas a cada tarea o actividad sin tareas, con el flujo, la actividad y la tarea donde están",
+     "rel": "REL-08"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía enlazada en la tarea «Poner lavadora» de la actividad «Lavandería» del flujo «Alistamiento»",
+     "cuando": "se abre la guía en el editor",
+     "entonces": "en «¿Dónde se usa?» sale «Alistamiento › Lavandería › Poner lavadora» con un enlace «Abrir →»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo con una copia para una propiedad que enlaza la guía",
+     "cuando": "se abre la guía en el editor",
+     "entonces": "salen dos usos: el del flujo general y el de la copia, esta con el nombre de la propiedad entre paréntesis"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una actividad sin tareas que enlaza la guía",
+     "cuando": "se abre la guía en el editor",
+     "entonces": "sale el flujo y la actividad, sin tarea"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una guía que ninguna tarea enlaza",
+     "cuando": "se abre la guía en el editor",
+     "entonces": "sale «Sin uso todavía.»"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias",
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "_usosDeGuia(guiaId) recorre loadFlujos() (localStorage str-flujos-v2) por actividad.guias (si no tiene tareas) y tarea.guias; _propNombre usa str-propiedades-v1. Conocimiento solo hace pull de «guias» (_syncColFromApi); la copia de flujos la mantiene Flujos (el shell lo carga como panel al abrir)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del shell (panel de Flujos con src fijo); sin probar la página suelta"
+   }
+  },
+  {
+   "id": "CU-KN-3.2",
+   "capacidad": "CAP-KN-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir desde «¿Dónde se usa?» el flujo que usa la guía, directo en el editor de Flujos",
+   "declarado": "construido",
+   "limitantes": [
+    "Al pulsar «Abrir →» la página pasa a Flujos sin avisar: lo que estaba sin guardar en la guía se pierde.",
+    "Abre el flujo (o su copia) pero no lleva a la actividad ni a la tarea."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-FL-3.2",
+     "dato": "flujo que se quiere abrir en el editor, para cambiar o quitar la guía de su tarea",
+     "rel": "REL-08"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía en uso abierta en el editor",
+     "cuando": "se pulsa «Abrir →» en uno de sus usos",
+     "entonces": "se abre Flujos con ese flujo ya en el editor"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una guía con cambios sin guardar",
+     "cuando": "se pulsa «Abrir →»",
+     "entonces": "se sale de Conocimiento y los cambios se pierden sin aviso"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_irAFlujos(\"str-flujos.html?edit=<flujoId>\") → location.href con ?v=; el parámetro ?edit= lo atiende Flujos (CU-FL-3.2)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _irAFlujos y el enlace de cada uso"
+   }
+  },
+  {
+   "id": "CU-KN-4.1",
+   "capacidad": "CAP-KN-4",
+   "actor": [
+    "colaborador",
+    "admin",
+    "operador"
+   ],
+   "que": "Leer una guía abierta desde la tarea del turno: su título y su texto con párrafos, listas y negrita, sin salir de la tarea",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo lectura: no se puede editar ni marcar nada desde el visor.",
+    "El texto tiene formato mínimo (párrafos, lista con guion y negrita); lo demás se ve como texto corrido.",
+    "Quien está en el turno ve la versión de la guía que su equipo ya sincronizó (CU-KN-6.3); un cambio hecho hace un momento puede tardar en llegar.",
+    "En el portal del colaborador el visor y los diálogos de Housekeeping quedaron detrás del panel del turno hasta INC-131 (cerrado)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-2.5",
+     "dato": "guía de la tarea que se abre en el checklist",
+     "rel": "REL-30"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea con una sola guía y sin nota",
+     "cuando": "el colaborador pulsa el botón de la guía (📖)",
+     "entonces": "la guía se abre encima del turno con su título y su texto, y al cerrarla (✕ o tocando fuera) vuelve a la tarea"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un texto con párrafos separados por una línea en blanco, líneas que empiezan con guion y una parte entre dobles asteriscos",
+     "cuando": "se abre la guía",
+     "entonces": "los párrafos se ven separados, las líneas con guion como lista y la parte marcada en negrita"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un texto que contiene código de página (por ejemplo una etiqueta entre ángulos)",
+     "cuando": "se abre la guía",
+     "entonces": "se muestra tal cual escrito y no se interpreta"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-131"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-guia-visor.js",
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "STRGuiaVisor.abrir(guia) arma el overlay con _renderTexto (todo pasa por _esc; **negrita**, listas \"- \", párrafos por línea en blanco); HK lo llama desde _verGuiasHK/_abrirGuiaVisorHK con las guías de str-guias-v1 y el portal lo muestra dentro del iframe de HK."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del visor y de _verGuiasHK en Housekeeping"
+   }
+  },
+  {
+   "id": "CU-KN-4.2",
+   "capacidad": "CAP-KN-4",
+   "actor": [
+    "colaborador",
+    "admin",
+    "operador"
+   ],
+   "que": "Ver las imágenes de la guía en una galería, ampliarlas a pantalla completa y pasar de una a otra",
+   "declarado": "construido",
+   "limitantes": [
+    "Las imágenes necesitan conexión y sesión y no se guardan en el equipo: sin conexión quedan en blanco, sin mensaje.",
+    "No hay acercar con zoom en la pantalla completa.",
+    "Una imagen que ya no existe o no carga queda en blanco sin aviso."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía con tres imágenes",
+     "cuando": "se abre en el visor",
+     "entonces": "las tres se ven como miniaturas cuadradas en una cuadrícula y al tocar una se amplía a pantalla completa"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una imagen ampliada en una guía con varias",
+     "cuando": "se pulsa la flecha, se desliza el dedo o se pulsa la ✕",
+     "entonces": "se pasa a la anterior o a la siguiente (la última lleva a la primera) o se cierra la pantalla completa"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una imagen que no se puede cargar",
+     "cuando": "se abre la guía",
+     "entonces": "su recuadro queda vacío y el resto de la guía se ve normal"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-1"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-guia-visor.js"
+    ],
+    "rutas": [
+     "GET /api/archivo/*"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_abrirLightbox(imagenes, idx) + _resolverImg → STRApi.archivoUrl(url) (fetch con sesión → blob:, caché en memoria de la pestaña); el catch es vacío."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del visor y de STRApi.archivoUrl; sin probar con una imagen rota"
+   }
+  },
+  {
+   "id": "CU-KN-4.3",
+   "capacidad": "CAP-KN-4",
+   "actor": [
+    "colaborador",
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir los enlaces de la guía en otra pestaña, con la miniatura del video si son de YouTube",
+   "declarado": "construido",
+   "limitantes": [
+    "El video no se reproduce dentro de la guía: solo se abre el enlace en otra pestaña.",
+    "Fuera de YouTube no hay miniatura."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía con un enlace con título",
+     "cuando": "se abre en el visor",
+     "entonces": "se ve una tarjeta con el título y el sitio («Abrir ↗»); al tocarla se abre en otra pestaña"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un enlace de YouTube",
+     "cuando": "se abre la guía",
+     "entonces": "la tarjeta muestra la miniatura del video"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un enlace sin título",
+     "cuando": "se abre la guía",
+     "entonces": "la tarjeta muestra la dirección en lugar del título"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-guia-visor.js"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "abrir(): enlacesHtml con <a target=\"_blank\" rel=\"noopener\">, _youtubeId y _dominio."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del visor: armado de las tarjetas de enlace"
+   }
+  },
+  {
+   "id": "CU-KN-4.4",
+   "capacidad": "CAP-KN-4",
+   "actor": [
+    "colaborador",
+    "admin",
+    "operador"
+   ],
+   "que": "Ampliar a pantalla completa las fotos del turno y las fotos de la evidencia de un incidente, pasando de una a otra",
+   "declarado": "construido",
+   "limitantes": [
+    "Es el mismo visor de imágenes de las guías prestado a Housekeeping: lo que se cambie en la pantalla completa cambia en los tres sitios.",
+    "En la evidencia de un incidente solo se amplían las fotos (no los videos) y se usa la copia reducida si existe."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-3.1",
+     "dato": "fotos de la tarea del turno que se quieren ampliar",
+     "rel": "REL-30"
+    },
+    {
+     "de": "CU-HK-4.2",
+     "dato": "fotos de la evidencia de un incidente que se quieren ampliar",
+     "rel": "REL-30"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea hecha con dos fotos",
+     "cuando": "se toca una miniatura de la foto",
+     "entonces": "se abre la pantalla completa en esa foto y se puede pasar a la otra del mismo conjunto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la evidencia de un incidente con fotos y un video",
+     "cuando": "se toca una foto",
+     "entonces": "se amplía la foto y solo se pasa entre las fotos, sin el video"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-guia-visor.js",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "GET /api/archivo/*"
+    ],
+    "colecciones": [],
+    "notas": "STRGuiaVisor.lightbox([{url}], i), usado por _hkVerFoto (fotos de tarea, REQ-F9.o) y _tkVerFotos (evidencia, usa urlMin)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del visor y de las dos funciones de Housekeeping que lo llaman"
+   }
+  },
+  {
+   "id": "CU-KN-4.5",
+   "capacidad": "CAP-KN-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Previsualizar la guía como la verá el colaborador, desde el editor y antes de guardarla",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El visor se carga en la página de Conocimiento y su cabecera dice que sirve para previsualizar, pero ningún botón del editor lo llama: la guía se ve por primera vez en el turno.",
+    "No hay un REQ ni una decisión que lo pida; la única huella es ese comentario del código. Diseño decide si se quiere."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía abierta en el editor, guardada o no",
+     "cuando": "se pide la vista previa",
+     "entonces": "se abre el visor con lo escrito hasta ahora, como lo vería el colaborador, y al cerrarlo se vuelve al editor"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html",
+     "str-guia-visor.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin implementación: str-conocimiento.html carga str-guia-visor.js pero nunca llama a STRGuiaVisor.abrir; el comentario de cabecera del visor y docs/claude/housekeeping.md hablan de «previsualizar»."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda de STRGuiaVisor en la página de Conocimiento: solo la carga del script, ninguna llamada"
+   }
+  },
+  {
+   "id": "CU-KN-5.1",
+   "capacidad": "CAP-KN-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar la biblioteca de guías a Flujos, para buscarlas y enlazarlas a las tareas, y a Housekeeping, para tenerlas en el turno",
+   "declarado": "construido",
+   "limitantes": [
+    "Las tareas enlazan la guía por referencia y no copian su texto (RT-4): corregir una guía la corrige en todas las tareas, incluidas las copias por propiedad.",
+    "Una guía nueva llega al teléfono del colaborador cuando su equipo se sincroniza, no al instante (CU-KN-6.3)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-FL-2.7",
+     "dato": "guías de la biblioteca con su título y sus etiquetas, para buscarlas y elegirlas",
+     "rel": "REL-08"
+    },
+    {
+     "a": "CU-HK-2.5",
+     "dato": "guías de la biblioteca (texto, imágenes y enlaces) para abrirlas desde la tarea del turno",
+     "rel": "REL-30"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "guías guardadas en la biblioteca",
+     "cuando": "se abre el editor de flujos y se pulsa el botón de guías de una tarea",
+     "entonces": "se ven las guías por título, se pueden buscar por título o etiqueta y elegir una para enlazarla"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una guía recién creada en Conocimiento",
+     "cuando": "se abre el editor de flujos",
+     "entonces": "la guía ya aparece para elegir"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el turno abierto en el teléfono del colaborador",
+     "cuando": "el equipo se sincroniza",
+     "entonces": "recibe las guías nuevas y las cambiadas para abrirlas desde las tareas"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html",
+     "str-flujos.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/guias"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "La colección guias (str-guias-v1) la escribe Conocimiento (y Flujos al crear una guía, CU-KN-5.2) y la leen Flujos (pullSeed(\"guias\"), buscador de _gpRenderBuscador) y Housekeeping (STRApi.col.pull(\"guias\") al cargar y en el sondeo periódico, _readGuias)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de Flujos y Housekeeping: dónde leen la colección de guías"
+   }
+  },
+  {
+   "id": "CU-KN-5.2",
+   "capacidad": "CAP-KN-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar en la biblioteca la guía que se crea desde el editor de flujos, con su título y su texto, para completarla después aquí",
+   "declarado": "construido",
+   "limitantes": [
+    "La guía creada así lleva solo título y texto, con categoría «General»; las imágenes, los enlaces y las etiquetas se agregan después en Conocimiento.",
+    "Se guarda al instante: si luego se cancela el flujo, la guía queda en la biblioteca sin enlazar a nada y sin que nadie lo avise (INC-168, abierto; Diseño: si se cancela el flujo, la guía no se guarda o se pregunta)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-FL-2.8",
+     "dato": "guía nueva con título y texto, creada desde el editor de flujos",
+     "rel": "REL-08"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía creada desde la ventana de guías de una tarea en Flujos, y el flujo guardado",
+     "cuando": "se abre Conocimiento",
+     "entonces": "la guía está en la lista con categoría «General», sin adjuntos y «usada en 1 tarea»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una guía creada desde Flujos y el flujo cancelado después",
+     "cuando": "se abre Conocimiento",
+     "entonces": "la guía está en la lista con «usada en 0 tareas», sin que nadie la haya pedido ya"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-21"
+   ],
+   "pendientes": [
+    "INC-168"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html",
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "/api/col/guias"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_gpGuardarNuevaGuia (Flujos) hace guias.push + persistGuias() inmediato con {categoria:\"general\", ambito:\"cuenta\", version:1}; Conocimiento solo la lee en su pull."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de Flujos: _gpGuardarNuevaGuia persiste la guía antes de guardar el flujo"
+   }
+  },
+  {
+   "id": "CU-KN-5.3",
+   "capacidad": "CAP-KN-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir Conocimiento con una guía nueva ya abierta y su título puesto, desde un enlace de otro módulo",
+   "declarado": "construido",
+   "limitantes": [
+    "Hoy ningún módulo lo usa: Flujos prefirió crear la guía en una ventana propia (CU-FL-2.8).",
+    "Solo pone el título: no pasa la categoría, el texto ni la tarea a enlazar, y no vuelve solo al módulo de origen."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un enlace a Conocimiento con la orden de crear y un título",
+     "cuando": "se abre",
+     "entonces": "el editor sale abierto con una guía nueva que ya lleva ese título"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un enlace con la orden de crear y sin título",
+     "cuando": "se abre",
+     "entonces": "el editor sale abierto con una guía nueva vacía"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "Parámetros ?nueva=1&titulo=… leídos en DOMContentLoaded y en nuevaGuia(); sin llamadores en el repositorio (str-flujos.html lo cita en un comentario como opción descartada)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y búsqueda de llamadores: ninguno"
+   }
+  },
+  {
+   "id": "CU-KN-6.1",
+   "capacidad": "CAP-KN-6",
+   "actor": [
+    "colaborador",
+    "admin",
+    "operador"
+   ],
+   "que": "Permitir abrir Conocimiento solo al administrador y al operador",
+   "declarado": "construido",
+   "limitantes": [
+    "El menú muestra «Guías» solo a esos dos roles, pero lo que decide es el rol que dice el sistema, no el menú (RT-14).",
+    "El único caso de pruebas que toca este caso de uso (REQ-SH-2 h) comprueba que el administrador ve la página abierta y sin «Sin permiso»; no prueba el rechazo del colaborador ni la falta de sesión."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario con sesión"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-4.2",
+     "dato": "aviso de que el módulo abierto no tiene sesión, para que el menú principal pida entrar",
+     "rel": "REL-02"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador u operador con sesión",
+     "cuando": "abre Guías desde el menú",
+     "entonces": "ve la biblioteca (panel a la vista, página cargada y sin el aviso de falta de permiso)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador con sesión",
+     "cuando": "abre Conocimiento",
+     "entonces": "ve «Sin permiso para este módulo» (dentro del menú) o vuelve a su inicio, y no se cargan guías"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "nadie con sesión",
+     "cuando": "se abre Conocimiento",
+     "entonces": "si está dentro del menú, avisa al menú para que pida entrar; suelto, va a la pantalla de entrada"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14",
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "window._strRolOk = STRApi.exigirRol([\"admin\",\"operador\"]) antes de cargar (INC-53, INC-108, REQ-U8); el arranque (DOMContentLoaded) no corre sin permiso; superadmin cuenta como admin."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de STRApi.exigirRol; la prueba REQ-SH-2 h abre «Guías» como administrador"
+   }
+  },
+  {
+   "id": "CU-KN-6.2",
+   "capacidad": "CAP-KN-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dejar que solo el administrador y el operador creen, cambien o eliminen guías y suban sus imágenes; el colaborador solo las lee",
+   "declarado": "construido",
+   "limitantes": [
+    "Para el operador no hace falta un permiso extra (a diferencia de inventario): basta el rol.",
+    "La regla de la subida de imágenes se tomó de los mapas técnicos; el código de la subida no estaba en las fuentes."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con sesión",
+     "cuando": "guarda, cambia o elimina una guía",
+     "entonces": "el sistema lo acepta"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador que intenta guardar o eliminar una guía por su cuenta",
+     "cuando": "se envía el cambio",
+     "entonces": "el sistema responde «Sin permiso para escribir en esta colección» y no cambia nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador que intenta subir una imagen de guía",
+     "cuando": "se envía el archivo",
+     "entonces": "el sistema la rechaza"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "PUT /api/col/guias",
+     "POST /api/upload (tipo guia)"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "api/col/index.php: $rolesEscritura = [admin, operador] para toda colección salvo turnos, tickets, inv-movimientos e inv-pendientes (403 «Sin permiso para escribir en esta colección»); /api/upload tipo guia|doc|plano: JWT admin/operador (docs/claude/servidor-php.md)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (roles de escritura); la subida se tomó de docs/claude/servidor-php.md"
+   }
+  },
+  {
+   "id": "CU-KN-6.3",
+   "capacidad": "CAP-KN-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar las guías y mantenerlas al día en cada equipo, también las cambiadas sin conexión",
+   "declarado": "construido",
+   "limitantes": [
+    "Las guías se piden al abrir la página y no se refrescan mientras está abierta: lo que otra persona cambie desde otro equipo se ve al volver a abrirla.",
+    "Si dos personas editan la misma guía, gana la última que guarda y no se avisa del choque.",
+    "Si el sistema rechaza el guardado (por ejemplo, un cuerpo demasiado grande o un fallo), la pantalla igual dice que se guardó, solo queda un aviso interno, y el cambio se pierde en la siguiente sincronización. Posible incidente nuevo (Desarrollo lo confirma).",
+    "Un cambio hecho sin conexión se envía cuando vuelve la conexión."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una guía guardada con conexión",
+     "cuando": "se abre Conocimiento en otro equipo",
+     "entonces": "ese equipo muestra la guía con los cambios"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un equipo sin conexión",
+     "cuando": "se guarda una guía",
+     "entonces": "queda guardada en el equipo y se envía sola cuando vuelve la conexión"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un guardado que el sistema rechaza con error",
+     "cuando": "se pulsa «Guardar»",
+     "entonces": "la pantalla dice «Guía actualizada», pero el cambio desaparece al sincronizar de nuevo"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [
+     "GET /api/col/guias",
+     "PUT /api/col/guias"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "persistGuias: diff contra str-col-lastpush-v1 (actualiza la copia ANTES de subir) y STRApi.col.push; un fallo de red se encola (str-col-pending), un error HTTP se rechaza y solo hace console.warn; _syncColFromApi hace un pull al cargar y STRApi.col.pull reemplaza la caché local (INC-78: el servidor manda)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de persistGuias, _syncColFromApi y de STRApi.col.pull/push; el error HTTP sin aviso se dedujo del código, no se provocó"
+   }
+  },
+  {
+   "id": "CU-KN-6.4",
+   "capacidad": "CAP-KN-6",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Leer las guías del negocio desde su teléfono, sin poder cambiarlas",
+   "declarado": "construido",
+   "limitantes": [
+    "DA-45 (capa 2) pone «guías» entre lo que el colaborador ve de la propiedad mientras tenga un turno próximo o un incidente abierto ahí. El filtro de lectura del colaborador solo descarta una guía si trae propiedad y no es de las suyas; las guías no traen propiedad, así que le llegan todas las de la cuenta, siempre.",
+    "Diseño decide si las guías son del negocio entero y todas visibles (lo probable, por REQ-K2: «el colaborador puede leer todas las guías de su cuenta») o si hay que acotarlas; es la misma regla de lectura que INC-158 revela para las ubicaciones."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con un turno",
+     "cuando": "abre el turno en su teléfono",
+     "entonces": "recibe las guías del negocio y puede abrir las de sus tareas"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador sin turnos próximos ni recientes",
+     "cuando": "su teléfono se sincroniza",
+     "entonces": "recibe igual todas las guías (hoy no se acotan por turno)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "intenta cambiar una guía",
+     "entonces": "el sistema lo rechaza (CU-KN-6.2)"
+    }
+   ],
+   "origen": [
+    "DA-45",
+    "REQ-K2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-120"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "GET /api/col/guias"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_colFiltrarLecturaColaborador, case \"guias\": `if (isset($d->propId) && $d->propId !== \"\" && !$enMisProps($d)) continue 2;` Las guías no llevan propId (modelo: {id, titulo, categoria, texto, adjuntos, etiquetas, ambito, version, …}), así que siempre pasan; el contexto _colLecturaContextoBD se calcula igual aunque no filtre guías."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/col/index.php (filtro de lectura del colaborador) y del modelo de la guía; el efecto real no se probó con un colaborador"
+   }
+  },
+  {
+   "id": "CU-KN-7.1",
+   "capacidad": "CAP-KN-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el catálogo de guías de la plataforma que corresponde al plan del negocio y usarlas por referencia o copiarlas a la biblioteca propia para personalizarlas",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Cada guía ya trae un campo de ámbito (hoy siempre «cuenta»), pero no existe el catálogo, ni los planes, ni la pestaña «Catálogo STR».",
+    "Depende de que haya planes de suscripción y un administrador de la plataforma (REQ-U8-superadmin, definir cuando haya clientes reales)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con un plan que incluye el catálogo",
+     "cuando": "abre la pestaña del catálogo en Conocimiento",
+     "entonces": "ve las guías de la plataforma que su plan permite y puede usar una por referencia (se actualiza sola) o copiarla a su biblioteca para editarla"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una guía de la plataforma",
+     "cuando": "el negocio intenta editarla",
+     "entonces": "no se puede editar; solo se puede copiar y editar la copia"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "Sin implementación: `ambito:\"plataforma\"` está previsto en el modelo (REQ-K2, decisión 2026-09-11) y no se usa; no hay copia con origenId."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del modelo de la guía y de REQ-K2: el campo existe, ninguna pantalla lo usa"
+   }
+  },
+  {
+   "id": "CU-KN-7.2",
+   "capacidad": "CAP-KN-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Adjuntar a una guía un PDF o un video propio",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy solo se adjuntan imágenes subidas y enlaces. REQ-K2 dejó pendiente la interfaz de PDF.",
+    "El sistema ya sabe guardar PDF como documentos de otro uso, pero Conocimiento no lo ofrece."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de una guía",
+     "cuando": "se sube un PDF",
+     "entonces": "el PDF queda como adjunto y el visor lo abre para leerlo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el editor de una guía",
+     "cuando": "se sube un video",
+     "entonces": "el video queda como adjunto y el visor lo reproduce o lo abre"
+    }
+   ],
+   "origen": [
+    "REQ-K2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html",
+     "str-guia-visor.js"
+    ],
+    "rutas": [
+     "POST /api/upload"
+    ],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "Sin implementación: el selector de archivos solo acepta image/*; REQ-K2 definió adjuntos de tipo imagen, enlace y video y dejó «UI de PDF» pendiente."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del editor: el único selector de archivos es de imágenes"
+   }
+  },
+  {
+   "id": "CU-KN-7.3",
+   "capacidad": "CAP-KN-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Enlazar guías a los tipos de incidente y a las actividades de soporte, para que quien reporta un incidente vea el protocolo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy una guía solo se enlaza desde las tareas y las actividades sin tareas de un flujo (CU-FL-2.7).",
+    "REQ-S4 («Conocimiento vía flujos») sigue en el historial como «con Bloque C»; no hay REQ vigente ni decisión que lo ponga en cola."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un tipo de incidente con una guía de protocolo enlazada",
+     "cuando": "alguien reporta un incidente de ese tipo",
+     "entonces": "el reporte ofrece abrir la guía del protocolo"
+    }
+   ],
+   "origen": [
+    "REQ-K2",
+    "REQ-S4"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "guias",
+     "tickets"
+    ],
+    "notas": "Sin implementación: tickets no lleva guias; REQ-K2 lo prevé («tipos de incidente y actividades de soporte los referencian por id»)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda de guías en el código de Housekeeping: solo se leen desde las tareas de los flujos"
+   }
+  },
+  {
+   "id": "CU-KN-7.4",
+   "capacidad": "CAP-KN-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Reiniciar las guías para dejar el sistema limpio",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-49 pospuesta por Carlos el 18-oct («de momento descartemos los borrados»); vuelve al alcance si se retoma.",
+    "Se pidió solo como limpieza puntual, sin pantalla nueva; «reiniciar módulo» queda en la bolsa (T-21)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con guías de ensayo",
+     "cuando": "se reinician las guías con respaldo previo y confirmación escrita",
+     "entonces": "las guías se archivan sin borrarse físicamente y las tareas que las enlazaban quedan sin guía"
+    }
+   ],
+   "origen": [
+    "DA-49"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-12"
+   ],
+   "pendientes": [
+    "T-21"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "Sin código en el producto: Conocimiento no tiene acción de reinicio ni de archivado. Contrapartes: CU-FL-10.5, CU-INV-8.5 y CU-HK-10.8."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de DA-49 y de la página: sin acción de reinicio"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-BC-1",
+   "porque": "Es de la Base de conocimiento del proyecto (pestaña Diagrama del mapa), que pertenece al Grupo Proyecto (PRJ), no a las guías del negocio; salió por la palabra «conocimiento». Aceptado."
+  },
+  {
+   "id": "REQ-BC-2",
+   "porque": "Pestaña «Catálogo» de la Base de conocimiento (fichas de la fábrica): del Grupo Proyecto (PRJ). Entregado."
+  },
+  {
+   "id": "INC-102",
+   "porque": "Es del Diagrama de la Base de conocimiento (avisos de consola y cabecera): del Grupo Proyecto (PRJ), no de las guías. Cerrado. Su campo «módulo» dice «Base de conocimiento (interno)»."
+  },
+  {
+   "id": "bolsa: Diagrama de la Base de conocimiento, versión 2",
+   "porque": "Mejoras del diagrama de la Base de conocimiento: es del Grupo Proyecto (PRJ). Sin definir."
+  },
+  {
+   "id": "REQ-PC1-1",
+   "porque": "Actividades guiadas por cámara (Puntos de control, PC1): salió por coincidencia de palabra («guiada»). Entregado."
+  },
+  {
+   "id": "INC-84",
+   "porque": "El respaldo de la cuenta no incluía la colección de guías: se arregló en el respaldo (K3, CU-K3-6.1 y CU-K3-6.2), no en Conocimiento. Cerrado."
+  },
+  {
+   "id": "INC-101",
+   "porque": "El respaldo diario no incluía guías ni grupos de inventario: del respaldo (K3). Cerrado por el lote 56."
+  },
+  {
+   "id": "INC-96",
+   "porque": "Google bloqueaba el permiso de Drive: es de la Copia a Drive (K3); el seguimiento lo clasificó como «Conocimiento» por error. Cerrado."
+  },
+  {
+   "id": "INC-97",
+   "porque": "Conectar Drive sin marcar la casilla de permiso: es de la Copia a Drive (K3); el seguimiento lo clasificó como «Conocimiento» por error. Cerrado."
+  },
+  {
+   "id": "INC-112",
+   "porque": "Nota «está en…» de un juego incompleto en Inventario; salió por la palabra «guía». Cerrado."
+  },
+  {
+   "id": "INC-158",
+   "porque": "Las ubicaciones comunes llegan al colaborador sin filtrar por propiedad. Es de Propiedades (CU-PR-8.3), pero comparte el filtro de lectura con las guías: ver la duda de CU-KN-6.4. Abierto."
+  },
+  {
+   "id": "bolsa: Copia a Drive de guías, documentos y planos",
+   "porque": "Decisión pendiente (¿entran en la copia a Drive, fuera del corte?). La cubre CU-K3-2.8 (no construido) en Copia a Drive; aquí solo se cita en las limitantes de CU-KN-2.6. Sin id en la bolsa."
+  }
+ ]
+}

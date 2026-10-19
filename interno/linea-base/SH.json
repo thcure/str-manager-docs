@@ -1,0 +1,1674 @@
+{
+ "modulo": "SH",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-app-shell.html (1804 líneas, leído completo; cliente p5c110): menú de 4 grupos y Favoritos, _aplicarRolesMenu / _inicioElegir, openModule / navSub / nav, favoritos por usuario, panel de Configuración, aviso fijo y aviso breve, renderApiSession, oyente de «str:sin-sesion», _strRenewApiSession, temas, menú del celular",
+  "str-lo-que-viene.html (275 líneas, leído completo): lectura de los tres documentos, funciones puras de la etapa y guarda de acceso",
+  "str-api.js por búsqueda: requireSession, exigirRol, rutaInicio, logout, clearSession, recienEnLogin, avisoSinSesion, showExpiredBanner, docs.* (no se leyó completo)",
+  "str-calendario.html, str-flujos.html, str-propiedades.html, str-conocimiento.html, str-m1-housekeeping.html, str-tablero.html por búsqueda de _irAFlujos, postMessage hacia el marco y botones «← Shell»",
+  "docs/claude/shell-y-api.md (fila de str-app-shell.html y notas de str-api.js, por búsqueda); no se leyeron servidor-php.md ni los mapas de los otros módulos",
+  "sh-fuentes.json: módulo SH del mapa, REQ-SH-2, REQ-FL-12, REQ-OP-1 y REQ-INV2-8-1, DA-16 y DA-49, bolsa (T-9, T-10, T-17, T-21), 10 INC (INC-79, 87, 93, 108, 109, 110, 111, 131, 134, 162), DT-27 y DT-48, relaciones REL-01, 02, 18, 23, 26 (más REL-24, 33, 34 leídas del mapa), actores y reglas",
+  "claude/producto/requerimientos-sh2-fl12-op1-menu-tablero-2026-10.md (decisiones de Carlos y criterios de REQ-SH-2 y REQ-OP-1) y claude/producto/requerimientos-reinicio-modulos-2026-10.md (REQ-RM-1, borrador)",
+  "sh-guiones.json, guiones-e2e.json y los .spec.js de REQ-SH-2 (12 casos), INC-134 (2), REQ-OP-1b (a y d citados; h, de la lectura del Tablero, y los demás son de OP) y REQ-K3b-aviso (e y e2 citados; f, una captura sin aserción, no); descartados como no ejercitadores del marco: REQ-MOD-6 (6 guiones), R-3-db-config, REQ-K3b b a f, REQ-K3b-aviso b a d y g, REQ-K3c-vista",
+  "interno/linea-base/esquema.json, sistema.json, U.json, K3.json, CAL.json, FL.json y HK.json (estilo y flujos hacia CU-SH-… provisionales), y los archivos de mapeo U-mapeo.json y K3-mapeo.json"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "El marco de la aplicación: barra superior, menú de grupos plegables (Favoritos, Operación del día, Configurar el negocio, Lo que viene y Proyecto) y el área donde se abre cada módulo sin salir de él.",
+   "El menú por rol: qué ve el administrador y qué el operador, y la primera pantalla a la que entran (el Tablero).",
+   "Favoritos de cada persona.",
+   "Lo que el marco hace cuando un módulo abierto se queda sin sesión y cómo pinta la barra con la sesión.",
+   "«Lo que viene»: la lista de áreas pendientes con su etapa calculada, solo para el administrador.",
+   "El panel de Configuración como sitio del marco para la tarjeta de Drive; el aviso fijo bajo la barra y el aviso breve.",
+   "El menú en el celular y el tema oscuro o claro.",
+   "El acceso, desde el menú, a las siete páginas del grupo Proyecto (de la fábrica).",
+   "Lo definido y pospuesto: reiniciar módulos desde Configuración (fuera de alcance por ahora)."
+  ],
+  "fuera": [
+   "La sesión (renovación, vencimiento, cierre) y llevar a cada rol a su inicio, y los permisos de cada rol: son de Identidad, equipo y permisos (CAP-U-2 y CAP-U-3); aquí solo se cuenta cómo el marco pinta la sesión y reacciona a un módulo sin sesión.",
+   "La tarjeta de copia a Drive de Configuración (conectar, volver de Google, probar, desconectar, estado y reporte del corte), el aviso del corte (qué dice y a quién), el respaldo descargable ⬇ y el diario: son de Copia a Drive y retención (CAP-K3-1, CAP-K3-4 y CAP-K3-6).",
+   "El contenido de cada módulo abierto, incluido el Tablero (OP) y las siete páginas del grupo Proyecto (PRJ).",
+   "El cliente compartido (str-api.js) y el servidor: aquí solo se cuenta lo que el marco les pide.",
+   "Lo retirado en REQ-SH-2: el Dashboard y el Portafolio con datos de ejemplo, las maquetas del menú, el selector de propiedad de muestra y el aviso «Subir mis datos al servidor».",
+   "Los botones «← Shell» o «← Menú» de cada módulo cuando se abre suelto (de cada módulo).",
+   "Cómo ordena el Tablero sus turnos y alertas y cuándo lee (OP)."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde str-app-shell.html (1804 líneas, leído completo, versión del cliente p5c110) y str-lo-que-viene.html (275, completo), con str-api.js por búsqueda (sesión, rol, salida, aviso sin sesión, documentos), los módulos por búsqueda de cómo navegan entre sí, el mapa técnico shell-y-api.md, REQ-SH-2, REQ-OP-1 y el borrador de REQ-RM-1, y los guiones REQ-SH-2, INC-134, REQ-OP-1b y REQ-K3b-aviso (se leyeron los .spec.js de los casos citados). En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Un solo dato, una fuente: la sesión y el cierre de sesión son de Identidad (CU-U-3.x), y la tarjeta de Drive, el aviso del corte y el respaldo son de Copia a Drive (CU-K3-1.x, 4.x, 6.1); el Shell recoge el marco y se enlaza con ellos por flujos (REL-02, REL-18). Falta la decisión de Diseño sobre dos fronteras: el aviso fijo (marco aquí, contenido en K3) y la pantalla «Lo que viene» (aquí, aunque el mapa la lista en PRJ). Los guiones de salud del servicio (REQ-MOD-6*, R-3-db-config) y los de la tarjeta de Drive (REQ-K3b b a f, REQ-K3c-vista f) usan el marco solo como página de entrada y no se citan; REQ-OP-1b h es del Tablero (cuándo deja de leer). Los ids CU-OP-1.2 y CU-PRJ-1.1 son provisionales. No estaban entre las fuentes las pruebas unitarias del marco (tests/menu-sh2.test.js, roles.test.js, sesion-shell.test.js), que no cuentan en esta línea base. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-SH-1",
+   "nombre": "Menú por rol y pantalla de inicio",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Mostrar a cada persona solo los grupos y las entradas de menú que su rol puede abrir, todas con una pantalla real, y llevarla al entrar a la primera pantalla de trabajo (el Tablero)."
+  },
+  {
+   "id": "CAP-SH-2",
+   "nombre": "Avisos del marco",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Alojar el aviso fijo que el servidor entrega bajo la barra superior (hoy, el del próximo corte) y mostrar avisos breves cuando una acción del marco termina o falla."
+  },
+  {
+   "id": "CAP-SH-3",
+   "nombre": "Abrir módulos y moverse en el marco",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Abrir cada módulo dentro del marco sin salir de él, plegar los grupos del menú, usar el menú en el celular y pasar de un módulo a otro."
+  },
+  {
+   "id": "CAP-SH-4",
+   "nombre": "Barra superior y sesión en el marco",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Mostrar quién tiene sesión (o «Entrar» si no hay) y decidir qué hace el marco cuando un módulo abierto se queda sin sesión."
+  },
+  {
+   "id": "CAP-SH-5",
+   "nombre": "Favoritos",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Anclar entradas del menú en Favoritos, por persona, verlas arriba al entrar y limpiar las que ya no existen."
+  },
+  {
+   "id": "CAP-SH-6",
+   "nombre": "Lo que viene",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Una página solo para el administrador con lo que falta del STR por área: qué es, para qué sirve, en qué etapa va (idea, definido, en construcción) y en qué orden; la etapa se calcula, no se escribe."
+  },
+  {
+   "id": "CAP-SH-7",
+   "nombre": "Configuración del negocio",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "El panel de Configuración como sitio del marco donde se aloja la tarjeta de copia en Google Drive (que es de Copia a Drive); incluye lo definido y pospuesto: reiniciar módulos."
+  },
+  {
+   "id": "CAP-SH-8",
+   "nombre": "Grupo Proyecto en el menú",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Dar al administrador, plegado al final del menú, el acceso a las siete páginas internas del proyecto. Es de la fábrica de software, no del negocio."
+  },
+  {
+   "id": "CAP-SH-9",
+   "nombre": "Apariencia del marco",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Cambiar entre tema oscuro y claro y que los módulos abiertos lo sigan."
+  },
+  {
+   "id": "CAP-SH-10",
+   "nombre": "Respaldo de la cuenta",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Descargar desde el marco un respaldo con los datos del negocio (viene de K3 por decisión de Diseño, M-824)."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-SH-1.1",
+   "capacidad": "CAP-SH-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en el menú principal solo los grupos y las entradas que mi rol puede abrir, todas con una pantalla real",
+   "declarado": "construido",
+   "limitantes": [
+    "El administrador ve Favoritos y cuatro grupos (Operación del día, Configurar el negocio, Lo que viene y Proyecto) con 17 entradas; el operador ve 9 y no ve «Lo que viene» ni «Proyecto». Configuración no depende del rol: la ven los dos.",
+    "Sin rol conocido (la sesión aún no lo dijo) no se ve ninguna entrada que dependa del rol: no hay rol por defecto.",
+    "Es solo la cara de la pantalla: quien decide qué puede hacer cada rol es el sistema (CU-U-2.6) y cada módulo se cierra por sí mismo (CU-U-2.5). El colaborador nunca ve el menú: va a su portal.",
+    "Una entrada nueva entra al menú solo cuando su requerimiento queda aceptado; antes vive en «Lo que viene» (decisión 3 de REQ-SH-2). Nada lo obliga salvo el guion que cuenta las 17 entradas.",
+    "Un cambio de rol hecho por el administrador se ve al volver a cargar el STR, no al instante.",
+    "Deuda de cobertura anotada al aceptar REQ-SH-2: RT-6, RT-10, RT-11 y RT-13 y REL-30 no tienen caso en la ruta de ese requerimiento."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "nombre, rol y permisos de la persona con sesión, para armar el menú principal y su barra"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "ve Favoritos y, en este orden, «Operación del día» (Tablero, Calendario, Limpieza & HK, Inventario), «Configurar el negocio» (Propiedades, Flujos de trabajo, Guías, Equipo y permisos, Configuración), «Lo que viene» y «Proyecto»; ninguna entrada es una maqueta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "ve las 9 entradas de «Operación del día» y «Configurar el negocio» y no ve «Lo que viene» ni «Proyecto»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona sin sesión del sistema que se queda en el marco (por ejemplo, acaba de venir de la pantalla de entrada sin completarla)",
+     "cuando": "carga el menú",
+     "entonces": "no ve ningún grupo ni entrada que dependa del rol; solo Favoritos y Configuración, y el panel de Configuración pide iniciar sesión"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un operador al que el administrador cambió el rol",
+     "cuando": "vuelve a cargar el STR",
+     "entonces": "el menú se arma con el rol vigente que dice el servidor, no con el que había guardado el aparato"
+    },
+    {
+     "id": "E5",
+     "tipo": "alterno",
+     "dado": "una persona con la cuenta de Google abierta cuya sesión del sistema se renueva sola después de cargar",
+     "cuando": "llega la sesión nueva",
+     "entonces": "el menú, la barra y Favoritos se pintan de nuevo con su rol, sin recargar"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2",
+    "REQ-SH1",
+    "REQ-S1",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-93",
+    "INC-108",
+    "INC-109"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/me"
+    ],
+    "colecciones": [
+     "str-user",
+     "str-me-permisos-v1"
+    ],
+    "notas": "_aplicarRolesMenu(rol) muestra u oculta cada elemento con data-roles (_rolVeElemento: superadmin, legado de MySQL, cuenta como admin; un ítem es visible si él y todos sus contenedores lo ven, _navItemVisible); se aplica al cargar, tras renovar la sesión y tras STRApi.me(true). Sin str-user todo lo que tiene data-roles queda oculto. nav() tiene la guarda por rol (INC-109); openModule() y navSub() no (ver CU-SH-3.1). Los casos a y b comprueban las 17 y 9 entradas y los grupos ocultos; los vigilan además tests/menu-sh2.test.js y tests/roles.test.js (no estaban entre las fuentes). E3, E4 y E5 salen de leer el código: sin prueba."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-1.2",
+   "capacidad": "CAP-SH-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Entrar al STR directamente en el Tablero, la primera pantalla de trabajo, sin tener que elegirla",
+   "declarado": "construido",
+   "limitantes": [
+    "La pantalla de inicio es la entrada visible de menor orden de inicio: hoy el Tablero (1); si no existiera, Limpieza & HK (2). Vale para el administrador y el operador.",
+    "No recuerda la última pantalla usada: cada vez que se carga el STR vuelve al inicio.",
+    "Cuando se vuelve de Google con el resultado de conectar Drive, lo que queda abierto es Configuración y no el inicio (CU-K3-1.2).",
+    "El colaborador no pasa por aquí: va a su portal (CU-U-3.10).",
+    "Desde L-132 el STR no muestra datos de ejemplo ni selector de propiedad de muestra; el Dashboard y el Portafolio se retiraron."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-OP-4.1",
+     "dato": "petición de abrir el Tablero como pantalla de inicio del marco",
+     "rel": "REL-01"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "queda abierto el Tablero dentro del marco, su entrada marcada en el menú y un solo panel a la vista"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "queda abierto el Tablero, igual que para el administrador"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un menú que no tiene la entrada del Tablero",
+     "cuando": "abre el STR",
+     "entonces": "queda abierta Limpieza & HK"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un administrador que acaba de entrar",
+     "cuando": "mira el marco y su pantalla de inicio",
+     "entonces": "no ve huéspedes, propiedades ni tickets de muestra, ni un selector de propiedad de muestra"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "una persona cuyo rol aún no se conoce",
+     "cuando": "carga el STR",
+     "entonces": "no se abre ninguna pantalla hasta que llega el rol; entonces se abre la de inicio"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2",
+    "REQ-OP-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E4"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-OP-1b",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html",
+     "str-tablero.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Al final de _aplicarRolesMenu, si hay rol y ningún .panel.show, se elige con _inicioElegir la entrada visible de menor data-inicio (Tablero 1, Limpieza & HK 2) y se le hace .click(), igual que desde el menú. El caso e espera el Tablero si su entrada existe y Limpieza & HK si no; hoy el Tablero existe, así que la rama de E3 no se ejercita. El id CU-OP-1.2 es provisional (OP aún no tiene línea base) y no es el CU-OP-1.1 que usa HK."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-2.1",
+   "capacidad": "CAP-SH-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver, fijo bajo la barra superior y en cualquier pantalla, el aviso que el servidor entrega para mí (hoy, el del próximo corte) y pasar de él a Configuración",
+   "declarado": "construido",
+   "limitantes": [
+    "El marco solo aloja el aviso: qué dice, cuándo sale y a quién (administrador, y operador con permiso) lo decide el servidor, y su contenido es de Copia a Drive (CU-K3-4.2, 4.3 y 4.4). Aquí no se repiten esos textos.",
+    "Ocupa una franja propia entre la barra y el contenido, que empuja el contenido hacia abajo; se ve igual con cualquier módulo abierto.",
+    "Se pide al servidor al cargar el STR y cada vez que se abre Configuración; no se vuelve a pedir solo. Un cambio hecho fuera (por ejemplo, conectar el Drive en otra pestaña) no lo quita hasta recargar.",
+    "Si el servidor no responde, la franja se oculta sin mostrar error.",
+    "El enlace «Conectar Drive» solo lo tiene el administrador; el operador ve el texto «Solo el administrador puede conectar el Drive»."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-4.2",
+     "dato": "aviso fijo del próximo corte, con su fecha, para quien puede verlo (administrador y operador autorizado)",
+     "rel": "REL-18"
+    },
+    {
+     "de": "CU-K3-4.3",
+     "dato": "recordatorio de 7, 3 o 1 días para el corte, al frente del aviso fijo",
+     "rel": "REL-18"
+    },
+    {
+     "de": "CU-K3-4.4",
+     "dato": "cantidad de archivos que aún no están en Drive a tres días o menos del corte, para el aviso fijo",
+     "rel": "REL-18"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-7.1",
+     "dato": "petición de abrir Configuración desde el enlace «Conectar Drive» del aviso fijo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador de un negocio sin Drive conectado",
+     "cuando": "abre cualquier pantalla del STR",
+     "entonces": "ve, fija bajo la barra, la franja del aviso del corte con «Conectar Drive», que lo lleva a Configuración"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador autorizado a ver el aviso",
+     "cuando": "abre el STR",
+     "entonces": "ve el aviso con «Solo el administrador puede conectar el Drive» y sin enlace"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un negocio al que el servidor no le entrega aviso (Drive conectado y nada pendiente)",
+     "cuando": "abre el STR",
+     "entonces": "no hay franja"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "el servidor no responde, o la persona no puede ver el aviso",
+     "cuando": "carga el STR",
+     "entonces": "la franja no aparece y nada falla"
+    },
+    {
+     "id": "E5",
+     "tipo": "alterno",
+     "dado": "una pantalla de 390 px",
+     "cuando": "se muestra el aviso",
+     "entonces": "el texto se lee completo, con el enlace o la nota del operador"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "REQ-K3-3"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1",
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "e2"
+     ],
+     "escenarios": [
+      "E2",
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [],
+    "notas": "Franja #corteAviso entre .topbar y .layout (flex none, sin sticky) que pinta _corteAvisoPintar(estado) con avisoCorte, retencion y corteAvisos; la carga _corteAvisoCargar en DOMContentLoaded (solo si STRApi.online() y el rol es admin, superadmin u operador) y _driveCargarEstado cada vez que se abre Configuración; el enlace llama window._corteAvisoIr → nav(config). _corteAvisoDebeVerse/_corteAvisoTexto (entre [CORTE-AVISO-inicio] y [CORTE-AVISO-fin]) son de K3; este caso de uso es solo el marco. Decisión de levantamiento (por confirmar con Diseño y K3): el Shell queda con la franja y K3 con el contenido; la pregunta la dejó K3 en sus notas de mapeo. Los casos e y e2 comprueban hoy solo la rama «con Drive no se ve» (E3) porque el Drive de negocio está conectado (límite ya anotado en CU-K3-4.2); el caso f (E5) es una captura a 390 px sin aserción que, con Drive conectado, no llega a mostrar el aviso, por eso no se cita. E4 sale de leer el código."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-2.2",
+   "capacidad": "CAP-SH-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver un aviso breve en pantalla, que se quita solo a los pocos segundos, cuando una acción del marco termina o falla",
+   "declarado": "construido",
+   "limitantes": [
+    "Es el único aviso breve del marco: lo usan la conexión con Drive (probar, desconectar, volver de Google, error al iniciar) y Favoritos. Los módulos abiertos tienen los suyos.",
+    "Un aviso nuevo reemplaza al anterior y reinicia el reloj; dura unos 3 segundos y se puede perder si la persona no mira (por eso el motivo de un fallo al volver de Google también queda escrito en la tarjeta, CU-K3-1.2).",
+    "El aviso fijo de «Sesión vencida» o «Tu sesión no está activa» es de otra clase (CU-U-3.7, CU-SH-4.2)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador en Configuración con Drive conectado",
+     "cuando": "pulsa «Probar conexión»",
+     "entonces": "aparece abajo «✓ Conexión con Drive correcta (archivo de prueba creado y borrado)» y se quita solo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "dos acciones seguidas que avisan",
+     "cuando": "termina la segunda",
+     "entonces": "el segundo aviso reemplaza al primero"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona sin la sesión cargada",
+     "cuando": "toca ☆ para anclar una entrada",
+     "entonces": "aparece «Espera a que cargue tu sesión para guardar favoritos» y no se guarda nada"
+    }
+   ],
+   "origen": [
+    "REQ-S1",
+    "REQ-K3-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "shellToast(msg) escribe en #shellToast, que sube con la clase .show y la quita a los 2,8 s (_shellToastTimer). Llamadas: _driveConectar, _driveProbar, _driveDesconectar, el regreso de Google (?drive=) y toggleFav/favNav."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de shellToast y de todas sus llamadas en str-app-shell.html; ningún guion lee el aviso breve"
+   }
+  },
+  {
+   "id": "CU-SH-3.1",
+   "capacidad": "CAP-SH-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir un módulo desde su entrada del menú, dentro del marco y sin salir de él",
+   "declarado": "construido",
+   "limitantes": [
+    "El módulo se carga la primera vez que se abre y se queda cargado: volver a abrirlo lo muestra tal como se dejó, sin recargarlo (cada módulo se refresca por su cuenta).",
+    "«Flujos de trabajo» es distinto: su pantalla se carga al arrancar el STR y su entrada solo la muestra; Configuración también es un panel propio del marco y no un módulo cargado aparte.",
+    "Los módulos ya abiertos siguen vivos aunque no estén a la vista; el marco no les avisa si están o no a la vista (el Tablero lo resuelve por su cuenta y deja de leer cuando no está a la vista).",
+    "Abrir no revisa el rol: una entrada oculta no se puede tocar, pero un favorito heredado de otro rol sí abre el módulo (CU-SH-5.2) y el módulo responde «Sin permiso para este módulo» (CU-U-2.5, E3). Posible incidente nuevo.",
+    "Cada módulo se pide con la versión de la aplicación que tenga el marco en ese momento (RT-20), para no recibir una copia vieja.",
+    "Abierto sin marco (con su botón «← Shell»), el módulo funciona igual; eso es de cada módulo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador en el STR",
+     "cuando": "toca «Calendario» en el menú",
+     "entonces": "la pantalla del Calendario aparece en el área de la derecha, la entrada queda marcada y las demás pantallas quedan ocultas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un módulo que ya se abrió antes",
+     "cuando": "toca otra vez su entrada",
+     "entonces": "lo ve tal como lo dejó, sin recargarlo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona cuyo rol no corresponde al módulo",
+     "cuando": "el módulo termina de cargar",
+     "entonces": "ve «Sin permiso para este módulo» y no se lee ningún dato (CU-U-2.5)"
+    }
+   ],
+   "origen": [
+    "REQ-S1",
+    "REQ-SH-2"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-20"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "openModule(el, key, url) crea una sola vez #panel-mod-<key> con un iframe a <url>?v=STR_API_VERSION (p5c110) dentro de .content, marca el ítem con sel y deja show solo en ese panel; navSub(el) hace lo mismo con el panel estático #panel-workflows; nav(el) con los paneles propios (config). El caso h abre las entradas de los grupos Operación del día, Configurar el negocio y Lo que viene y comprueba que su panel queda a la vista, que la página real carga y que no dice «Sin permiso». Tests/menu-sh2.test.js vigila la lista de entradas (no estaba entre las fuentes)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-3.2",
+   "capacidad": "CAP-SH-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Plegar y desplegar los grupos del menú",
+   "declarado": "construido",
+   "limitantes": [
+    "Al cargar, «Proyecto» está plegado y los demás grupos abiertos; lo que la persona pliegue no se recuerda: al recargar vuelve a ese estado.",
+    "El rótulo de «Favoritos» también se pliega."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador que acaba de entrar",
+     "cuando": "mira el menú",
+     "entonces": "«Proyecto», último grupo, está plegado y sus entradas ocultas; los demás grupos están abiertos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un grupo cualquiera",
+     "cuando": "toca su rótulo",
+     "entonces": "el grupo se pliega o se despliega sin afectar a los demás"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "toggleGroup(hdr) alterna la clase collapsed en .nav-group-hdr y en su .nav-group-body; en DOMContentLoaded solo #nav-group-proyecto arranca plegado. El caso f comprueba el estado inicial y que al tocar el rótulo de Proyecto sus siete entradas abren; no prueba el plegado de los demás grupos."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-3.3",
+   "capacidad": "CAP-SH-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir y cerrar el menú con el botón ☰ cuando uso el STR en el celular",
+   "declarado": "construido",
+   "limitantes": [
+    "En pantallas de 768 px o menos el menú está plegado fuera de la pantalla y se abre sobre ella; en pantallas más anchas siempre está a la vista y el botón no se ve.",
+    "Al elegir una entrada el menú se cierra solo; tocar fuera, en la capa oscura, también lo cierra.",
+    "El caso de prueba es una captura a 390 px con medida del ancho de la página; no hay prueba en otros anchos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una pantalla de 390 px",
+     "cuando": "la persona abre el STR y toca ☰",
+     "entonces": "el menú estaba cerrado y se abre sobre la pantalla; se leen los grupos sin desbordar el ancho"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el menú abierto en el celular",
+     "cuando": "toca una entrada",
+     "entonces": "el menú se cierra y se abre la pantalla elegida"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el menú abierto en el celular",
+     "cuando": "toca fuera del menú",
+     "entonces": "el menú se cierra"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "i"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "toggleSidebar/closeSidebar alternan .sidebar.mobile-open y #mobOverlay.show; la media query de 768 px mueve la barra lateral a -232 px y muestra .hamburger; un click en cualquier .nav-item cierra el menú si innerWidth <= 768. A 480 px o menos se ocultan los íconos de la barra salvo el último (campana, ayuda, respaldo y el primer salir) y desde 768 px no se ve el nombre."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-3.4",
+   "capacidad": "CAP-SH-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Pasar de un módulo a otro desde un botón del propio módulo (por ejemplo, de Propiedades a Flujos o de Calendario a Housekeeping) sin salir del marco",
+   "declarado": "parcial",
+   "limitantes": [
+    "Funciona: el módulo cambia su propia pantalla por la del destino y la persona sigue dentro del marco.",
+    "Pero el menú no se entera: la entrada marcada sigue siendo la del módulo de origen.",
+    "Si después toca en el menú la entrada de origen, ve la pantalla del destino y no la de origen hasta recargar el STR, porque el módulo ya cargado se reutiliza (CU-SH-3.1, E2). Posible incidente nuevo, leído en el código y sin probar.",
+    "El mapa técnico y la relación REL-02 dicen que el módulo le pide al marco marcar el destino, pero ningún módulo lo hace hoy: la función del marco que lo haría (navToWorkflows) no tiene quién la llame.",
+    "Cada módulo manda a su destino con la versión de la aplicación escrita a mano en su propio código, que hay que cambiar a la vez que la del marco (RT-20)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador en Propiedades",
+     "cuando": "pulsa el botón que lleva al editor de Flujos",
+     "entonces": "la pantalla de Flujos se abre en el mismo lugar, dentro del marco"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la persona acaba de llegar a Flujos desde Propiedades",
+     "cuando": "mira el menú",
+     "entonces": "la entrada marcada sigue siendo «Propiedades»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "la persona acaba de llegar a Flujos desde Propiedades",
+     "cuando": "toca «Propiedades» en el menú",
+     "entonces": "ve la pantalla de Flujos y no la de Propiedades hasta que recarga el STR"
+    }
+   ],
+   "origen": [
+    "REQ-S1"
+   ],
+   "reglas": [
+    "RT-20"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html",
+     "str-propiedades.html",
+     "str-calendario.html",
+     "str-flujos.html",
+     "str-conocimiento.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_irAFlujos(url) de cada módulo hace window.location.href = url + ?v=p5c110 dentro de su propio iframe; no llama a window.top.navSub (docs/claude/shell-y-api.md y REL-02 lo describen así). openModule reutiliza #panel-mod-<key> sin tocar su src. No hay guion que recorra este camino."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _irAFlujos en Propiedades, Calendario, Flujos, Guías y Housekeeping, de openModule/navSub/navToWorkflows en str-app-shell.html y búsqueda de llamadas a navSub desde los módulos (ninguna)"
+   }
+  },
+  {
+   "id": "CU-SH-4.1",
+   "capacidad": "CAP-SH-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en la barra superior quién tiene sesión y, si no hay, un botón «Entrar»",
+   "declarado": "construido",
+   "limitantes": [
+    "La barra muestra dos bloques de persona: el del sistema (nombre y negocio) y el de la cuenta de Google, que trae el nombre de esa cuenta y no el del sistema (INC-111, abierto).",
+    "Hay dos botones de salir con el mismo símbolo: uno cierra solo la cuenta de Google y otro solo la sesión del sistema; ninguno borra la copia del aparato (INC-162, CU-U-3.8).",
+    "El rol se ve solo al pasar el puntero por el avatar de la cuenta de Google.",
+    "En 768 px o menos no se ve el nombre; en 480 px o menos se ocultan además la campana, la ayuda, el respaldo y el botón de salir del sistema (queda el de Google).",
+    "La campana (con un punto rojo fijo) y el signo de ayuda no hacen nada: son adornos que parecen funciones (posible incidente nuevo).",
+    "El respaldo ⬇ de la barra es de Copia a Drive (CU-K3-6.1) y solo lo ve el administrador."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador u operador con sesión",
+     "cuando": "abre el STR",
+     "entonces": "la barra muestra su nombre y su negocio, no muestra «Entrar» ni el aviso rojo «Sesión vencida · Entrar», y la renovación de la sesión, si hace falta, es una sola"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona con la cuenta de Google abierta cuya sesión del sistema venció (dura 24 horas)",
+     "cuando": "abre el STR",
+     "entonces": "el marco espera a que Google recupere la cuenta, renueva la sesión una sola vez y pinta de nuevo la barra, el menú y Favoritos; no queda «Entrar» ni la franja roja de sesión vencida"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una persona que cierra sesión en otra pestaña del mismo navegador",
+     "cuando": "vuelve a esta pestaña",
+     "entonces": "la barra se repinta con «Entrar» sin recargar"
+    }
+   ],
+   "origen": [
+    "REQ-U-8",
+    "REQ-S1"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [
+    "INC-111",
+    "INC-134",
+    "INC-162"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-134",
+     "casos": [
+      "a",
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-token",
+     "str-user"
+    ],
+    "notas": "renderApiSession() lee str-token y str-user y muestra #apiUserBtn (nombre · negocio), #apiLogoutBtn y #apiBackupBtn (solo rol admin) o #apiEntrarBtn; el bloque #userName lo pinta onAuthStateChanged con el displayName de Firebase (INC-111). Se repinta al cargar, tras _strRenewApiSession y con el evento storage de str-token/str-user. Los casos a y b de INC-134 comprueban E1 (sin «Entrar», usuario a la vista, sin aviso rojo, a lo sumo un POST /api/login); no fuerzan una sesión vencida, esa carrera la vigila tests/sesion-shell.test.js (no estaba entre las fuentes). E2 (la carrera de INC-134) y E3 salen de leer el código; sin sesión guardada el marco no se queda: manda a la pantalla de entrada (CU-SH-4.2)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-4.2",
+   "capacidad": "CAP-SH-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ser llevado a la pantalla de entrada cuando un módulo abierto en el marco se queda sin sesión, o ver el aviso fijo «Tu sesión no está activa» si acabo de venir de ella",
+   "declarado": "construido",
+   "limitantes": [
+    "El módulo no se redirige solo: avisa al marco y el marco decide.",
+    "Si se acaba de pasar por la pantalla de entrada (menos de 5 segundos) no se vuelve a mandar a ella: se muestra un aviso fijo con «Iniciar sesión» (freno del ir y venir, CU-U-3.5).",
+    "Solo se atienden avisos del mismo sitio.",
+    "Tras entrar de nuevo se vuelve al marco, que abre la pantalla de inicio; no se vuelve a la última pantalla en uso.",
+    "Avisan Calendario, Flujos y cualquier módulo que exija sesión al abrirse; el aviso rojo «Sesión vencida · Entrar» de una petición fallida se queda dentro de su módulo y no pasa por el marco (CU-U-3.7).",
+    "Housekeeping dentro del marco también manda este aviso al marco; su flujo en HK solo apunta al portal (CU-HK-10.4)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-3.7",
+     "dato": "aviso de que el módulo abierto no tiene sesión, para que el menú principal decida a dónde llevar a la persona",
+     "rel": "REL-02"
+    },
+    {
+     "de": "CU-CAL-5.8",
+     "dato": "aviso de que el Calendario abierto no tiene sesión, para que el menú decida a dónde llevar a la persona",
+     "rel": "REL-02"
+    },
+    {
+     "de": "CU-FL-9.1",
+     "dato": "aviso de que el módulo abierto no tiene sesión, para que el menú principal pida entrar",
+     "rel": "REL-02"
+    },
+    {
+     "de": "CU-KN-6.1",
+     "dato": "aviso de que el módulo abierto no tiene sesión, para que el menú principal pida entrar",
+     "rel": "REL-02"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un módulo abierto en el marco cuya sesión venció y no se pudo renovar",
+     "cuando": "el módulo avisa que no hay sesión",
+     "entonces": "el marco lleva a la pantalla de entrada con el marco como destino y, al entrar, el STR abre de nuevo en su inicio"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la persona acaba de venir de la pantalla de entrada (menos de 5 segundos)",
+     "cuando": "un módulo avisa que no hay sesión",
+     "entonces": "el marco no la devuelve a la entrada: muestra el aviso fijo «Tu sesión no está activa. Iniciar sesión»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un aviso que llega desde otro sitio",
+     "cuando": "llega al marco",
+     "entonces": "se ignora"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html",
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-login-visitado-en"
+    ],
+    "notas": "Oyente window.addEventListener('message') del marco: ignora ev.origin distinto de location.origin y, para tipo 'str:sin-sesion', llama STRApi.avisoSinSesion() si STRApi.recienEnLogin() o location.replace('login.html?next=str-app-shell.html'). Lo envía STRApi.requireSession desde un módulo embebido (REL-02) y Housekeeping dentro del marco (str-m1-housekeeping.html). Ningún guion fuerza una sesión vencida."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del oyente de «str:sin-sesion» del marco, de requireSession, recienEnLogin y avisoSinSesion en str-api.js y de los envíos desde Housekeeping"
+   }
+  },
+  {
+   "id": "CU-SH-5.1",
+   "capacidad": "CAP-SH-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Anclar una entrada del menú en Favoritos, o quitarla, con su estrella ☆",
+   "declarado": "construido",
+   "limitantes": [
+    "Los Favoritos son de cada persona y se guardan en el aparato, no en la cuenta: no pasan de un equipo o navegador a otro.",
+    "Sin la sesión cargada no se puede anclar: avisa «Espera a que cargue tu sesión para guardar favoritos».",
+    "La estrella solo se ve al pasar el puntero por la entrada, o cuando ya está marcada; en un celular, sin puntero, no se ofrece a la vista (por confirmar).",
+    "Tocar la estrella también abre el módulo de esa entrada: el clic de la entrada actúa antes de que la estrella lo detenga (leído en el código, sin prueba; posible incidente nuevo).",
+    "Se puede anclar cualquier entrada que la persona vea, incluida Configuración."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una entrada del menú sin anclar",
+     "cuando": "la persona toca su ☆",
+     "entonces": "la estrella pasa a ★ y la entrada aparece arriba, en Favoritos, con su ícono y su nombre"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una entrada anclada",
+     "cuando": "la persona toca su ★ o la ✕ de su fila en Favoritos",
+     "entonces": "se quita de Favoritos y la estrella vuelve a ☆"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "la sesión aún no se ha cargado",
+     "cuando": "toca ☆",
+     "entonces": "aparece el aviso de esperar y no se guarda nada"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-favoritos-v1:<id de usuario>"
+    ],
+    "notas": "toggleFav(starBtn) guarda {id, label, icon, panel, url} en str-favoritos-v1:<id> (saveFavs); la estrella se inyecta en cada .nav-item y un oyente delegado en .sidebar llama a toggleFav (con stopPropagation, que llega tarde: el onclick del ítem ya corrió)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de toggleFav, removeFav, el oyente delegado de la barra lateral y el estilo .ni-star en str-app-shell.html; el guion g de REQ-SH-2 solo lee el estado, no ancla"
+   }
+  },
+  {
+   "id": "CU-SH-5.2",
+   "capacidad": "CAP-SH-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver mis Favoritos arriba al entrar, y abrir uno con un clic",
+   "declarado": "construido",
+   "limitantes": [
+    "Cada persona tiene los suyos: una persona nueva empieza sin ninguno. Los guardados antes de separarlos por persona pasaron, una sola vez, al primer usuario que abrió el STR en ese navegador (la clave vieja no se borra).",
+    "Se vuelven a pintar cuando la sesión llega o se renueva (si al cargar aún no había sesión salían vacíos).",
+    "No se filtran por rol: el favorito de una entrada que el rol no ve (por ejemplo, el heredado de un administrador en el mismo navegador) se muestra y al tocarlo abre el módulo, que responde «Sin permiso para este módulo» (CU-SH-3.1). Posible incidente nuevo.",
+    "El guion solo lee el estado de Favoritos y la coherencia con las estrellas; no ancla ni abre favoritos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con favoritos",
+     "cuando": "abre el STR",
+     "entonces": "los ve arriba, cada uno con su ícono y su nombre, y al tocar uno se abre su módulo como desde su entrada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona nueva",
+     "cuando": "abre el STR",
+     "entonces": "ve Favoritos vacío con la ayuda «Pasa el cursor sobre un módulo y toca ☆ para anclarlo aquí»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "Favoritos guardados antes de separarlos por persona",
+     "cuando": "abre el STR el primer usuario del navegador",
+     "entonces": "los recibe una sola vez como suyos"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "g"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-favoritos-v1:<id de usuario>",
+     "str-favoritos-v1",
+     "str-favoritos-v1-de"
+    ],
+    "notas": "loadFavs/_favKey (por usuario), _favRepintar (al cargar y desde _aplicarRolServidor y _strRenewApiSession), renderFavs y favNav (dispara el click real de la entrada con data-fav-id). El caso g comprueba que Favoritos queda vacío o con elementos y que ninguna entrada se repite fuera de Favoritos; no abre un favorito."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-SH-5.3",
+   "capacidad": "CAP-SH-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Reconocer y quitar un favorito cuya entrada ya no existe en el menú",
+   "declarado": "construido",
+   "limitantes": [
+    "Pasó con las maquetas retiradas en REQ-SH-2 (Check-in, Mantenimiento): el favorito sigue guardado en el aparato hasta que la persona lo quita.",
+    "La fila se ve atenuada y con «✕ quitar»; al tocarla solo avisa y vuelve a pintar la lista."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un favorito guardado cuya entrada ya no está en el menú",
+     "cuando": "la persona abre el STR",
+     "entonces": "lo ve atenuado, con «✕ quitar» y el texto «Este favorito ya no existe» al pasar el puntero"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ese favorito atenuado",
+     "cuando": "la persona toca la fila",
+     "entonces": "aparece el aviso «Este favorito ya no existe»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "ese favorito atenuado",
+     "cuando": "toca «✕ quitar»",
+     "entonces": "desaparece de Favoritos"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-favoritos-v1:<id de usuario>"
+    ],
+    "notas": "_favEsResoluble(f) busca la entrada por data-fav-id, por data-fav-url o por data-panel; renderFavs marca .fav-item-orphan; favNav muestra el aviso y repinta. No hay guion."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _favEsResoluble, renderFavs, favNav y los estilos .fav-item-orphan"
+   }
+  },
+  {
+   "id": "CU-SH-6.1",
+   "capacidad": "CAP-SH-6",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver lo que todavía falta del STR, por área: qué es, para qué sirve, en qué etapa va y en qué orden",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo para el administrador: el operador que la abre a mano vuelve al STR sin ver nada (CU-U-2.5, E2).",
+    "La etapa no se escribe: se calcula con el estado de los requerimientos de cada área y el de sus lotes de trabajo (idea, definido o en construcción); un área con todos sus requerimientos aceptados sale de la lista, porque ya está en el menú (decisión 2 de Carlos, 16-oct).",
+    "Lee los documentos de seguimiento y diseño del proyecto, de la última versión publicada, y dice de cuál; permite actualizarlos. No lee nada del negocio ni escribe nada.",
+    "Si no se puede leer el diseño o el seguimiento, la lista sale con un aviso y las áreas con requerimientos quedan «Sin etapa»; si no se puede leer la lista misma, ofrece «Reintentar».",
+    "Es transitoria: cuando el proyecto salga a su propio sitio (D4) pasa a Proyectos › P01 › Alcance.",
+    "Pregunta de alcance: el mapa asigna esta pantalla a Grupo Proyecto (PRJ, relación REL-24); aquí se cuenta porque REQ-SH-2 la trata como entrada del menú. Al levantar PRJ debe quedar en un solo módulo. El guion c no puede cambiar el estado de un requerimiento: el cambio de etapa (E2) se prueba aparte, con pruebas de las reglas de cálculo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "abre «Lo que viene»",
+     "entonces": "ve el resumen («N áreas · X en construcción · Y definidas · Z ideas») y cada área con su orden, nombre, para qué sirve, etapa y requerimientos, en el orden fijado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un requerimiento de un área que cambió de estado en los documentos",
+     "cuando": "la persona pulsa «⟳ Actualizar»",
+     "entonces": "la etapa del área cambia sin que nadie edite la lista"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un área con todos sus requerimientos aceptados",
+     "cuando": "se muestra la lista",
+     "entonces": "esa área ya no aparece"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "no se puede leer el diseño o el seguimiento",
+     "cuando": "se muestra la lista",
+     "entonces": "sale con un aviso y las áreas con requerimientos quedan «Sin etapa»"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "no se puede leer la lista de áreas",
+     "cuando": "se abre la pantalla",
+     "entonces": "dice que no se pudo leer y ofrece «Reintentar»"
+    },
+    {
+     "id": "E6",
+     "tipo": "alterno",
+     "dado": "una pantalla de 390 px",
+     "cuando": "se abre «Lo que viene»",
+     "entonces": "cada área se lee por orden, nombre, para qué sirve y etapa"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "j"
+     ],
+     "escenarios": [
+      "E6"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-lo-que-viene.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Lee interno/lo-que-viene.json, interno/diseno.json e interno/seguimiento.json del repositorio de documentos con STRApi.docs (commit() y url(), REL-24) y calcula la etapa con las funciones puras entre [LQV-inicio] y [LQV-fin] (_lqvEtapaDe, _lqvAreas, _lqvResumen; tests/menu-sh2.test.js). Guarda de acceso: admin o superadmin, si no, «Sin permiso para este módulo» dentro del marco o vuelta al inicio. El caso c compara la etapa mostrada con la que recalcula con los tres JSON del mismo commit; el caso j es una captura a 390 px sin aserción."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-7.1",
+   "capacidad": "CAP-SH-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir Configuración desde el menú, donde hoy está la tarjeta de la copia en Google Drive",
+   "declarado": "construido",
+   "limitantes": [
+    "Hoy Configuración solo trae esa tarjeta (conectar, probar, desconectar y ver el estado son de Copia a Drive: CU-K3-1.1 a 1.6); no hay otros ajustes. La tolerancia de salida está en Housekeeping y los horarios en la ficha de la propiedad (DA-16).",
+    "Al abrirla se pide de nuevo el estado de Drive.",
+    "El operador la abre y ve la tarjeta en solo lectura; el colaborador no llega al marco.",
+    "Se abre también desde el aviso fijo (CU-SH-2.1) y al volver de Google (CU-K3-1.2).",
+    "Es un panel del propio marco, no un módulo cargado aparte."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SH-2.1",
+     "dato": "petición de abrir Configuración desde el enlace «Conectar Drive» del aviso fijo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "toca «Configuración» en el menú",
+     "entonces": "se abre el panel con «☁ Copia en Google Drive» y el estado de la conexión"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "toca «Configuración»",
+     "entonces": "ve el mismo panel y la tarjeta sin botones"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el aviso fijo del corte",
+     "cuando": "la persona toca «Conectar Drive»",
+     "entonces": "se abre el panel de Configuración"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una persona sin sesión del sistema",
+     "cuando": "abre Configuración",
+     "entonces": "la tarjeta dice «Inicia sesión en el servidor para ver la copia en Drive»"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "REQ-SH-2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [],
+    "notas": "La entrada (data-panel=\"config\", sin data-roles: única excepción) llama nav(el), que muestra #panel-config y ejecuta _driveCargarEstado(). El caso h abre las entradas de «Configurar el negocio», entre ellas Configuración, y comprueba que #panel-config queda a la vista; los guiones de REQ-K3b que abren Configuración la usan de entrada para comprobar la tarjeta (CU-K3-1.x) y no se citan aquí."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-SH-7.2",
+   "capacidad": "CAP-SH-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Reiniciar los datos de un módulo desde Configuración («borrado maestro»), con respaldo antes y confirmación escrita",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "Carlos lo pospuso el 18-oct («de momento descartemos los borrados», DA-49 pospuesta) y la funcionalidad quedó en la bolsa (T-21); el borrador del requerimiento (REQ-RM-1) está definido pero sin orden de construcción.",
+    "Lo que se acordó, si se retoma: solo administrador; respaldo descargado antes (RT-12); archivar y no borrar (RT-5); escribir REINICIAR para confirmar; registro de quién, cuándo y cuántos; conserva propiedades, calendario, usuarios reales y la configuración; reinicia inventario, turnos y horas, incidentes, flujos y guías.",
+    "El reinicio puntual de la limpieza de DA-49 también se detuvo («todo queda detenido salvo MJ-16»)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con el respaldo ya descargado",
+     "cuando": "marca un módulo en Configuración y escribe REINICIAR",
+     "entonces": "los registros del módulo quedan archivados (no se ven en ninguna pantalla), queda el registro de quién y cuándo, y propiedades, calendario y usuarios no cambian"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un administrador sin respaldo descargado en esta sesión",
+     "cuando": "intenta reiniciar",
+     "entonces": "el botón está deshabilitado con «Descarga el respaldo primero»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador o un colaborador",
+     "cuando": "abre Configuración",
+     "entonces": "no ve la opción y el servidor la rechaza"
+    }
+   ],
+   "origen": [
+    "DA-49",
+    "P-16"
+   ],
+   "reglas": [
+    "RT-2",
+    "RT-5",
+    "RT-12"
+   ],
+   "pendientes": [
+    "T-21"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "No existe. Definido en claude/producto/requerimientos-reinicio-modulos-2026-10.md (REQ-RM-1, módulo Fundación › Configuración); el respaldo previo sería el descargable de CU-K3-6.1."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de DA-49, de la bolsa (T-21), de P-16 y del borrador del requerimiento; en el código del marco no hay nada de esto"
+   }
+  },
+  {
+   "id": "CU-SH-8.1",
+   "capacidad": "CAP-SH-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Abrir desde el menú las siete páginas del grupo Proyecto (Seg. Proyecto, Marco de Trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento y Nomenclatura), plegado al final y solo para el administrador",
+   "declarado": "construido",
+   "limitantes": [
+    "Es de la fábrica de software, no del negocio: no cuenta en la cobertura de producto.",
+    "El contenido de cada página es de Grupo Proyecto (PRJ); aquí solo se cuenta el acceso desde el menú.",
+    "Transitorio: el proyecto sale del STR a un sitio aparte (plan D4, ADR-009).",
+    "El operador no lo ve en el menú ni abriendo una página a mano (CU-U-2.5)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PRJ-1.1",
+     "dato": "petición de abrir cada página del grupo Proyecto dentro del marco",
+     "rel": "REL-01"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "despliega «Proyecto», último grupo y plegado al entrar, y toca cada entrada",
+     "entonces": "cada una de las siete páginas abre dentro del marco"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "abre el STR",
+     "entonces": "no ve el grupo «Proyecto»"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html",
+     "str-seg-proyecto.html",
+     "str-marco-trabajo.html",
+     "str-instrucciones.html",
+     "str-cobit.html",
+     "str-elementos.html",
+     "str-base-conocimiento.html",
+     "str-nomenclatura.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "#nav-group-proyecto (data-roles=\"admin\") con siete openModule; arranca plegado en DOMContentLoaded. El id CU-PRJ-1.1 es provisional (PRJ aún no tiene línea base). El caso f cuenta el último grupo, su plegado y que cada entrada abre su página real."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-SH-9.1",
+   "capacidad": "CAP-SH-9",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cambiar entre tema oscuro y claro, y que el marco y los módulos abiertos lo sigan",
+   "declarado": "construido",
+   "limitantes": [
+    "La elección se guarda en el aparato (por navegador, no por persona); sin elección abre oscuro.",
+    "Los módulos que se abren dentro del marco cambian a la vez; los que se abren sueltos leen la misma elección al cargar."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el STR en tema oscuro",
+     "cuando": "la persona toca el botón de tema (🌙)",
+     "entonces": "el marco y los módulos abiertos pasan a tema claro y el botón muestra ☀️"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona que eligió tema claro",
+     "cuando": "recarga o abre otro módulo",
+     "entonces": "se conserva el tema claro"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un navegador sin elección guardada",
+     "cuando": "abre el STR",
+     "entonces": "se ve en tema oscuro"
+    }
+   ],
+   "origen": [
+    "REQ-S1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-theme"
+    ],
+    "notas": "toggleTheme() cambia data-theme de la raíz, guarda str-theme y reescribe data-theme en el documento de cada iframe del mismo origen; al cargar se lee str-theme (INC-11). Los módulos también escuchan el evento storage de str-theme."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de toggleTheme y de la inicialización del tema en str-app-shell.html y del oyente de storage en str-lo-que-viene.html; ningún guion cambia el tema"
+   }
+  },
+  {
+   "id": "CU-SH-10.1",
+   "capacidad": "CAP-SH-10",
+   "actor": [
+    "admin"
+   ],
+   "que": "Descargar un respaldo de la cuenta con los datos del negocio",
+   "declarado": "parcial",
+   "limitantes": [
+    "Solo el administrador ve el botón de respaldo (⬇ junto a su nombre).",
+    "El respaldo no trae las fotos, evidencias ni videos (están en el servidor y se respaldan aparte, CU-K3-6.4, antes del primer corte) ni, hoy, los datos de la cuenta, del calendario de cortes, del registro de la copia a Drive y de la exportación de calendario (DT-43).",
+    "Es solo de descarga: no hay importación desde la aplicación.",
+    "Nunca se ha probado una restauración real con el respaldo diario (DT-42, INC-137).",
+    "Lo genera el Servidor (exportación de la cuenta); se liga a su caso de uso al levantar la plataforma."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión en el servidor",
+     "cuando": "pulsa el botón de respaldo",
+     "entonces": "se descarga un archivo de respaldo con la fecha del día, con todos los datos del negocio, sus usuarios (sin contraseñas) y sus capacidades"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador o un colaborador",
+     "cuando": "abre la aplicación",
+     "entonces": "no ve el botón de respaldo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el servidor no entrega el respaldo",
+     "cuando": "el administrador lo pide",
+     "entonces": "el botón muestra una cruz unos segundos y no descarga nada"
+    }
+   ],
+   "origen": [
+    "DT-43",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-12",
+    "RT-14"
+   ],
+   "pendientes": [
+    "DT-42",
+    "DT-43",
+    "INC-79",
+    "INC-84",
+    "INC-101"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/export"
+    ],
+    "colecciones": [],
+    "notas": "Botón #apiBackupBtn y _descargarRespaldo del shell (fecha local, INC-79); la lista de colecciones de api/export debe ser la de /api/col (INC-84, INC-101, vigilado por tests/export-colecciones.test.js). api/export/index.php no estaba entre las fuentes: lo del servidor sale de docs/claude/servidor-php.md."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _descargarRespaldo y del botón en str-app-shell.html y de la descripción del respaldo en docs/claude/servidor-php.md; api/export/index.php no estaba entre las fuentes"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-79",
+   "porque": "Cerrado. Fue la fecha UTC de HK y del nombre del respaldo ⬇ del marco; el respaldo es de Copia a Drive (CU-K3-6.1, que ya lo anota)."
+  },
+  {
+   "id": "INC-87",
+   "porque": "Cerrado. Del cambio de equipo de la fábrica (modelo e infraestructura); no es del producto."
+  },
+  {
+   "id": "INC-110",
+   "porque": "Abierto. Seguimiento lo etiqueta «Shell / roles», pero es el botón «Editar» de Equipo que el operador ve sin permiso: cuelga de CU-U-1.4 (Identidad)."
+  },
+  {
+   "id": "INC-131",
+   "porque": "Cerrado. Diálogos de Housekeeping detrás del panel del turno en el portal: de Housekeeping y Portal."
+  },
+  {
+   "id": "DT-27",
+   "porque": "Abierta. prop-workflows sigue en el cliente compartido; la parte del marco («Subir mis datos») se retiró en L-132. Es del cliente compartido (API)."
+  },
+  {
+   "id": "DT-48",
+   "porque": "Abierta. Documentación del portal (fila portal.html de shell-y-api.md) desactualizada: es del Portal y solo toca documentos."
+  },
+  {
+   "id": "DA-16",
+   "porque": "Decidida. Dónde vive la tolerancia de salida; el marco no la aloja (Propiedades y Housekeeping). Solo se nombra en CU-SH-7.1."
+  },
+  {
+   "id": "T-9",
+   "porque": "Hecha. Tarea programada de la copia a Drive: de Copia a Drive (CU-K3-2.1)."
+  },
+  {
+   "id": "T-10",
+   "porque": "Hecha. Publicación de la aplicación de Google: de Copia a Drive (CU-K3-1.1)."
+  },
+  {
+   "id": "T-17",
+   "porque": "Deuda abierta («SH / cola de subida»): las fotos de administrador u operador sin subir solo se reintentan al abrir Housekeeping, y con el Tablero como inicio Housekeeping no se carga. Ya cuelga de CU-HK-3.2 (que la cita). El arreglo posible (cargar la cola en el marco o avisar «N fotos sin subir» en el Tablero) no tiene requerimiento: si se decide, sería un caso de uso nuevo del Shell."
+  },
+  {
+   "id": "REQ-FL-12",
+   "porque": "Aceptado. Emoji y nombre corto por flujo: de Flujos; el marco no interviene."
+  },
+  {
+   "id": "REQ-OP-1",
+   "porque": "Aceptado. Es del Tablero (OP); al marco le toca solo abrirlo como inicio (CU-SH-1.2)."
+  },
+  {
+   "id": "REQ-INV2-8-1",
+   "porque": "Definido. Plantilla de arranque: de Inventario; aparece como área de «Lo que viene» (CU-SH-6.1) y nada más."
+  },
+  {
+   "id": "campana-y-ayuda",
+   "porque": "La campana (con punto rojo fijo) y el signo de ayuda de la barra superior no tienen función ni requerimiento. Se anotan en CU-SH-4.1; Diseño decide si se construyen, se quitan o se dejan."
+  }
+ ]
+}

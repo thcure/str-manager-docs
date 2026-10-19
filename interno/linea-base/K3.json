@@ -1,7 +1,7 @@
 {
  "modulo": "K3",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "api/drive/index.php (271 líneas, leído completo: conectar, callback, estado, desconectar, prueba, cron, copias, corte, corte-prueba)",
@@ -12,7 +12,18 @@
   "k3-guiones.json y guiones-e2e.json: REQ-K3b, REQ-K3b-aviso, REQ-K3c y REQ-K3c-vista (4 guiones, 21 casos, se leyeron los .spec.js completos para ver qué comprueba cada caso); se descartaron como preparación los casos b y c de REQ-K3b-aviso, REQ-K3c y REQ-K3c-vista y los de DT-42, DA-47 e INC-132, que no ejercen K3",
   "interno/linea-base/esquema.json, sistema.json, INV.json, HK.json, PR.json, POR.json, U.json, FL.json y CAL.json (estilo y flujos con ids reales)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-824)",
+   "que": "Pesos (esenciales CAP-1, 2, 5 y 6; necesarias 3, 4 y 7) y decisiones a–e aplicados por el Arquitecto: CU-K3-6.1 a 6.3 salen a la plataforma (6.1 → CU-SH-10.1; 6.2 y 6.3 → Servidor), 6.4 no construido y en alcance, 4.6 a la bolsa, aviso solo para el admin, 2.8 al próximo cruce; regla: el corte nunca borra sin copia confirmada."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-825)",
+   "que": "INC-175 y INC-176 (altos, corte del 30-nov) e INC-177 atados; K3-d queda como limitante de capacidad con T-11 recomendada antes del corte."
+  }
+ ],
  "alcance": {
   "dentro": [
    "La conexión del Google Drive de cada negocio: conectar, volver de Google, probar, desconectar y ver el estado en Configuración.",
@@ -20,9 +31,9 @@
    "El estado de la copia de cada archivo (insignia ☁ en el turno), la entrega desde Drive de lo que el corte borró y el aviso «Eliminado en el corte del …».",
    "El calendario de cortes (día 30), el aviso fijo, los recordatorios de 7, 3 y 1 días, el aviso de archivos pendientes a 3 días y el reporte del último corte.",
    "El corte mensual único: la ventana, la última copia, el borrado con y sin copia, el registro que se conserva, el reporte y el corte de prueba.",
-   "El respaldo descargable de la cuenta, el respaldo diario y el respaldo de los archivos antes del primer corte.",
    "El cuidado del permiso de Google y de los accesos por rol y por clave de tarea programada.",
-   "Lo definido y aún por construir: copiar guías, documentos y planos, avisos del corte por el canal de Comunicaciones, borrar archivos fuera del corte y el respaldo de los archivos como función."
+   "Lo definido y aún por construir: copiar guías, documentos y planos, borrar archivos fuera del corte y el respaldo de los archivos como función.",
+   "El respaldo de los archivos del servidor antes del primer corte (T-12)."
   ],
   "fuera": [
    "La toma de la foto, su cola de subida en el teléfono y su subida al sistema (Housekeeping y Servidor): aquí solo se cuenta lo que se hace con el archivo ya subido.",
@@ -31,58 +42,60 @@
    "El menú, la barra y el inicio de sesión del marco (Shell) y los permisos de cada rol (Identidad): aquí solo se cuenta lo que el marco muestra del corte y quién puede qué en Drive.",
    "El resto de los archivos que el sistema guarda: guías, documentos y planos (hoy sin copia ni corte, ver CU-K3-2.8).",
    "Lo decidido y descartado: guardar 30 días en la aplicación, retener los incidentes abiertos más 90 días, borrar solo lo confirmado en Drive, el ZIP mensual descargable para negocios sin Drive y la miniatura que queda en la aplicación (DA-25, derogada en parte por DA-32).",
-   "La retención de los datos de huéspedes TRA/SIRE, sin plazo definido (M2)."
+   "La retención de los datos de huéspedes TRA/SIRE, sin plazo definido (M2).",
+   "El respaldo descargable de la cuenta (Shell, CU-SH-10.1), el respaldo diario y el ensayo de restauración (Servidor; se integran al levantar la plataforma desde interno/linea-base/por-levantar/SRV.json) (Diseño, M-824 a).",
+   "Los avisos del corte por WhatsApp o correo (Comunicaciones, M6): bolsa (CU-K3-4.6)."
   ],
-  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde api/drive/index.php, api/lib/drive.php, drive-copia.php, corte.php, retencion.php y archivo-corte.php (completos), lo que el shell y Housekeeping hacen con ellos, el mapa técnico y los cuatro guiones e2e de REQ-K3b y REQ-K3c. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Las pruebas e2e de K3 solo ejercen lo que se ve en pantalla y el corte de prueba sobre datos zz-verif-: ninguna dispara una copia real ni el corte real, y las pruebas unitarias con réplica de Drive (tests/drive-copia.test.js, corte.test.js, retencion.test.js) no cuentan en esta línea base. El módulo está construido pero sin activar del todo: la tarea de copia se creó el 16-oct (T-9) y la del corte no existe hasta tener el respaldo de los archivos (T-12); el primer corte real es el 30-nov-2026 a las 23:00. El respaldo descargable y el diario son, según el mapa, de Shell y Servidor; aquí se levantan porque RT-12 los exige antes de borrar y la tarea los nombra en el módulo (por confirmar)."
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde api/drive/index.php, api/lib/drive.php, drive-copia.php, corte.php, retencion.php y archivo-corte.php (completos), lo que el shell y Housekeeping hacen con ellos, el mapa técnico y los cuatro guiones e2e de REQ-K3b y REQ-K3c. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. Las pruebas e2e de K3 solo ejercen lo que se ve en pantalla y el corte de prueba sobre datos zz-verif-: ninguna dispara una copia real ni el corte real, y las pruebas unitarias con réplica de Drive (tests/drive-copia.test.js, corte.test.js, retencion.test.js) no cuentan en esta línea base. El módulo está construido pero sin activar del todo: la tarea de copia se creó el 16-oct (T-9) y la del corte no existe hasta tener el respaldo de los archivos (T-12); el primer corte real es el 30-nov-2026 a las 23:00. El respaldo descargable, el diario y el ensayo de restauración pasaron a la plataforma (Diseño, M-824)."
  },
  "capacidades": [
   {
    "id": "CAP-K3-1",
    "nombre": "Conexión del Google Drive del negocio",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que cada negocio conecte, pruebe y desconecte su propio Google Drive con permiso solo sobre los archivos que el sistema crea, y vea en qué estado está."
   },
   {
    "id": "CAP-K3-2",
    "nombre": "Copia a Drive cada 15 minutos",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Copiar al Drive del negocio las fotos, evidencias y videos nuevos (primero lo de incidentes), ordenados por propiedad y mes, sin repetir y reintentando los fallos; los datos de prueba nunca salen."
   },
   {
    "id": "CAP-K3-3",
    "nombre": "Estado de la copia y de lo eliminado",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Mostrar a administrador y operador si cada archivo ya tiene copia y, cuando el corte lo quitó del sistema, entregarlo desde Drive o decir en qué corte se eliminó."
   },
   {
    "id": "CAP-K3-4",
    "nombre": "Calendario, avisos y reporte del corte",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Fijar cuándo toca el corte de cada negocio (día 30), avisarlo en un aviso fijo con recordatorios 7, 3 y 1 días antes, avisar lo que falta copiar y mostrar el reporte del último corte."
   },
   {
    "id": "CAP-K3-5",
    "nombre": "Corte mensual de almacenamiento",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "El día 30 de cada mes borrar del servidor las fotos, evidencias y videos subidos hasta el corte, con o sin Drive, conservando en el registro la fecha, la huella y el enlace de Drive."
   },
   {
    "id": "CAP-K3-6",
    "nombre": "Respaldo antes de borrar",
    "tipo": "datos",
-   "peso": "por-confirmar",
-   "que": "Tener un respaldo de los datos (descargable y diario) y de los archivos antes del primer corte, que es el único borrado físico del sistema."
+   "peso": "esencial",
+   "que": "Tener un respaldo de los archivos del servidor antes del primer corte, que es el único borrado físico del sistema. El respaldo descargable de la cuenta, el diario y el ensayo de restauración son de la plataforma (Shell y Servidor)."
   },
   {
    "id": "CAP-K3-7",
    "nombre": "Cuidado del permiso y de los accesos",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Guardar el permiso de Google sin que salga del servidor, dejar cada acción de Drive al rol que le toca y aceptar la copia y el corte solo desde la tarea programada."
   }
  ],
@@ -515,7 +528,9 @@
     "RT-9",
     "RT-18"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-177"
+   ],
    "pruebas": [
     {
      "guion": "REQ-K3b",
@@ -603,7 +618,8 @@
    ],
    "pendientes": [
     "INC-135",
-    "T-10"
+    "T-10",
+    "INC-175"
    ],
    "pruebas": [],
    "tecnica": {
@@ -638,7 +654,8 @@
     "Por negocio y pasada: hasta 25 archivos copiados, 300 nuevos registrados y 50 segundos en total; lo que sobre sigue en la pasada siguiente.",
     "Las guías, documentos y planos no se copian (CU-K3-2.8).",
     "La tarea programada de 15 minutos se creó el 16-oct (T-9; el mapa aún marca REL-28 «por crear»); la revisión de las primeras fotos reales en el Drive de Carlos (T-11) sigue pendiente.",
-    "Las pruebas e2e no disparan ninguna copia real: la copia se comprueba con una réplica de Drive en pruebas unitarias, que no cuentan en esta línea base."
+    "Las pruebas e2e no disparan ninguna copia real: la copia se comprueba con una réplica de Drive en pruebas unitarias, que no cuentan en esta línea base.",
+    "Capacidad (Desarrollo, M-825, K3-d): 25 archivos por negocio y pasada, cada 15 minutos (hasta unos 2 400 al día con archivos chicos, menos con videos). Sin la primera copia real (T-11) no se sabe el atraso del primer corte: se recomienda correr T-11 antes del 30-nov, medir y subir el tope si no alcanza."
    ],
    "entradas": [
     {
@@ -1115,7 +1132,7 @@
    "declarado": "no-construido",
    "limitantes": [
     "Hoy las guías, los documentos y los planos no tienen copia en ningún lado y el corte no los toca.",
-    "Pendiente de decisión del dueño: «¿entran en la copia a Drive, fuera del corte?» (bolsa, LM-36, M-489; llevarlo al próximo cruce de K3)."
+    "Entra al próximo cruce de K3 (Diseño, M-824 e)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1683,9 +1700,9 @@
    "que": "Ver en un aviso fijo la fecha del próximo corte cuando el negocio no tiene Drive conectado, con el modo de conectarlo",
    "declarado": "construido",
    "limitantes": [
-    "Lo ve el administrador y el operador que tiene todos los permisos; el operador con permisos acotados solo lo vería con el permiso de configurar Drive, que hoy no se puede dar (CU-U-2.8).",
+    "Lo ve solo quien tiene configurar Drive, es decir el administrador; no se delega (Diseño, M-824 d). El operador con todos los permisos también lo ve hoy; el de permisos acotados no (CU-U-2.8).",
     "El administrador tiene el enlace «Conectar Drive»; el operador ve «Solo el administrador puede conectar el Drive» y ningún enlace.",
-    "El aviso trata como «sin Drive» a una conexión «con error» aunque siga copiando.",
+    "El aviso trata como «sin Drive» a una conexión «con error» aunque siga copiando. (INC-177, abierto, medio).",
     "Los guiones e y e2 comprueban una rama u otra según el Drive de «negocio» esté o no conectado: hoy está conectado, así que comprueban que con Drive el aviso no se ve.",
     "El aviso a 390 px (caso f) es una captura, no una afirmación."
    ],
@@ -1740,7 +1757,9 @@
     "RT-8",
     "RT-14"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-177"
+   ],
    "pruebas": [
     {
      "guion": "REQ-K3b-aviso",
@@ -2032,9 +2051,9 @@
     "admin"
    ],
    "que": "Recibir los avisos del corte por el canal de Comunicaciones (WhatsApp o correo), además del aviso fijo",
-   "declarado": "no-construido",
+   "declarado": "fuera-de-alcance",
    "limitantes": [
-    "Se decidió que los avisos queden en el aviso fijo «hasta M6» (REQ-K3-3, M-470); Comunicaciones (M6) está sin definir."
+    "Los avisos del corte quedan en la aplicación; por WhatsApp o correo con Comunicaciones (M6) va a la bolsa (Diseño, M-824 c)."
    ],
    "entradas": [],
    "salidas": [],
@@ -2078,7 +2097,8 @@
     "Si la tarea no corre en los cuatro días de la ventana, ese mes no hay corte: se acumula y se borra en el siguiente.",
     "Si dos pasadas coinciden, la segunda responde «ocupado»; el bloqueo vence solo.",
     "El corte no exige las claves de Google: un servidor sin ellas trata a todo negocio como sin Drive (ver CU-K3-5.4).",
-    "Las pruebas e2e solo ejercen el corte en modo de prueba sobre datos zz-verif- (CU-K3-5.8); la pasada real no tiene guion."
+    "Las pruebas e2e solo ejercen el corte en modo de prueba sobre datos zz-verif- (CU-K3-5.8); la pasada real no tiene guion.",
+    "Regla de producto (Diseño, M-824): el corte nunca borra sin una copia confirmada; con la conexión revocada o con error, o sin respuesta de Google, se niega a borrar y avisa."
    ],
    "entradas": [
     {
@@ -2142,7 +2162,8 @@
    ],
    "pendientes": [
     "T-12",
-    "T-13"
+    "T-13",
+    "INC-175"
    ],
    "pruebas": [],
    "tecnica": {
@@ -2247,7 +2268,8 @@
    "limitantes": [
     "Un archivo copiado que Drive no confirma (por ejemplo, porque Google no responde) vuelve a la cola de copia con su enlace borrado del registro; si el tercer día sigue sin confirmarse, se borra sin copia aunque esté en Drive (ver CU-K3-5.4).",
     "Lo que se aplaza lo cuenta el aviso fijo (CU-K3-4.4) y el reporte («esperan su copia»).",
-    "DA-25 pedía no borrar nada sin copia confirmada; DA-32 lo cambió: se reintenta 3 días y se borra igual."
+    "DA-25 pedía no borrar nada sin copia confirmada; DA-32 lo cambió: se reintenta 3 días y se borra igual.",
+    "Si Google no responde al confirmar un archivo (error o permiso que no renueva), se trata igual que «no está»: reCopiar le borra el enlace y el tercer día se borra sin copia aunque esté en Drive (INC-176, abierto, alto). Regla de producto (Diseño, M-824): el corte nunca borra sin una copia confirmada; con la conexión revocada o con error, o sin respuesta de Google, se niega a borrar y avisa."
    ],
    "entradas": [
     {
@@ -2300,7 +2322,9 @@
     "RT-8",
     "RT-12"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-176"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [],
@@ -2329,7 +2353,8 @@
    "limitantes": [
     "Sin Drive el corte borra desde el día 0 todo lo subido hasta las 23:00 y registra su huella; no hay espera.",
     "Un negocio con la conexión revocada, o un servidor sin las claves de Google, cuenta como «sin Drive»: se borra sin copia incluso lo que ya estaba copiado en Drive, y el registro lo marca «sin copia» (la aplicación dirá «Eliminado en el corte» aunque el archivo siga en Drive).",
-    "El archivo «omitido» (dato de prueba o sin registro) se borra sin copia aunque el negocio tenga Drive."
+    "El archivo «omitido» (dato de prueba o sin registro) se borra sin copia aunque el negocio tenga Drive.",
+    "Con la conexión revocada o sin claves el negocio se decide «sin copia» de entrada, sin mirar el día ni si ya estaba copiado (INC-175, abierto, alto). Regla de producto (Diseño, M-824): el corte nunca borra sin una copia confirmada; con la conexión revocada o con error, o sin respuesta de Google, se niega a borrar y avisa."
    ],
    "entradas": [
     {
@@ -2378,7 +2403,9 @@
     "RT-8",
     "RT-12"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-175"
+   ],
    "pruebas": [
     {
      "guion": "REQ-K3c",
@@ -2734,207 +2761,6 @@
    "confianza": "media"
   },
   {
-   "id": "CU-K3-6.1",
-   "capacidad": "CAP-K3-6",
-   "actor": [
-    "admin"
-   ],
-   "que": "Descargar un respaldo de la cuenta con los datos del negocio",
-   "declarado": "parcial",
-   "limitantes": [
-    "Solo el administrador ve el botón de respaldo (⬇ junto a su nombre).",
-    "El respaldo no trae las fotos, evidencias ni videos (están en el servidor y se respaldan aparte, CU-K3-6.4) ni, hoy, los datos de la cuenta, del calendario de cortes, del registro de la copia a Drive y de la exportación de calendario (DT-43).",
-    "Es solo de descarga: no hay importación desde la aplicación.",
-    "Nunca se ha probado una restauración real con el respaldo diario (DT-42, INC-137).",
-    "El dueño de este caso de uso según el mapa es Shell (botón) y Servidor (respaldo); aquí se levanta porque RT-12 lo exige antes del primer corte (por confirmar)."
-   ],
-   "entradas": [],
-   "salidas": [],
-   "escenarios": [
-    {
-     "id": "E1",
-     "tipo": "principal",
-     "dado": "un administrador con sesión en el servidor",
-     "cuando": "pulsa el botón de respaldo",
-     "entonces": "se descarga un archivo de respaldo con la fecha del día, con todos los datos del negocio, sus usuarios (sin contraseñas) y sus capacidades"
-    },
-    {
-     "id": "E2",
-     "tipo": "alterno",
-     "dado": "un operador o un colaborador",
-     "cuando": "abre la aplicación",
-     "entonces": "no ve el botón de respaldo"
-    },
-    {
-     "id": "E3",
-     "tipo": "excepcion",
-     "dado": "el servidor no entrega el respaldo",
-     "cuando": "el administrador lo pide",
-     "entonces": "el botón muestra una cruz unos segundos y no descarga nada"
-    }
-   ],
-   "origen": [
-    "DT-43",
-    "DA-32"
-   ],
-   "reglas": [
-    "RT-12",
-    "RT-14"
-   ],
-   "pendientes": [
-    "DT-42",
-    "DT-43",
-    "INC-79",
-    "INC-84",
-    "INC-101"
-   ],
-   "pruebas": [],
-   "tecnica": {
-    "paginas": [
-     "str-app-shell.html"
-    ],
-    "rutas": [
-     "GET /api/export"
-    ],
-    "colecciones": [],
-    "notas": "Botón #apiBackupBtn y _descargarRespaldo del shell (fecha local, INC-79); la lista de colecciones de api/export debe ser la de /api/col (INC-84, INC-101, vigilado por tests/export-colecciones.test.js). api/export/index.php no estaba entre las fuentes: lo del servidor sale de docs/claude/servidor-php.md."
-   },
-   "confianza": "media",
-   "verificado": {
-    "fecha": "2026-10-18",
-    "como": "Lectura de _descargarRespaldo y del botón en str-app-shell.html y de la descripción del respaldo en docs/claude/servidor-php.md; api/export/index.php no estaba entre las fuentes"
-   }
-  },
-  {
-   "id": "CU-K3-6.2",
-   "capacidad": "CAP-K3-6",
-   "actor": [
-    "cron"
-   ],
-   "que": "Guardar cada noche en el servidor un respaldo de cada cuenta y conservar los últimos 30",
-   "declarado": "construido",
-   "limitantes": [
-    "Deja fuera las cuentas de ensayo de restauración (L-131); la cuenta de pruebas sí entra en el respaldo (CU-U-7.3).",
-    "No se pudo comprobar que la tarea programada de las 03:00 exista en el servidor de alojamiento: solo hay su descripción en el mapa técnico.",
-    "El nombre del respaldo diario usa la fecha UTC y entre las 19:00 y las 24:00 de Bogotá sale con la fecha del día siguiente (INC-81, pospuesto por decisión del dueño; cosmético).",
-    "Guarda el respaldo en el mismo servidor que los datos: no es una copia fuera de él."
-   ],
-   "entradas": [],
-   "salidas": [
-    {
-     "a": "CU-K3-6.3",
-     "dato": "respaldo diario guardado de la cuenta, para ensayar su restauración"
-    }
-   ],
-   "escenarios": [
-    {
-     "id": "E1",
-     "tipo": "principal",
-     "dado": "varias cuentas",
-     "cuando": "corre la tarea de las 03:00",
-     "entonces": "cada cuenta tiene su archivo de respaldo del día y solo se conservan los últimos 30"
-    }
-   ],
-   "origen": [
-    "DT-43",
-    "DA-32"
-   ],
-   "reglas": [
-    "RT-12",
-    "RT-22"
-   ],
-   "pendientes": [
-    "DT-43",
-    "INC-81",
-    "INC-84",
-    "INC-101"
-   ],
-   "pruebas": [],
-   "tecnica": {
-    "paginas": [],
-    "rutas": [
-     "POST /api/export/cron"
-    ],
-    "colecciones": [],
-    "notas": "api/backups/<cuenta>/<fecha>.json con .htaccess de denegación; X-Cron-Key. Fuente: docs/claude/servidor-php.md (api/export/index.php no estaba entre las fuentes)."
-   },
-   "confianza": "baja",
-   "verificado": {
-    "fecha": "2026-10-18",
-    "como": "Solo la descripción de docs/claude/servidor-php.md; no se leyó api/export/index.php ni se vio la tarea programada"
-   }
-  },
-  {
-   "id": "CU-K3-6.3",
-   "capacidad": "CAP-K3-6",
-   "actor": [
-    "admin",
-    "cola-arquitecto"
-   ],
-   "que": "Ensayar la restauración de un respaldo en una cuenta de pruebas nueva y temporal, sin tocar el negocio, y dejar constancia de conteos y huellas",
-   "declarado": "construido",
-   "limitantes": [
-    "El ensayo real del 16-oct falló con un error en la creación de la cuenta (INC-137, abierto): hasta que se cierre, no se ha restaurado nunca un respaldo real.",
-    "La constancia compara conteos por tipo de dato y huellas contra el respaldo; la copia se borra al terminar y queda constancia del borrado.",
-    "Existe para la fábrica (antes del primer corte, MJ-6); es de Servidor en el mapa y aquí se cita por RT-12."
-   ],
-   "entradas": [
-    {
-     "de": "CU-K3-6.2",
-     "dato": "respaldo diario guardado de la cuenta, para ensayar su restauración"
-    }
-   ],
-   "salidas": [],
-   "escenarios": [
-    {
-     "id": "E1",
-     "tipo": "principal",
-     "dado": "un respaldo diario del negocio",
-     "cuando": "el administrador ensaya la restauración",
-     "entonces": "se crea una cuenta de prueba temporal con las colecciones del respaldo, se devuelve la constancia y el negocio queda intacto"
-    },
-    {
-     "id": "E2",
-     "tipo": "alterno",
-     "dado": "un operador",
-     "cuando": "intenta ensayar",
-     "entonces": "el sistema se lo niega"
-    }
-   ],
-   "origen": [
-    "DA-44",
-    "DT-42"
-   ],
-   "reglas": [
-    "RT-2",
-    "RT-12",
-    "RT-24"
-   ],
-   "pendientes": [
-    "INC-137",
-    "DT-42"
-   ],
-   "pruebas": [],
-   "tecnica": {
-    "paginas": [],
-    "rutas": [
-     "POST /api/restauracion/ensayo",
-     "GET /api/restauracion/constancia",
-     "POST /api/restauracion/borrar"
-    ],
-    "colecciones": [
-     "cuenta"
-    ],
-    "notas": "api/lib/restauracion.php (no estaba entre las fuentes): lo del servidor sale de docs/claude/servidor-php.md y de INC-137."
-   },
-   "confianza": "baja",
-   "verificado": {
-    "fecha": "2026-10-18",
-    "como": "Solo la descripción de docs/claude/servidor-php.md y los incidentes INC-137 e INC-156"
-   },
-   "ambito": "fabrica"
-  },
-  {
    "id": "CU-K3-6.4",
    "capacidad": "CAP-K3-6",
    "actor": [
@@ -2945,7 +2771,7 @@
    "limitantes": [
     "Hoy es un procedimiento manual del Arquitecto con el dueño (procedimiento-respaldo-corte-2026-10.md); la aplicación no lo hace ni lo exige.",
     "Sin este respaldo no se crea la tarea programada del corte (RT-12, T-12); debe estar antes del 30-nov-2026 a las 23:00.",
-    "El respaldo diario no incluye archivos (CU-K3-6.1)."
+    "El respaldo diario no incluye archivos (es de la plataforma: Servidor)."
    ],
    "entradas": [],
    "salidas": [],
@@ -2973,9 +2799,9 @@
     "paginas": [],
     "rutas": [],
     "colecciones": [],
-    "notas": "Sin código: procedimiento (T-12). Por confirmar con Diseño si es fuera de alcance de la aplicación."
+    "notas": "Sin código: procedimiento (T-12). Queda no construido y dentro del alcance: es requisito antes del corte del 30-nov (Diseño, M-824 b)."
    },
-   "confianza": "media"
+   "confianza": "alta"
   },
   {
    "id": "CU-K3-7.1",

@@ -12,3 +12,5 @@ Niveles: sistema → módulo (el del mapa) → capacidad (tipo y peso) → caso 
 Quién escribe: el Arquitecto, la estructura y la extracción. Diseño, con Carlos, revisa y confirma el contenido de producto (capacidades, peso, alcance, escenarios). Desarrollo confirma lo técnico dudoso (casos de uso con `confianza: baja`).
 
 Reglas: módulos, actores, relaciones y reglas se apuntan por id al mapa (un dato, una fuente). La capa funcional no nombra tecnología; lo técnico va en `tecnica`. El estado de un caso de uso con prueba lo calcula la herramienta, no se escribe a mano.
+
+`por-levantar/<MOD>.json`: casos de uso que ya salieron de un módulo hacia otro que aún no tiene línea base (p. ej. el respaldo diario y el ensayo de restauración, de K3 a Servidor). La herramienta no los lee; se integran, con su id nuevo, al levantar ese módulo, y el archivo se borra.

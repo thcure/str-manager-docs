@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 12:12",
+ "actualizadoEn": "2026-10-19 12:14",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1552,12 +1552,12 @@
    "modulo": "Copia a Drive y corte",
    "fecha": "2026-10-18",
    "titulo": "El respaldo diario (POST /api/export modo cron) escribe un archivo vacío sobre el del día y responde ok si json_encode falla (por ejemplo UTF-8 inválido en un dato), y con 30 días de rotación un fallo repetido deja solo respaldos vacíos",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/export/index.php ≈L86–96: $json = json_encode(...) sin comprobar false; file_put_contents($archivo, false) escribe 0 bytes; $resultados[$cuentaId] = [ok => true]. Arreglo: JSON_THROW_ON_ERROR (o comprobar false), escribir a un temporal y renombrar, y no rotar si el del día falló. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-58 (cruce con Carlos): si el respaldo falla, no sobrescribe el bueno y avisa al admin. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "nota": "22:29 api/export/index.php ≈L86–96: $json = json_encode(...) sin comprobar false; file_put_contents($archivo, false) escribe 0 bytes; $resultados[$cuentaId] = [ok => true]. Arreglo: JSON_THROW_ON_ERROR (o comprobar false), escribir a un temporal y renombrar, y no rotar si el del día falló. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-58 (cruce con Carlos): si el respaldo falla, no sobrescribe el bueno y avisa al admin. Espera que se levante la pausa; orden del Jefe de proyecto. · 12:14 Cerrado: L-154 (93b8234) + L-155 (130411a) aceptados (veredicto L-155, 12:11). El aviso visible al admin cuando el respaldo falla queda en la bolsa.",
    "categoria": "crítico",
    "prioridad": "P2"
   },
@@ -1567,12 +1567,12 @@
    "modulo": "Copia a Drive y corte",
    "fecha": "2026-10-18",
    "titulo": "El respaldo (/api/export) no trae de los usuarios la ficha de pago (perfil_pago: tarifas, política de horas, saldo desde) ni los permisos: restaurar desde él perdería el dinero y los permisos del equipo",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "definición",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/export/index.php _exportCuenta ≈L38: SELECT id, nombre, email, rol, telefono, activo, capacidades, empresa, color, estado, es_cuenta, firebase_uid, created_at (sin perfil_pago ni permisos). DT-43 solo pide cuenta, cuenta_retencion, drive_copia e ical_export. El ensayo de restauración no inserta usuarios (por diseño, para no abrir sesión en la copia), así que tampoco lo detecta. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P2. Regla: el respaldo trae la ficha de pago y los permisos (M-839 d). Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "nota": "22:29 api/export/index.php _exportCuenta ≈L38: SELECT id, nombre, email, rol, telefono, activo, capacidades, empresa, color, estado, es_cuenta, firebase_uid, created_at (sin perfil_pago ni permisos). DT-43 solo pide cuenta, cuenta_retencion, drive_copia e ical_export. El ensayo de restauración no inserta usuarios (por diseño, para no abrir sesión en la copia), así que tampoco lo detecta. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P2. Regla: el respaldo trae la ficha de pago y los permisos (M-839 d). Espera que se levante la pausa; orden del Jefe de proyecto. · 12:14 Cerrado: L-154 (93b8234) + L-155 (130411a) aceptados (veredicto L-155, 12:11). El aviso visible al admin cuando el respaldo falla queda en la bolsa.",
    "categoria": "normal",
    "prioridad": "P2"
   },
@@ -1745,12 +1745,12 @@
    "modulo": "Servidor y API",
    "fecha": "2026-10-19",
    "titulo": "L-154 bloqueado en la puerta de pruebas: el comentario del guion INC-190 nombraba la cabecera del cron y las guardias de tests/e2e lo rechazaron; la CLI no lo copió",
-   "estado": "en fix",
+   "estado": "cerrado",
    "severidad": "bajo",
    "origen": "log/L-154-pruebas.json (puerta de entrada; no se gastó verificación)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "12:05 Arreglo: L-155, lote solo de guion con el comentario reescrito («Solo lee: nunca llama al cron ni escribe»); pasa tests/e2e-esquema.test.js. Lección: correr las guardias de tests/e2e (e2e-esquema y drive-copia A8) sobre todo guion nuevo antes de encolar."
+   "nota": "12:05 Arreglo: L-155, lote solo de guion con el comentario reescrito («Solo lee: nunca llama al cron ni escribe»); pasa tests/e2e-esquema.test.js. Lección: correr las guardias de tests/e2e (e2e-esquema y drive-copia A8) sobre todo guion nuevo antes de encolar. · 12:14 Cerrado: L-155 aceptado; propuesta al Arquitecto para el punto 13 del revisor previo (M-884)."
   }
  ],
  "dts": [
@@ -15519,9 +15519,67 @@
    "req": "INC-190, INC-191",
    "categoria": "normal",
    "resumen": "Respaldo diario con temporal + renombrar y perfil_pago/permisos",
-   "estado": "instalado",
-   "observacion": "Bloqueado en la puerta de entrada de pruebas: falta tests/e2e/INC-190-respaldo.spec.js (la CLI no lo copió por INC-203). No se gastó verificación; se acepta con L-155.",
-   "hash": "93b8234"
+   "estado": "aceptado",
+   "observacion": "Bloqueado en la puerta de entrada de pruebas: falta tests/e2e/INC-190-respaldo.spec.js (la CLI no lo copió por INC-203). No se gastó verificación; se acepta con L-155. 12:11 Aceptado junto con L-155 (log\\L-155-veredicto.json).",
+   "hash": "93b8234",
+   "aceptacion": {
+    "lote": "L-155",
+    "hash": "130411a",
+    "fecha": "2026-10-19",
+    "horaBogota": "12:11",
+    "resultado": "aceptado"
+   }
+  },
+  {
+   "lote": "L-155",
+   "fecha": "2026-10-19",
+   "req": "INC-190, INC-191",
+   "categoria": "normal",
+   "resumen": "Guion N2 tests/e2e/INC-190-respaldo.spec.js (reencola el de L-154, INC-203)",
+   "estado": "aceptado",
+   "observacion": "Encolado 12:05 (cmp IGUAL). Revisor previo 16/17 corregido. Construido 130411a 12:07 (run.js 93/93; e2e-esquema 20/20, drive-copia 78/78). Pruebas: verde, causa null; centinelas SRV y humo-pw en verde; regresión diferida al tren (LM-49). Juez 12:11: ACEPTADO. N2 a: operador 403; b: admin 200, cuenta de pruebas, perfil_pago y permisos en cada usuario, solo zz-verif-, sin password_hash.",
+   "hash": "130411a",
+   "version": "p5c110",
+   "aceptacion": {
+    "lote": "L-155",
+    "hash": "130411a",
+    "fecha": "2026-10-19",
+    "horaBogota": "12:11",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK (cubierto por tests/export-respaldo.test.js A3)"
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK (cubierto por tests/export-respaldo.test.js C1–C3)"
+     },
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: respaldo como operador: 403 Solo admin puede descargar el respaldo"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: respaldo como admin: 200 · usuarios 4  | si: es la cuenta de pruebas: sí | si: cada usuario trae perfil_pago y permisos (objeto o null): sí | si: solo usuarios zz-verif-: sí | si: sin password_hash: sí"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "La instrucción no declara criterios N3 ni N4; solo a y b (N1+N2), ambos en verde. Fase 1 (LM-49): regresión diferida al tren: DA-47-cuenta-pruebas.spec.js, DT-35.spec.js, DT-40.spec.js, DT-41.spec.js, DT-42.spec.js, INC-120-c12.spec.js, INC-120-c3.spec.js, INC-121.spec.js, INC-125.spec.js, INC-126.spec.js, INC-128-b.spec.js, INC-128.spec.js, INC-131.spec.js, INC-132.spec.js, INC-134.spec.js, INC-141.spec.js, INC-146-purga.spec.js, INC-150.spec.js, L-108.spec.js, R-3-db-config.spec.js, REQ-FL-12.spec.js, REQ-INV2-3-4-hk.spec.js, REQ-INV2-3-4.spec.js, REQ-INV2-4-1-interfaz.spec.js, REQ-INV2-4-1.spec.js, REQ-INV2-4-2-dif.spec.js, REQ-INV2-7-1-hk.spec.js, REQ-INV2-7-1.spec.js, REQ-K3b-aviso.spec.js, REQ-K3b.spec.js, REQ-K3c-vista.spec.js, REQ-K3c.spec.js, REQ-MOD-6-carga-rol.spec.js, REQ-MOD-6-carga.spec.js, REQ-MOD-6-complemento.spec.js, REQ-MOD-6-credenciales.spec.js, REQ-MOD-6-lectura.spec.js, REQ-MOD-6.spec.js, REQ-OP-1.spec.js, REQ-OP-1b.spec.js, REQ-SH-2.spec.js. Centinelas de la ruta SRV en verde (REQ-INV2-4-2.spec.js, REQ-INV2-7-1-hk-turno.spec.js), sin casos rojos. Humo-pw en verde (s1, w, s2, s3). pruebas.json › resultado: «verde», causa: null. Huecos de la ruta: ninguno; «a declarar» (REL-36, REL-73, REL-96, REL-97, REL-98, REL-99, REL-100, REL-109): relaciones de SRV con otros módulos que este guion no ejerce por ser solo lectura — deuda de cobertura de la ruta, no baja el resultado. Sin cortes de red ni sesiones caídas en esta corrida."
+   }
   }
  ],
  "esquema": {
@@ -17829,9 +17887,9 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Respaldo diario sin archivo vacío ni pisado (temporal + renombrar, sin rotación si falla, constancia en el registro) y con perfil_pago y permisos de cada usuario",
-   "estado": "construido",
+   "estado": "aceptado",
    "desde": "2026-10-19 11:13",
-   "nota": "11:13 Grupo 4 del orden activo (M-864/M-867); criterios de Diseño M-866; DA-58 decidida. Borrador en claude/producto/borradores/L-154-instr-inc190-respaldo.md. N1 tests/export-respaldo.test.js 17/0 (7 FAIL con el código de hoy). Revisor previo 11/17, corregidos 1, 3, 6, 7, 13 y 15. Pedida la revisión previa del Jefe de proyecto. Va tras la regresión completa (reprobar L-153, en marcha). · 11:18 Revisión previa del Jefe de proyecto 14/17 (M-871), corregidos 4, 13 y 15. Se encola tras la regresión. · 11:56 Encolado (cmp IGUAL) tras la regresión en verde. · 12:05 Construido; bloqueado en la puerta de pruebas (sin guion, INC-203); el código ya está en main (93b8234). Se acepta junto con L-155."
+   "nota": "11:13 Grupo 4 del orden activo (M-864/M-867); criterios de Diseño M-866; DA-58 decidida. Borrador en claude/producto/borradores/L-154-instr-inc190-respaldo.md. N1 tests/export-respaldo.test.js 17/0 (7 FAIL con el código de hoy). Revisor previo 11/17, corregidos 1, 3, 6, 7, 13 y 15. Pedida la revisión previa del Jefe de proyecto. Va tras la regresión completa (reprobar L-153, en marcha). · 11:18 Revisión previa del Jefe de proyecto 14/17 (M-871), corregidos 4, 13 y 15. Se encola tras la regresión. · 11:56 Encolado (cmp IGUAL) tras la regresión en verde. · 12:05 Construido; bloqueado en la puerta de pruebas (sin guion, INC-203); el código ya está en main (93b8234). Se acepta junto con L-155. · 12:11 Aceptado (veredicto L-155, juez local: N1 y N2 a y b en verde)."
   },
   {
    "vista": "siguiente",
@@ -17841,9 +17899,9 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Guion N2 de INC-190 (solo lectura de /export: 403 para operador; 200 para admin con perfil_pago y permisos, solo zz-verif-, sin password_hash)",
-   "estado": "construido",
+   "estado": "aceptado",
    "desde": "2026-10-19 12:05",
-   "nota": "12:05 Reencola el guion de L-154 (INC-203). Revisor previo 16/17 (falló 15, corregido). Pasa e2e-esquema. cmp IGUAL. Detrás va L-137. · 12:07 Construido (130411a; tests 93/93); entrada por commit: guion OK. Pruebas y juez en la cola."
+   "nota": "12:05 Reencola el guion de L-154 (INC-203). Revisor previo 16/17 (falló 15, corregido). Pasa e2e-esquema. cmp IGUAL. Detrás va L-137. · 12:07 Construido (130411a; tests 93/93); entrada por commit: guion OK. Pruebas y juez en la cola. · 12:11 Aceptado (veredicto L-155, juez local: N1 y N2 a y b en verde)."
   }
  ],
  "riesgos": [

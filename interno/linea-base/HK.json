@@ -1,7 +1,7 @@
 {
  "modulo": "HK",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-m1-housekeeping.html (7341 líneas, leído por funciones: turnos, estados, cierre, fotos, incidentes, salida real, alertas, horas, inventario del turno, puente al portal)",
@@ -13,7 +13,13 @@
   "hk-guiones.json: 26 guiones e2e que tocan Housekeeping con sus casos (campos «que» y «cubre»; los .spec.js se miraron solo para saber si un caso crea el turno por la interfaz)",
   "interno/linea-base/esquema.json, sistema.json e INV.json (para espejar los flujos con Inventario con sus REL-n)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-799)",
+   "que": "Peso: esenciales 1, 2, 3, 5 y 10; necesarias 4, 6, 7, 8, 9 y 11. CU-HK-6.6 con E3 (DA-41) y origen DA-20, DA-41, REQ-F11-5-2; CU-HK-7.2 con la limitante de P-15. Alcance, separación de 9.1/9.2 e ids provisionales de acuerdo."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Turnos automáticos desde las reservas y turnos manuales: lista, estado, titular, apoyos, flujos del turno, bloqueo y eliminación.",
@@ -45,77 +51,77 @@
    "id": "CAP-HK-1",
    "nombre": "Armado y gestión de turnos",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Armar los turnos (automáticos desde las reservas o manuales), verlos, asignarles titular, ajustar sus flujos, bloquearlos, eliminarlos y compartir su mensaje."
   },
   {
    "id": "CAP-HK-2",
    "nombre": "Ejecución del turno",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Hacer el turno: iniciarlo, marcar u omitir tareas, seguir procesos con espera, abrir guías, cerrar la limpieza, cerrar y reabrir el turno, y el trabajo de los apoyos."
   },
   {
    "id": "CAP-HK-3",
    "nombre": "Fotos del turno y cola de subida",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Tomar las fotos que piden las tareas y subirlas sin perderlas, aun sin señal, con su estado visible y su copia en Drive."
   },
   {
    "id": "CAP-HK-4",
    "nombre": "Incidentes y evidencia",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Reportar incidentes del turno con fotos y videos, verlos, resolverlos o escalarlos, anular evidencia con motivo y descargar el expediente."
   },
   {
    "id": "CAP-HK-5",
    "nombre": "Salida del huésped, alertas y avance",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Registrar la salida real del huésped y avisar lo que se atrasa: sin colaborador, no iniciado, retraso y checkout tardío, con el avance del turno."
   },
   {
    "id": "CAP-HK-6",
    "nombre": "Horas, apoyos y valor del turno",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Planificar y medir las horas de cada persona del turno, agregar apoyos, ajustar con motivo, estimar el valor y configurar el negocio."
   },
   {
    "id": "CAP-HK-7",
    "nombre": "Inventario dentro del turno",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Recibir de Inventario lo que el turno necesita y declarar conteos y niveles, con fotos de lugar o artículo y movimientos rechazados."
   },
   {
    "id": "CAP-HK-8",
    "nombre": "Entrega y recepción de zona",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Registrar a ciegas la recepción de la zona al empezar y la entrega precargada al terminar, con fotos, solo por el titular y sin poder cerrar sin ellas."
   },
   {
    "id": "CAP-HK-9",
    "nombre": "Pendientes de ropa entre turnos",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Dejar y recibir los pendientes del circuito de la ropa entre un turno y el siguiente: ver, marcar hecho y avisar al cerrar."
   },
   {
    "id": "CAP-HK-10",
    "nombre": "Portal, sincronización y copia local",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Entregar los turnos al portal y al Calendario, mantener la sesión, sincronizar sin pisar lo marcado y cuidar la copia local del teléfono."
   },
   {
    "id": "CAP-HK-11",
    "nombre": "Límites y accesos del colaborador",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Limitar lo que el colaborador ve y cambia: 90 días de gestión, datos del huésped de hoy y mañana, solo el titular registra inventario, plazo de 2 horas y solo sus incidentes."
   }
  ],
@@ -2635,11 +2641,19 @@
      "dado": "un apoyo que trabajó menos horas que las del turno llamado",
      "cuando": "se cierra el turno",
      "entonces": "se paga el turno llamado completo y las horas de menos se anotan en la bolsa de tiempo del colaborador para compensarlas con trabajo futuro"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un colaborador acumuló horas no trabajadas de llamados completos",
+     "cuando": "el operador revisa la bolsa de tiempo en Equipo o el colaborador la ve en su portal",
+     "entonces": "la bolsa no tiene límite ni plazo, el operador decide cuándo se compensa y nunca se descuenta dinero"
     }
    ],
    "origen": [
-    "REQ-F11-5-2",
-    "DA-20"
+    "DA-20",
+    "DA-41",
+    "REQ-F11-5-2"
    ],
    "reglas": [],
    "pendientes": [],
@@ -2652,7 +2666,7 @@
     "colecciones": [],
     "notas": "Sin rastro en el código de la página (búsqueda de bolsa de tiempo y de duración del apoyo sin resultados). Las opciones 7 h, 5 h y libre y la recomendación salen del texto del REQ y de la decisión DA-20."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda en el código de la página: sin duración de apoyo propuesta ni bolsa de tiempo"
@@ -2789,7 +2803,8 @@
    "limitantes": [
     "Un colaborador de apoyo no puede marcar la tarea de inventario ni registrar conteos.",
     "En los turnos de una propiedad con zona principal, la tarea de conteo de la zona la reemplaza la entrega de zona (CU-HK-7.3).",
-    "Un movimiento ya registrado no se edita: se corrige con otro movimiento que lo anula."
+    "Un movimiento ya registrado no se edita: se corrige con otro movimiento que lo anula.",
+    "Se declara una cantidad o un porcentaje por artículo; no hay presentaciones ni nivel por cada presentación abierta (P-15; ver CU-INV-1.8 y CU-INV-4.8)."
    ],
    "entradas": [],
    "salidas": [
@@ -2828,7 +2843,8 @@
     }
    ],
    "origen": [
-    "DA-22"
+    "DA-22",
+    "P-15"
    ],
    "reglas": [
     "RT-5",

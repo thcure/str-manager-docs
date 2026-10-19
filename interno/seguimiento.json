@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 11:02",
+ "actualizadoEn": "2026-10-19 11:06",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1257,7 +1257,7 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
    "causaRaiz": "construcción",
    "debioDetectarse": "tests",
-   "nota": "21:07 api/sync-ical/index.php ≈L205–245: rama «match» (por icalUid o por fechas) no toca status ni canceladaEn. El sync del navegador sí restaura (str-calendario.html ≈L1663 «If was previously cancelled but now reappears → restore» y el repair pass ≈L1760–1771 con STRApi.reservas.estado). _icalExpExportables (api/lib/ical-export.php) excluye canceladas. Arreglo: en la rama match, si status = cancelada y vuelve a verse, status = estado por fechas (misma regla REQ-C6) y quitar canceladaEn; prueba N1 en sync-ical. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): crítico, P2. Regla: primero de toda la fila por riesgo de sobreventa; necesita DA y cruce con Carlos al levantar la pausa (Diseño le cuenta a Carlos por si lo sube). Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "nota": "21:07 api/sync-ical/index.php ≈L205–245: rama «match» (por icalUid o por fechas) no toca status ni canceladaEn. El sync del navegador sí restaura (str-calendario.html ≈L1663 «If was previously cancelled but now reappears → restore» y el repair pass ≈L1760–1771 con STRApi.reservas.estado). _icalExpExportables (api/lib/ical-export.php) excluye canceladas. Arreglo: en la rama match, si status = cancelada y vuelve a verse, status = estado por fechas (misma regla REQ-C6) y quitar canceladaEn; prueba N1 en sync-ical. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): crítico, P2. Regla: primero de toda la fila por riesgo de sobreventa; necesita DA y cruce con Carlos al levantar la pausa (Diseño le cuenta a Carlos por si lo sube). Espera que se levante la pausa; orden del Jefe de proyecto. · 19-oct 11:06 DA-51 decidida por Carlos (opción A, 11:04, M-869), con precisión: un evento del canal con las mismas fechas es una reserva NUEVA. Regla: la importación identifica cada reserva por el identificador del canal (icalUid), nunca por las fechas; la cancelada no se reactiva ni se reutiliza (queda como historia); un evento nuevo crea una reserva nueva con su turno y avisa al operador; una reserva directa nunca la adopta un evento del canal (cierra INC-172). Nota técnica: hoy un uid nuevo cae al emparejamiento por fechas ($matchFechaStmt) y «adopta» la cancelada (que sigue cancelada): por eso no se ve en HK ni bloquea en Airbnb.",
    "categoria": "crítico",
    "prioridad": "P2"
   },
@@ -1287,7 +1287,7 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "21:07 api/sync-ical/index.php $matchFechaStmt ≈L142–148 (sin filtro de fromIcal/icalFeedId vacío ni de status) y rama match ≈L205. Arreglo: emparejar por fechas solo reservas sin icalFeedId que vengan del iCal (fromIcal) y no canceladas, o marcar conflicto en vez de adoptar. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): normal, P2. Regla: una reserva directa nunca la adopta un canal. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "nota": "21:07 api/sync-ical/index.php $matchFechaStmt ≈L142–148 (sin filtro de fromIcal/icalFeedId vacío ni de status) y rama match ≈L205. Arreglo: emparejar por fechas solo reservas sin icalFeedId que vengan del iCal (fromIcal) y no canceladas, o marcar conflicto en vez de adoptar. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): normal, P2. Regla: una reserva directa nunca la adopta un canal. Espera que se levante la pausa; orden del Jefe de proyecto. · 19-oct 11:06 DA-51 decidida por Carlos (opción A, 11:04, M-869), con precisión: un evento del canal con las mismas fechas es una reserva NUEVA. Regla: la importación identifica cada reserva por el identificador del canal (icalUid), nunca por las fechas; la cancelada no se reactiva ni se reutiliza (queda como historia); un evento nuevo crea una reserva nueva con su turno y avisa al operador; una reserva directa nunca la adopta un evento del canal (cierra INC-172). Nota técnica: hoy un uid nuevo cae al emparejamiento por fechas ($matchFechaStmt) y «adopta» la cancelada (que sigue cancelada): por eso no se ve en HK ni bloquea en Airbnb.",
    "categoria": "normal",
    "prioridad": "P2"
   },

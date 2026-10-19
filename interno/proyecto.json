@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-18 20:14",
+ "actualizadoEn": "2026-10-18 20:34",
  "escritor": "Chat Jefe de proyecto (encargo rol-jefe-proyecto, LM-57)",
  "descripcion": "Orden y avance del proyecto: planes PT-n, prioridades[] (orden dentro de cada nivel P0-P3 y regla 4), lecciones de priorizacion y seguimiento, traspaso. Lo escribe solo el Chat Jefe de proyecto; los demas lo leen. Copia inicial tal cual de planes[] y prioridades[] de diseno.json (18-oct-2026); desde ahora la fuente es este archivo.",
  "esquema": {
@@ -511,7 +511,7 @@
     {
      "ref": "MJ-16 Fase 4",
      "carril": "Resto de módulos",
-     "estado": "en curso: 5 de 12 módulos con línea base (Inventario, HK, PR, POR cerrados; U en revisión, 44 casos de uso, 10,5 %); FL siguiente. Orden: HK, PR, POR, U, FL, CAL, INC1, K3, PG, KN, OP, SH; luego plataforma y lo interno; M2, CMP, PC1 y M6 solo con alcance",
+     "estado": "en curso: 6 de 12 módulos con línea base (Inventario, HK, PR, POR, U cerrados; FL en revisión, 52 casos de uso, 5,9 %); CAL siguiente. Orden: HK, PR, POR, U, FL, CAL, INC1, K3, PG, KN, OP, SH; luego plataforma y lo interno; M2, CMP, PC1 y M6 solo con alcance",
      "orden": 4,
      "quien": "Arquitecto, Diseño y Desarrollo"
     },
@@ -537,7 +537,7 @@
      "quien": "Arquitecto, Diseño y Desarrollo"
     }
    ],
-   "nota": "Único plan activo (orden de Carlos 18-oct 18:08). Cerrados: Inventario, HK (33,3 %), PR (2,4 %), POR (25,0 %, pesada 23,3 %)."
+   "nota": "Único plan activo (orden de Carlos 18-oct 18:08). Cerrados: Inventario, HK (33,3 %), PR (2,4 %), POR (25,0 %), U (10,5 %, pesada 11,8 %)."
   }
  ],
  "prioridades": [
@@ -613,7 +613,7 @@
   "fecha": "2026-10-18",
   "estado": "proyecto.json con planes[] (PT-MJ16 único activo; los demás activos detenidos), prioridades[], lecciones[] y detenidos. Falta bolsa[] (la entrega Diseño o el Arquitecto).",
   "conCarlos": "Sin preguntas abiertas. Decisiones abiertas de antes: DA-12, REQ-INV2-8-2.",
-  "proximoPaso": "Llevar el avance de MJ-16 fase 4: U en revisión, FL siguiente. Al reanudar: ordenar INC-157 e INC-158 (críticos P2), INC-159 (normal P2), L-137, L-134 y la regresión en la cuenta nueva; esperar los incidentes de U que Desarrollo confirme."
+  "proximoPaso": "Llevar el avance de MJ-16 fase 4: FL en revisión, CAL siguiente. Al reanudar: seguir ordenAlLevantarPausa (INC-161, 160, 157, 158, 162, 159, 163, 164, L-137, L-134) y la regresión en la cuenta nueva."
  },
  "detenidos": {
   "fecha": "2026-10-18 20:14",
@@ -627,8 +627,92 @@
    "INC-157 (crítico, P2: horas por turno sin permiso de tarifas; arreglo en el servidor)",
    "INC-158 (crítico, P2: el colaborador recibe ubicaciones de propiedades ajenas; cabe en DA-45)",
    "INC-159 (normal, P2: «Mi dinero» muestra sin propiedad los turnos de más de 90 días; texto fijo «Turno anterior a 90 días»)",
-   "T-25 (bolsa, media): vista previa del portal (?como=) de solo lectura"
+   "T-25 (bolsa, media): vista previa del portal (?como=) de solo lectura",
+   "INC-160 a INC-164 y DT-49 (ver ordenAlLevantarPausa)"
   ],
   "regla": "Los pedidos nuevos de Carlos van a la bolsa; nada se encola hasta nueva orden de Carlos."
+ },
+ "ordenAlLevantarPausa": {
+  "fecha": "2026-10-18 20:34",
+  "nota": "Ninguno es P0 (LM-48 v2). Un lote de construcción a la vez; los críticos necesitan DA citada, cruce de Carlos y mi revisión previa. Orden de gravedad: identidad y permisos primero, luego dinero y datos, luego sesión, luego lo normal.",
+  "items": [
+   {
+    "orden": 1,
+    "ref": "INC-161",
+    "nivel": "P2",
+    "categoria": "crítico",
+    "que": "reinvitar a un usuario activo y quedarse con su cuenta"
+   },
+   {
+    "orden": 2,
+    "ref": "INC-160",
+    "nivel": "P2",
+    "categoria": "crítico",
+    "que": "capacidades sin control de rol"
+   },
+   {
+    "orden": 3,
+    "ref": "INC-157",
+    "nivel": "P2",
+    "categoria": "crítico",
+    "que": "horas por turno sin permiso de tarifas"
+   },
+   {
+    "orden": 4,
+    "ref": "INC-158",
+    "nivel": "P2",
+    "categoria": "crítico",
+    "que": "ubicaciones de todas las propiedades al colaborador (DA-45)"
+   },
+   {
+    "orden": 5,
+    "ref": "INC-162",
+    "nivel": "P2",
+    "categoria": "crítico",
+    "que": "cerrar sesión incompleto y copia local"
+   },
+   {
+    "orden": 6,
+    "ref": "INC-159",
+    "nivel": "P2",
+    "categoria": "normal",
+    "que": "texto en Mi dinero para turnos de más de 90 días"
+   },
+   {
+    "orden": 7,
+    "ref": "INC-163",
+    "nivel": "P3",
+    "categoria": "normal",
+    "que": "/api/me sin capacidades"
+   },
+   {
+    "orden": 8,
+    "ref": "INC-164",
+    "nivel": "P3",
+    "categoria": "normal",
+    "que": "Eliminar solo inactiva; id inexistente responde 200"
+   },
+   {
+    "orden": 9,
+    "ref": "L-137",
+    "nivel": "P3",
+    "categoria": "normal",
+    "que": "ensayo de restauración con plan_id (INC-137)"
+   },
+   {
+    "orden": 10,
+    "ref": "L-134",
+    "nivel": "P3",
+    "categoria": "normal",
+    "que": "error de Google en Drive (INC-135)"
+   },
+   {
+    "orden": 11,
+    "ref": "Regresión completa en la cuenta nueva",
+    "nivel": "—",
+    "categoria": "no es lote",
+    "que": "ajuste de guiones K3b, K3c y DT-42"
+   }
+  ]
  }
 }

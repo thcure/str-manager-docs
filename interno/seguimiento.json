@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 14:13",
+ "actualizadoEn": "2026-10-19 14:37",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1252,12 +1252,12 @@
    "modulo": "Calendario",
    "fecha": "2026-10-18",
    "titulo": "La importación automática (cron /api/sync-ical) no restaura una reserva de canal cancelada que el canal vuelve a traer: actualiza fechas y lastSeenAt pero deja status «cancelada» y canceladaEn; queda sin turno en HK y la noche sale libre en la exportación a Airbnb (riesgo de sobreventa) hasta que alguien sincroniza desde el Calendario",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "alto",
    "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
    "causaRaiz": "construcción",
    "debioDetectarse": "tests",
-   "nota": "21:07 api/sync-ical/index.php ≈L205–245: rama «match» (por icalUid o por fechas) no toca status ni canceladaEn. El sync del navegador sí restaura (str-calendario.html ≈L1663 «If was previously cancelled but now reappears → restore» y el repair pass ≈L1760–1771 con STRApi.reservas.estado). _icalExpExportables (api/lib/ical-export.php) excluye canceladas. Arreglo: en la rama match, si status = cancelada y vuelve a verse, status = estado por fechas (misma regla REQ-C6) y quitar canceladaEn; prueba N1 en sync-ical. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): crítico, P2. Regla: primero de toda la fila por riesgo de sobreventa; necesita DA y cruce con Carlos al levantar la pausa (Diseño le cuenta a Carlos por si lo sube). Espera que se levante la pausa; orden del Jefe de proyecto. · 19-oct 11:06 DA-51 decidida por Carlos (opción A, 11:04, M-869), con precisión: un evento del canal con las mismas fechas es una reserva NUEVA. Regla: la importación identifica cada reserva por el identificador del canal (icalUid), nunca por las fechas; la cancelada no se reactiva ni se reutiliza (queda como historia); un evento nuevo crea una reserva nueva con su turno y avisa al operador; una reserva directa nunca la adopta un evento del canal (cierra INC-172). Nota técnica: hoy un uid nuevo cae al emparejamiento por fechas ($matchFechaStmt) y «adopta» la cancelada (que sigue cancelada): por eso no se ve en HK ni bloquea en Airbnb.",
+   "nota": "21:07 api/sync-ical/index.php ≈L205–245: rama «match» (por icalUid o por fechas) no toca status ni canceladaEn. El sync del navegador sí restaura (str-calendario.html ≈L1663 «If was previously cancelled but now reappears → restore» y el repair pass ≈L1760–1771 con STRApi.reservas.estado). _icalExpExportables (api/lib/ical-export.php) excluye canceladas. Arreglo: en la rama match, si status = cancelada y vuelve a verse, status = estado por fechas (misma regla REQ-C6) y quitar canceladaEn; prueba N1 en sync-ical. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): crítico, P2. Regla: primero de toda la fila por riesgo de sobreventa; necesita DA y cruce con Carlos al levantar la pausa (Diseño le cuenta a Carlos por si lo sube). Espera que se levante la pausa; orden del Jefe de proyecto. · 19-oct 11:06 DA-51 decidida por Carlos (opción A, 11:04, M-869), con precisión: un evento del canal con las mismas fechas es una reserva NUEVA. Regla: la importación identifica cada reserva por el identificador del canal (icalUid), nunca por las fechas; la cancelada no se reactiva ni se reutiliza (queda como historia); un evento nuevo crea una reserva nueva con su turno y avisa al operador; una reserva directa nunca la adopta un evento del canal (cierra INC-172). Nota técnica: hoy un uid nuevo cae al emparejamiento por fechas ($matchFechaStmt) y «adopta» la cancelada (que sigue cancelada): por eso no se ve en HK ni bloquea en Airbnb. · 14:33 Cerrado: L-158 aceptado (42a63f5).",
    "categoria": "crítico",
    "prioridad": "P2"
   },
@@ -1282,12 +1282,12 @@
    "modulo": "Calendario",
    "fecha": "2026-10-18",
    "titulo": "El emparejamiento por fechas del cron (propId + checkIn + checkOut + tipo reserva) no excluye reservas directas ni canceladas: un evento de canal con las mismas fechas «adopta» una reserva directa (le pone icalFeedId e icalUid) y, cuando el canal deja de traerla, la ausencia la cancela",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "21:07 api/sync-ical/index.php $matchFechaStmt ≈L142–148 (sin filtro de fromIcal/icalFeedId vacío ni de status) y rama match ≈L205. Arreglo: emparejar por fechas solo reservas sin icalFeedId que vengan del iCal (fromIcal) y no canceladas, o marcar conflicto en vez de adoptar. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): normal, P2. Regla: una reserva directa nunca la adopta un canal. Espera que se levante la pausa; orden del Jefe de proyecto. · 19-oct 11:06 DA-51 decidida por Carlos (opción A, 11:04, M-869), con precisión: un evento del canal con las mismas fechas es una reserva NUEVA. Regla: la importación identifica cada reserva por el identificador del canal (icalUid), nunca por las fechas; la cancelada no se reactiva ni se reutiliza (queda como historia); un evento nuevo crea una reserva nueva con su turno y avisa al operador; una reserva directa nunca la adopta un evento del canal (cierra INC-172). Nota técnica: hoy un uid nuevo cae al emparejamiento por fechas ($matchFechaStmt) y «adopta» la cancelada (que sigue cancelada): por eso no se ve en HK ni bloquea en Airbnb.",
+   "nota": "21:07 api/sync-ical/index.php $matchFechaStmt ≈L142–148 (sin filtro de fromIcal/icalFeedId vacío ni de status) y rama match ≈L205. Arreglo: emparejar por fechas solo reservas sin icalFeedId que vengan del iCal (fromIcal) y no canceladas, o marcar conflicto en vez de adoptar. Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): normal, P2. Regla: una reserva directa nunca la adopta un canal. Espera que se levante la pausa; orden del Jefe de proyecto. · 19-oct 11:06 DA-51 decidida por Carlos (opción A, 11:04, M-869), con precisión: un evento del canal con las mismas fechas es una reserva NUEVA. Regla: la importación identifica cada reserva por el identificador del canal (icalUid), nunca por las fechas; la cancelada no se reactiva ni se reutiliza (queda como historia); un evento nuevo crea una reserva nueva con su turno y avisa al operador; una reserva directa nunca la adopta un evento del canal (cierra INC-172). Nota técnica: hoy un uid nuevo cae al emparejamiento por fechas ($matchFechaStmt) y «adopta» la cancelada (que sigue cancelada): por eso no se ve en HK ni bloquea en Airbnb. · 14:33 Cerrado: L-158 aceptado (42a63f5).",
    "categoria": "normal",
    "prioridad": "P2"
   },
@@ -15689,6 +15689,61 @@
     "datosDePrueba": "limpiar() corrio sin error",
     "notas": "Pruebas derivadas de la instrucción solo declara el criterio «a» (N2); los casos b, c, i y j del guion no cambian con este lote (lo dice el propio Riesgo de la instrucción) y no se juzgan como criterio aparte. Fase 1 (LM-49): regresión diferida al tren: DA-47-cuenta-pruebas.spec.js, DT-41.spec.js, DT-42.spec.js, INC-120-c12.spec.js, INC-120-c3.spec.js, INC-125.spec.js, INC-126.spec.js, INC-127.spec.js, INC-128-b.spec.js, INC-130.spec.js, INC-131.spec.js, INC-132.spec.js, INC-140.spec.js, INC-141.spec.js, INC-146-purga.spec.js, INC-146.spec.js, INC-150.spec.js, INC-190-respaldo.spec.js, L-108.spec.js, REQ-INV2-3-4-hk.spec.js, REQ-INV2-4-1-interfaz.spec.js, REQ-INV2-4-2-dif.spec.js, REQ-INV2-7-1-hk.spec.js, REQ-INV2-7-1.spec.js, REQ-K3b-aviso.spec.js, REQ-K3b.spec.js, REQ-K3c-vista.spec.js, REQ-K3c.spec.js, REQ-OP-1.spec.js, REQ-OP-1b.spec.js, REQ-SH-2.spec.js. Centinelas en ruta (REQ-INV2-4-2.spec.js, REQ-INV2-7-1-hk-turno.spec.js): todos sus casos en true, sin ok:false. pruebas.json › resultado: «verde», causa: null. No hay letra N3 en «Pruebas derivadas»: no se juzgan las capturas de 'i' (fuera del alcance declarado por la instrucción). Huecos y «A declarar» de la ruta de INV (REL-30, RT-10, RT-11, RT-15) son deuda de cobertura preexistente de la ruta, no de este lote."
    }
+  },
+  {
+   "lote": "L-158",
+   "fecha": "2026-10-19",
+   "req": "INC-170, INC-172",
+   "categoria": "crítico",
+   "resumen": "El canal identifica cada reserva por su identificador: reactiva la misma, crea la nueva aunque coincida en fechas (alerta 6 del Tablero), retoma lo de antes o de un canal quitado, nunca adopta una directa",
+   "estado": "aceptado",
+   "observacion": "DA-51 con cruce de Carlos (19-oct 11:04, M-869). Revisor previo en tres pasadas (14, 13 y 16/17, corregido) y Jefe de proyecto 17/17 (M-906). Encolado 14:07 (cmp IGUAL). Construido 42a63f5 (run.js 94/94). Ok de producto de Diseño 14:13 (M-914). Juez 14:33: ACEPTADO, fase completa: N1 94/94, N2 b (alerta 6 con sus dos títulos y fechas), regresión por ruta 45 guiones (126 casos) en verde. Hueco de cobertura REL-22 (cron→CAL) cubierto por los N1 A1–A6 y B1–B5 (RT-22).",
+   "hash": "42a63f5",
+   "version": "p5c111",
+   "aceptacion": {
+    "lote": "L-158",
+    "hash": "42a63f5",
+    "fecha": "2026-10-19",
+    "horaBogota": "14:33",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 94/94 archivos OK (A1–A6, B1–B5, C1–C8 en tests/ical-reservas-canal.test.js)"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: preparación: propiedad 200 · reservas 200 | si: alertas 6 de la propiedad: [[\"azul\",\"Reserva nueva de Airbnb en las fechas de una cancelada\",\"29–31 oct\"],[\"azul\",\"Reserva de Booking reactivada: el canal la volvió a traer\",\"2–4 nov\"]] | si: títulos: [\"Reserva de Booking reactivada: el canal la volvió a traer\",\"Reserva nueva de Airbnb en las fechas de una cancelada\"] | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "b (E1–E4)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 94/94 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado: «verde», causa: null; sin ningún \"ok\": false (Grep). Fase completa (lote crítico), sin diferidos; regresión por ruta: 45 guiones (126 casos) en verde, 8 en noCorren (fuera de la ruta, no cuentan). La instrucción no tiene criterios N3 (cómo se ve la alerta lo juzga el N3 de L-159 y Diseño); la única captura de la carpeta (INC-125-b-medida) es de regresión. Deuda de cobertura: regresionSeleccion.ruta.huecos trae REL-22 (cron→CAL); un guion no puede llamar al cron (RT-22): la cubren los N1 A1–A6 y B1–B5. Sesiones sin caídas."
+   }
+  },
+  {
+   "lote": "L-159",
+   "fecha": "2026-10-19",
+   "req": "INC-171",
+   "categoria": "crítico",
+   "resumen": "Quitar un canal pide confirmar; elimina los bloqueos de Airbnb y deja lo demás «Canal quitado» (⚑ en el Calendario, alerta 7 del Tablero) para cancelar, eliminar o dejar como propio",
+   "estado": "encolado",
+   "observacion": "DA-51 con cruce de Carlos (19-oct 11:04, M-869). Revisor previo en tres pasadas y Jefe de proyecto 17/17 (M-906). Archivos de LENOVO tras L-158 idénticos a la base del borrador. Guardias e2e-esquema 20/0 y drive-copia 78/0. Encolado 14:37 (cmp IGUAL).",
+   "version": "p5c112"
   }
  ],
  "esquema": {
@@ -18044,9 +18099,9 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "El canal identifica cada reserva por su identificador: reactiva la misma, crea la nueva aunque coincida en fechas (alerta 6 del Tablero), retoma lo de antes o de un canal quitado, nunca adopta una directa",
-   "estado": "construido",
-   "desde": "2026-10-19 14:07",
-   "nota": "13:14 Grupo 3 (M-864/M-893); DA-51 a con cruce de Carlos (M-869) y detalles de Diseño (M-823, M-894). N1 tests/ical-reservas-canal.test.js 27/0. Aplicado a main da idéntico. En revisión previa del subagente; luego a la del Jefe de proyecto. ?v= p5c111 (si L-156 va antes, se rehace). · 13:28 Revisor previo 14/17 (5, 13, 15) y defectos: lectura de reservas que mueve el cursor del Calendario, «Cancelar» imposible en canal quitado, bloqueos de Booking (sobreventa), orden de guardados, alerta 6 en la misma pasada, horas del servidor, guion c. Se corrige; pregunta a Diseño (M-904). · 13:52 Tres pasadas del subagente (14, 13 y 16/17), todo corregido; reglas de Diseño M-904 aplicadas. N1 38/0; aplicado a main da idéntico. Borrador en claude/producto/borradores/L-158-instr-inc170-canal-identificador.md. Pedida la revisión previa del Jefe de proyecto. · 14:03 Revisión previa del Jefe de proyecto (M-905): fallaron 12 (demasiado grande) y 13 (letras); partido en L-158 (INC-170 e INC-172) y L-159 (INC-171), letras alineadas, RT-21/RT-22 y SRV en la zona, firstSeenAt exigido por el N1 (A4, C7). N1 29/0; aplicado a main da idéntico. Pedida la segunda lectura. · 14:07 Segunda lectura del Jefe de proyecto 17/17 (M-906); $hoy y $now confirmados en _syncIcalCuenta (L179–180). Busca rehechos contra main 199a5d6 (todos únicos). Encolado (cmp IGUAL). · 14:12 Construido (42a63f5; run.js 94/94; N1 29/0 con PHP real). Pruebas (regresión completa) y juez en la cola; pedido el ok de producto a Diseño."
+   "estado": "aceptado",
+   "desde": "2026-10-19 14:33",
+   "nota": "13:14 Grupo 3 (M-864/M-893); DA-51 a con cruce de Carlos (M-869) y detalles de Diseño (M-823, M-894). N1 tests/ical-reservas-canal.test.js 27/0. Aplicado a main da idéntico. En revisión previa del subagente; luego a la del Jefe de proyecto. ?v= p5c111 (si L-156 va antes, se rehace). · 13:28 Revisor previo 14/17 (5, 13, 15) y defectos: lectura de reservas que mueve el cursor del Calendario, «Cancelar» imposible en canal quitado, bloqueos de Booking (sobreventa), orden de guardados, alerta 6 en la misma pasada, horas del servidor, guion c. Se corrige; pregunta a Diseño (M-904). · 13:52 Tres pasadas del subagente (14, 13 y 16/17), todo corregido; reglas de Diseño M-904 aplicadas. N1 38/0; aplicado a main da idéntico. Borrador en claude/producto/borradores/L-158-instr-inc170-canal-identificador.md. Pedida la revisión previa del Jefe de proyecto. · 14:03 Revisión previa del Jefe de proyecto (M-905): fallaron 12 (demasiado grande) y 13 (letras); partido en L-158 (INC-170 e INC-172) y L-159 (INC-171), letras alineadas, RT-21/RT-22 y SRV en la zona, firstSeenAt exigido por el N1 (A4, C7). N1 29/0; aplicado a main da idéntico. Pedida la segunda lectura. · 14:07 Segunda lectura del Jefe de proyecto 17/17 (M-906); $hoy y $now confirmados en _syncIcalCuenta (L179–180). Busca rehechos contra main 199a5d6 (todos únicos). Encolado (cmp IGUAL). · 14:12 Construido (42a63f5; run.js 94/94; N1 29/0 con PHP real). Pruebas (regresión completa) y juez en la cola; pedido el ok de producto a Diseño. · 14:13 Ok de producto de Diseño (M-914). · 14:33 Aceptado (veredicto L-158: N1 94/94, N2 b en verde, regresión por ruta 45 guiones en verde; REL-22 cubierta por los N1)."
   },
   {
    "vista": "siguiente",
@@ -18056,11 +18111,11 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "Quitar un canal pide confirmar; elimina los bloqueos de Airbnb y deja lo demás «Canal quitado» (⚑ en el Calendario, alerta 7 del Tablero) para cancelar, eliminar o dejar como propio",
-   "estado": "redactado",
-   "desde": "2026-10-19 14:03",
-   "esperaA": "L-158",
-   "espera": "aceptación de L-158",
-   "nota": "14:03 Parte del grupo 3 (M-905); DA-51 con cruce de Carlos 19-oct 11:04 (M-869), encima de L-158. N1 tests/canal-quitado.test.js 14/0; aplicado sobre main con L-158 da idéntico. Borrador en claude/producto/borradores/L-159-instr-inc171-canal-quitado.md. ?v= p5c112. · 14:07 Segunda lectura 17/17 (M-906); corregido el comentario de P2 (tests/canal-quitado.test.js). Se encola al aceptar L-158. · 14:11 Pausa de la cola pedida por Carlos (M-909/M-912/M-913) después de aceptar L-158 y L-159: nada se encola después. · 14:13 Indicación del Jefe de proyecto (M-915): al aceptarse L-159, Desarrollo crea PAUSA en la raíz de la cola y lo confirma."
+   "estado": "encolado",
+   "desde": "2026-10-19 14:37",
+   "esperaA": "CLI",
+   "espera": "construcción de L-159",
+   "nota": "14:03 Parte del grupo 3 (M-905); DA-51 con cruce de Carlos 19-oct 11:04 (M-869), encima de L-158. N1 tests/canal-quitado.test.js 14/0; aplicado sobre main con L-158 da idéntico. Borrador en claude/producto/borradores/L-159-instr-inc171-canal-quitado.md. ?v= p5c112. · 14:07 Segunda lectura 17/17 (M-906); corregido el comentario de P2 (tests/canal-quitado.test.js). Se encola al aceptar L-158. · 14:11 Pausa de la cola pedida por Carlos (M-909/M-912/M-913) después de aceptar L-158 y L-159: nada se encola después. · 14:13 Indicación del Jefe de proyecto (M-915): al aceptarse L-159, Desarrollo crea PAUSA en la raíz de la cola y lo confirma. · 14:37 L-158 aceptado; archivos de LENOVO idénticos a la base del borrador. Encolado (cmp IGUAL). Después de L-159 no se encola nada (pausa, M-912/M-913); PAUSA al aceptarse (M-915)."
   }
  ],
  "riesgos": [

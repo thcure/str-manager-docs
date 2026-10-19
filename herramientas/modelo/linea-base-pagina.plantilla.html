@@ -56,6 +56,12 @@ input[type=search]{width:min(320px,80vw)}
 .tesela:hover{transform:scale(1.15)} @media (prefers-reduced-motion:reduce){.tesela:hover{transform:none}}
 .pct{font:700 .9rem/1 var(--f-dat);white-space:nowrap}
 .diagrama{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow-x:auto}
+.diagrama{position:relative}
+.flota{position:absolute;z-index:5;width:min(380px,calc(100% - 16px));max-height:440px;overflow:auto;background:var(--hoja);border:1px solid var(--acento);border-radius:8px;box-shadow:0 6px 22px var(--sombra);padding:10px 12px;font-size:.85rem;line-height:1.35;pointer-events:none}
+.flota[hidden]{display:none} .flota h4{margin:0 0 6px;font-size:.9rem}
+.flota .l{padding:4px 0;border-top:1px solid var(--linea)} .flota .l:first-of-type{border-top:0}
+.flota .s{color:var(--acento);font-weight:700} .flota .e{color:var(--entra);font-weight:700} .flota .mas{color:var(--tenue);margin-top:4px}
+.diagrama .arista{cursor:help} .diagrama .cuenta{pointer-events:none}
 .relpanel{margin-top:10px;background:var(--hoja);border:1px solid var(--linea);border-radius:8px;padding:12px 14px}
 .relpanel h3{margin:0 0 6px;font-size:1rem} .relpanel .grupo{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
 .relpanel ul{list-style:none;margin:0;padding:0} .relpanel li{padding:6px 0;border-top:1px solid var(--linea)} .relpanel li:first-child{border-top:0}
@@ -248,6 +254,33 @@ function panelRel(m){
     <div class="grupo"><div><div class="dir sale">Entrega a (${sal.length})</div><ul>${sal.map((x) => itemRel(x, 'sale')).join('') || '<li class="tenue">Nada.</li>'}</ul></div>
     <div><div class="dir entra">Recibe de (${ent.length})</div><ul>${ent.map((x) => itemRel(x, 'entra')).join('') || '<li class="tenue">Nada.</li>'}</ul></div></div>`;
 }
+function lineaFlota(x, lado){
+  const I = (D.relInfo || {})[x.rel], desc = I ? I.dato : [...x.datos][0] || '';
+  return `<div class="l"><span class="${lado === 'sale' ? 's' : 'e'}">${lado === 'sale' ? '→' : '←'} ${esc(x.otro)}</span> <b>${esc(x.rel || '—')}</b>: ${esc(corta(desc, 90))}</div>`;
+}
+function htmlFlotaModulo(m){
+  const r = relacionesDe(m), lista = (lado) => Object.values(r[lado]).sort((a, b) => b.n - a.n);
+  const todos = lista('sale').map((x) => [x, 'sale']).concat(lista('entra').map((x) => [x, 'entra']));
+  const max = 7, mas = todos.length - max;
+  return `<h4>${esc(m)} · ${esc(corta(nMod(m), 40))}</h4>${todos.slice(0, max).map(([x, l]) => lineaFlota(x, l)).join('') || '<div class="tenue">Sin relaciones con este filtro.</div>'}${mas > 0 ? `<div class="mas">y ${mas} más: el detalle completo está debajo del mapa.</div>` : ''}`;
+}
+function htmlFlotaArista(o, d){
+  const v = {}; recorrerFlujos((a, b, f) => { if (a !== o || b !== d || (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL)) return; const k = f.rel || '—'; (v[k] = v[k] || {rel: f.rel, otro: d, n: 0, datos: new Set()}).n++; v[k].datos.add(f.dato); });
+  return `<h4>${esc(o)} → ${esc(d)}</h4>` + Object.values(v).sort((a, b) => b.n - a.n).map((x) => { const I = (D.relInfo || {})[x.rel];
+    return `<div class="l"><b>${esc(x.rel || '—')}</b> <span class="tenue">(${x.n} flujo${x.n > 1 ? 's' : ''})</span>: ${esc(corta(I ? I.dato : [...x.datos][0] || '', 160))}${I && I.mec && !/^por precisar/.test(I.mec) ? `<div class="tenue">${esc(corta(I.mec, 120))}</div>` : ''}</div>`; }).join('');
+}
+function mostrarFlota(html, cx, cy){
+  const cont = $('#dg'); let f = $('#dgFlota');
+  if (!f) { f = document.createElement('div'); f.id = 'dgFlota'; f.className = 'flota'; cont.appendChild(f); }
+  if (!html) { f.hidden = true; return; }
+  f.innerHTML = html; f.hidden = false;
+  const rc = cont.getBoundingClientRect(), x = cx - rc.left + cont.scrollLeft, y = cy - rc.top + cont.scrollTop;
+  const w = f.offsetWidth, h = f.offsetHeight, W = cont.scrollWidth, H = cont.scrollHeight;
+  let left = Math.min(Math.max(8, x + 16), W - w - 8), top = y + 18;
+  if (top + h > H - 4) top = Math.max(4, y - h - 18);
+  if (x + 16 + w > W - 8 && x - w - 16 > 8) left = x - w - 16;
+  f.style.left = left + 'px'; f.style.top = top + 'px';
+}
 function relsArista(o, d){
   const v = {}; recorrerFlujos((a, b, f) => { if (a !== o || b !== d || (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL)) return; v[f.rel || '—'] = (v[f.rel || '—'] || 0) + 1; });
   return Object.entries(v).sort((a, b) => b[1] - a[1]).map(([r]) => `${r}: ${corta(((D.relInfo || {})[r] || {}).dato || '', 90)}`).join('\n');
@@ -279,7 +312,7 @@ function diagramaSistema(){
   $('#fRelDesc').textContent = descTipoRel(FILTRO_REL); panelRel(null);
   if (!Object.keys(ar).length) { $('#dgAyuda').textContent = ''; $('#dg').innerHTML = '<p class="tenue">Ningún flujo entre módulos con ese tipo de relación.</p>'; return; }
   if (VISTA_DG === 'matriz') return matrizSistema(ar);
-  $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Debajo del mapa se explica cada relación del módulo señalado.';
+  $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Al señalar un módulo o una flecha aparece de qué se trata cada relación; el detalle completo queda debajo del mapa. En el celular, el primer toque muestra y el segundo entra.';
   const capas = capasOrden();
   const W = 1000, filaH = 104, top = 26, nodoW = 128, nodoH = 56, H = top + capas.length * filaH, pos = {};
   capas.forEach(([t, ms], r) => {
@@ -299,8 +332,7 @@ function diagramaSistema(){
     const misma = Math.abs(dy) < 1;
     const cx = (x1 + x2) / 2 + (misma ? 0 : dy * .12), cy = (y1 + y2) / 2 + (misma ? -Math.max(40, Math.abs(dx) * .18) : 0) - dx * .06;
     const [ax, ay] = borde(x1, y1, cx - x1, cy - y1), [bx, by] = borde(x2, y2, cx - x2, cy - y2);
-    s += `<path class="arista" data-o="${o}" data-d="${d}" d="M${ax},${ay} Q${cx},${cy} ${bx},${by}" fill="none" stroke-width="${Math.min(1 + n * .35, 7)}" marker-end="url(#flN)"><title>${o} → ${d}: ${n} flujo(s)
-${esc(relsArista(o, d))}</title></path>
+    s += `<path class="arista" data-o="${o}" data-d="${d}" d="M${ax},${ay} Q${cx},${cy} ${bx},${by}" fill="none" stroke-width="${Math.min(1 + n * .35, 7)}" marker-end="url(#flN)"></path>
       <text class="cuenta" data-o="${o}" data-d="${d}" x="${(ax + 2 * cx + bx) / 4}" y="${(ay + 2 * cy + by) / 4 - 3}" text-anchor="middle">${n}</text>`; });
   capas.forEach(([t, ms]) => ms.forEach((m) => { const [x, y] = pos[m], l = !!D.modulos[m];
     const I = l ? D.modulos[m].informe : null, pe = I ? I.porEstado : {}, tot = Object.values(pe).reduce((a, b) => a + b, 0) || 1;
@@ -314,17 +346,27 @@ ${esc(relsArista(o, d))}</title></path>
       <text x="${x - nodoW / 2 + 8}" y="${y + 8}" class="t2">${esc(corta(nMod(m), 19))}</text>${barra}</g>`; }));
   $('#dg').innerHTML = s + '</svg>';
   const svg = $('#svgCapas');
-  const marcar = (m) => { svg.classList.toggle('foco', !!m); if (m) panelRel(m);
+  let activo = null, tactil = false;
+  svg.addEventListener('pointerdown', (e) => { tactil = e.pointerType === 'touch'; }, true); svg.addEventListener('keydown', () => { tactil = false; }, true);
+  const centro = (g) => { const b = g.getBoundingClientRect(); return [b.left + b.width / 2, b.bottom - 6]; };
+  const marcar = (m, g) => { activo = m; svg.classList.toggle('foco', !!m); if (m) panelRel(m);
+    if (m && g) { const [cx, cy] = centro(g); mostrarFlota(htmlFlotaModulo(m), cx, cy); } else if (!m) mostrarFlota(null);
     svg.querySelectorAll('.arista, .cuenta').forEach((el) => { const sale = el.dataset.o === m, entra = el.dataset.d === m;
       el.classList.toggle('sale', !!m && sale); el.classList.toggle('entra', !!m && entra);
       if (el.tagName === 'path') el.setAttribute('marker-end', m && sale ? 'url(#flS)' : m && entra ? 'url(#flE)' : 'url(#flN)'); });
     svg.querySelectorAll('.nodo').forEach((g) => { const v = g.dataset.m === m || (!!m && [...svg.querySelectorAll('.arista')].some((a) => (a.dataset.o === m && a.dataset.d === g.dataset.m) || (a.dataset.d === m && a.dataset.o === g.dataset.m)));
       g.classList.toggle('apagado', !!m && !v); }); };
   svg.querySelectorAll('.nodo').forEach((g) => {
-    g.addEventListener('mouseenter', () => marcar(g.dataset.m)); g.addEventListener('focus', () => marcar(g.dataset.m));
-    g.addEventListener('mouseleave', () => marcar(null));
-    g.addEventListener('click', () => { if (D.modulos[g.dataset.m]) ir(g.dataset.m); });
+    g.addEventListener('mouseenter', () => { if (!tactil) marcar(g.dataset.m, g); }); g.addEventListener('focus', () => { if (!tactil) marcar(g.dataset.m, g); });
+    g.addEventListener('mouseleave', () => { if (!tactil) marcar(null); });
+    g.addEventListener('click', () => { if (tactil && activo !== g.dataset.m) { marcar(g.dataset.m, g); return; } if (D.modulos[g.dataset.m]) ir(g.dataset.m); });
     g.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && D.modulos[g.dataset.m]) { e.preventDefault(); ir(g.dataset.m); } }); });
+  svg.querySelectorAll('.arista').forEach((a) => {
+    const ver = (e) => mostrarFlota(htmlFlotaArista(a.dataset.o, a.dataset.d), e.clientX, e.clientY);
+    a.addEventListener('mousemove', (e) => { if (!tactil) ver(e); });
+    a.addEventListener('mouseleave', () => { if (!tactil) mostrarFlota(activo ? htmlFlotaModulo(activo) : null, ...(activo ? centro(svg.querySelector(`.nodo[data-m="${activo}"]`)) : [0, 0])); });
+    a.addEventListener('click', (e) => { e.stopPropagation(); ver(e); }); });
+  svg.addEventListener('click', (e) => { if (!e.target.closest('.nodo') && !e.target.closest('.arista')) marcar(null); });
 }
 function matrizSistema(ar){
   $('#dgAyuda').textContent = 'Fila = módulo que entrega; columna = módulo que recibe; el número es cuántos flujos van de uno a otro. Más oscuro = más dependencia. Clic en un módulo para entrar.';

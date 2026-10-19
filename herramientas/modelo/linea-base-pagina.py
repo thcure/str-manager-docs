@@ -66,6 +66,8 @@ def main(argv):
         'rt': {r['id']: r['titulo'] for r in mapa['reglas']},
         'incs': {x['id']: {'t': x.get('titulo', ''), 'e': x.get('estado') or 'abierto'} for x in seg['incs']},
         'avisos': informe['avisos'],
+        'sistema': lb.cargar(os.path.join(d, 'sistema.json')),
+        'objetivos': [o for o in (lb.cargar(os.path.join(raiz, 'interno', 'diseno.json')).get('objetivos') or []) if o.get('id') in set(lb.cargar(os.path.join(d, 'sistema.json')).get('objetivos', []))],
     }
     with open(os.path.join(AQUI, 'linea-base-pagina.plantilla.html'), encoding='utf-8') as f:
         html = f.read()

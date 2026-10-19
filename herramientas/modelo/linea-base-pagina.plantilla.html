@@ -137,6 +137,7 @@ function vistaSistema(){
      <span class="tenue">${mods.length} de ${Object.keys(D.nombresModulo).length} módulos levantados · ${ncu} casos de uso · resultados de ${esc(D.resultados || 'ninguna corrida')} · página ${esc(D.generado)}</span></div>
      <div class="cifras"><div class="cifra"><span class="etq">Cobertura de lo levantado</span><b class="dat">${fmtPct(alc ? Math.round(1000 * (1 - falt / alc)) / 10 : null)}</b><span class="tenue">${alc - falt} de ${alc} comprobados</span></div></div></header>
    <section class="sec">${barra(tot, true)}</section>
+   ${seccionAlcance(mods)}
    <section class="sec"><div class="fila"><h2>Módulos</h2><span class="tenue">Toca un módulo para ver sus capacidades y casos de uso.</span></div>
      <div class="mods">${mods.map((m) => { const I = D.modulos[m].informe, A = D.modulos[m].archivo;
        return `<button class="mod" data-m="${m}"><div class="fila2"><span class="etq">${m}</span><span class="chip">${esc(A.estadoArchivo)}</span></div>
@@ -144,8 +145,34 @@ function vistaSistema(){
        ${pend.map((m) => `<div class="mod fantasma"><div class="fila2"><span class="etq">${m}</span><span class="chip">por levantar</span></div><h3>${esc(nMod(m))}</h3></div>`).join('')}</div></section>
    <section class="sec"><div class="fila"><h2>Cómo se conectan</h2><span class="tenue">Flujos entre casos de uso, sumados por módulo. Borde punteado: módulo aún sin levantar.</span></div>
      <div class="diagrama" id="dg"></div></section>`;
-  $$('.mod[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
+  $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
+  $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
   diagramaSistema();
+}
+function seccionAlcance(mods){
+  const S = D.sistema || {}, Al = S.alcance || {}, conf = Al.confirmacion || {};
+  const filas = mods.map((m) => { const A = D.modulos[m].archivo, cus = A.casosUso;
+    const peso = {}; A.capacidades.forEach((c) => peso[c.peso] = (peso[c.peso] || 0) + 1);
+    const prod = cus.filter((u) => u.ambito !== 'fabrica');
+    const r = {m, caps: A.capacidades.length, peso, fab: cus.length - prod.length,
+      con: prod.filter((u) => u.declarado === 'construido' || u.declarado === 'parcial').length,
+      por: prod.filter((u) => u.declarado === 'no-construido').length,
+      fuera: prod.filter((u) => u.declarado === 'fuera-de-alcance').length};
+    r.alc = r.con + r.por; return r; });
+  const t = filas.reduce((a, r) => { ['caps','alc','con','por','fuera','fab'].forEach((k) => a[k] += r[k]); return a; }, {caps:0, alc:0, con:0, por:0, fuera:0, fab:0});
+  const fuera = Object.values(CU).filter(({u}) => u.declarado === 'fuera-de-alcance' && u.ambito !== 'fabrica');
+  const pw = (r) => ['esencial','necesaria','accesoria','por-confirmar'].filter((k) => r.peso[k]).map((k) => `${r.peso[k]} ${k}`).join(' · ');
+  return `<section class="sec"><div class="fila"><h2>Alcance del sistema</h2><span class="chip">${esc(conf.estado === 'confirmado' ? 'confirmado por Carlos ' + (conf.fecha || '') : 'borrador · lo confirma Carlos con Diseño')}</span></div>
+     <p class="tenue" style="margin:0">${esc(Al.que || '')}</p>
+     <div class="alcance">${(D.objetivos || []).map((o) => `<div class="caja"><span class="etq">${esc(o.id)}</span><h3 style="margin:4px 0">${esc(o.nombre)}</h3><span class="tenue">${esc(o.descripcion)}</span></div>`).join('')}</div>
+     <div class="tabla" style="max-height:none"><table><thead><tr><th>Módulo</th><th>Capacidades</th><th>En alcance</th><th>Construido</th><th>Por construir</th><th>Fuera</th><th>De fábrica</th></tr></thead><tbody>
+       ${filas.map((r) => `<tr data-m="${r.m}"><td><b>${r.m}</b> · ${esc(nMod(r.m))}</td><td class="tenue">${r.caps}: ${esc(pw(r))}</td><td class="dat">${r.alc}</td><td class="dat">${r.con}</td><td class="dat">${r.por}</td><td class="dat">${r.fuera}</td><td class="dat">${r.fab}</td></tr>`).join('')}
+       <tr><td><b>Total</b></td><td class="dat">${t.caps}</td><td class="dat"><b>${t.alc}</b></td><td class="dat">${t.con}</td><td class="dat">${t.por}</td><td class="dat">${t.fuera}</td><td class="dat">${t.fab}</td></tr></tbody></table></div>
+     <div class="alcance">
+       <div class="caja"><span class="etq">Decisiones del sistema</span><ul>${(Al.decisiones || []).map((x) => `<li>${esc(x)}</li>`).join('') || '<li class="tenue">Ninguna todavía.</li>'}</ul></div>
+       <div class="caja"><span class="etq">Pendiente de Carlos</span><ul>${(Al.pendientesCarlos || []).map((x) => `<li>${esc(x)}</li>`).join('') || '<li class="tenue">Nada.</li>'}</ul></div></div>
+     <details class="caja"><summary><b>Fuera del alcance (${fuera.length})</b> <span class="tenue">· lo que se decidió no hacer por ahora, con su motivo</span></summary>
+       <ul>${fuera.map(({mod, u}) => `<li><button class="enl" data-cu="${esc(u.id)}">${esc(u.id)}</button> ${esc(u.que)} <span class="tenue">— ${esc(corta((u.limitantes || [])[0] || '', 160))}</span></li>`).join('')}</ul></details></section>`;
 }
 function diagramaSistema(){
   const ar = {};
@@ -156,9 +183,9 @@ function diagramaSistema(){
   });
   const nodos = [...new Set(Object.keys(ar).flatMap((k) => k.split('>')).concat(Object.keys(D.modulos)))];
   const lev = nodos.filter((n) => D.modulos[n]), otros = nodos.filter((n) => !D.modulos[n]);
-  const W = 980, H = 440, cx = W / 2, cy = H / 2, pos = {};
-  lev.forEach((n, i) => { const a = (i / Math.max(lev.length, 1)) * Math.PI * 2 - Math.PI / 2, r = lev.length > 1 ? 1 : 0; pos[n] = [cx + 110 * r * Math.cos(a), cy + 80 * r * Math.sin(a)]; });
-  otros.forEach((n, i) => { const a = (i / Math.max(otros.length, 1)) * Math.PI * 2 - Math.PI / 2; pos[n] = [cx + 380 * Math.cos(a), cy + 175 * Math.sin(a)]; });
+  const W = 980, H = 560, cx = W / 2, cy = H / 2, pos = {};
+  const anillo = (lista, rx, ry) => lista.forEach((n, i) => { const a = (i / Math.max(lista.length, 1)) * Math.PI * 2 - Math.PI / 2, r = lista.length > 1 ? 1 : 0; pos[n] = [cx + rx * r * Math.cos(a), cy + ry * r * Math.sin(a)]; });
+  if (otros.length) { anillo(lev, 110 + 14 * lev.length, 70 + 8 * lev.length); anillo(otros, 420, 240); } else anillo(lev, 420, 238);
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Flujos entre módulos" style="min-width:720px"><defs><marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker></defs>`;
   Object.entries(ar).forEach(([k, n]) => { const [o, d] = k.split('>'); const [x1, y1] = pos[o], [x2, y2] = pos[d];
     const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, ox = -dy / L * 6, oy = dx / L * 6;

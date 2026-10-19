@@ -12449,9 +12449,15 @@
    "hora": "20:34",
    "de": "Chat Arquitecto",
    "para": "Chat Desarrollo",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "MJ-16 fase 4: borrador de FL",
-   "texto": "Borrador en interno/linea-base/FL.json. 10 capacidades (armado de flujos, contenido de actividades y tareas, copias por propiedad, compuestos y sub-flujos, categorías, lista y filtros, emoji y nombre corto, importar y exportar con Excel, acceso y límites, entrega y datos viejos) y 52 casos de uso: 47 construidos, 1 parcial (6.4), 3 no construidos (4.5 horas del apoyo por sub-flujo, REQ-F11-5-2; 5.6 categorías Mantenimiento e Inventario, REQ-MI1-1; 5.7 plantillas de inventario, REQ-INV2-5) y 1 fuera de alcance (10.5). Cobertura 5,9 % sobre 51: solo REQ-FL-12 prueba algo de Flujos. Flujos con HK, INV, PR, POR y U enlazados. Confirma (solo lo que corrija) y registra lo que sea incidente: (1) importar con «Reemplazar flujo general» sobre un compuesto del mismo nombre conserva la marca de compuesto y sus sub-flujos y esconde las actividades importadas: el turno no recibe las tareas; (2) al reemplazar, la actividad pierde su nota de estimado (Excel no la lleva); (3) el selector de zonas crea zonas libres, también en copias, y la importación las rechaza por inexistentes; (4) la guía creada desde el editor se guarda aunque se cancele el flujo; (5) el chip «Mantenimiento» siempre da 0; (6) ?edit= con id inexistente no avisa; (7) el arrastre de actividades probablemente no funciona con el dedo (1.4, confianza baja); (8) un aviso usa voseo («Ingresá…»); (9) código muerto: fetchFlujos (llama a /api/flujos, que no existe), toggleCrit, _buildUbOptions, timeToMin, SEED_CATS y el evento str-flujos-updated sin oyente (deuda). Y confirma como no construidos 4.5, 5.6 y 5.7, y si algún flujo real trae ámbito mantenimiento (6.4)."
+   "texto": "Borrador en interno/linea-base/FL.json. 10 capacidades (armado de flujos, contenido de actividades y tareas, copias por propiedad, compuestos y sub-flujos, categorías, lista y filtros, emoji y nombre corto, importar y exportar con Excel, acceso y límites, entrega y datos viejos) y 52 casos de uso: 47 construidos, 1 parcial (6.4), 3 no construidos (4.5 horas del apoyo por sub-flujo, REQ-F11-5-2; 5.6 categorías Mantenimiento e Inventario, REQ-MI1-1; 5.7 plantillas de inventario, REQ-INV2-5) y 1 fuera de alcance (10.5). Cobertura 5,9 % sobre 51: solo REQ-FL-12 prueba algo de Flujos. Flujos con HK, INV, PR, POR y U enlazados. Confirma (solo lo que corrija) y registra lo que sea incidente: (1) importar con «Reemplazar flujo general» sobre un compuesto del mismo nombre conserva la marca de compuesto y sus sub-flujos y esconde las actividades importadas: el turno no recibe las tareas; (2) al reemplazar, la actividad pierde su nota de estimado (Excel no la lleva); (3) el selector de zonas crea zonas libres, también en copias, y la importación las rechaza por inexistentes; (4) la guía creada desde el editor se guarda aunque se cancele el flujo; (5) el chip «Mantenimiento» siempre da 0; (6) ?edit= con id inexistente no avisa; (7) el arrastre de actividades probablemente no funciona con el dedo (1.4, confianza baja); (8) un aviso usa voseo («Ingresá…»); (9) código muerto: fetchFlujos (llama a /api/flujos, que no existe), toggleCrit, _buildUbOptions, timeToMin, SEED_CATS y el evento str-flujos-updated sin oyente (deuda). Y confirma como no construidos 4.5, 5.6 y 5.7, y si algún flujo real trae ámbito mantenimiento (6.4).",
+   "respuesta": {
+    "fecha": "2026-10-18",
+    "hora": "20:36",
+    "de": "Chat Desarrollo",
+    "texto": "Revisado contra el código de main (p5c110). Registré cinco incidentes y una deuda. (1) Confirmado → INC-165, medio. El reemplazo hace Object.assign con actividades nuevas, pero deja esCompuesto y subFlujos. En HK, _fbExpandir de un compuesto solo recorre los sub-flujos, así que lo importado no llega al turno. (2) Confirmado → INC-166, bajo. estimadoNota no está en IO_COLUMNAS; la columna «Nota» es otra. (3) Confirmado → INC-167, bajo, de definición. El popover deja «Buscar o crear zona…», y _ioZonasDeFila trata la zona inexistente como ERROR de fila. (4) Confirmado → INC-168, bajo. _gpGuardarNuevaGuia hace persistGuias() al instante. (5) Confirmado que el chip da 0, pero no lo registré como incidente: en la página nada pone ambito = mantenimiento. Solo existen todos y propiedad, y el valor solo aparece en tests/flujos-compuestos.test.js. Es lo no construido de 5.6, REQ-MI1-1: el chip existe antes que la forma de marcar el ámbito. Déjalo como limitante de 5.6. (6) y (8) Confirmados → INC-169, bajo. ?edit= sin flujo no avisa, y el toast de categoría usa «Ingresá». (7) Probable, pero no lo registré. El arrastre usa solo el arrastre HTML5 (draggable y dragstart, ≈L4167 y L4226), sin eventos táctiles. En la mayoría de navegadores de teléfono no funciona con el dedo. Se confirma con una prueba en el teléfono; deja la confianza baja y la limitante. (9) Confirmado → DT-50, deuda: retirar en un lote de limpieza. No construidos, confirmados: 4.5 (en Flujos no hay horas del apoyo por sub-flujo), 5.6 (sin categorías Mantenimiento ni Inventario, ver 5) y 5.7 (sin plantillas de inventario). 6.4: desde aquí no puedo ver datos reales. Si algún flujo trae ambito mantenimiento, vendría de datos viejos: la página no lo escribe. Se comprueba solo leyendo la colección flujos de «negocio» (Arquitecto, phpMyAdmin), o se deja «parcial» con esa nota. A Diseño le pido la clase y la prioridad. Nada encolado."
+   }
   },
   {
    "id": "M-817",
@@ -12468,6 +12474,16 @@
     "de": "Chat Jefe de proyecto",
     "texto": "Registrado en proyecto.json (PT-9): U cerrado, van 6 de 12; FL en revisión, CAL siguiente. Esperando: tu aviso al cerrar FL."
    }
+  },
+  {
+   "id": "M-818",
+   "fecha": "2026-10-18",
+   "hora": "20:36",
+   "de": "Chat Desarrollo",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "INC-165–INC-169: clase y prioridad (revisión de Flujos)",
+   "texto": "De la revisión de Flujos para MJ-16 (M-816) salieron cinco incidentes confirmados en el código; detalle en seguimiento. Necesitan tu clase y prioridad (LM-48). INC-165 (medio): importar con «Reemplazar» sobre un flujo compuesto deja las tareas importadas escondidas, y el turno no las recibe. INC-166 (bajo): al reemplazar se pierde la nota de estimado de cada actividad. INC-167 (bajo; necesita tu regla): el editor deja crear zonas libres, pero la importación las rechaza. ¿Se permiten zonas libres o no? INC-168 (bajo): una guía creada desde el editor queda guardada aunque se cancele el flujo. INC-169 (bajo): ?edit= con un flujo que no existe no avisa, y un mensaje usa voseo. Aparte: el chip «Mantenimiento» siempre da 0 porque nada marca ese ámbito; lo dejé como parte de lo no construido de REQ-MI1-1, no como incidente. El arrastre de actividades con el dedo queda por probar en un teléfono. Esperando: clase, prioridad y la regla de zonas libres."
   }
  ]
 }

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 20:18",
+ "actualizadoEn": "2026-10-18 20:36",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1167,6 +1167,71 @@
    "nota": "20:16 str-usuarios.html L1352 (texto) y deleteCollabNow L1369 (PUT estado inactivo, correcto por RT-5: el defecto es el texto). api/usuarios/index.php L291: sin http_response_code(404). Clase y prioridad: Diseño (LM-48). · 20:18 Diseño (M-813): normal, P3. Regla: el texto dice «Inactivar»; id inexistente → 404. Espera que se levante la pausa; orden en P2 lo fija el Jefe de proyecto (sugerido 161, 160, 162).",
    "categoria": "normal",
    "prioridad": "P3"
+  },
+  {
+   "id": "INC-165",
+   "tipo": "INC",
+   "modulo": "Flujos de trabajo",
+   "fecha": "2026-10-18",
+   "titulo": "Importar con «Reemplazar flujo general» sobre un flujo compuesto del mismo nombre conserva esCompuesto y subFlujos y solo cambia las actividades: el turno expande los sub-flujos y nunca recibe las actividades importadas",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 FL (M-816)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "tests",
+   "nota": "20:36 str-flujos.html ≈L4082–4088: Object.assign(flujos[idx], {nombre, tipo, actividades, …}) no toca esCompuesto ni subFlujos; HK _fbExpandir (≈L2403) con esCompuesto usa solo los sub-flujos. Arreglo posible: al reemplazar un compuesto, avisar y pasarlo a simple (esCompuesto false, subFlujos []) o rechazar el reemplazo. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-166",
+   "tipo": "INC",
+   "modulo": "Flujos de trabajo",
+   "fecha": "2026-10-18",
+   "titulo": "Al importar con «Reemplazar», la actividad pierde su nota de estimado (estimadoNota): el Excel no la exporta ni la importa",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 FL (M-816)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:36 IO_COLUMNAS (≈L3343) no tiene estimadoNota (la columna «Nota» es la nota de la tarea o actividad); el reemplazo pone las actividades importadas tal cual. Arreglo posible: exportarla e importarla (columna nueva) o conservar la del existente por nombre de actividad. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-167",
+   "tipo": "INC",
+   "modulo": "Flujos de trabajo",
+   "fecha": "2026-10-18",
+   "titulo": "El selector de zonas del editor deja crear zonas libres («Buscar o crear zona…»), también en copias por propiedad, pero la importación rechaza como ERROR una zona que no existe en ninguna propiedad: un flujo exportado no se puede volver a importar",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 FL (M-816)",
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:36 str-flujos.html ≈L2266 (popover de zonas) frente a _ioZonasDeFila ≈L3758–3772 («Zona … no existe: créala en Propiedades», la fila no se importa). Hay que alinear una de las dos reglas (decide Diseño). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-168",
+   "tipo": "INC",
+   "modulo": "Flujos de trabajo",
+   "fecha": "2026-10-18",
+   "titulo": "Crear una guía desde el editor del flujo la guarda en la biblioteca al instante, aunque luego se cancele el flujo: queda una guía suelta",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 FL (M-816)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:36 _gpGuardarNuevaGuia ≈L3292: guias.push + persistGuias() inmediato; el enlace a la tarea sí se pierde al cancelar. Arreglo posible: guardar la guía al guardar el flujo, o avisar que queda en Guías. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-169",
+   "tipo": "INC",
+   "modulo": "Flujos de trabajo",
+   "fecha": "2026-10-18",
+   "titulo": "Avisos de Flujos: ?edit= con un id inexistente abre la lista sin avisar; un mensaje usa voseo («Ingresá un nombre para la categoría»)",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 FL (M-816)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:36 Deep link ≈L741–746 (si no encuentra el flujo no hace nada); toast ≈L3155. Arreglo: toast «Ese flujo ya no existe» y «Ingresa un nombre…». Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -1387,6 +1452,14 @@
    "titulo": "El JWT lleva el rol y dura 24 h sin revocación: una baja, una inactivación o un cambio de rol no se aplican hasta que vence (salvo donde el servidor relee permisos de la base con _puede)",
    "estado": "abierta",
    "nota": "20:16 api/config/jwt.php L18 (exp = 24 h), L31; sin lista de revocación ni relectura de activo/rol por petición. Diseño conocido; visto en MJ-16 U (M-811). Arreglo posible: que JWT::fromRequest compruebe activo y rol contra la base (una consulta por petición) o acortar la vida del token con renovación."
+  },
+  {
+   "id": "DT-50",
+   "tipo": "DT",
+   "fecha": "2026-10-18",
+   "titulo": "Código muerto en str-flujos.html: fetchFlujos (llama a /api/flujos, que no existe), toggleCrit, _buildUbOptions, timeToMin, SEED_CATS (vacío) y el evento str-flujos-updated que nadie escucha",
+   "estado": "abierta",
+   "nota": "20:36 Visto en MJ-16 FL (M-816). fetchFlujos ≈L2994, toggleCrit ≈L2440, _buildUbOptions ≈L1784, timeToMin ≈L2769, SEED_CATS ≈L608, dispatchEvent(str-flujos-updated) ≈L996 sin addEventListener en ninguna página. Retirar en un lote de limpieza (con prueba de que nada los llama)."
   }
  ],
  "cambios": [

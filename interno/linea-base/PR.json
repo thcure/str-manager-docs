@@ -1,7 +1,7 @@
 {
  "modulo": "PR",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-propiedades.html (3599 líneas, leída por funciones: lista, ficha, horarios, ubicaciones, subtipos, zonas, plano, flujo base, colaborador base, depósito, inventario, canales, exportación a Airbnb, sincronización)",
@@ -13,7 +13,13 @@
   "pr-guiones.json: 4 guiones e2e que pasan por Propiedades (INC-117, INC-120-c12, INC-120-c3, REQ-INV2-4-1-interfaz); los .spec.js se leyeron para ver qué comprueba cada caso",
   "interno/linea-base/esquema.json, INV.json y HK.json (estilo y flujos con ids reales)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-802) y Chat Desarrollo (M-803)",
+   "que": "Peso: esenciales 1, 3, 5, 7 y 8; necesarias 2, 4, 6 y 9. 7.5 confirmado (confianza alta). INC-157 (3.4) e INC-158 (8.3) registrados. T-22 (4.6) y T-23 (1.4) a la bolsa. DA-11 sin atar (dato de prueba). INC-75 e INC-77 cerrados."
+  }
+ ],
  "alcance": {
   "dentro": [
    "La ficha de la propiedad: crear, ver, buscar, editar y eliminar, con ciudad y color.",
@@ -44,63 +50,63 @@
    "id": "CAP-PR-1",
    "nombre": "Fichas de propiedades",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Crear, ver, buscar, editar y eliminar las propiedades del negocio con sus datos básicos."
   },
   {
    "id": "CAP-PR-2",
    "nombre": "Ubicaciones, subtipos y dirección",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Llevar las ubicaciones comunes (edificio, conjunto, casa…) con sus tipos, los subtipos de propiedad con sus zonas típicas y la dirección de cada propiedad."
   },
   {
    "id": "CAP-PR-3",
    "nombre": "Horario base y horas del turno",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Fijar por propiedad el check-in y el check-out, el ingreso 24/7 o con hora límite, la tolerancia de salida y las horas del turno; vacío significa las del negocio."
   },
   {
    "id": "CAP-PR-4",
    "nombre": "Zonas de la propiedad y plano",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Definir las áreas de cada propiedad (sala, baño…), traerlas de otra propiedad o del subtipo, y subir un plano donde ubicarlas."
   },
   {
    "id": "CAP-PR-5",
    "nombre": "Flujo base y colaborador base",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Elegir qué flujo arma el turno de la propiedad y qué colaborador es su responsable por defecto, con las etapas del flujo a la vista."
   },
   {
    "id": "CAP-PR-6",
    "nombre": "Inventario desde la ficha",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Describir el depósito, elegir la zona principal de inventario, ver las zonas que sirven a la propiedad, hacer que una zona la sirva y quitar o devolver el acceso del colaborador base."
   },
   {
    "id": "CAP-PR-7",
    "nombre": "Canales y exportación de disponibilidad a Airbnb",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Conectar los calendarios de los canales a cada propiedad, ver su estado y exportar la disponibilidad hacia Airbnb con un enlace secreto y un día de limpieza opcional."
   },
   {
    "id": "CAP-PR-8",
    "nombre": "Entrega de los datos de la propiedad a otros módulos",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Dar a Housekeeping, al Calendario y al colaborador los datos de la propiedad que cada uno necesita, acotados a lo permitido."
   },
   {
    "id": "CAP-PR-9",
    "nombre": "Acceso, sincronización y reinicio",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Dejar ver y editar propiedades solo al administrador y al operador, traer y enviar los datos sin subir ejemplos ni pisar lo del sistema, y lo definido sobre límites y reinicio."
   }
  ],
@@ -337,7 +343,9 @@
    "reglas": [
     "RT-5"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "T-23"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1024,7 +1032,7 @@
    "que": "Fijar las horas planificadas de un turno en la propiedad, o dejar las del negocio",
    "declarado": "construido",
    "limitantes": [
-    "Cambiar las horas por turno no pide el permiso de dinero: un operador sin permiso de tarifas puede cambiarlas, y con ellas las horas que se pagan (Desarrollo y Diseño lo confirman)."
+    "Cambiar las horas por turno no pide el permiso de dinero: un operador sin permiso de tarifas puede cambiarlas, y con ellas las horas que se pagan (confirmado, INC-157)."
    ],
    "entradas": [],
    "salidas": [
@@ -1062,7 +1070,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-157"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1089,7 +1099,7 @@
    "que": "Ver en su portal el horario de la propiedad (check-in 24/7 o con hora límite, y check-out)",
    "declarado": "no-construido",
    "limitantes": [
-    "Es crítico (amplía lo que lee el colaborador): necesita decisión y cruce con Carlos; en la bolsa con prioridad baja.",
+    "Es crítico (amplía lo que lee el colaborador): queda en la bolsa; su cruce con Carlos se hace cuando se levante la pausa (M-802).",
     "Hoy el colaborador recibe check-in y check-out de la propiedad, pero no el ingreso 24/7 ni la hora límite, y el portal no muestra ninguno."
    ],
    "entradas": [],
@@ -1452,7 +1462,9 @@
     "REQ-P3"
    ],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "T-22"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -2301,8 +2313,7 @@
    "que": "Leer la disponibilidad de una propiedad desde su enlace secreto",
    "declarado": "construido",
    "limitantes": [
-    "Solo exporta fechas: no precios ni datos del huésped.",
-    "La lectura pública del enlace no estaba entre las fuentes: lo descrito sale de la página y de su documentación (Desarrollo lo confirma)."
+    "Solo exporta fechas (bloqueos «No disponible» y «Limpieza», sin canceladas ni finalizadas, desde ayer) y el nombre de la propiedad en el nombre del calendario; no precios ni datos del huésped."
    ],
    "entradas": [
     {
@@ -2358,10 +2369,10 @@
     "colecciones": [],
     "notas": "Ruta pública con token aleatorio por propiedad (regenerar lo invalida); regla de referencia en STRApi (_resExportables, _resIcsDe: ventana desde ayer, sin canceladas ni finalizadas, sin eco de Airbnb) que el PHP api/lib/ical-export.php debe repetir; ninguno de los dos se probó aquí."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
-    "como": "Lectura de la regla de referencia en el cliente (str-api.js); el archivo del servidor y la ruta pública no estaban entre las fuentes"
+    "como": "Desarrollo (M-803): ruta pública con token de 40 hex y propId en la misma fila; lectura registrada; prueba unitaria tests/ical-export.test.js"
    }
   },
   {
@@ -2568,13 +2579,13 @@
    "declarado": "construido",
    "limitantes": [
     "No recibe los calendarios de canales, el depósito, el ingreso 24/7 ni la hora límite.",
-    "Las ubicaciones comunes (con su dirección e indicaciones) parecen llegar sin acotar a sus propiedades, a diferencia de las propiedades: Desarrollo lo confirma.",
+    "Las ubicaciones comunes (con dirección, barrio e indicaciones) llegan al colaborador sin acotar a sus propiedades (confirmado, INC-158).",
     "Admin y operador no cambian: ven todas las propiedades."
    ],
    "entradas": [],
    "salidas": [
     {
-     "a": "CU-POR-1.3",
+     "a": "CU-POR-7.1",
      "dato": "datos de las propiedades donde trabaja el colaborador (lista permitida), con su ventana de 90 días"
     }
    ],
@@ -2608,8 +2619,9 @@
     "RT-14"
    ],
    "pendientes": [
-    "INC-94",
-    "INC-120"
+    "INC-120",
+    "INC-158",
+    "INC-94"
    ],
    "pruebas": [],
    "tecnica": {
@@ -3022,14 +3034,6 @@
    "porque": "Anulación de movimientos de inventario de prueba; es de la fábrica y de Inventario, sustituida por DA-49 (que sí cuelga de CU-PR-9.5)."
   },
   {
-   "id": "INC-75",
-   "porque": "Es del Calendario (logos de canal en la columna de propiedades); ningún caso de uso de Propiedades lo ejerce. Cerrado."
-  },
-  {
-   "id": "INC-77",
-   "porque": "Es de Flujos (borrar un flujo que era base de una propiedad no avisaba; ya avisa y la ficha marca el flujo ausente en CU-PR-5.1). Cerrado."
-  },
-  {
    "id": "INC-83",
    "porque": "Es del editor de Flujos (el mínimo de fotos de una tarea queda activo e invisible); Propiedades solo muestra las etapas del flujo. Cerrado."
   },
@@ -3048,6 +3052,10 @@
   {
    "id": "INC-150",
    "porque": "Es de la purga de datos de prueba de Inventario (reconocía las propiedades por un campo equivocado del nombre); no es una función de Propiedades. Cerrado."
+  },
+  {
+   "id": "DA-11",
+   "porque": "Decidió un dato de prueba (la propiedad base del colaborador de prueba), no una regla de producto (Diseño, M-802)."
   }
  ]
 }

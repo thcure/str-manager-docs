@@ -1,0 +1,1722 @@
+{
+ "modulo": "POR",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "portal.html (621 líneas, leído completo: listas, tarjeta, barra fija, Mi dinero, perfil, vista previa y mensajes con Housekeeping)",
+  "docs/claude/shell-y-api.md (fila de portal.html y de str-api.js), usuarios-y-roles.md (redirección por rol, INC-53 e INC-56), housekeeping.md y housekeeping-2.md (modo colaborador, puente con el portal, sesión embebida, cartel de foto borrada)",
+  "str-m1-housekeeping.html (por búsqueda: _hkTurnoParaPortal, _ambitoTurno, _hkOS, sub-flujos) y api/col/index.php (por búsqueda: lectura del colaborador, ventana de 90 días, huésped de hoy o mañana, ventana de 2 h)",
+  "str-manager-docs/producto/modulos/M1-housekeeping.md (portal del colaborador en el manual de producto)",
+  "por-fuentes.json: módulo POR del mapa, 14 REQ, 23 DA, 4 de la bolsa, 21 INC, 2 DT, relaciones REL-05, REL-01, REL-02, REL-23 y REL-26, actores y reglas transversales (más REL-14, REL-15 y REL-31 del mapa por su mecanismo)",
+  "por-guiones.json: 22 guiones e2e con casos por el portal; se leyeron los .spec.js de INC-126, INC-127, INC-131, INC-132, INC-140, INC-120-c12, INC-120-c3 y REQ-K3b / K3c para ver qué comprueba cada caso",
+  "interno/linea-base/esquema.json, sistema.json, INV.json, HK.json y PR.json (estilo y flujos con ids reales)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Las listas de turnos del colaborador (Hoy, Atrasados, Próximos, Recientes) y la tarjeta de cada turno: estado, alertas, avance, esperas con cuenta regresiva, fotos, huésped, llegada y salida.",
+   "Abrir un turno propio dentro del portal (desde su tarjeta, un aviso fijo o el enlace que le enviaron) y mantener la lista al día.",
+   "Los avisos fijos de esperas en curso y de fotos que no se pudieron subir, sin tapar el pie del turno.",
+   "«Mi dinero»: valor estimado, horas, saldo de horas y turnos del mes.",
+   "Sesión y perfil: entrar, volver al inicio de sesión, salir, tipo de teléfono y tema.",
+   "La vista previa del portal de un colaborador para el administrador y el operador.",
+   "Lo que el portal recibe acotado a la operación del colaborador y su separación de la copia a Drive.",
+   "Lo definido y aún por construir: calendario del colaborador con eventos de mantenimiento e inventario, vista de su sub-flujo, adelantos, compras y pagos recibidos, y «Mi desempeño»."
+  ],
+  "fuera": [
+   "La ejecución del turno (iniciar, marcar tareas, fotos, incidentes, cierre, entrega y recepción de zona, pendientes de ropa): es de Housekeeping; el portal la abre y la contiene.",
+   "El cálculo de las horas y del valor del turno (Housekeeping) y la liquidación y el pago (Pagos): aquí solo se muestra el resultado.",
+   "Lo que el servidor deja leer y escribir al colaborador (90 días, huésped de hoy o mañana, ventana de 2 horas): se cuenta en Housekeeping (CU-HK-11.x) y en Propiedades (CU-PR-8.3).",
+   "Alta, invitación, roles y permisos del colaborador (Identidad) y el menú y el inicio de sesión (Shell).",
+   "El horario y el plano de la propiedad en el portal: son casos de uso de Propiedades (CU-PR-3.5 y CU-PR-4.6).",
+   "El informe para el propietario de terceros: no es un portal operativo."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde el código del portal (621 líneas), su mapa técnico, los guiones e2e y las fuentes del módulo. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). El portal es un contenedor delgado: casi todo lo que el colaborador hace dentro del turno es de Housekeeping, y los guiones e2e que abren el portal son sobre todo de Housekeeping; aquí solo se citan los casos que ejercen algo propio del portal (listas, tarjeta, barra fija, «Mi dinero», sesión, límites con Drive). Los mismos casos de INC-126, INC-127, INC-131, INC-132 e INC-140 también respaldan casos de uso de Housekeeping. Los casos de uso de módulos vecinos sin línea base (Calendario CAL, Identidad U, Pagos PG) usan identificadores provisionales que su dueño debe confirmar; los flujos con Inventario, Housekeeping y Propiedades usan los ids reales. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-POR-1",
+   "nombre": "Mis turnos",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver los turnos propios del colaborador según cuándo le tocan (hoy, atrasados, próximos, recientes), abrir uno para trabajarlo y mantener la lista al día. Por construir: su calendario con eventos propios y la vista de su sub-flujo."
+  },
+  {
+   "id": "CAP-POR-2",
+   "nombre": "Tarjeta del turno",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Mostrar en cada turno lo que el colaborador necesita para decidir sin abrirlo: estado, alertas, avance, esperas con cuenta regresiva, fotos y el huésped."
+  },
+  {
+   "id": "CAP-POR-3",
+   "nombre": "Avisos fijos de pendientes",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Mantener a la vista, desde cualquier parte del portal, lo que no puede esperar: esperas en curso y fotos que no se pudieron subir, sin tapar el pie del turno."
+  },
+  {
+   "id": "CAP-POR-4",
+   "nombre": "Mi dinero",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Mostrar al colaborador, solo con sus turnos, cuánto va ganando, cuántas horas tiene a favor o en contra y los turnos del mes. Por construir: adelantos, compras y pagos recibidos."
+  },
+  {
+   "id": "CAP-POR-5",
+   "nombre": "Sesión y perfil",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Entrar al portal con la sesión abierta, volver al inicio de sesión si se pierde, salir, y ajustar lo propio del teléfono (tipo de teléfono y tema)."
+  },
+  {
+   "id": "CAP-POR-6",
+   "nombre": "Vista previa de administrador y operador",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Dejar que el administrador o el operador elija un colaborador y vea su portal tal como él lo ve."
+  },
+  {
+   "id": "CAP-POR-7",
+   "nombre": "Límites de lo que recibe el portal",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Que el portal del colaborador reciba y muestre solo lo de su operación y nunca toque lo del negocio (copia a Drive, credenciales)."
+  },
+  {
+   "id": "CAP-POR-8",
+   "nombre": "Mi desempeño",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Mostrar al colaborador su desempeño acumulado. Por construir: la pestaña existe y está deshabilitada."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-POR-1.1",
+   "capacidad": "CAP-POR-1",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver mis turnos agrupados en Hoy, Atrasados, Próximos y Recientes",
+   "declarado": "construido",
+   "limitantes": [
+    "Un turno de un día anterior que no se completó va a Atrasados, no a Próximos; el ya completado pasa a Recientes, que solo muestra los últimos 30 días. Lo anterior (hasta 90 días de gestión) solo cuenta en «Mi dinero».",
+    "Son listas, no un calendario: no hay vista de mes ni de semana (ver CU-POR-1.5).",
+    "El portal nunca arma ni calcula los turnos: pinta lo que Housekeeping le entrega."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-10.1",
+     "dato": "turnos del colaborador con horas, procesos, fotos pendientes, alertas y pago",
+     "rel": "REL-05"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-POR-1.2",
+     "dato": "turno elegido en su tarjeta"
+    },
+    {
+     "a": "CU-POR-3.1",
+     "dato": "turnos propios con esperas en curso"
+    },
+    {
+     "a": "CU-POR-3.2",
+     "dato": "cuenta de fotos pendientes y fallidas de cada turno"
+    },
+    {
+     "a": "CU-POR-4.1",
+     "dato": "turnos propios con sus horas planificadas y efectivas, su valor y la política de pago"
+    },
+    {
+     "a": "CU-POR-4.2",
+     "dato": "turnos del mes con sus horas, su valor y mi rol"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con turnos hoy, de días anteriores sin completar, futuros y completados en el último mes",
+     "cuando": "abre su portal",
+     "entonces": "ve cuatro grupos: Hoy; Atrasados en rojo, del más reciente al más antiguo; Próximos por fecha; y Recientes, plegado y con su cuenta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador sin turnos hoy",
+     "cuando": "abre su portal",
+     "entonces": "ve «Hoy no tienes turnos» y, si los tiene, sus otros grupos"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un teléfono que ya tiene guardada su lista de turnos y aún no recibió la del servidor",
+     "cuando": "abre su portal",
+     "entonces": "la lista se pinta con lo que Housekeeping ya tiene y se corrige cuando llega lo del servidor"
+    }
+   ],
+   "origen": [
+    "REQ-U6",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-127",
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-127",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_renderListas con el mensaje hk:turnos; ámbito historial = turno de día anterior ya completado (_ambitoTurno de Housekeeping); se repinta cada 30 s; la lista del primer mensaje sale de la copia del teléfono (INC-126)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-1.2",
+   "capacidad": "CAP-POR-1",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Abrir un turno propio para trabajarlo, desde su tarjeta, desde un aviso fijo o con el enlace que le enviaron",
+   "declarado": "construido",
+   "limitantes": [
+    "Con el enlace de un turno que no es suyo el aviso sale pasados 20 segundos (el turno recién asignado puede tardar en llegar) y solo una vez."
+   ],
+   "entradas": [
+    {
+     "de": "CU-POR-1.1",
+     "dato": "turno elegido en su tarjeta"
+    },
+    {
+     "de": "CU-POR-3.1",
+     "dato": "turno con esperas en curso al que lleva la barra"
+    },
+    {
+     "de": "CU-POR-3.2",
+     "dato": "turno con fotos fallidas al que lleva el aviso"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-10.2",
+     "dato": "orden de abrir un turno y de refrescar la lista, con el enlace del turno",
+     "rel": "REL-05"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno propio en la lista",
+     "cuando": "toca su tarjeta",
+     "entonces": "el turno se abre a pantalla completa para trabajarlo, con sus diálogos (cerrar limpieza con pendientes, menú de fotos) por encima del turno; al cerrarlo vuelve a la lista ya actualizada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el enlace de un turno recién asignado que todavía no llega al teléfono",
+     "cuando": "abre el portal con ese enlace",
+     "entonces": "el portal espera la lista del servidor y abre el turno cuando llega, sin decir que no es suyo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el enlace de un turno ajeno o inexistente",
+     "cuando": "lo abre",
+     "entonces": "a los 5 segundos no hay aviso; antes de 30 segundos le dice que ese turno no está asignado a él y no abre Housekeeping"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-17"
+   ],
+   "pendientes": [
+    "INC-126",
+    "INC-127",
+    "INC-131"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-126",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    },
+    {
+     "guion": "INC-131",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "abrirTurno manda portal:abrir a Housekeeping y muestra el marco a pantalla completa; ?turno= se resuelve en _portalDeepLink (abrir / esperar / avisar, plazo 20 s, INC-126); hk:cerrar oculta el marco y pide portal:refrescar. INC-131: los diálogos de Housekeeping quedaban detrás del panel del turno."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-1.3",
+   "capacidad": "CAP-POR-1",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Actualizar la lista de turnos a mano o al volver a la pantalla",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el colaborador en su lista",
+     "cuando": "toca «Actualizar»",
+     "entonces": "Housekeeping vuelve a leer sus turnos y la lista se repinta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el portal en segundo plano y ningún turno abierto",
+     "cuando": "el colaborador vuelve a la pantalla",
+     "entonces": "la lista se actualiza sola; si había un turno abierto no se interrumpe"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno abierto que el colaborador cierra",
+     "cuando": "vuelve a la lista",
+     "entonces": "la lista se actualiza sola con lo que acaba de marcar"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-130"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_solicitarRefresco manda portal:refrescar; también al volver la visibilidad de la pestaña y al recibir hk:cerrar. INC-130: un pull pedido antes del clic pisaba la marca recién hecha."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html: botón Actualizar, cambio de visibilidad y cierre del turno; sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-1.4",
+   "capacidad": "CAP-POR-1",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver y marcar solo las tareas de mi sub-flujo cuando comparto el turno con otra persona",
+   "declarado": "no-construido",
+   "limitantes": [
+    "REQ-F11-6 figura «entregado» (pasado a Desarrollo), pero ni el portal ni la lista tienen vista ni restricción por sub-flujo; Housekeeping solo muestra el colaborador sugerido de cada etapa.",
+    "No se leyó el documento del REQ (no estaba entre las fuentes): el alcance sale del título y de la nota del seguimiento («restringe escritura del colaborador a su sub-flujo»)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno cuyo flujo reparte sub-flujos entre un titular y un apoyo",
+     "cuando": "el apoyo abre su turno",
+     "entonces": "ve y marca solo las tareas de su sub-flujo"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el mismo turno",
+     "cuando": "el apoyo intenta marcar una tarea de otro sub-flujo",
+     "entonces": "el sistema no se lo permite"
+    }
+   ],
+   "origen": [
+    "REQ-F11-6",
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: búsqueda de «subflujo» y «sub-flujo» en portal.html sin resultados; en Housekeeping solo el armado de etapas desde el flujo base (_fbExpandir, colaboradorId de cada sub-flujo)."
+   },
+   "confianza": "baja"
+  },
+  {
+   "id": "CU-POR-1.5",
+   "capacidad": "CAP-POR-1",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver en mi calendario los eventos de mantenimiento e inventario donde soy responsable",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Decidido (DA-40, crítico) y REQ-MI1-4 figura «entregado» (pasado a Desarrollo); el portal no tiene calendario ni lee eventos.",
+    "Depende de que el Calendario guarde eventos de mantenimiento e inventario con responsable y de su paso al turno (REL-31, por construir)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-12.3",
+     "dato": "eventos de inventario del colaborador para su calendario"
+    },
+    {
+     "de": "CU-CAL-1.1",
+     "dato": "eventos de mantenimiento e inventario con su responsable, su recurrencia y su flujo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un evento de mantenimiento o de inventario con el colaborador como responsable",
+     "cuando": "abre su calendario en el portal",
+     "entonces": "ve el evento, sin los de otras personas y sin el contacto de proveedores"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un evento sin responsable o de otra persona",
+     "cuando": "el colaborador abre su calendario",
+     "entonces": "no aparece"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-4",
+    "DA-40"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: búsqueda de «calendar», «mantenim» y «evento» en portal.html sin resultados."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-POR-2.1",
+   "capacidad": "CAP-POR-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver en la tarjeta del turno su estado, sus alertas, su avance por etapas y sus fotos",
+   "declarado": "construido",
+   "limitantes": [
+    "La tarjeta no muestra la dirección ni el horario de la propiedad (el horario en el portal es CU-PR-3.5, sin construir)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno en curso con alertas, etapas con avance y fotos tomadas",
+     "cuando": "mira la lista",
+     "entonces": "la tarjeta muestra la propiedad, la fecha y la ventana de horas, el estado (pendiente, en curso, lista, completado o bloqueado), las alertas según su nivel, cada etapa con su porcentaje y el total de fotos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno donde el colaborador es apoyo, o de un día anterior sin completar",
+     "cuando": "mira la lista",
+     "entonces": "la tarjeta lleva la etiqueta «Apoyo», o «atrasado» en rojo"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno con fotos que aún están en la cola del teléfono",
+     "cuando": "mira la lista",
+     "entonces": "la tarjeta marca «N pendientes» en ámbar, y en rojo si alguna falló"
+    }
+   ],
+   "origen": [
+    "REQ-U6",
+    "REQ-U6.3",
+    "REQ-F9.o"
+   ],
+   "reglas": [
+    "RT-17"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_tarjetaTurno y _chipEstado; alertas, etapas, fotos y fotosPendientes llegan ya calculadas por Housekeeping."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (_tarjetaTurno); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-2.2",
+   "capacidad": "CAP-POR-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Seguir las esperas del turno con su cuenta regresiva y recibir aviso cuando una vence",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo avisa con el portal abierto: no hay notificación fuera de la aplicación (queda pendiente en REQ-U6.2).",
+    "Los minutos y el vencimiento se calculan con el reloj del teléfono, no con la hora del servidor: con el reloj mal puesto el aviso se adelanta o se atrasa."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con una tarea de espera en marcha",
+     "cuando": "mira la lista",
+     "entonces": "la tarjeta muestra la espera con los minutos que faltan, que se recalculan cada 30 segundos sin pedir nada nuevo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una espera que vence con el portal abierto",
+     "cuando": "llega la hora",
+     "entonces": "la tarjeta pasa a «venció» en rojo, el teléfono vibra y sale un aviso breve, una sola vez"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una espera que ya había vencido antes de abrir el portal",
+     "cuando": "abre el portal",
+     "entonces": "se ve vencida en rojo pero no vibra ni avisa"
+    }
+   ],
+   "origen": [
+    "REQ-U6.2"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Recalcula con Date.now() en cada _renderListas y con setInterval de 30 s; _vencidoVistos y _primeraRenderProcesos evitan repetir el aviso; navigator.vibrate(200)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (_tarjetaTurno y _actualizarProcesos); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-2.3",
+   "capacidad": "CAP-POR-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el huésped, la llegada y la salida del turno, sin los datos personales que no le tocan",
+   "declarado": "construido",
+   "limitantes": [
+    "Teléfono, documento y correo del huésped nunca llegan al colaborador; el nombre solo para el turno de hoy o de mañana (DA-45)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de hoy o de mañana con reserva",
+     "cuando": "mira la tarjeta",
+     "entonces": "ve el nombre del huésped, cuántos son y las noches, la hora de llegada y la de salida, cada una «confirmada» o «por confirmar»; nunca teléfono, correo, montos ni notas privadas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno de más de un día adelante",
+     "cuando": "mira la tarjeta",
+     "entonces": "en lugar del nombre dice «Huésped (se ve un día antes del turno)» y muestra el código de la reserva"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno sin nombre de huésped confirmado",
+     "cuando": "mira la tarjeta",
+     "entonces": "dice «Huésped por confirmar» con el código en gris, nunca el marcador sintético del canal"
+    }
+   ],
+   "origen": [
+    "REQ-U6.1",
+    "DA-27",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-120-c3",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Bloque huésped de _tarjetaTurno; la bandera «oculto» la pone el servidor (L-144). Housekeeping resume el huésped con _datosHuesped y nunca usa el nombre sintético del iCal (INC-48)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-3.1",
+   "capacidad": "CAP-POR-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver la barra fija de esperas en curso y abrir el turno con un toque",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-POR-1.1",
+     "dato": "turnos propios con esperas en curso"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-POR-1.2",
+     "dato": "turno con esperas en curso al que lleva la barra"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "uno o más turnos con esperas en curso",
+     "cuando": "está en cualquier parte del portal",
+     "entonces": "una barra fija abajo dice «Tienes N procesos en curso → Abrir turno» y, al tocarla, abre el primer turno con espera"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ninguna espera en curso ni foto fallida",
+     "cuando": "mira el portal",
+     "entonces": "la barra no se ve y la lista usa toda la pantalla"
+    }
+   ],
+   "origen": [
+    "REQ-U6.2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "#procesosBar, _actualizarProcesos y el clic sobre .pb-linea[data-turno]."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (_actualizarProcesos y clic de la barra); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-3.2",
+   "capacidad": "CAP-POR-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el aviso en rojo de las fotos que no se pudieron subir y abrir el turno afectado",
+   "declarado": "construido",
+   "limitantes": [
+    "El aviso cuenta las fotos fallidas de cualquiera de sus turnos, no solo del abierto.",
+    "Una foto que ya no está en el teléfono (el sistema borró el almacenamiento) aparece como fallida sin un texto claro ni botón para tomarla otra vez (pendiente en la bolsa, sin referencia)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-POR-1.1",
+     "dato": "cuenta de fotos pendientes y fallidas de cada turno"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-POR-1.2",
+     "dato": "turno con fotos fallidas al que lleva el aviso"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "fotos de un turno que no se pudieron subir (por ejemplo sin señal)",
+     "cuando": "el colaborador está en cualquier parte del portal",
+     "entonces": "la barra fija muestra en rojo «N fotos no se pudieron subir → abrir turno» y, al tocarla, abre el primer turno con fotos fallidas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "las fotos fallidas reintentadas o quitadas",
+     "cuando": "ya no queda ninguna fallida",
+     "entonces": "la línea roja desaparece y el turno vuelve a ocupar toda la pantalla"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "esperas en curso y fotos fallidas a la vez",
+     "cuando": "mira la barra",
+     "entonces": "ve las dos líneas, cada una con su turno"
+    }
+   ],
+   "origen": [
+    "REQ-U6.3"
+   ],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [
+    "INC-132",
+    "INC-133",
+    "INC-138"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-132",
+     "casos": [
+      "c",
+      "g"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html",
+     "str-cola-subida.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Línea .pb-linea.err de #procesosBar con fotosFallidas de cada turno; la cola de subida vive en Housekeeping (CU-HK-3.2, CU-HK-3.3)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-3.3",
+   "capacidad": "CAP-POR-3",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Poder tocar los botones del pie del turno aunque el aviso fijo esté a la vista",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el aviso fijo en rojo a la vista en un teléfono de 390 px",
+     "cuando": "el colaborador abre el turno",
+     "entonces": "el pie del turno queda libre encima de la barra: «Cerrar limpieza» se puede tocar y avisa de las fotos pendientes"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el aviso fijo a la vista en una pantalla ancha (1366 px)",
+     "cuando": "toca «Cerrar turno»",
+     "entonces": "el turno se cierra y avisa de las fotos pendientes; con el turno cerrado el pie sigue libre"
+    }
+   ],
+   "origen": [
+    "REQ-U6.3"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-132"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-132",
+     "casos": [
+      "d",
+      "e"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "body.has-procesos-bar #hkFrame mide 100% menos --pb-alto; _reservarBarra guarda el alto real de la barra (una o dos líneas) al repintar y al cambiar el tamaño (L-127)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-4.1",
+   "capacidad": "CAP-POR-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el valor estimado, las horas y el saldo de horas de un mes",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo se pueden elegir tres meses (el actual y los dos anteriores); lo anterior cuenta únicamente en el saldo (DA-45).",
+    "El valor es estimado: la liquidación y los pagos recibidos no están (CU-POR-4.3).",
+    "Las horas y el valor los calcula Housekeeping con un solo cálculo: el portal solo suma y pinta; solo cuentan los turnos propios."
+   ],
+   "entradas": [
+    {
+     "de": "CU-POR-1.1",
+     "dato": "turnos propios con sus horas planificadas y efectivas, su valor y la política de pago"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "turnos cerrados de un mes con tarifa registrada",
+     "cuando": "abre «Mi dinero» y elige entre el mes actual y los dos anteriores",
+     "entonces": "ve el valor estimado del mes («estimado · pendiente de liquidar»), las horas planificadas contra las efectivas y el saldo de horas acumulado, negativo cuando son horas por reponer"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un mes con turnos cerrados y ninguna tarifa registrada",
+     "cuando": "abre «Mi dinero»",
+     "entonces": "el valor sale «—» con el aviso «sin tarifa registrada · pide a tu administrador que la digite»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un colaborador a quien se le paga por horas reales",
+     "cuando": "mira el saldo de horas",
+     "entonces": "dice «no aplica: se te paga por horas reales»"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "DA-20",
+    "DA-41",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-120"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-120-c12",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_renderDinero con STRApi.horas.saldo y la política y fecha de inicio que traen los turnos; _periodos arma tres meses (el mapa técnico docs/claude/shell-y-api.md aún dice «actual y 5 anteriores»; el código y DA-45 dicen tres)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-4.2",
+   "capacidad": "CAP-POR-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver los turnos del mes con su valor, mi rol en cada uno y la diferencia de horas",
+   "declarado": "construido",
+   "limitantes": [
+    "Los turnos de más de 90 días llegan reducidos (solo fecha, rol y horas, sin propiedad): en los primeros días del tercer mes del selector la fila puede salir sin nombre de propiedad. Desarrollo lo confirma."
+   ],
+   "entradas": [
+    {
+     "de": "CU-POR-1.1",
+     "dato": "turnos del mes con sus horas, su valor y mi rol"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "turnos del mes, cerrados, en curso y sin iniciar",
+     "cuando": "abre «Mi dinero»",
+     "entonces": "cada fila muestra propiedad, fecha, «Titular» o «Apoyo», horas planificadas y efectivas, la diferencia en rojo o verde y el valor; los abiertos dicen «en curso» y los no iniciados «pendiente»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un mes sin turnos",
+     "cuando": "lo elige",
+     "entonces": "ve «Sin turnos en este periodo»"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "DA-45"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "dinLista dentro de _renderDinero; estado cerrado / en_curso / pendiente según efectivas e inicio (INC-68)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (_renderDinero); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-4.3",
+   "capacidad": "CAP-POR-4",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver mis adelantos, compras legalizadas, el saldo del adelanto y los pagos recibidos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "REQ-PG1-2 y DA-37 (crítico, dinero) figuran «entregado» (pasado a Desarrollo): la pantalla dice «Adelantos, compras y pagos recibidos llegan en la siguiente entrega» y no hay código.",
+    "El cobro al colaborador de un daño (DA-12) quedó pospuesto; si se construye, pedirle su consentimiento «desde su app» tocaría el portal."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PG-1.1",
+     "dato": "adelantos y compras del colaborador con su saldo del adelanto y los pagos de cada liquidación"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un adelanto entregado con compras legalizadas y un saldo pendiente",
+     "cuando": "abre «Mi dinero»",
+     "entonces": "ve cada adelanto, sus compras con factura aprobada, el saldo del adelanto y los pagos de cada liquidación"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un ajuste del saldo de horas hecho por el operador con un motivo",
+     "cuando": "abre «Mi dinero»",
+     "entonces": "ve el ajuste y su motivo"
+    }
+   ],
+   "origen": [
+    "REQ-PG1-2",
+    "DA-37"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: solo la nota fija al pie de «Mi dinero»."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-POR-5.1",
+   "capacidad": "CAP-POR-5",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Entrar al portal con la sesión abierta y volver al inicio de sesión si se pierde",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-HK-10.4",
+     "dato": "aviso de que Housekeeping se quedó sin sesión",
+     "rel": "REL-02"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con la sesión abierta",
+     "cuando": "abre el portal varias veces seguidas en menos de 30 segundos",
+     "entonces": "cada vez entra directo a su portal con sus turnos, sin pasar por la pantalla de inicio de sesión ni ver el aviso de «varios inicios automáticos»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador sin sesión",
+     "cuando": "abre el portal",
+     "entonces": "pasa al inicio de sesión y, al entrar, vuelve al portal"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el turno abierto avisa que se quedó sin sesión",
+     "cuando": "el portal lo recibe",
+     "entonces": "lo manda al inicio de sesión; si viene de iniciarla hace menos de 5 segundos, muestra un aviso fijo con el enlace «Iniciar sesión» para no entrar en bucle"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [
+    "INC-140"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-140",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html",
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRApi.requireSession al cargar (INC-53), freno de inicios automáticos de login.html (INC-56) y mensaje str:sin-sesion del marco de Housekeeping."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-5.2",
+   "capacidad": "CAP-POR-5",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Salir de la sesión",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador en su portal",
+     "cuando": "toca el botón de salir",
+     "entonces": "la sesión se cierra y pasa al inicio de sesión"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "handleSalir: STRApi.logout y location.replace(login.html)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (handleSalir); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-5.3",
+   "capacidad": "CAP-POR-5",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Corregir qué teléfono tengo (Android, iPhone u otro)",
+   "declarado": "construido",
+   "limitantes": [
+    "La elección vive en el teléfono: no se guarda en el servidor ni sigue al colaborador a otro aparato."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un portal que ya detectó el tipo de teléfono",
+     "cuando": "el colaborador toca su nombre, abre «Mi teléfono» y elige otro",
+     "entonces": "queda guardado, sale «Guardado: iPhone» (o el elegido) y Housekeeping lo usa en lo que depende del teléfono, como el botón de cámara y la ayuda al reportar un incidente"
+    }
+   ],
+   "origen": [
+    "REQ-U6.3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Menú #perfilMenu: lee y escribe str-os-v1; la detección automática es _hkOS de Housekeeping, que la usa en el modal de incidente."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (togglePerfil, _guardarOS) y del uso de _hkOS en Housekeeping; sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-5.4",
+   "capacidad": "CAP-POR-5",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Cambiar el tema claro u oscuro",
+   "declarado": "construido",
+   "limitantes": [
+    "La elección vive en el teléfono; no sigue al colaborador a otro aparato."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un portal en tema oscuro",
+     "cuando": "el colaborador toca el botón de tema",
+     "entonces": "el portal pasa a claro, y la próxima vez abre en el tema elegido"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "toggleTheme: str-theme en el almacenamiento local y data-theme en la página."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (toggleTheme); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-6.1",
+   "capacidad": "CAP-POR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Elegir un colaborador para ver su portal",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-U-1.1",
+     "dato": "colaboradores y operadores del equipo con su nombre, su color y su rol",
+     "rel": "REL-14"
+    },
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario con sesión: administrador y operador ven el selector, el colaborador entra a su portal"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador o un operador que abre el portal sin elegir a nadie",
+     "cuando": "lo abre",
+     "entonces": "ve el aviso «Estás viendo el portal como administrador; elige un colaborador para ver su portal» y la lista de colaboradores y operadores con su nombre y su rol; no se cargan turnos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un equipo sin colaboradores, o un equipo que no se pudo traer",
+     "cuando": "abre el portal",
+     "entonces": "ve «Sin colaboradores» o «No se pudo cargar el equipo»"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [
+     "GET /usuarios"
+    ],
+    "colecciones": [],
+    "notas": "Rama esOperador sin ?como= de portal.html; no carga el marco de Housekeeping."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (rama del selector); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-6.2",
+   "capacidad": "CAP-POR-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el portal tal como lo ve el colaborador elegido, con la etiqueta «vista previa · admin»",
+   "declarado": "construido",
+   "limitantes": [
+    "La vista previa no es de solo lectura: lo que se marque en un turno del colaborador se guarda con el acceso de quien mira."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.1",
+     "dato": "nombre y color del colaborador elegido",
+     "rel": "REL-14"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador elegido",
+     "cuando": "el administrador o el operador abre su portal",
+     "entonces": "la cabecera muestra el nombre y el color del colaborador con «vista previa · admin» debajo, y las listas son las de ese colaborador"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador que no existe",
+     "cuando": "abre su portal",
+     "entonces": "la cabecera dice «Usuario no encontrado»"
+    }
+   ],
+   "origen": [
+    "REQ-U6"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "GET /usuarios/{id}"
+    ],
+    "colecciones": [],
+    "notas": "?como=<id>: portal.html lo pasa al marco de Housekeeping, que limita los turnos a ese colaborador y escribe con el JWT de quien mira. INC-47: la cabecera muestra al colaborador, no al admin."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html y del mapa técnico de Housekeeping (?como=); sin guion e2e propio"
+   }
+  },
+  {
+   "id": "CU-POR-7.1",
+   "capacidad": "CAP-POR-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Recibir para el colaborador, acotados a su operación, los datos de las propiedades donde trabaja",
+   "declarado": "construido",
+   "limitantes": [
+    "El portal por sí solo pinta apenas el nombre de la propiedad: el resto de los datos los usa el turno abierto (Housekeeping).",
+    "Lo que se lee de turnos, reservas e incidentes (90 días, huésped de hoy o mañana) se cuenta en Housekeeping (CU-HK-11.1 y CU-HK-11.2); aquí solo la entrega de propiedades."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-8.3",
+     "dato": "datos de las propiedades donde trabaja el colaborador (lista permitida), con su ventana de 90 días"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con un turno de los últimos 90 días en una propiedad, o que es su colaborador base, o con un incidente abierto de un turno suyo",
+     "cuando": "abre su portal",
+     "entonces": "recibe de esa propiedad solo los datos permitidos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una propiedad donde el colaborador no tuvo turno en 90 días, ni es su base, ni tiene incidente abierto",
+     "cuando": "abre su portal",
+     "entonces": "no la recibe"
+    }
+   ],
+   "origen": [
+    "DA-45",
+    "DA-27"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-6"
+   ],
+   "pendientes": [
+    "INC-94",
+    "INC-120"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "La lista blanca y el contexto de lectura son del servidor (api/col/index.php, _colCamposPropiedadColaborador y _colLecturaContexto); el portal no filtra nada por su cuenta."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de portal.html (solo usa el nombre de la propiedad que trae cada turno) y del servidor; no se probó con un colaborador"
+   }
+  },
+  {
+   "id": "CU-POR-7.2",
+   "capacidad": "CAP-POR-7",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Usar el portal sin que toque la copia a Drive ni reciba credenciales",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador que abre su portal",
+     "cuando": "la página termina de cargar",
+     "entonces": "ninguna petición va a la copia en Drive y ninguna respuesta trae credenciales ni secretos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que inicia el turno y sube la foto general de la recepción",
+     "cuando": "la foto se guarda en el turno",
+     "entonces": "el portal tampoco pide nada a la copia en Drive"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "REQ-K3-3"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3c",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Drive solo lo conecta y consulta el administrador desde Configuración (shell); el portal nunca llama a /api/drive."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-8.1",
+   "capacidad": "CAP-POR-8",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver mi desempeño acumulado: turnos completados, tiempos promedio y calificaciones",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La pestaña existe y está deshabilitada con la leyenda «próximamente»; no hay función ni REQ propio en el seguimiento. El manual de producto del portal la nombra «métricas propias»."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con turnos completados",
+     "cuando": "abre «Mi desempeño»",
+     "entonces": "ve sus turnos completados, sus tiempos promedio y sus calificaciones"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Pestaña .tab.disabled sin acción en portal.html; docs de producto: str-manager-docs/producto/modulos/M1-housekeeping.md (Portal del colaborador)."
+   },
+   "confianza": "alta"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-88",
+   "porque": "Es de la sub-fila de inventario dentro del turno (CU-HK-7.2); el portal no la pinta. Cerrado."
+  },
+  {
+   "id": "INC-91",
+   "porque": "Es de la anulación de evidencia de incidentes en modo colaborador (CU-HK-4.4); el portal no tiene pantalla de incidentes (la etiqueta «Incidentes (portal colaborador)» del mapa es de Housekeeping). Cerrado."
+  },
+  {
+   "id": "INC-92",
+   "porque": "El portal empujaba turnos ajenos y salía el aviso «No puedes modificar un turno que no es tuyo»; se cerró con INC-94 en el servidor y en Housekeeping (CU-HK-11.4). Cerrado."
+  },
+  {
+   "id": "INC-98",
+   "porque": "Es de la zona principal del apto que el colaborador no recibía (Inventario, CU-INV-7.3). Cerrado."
+  },
+  {
+   "id": "INC-99",
+   "porque": "Es del filtro de zonas principales por propiedad en el servidor (Inventario, CU-INV-7.3). Cerrado."
+  },
+  {
+   "id": "INC-107",
+   "porque": "Es del aviso de préstamos abiertos al cerrar (CU-HK-7.6): el colaborador no recibe lo que registró otra persona. Abierto."
+  },
+  {
+   "id": "INC-108",
+   "porque": "Es de los roles y del acceso (Identidad y Shell); el portal solo lee el rol de la sesión. Cerrado."
+  },
+  {
+   "id": "INC-122",
+   "porque": "Es de la zona principal privada en el servidor (Inventario); latente, sin zonas reales. Pospuesto."
+  },
+  {
+   "id": "INC-128",
+   "porque": "Son las conexiones a MySQL al guardar turnos y movimientos (CU-HK-10.5 y servidor); se ve en el portal pero no es función suya. En diagnóstico."
+  },
+  {
+   "id": "INC-129",
+   "porque": "Es del catálogo de artículos que el servidor manda al colaborador (Inventario); lo que se ve son datos de prueba. Abierto."
+  },
+  {
+   "id": "INC-141",
+   "porque": "Es de la escritura de incidentes propios en el servidor (CU-HK-11.5). Cerrado."
+  },
+  {
+   "id": "INC-142",
+   "porque": "Es del aviso de huésped aún en la unidad y la autorresolución del checkout tardío en modo colaborador (CU-HK-5.3). Abierto."
+  },
+  {
+   "id": "INC-145",
+   "porque": "Rojos intermitentes de sesión del colaborador de prueba en la regresión: es entorno de pruebas, no producto. Abierto."
+  },
+  {
+   "id": "DT-45",
+   "porque": "Es del cliente de archivos (un 410 es definitivo, ráfagas de miniaturas); lo ve el portal pero es de Housekeeping y Copia a Drive (CU-HK-3.5). Abierta."
+  },
+  {
+   "id": "DT-47",
+   "porque": "Es de los guiones de REQ-INV2-4-2 (citan REL-10 en vez de REL-11); solo guion, se corrige en la fase 6. Abierta."
+  },
+  {
+   "id": "REQ-PR1-3",
+   "porque": "Horario de la propiedad en el portal: su caso de uso es CU-PR-3.5 (Propiedades, sin construir); aquí no hay un caso de uso propio. Bolsa, prioridad baja; duda para Diseño si el portal debe tener su par."
+  },
+  {
+   "id": "REQ-PP-1",
+   "porque": "Informe para el propietario de terceros: no es portal operativo ni del colaborador. Borrador."
+  },
+  {
+   "id": "REQ-BT-1",
+   "porque": "Bolsa de tiempo: descartado, absorbido (DA-41); el saldo de horas ya se ve en CU-POR-4.1."
+  },
+  {
+   "id": "REQ-INV2-4-1",
+   "porque": "Accesos por zona (servidor, Inventario y CU-HK-11.3); el portal no muestra zonas. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-3-1",
+   "porque": "Traslados, préstamos y devoluciones (Inventario); el portal no los muestra. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-3-4",
+   "porque": "Pendientes de ropa al cerrar el turno (CU-HK-9.x e Inventario); ocurren dentro del turno abierto. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-9",
+   "porque": "Propiedad a la que pertenece un juego de ropa (Inventario); el colaborador no abre Inventario. Aceptado."
+  },
+  {
+   "id": "REQ-PC1-2",
+   "porque": "Puntos de control con lector QR (CU-HK-2.10, Puntos de control); el inicio por QR es del turno. Entregado, sin construir."
+  },
+  {
+   "id": "REQ-INC1-2",
+   "porque": "Reclamos al huésped y a la plataforma (Incidentes); sin pantalla en el portal. Entregado."
+  },
+  {
+   "id": "REQ-CMP-1",
+   "porque": "Compras y alertas de reposición (Compras): el encargo de compra sería una actividad del turno, no del portal. Entregado."
+  },
+  {
+   "id": "REQ-U-8",
+   "porque": "Un usuario, un rol (Identidad y Shell); el portal solo usa el rol de la sesión (CU-POR-6.1). Aceptado."
+  },
+  {
+   "id": "REQ-PR1-1",
+   "porque": "Horario base en la ficha de la propiedad (CU-PR-3.2); el portal no lo muestra (CU-PR-3.5). Aceptado."
+  },
+  {
+   "id": "bolsa: Texto claro para una foto perdida en el teléfono",
+   "porque": "Sin referencia; es del texto de la miniatura «!» dentro del turno (CU-HK-3.3) y se cita en las limitantes de CU-POR-3.2. Baja prioridad."
+  },
+  {
+   "id": "T-14",
+   "porque": "Aceptación de términos de privacidad al registrarse: es del registro del colaborador (Identidad y Equipo), no del portal; duda para Diseño si debe pedirse en el primer ingreso al portal. Idea."
+  },
+  {
+   "id": "DA-6",
+   "porque": "Migrar propiedades de un propietario a otro negocio (Identidad); no hay función. Decidida (no se permite)."
+  },
+  {
+   "id": "DA-8",
+   "porque": "El propietario de terceros no tiene cuenta (Identidad, informe PP-1); no es el portal del colaborador. Decidida."
+  },
+  {
+   "id": "DA-11",
+   "porque": "Dato de prueba (usuario de prueba y base de una propiedad); no es función. Decidida."
+  },
+  {
+   "id": "DA-12",
+   "porque": "Cobro al colaborador de un daño: pospuesta; sin función. Se cita en las limitantes de CU-POR-4.3 porque el consentimiento se pediría desde la aplicación del colaborador."
+  },
+  {
+   "id": "DA-21",
+   "porque": "Qué es un mantenimiento (Flujos y Mantenimiento); lo del colaborador es CU-POR-1.5. Decidida."
+  },
+  {
+   "id": "DA-22",
+   "porque": "Consumo y auditoría de inventario (Inventario); sus eventos en el calendario del colaborador son CU-POR-1.5. Decidida."
+  },
+  {
+   "id": "DA-24",
+   "porque": "Autoriza el usuario colaborador de prueba para verificar (fábrica); no es del producto. Decidida."
+  },
+  {
+   "id": "DA-29",
+   "porque": "Decisiones de inventario y operación (QR, identificación antes de escanear); es de Inventario y Puntos de control. Decidida."
+  },
+  {
+   "id": "DA-30",
+   "porque": "Accesos por zona y un solo responsable por turno (Inventario, CU-HK-11.3); el portal solo etiqueta «Apoyo». Decidida."
+  },
+  {
+   "id": "DA-33",
+   "porque": "Pendientes de ropa (Inventario y CU-HK-9.x). Decidida."
+  },
+  {
+   "id": "DA-34",
+   "porque": "Lugares dentro de la zona y foto al cierre (Inventario y CU-HK-7.4). Decidida."
+  },
+  {
+   "id": "DA-36",
+   "porque": "Puntos de control con QR (Puntos de control, CU-HK-2.10). Decidida."
+  },
+  {
+   "id": "DA-38",
+   "porque": "Compras y reposición (Compras). Decidida."
+  },
+  {
+   "id": "DA-42",
+   "porque": "Quién ve el valor de compra de un activo (Inventario); el colaborador nunca lo recibe. Decidida."
+  },
+  {
+   "id": "DA-43",
+   "porque": "Entrega y recepción de zona (CU-HK-8.x e Inventario). Decidida."
+  },
+  {
+   "id": "DA-44",
+   "porque": "Ensayo de restauración del respaldo (Copia a Drive y respaldo, fábrica). Decidida."
+  },
+  {
+   "id": "DA-46",
+   "porque": "Arreglo de INC-141, incidentes ajenos (CU-HK-11.5). Decidida."
+  }
+ ]
+}

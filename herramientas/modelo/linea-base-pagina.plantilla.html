@@ -167,12 +167,14 @@ function vistaSistema(){
        ${pend.map((m) => `<div class="mod fantasma"><div class="fila2"><span class="etq">${m}</span><span class="chip">por levantar</span></div><h3>${esc(nMod(m))}</h3></div>`).join('')}</div></section>
    <section class="sec"><div class="fila"><h2>Cómo se conectan</h2>
        <div class="pestanas" role="tablist"><button role="tab" data-dg="capas" aria-selected="${VISTA_DG === 'capas'}">Mapa por capas</button><button role="tab" data-dg="matriz" aria-selected="${VISTA_DG === 'matriz'}">Matriz de dependencias</button></div></div>
+     <div class="filtros"><label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span></div>
      <span class="tenue" id="dgAyuda"></span>
      <div class="diagrama" id="dg"></div></section>`;
   $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
   $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
   $$('[data-dg]').forEach((b) => b.onclick = () => { VISTA_DG = b.dataset.dg; try { localStorage.setItem('lb-vista-dg', VISTA_DG); } catch (e) {}
     $$('[data-dg]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.dg === VISTA_DG))); diagramaSistema(); });
+  $('#fRel').onchange = (e) => { FILTRO_REL = e.target.value; try { localStorage.setItem('lb-filtro-rel', FILTRO_REL); } catch (x) {} diagramaSistema(); };
   diagramaSistema();
 }
 function seccionAlcance(mods){
@@ -200,22 +202,35 @@ function seccionAlcance(mods){
      <details class="caja"><summary><b>Fuera del alcance (${fuera.length})</b> <span class="tenue">· lo que se decidió no hacer por ahora, con su motivo</span></summary>
        <ul>${fuera.map(({mod, u}) => `<li><button class="enl" data-cu="${esc(u.id)}">${esc(u.id)}</button> ${esc(u.que)} <span class="tenue">— ${esc(corta((u.limitantes || [])[0] || '', 160))}</span></li>`).join('')}</ul></details></section>`;
 }
+let FILTRO_REL = (() => { try { return localStorage.getItem('lb-filtro-rel') || ''; } catch (e) { return ''; } })();
+const tipoFlujo = (f) => f.rel ? ((D.relTipo || {})[f.rel] || 'por-precisar') : 'sin-rel';
+function nombreTipoRel(t){ if (t === 'sin-rel') return 'Sin relación asignada'; const x = (D.tiposRelacion || {})[t] || t; return x.split(':')[0]; }
+function descTipoRel(t){ if (!t) return ''; if (t === 'sin-rel') return 'Flujos de los casos de uso que todavía no apuntan a ninguna relación del mapa.'; const x = (D.tiposRelacion || {})[t] || ''; return x.includes(':') ? x.slice(x.indexOf(':') + 1).trim() : x; }
+function opcionesRel(){
+  const n = {}; recorrerFlujos((o, d, f) => { const t = tipoFlujo(f); n[t] = (n[t] || 0) + 1; });
+  const tot = Object.values(n).reduce((a, b) => a + b, 0);
+  const orden = Object.keys(D.tiposRelacion || {}).concat(['sin-rel']).filter((t) => n[t]);
+  if (FILTRO_REL && !orden.includes(FILTRO_REL)) FILTRO_REL = '';
+  return `<option value="">Todas (${tot} flujos)</option>` + orden.map((t) => `<option value="${t}" ${t === FILTRO_REL ? 'selected' : ''}>${esc(nombreTipoRel(t))} (${n[t]})</option>`).join('');
+}
+function recorrerFlujos(fn){
+  Object.values(CU).forEach(({mod, u}) => {
+    (u.salidas || []).forEach((f) => { const d = modDe(f.a); if (d && d !== mod) fn(mod, d, f); });
+    (u.entradas || []).forEach((f) => { const o = modDe(f.de); if (o && o !== mod && !D.modulos[o]) fn(o, mod, f); });
+  });
+}
 let VISTA_DG = (() => { try { return localStorage.getItem('lb-vista-dg') || 'capas'; } catch (e) { return 'capas'; } })();
 const CAPAS = [
   ['Lo que ve la gente', ['SH', 'OP', 'POR']],
   ['Operación diaria', ['CAL', 'HK', 'INV', 'FL', 'KN', 'PR']],
   ['Gestión y dinero', ['INC1', 'PG', 'CMP', 'U']],
-  ['Con terceros: huésped, Google, canales', ['K3', 'M2', 'M6', 'PC1']],
+  ['Con terceros', ['K3', 'M2', 'M6', 'PC1']],
   ['Plataforma', ['API', 'SRV']],
   ['Fábrica (no cuenta en la cobertura)', ['PRJ', 'MOD']],
 ];
 function flujosModulo(){
   const ar = {};
-  const sumar = (o, d) => { if (!o || !d || o === d) return; const k = o + '>' + d; ar[k] = (ar[k] || 0) + 1; };
-  Object.values(CU).forEach(({mod, u}) => {
-    (u.salidas || []).forEach((f) => sumar(mod, modDe(f.a)));
-    (u.entradas || []).forEach((f) => { const o = modDe(f.de); if (!D.modulos[o]) sumar(o, mod); });
-  });
+  recorrerFlujos((o, d, f) => { if (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL) return; const k = o + '>' + d; ar[k] = (ar[k] || 0) + 1; });
   return ar;
 }
 function capasOrden(){
@@ -228,6 +243,8 @@ function capasOrden(){
 function soloPlan(m){ const A = D.modulos[m] && D.modulos[m].archivo; return !!A && A.casosUso.length > 0 && A.casosUso.every((u) => u.declarado === 'no-construido' || u.declarado === 'fuera-de-alcance'); }
 function diagramaSistema(){
   const ar = flujosModulo();
+  $('#fRelDesc').textContent = descTipoRel(FILTRO_REL);
+  if (!Object.keys(ar).length) { $('#dgAyuda').textContent = ''; $('#dg').innerHTML = '<p class="tenue">Ningún flujo entre módulos con ese tipo de relación.</p>'; return; }
   if (VISTA_DG === 'matriz') return matrizSistema(ar);
   $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir.';
   const capas = capasOrden();
@@ -237,9 +254,9 @@ function diagramaSistema(){
     ms.forEach((m, i) => { pos[m] = [x0 + ancho * (i + .5) / n, y]; });
   });
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Módulos del STR por capas y sus flujos" style="min-width:900px" id="svgCapas"><defs>
-    <marker id="flS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker>
-    <marker id="flE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--entra)"/></marker>
-    <marker id="flN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--tenue)"/></marker></defs>`;
+    <marker id="flS" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker>
+    <marker id="flE" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--entra)"/></marker>
+    <marker id="flN" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--tenue)"/></marker></defs>`;
   capas.forEach(([t], r) => { const y = top + r * filaH; const fab = /Fábrica/.test(t);
     s += `<rect x="4" y="${y}" width="${W - 8}" height="${filaH - 8}" rx="8" fill="${r % 2 ? 'var(--papel)' : 'var(--hoja)'}" stroke="var(--linea)" ${fab ? 'stroke-dasharray="4 3"' : ''}/>
       <text x="16" y="${y + 22}" class="capa">${esc(t)}</text>`; });

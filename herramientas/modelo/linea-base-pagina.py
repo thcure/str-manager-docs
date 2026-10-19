@@ -63,6 +63,8 @@ def main(argv):
         'nombresModulo': {m['id']: m['nombre'] for m in mapa['modulos']},
         'actores': {a['id']: a.get('corto') or a['id'] for a in mapa['actores']},
         'rel': {r['id']: '%s→%s · %s' % (r['origen'], r['destino'], r.get('dato', '')) for r in mapa['relaciones']},
+        'relTipo': {r['id']: r.get('tipo', 'por-precisar') for r in mapa['relaciones']},
+        'tiposRelacion': mapa.get('tiposRelacion', {}),
         'rt': {r['id']: r['titulo'] for r in mapa['reglas']},
         'incs': {x['id']: {'t': x.get('titulo', ''), 'e': x.get('estado') or 'abierto'} for x in seg['incs']},
         'avisos': informe['avisos'],

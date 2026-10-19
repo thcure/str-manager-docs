@@ -1,6 +1,6 @@
 {
  "modulo": "HK",
- "version": 7,
+ "version": 9,
  "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
@@ -43,6 +43,16 @@
    "fecha": "2026-10-18",
    "por": "Chat Arquitecto",
    "que": "Flujos con CAL enlazados a sus ids reales; pares completados."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-821)",
+   "que": "Nuevo CU-HK-2.11: abrir un turno por enlace (par de CU-CAL-3.7)."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Arquitecto",
+   "que": "Flujos con INC1, PG y K3 enlazados a sus ids reales; pares completados."
   }
  ],
  "alcance": {
@@ -570,7 +580,12 @@
     "Solo se elimina un turno manual, sin reserva, sin incidente abierto y sin pago.",
     "La eliminación marca el turno como borrado, no lo quita del almacén; no es borrado duro."
    ],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-PG-4.3",
+     "dato": "marca de turno liquidado, que impide eliminarlo"
+    }
+   ],
    "salidas": [],
    "escenarios": [
     {
@@ -747,9 +762,18 @@
     {
      "de": "CU-CAL-1.1",
      "dato": "evento de mantenimiento o inventario con su recurrencia, su responsable y su flujo"
+    },
+    {
+     "de": "CU-INC1-4.1",
+     "dato": "evento de mantenimiento del día y la propiedad del turno, con su flujo, para proponerlo al turno"
     }
    ],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-INC1-4.2",
+     "dato": "flujo del evento ejecutado en el turno, para darlo por realizado"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -1383,6 +1407,60 @@
    }
   },
   {
+   "id": "CU-HK-2.11",
+   "capacidad": "CAP-HK-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Abrir un turno directamente por su enlace (desde el Calendario o el mensaje de WhatsApp del turno)",
+   "declarado": "construido",
+   "limitantes": [
+    "Al colaborador el enlace lo lleva al portal con el turno abierto."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-3.7",
+     "dato": "enlace al turno elegido"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con su enlace",
+     "cuando": "el operador toca «Abrir en Housekeeping» en el Calendario",
+     "entonces": "Housekeeping abre ese turno"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo enlace",
+     "cuando": "lo abre el colaborador",
+     "entonces": "entra al portal con ese turno abierto"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html",
+     "str-calendario.html"
+    ],
+    "notas": "?turno=<id>; turnoDeepLink"
+   },
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Desarrollo (M-821): str-m1-housekeeping.html lee ?turno= y manda al colaborador a portal.html?turno="
+   },
+   "confianza": "alta"
+  },
+  {
    "id": "CU-HK-3.1",
    "capacidad": "CAP-HK-3",
    "actor": [
@@ -1455,7 +1533,7 @@
    "entradas": [],
    "salidas": [
     {
-     "a": "CU-K3-1.1",
+     "a": "CU-K3-2.1",
      "dato": "fotos, evidencia y videos del turno para copiarlos al Drive del negocio",
      "rel": "REL-16"
     }
@@ -1618,7 +1696,7 @@
    ],
    "entradas": [
     {
-     "de": "CU-K3-1.2",
+     "de": "CU-K3-3.1",
      "dato": "estado de la copia de cada foto en el Drive del negocio (pendiente, copiada, sin copia)",
      "rel": "REL-16"
     }
@@ -1683,7 +1761,7 @@
    ],
    "entradas": [
     {
-     "de": "CU-K3-1.3",
+     "de": "CU-K3-3.2",
      "dato": "foto eliminada en el corte, con su fecha de corte, su huella y su copia en Drive",
      "rel": "REL-17"
     }
@@ -1757,7 +1835,24 @@
      "rel": "REL-06"
     }
    ],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-INC1-2.1",
+     "dato": "evidencia (fotos y videos) que acompaña al incidente reportado, subida desde la cola del teléfono"
+    },
+    {
+     "a": "CU-INC1-3.1",
+     "dato": "incidente reportado en el turno, con su tipo, descripción, zona y quien lo reportó"
+    },
+    {
+     "a": "CU-INC1-3.3",
+     "dato": "incidentes reportados en los turnos"
+    },
+    {
+     "a": "CU-INC1-5.1",
+     "dato": "incidente de tipo «Daño por huésped», con su reserva y su evidencia"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -1823,7 +1918,12 @@
    "limitantes": [
     "El video solo se ve completo mediante «Ver video»; no hay miniatura."
    ],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-INC1-2.1",
+     "dato": "fecha de captura, hora de recepción, huella y original de cada evidencia, para verlos en el incidente"
+    }
+   ],
    "salidas": [],
    "escenarios": [
     {
@@ -1877,7 +1977,20 @@
     "Un incidente de checkout tardío se resuelve solo al registrar la salida real (CU-HK-5.1)."
    ],
    "entradas": [],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-INC1-3.2",
+     "dato": "incidente resuelto en sitio o escalado desde el turno"
+    },
+    {
+     "a": "CU-INC1-3.3",
+     "dato": "incidentes resueltos o escalados desde el turno"
+    },
+    {
+     "a": "CU-INC1-3.6",
+     "dato": "incidente escalado, a la espera de quien lo atiende"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -1940,7 +2053,12 @@
     "El motivo es obligatorio y nada se borra."
    ],
    "entradas": [],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-INC1-2.3",
+     "dato": "pedido de anular una evidencia, con su motivo"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -2373,11 +2491,15 @@
      "de": "CU-U-6.2",
      "dato": "perfil de pago y tarifa vigente de cada colaborador",
      "rel": "REL-14"
+    },
+    {
+     "de": "CU-PG-1.1",
+     "dato": "valor estimado de cada persona del turno"
     }
    ],
    "salidas": [
     {
-     "a": "CU-PG-1.1",
+     "a": "CU-PG-4.1",
      "dato": "horas del turno de cada persona y su valor estimado, para la liquidación"
     }
    ],
@@ -2441,7 +2563,12 @@
     "Las horas por defecto del apoyo salen de la configuración de Housekeeping (4 h si no hay), cosa que DA-20 descartó; la duración elegida por el operador está en CU-HK-6.6, no construido."
    ],
    "entradas": [],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-PG-1.2",
+     "dato": "apoyo del turno con sus horas planificadas"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -2503,7 +2630,12 @@
     "Solo con el permiso de tarifas."
    ],
    "entradas": [],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-PG-1.2",
+     "dato": "ajuste de las horas de una persona con su motivo"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -2549,7 +2681,12 @@
    "que": "Ver mis horas del turno, solo las mías, con mi rol en el turno",
    "declarado": "construido",
    "limitantes": [],
-   "entradas": [],
+   "entradas": [
+    {
+     "de": "CU-PG-1.1",
+     "dato": "valor del turno de la propia persona"
+    }
+   ],
    "salidas": [],
    "escenarios": [
     {
@@ -2610,7 +2747,12 @@
      "rel": "REL-06"
     }
    ],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-PG-1.2",
+     "dato": "horas por defecto del turno y del apoyo del negocio"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -2667,7 +2809,12 @@
      "dato": "sub-flujo asignado a cada colaborador con su tiempo de manos, para recomendar la duración llamada del apoyo"
     }
    ],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-PG-1.3",
+     "dato": "duración llamada del turno de cada apoyo de un sub-flujo"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",

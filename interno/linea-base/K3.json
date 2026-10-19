@@ -1,0 +1,3233 @@
+{
+ "modulo": "K3",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "api/drive/index.php (271 líneas, leído completo: conectar, callback, estado, desconectar, prueba, cron, copias, corte, corte-prueba)",
+  "api/lib/drive.php (354), api/lib/drive-copia.php (381), api/lib/corte.php (267), api/lib/retencion.php (70) y api/lib/archivo-corte.php (60), leídos completos (fuente principal)",
+  "str-app-shell.html por búsqueda de «drive», «corte» y «respaldo» (tarjeta de Configuración, aviso fijo #corteAviso, _corteAvisoTexto, _corteReporteTexto, botón y función de respaldo), str-m1-housekeeping.html por búsqueda ([HK-DRIVE], _hkDriveEstado, _hkCartelColab), str-api.js (archivoUrl y err.datos) y api/expediente/index.php (_expDesdeCorte)",
+  "docs/claude/servidor-php.md y shell-y-api.md por búsqueda de «drive», «corte», «retención», «respaldo» y «export» (migraciones 10 a 13, respaldo diario, ensayo de restauración); api/export, api/archivo, api/upload y api/lib/restauracion.php no estaban entre las fuentes",
+  "k3-fuentes.json: módulo K3 del mapa, REQ-K3-2 y REQ-K3-3 (aceptados), 7 DA (DA-25, DA-26, DA-32, DA-36, DA-44, DA-47, DA-49), 8 de la bolsa (T-9 a T-13 y 3 decisiones), 10 INC, 2 DT, relaciones REL-16, REL-17, REL-18, REL-19 y REL-28 (más las generales), actores y reglas RT-3, RT-7 a RT-12, RT-18, RT-22 y RT-24",
+  "k3-guiones.json y guiones-e2e.json: REQ-K3b, REQ-K3b-aviso, REQ-K3c y REQ-K3c-vista (4 guiones, 21 casos, se leyeron los .spec.js completos para ver qué comprueba cada caso); se descartaron como preparación los casos b y c de REQ-K3b-aviso, REQ-K3c y REQ-K3c-vista y los de DT-42, DA-47 e INC-132, que no ejercen K3",
+  "interno/linea-base/esquema.json, sistema.json, INV.json, HK.json, PR.json, POR.json, U.json, FL.json y CAL.json (estilo y flujos con ids reales)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "La conexión del Google Drive de cada negocio: conectar, volver de Google, probar, desconectar y ver el estado en Configuración.",
+   "La copia automática cada 15 minutos de fotos, evidencias y videos al Drive del negocio (carpeta negocio › propiedad › mes), con verificación de tamaño y huella, reintentos y carpetas recreadas.",
+   "El estado de la copia de cada archivo (insignia ☁ en el turno), la entrega desde Drive de lo que el corte borró y el aviso «Eliminado en el corte del …».",
+   "El calendario de cortes (día 30), el aviso fijo, los recordatorios de 7, 3 y 1 días, el aviso de archivos pendientes a 3 días y el reporte del último corte.",
+   "El corte mensual único: la ventana, la última copia, el borrado con y sin copia, el registro que se conserva, el reporte y el corte de prueba.",
+   "El respaldo descargable de la cuenta, el respaldo diario y el respaldo de los archivos antes del primer corte.",
+   "El cuidado del permiso de Google y de los accesos por rol y por clave de tarea programada.",
+   "Lo definido y aún por construir: copiar guías, documentos y planos, avisos del corte por el canal de Comunicaciones, borrar archivos fuera del corte y el respaldo de los archivos como función."
+  ],
+  "fuera": [
+   "La toma de la foto, su cola de subida en el teléfono y su subida al sistema (Housekeeping y Servidor): aquí solo se cuenta lo que se hace con el archivo ya subido.",
+   "Cómo se pintan la insignia ☁ y el cartel «Eliminado en el corte» dentro del turno (Housekeeping, CU-HK-3.4 y CU-HK-3.5): aquí se cuenta el estado que se entrega.",
+   "El expediente del incidente y su ZIP (Incidentes): aquí solo se cuenta la evidencia eliminada que se le entrega.",
+   "El menú, la barra y el inicio de sesión del marco (Shell) y los permisos de cada rol (Identidad): aquí solo se cuenta lo que el marco muestra del corte y quién puede qué en Drive.",
+   "El resto de los archivos que el sistema guarda: guías, documentos y planos (hoy sin copia ni corte, ver CU-K3-2.8).",
+   "Lo decidido y descartado: guardar 30 días en la aplicación, retener los incidentes abiertos más 90 días, borrar solo lo confirmado en Drive, el ZIP mensual descargable para negocios sin Drive y la miniatura que queda en la aplicación (DA-25, derogada en parte por DA-32).",
+   "La retención de los datos de huéspedes TRA/SIRE, sin plazo definido (M2)."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde api/drive/index.php, api/lib/drive.php, drive-copia.php, corte.php, retencion.php y archivo-corte.php (completos), lo que el shell y Housekeeping hacen con ellos, el mapa técnico y los cuatro guiones e2e de REQ-K3b y REQ-K3c. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Las pruebas e2e de K3 solo ejercen lo que se ve en pantalla y el corte de prueba sobre datos zz-verif-: ninguna dispara una copia real ni el corte real, y las pruebas unitarias con réplica de Drive (tests/drive-copia.test.js, corte.test.js, retencion.test.js) no cuentan en esta línea base. El módulo está construido pero sin activar del todo: la tarea de copia se creó el 16-oct (T-9) y la del corte no existe hasta tener el respaldo de los archivos (T-12); el primer corte real es el 30-nov-2026 a las 23:00. El respaldo descargable y el diario son, según el mapa, de Shell y Servidor; aquí se levantan porque RT-12 los exige antes de borrar y la tarea los nombra en el módulo (por confirmar)."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-K3-1",
+   "nombre": "Conexión del Google Drive del negocio",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Que cada negocio conecte, pruebe y desconecte su propio Google Drive con permiso solo sobre los archivos que el sistema crea, y vea en qué estado está."
+  },
+  {
+   "id": "CAP-K3-2",
+   "nombre": "Copia a Drive cada 15 minutos",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Copiar al Drive del negocio las fotos, evidencias y videos nuevos (primero lo de incidentes), ordenados por propiedad y mes, sin repetir y reintentando los fallos; los datos de prueba nunca salen."
+  },
+  {
+   "id": "CAP-K3-3",
+   "nombre": "Estado de la copia y de lo eliminado",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Mostrar a administrador y operador si cada archivo ya tiene copia y, cuando el corte lo quitó del sistema, entregarlo desde Drive o decir en qué corte se eliminó."
+  },
+  {
+   "id": "CAP-K3-4",
+   "nombre": "Calendario, avisos y reporte del corte",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Fijar cuándo toca el corte de cada negocio (día 30), avisarlo en un aviso fijo con recordatorios 7, 3 y 1 días antes, avisar lo que falta copiar y mostrar el reporte del último corte."
+  },
+  {
+   "id": "CAP-K3-5",
+   "nombre": "Corte mensual de almacenamiento",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "El día 30 de cada mes borrar del servidor las fotos, evidencias y videos subidos hasta el corte, con o sin Drive, conservando en el registro la fecha, la huella y el enlace de Drive."
+  },
+  {
+   "id": "CAP-K3-6",
+   "nombre": "Respaldo antes de borrar",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Tener un respaldo de los datos (descargable y diario) y de los archivos antes del primer corte, que es el único borrado físico del sistema."
+  },
+  {
+   "id": "CAP-K3-7",
+   "nombre": "Cuidado del permiso y de los accesos",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Guardar el permiso de Google sin que salga del servidor, dejar cada acción de Drive al rol que le toca y aceptar la copia y el corte solo desde la tarea programada."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-K3-1.1",
+   "capacidad": "CAP-K3-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Conectar el Google Drive del negocio con una cuenta de Google, dando permiso solo sobre los archivos que el propio sistema crea",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el administrador conecta; el operador ve el estado pero no tiene el botón (CU-K3-1.4).",
+    "Cada negocio tiene un solo Drive: volver a conectar reemplaza el permiso anterior. El sistema solo ve y crea los archivos de su carpeta «STR Manager»; el resto del Drive no lo ve.",
+    "Sin las claves de Google en el servidor no se puede conectar: la tarjeta dice que la copia no está configurada.",
+    "Mientras la aplicación de Google estuvo en modo prueba el permiso vencía a los 7 días (INC-135, T-10); la consola de Google la muestra ya en producción (leído por el Arquitecto el 15-oct).",
+    "El paso por la pantalla de permiso de Google no lo automatiza ningún guion: la comprobación con una cuenta de prueba es del dueño (N4 de REQ-K3-2, criterio 7)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-2.1",
+     "dato": "conexión activa con el permiso guardado y la carpeta «STR Manager» del negocio, para saber qué negocios se copian"
+    },
+    {
+     "a": "CU-K3-1.5",
+     "dato": "cuenta conectada, carpeta y fecha de conexión, para mostrarlas"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador de un negocio sin Drive conectado",
+     "cuando": "pulsa «Conectar Google Drive», elige su cuenta de Google y marca la casilla de permiso",
+     "entonces": "vuelve a la aplicación con «Google Drive conectado», se crea (o se reutiliza) la carpeta «STR Manager» en su Drive y la tarjeta de Configuración muestra la cuenta conectada y el enlace a la carpeta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio cuya conexión quedó «revocada» o «con error»",
+     "cuando": "el administrador pulsa «Volver a conectar»",
+     "entonces": "el permiso nuevo reemplaza al viejo, el último error se borra y la copia sigue sola en la pasada siguiente"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador, o un usuario sin sesión de administrador",
+     "cuando": "intenta conectar el Drive",
+     "entonces": "el sistema lo rechaza: conectar es solo del administrador"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un permiso concedido pero sin poder crear la carpeta «STR Manager»",
+     "cuando": "termina la conexión",
+     "entonces": "no se guarda nada y el permiso concedido se revoca para no dejarlo colgado"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "la persona que inició la conexión ya no es administrador activo de ese negocio al volver de Google",
+     "cuando": "Google devuelve al sistema",
+     "entonces": "no se conecta y se vuelve con un error"
+    }
+   ],
+   "origen": [
+    "REQ-K3",
+    "REQ-K3-2",
+    "DA-26",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-14",
+    "RT-18"
+   ],
+   "pendientes": [
+    "INC-96",
+    "INC-97",
+    "T-10"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/conectar",
+     "GET /api/drive/callback"
+    ],
+    "colecciones": [
+     "drive_conexion",
+     "drive_oauth_state"
+    ],
+    "notas": "api/drive/index.php (conectar y callback) y api/lib/drive.php: permiso único drive.file, acceso sin conexión con consentimiento forzado, state firmado (HMAC) de 10 minutos y de un solo uso, correo de drive/v3/about, carpeta raíz «STR Manager», upsert en drive_conexion con el permiso cifrado. INC-96 fue el 403 de Google por no tener a la cuenta de Carlos como usuario de prueba (cerrado 8-oct)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/drive/index.php (conectar y callback) y api/lib/drive.php; el flujo con la pantalla de Google no tiene guion e2e (REQ-K3b c y d prueban solo el regreso)"
+   }
+  },
+  {
+   "id": "CU-K3-1.2",
+   "capacidad": "CAP-K3-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Volver de Google a la aplicación sabiendo qué pasó (conectado, cancelado, sin el permiso de Drive o con error)",
+   "declarado": "construido",
+   "limitantes": [
+    "El aviso de «sin permiso» y de «error» vive en la tarjeta de Configuración hasta salir de la página; «conectado» y «cancelado» solo muestran un aviso pasajero.",
+    "Cuando algo falla, el motivo exacto (qué paso falló) queda en el registro de errores del servidor, no en pantalla.",
+    "INC-135 observó vueltas de Google con el código de seguridad mal formado en horas en que Carlos no reconectaba (16-oct, 17:03, 17:21 y 17:53 UTC): origen por revisar."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador que conectó sin marcar la casilla de Drive en la pantalla de Google",
+     "cuando": "Google lo devuelve a la aplicación",
+     "entonces": "se abre Configuración con el aviso «Marca la casilla de Google Drive», la dirección queda limpia y el permiso concedido a medias se revoca"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una vuelta de Google con un código de seguridad inválido, vencido o ya usado",
+     "cuando": "llega a la aplicación",
+     "entonces": "se vuelve a Configuración con «No se pudo conectar Google Drive» y la dirección sin código ni datos de seguridad"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un administrador que cancela en la pantalla de Google",
+     "cuando": "Google lo devuelve",
+     "entonces": "ve «Conexión con Google Drive cancelada» y la conexión queda como estaba"
+    },
+    {
+     "id": "E4",
+     "tipo": "principal",
+     "dado": "una conexión completada",
+     "cuando": "Google devuelve a la aplicación",
+     "entonces": "ve «Google Drive conectado» y la tarjeta ya muestra la cuenta"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-9"
+   ],
+   "pendientes": [
+    "INC-97"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/callback"
+    ],
+    "colecciones": [
+     "drive_oauth_state",
+     "drive_conexion"
+    ],
+    "notas": "Redirección a str-app-shell.html?drive=ok|cancelado|sin-permiso|error; el shell lee el parámetro, lo limpia y abre Configuración. _driveFallo anota «drive-callback · paso: …» en api/logs/error.log. INC-97: el callback comprueba que el scope drive.file se concedió."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-1.3",
+   "capacidad": "CAP-K3-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Probar la conexión: el sistema crea y borra un archivo de prueba en la carpeta del Drive del negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el administrador la usa; si el permiso lo retiró Google, la prueba lo dice y pide volver a conectar.",
+    "Si la carpeta «STR Manager» se borró a mano en Drive, la prueba crea (o reutiliza) otra y guarda la nueva.",
+    "El archivo de prueba se borra de verdad; si no se puede borrar el aviso lo dice y la conexión queda «con error»."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-1.5",
+     "dato": "resultado de la prueba: conexión activa o con error, con su motivo"
+    },
+    {
+     "a": "CU-INC1-1.6",
+     "dato": "evidencia eliminada en el corte, con su fecha de corte, su huella y su copia en Drive",
+     "rel": "REL-19"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive conectado",
+     "cuando": "el administrador pulsa «Probar conexión»",
+     "entonces": "el sistema crea y borra un archivo de prueba en su carpeta, avisa «Conexión con Drive correcta» y la conexión queda activa sin error"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un permiso que Google ya retiró",
+     "cuando": "el administrador prueba",
+     "entonces": "ve «Google retiró el permiso: vuelve a conectar» y la conexión pasa a «revocada»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "Google no responde o no deja escribir",
+     "cuando": "el administrador prueba",
+     "entonces": "ve el motivo de Google, la conexión pasa a «con error» y conserva el permiso para volver a probar"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "una carpeta «STR Manager» borrada a mano en el Drive del negocio",
+     "cuando": "el administrador prueba",
+     "entonces": "el sistema crea (o reutiliza) otra carpeta, la guarda y la prueba termina bien"
+    }
+   ],
+   "origen": [
+    "REQ-K3",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "POST /api/drive/prueba"
+    ],
+    "colecciones": [
+     "drive_conexion"
+    ],
+    "notas": "Sube zz-prueba-conexion.txt y lo borra; invalid_grant → estado revocada + 409; otro fallo → estado error (conserva el permiso). Solo admin y superadmin."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/drive/index.php, rama «prueba»; sin guion e2e (la prueba escribiría en el Drive real de «negocio»)"
+   }
+  },
+  {
+   "id": "CU-K3-1.4",
+   "capacidad": "CAP-K3-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Desconectar el Google Drive del negocio retirando el permiso en Google",
+   "declarado": "construido",
+   "limitantes": [
+    "Los archivos que ya están en la carpeta «STR Manager» se quedan en el Drive del negocio; desconectar no borra nada allá.",
+    "Desconectado, el negocio queda «sin Drive»: la copia se detiene y el corte lo trata como un negocio sin Drive (CU-K3-5.4), así que el día del corte se borra sin copia todo lo que siga en el servidor, incluso lo que ya estaba copiado en Drive (que deja de verse desde la aplicación).",
+    "Si Google no confirma la revocación el permiso se borra igual del sistema y el aviso lo dice."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-1.5",
+     "dato": "conexión revocada, para mostrarla como desconectada"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive conectado",
+     "cuando": "el administrador confirma «Desconectar»",
+     "entonces": "el sistema retira el permiso en Google, olvida el permiso guardado y la tarjeta muestra «Desconectado»; los archivos de Drive no se tocan"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "Google no confirma la revocación",
+     "cuando": "el administrador desconecta",
+     "entonces": "el permiso guardado se borra igual y el aviso dice «Desconectado (Google no confirmó la revocación)»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un negocio que nunca conectó",
+     "cuando": "el administrador desconecta",
+     "entonces": "responde bien sin hacer nada"
+    }
+   ],
+   "origen": [
+    "REQ-K3",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "POST /api/drive/desconectar"
+    ],
+    "colecciones": [
+     "drive_conexion"
+    ],
+    "notas": "Revoca en oauth2.googleapis.com/revoke, deja la fila en estado revocada y borra refresh_token_cifrado, access_cifrado y access_vence."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/drive/index.php, rama «desconectar», y de _driveMarcar; sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-1.5",
+   "capacidad": "CAP-K3-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en Configuración el estado de la conexión y de la copia: cuenta conectada, carpeta, archivos copiados y pendientes, última pasada y errores",
+   "declarado": "construido",
+   "limitantes": [
+    "El operador ve la tarjeta en solo lectura, sin botones; el colaborador no la ve.",
+    "La tarjeta no muestra ningún secreto del permiso.",
+    "El estado «conectado» solo cuenta cuando la conexión está activa; una conexión «con error» (que sigue copiando) se muestra aparte, y el aviso fijo del corte la trata como un negocio sin Drive."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-1.1",
+     "dato": "cuenta conectada, carpeta y fecha de conexión, para mostrarlas"
+    },
+    {
+     "de": "CU-K3-1.3",
+     "dato": "resultado de la prueba: conexión activa o con error, con su motivo"
+    },
+    {
+     "de": "CU-K3-1.4",
+     "dato": "conexión revocada, para mostrarla como desconectada"
+    },
+    {
+     "de": "CU-K3-1.6",
+     "dato": "conexión revocada o con error y su motivo, para decirlo en la tarjeta"
+    },
+    {
+     "de": "CU-K3-2.1",
+     "dato": "resumen de la copia: archivos copiados y pendientes y hora de la última pasada"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive conectado y copias hechas",
+     "cuando": "el administrador abre Configuración",
+     "entonces": "la tarjeta dice «Cada 15 minutos…», la cuenta conectada, el enlace a la carpeta, cuántos archivos están en Drive y cuántos pendientes, y la hora de la última pasada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una conexión revocada o con error",
+     "cuando": "el administrador abre Configuración",
+     "entonces": "la tarjeta lo dice en rojo con el último error y ofrece «Volver a conectar»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "abre Configuración",
+     "entonces": "ve el mismo estado sin botones de conectar, probar ni desconectar"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un negocio sin las claves de Google configuradas en el servidor",
+     "cuando": "abre Configuración",
+     "entonces": "la tarjeta indica que no se puede conectar, sin fallar"
+    }
+   ],
+   "origen": [
+    "REQ-K3",
+    "REQ-K3-2"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [
+     "drive_conexion",
+     "drive_copia"
+    ],
+    "notas": "_driveCargarEstado del shell lee GET /drive/estado: {configurado, conectado, google_email, carpeta, estado, ultimo_error, copia:{pendientes, copiados, omitidos, ultimaPasada}}. Responde 200 aunque falten las claves de Google."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-1.6",
+   "capacidad": "CAP-K3-1",
+   "actor": [
+    "sistema",
+    "google-drive"
+   ],
+   "que": "Marcar la conexión como revocada o con error cuando Google retira el permiso o deja de responder, y dejar dicho el motivo",
+   "declarado": "construido",
+   "limitantes": [
+    "Con el permiso retirado (revocada) la copia se detiene hasta que el administrador vuelva a conectar; el corte lo trata como negocio sin Drive: el día del corte borra sin copia todo lo que siga en el servidor, incluso lo que ya estaba copiado en Drive, que deja de verse desde la aplicación (CU-K3-5.4).",
+    "Con «error» se conserva el permiso y la copia lo reintenta en la pasada siguiente; al funcionar vuelve a «activa» sola.",
+    "INC-135 (abierto): cuando Google retira el permiso solo se guarda «Google retiró el permiso» y se pierden el código y la descripción que da Google."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-1.5",
+     "dato": "conexión revocada o con error y su motivo, para decirlo en la tarjeta"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un permiso que Google ya retiró (por ejemplo, vencido a los 7 días en modo prueba)",
+     "cuando": "corre la pasada de copia",
+     "entonces": "la conexión pasa a «revocada» con «Google retiró el permiso», se borra el permiso guardado y la pasada se detiene"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "Google no responde al renovar el permiso",
+     "cuando": "corre la pasada de copia",
+     "entonces": "la conexión queda «con error» con el motivo, conserva el permiso y la pasada se detiene hasta la siguiente"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una conexión «con error»",
+     "cuando": "la siguiente pasada logra renovar el permiso",
+     "entonces": "vuelve a «activa» y sigue copiando"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un permiso guardado que no se puede leer (por ejemplo, cambió la llave de cifrado)",
+     "cuando": "corre la pasada",
+     "entonces": "la conexión pasa a «con error: vuelve a conectar» y ese negocio se salta"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-18"
+   ],
+   "pendientes": [
+    "INC-135",
+    "T-10"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "POST /api/drive/cron"
+    ],
+    "colecciones": [
+     "drive_conexion"
+    ],
+    "notas": "_dcPasadaCuenta (rama renovar) y _dcCron; mismo cambio de estado en la rama «prueba». El caso real (invalid_grant) ocurrió el 16-oct 11:30 con el token emitido cuando la app estaba en «Prueba»."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcPasadaCuenta, _dcCron) y del incidente real INC-135 (16-oct); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-2.1",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "cron"
+   ],
+   "que": "Copiar cada 15 minutos al Drive de cada negocio las fotos, evidencias y videos nuevos, primero la evidencia y los videos de incidentes y después las fotos de tareas",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin Drive conectado el negocio no se copia; con la conexión revocada la pasada lo salta (CU-K3-1.6).",
+    "Solo se copian los originales; la copia reducida (miniatura) de la evidencia no va a Drive.",
+    "Por negocio y pasada: hasta 25 archivos copiados, 300 nuevos registrados y 50 segundos en total; lo que sobre sigue en la pasada siguiente.",
+    "Las guías, documentos y planos no se copian (CU-K3-2.8).",
+    "La tarea programada de 15 minutos se creó el 16-oct (T-9; el mapa aún marca REL-28 «por crear»); la revisión de las primeras fotos reales en el Drive de Carlos (T-11) sigue pendiente.",
+    "Las pruebas e2e no disparan ninguna copia real: la copia se comprueba con una réplica de Drive en pruebas unitarias, que no cuentan en esta línea base."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-3.2",
+     "dato": "fotos, evidencias y videos que el turno o el incidente ya subió al sistema, para copiarlos al Drive del negocio",
+     "rel": "REL-16"
+    },
+    {
+     "de": "CU-K3-1.1",
+     "dato": "conexión activa con el permiso guardado y la carpeta «STR Manager» del negocio, para saber qué negocios se copian"
+    },
+    {
+     "de": "CU-K3-5.3",
+     "dato": "archivos copiados que Drive ya no confirma, que vuelven a la cola de copia"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-1.5",
+     "dato": "resumen de la copia: archivos copiados y pendientes y hora de la última pasada"
+    },
+    {
+     "a": "CU-K3-3.1",
+     "dato": "registro de cada archivo con su estado de copia, su enlace y su último error"
+    },
+    {
+     "a": "CU-K3-4.4",
+     "dato": "archivos pendientes de copia subidos hasta el corte, para contarlos en el aviso"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive conectado, un video de un incidente y una foto de una tarea recién subidos al sistema",
+     "cuando": "corre la pasada de copia",
+     "entonces": "primero se copia el video, después la foto, ambos a la carpeta del negocio; cada uno queda «copiado» con su enlace de Drive"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio sin Drive conectado",
+     "cuando": "corre la pasada",
+     "entonces": "no se copia ni se registra nada de ese negocio"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "Google no responde durante la pasada",
+     "cuando": "corre la pasada",
+     "entonces": "la pasada se detiene con el motivo, nada se pierde y lo pendiente se reintenta en la siguiente"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "más archivos nuevos que el cupo de la pasada",
+     "cuando": "corre la pasada",
+     "entonces": "se copian los primeros por prioridad y hora de subida, y el resto queda pendiente para la próxima"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-25",
+    "DA-32",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-9",
+    "RT-11",
+    "RT-22"
+   ],
+   "pendientes": [
+    "T-9",
+    "T-11"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/cron"
+    ],
+    "colecciones": [
+     "drive_copia",
+     "drive_carpeta",
+     "drive_evento",
+     "drive_pasada",
+     "drive_conexion"
+    ],
+    "notas": "api/lib/drive-copia.php: _dcCron (candado, todas las cuentas, una conexión) → _dcPasadaCuenta (descubrir → renovar → carpeta raíz → pendientes por prioridad); lee api/uploads/<cuenta>/{evidencia,video,foto}/<ref>/<uuid>.<ext>. X-Cron-Key."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php y api/drive/index.php (rama «cron»); la última pasada sin error del 16-oct 11:45 sale de la nota de T-9"
+   }
+  },
+  {
+   "id": "CU-K3-2.2",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Acomodar cada archivo copiado en la carpeta «STR Manager › negocio › propiedad › mes» y ponerle un nombre con su fecha, hora y tipo",
+   "declarado": "construido",
+   "limitantes": [
+    "El mes de la carpeta es el mes en que el archivo llegó al sistema, en hora de Bogotá, no la fecha del turno.",
+    "Un archivo sin propiedad va a la carpeta «Sin propiedad»; los nombres se limpian de barras y caracteres de control y se cortan a 120 caracteres.",
+    "El nombre es «aaaa-mm-dd_hhmm_tipo_identificador»."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto de una propiedad subida el 17 de octubre",
+     "cuando": "se copia a Drive",
+     "entonces": "queda en «STR Manager › nombre del negocio › nombre de la propiedad › 2026-10» con un nombre que empieza por su fecha y hora de llegada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una evidencia cuyo incidente no tiene propiedad",
+     "cuando": "se copia",
+     "entonces": "queda en la carpeta «Sin propiedad»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una foto subida a las 23:30 del 31 de octubre en Bogotá",
+     "cuando": "se copia",
+     "entonces": "queda en la carpeta del mes de octubre, no de noviembre"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "drive_carpeta"
+    ],
+    "notas": "_dcRutaCarpetas, _dcNombreArchivo, _dcMes y _dcCarpeta; las carpetas se crean o reutilizan por nombre y se guardan por clave negocio/propiedad/mes. DA-25 decía STR/Propiedad/Año-Mes/Fecha-turno: DA-32 la cambió a negocio/propiedad/AAAA-MM."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcRutaCarpetas, _dcNombreArchivo, _dcMes, _dcCarpeta); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-2.3",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dar un archivo por copiado solo cuando Drive confirma el mismo tamaño y la misma huella, y no subir dos veces lo mismo",
+   "declarado": "construido",
+   "limitantes": [
+    "Un archivo igual a otro ya copiado (misma huella y tamaño) no se sube de nuevo: apunta a la copia existente.",
+    "Si una pasada se cortó después de subir, la siguiente encuentra el archivo en la carpeta, lo da por copiado y no duplica.",
+    "Si Drive guarda algo distinto, ese archivo se borra de Drive y cuenta como fallo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un archivo que se sube a Drive",
+     "cuando": "Drive confirma el mismo tamaño y la misma huella",
+     "entonces": "el archivo queda «copiado» con su enlace"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "Drive guarda un archivo con otro tamaño o huella",
+     "cuando": "termina la subida",
+     "entonces": "el archivo de Drive se borra, el archivo queda pendiente con el error anotado y se reintenta"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "dos archivos con el mismo contenido",
+     "cuando": "corre la pasada",
+     "entonces": "el segundo se marca copiado con el enlace del primero («misma huella») sin subirlo"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "una pasada que se cortó justo después de subir un archivo",
+     "cuando": "corre la siguiente",
+     "entonces": "encuentra el archivo igual en la carpeta, lo da por copiado («ya estaba en Drive») y no lo duplica"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-25",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "sha256 y md5 se calculan al registrar el archivo; copiadoPorHuella, buscarArchivo y la comparación size/md5 de la respuesta de Drive en _dcPasadaCuenta. El estado de las copias es de admin y operador (CU-K3-3.1)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcPasadaCuenta, _dcDescubrir); cubierto por pruebas unitarias con réplica de Drive, que no cuentan aquí"
+   }
+  },
+  {
+   "id": "CU-K3-2.4",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Reintentar los archivos que fallaron, cada vez con más espera, y pausar al negocio cuando fallan tres seguidos",
+   "declarado": "construido",
+   "limitantes": [
+    "Los tres primeros intentos se hacen en la pasada siguiente; hasta el décimo, cada hora; después, cada 6 horas. No hay un tope: un archivo que nunca se copia sigue intentando.",
+    "Tres fallos seguidos en un negocio detienen su pasada hasta la siguiente.",
+    "Un archivo que no se logra copiar antes del corte se borra sin copia (CU-K3-5.3); el aviso fijo cuenta cuántos faltan cuando quedan tres días o menos (CU-K3-4.4)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un archivo que falla al subirse",
+     "cuando": "corre la pasada",
+     "entonces": "queda pendiente con el error y el número de intentos, y se vuelve a probar en la pasada siguiente"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un archivo con diez intentos fallidos",
+     "cuando": "pasan las pasadas",
+     "entonces": "se intenta cada hora y después cada 6 horas"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "tres fallos seguidos en un mismo negocio",
+     "cuando": "sigue la pasada",
+     "entonces": "se detiene ese negocio con «errores seguidos» y los demás negocios no se ven afectados"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_dcProximoIntento y DC_ERRORES_SEGUIDOS = 3; columnas intentos, ultimo_error y proximo_intento de drive_copia."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcProximoIntento, _dcPasadaCuenta); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-2.5",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Volver a crear la carpeta que el negocio borró, movió o renombró en su Drive y dejar constancia",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo detecta lo que cambió en las carpetas que el sistema creó; los archivos que alguien borre dentro de Drive no se vuelven a subir (quedan «copiados» en el registro).",
+    "La constancia queda en un registro de eventos del servidor; no hay pantalla que lo muestre."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "el negocio borró la carpeta del mes en su Drive",
+     "cuando": "corre una pasada con archivos para esa carpeta",
+     "entonces": "el sistema crea (o reutiliza) otra con el nombre esperado, copia ahí y anota que la carpeta se recreó"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el negocio borró o renombró la carpeta raíz «STR Manager»",
+     "cuando": "corre la pasada",
+     "entonces": "se crea otra raíz, se guarda y las carpetas de abajo se vuelven a armar"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2"
+   ],
+   "reglas": [
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "drive_carpeta",
+     "drive_evento",
+     "drive_conexion"
+    ],
+    "notas": "_dcCarpeta (compara estado, papelera, nombre y padre de cada carpeta una vez por pasada) y _dcPasadaCuenta (raíz); evento «carpeta-recreada»."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcCarpeta, _dcPasadaCuenta); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-2.6",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Esperar a que el turno o el incidente de un archivo exista en el sistema antes de copiarlo, y no sacar a Drive lo que nada referencia",
+   "declarado": "construido",
+   "limitantes": [
+    "El teléfono sube la foto antes que el turno: por eso el archivo espera; a las 24 horas sin turno ni incidente queda «omitido: sin registro» y nunca va a Drive.",
+    "En el corte, un archivo «omitido» se borra sin copia (CU-K3-5.4): una foto cuyo turno nunca llegó se pierde."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "alterno",
+     "dado": "una foto que llegó antes de que el teléfono subiera su turno",
+     "cuando": "corre la pasada",
+     "entonces": "no se registra ni se copia todavía y se mira de nuevo en la siguiente"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una foto con más de 24 horas cuyo turno o incidente no está en el sistema",
+     "cuando": "corre la pasada",
+     "entonces": "queda «omitido: sin registro» y no sale a Drive"
+    },
+    {
+     "id": "E3",
+     "tipo": "principal",
+     "dado": "una foto cuyo turno ya está en el sistema",
+     "cuando": "corre la pasada",
+     "entonces": "se registra con la propiedad del turno y queda pendiente de copia"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_dcClasificar (ref → turnos/tickets en col_item; la propiedad se lee por nombre o name, INC-150) y _dcDescubrir."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcClasificar, _dcDescubrir); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-2.7",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Correr una sola pasada de copia a la vez y no pasarse de su tiempo",
+   "declarado": "construido",
+   "limitantes": [
+    "Si una pasada muere, el bloqueo vence solo a los 200 segundos.",
+    "Cuando se acaba el tiempo (50 s) no se empieza otro archivo; los negocios que no alcanzaron esperan a la pasada siguiente."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "alterno",
+     "dado": "una pasada todavía en curso",
+     "cuando": "llega la siguiente orden de copia",
+     "entonces": "responde «ocupado» y no hace nada"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una pasada que murió sin soltar su bloqueo",
+     "cuando": "pasan 200 segundos",
+     "entonces": "la orden siguiente toma el bloqueo y sigue"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "más negocios con Drive que tiempo disponible",
+     "cuando": "corre la pasada",
+     "entonces": "los últimos negocios quedan para la próxima con «sin tiempo en esta pasada»"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2"
+   ],
+   "reglas": [
+    "RT-19",
+    "RT-22"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/cron"
+    ],
+    "colecciones": [
+     "drive_pasada"
+    ],
+    "notas": "Candado por tabla (drive_pasada, fila id=1) y no GET_LOCK: desde L-118 la conexión es persistente (RT-19). Una sola conexión para toda la pasada."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcCandadoTomar, _dcCron); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-2.8",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "admin"
+   ],
+   "que": "Copiar a Drive también las guías, los documentos y los planos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy las guías, los documentos y los planos no tienen copia en ningún lado y el corte no los toca.",
+    "Pendiente de decisión del dueño: «¿entran en la copia a Drive, fuera del corte?» (bolsa, LM-36, M-489; llevarlo al próximo cruce de K3)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive y una guía con documentos y planos subidos",
+     "cuando": "corre la pasada de copia",
+     "entonces": "también se copian a su Drive, y el corte mensual no los borra"
+    }
+   ],
+   "origen": [
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "api/uploads guia/, doc/ y plano/ quedan fuera de _dcDescubrir (solo evidencia, video y foto) y de _ckBorrarArchivo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php y corte.php: ninguna rama toca guia/, doc/ ni plano/"
+   }
+  },
+  {
+   "id": "CU-K3-2.9",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dejar fuera de Drive los datos de prueba: ningún archivo de prueba sale al Drive del negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "Es de prueba el archivo cuyo turno o incidente lleva «zz-verif-» o cuya propiedad se llama «zz-verif-…»; queda «omitido: dato de prueba».",
+    "Existe solo para que la fábrica de pruebas pueda verificar en el negocio real sin ensuciar su Drive (RT-3, RT-24)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto de un turno de la propiedad «zz-verif-Propiedad»",
+     "cuando": "corre la pasada de copia",
+     "entonces": "queda «omitido: dato de prueba»: nunca «copiado» ni «pendiente»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un archivo cuyo turno lleva «zz-verif-» en su identificador",
+     "cuando": "se descubre",
+     "entonces": "queda «omitido: dato de prueba» sin consultar la propiedad"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-3",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "GET /api/drive/copias"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_dcClasificar (M-454 punto 1) mira ref y nombre de la propiedad, con mayúsculas y minúsculas indistintas. INC-150 corrigió la purga de prueba (nombre/name), no esta clasificación, que ya leía los dos."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-K3-2.10",
+   "capacidad": "CAP-K3-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dejar fuera de la copia y del corte las cuentas de ensayo de restauración y la cuenta de pruebas",
+   "declarado": "construido",
+   "limitantes": [
+    "Se reconocen por el nombre de la cuenta: «zz-verif-restauracion-…» (L-131) y «zz-verif-pruebas» (L-150).",
+    "DA-47 anticipaba «un clic para conectar un Drive aparte para la cuenta de pruebas»; el código hoy la deja fuera de la copia por completo (duda para Diseño)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una cuenta de ensayo de restauración con archivos",
+     "cuando": "corre la copia y el corte",
+     "entonces": "ninguna de las dos la toca, ni se le crea calendario de corte"
+    },
+    {
+     "id": "E2",
+     "tipo": "principal",
+     "dado": "la cuenta «zz-verif-pruebas»",
+     "cuando": "corre la copia y el corte",
+     "entonces": "se deja fuera de las dos"
+    }
+   ],
+   "origen": [
+    "DA-44",
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-3",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/cron",
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [
+     "cuenta"
+    ],
+    "notas": "Filtro SQL c.nombre NOT LIKE 'zz-verif-restauracion-%' AND c.nombre <> 'zz-verif-pruebas' en _dcCron y _ckCron; REL-28 lo anota."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/drive-copia.php (_dcCron) y api/lib/corte.php (_ckCron); sin guion e2e"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-K3-3.1",
+   "capacidad": "CAP-K3-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Saber el estado de la copia de cada foto, evidencia o video de un turno o de un incidente, incluso los que el corte ya borró",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo para el administrador y el operador: el colaborador no pide nada a Drive y no ve la insignia.",
+    "El estado puede ser: copiado, pendiente, en espera (hay Drive y la próxima pasada lo registra), omitido (dato de prueba, sin registro o eliminado en el corte sin copia), sin Drive o eliminado en el corte (con o sin copia).",
+    "Responde aunque falten las claves de Google; nunca trae el permiso."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-2.1",
+     "dato": "registro de cada archivo con su estado de copia, su enlace y su último error"
+    },
+    {
+     "de": "CU-K3-5.5",
+     "dato": "archivos borrados en el corte con su fecha, su huella y si hubo copia"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-3.4",
+     "dato": "estado de la copia de cada foto en el Drive del negocio (pendiente, copiada, sin copia)",
+     "rel": "REL-16"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno con una foto ya copiada a Drive",
+     "cuando": "el operador abre el registro del turno",
+     "entonces": "la miniatura lleva una insignia ☁ «En Drive» con el enlace al archivo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto aún sin copiar",
+     "cuando": "el operador abre el turno",
+     "entonces": "la insignia dice «Pendiente de copia en Drive» y el último error, si lo hay"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una foto de un turno de prueba",
+     "cuando": "el operador abre el turno",
+     "entonces": "la insignia dice «Sin copia en Drive (dato de prueba)»: nunca «copiado» ni «pendiente»"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un negocio sin Drive conectado",
+     "cuando": "el operador abre el turno",
+     "entonces": "la insignia dice «Sin copia: Drive no conectado»"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "pide el estado de copia de un turno",
+     "entonces": "el sistema se lo niega"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "REQ-K3-3",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-9",
+    "RT-11",
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E3",
+      "E4"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "g"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "GET /api/drive/copias?ref="
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "Una consulta por turno o incidente (ref), guardada 60 s por la página; _dcCopiasDeRef junta los archivos en disco con los renglones de drive_copia y agrega los borrados por corte. El caso d comprueba E3 o E4 según el Drive de «negocio» esté o no conectado (hoy lo está: «en-espera» u «omitido»)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-3.2",
+   "capacidad": "CAP-K3-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver una foto, evidencia o video que el corte ya borró del sistema: desde Drive si hay copia, y si no con el aviso «Eliminado en el corte del …»",
+   "declarado": "construido",
+   "limitantes": [
+    "Con copia, el sistema trae el archivo de Drive con el permiso del negocio y lo entrega (el permiso nunca sale del servidor); sin rangos de lectura.",
+    "Sin copia, el sistema responde que el archivo fue eliminado en el corte, con la fecha del corte, la huella y la fecha de subida.",
+    "Si el archivo está en Drive pero Google no lo entrega, responde un error «intenta de nuevo» sin dar por perdido el archivo.",
+    "El portal del colaborador muestra el aviso desde la respuesta del archivo y nunca pide nada a Drive.",
+    "Cada foto borrada vuelve a pedirse varias veces (8 respuestas de «eliminado» por la misma foto en el portal): DT-45 pide que el cliente la recuerde y que el servidor responda sin tocar la base.",
+    "Los archivos que se muestran desde Drive aún no tienen prueba e2e (el corte de prueba solo borra sin copia)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.5",
+     "dato": "registro del archivo borrado con su fecha de corte, su huella, su fecha de subida y su copia en Drive"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-3.5",
+     "dato": "foto eliminada en el corte, con su fecha de corte, su huella y su copia en Drive",
+     "rel": "REL-17"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto de tarea que el corte borró con copia en Drive",
+     "cuando": "cualquier usuario autorizado abre el turno",
+     "entonces": "la foto se ve igual que antes: el sistema la trae de Drive"
+    },
+    {
+     "id": "E2",
+     "tipo": "principal",
+     "dado": "una foto que el corte borró sin copia",
+     "cuando": "el administrador u operador abre el turno",
+     "entonces": "la miniatura dice «Eliminado en el corte del <fecha>» dentro del cuadro y la insignia lo marca; el servidor responde con esa fecha"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "la misma foto borrada sin copia",
+     "cuando": "el colaborador abre el turno en su portal",
+     "entonces": "ve el mismo aviso con la fecha del corte, sin que el portal pida nada a Drive"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una foto con copia en Drive cuando Google no la entrega",
+     "cuando": "se pide la foto",
+     "entonces": "el sistema responde que el archivo está en Drive pero Google no lo entregó, y se puede intentar de nuevo"
+    },
+    {
+     "id": "E5",
+     "tipo": "alterno",
+     "dado": "un archivo que no existe y no pasó por ningún corte",
+     "cuando": "se pide",
+     "entonces": "responde «no encontrado» como siempre"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-10",
+    "RT-18"
+   ],
+   "pendientes": [
+    "DT-45"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "i"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [
+     "GET /api/archivo/<cuenta>/<tipo>/<ref>/<archivo>"
+    ],
+    "colecciones": [
+     "drive_copia",
+     "drive_conexion"
+    ],
+    "notas": "api/lib/archivo-corte.php: _acServirBorrado solo en la rama del 404 del archivo; la copia reducida *.min.jpg usa el renglón del original (_acPatron). _driveAccesoCache guarda el acceso cifrado hasta 60 s antes de vencer. 410 con {error, corte, sha256, subidoEn}; 502 si Google falla. api/archivo/index.php no estaba entre las fuentes leídas (solo su llamada)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/archivo-corte.php y de _hkDriveEstado y _hkCartelColab de str-m1-housekeeping.html; api/archivo/index.php, que llama a _acServirBorrado, no estaba entre las fuentes"
+   }
+  },
+  {
+   "id": "CU-K3-3.3",
+   "capacidad": "CAP-K3-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en el expediente de un incidente la evidencia que el corte ya borró: incluida desde Drive si hay copia, o con la nota «Eliminado en el corte del …»",
+   "declarado": "construido",
+   "limitantes": [
+    "Con copia, la evidencia entra al expediente igual que antes, con su huella recalculada; sin copia (o si Google no la entrega) no entra y el expediente dice en qué corte se eliminó y conserva la huella registrada.",
+    "Una evidencia anulada no se busca en Drive.",
+    "El colaborador no puede pedir el expediente."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-INC1-1.1",
+     "dato": "evidencia de un incidente eliminada en el corte: su contenido traído de Drive, o la nota «Eliminado en el corte del …» con su huella",
+     "rel": "REL-19"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente cuya evidencia se borró en el corte con copia en Drive",
+     "cuando": "el administrador arma el expediente",
+     "entonces": "el expediente trae la evidencia, marcada como venida de Drive, con su huella recalculada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente cuya evidencia se borró en el corte sin copia",
+     "cuando": "el administrador arma el expediente",
+     "entonces": "la fila dice «Eliminado en el corte del <fecha>» y el expediente conserva la huella registrada"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "GET /api/expediente/<ticketId>"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "api/expediente/index.php: _expDesdeCorte; el temporal bajado de Drive se borra al terminar; evidencias.json lleva eliminadoEnCorte y origen (drive/servidor). El expediente en sí es de Incidentes (REL-20)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _expDesdeCorte y de las líneas que lo usan en api/expediente/index.php; sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-4.1",
+   "capacidad": "CAP-K3-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Fijar el calendario de cortes de cada negocio y decir cuál es su próximo corte: el día 30 de cada mes (el último día en febrero), el primer corte el mes siguiente al registro",
+   "declarado": "construido",
+   "limitantes": [
+    "Los negocios que ya existían al desplegar esta regla (15-oct) empiezan a contar desde ese día: su primer corte es el 30-nov-2026 a las 23:00.",
+    "Un negocio nuevo cuenta desde su registro, en hora de Bogotá; el calendario se crea la primera vez que se pide.",
+    "El día del corte todavía cuenta como «próximo corte» hasta que pasa.",
+    "Todas las fechas son de Bogotá; la hora la da el servidor, no el aparato."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-4.2",
+     "dato": "fecha del próximo corte del negocio y días que faltan"
+    },
+    {
+     "a": "CU-K3-4.3",
+     "dato": "días que faltan para el corte, para decidir el recordatorio"
+    },
+    {
+     "a": "CU-K3-4.4",
+     "dato": "fecha del próximo corte y límite de las 23:00, para contar pendientes"
+    },
+    {
+     "a": "CU-K3-5.1",
+     "dato": "inicio del calendario del negocio, para saber si está en su ventana de corte"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con calendario",
+     "cuando": "el administrador abre la aplicación",
+     "entonces": "recibe la fecha de su próximo corte, escrita (por ejemplo «30 de noviembre de 2026»)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un mes de febrero",
+     "cuando": "se calcula el corte",
+     "entonces": "cae en el último día del mes (28 o 29)"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un negocio que ya existía al desplegar el calendario el 15-oct",
+     "cuando": "se calcula su primer corte",
+     "entonces": "es el 30-nov-2026"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un negocio sin calendario todavía",
+     "cuando": "se pide su próximo corte",
+     "entonces": "se fija su inicio con la fecha de su registro (o con hoy si no se conoce) y se guarda"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [
+     "cuenta_retencion",
+     "cuenta"
+    ],
+    "notas": "api/lib/retencion.php: _retCorteDelMes, _retPrimerCorte, _retProximoCorte, _retInicio (origen despliegue o registro). El caso e solo comprueba que el estado trae una fecha de próximo corte."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-4.2",
+   "capacidad": "CAP-K3-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en un aviso fijo la fecha del próximo corte cuando el negocio no tiene Drive conectado, con el modo de conectarlo",
+   "declarado": "construido",
+   "limitantes": [
+    "Lo ve el administrador y el operador que tiene todos los permisos; el operador con permisos acotados solo lo vería con el permiso de configurar Drive, que hoy no se puede dar (CU-U-2.8).",
+    "El administrador tiene el enlace «Conectar Drive»; el operador ve «Solo el administrador puede conectar el Drive» y ningún enlace.",
+    "El aviso trata como «sin Drive» a una conexión «con error» aunque siga copiando.",
+    "Los guiones e y e2 comprueban una rama u otra según el Drive de «negocio» esté o no conectado: hoy está conectado, así que comprueban que con Drive el aviso no se ve.",
+    "El aviso a 390 px (caso f) es una captura, no una afirmación."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-4.1",
+     "dato": "fecha del próximo corte del negocio y días que faltan"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-2.1",
+     "dato": "aviso fijo del próximo corte, con su fecha, para quien puede verlo (administrador y operador autorizado)",
+     "rel": "REL-18"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio sin Drive conectado y un administrador",
+     "cuando": "abre cualquier página de la aplicación",
+     "entonces": "ve arriba, fijo: «Tu próximo corte es el <fecha>: ese día se eliminarán del sistema las fotos y videos. Conecta el Drive del negocio para conservar una copia», con «Conectar Drive» que lo lleva a Configuración"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con permiso de ver el aviso",
+     "cuando": "abre la aplicación",
+     "entonces": "ve el mismo aviso con «Solo el administrador puede conectar el Drive» y sin el enlace de conectar"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un negocio con Drive conectado y sin archivos por copiar cerca del corte",
+     "cuando": "abre la aplicación",
+     "entonces": "no ve el aviso"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un colaborador, o un operador sin el permiso",
+     "cuando": "abre la aplicación",
+     "entonces": "no ve el aviso"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1",
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "e2"
+     ],
+     "escenarios": [
+      "E2",
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [
+     "cuenta_retencion"
+    ],
+    "notas": "#corteAviso entre la barra superior y el cuerpo, pintado por _corteAvisoPintar con avisoCorte, retencion y corteAvisos de /drive/estado; el servidor decide si el usuario debe verlo (admin, o operador con _puede config.drive) y el cliente no calcula fechas."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-4.3",
+   "capacidad": "CAP-K3-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Recibir el recordatorio «Faltan 7 días», «Faltan 3 días» o «Mañana es el corte» al frente del aviso fijo, cuando el negocio no tiene Drive",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo para negocios sin Drive; con Drive el aviso es el de archivos pendientes (CU-K3-4.4).",
+    "Los recordatorios salen solo dentro del aviso fijo: no se envían por WhatsApp ni correo (CU-K3-4.6)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-4.1",
+     "dato": "días que faltan para el corte, para decidir el recordatorio"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-2.1",
+     "dato": "recordatorio de 7, 3 o 1 días para el corte, al frente del aviso fijo",
+     "rel": "REL-18"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio sin Drive a 7 días del corte",
+     "cuando": "el administrador abre la aplicación",
+     "entonces": "el aviso empieza con «Faltan 7 días para el corte.»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo negocio a 1 día",
+     "cuando": "abre la aplicación",
+     "entonces": "el aviso empieza con «Mañana es el corte.»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un día que no es 7, 3 ni 1",
+     "cuando": "abre la aplicación",
+     "entonces": "el aviso lleva solo la fecha del corte, sin recordatorio"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [],
+    "notas": "_ckRecordatorio y _ckAvisos en api/lib/corte.php; el texto lo arma _corteAvisoTexto del shell. El caso f solo comprueba que el recordatorio es nulo o 7, 3 o 1, no cada texto."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-4.4",
+   "capacidad": "CAP-K3-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver un aviso fijo cuando, a tres días o menos del corte, hay archivos que aún no están en Drive y se eliminarán sin copia",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo sale con Drive conectado y a 3 días o menos del corte; el aviso no tiene enlace de conectar.",
+    "Cuenta los archivos pendientes de copia subidos hasta las 23:00 del día del corte."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-2.1",
+     "dato": "archivos pendientes de copia subidos hasta el corte, para contarlos en el aviso"
+    },
+    {
+     "de": "CU-K3-4.1",
+     "dato": "fecha del próximo corte y límite de las 23:00, para contar pendientes"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-2.1",
+     "dato": "cantidad de archivos que aún no están en Drive a tres días o menos del corte, para el aviso fijo",
+     "rel": "REL-18"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive y 12 archivos pendientes de copia, a 3 días del corte",
+     "cuando": "el administrador abre la aplicación",
+     "entonces": "ve «12 archivos aún no están en Drive. Si no se copian antes del corte del <fecha>, se eliminarán del sistema sin copia»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio con Drive sin pendientes, o a más de 3 días del corte",
+     "cuando": "abre la aplicación",
+     "entonces": "no ve el aviso"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_ckAvisos calcula pendientesAlCorte con los renglones «pendiente» sin borrar y subidos hasta el límite del corte."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-4.5",
+   "capacidad": "CAP-K3-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en Configuración el reporte del último corte: cuántos archivos se eliminaron (con copia y sin copia), cuántos MB se liberaron y cuántos esperan su copia",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo muestra el último corte del negocio; no hay historial de cortes en pantalla.",
+    "Hasta el primer corte real (30-nov-2026) el reporte no existe."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.7",
+     "dato": "reporte acumulado del último corte del negocio"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio que ya tuvo un corte",
+     "cuando": "el administrador abre Configuración",
+     "entonces": "la tarjeta dice «Último corte: <fecha> · N archivos eliminados (X con copia en Drive, Y sin copia) · Z MB liberados» y, si quedaron, cuántos esperan su copia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio sin cortes todavía",
+     "cuando": "abre Configuración",
+     "entonces": "la tarjeta no muestra la línea del último corte"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/drive/estado"
+    ],
+    "colecciones": [
+     "corte_reporte"
+    ],
+    "notas": "_ckAvisos.ultimoCorte y _corteReporteTexto. El caso f comprueba que la línea aparece si y solo si el servidor trae un último corte."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-4.6",
+   "capacidad": "CAP-K3-4",
+   "actor": [
+    "admin"
+   ],
+   "que": "Recibir los avisos del corte por el canal de Comunicaciones (WhatsApp o correo), además del aviso fijo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Se decidió que los avisos queden en el aviso fijo «hasta M6» (REQ-K3-3, M-470); Comunicaciones (M6) está sin definir."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio a 7 días del corte y un canal de comunicación configurado",
+     "cuando": "llega el recordatorio",
+     "entonces": "el administrador lo recibe también por el canal, no solo en el aviso fijo"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3"
+   ],
+   "reglas": [
+    "RT-8"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: solo la frase «avisos en el aviso fijo hasta M6» del REQ-K3-3."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-K3-5.1",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "cron"
+   ],
+   "que": "Correr el corte mensual de cada negocio solo dentro de su ventana, desde las 23:00 del día de corte hasta el tercer día después, y no hacer nada fuera de ella",
+   "declarado": "construido",
+   "limitantes": [
+    "No está activo: la tarea programada del corte no se ha creado y no se creará sin el respaldo completo de los archivos del servidor (RT-12, T-12; REL-28 «por crear»).",
+    "El primer corte real es el del 30-nov-2026 a las 23:00; su revisión por el dueño (T-13) es el 1-dic.",
+    "Corta lo subido hasta las 23:00 del día del corte; lo que llega después queda para el corte siguiente.",
+    "Si la tarea no corre en los cuatro días de la ventana, ese mes no hay corte: se acumula y se borra en el siguiente.",
+    "Si dos pasadas coinciden, la segunda responde «ocupado»; el bloqueo vence solo.",
+    "El corte no exige las claves de Google: un servidor sin ellas trata a todo negocio como sin Drive (ver CU-K3-5.4).",
+    "Las pruebas e2e solo ejercen el corte en modo de prueba sobre datos zz-verif- (CU-K3-5.8); la pasada real no tiene guion."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-4.1",
+     "dato": "inicio del calendario del negocio, para saber si está en su ventana de corte"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-5.2",
+     "dato": "negocio con Drive dentro de su ventana, con el día de la ventana (0 a 3)"
+    },
+    {
+     "a": "CU-K3-5.3",
+     "dato": "negocio con Drive dentro de su ventana, con el día de la ventana (0 a 3)"
+    },
+    {
+     "a": "CU-K3-5.4",
+     "dato": "negocio dentro de su ventana, con o sin Drive, con el día de la ventana"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el 30 de un mes a las 23:00 o más tarde, y un negocio con archivos subidos antes de esa hora",
+     "cuando": "corre la pasada del corte",
+     "entonces": "el negocio entra en su ventana y se le corta lo subido hasta las 23:00"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el 30 a las 22:00, o el cuarto día después del corte",
+     "cuando": "corre la pasada",
+     "entonces": "no hace nada con ese negocio"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un archivo subido a las 23:30 del día del corte",
+     "cuando": "corre el corte",
+     "entonces": "no se borra: espera al corte del mes siguiente"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "varios negocios y poco tiempo",
+     "cuando": "corre la pasada",
+     "entonces": "los que no alcanzaron quedan para la pasada siguiente (cada 15 minutos) y el reporte los marca incompletos"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-12",
+    "RT-22"
+   ],
+   "pendientes": [
+    "T-12",
+    "T-13"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [
+     "cuenta_retencion",
+     "drive_pasada",
+     "corte_reporte"
+    ],
+    "notas": "api/lib/corte.php: _ckCron (candado en la fila id=2 de drive_pasada) → _ckVentana (último corte ≤ hoy; día 0 desde las 23:00 hasta el día 3) → _ckCorteCuenta. X-Cron-Key; una conexión; presupuesto de 50 s y 400 archivos por negocio y pasada."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/corte.php (_ckCron, _ckVentana, _ckLimiteUtc) y api/drive/index.php (rama «corte»); el corte real no ha corrido nunca"
+   }
+  },
+  {
+   "id": "CU-K3-5.2",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Con Drive: hacer una última copia el día del corte y borrar «con copia» lo que Drive confirma que tiene (mismo tamaño y misma huella)",
+   "declarado": "construido",
+   "limitantes": [
+    "La última copia del día 0 es una pasada limitada a 20 segundos y al cupo normal de 25 archivos; lo que falte lo sigue copiando la pasada de cada 15 minutos mientras dura la ventana.",
+    "Antes de borrar se pregunta a Drive por cada archivo copiado; si Drive no responde ese archivo cuenta como no confirmado (CU-K3-5.3).",
+    "Borrar «con copia» deja el enlace de Drive en el registro y permite verlo desde la aplicación (CU-K3-3.2)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.1",
+     "dato": "negocio con Drive dentro de su ventana, con el día de la ventana (0 a 3)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-5.5",
+     "dato": "archivos borrados con copia, con su enlace de Drive"
+    },
+    {
+     "a": "CU-K3-5.7",
+     "dato": "conteo de archivos y bytes borrados con copia"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con Drive, y una foto copiada que Drive confirma con el mismo tamaño y huella",
+     "cuando": "corre el corte",
+     "entonces": "se borra del servidor, queda «con copia» y el registro conserva el enlace"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio con Drive y fotos nuevas aún sin copiar",
+     "cuando": "llega el día 0 del corte",
+     "entonces": "antes de borrar corre una última pasada de copia"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-9",
+    "RT-12"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_ckCorteCuenta (copiar solo si dia === 0), _ckRedGoogle y _driveArchivoInfo; _ckDecidir devuelve con-copia. Cubierto por pruebas unitarias con réplica, que no cuentan aquí."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/corte.php (_ckCorteCuenta, _ckDecidir, _ckRedGoogle)"
+   }
+  },
+  {
+   "id": "CU-K3-5.3",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Con Drive: aplazar hasta tres días lo que aún no está en Drive o que Drive ya no confirma, y borrarlo sin copia el tercer día",
+   "declarado": "construido",
+   "limitantes": [
+    "Un archivo copiado que Drive no confirma (por ejemplo, porque Google no responde) vuelve a la cola de copia con su enlace borrado del registro; si el tercer día sigue sin confirmarse, se borra sin copia aunque esté en Drive (ver CU-K3-5.4).",
+    "Lo que se aplaza lo cuenta el aviso fijo (CU-K3-4.4) y el reporte («esperan su copia»).",
+    "DA-25 pedía no borrar nada sin copia confirmada; DA-32 lo cambió: se reintenta 3 días y se borra igual."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.1",
+     "dato": "negocio con Drive dentro de su ventana, con el día de la ventana (0 a 3)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-2.1",
+     "dato": "archivos copiados que Drive ya no confirma, que vuelven a la cola de copia"
+    },
+    {
+     "a": "CU-K3-5.5",
+     "dato": "archivos borrados sin copia el tercer día"
+    },
+    {
+     "a": "CU-K3-5.7",
+     "dato": "conteo de archivos aplazados y borrados sin copia"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto pendiente de copia el día 0",
+     "cuando": "corre el corte",
+     "entonces": "no se borra; sigue pendiente y se cuenta como «esperan su copia»"
+    },
+    {
+     "id": "E2",
+     "tipo": "principal",
+     "dado": "la misma foto, todavía sin copia el tercer día",
+     "cuando": "corre el corte",
+     "entonces": "se borra sin copia y el registro la marca así"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una foto que figura copiada pero Drive ya no la tiene (la borraron allá)",
+     "cuando": "corre el corte antes del tercer día",
+     "entonces": "vuelve a la cola de copia con el motivo «no estaba en Drive al corte» y no se borra"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-12"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_ckDecidir (aplazar mientras dia < CK_DIAS_REINTENTO = 3) y repo.reCopiar (borra drive_id y enlace del renglón)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/corte.php (_ckDecidir, _ckCorteCuenta, reCopiar); el efecto de que Google no responda al confirmar queda como duda para Desarrollo"
+   }
+  },
+  {
+   "id": "CU-K3-5.4",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Borrar sin copia lo que no tiene ni tendrá copia: todo, si el negocio no tiene Drive; y lo de prueba o sin registro, aunque lo tenga",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin Drive el corte borra desde el día 0 todo lo subido hasta las 23:00 y registra su huella; no hay espera.",
+    "Un negocio con la conexión revocada, o un servidor sin las claves de Google, cuenta como «sin Drive»: se borra sin copia incluso lo que ya estaba copiado en Drive, y el registro lo marca «sin copia» (la aplicación dirá «Eliminado en el corte» aunque el archivo siga en Drive).",
+    "El archivo «omitido» (dato de prueba o sin registro) se borra sin copia aunque el negocio tenga Drive."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.1",
+     "dato": "negocio dentro de su ventana, con o sin Drive, con el día de la ventana"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-5.5",
+     "dato": "archivos borrados sin copia (sin Drive, de prueba o sin registro)"
+    },
+    {
+     "a": "CU-K3-5.7",
+     "dato": "conteo de archivos y bytes borrados sin copia"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio sin Drive conectado y fotos subidas antes del corte",
+     "cuando": "corre el corte",
+     "entonces": "se registra la huella de cada una, se borran del servidor y quedan «sin copia»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio con Drive y una foto de prueba (omitida)",
+     "cuando": "corre el corte",
+     "entonces": "se borra sin copia sin esperar"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un negocio cuya conexión quedó revocada antes del día del corte",
+     "cuando": "corre el corte",
+     "entonces": "se trata como sin Drive y se borra todo sin copia"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-12"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte",
+     "POST /api/drive/corte-prueba"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "_ckDecidir: !tieneDrive → sin-copia; estado omitido → sin-copia. tieneDrive = _dcCuentasACopiar([fila]) y _driveConfigurado(). El caso d prueba E2 con el corte de prueba (Drive conectado, foto de prueba)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-5.5",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Conservar en el registro de cada archivo borrado la fecha del servidor, la huella, la fecha del corte y, si hubo copia, el enlace de Drive",
+   "declarado": "construido",
+   "limitantes": [
+    "Al borrar un original se borra también su copia reducida (miniatura).",
+    "Un archivo pendiente que se borra sin copia sale de la cola de copia (queda «omitido: eliminado en el corte sin copia»).",
+    "Un archivo sin renglón se registra en el momento del corte (huella incluida) antes de borrarlo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.2",
+     "dato": "archivos borrados con copia, con su enlace de Drive"
+    },
+    {
+     "de": "CU-K3-5.3",
+     "dato": "archivos borrados sin copia el tercer día"
+    },
+    {
+     "de": "CU-K3-5.4",
+     "dato": "archivos borrados sin copia (sin Drive, de prueba o sin registro)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-3.2",
+     "dato": "registro del archivo borrado con su fecha de corte, su huella, su fecha de subida y su copia en Drive"
+    },
+    {
+     "a": "CU-K3-3.1",
+     "dato": "archivos borrados en el corte con su fecha, su huella y si hubo copia"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una foto que el corte borra sin copia",
+     "cuando": "termina el corte",
+     "entonces": "el registro conserva la fecha de subida, la huella, la fecha del corte y que no hubo copia; la foto ya no se sirve desde el servidor"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto borrada con copia",
+     "cuando": "termina el corte",
+     "entonces": "el registro conserva además el enlace y el identificador del archivo en Drive"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una foto que nunca llegó a registrarse",
+     "cuando": "corre el corte",
+     "entonces": "se registra con su huella justo antes de borrarse"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "repo.borrado: borrado_en, corte, liberado, con_copia; conserva subido_en, huella, drive_id y enlace."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-5.6",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Borrar solo las fotos, evidencias y videos de la carpeta del propio negocio, y nunca las guías, los documentos ni los planos",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo borra archivos con nombre de identificador y extensión de foto o video, dentro de foto/, evidencia/ y video/ de la cuenta; nunca sale de esa carpeta.",
+    "No hay otro borrado físico en el sistema: borrar fuera del corte es CU-K3-5.9."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con fotos, una guía y un plano",
+     "cuando": "corre el corte",
+     "entonces": "se borran las fotos y videos que tocan; la guía y el plano siguen donde estaban"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una ruta con «..» o con un nombre que no es de foto o video",
+     "cuando": "el corte intenta borrarla",
+     "entonces": "no se borra nada"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-8"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [],
+    "notas": "_ckBorrarArchivo: expresión del nombre, realpath dentro de la carpeta de la cuenta, borra el original y <uuid>.min.jpg."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/corte.php (_ckBorrarArchivo); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-5.7",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar el reporte de cada corte por negocio, sumando las pasadas de la ventana, y decir si quedó completo",
+   "declarado": "construido",
+   "limitantes": [
+    "El reporte se acumula en cada pasada: borrados, bytes, con copia, sin copia, aplazados (el último valor) y «completo».",
+    "Para el dueño solo se ve el último (CU-K3-4.5); el primer reporte real será el del 30-nov."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-5.2",
+     "dato": "conteo de archivos y bytes borrados con copia"
+    },
+    {
+     "de": "CU-K3-5.3",
+     "dato": "conteo de archivos aplazados y borrados sin copia"
+    },
+    {
+     "de": "CU-K3-5.4",
+     "dato": "conteo de archivos y bytes borrados sin copia"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-K3-4.5",
+     "dato": "reporte acumulado del último corte del negocio"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un corte que se hace en varias pasadas",
+     "cuando": "terminan las pasadas",
+     "entonces": "el reporte del negocio suma todo lo borrado y marca si quedó completo"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [
+     "corte_reporte"
+    ],
+    "notas": "_ckReporteSumar: INSERT … ON DUPLICATE KEY UPDATE sobre (cuenta_id, corte)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/lib/corte.php (_ckReporteSumar); sin guion e2e"
+   }
+  },
+  {
+   "id": "CU-K3-5.8",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "admin"
+   ],
+   "que": "Correr un corte de prueba sobre los datos de un turno o incidente de prueba para verificar el corte sin tocar datos reales",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el administrador; solo una referencia cuyos archivos sean de prueba (zz-verif-); si no, lo rechaza antes de mirar el disco.",
+    "El corte de prueba usa «hoy» como corte y «ahora» como límite, con el día 0 a 3 a elección, sin pasada de copia y sin escribir reporte; devuelve lo que hizo.",
+    "Existe para la fábrica de pruebas, no para el negocio."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno de prueba con una foto subida",
+     "cuando": "el administrador corre el corte de prueba sobre ese turno",
+     "entonces": "borra su foto sin copia, devuelve cuántos borró y el registro conserva fecha, huella y corte"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una referencia de un turno real",
+     "cuando": "el administrador intenta el corte de prueba",
+     "entonces": "el sistema lo rechaza («Solo datos de prueba») y no borra nada"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-2",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3c",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-K3c-vista",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "POST /api/drive/corte-prueba"
+    ],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "api/drive/index.php, rama «corte-prueba»: _ckRefDePrueba + _ckCorteCuenta con soloRefs y límite = ahora. Los guiones lo llaman con STRApi.post desde la página del admin."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-K3-5.9",
+   "capacidad": "CAP-K3-5",
+   "actor": [
+    "admin"
+   ],
+   "que": "Borrar archivos del servidor fuera del corte, dejando su huella en el registro",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy el único borrado físico del sistema es el corte; no hay manera de quitar un archivo antes (DT-44, vacío 1 del mapa LM-36, sin prioridad decidida)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un archivo que el administrador quiere quitar antes del corte",
+     "cuando": "lo borra",
+     "entonces": "el archivo se elimina del servidor y el registro conserva su huella y la fecha, como en el corte"
+    }
+   ],
+   "origen": [
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-12"
+   ],
+   "pendientes": [
+    "DT-44"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "drive_copia"
+    ],
+    "notas": "Sin código."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-K3-6.1",
+   "capacidad": "CAP-K3-6",
+   "actor": [
+    "admin"
+   ],
+   "que": "Descargar un respaldo de la cuenta con los datos del negocio",
+   "declarado": "parcial",
+   "limitantes": [
+    "Solo el administrador ve el botón de respaldo (⬇ junto a su nombre).",
+    "El respaldo no trae las fotos, evidencias ni videos (están en el servidor y se respaldan aparte, CU-K3-6.4) ni, hoy, los datos de la cuenta, del calendario de cortes, del registro de la copia a Drive y de la exportación de calendario (DT-43).",
+    "Es solo de descarga: no hay importación desde la aplicación.",
+    "Nunca se ha probado una restauración real con el respaldo diario (DT-42, INC-137).",
+    "El dueño de este caso de uso según el mapa es Shell (botón) y Servidor (respaldo); aquí se levanta porque RT-12 lo exige antes del primer corte (por confirmar)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión en el servidor",
+     "cuando": "pulsa el botón de respaldo",
+     "entonces": "se descarga un archivo de respaldo con la fecha del día, con todos los datos del negocio, sus usuarios (sin contraseñas) y sus capacidades"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador o un colaborador",
+     "cuando": "abre la aplicación",
+     "entonces": "no ve el botón de respaldo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el servidor no entrega el respaldo",
+     "cuando": "el administrador lo pide",
+     "entonces": "el botón muestra una cruz unos segundos y no descarga nada"
+    }
+   ],
+   "origen": [
+    "DT-43",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-12",
+    "RT-14"
+   ],
+   "pendientes": [
+    "DT-42",
+    "DT-43",
+    "INC-79",
+    "INC-84",
+    "INC-101"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "GET /api/export"
+    ],
+    "colecciones": [],
+    "notas": "Botón #apiBackupBtn y _descargarRespaldo del shell (fecha local, INC-79); la lista de colecciones de api/export debe ser la de /api/col (INC-84, INC-101, vigilado por tests/export-colecciones.test.js). api/export/index.php no estaba entre las fuentes: lo del servidor sale de docs/claude/servidor-php.md."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _descargarRespaldo y del botón en str-app-shell.html y de la descripción del respaldo en docs/claude/servidor-php.md; api/export/index.php no estaba entre las fuentes"
+   }
+  },
+  {
+   "id": "CU-K3-6.2",
+   "capacidad": "CAP-K3-6",
+   "actor": [
+    "cron"
+   ],
+   "que": "Guardar cada noche en el servidor un respaldo de cada cuenta y conservar los últimos 30",
+   "declarado": "construido",
+   "limitantes": [
+    "Deja fuera las cuentas de ensayo de restauración (L-131); la cuenta de pruebas sí entra en el respaldo (CU-U-7.3).",
+    "No se pudo comprobar que la tarea programada de las 03:00 exista en el servidor de alojamiento: solo hay su descripción en el mapa técnico.",
+    "El nombre del respaldo diario usa la fecha UTC y entre las 19:00 y las 24:00 de Bogotá sale con la fecha del día siguiente (INC-81, pospuesto por decisión del dueño; cosmético).",
+    "Guarda el respaldo en el mismo servidor que los datos: no es una copia fuera de él."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-K3-6.3",
+     "dato": "respaldo diario guardado de la cuenta, para ensayar su restauración"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "varias cuentas",
+     "cuando": "corre la tarea de las 03:00",
+     "entonces": "cada cuenta tiene su archivo de respaldo del día y solo se conservan los últimos 30"
+    }
+   ],
+   "origen": [
+    "DT-43",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-12",
+    "RT-22"
+   ],
+   "pendientes": [
+    "DT-43",
+    "INC-81",
+    "INC-84",
+    "INC-101"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/export/cron"
+    ],
+    "colecciones": [],
+    "notas": "api/backups/<cuenta>/<fecha>.json con .htaccess de denegación; X-Cron-Key. Fuente: docs/claude/servidor-php.md (api/export/index.php no estaba entre las fuentes)."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Solo la descripción de docs/claude/servidor-php.md; no se leyó api/export/index.php ni se vio la tarea programada"
+   }
+  },
+  {
+   "id": "CU-K3-6.3",
+   "capacidad": "CAP-K3-6",
+   "actor": [
+    "admin",
+    "cola-arquitecto"
+   ],
+   "que": "Ensayar la restauración de un respaldo en una cuenta de pruebas nueva y temporal, sin tocar el negocio, y dejar constancia de conteos y huellas",
+   "declarado": "construido",
+   "limitantes": [
+    "El ensayo real del 16-oct falló con un error en la creación de la cuenta (INC-137, abierto): hasta que se cierre, no se ha restaurado nunca un respaldo real.",
+    "La constancia compara conteos por tipo de dato y huellas contra el respaldo; la copia se borra al terminar y queda constancia del borrado.",
+    "Existe para la fábrica (antes del primer corte, MJ-6); es de Servidor en el mapa y aquí se cita por RT-12."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-6.2",
+     "dato": "respaldo diario guardado de la cuenta, para ensayar su restauración"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un respaldo diario del negocio",
+     "cuando": "el administrador ensaya la restauración",
+     "entonces": "se crea una cuenta de prueba temporal con las colecciones del respaldo, se devuelve la constancia y el negocio queda intacto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "intenta ensayar",
+     "entonces": "el sistema se lo niega"
+    }
+   ],
+   "origen": [
+    "DA-44",
+    "DT-42"
+   ],
+   "reglas": [
+    "RT-2",
+    "RT-12",
+    "RT-24"
+   ],
+   "pendientes": [
+    "INC-137",
+    "DT-42"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/restauracion/ensayo",
+     "GET /api/restauracion/constancia",
+     "POST /api/restauracion/borrar"
+    ],
+    "colecciones": [
+     "cuenta"
+    ],
+    "notas": "api/lib/restauracion.php (no estaba entre las fuentes): lo del servidor sale de docs/claude/servidor-php.md y de INC-137."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Solo la descripción de docs/claude/servidor-php.md y los incidentes INC-137 e INC-156"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-K3-6.4",
+   "capacidad": "CAP-K3-6",
+   "actor": [
+    "admin"
+   ],
+   "que": "Respaldar todos los archivos del servidor (fotos, evidencias, videos, guías) antes del primer corte y dejar constancia",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy es un procedimiento manual del Arquitecto con el dueño (procedimiento-respaldo-corte-2026-10.md); la aplicación no lo hace ni lo exige.",
+    "Sin este respaldo no se crea la tarea programada del corte (RT-12, T-12); debe estar antes del 30-nov-2026 a las 23:00.",
+    "El respaldo diario no incluye archivos (CU-K3-6.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el servidor con las fotos de los negocios",
+     "cuando": "se acerca el primer corte",
+     "entonces": "existe una copia completa de los archivos del servidor con su constancia, antes de crear la tarea del corte"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32"
+   ],
+   "reglas": [
+    "RT-12"
+   ],
+   "pendientes": [
+    "T-12"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: procedimiento (T-12). Por confirmar con Diseño si es fuera de alcance de la aplicación."
+   },
+   "confianza": "media"
+  },
+  {
+   "id": "CU-K3-7.1",
+   "capacidad": "CAP-K3-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar el permiso de Google cifrado y no dejarlo salir del servidor: ni en pantallas, avisos, direcciones, registros ni respuestas",
+   "declarado": "construido",
+   "limitantes": [
+    "Cambiar la llave de cifrado deja ilegibles los permisos guardados: cada negocio tendría que volver a conectar.",
+    "Los mensajes de error de Google se cortan a 200 caracteres y nunca llevan el permiso."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador que abre Configuración",
+     "cuando": "la aplicación lee el estado de la conexión",
+     "entonces": "la respuesta no trae el permiso ni la llave ni el secreto de la aplicación de Google"
+    },
+    {
+     "id": "E2",
+     "tipo": "principal",
+     "dado": "el portal del colaborador abierto",
+     "cuando": "se leen todas sus respuestas",
+     "entonces": "ninguna trae el permiso ni credenciales"
+    },
+    {
+     "id": "E3",
+     "tipo": "principal",
+     "dado": "un turno con fotos",
+     "cuando": "el operador consulta el estado de la copia",
+     "entonces": "la respuesta no trae el permiso"
+    }
+   ],
+   "origen": [
+    "REQ-K3",
+    "REQ-K3-2",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-18",
+    "RT-9"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-K3b",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-K3b-aviso",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "GET /api/drive/estado",
+     "GET /api/drive/copias"
+    ],
+    "colecciones": [
+     "drive_conexion"
+    ],
+    "notas": "_driveCifrar/_driveDescifrar (sodium secretbox «s1:» o AES-256-GCM «g1:»), clave de 32 bytes en DRIVE_TOKEN_KEY; el acceso en caché se guarda cifrado (access_cifrado)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-K3-7.2",
+   "capacidad": "CAP-K3-7",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dejar cada acción de Drive solo a quien le toca: conectar, probar, desconectar y el corte de prueba, al administrador; ver el estado y las copias, al administrador y al operador; nada, al colaborador",
+   "declarado": "construido",
+   "limitantes": [
+    "El servidor decide; la página solo oculta (RT-14).",
+    "Primero se revisa el rol, después el método y por último que las claves de Google estén configuradas."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "pide cualquier ruta de Drive",
+     "entonces": "el sistema responde «sin permiso»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un operador",
+     "cuando": "intenta conectar, probar, desconectar o correr un corte de prueba",
+     "entonces": "el sistema responde «sin permiso»"
+    },
+    {
+     "id": "E3",
+     "tipo": "principal",
+     "dado": "un operador",
+     "cuando": "pide el estado o las copias de un turno",
+     "entonces": "las recibe"
+    }
+   ],
+   "origen": [
+    "REQ-K3",
+    "REQ-K3-2",
+    "DA-26"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/drive/*"
+    ],
+    "colecciones": [],
+    "notas": "_driveRolesPorAccion entre [DRIVE-ROLES-inicio] y [DRIVE-ROLES-fin], con réplica en tests/drive.test.js."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _driveRolesPorAccion y de api/drive/index.php; el guion K3b e comprueba que el portal no pide nada, no que el servidor rechace"
+   }
+  },
+  {
+   "id": "CU-K3-7.3",
+   "capacidad": "CAP-K3-7",
+   "actor": [
+    "cron"
+   ],
+   "que": "Aceptar la pasada de copia y la del corte solo con la clave de la tarea programada",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin clave, con clave equivocada o con la clave de ejemplo sin cambiar, la petición se rechaza.",
+    "Las dos tareas se crean solo desde el panel del alojamiento (RT-22)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "excepcion",
+     "dado": "una petición de copia o de corte sin la clave correcta",
+     "cuando": "llega al servidor",
+     "entonces": "el sistema la rechaza y no hace nada"
+    },
+    {
+     "id": "E2",
+     "tipo": "principal",
+     "dado": "la tarea programada con la clave correcta",
+     "cuando": "llama",
+     "entonces": "el sistema hace una pasada"
+    }
+   ],
+   "origen": [
+    "REQ-K3-2",
+    "REQ-K3-3"
+   ],
+   "reglas": [
+    "RT-18",
+    "RT-22"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "POST /api/drive/cron",
+     "POST /api/drive/corte"
+    ],
+    "colecciones": [],
+    "notas": "Cabecera X-Cron-Key comparada con hash_equals contra CRON_KEY de secrets.php."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/drive/index.php (ramas «cron» y «corte»); sin guion e2e"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-132",
+   "porque": "Es del aviso fijo de fotos que no se pudieron subir, que tapaba el pie del turno en el portal (Housekeeping y Portal); los guiones K3 lo usan como preparación, no lo ejercen. Cerrado."
+  },
+  {
+   "id": "INC-145",
+   "porque": "Rojos intermitentes de sesión del colaborador de prueba en la regresión (REQ-K3c y REQ-K3c-vista c, d e i): es entorno de pruebas, no del producto. Abierto."
+  },
+  {
+   "id": "INC-150",
+   "porque": "Es de la purga de movimientos de prueba (fábrica, L-147 y L-148), que no reconocía propiedades por «name»; la clasificación de la copia (CU-K3-2.9) ya miraba los dos nombres. Cerrado."
+  },
+  {
+   "id": "INC-156",
+   "porque": "Es de la creación de la cuenta «zz-verif-pruebas» (Identidad, CU-U-7.3); K3 solo la deja fuera de la copia y del corte (CU-K3-2.10). Cerrado."
+  },
+  {
+   "id": "DT-39",
+   "porque": "Es de la migración de esquema en cada conexión (Servidor, RT-19); K3 solo la sufre en sus pasadas. Programada."
+  },
+  {
+   "id": "DA-36",
+   "porque": "Es de los puntos de control con QR y el respaldo por foto (REQ-PC1-2, módulo PC1); sus fotos seguirían las reglas de copia y corte, pero no está construido."
+  },
+  {
+   "id": "DA-49",
+   "porque": "Reinicio de los módulos para dejar el sistema limpio; conserva la configuración de la cuenta, incluida la conexión a Drive, y no toca K3. Pospuesta."
+  },
+  {
+   "id": "REQ-PC1-2",
+   "porque": "La foto de respaldo de un punto de control sería otro archivo que sigue la copia y el corte (RT-11); es de PC1, entregado a Desarrollo, no construido."
+  },
+  {
+   "id": "REQ-INV2-7",
+   "porque": "Foto al cierre por ubicación: dice que seguiría la regla de K3, pero está descartado y reemplazado por REQ-INV2-7-1 y REQ-INV2-7-2 (Inventario)."
+  },
+  {
+   "id": "bolsa: Retención de datos TRA/SIRE (M2)",
+   "porque": "Decisión pendiente (15-oct, M-489): retención sin plazo de los datos TRA/SIRE; se define al redactar el REQ de M2 (Ley 1581 y norma de Migración). No es del corte de fotos."
+  },
+  {
+   "id": "bolsa: Copia a Drive de guías, documentos y planos",
+   "porque": "Es la decisión que decide si CU-K3-2.8 entra al alcance; sin id en la bolsa, se llevará al próximo cruce de K3."
+  }
+ ]
+}

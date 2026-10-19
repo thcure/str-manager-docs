@@ -1,0 +1,2099 @@
+{
+ "modulo": "INC1",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "api/expediente/index.php (443 líneas, leído completo: fuente principal del expediente, la huella, la línea de tiempo, la constancia y el corte)",
+  "api/col/index.php (1966 líneas, leído por tickets: _colMergeEvidencias, _colMergeExpedientes, INC-141, lectura del colaborador, estados abierto y escalado, cierre del PUT)",
+  "str-m1-housekeeping.html (7341 líneas, leído por funciones de incidentes: reportar, resolver, escalar, evidencia, anulación, expediente, lista del turno)",
+  "docs/claude/housekeeping.md, housekeeping-2.md y servidor-php.md (por «ticket», «incidente», «evidencia», «expediente»)",
+  "inc1-fuentes.json: 8 REQ, 12 DA, 4 de la bolsa, 10 INC, 2 DT, módulos, relaciones (REL-19, REL-20, REL-31), actores y reglas del mapa",
+  "interno/seguimiento.json, lo-que-viene.json y mensajes.json (solo para el resumen de REQ-INC1-1 y REQ-INC1-2 y los avisos M-199 y M-213: los documentos de criterios de los REQ no estuvieron entre las fuentes)",
+  "guiones-e2e.json: 50 guiones; ninguno ejerce un caso de uso de Incidentes (INC-141 e INC-120-c12 cuelgan de CU-HK-11.5 y CU-HK-11.1)",
+  "interno/linea-base/esquema.json, sistema.json y HK, CAL, INV, FL, U, POR (para espejar los flujos con sus REL-n y ver qué ya está en Housekeeping)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "El expediente del incidente: paquete con los originales de la evidencia sin alterar, sus huellas, el resumen imprimible y la línea de tiempo, con constancia de cada generación y el nombre del huésped solo si se pide.",
+   "La evidencia como prueba: original intacto, huella, fecha de captura y hora de recepción del sistema, registro que solo crece, anulación con motivo, y lo que el corte mensual deja de ella.",
+   "El incidente como objeto propio: su ligadura al turno, la propiedad y la reserva (sin datos personales), la hora de sus cambios de estado y lo que le falta fuera del turno.",
+   "Por construir, de REQ-INC1-1: la lista del operador, el artículo afectado, la decisión (baja, reponer, comprar, sin acción) y el cierre.",
+   "Por construir, de REQ-INC1-2 (DA-35): los reclamos al huésped y a la plataforma, con pasos y plazos por canal, expediente, cierre con montos y el permiso «reclamos».",
+   "Por construir, de REQ-MI1 y DA-21: el mantenimiento programado y la reparación nacida de un incidente, su paso al turno y su cierre como realizado."
+  ],
+  "fuera": [
+   "Reportar un incidente desde el turno, verlo, resolverlo o escalarlo, anular evidencia y pedir el expediente desde la pantalla: ya están en Housekeeping (CAP-HK-4); aquí solo se enlazan por entradas y salidas.",
+   "La cola de subida del teléfono y la insignia de copia en Drive de la evidencia (Housekeeping, CU-HK-3.2 a CU-HK-3.5).",
+   "La copia a Drive y el corte mensual (Copia a Drive y retención): aquí solo se cuenta lo que el expediente ve de ellos.",
+   "Los límites de lectura y de escritura del colaborador sobre incidentes (CU-HK-11.1, CU-HK-11.2 y CU-HK-11.5).",
+   "La programación de eventos en el Calendario, las categorías de Flujos y el calendario del colaborador (CU-CAL-1.1 a 1.3, CU-FL-5.6, CU-POR-1.5): aquí solo el lado del mantenimiento.",
+   "El cargo al colaborador por daños (DA-12, pospuesta) queda como fuera de alcance mientras no se retome."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18. Lo construido (el expediente y la evidencia como prueba, y el registro del incidente) se comprobó leyendo api/expediente, api/col y la página de Housekeeping; lo definido por construir (incidentes internos, reclamos, mantenimiento) sale de las decisiones, el plan y el mapa, porque los documentos de criterios de REQ-INC1-1, REQ-INC1-2 y REQ-MI1 no estuvieron entre las fuentes: esos casos de uso quedan con confianza baja y Diseño debe confirmarlos. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido. Hoy no existe un módulo de Incidentes ni de Mantenimiento en el menú: el incidente vive dentro del turno de Housekeeping. Ningún guion e2e ejerce un caso de uso de este módulo. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Los casos de uso de módulos vecinos sin línea base (Copia a Drive) usan ids provisionales; los de HK, CAL, INV, FL y U usan ids reales y varios de sus pares están por agregar en esos archivos. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-INC1-1",
+   "nombre": "Expediente del incidente",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Armar, a pedido del administrador o del operador, el expediente de un incidente para Airbnb o la aseguradora: los originales de la evidencia sin alterar, sus huellas, un resumen imprimible y la línea de tiempo, dejando constancia de cada vez que se genera."
+  },
+  {
+   "id": "CAP-INC1-2",
+   "nombre": "Evidencia como prueba",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Guardar las fotos y los videos de un incidente como prueba: original sin tocar con su huella, la fecha de captura y la hora de recepción del sistema, un registro que solo crece y una anulación con motivo que nunca borra."
+  },
+  {
+   "id": "CAP-INC1-3",
+   "nombre": "Registro y gestión del incidente",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Qué es un incidente más allá de lo que se reporta en el turno: a qué turno, propiedad y reserva pertenece, cómo cambia de estado y lo que el operador decide hacer con él. Por construir: la lista propia, el artículo afectado, la decisión y el cierre (REQ-INC1-1)."
+  },
+  {
+   "id": "CAP-INC1-4",
+   "nombre": "Mantenimiento",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "El mantenimiento como actividad de soporte (preventivo con periodicidad, o reparación correctiva nacida de un incidente): llevar el evento al turno del colaborador, darlo por realizado al ejecutar su flujo y verlo desde su módulo. Por construir (REQ-MI1, DA-21)."
+  },
+  {
+   "id": "CAP-INC1-5",
+   "nombre": "Reclamos al huésped y a la plataforma",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Reclamar el daño que causó un huésped siguiendo los pasos y plazos de cada canal, con el expediente del incidente como prueba, el cierre con montos y un permiso propio para verlos. Por construir (REQ-INC1-2, DA-35)."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-INC1-1.1",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Armar el expediente de un incidente con los originales de su evidencia sin alterar, las huellas, la línea de tiempo y un resumen imprimible",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo entran los originales de la evidencia vigente; la anulada queda en el resumen y no en el paquete.",
+    "Un incidente sin evidencia también genera expediente (resumen y línea de tiempo) aunque Housekeeping no ofrece el botón en ese caso."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.5",
+     "dato": "pedido del expediente de un incidente, con la marca de incluir o no el nombre del huésped",
+     "rel": "REL-20"
+    },
+    {
+     "de": "CU-K3-3.3",
+     "dato": "evidencia de un incidente eliminada en el corte: su contenido traído de Drive, o la nota «Eliminado en el corte del …» con su huella",
+     "rel": "REL-19"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INC1-5.5",
+     "dato": "expediente del incidente como pieza del reclamo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con tres fotos y un video ya subidos",
+     "cuando": "el operador pide el expediente",
+     "entonces": "recibe un paquete con los cuatro originales tal como se subieron, el listado de huellas, el resumen imprimible y la línea de tiempo, con el nombre del archivo según el día en hora de Colombia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente con una evidencia anulada",
+     "cuando": "se arma el expediente",
+     "entonces": "el original anulado no entra al paquete, pero el resumen lo muestra tachado con la fecha de anulación, quién la anuló y el motivo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una evidencia cuyo archivo no está en el servidor ni en el registro del corte",
+     "cuando": "se arma el expediente",
+     "entonces": "el resumen dice «Archivo no encontrado en el servidor» en esa fila y el resto del expediente se entrega"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-7",
+    "RT-10"
+   ],
+   "pendientes": [
+    "INC-85",
+    "INC-86"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}"
+    ],
+    "colecciones": [
+     "tickets",
+     "reservas",
+     "propiedades",
+     "turnos"
+    ],
+    "notas": "api/expediente/index.php: ZIP armado en el temporal del sistema (ZipArchive) con evidencia/NN-<uuid>.<ext> byte a byte, SHA256SUMS.txt, expediente.json y expediente.html autocontenido que se guarda como PDF desde el navegador. Lee col_item (ticket, reserva, propiedad, turno) y las tablas usuario y cuenta para los nombres."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de api/expediente/index.php; INC-85 cerrado: verificado en producción el 7-oct con un incidente zz-verif- (39-veredicto-2)"
+   }
+  },
+  {
+   "id": "CU-INC1-1.2",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Recalcular la huella de cada original al armar el expediente y señalar la que no coincide con la registrada al subirla",
+   "declarado": "construido",
+   "limitantes": [
+    "El expediente avisa la diferencia pero no la corrige ni bloquea la entrega."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una evidencia cuyo archivo no ha cambiado desde que se subió",
+     "cuando": "se arma el expediente",
+     "entonces": "el listado de huellas trae la recalculada y el resumen dice «Original incluido · huella verificada»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un archivo del servidor distinto al que se registró",
+     "cuando": "se arma el expediente",
+     "entonces": "el listado marca la línea «DIFIERE del registrado», el resumen muestra la huella registrada y la calculada, y el expediente se entrega igual"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una evidencia anulada o sin archivo",
+     "cuando": "se arma el expediente",
+     "entonces": "no se recalcula nada y el resumen muestra solo la huella registrada"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/expediente/{ticketId}"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "hash_file(sha256) sobre el archivo de api/uploads/ (o el temporal traído de Drive); línea «# DIFIERE del registrado <huella>» en SHA256SUMS.txt."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php (bucle de evidencias)"
+   }
+  },
+  {
+   "id": "CU-INC1-1.3",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dejar constancia en el incidente de cada expediente generado (cuándo, quién, con o sin nombre y cuántos archivos) antes de entregarlo",
+   "declarado": "construido",
+   "limitantes": [
+    "La constancia se anota antes de la descarga: si la descarga falla después, queda el registro de un expediente que el operador no recibió."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador que descarga el expediente de un incidente",
+     "cuando": "el sistema arma el paquete",
+     "entonces": "antes de entregarlo anota en el incidente la hora del sistema, quién lo pidió, si llevó el nombre del huésped y cuántos archivos, y luego lo entrega"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un fallo al anotar la constancia",
+     "cuando": "se pide el expediente",
+     "entonces": "no se entrega nada y el operador ve «No se pudo registrar el expediente en el incidente»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un incidente con expedientes ya generados",
+     "cuando": "un colaborador guarda el incidente desde su teléfono",
+     "entonces": "las constancias siguen intactas: solo crecen y lo que mande un colaborador se descarta"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-7",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}",
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Transacción con FOR UPDATE que agrega a ticket.expedientes[] {id exp_…, en, por, conNombre, archivos}; _colMergeExpedientes en api/col descarta lo que mande un colaborador y nunca quita."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php y de _colMergeExpedientes en api/col/index.php"
+   }
+  },
+  {
+   "id": "CU-INC1-1.4",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mostrar solo el resumen del expediente, sin armar el paquete ni dejar constancia",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con evidencia",
+     "cuando": "el operador pide solo el resumen",
+     "entonces": "ve en pantalla el resumen imprimible con la línea de tiempo marcada «vista previa (no registrada)» y el incidente no anota ninguna constancia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente sin evidencia",
+     "cuando": "el operador pide el resumen",
+     "entonces": "el resumen dice «Sin evidencias» y trae los datos del incidente y de la reserva"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}?solo=html"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Parámetro solo=html; responde la página sin ZIP y sin tocar ticket.expedientes[]."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php (rama soloHtml)"
+   }
+  },
+  {
+   "id": "CU-INC1-1.5",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Incluir el nombre del huésped en el expediente solo cuando se pide, y dejar constancia de que se incluyó",
+   "declarado": "construido",
+   "limitantes": [
+    "Con el nombre pedido y un turno sin reserva, el campo del nombre sale vacío pero presente; por confirmar si es lo esperado (DT-29).",
+    "Cualquier administrador u operador puede pedir el nombre: no hay un permiso aparte para ello."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente de un turno con reserva y el expediente pedido sin marcar el nombre",
+     "cuando": "se arma",
+     "entonces": "el expediente trae el código de la reserva, el canal y las fechas, pero no el nombre del huésped"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el mismo incidente con «Incluir nombre del huésped» marcado",
+     "cuando": "se arma",
+     "entonces": "el expediente trae el nombre, la línea de tiempo dice «con nombre del huésped» y la constancia queda marcada «con nombre»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un incidente de un turno sin reserva y el nombre pedido",
+     "cuando": "se arma",
+     "entonces": "no hay nombre que incluir y el campo sale vacío"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [
+    "DT-29"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}?nombre=1"
+    ],
+    "colecciones": [
+     "tickets",
+     "reservas"
+    ],
+    "notas": "El nombre sale de la reserva (huespedNombre o guestName) solo con ?nombre=1; el incidente guarda solo el id de la reserva (resId)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php (conNombre) y de la ventana «Expediente del incidente» de la página"
+   }
+  },
+  {
+   "id": "CU-INC1-1.6",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Incluir en el expediente la evidencia que el corte mensual ya quitó del servidor: traerla de Drive si hay copia, o decir en qué corte se eliminó",
+   "declarado": "construido",
+   "limitantes": [
+    "La regla «la evidencia no se borra» quedó sin efecto por DA-32 punto 7: el corte quita toda la evidencia, abierta o no; lo que sobrevive es el registro con la huella y, si hay Drive, la copia.",
+    "Si el Drive del negocio no responde, la evidencia con copia no se puede incluir hasta pedir el expediente de nuevo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-K3-1.3",
+     "dato": "evidencia eliminada en el corte, con su fecha de corte, su huella y su copia en Drive",
+     "rel": "REL-19"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una evidencia ya borrada del servidor por el corte y con copia en el Drive del negocio",
+     "cuando": "se arma el expediente",
+     "entonces": "la evidencia entra al paquete como las demás, con su huella recalculada, y el resumen dice que la copia se trajo de Drive"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una evidencia borrada por el corte y sin copia",
+     "cuando": "se arma el expediente",
+     "entonces": "no entra al paquete, el resumen dice «Eliminado en el corte del <fecha>» y se conserva la huella registrada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una evidencia con copia que Google no entrega en ese momento",
+     "cuando": "se arma el expediente",
+     "entonces": "se trata como sin archivo: el resumen dice en qué corte se eliminó y que tiene copia que no se pudo traer ahora"
+    }
+   ],
+   "origen": [
+    "REQ-K3-3",
+    "DA-32",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-8",
+    "RT-9",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}",
+     "/api/archivo"
+    ],
+    "colecciones": [
+     "tickets",
+     "drive_copia"
+    ],
+    "notas": "_expDesdeCorte: consulta drive_copia (borrado_en, corte, con_copia, drive_id), baja la copia a un temporal con _driveDescargarA y lo borra al terminar. Desde L-125."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php (_expDesdeCorte) y de servidor-php.md; no se probó con un Drive real"
+   }
+  },
+  {
+   "id": "CU-INC1-1.7",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar el expediente solo al administrador y al operador, y solo de un incidente de su propio negocio",
+   "declarado": "construido",
+   "limitantes": [
+    "Un incidente dado de baja responde «Incidente no encontrado» (INC-86, cerrado, no era fallo)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador o un operador con sesión",
+     "cuando": "pide el expediente de un incidente de su negocio",
+     "entonces": "lo recibe"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador con sesión",
+     "cuando": "pide un expediente, aunque conozca el identificador",
+     "entonces": "el sistema responde sin permiso y no entrega nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un identificador mal formado, inexistente, dado de baja o de otro negocio",
+     "cuando": "se pide el expediente",
+     "entonces": "el sistema lo rechaza («Id de incidente inválido» o «Incidente no encontrado») sin entregar nada"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-86"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Roles admin, operador y superadmin; la cuenta sale del token; el id pasa por una lista blanca antes de tocar el disco; solo GET."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php (guardas de rol, método e identificador)"
+   }
+  },
+  {
+   "id": "CU-INC1-1.8",
+   "capacidad": "CAP-INC1-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Armar la línea de tiempo del incidente: registro, fotos tomadas y recibidas, anulaciones, escalamiento, resolución y generación del expediente",
+   "declarado": "parcial",
+   "limitantes": [
+    "La hora del escalamiento no existe: nada la escribe (CU-INC1-3.2).",
+    "La línea de tiempo lista solo la generación que se está armando, no las anteriores (DT-29).",
+    "Los textos «Video 3 tomada/recibida» concuerdan mal en género (DT-29)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con dos fotos, ya resuelto",
+     "cuando": "se arma el expediente",
+     "entonces": "la línea de tiempo lista en orden de hora de Colombia: registro y quién lo hizo, cada foto tomada y recibida, la resolución con su nota y la generación del expediente"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto anulada",
+     "cuando": "se arma la línea de tiempo",
+     "entonces": "se suma el evento «anulada por <persona> · motivo»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un incidente escalado",
+     "cuando": "se arma la línea de tiempo",
+     "entonces": "aparece «Incidente escalado» sin fecha, al final y antes de la generación, porque el sistema nunca guardó cuándo se escaló"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-10"
+   ],
+   "pendientes": [
+    "DT-29"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/expediente/{ticketId}"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Lee ticket.escaladoEn, que ningún código de la página ni de api/col escribe; la fecha EXIF se toma como hora de Colombia."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de api/expediente/index.php y búsqueda de escaladoEn en todo el código recibido: solo se lee"
+   }
+  },
+  {
+   "id": "CU-INC1-2.1",
+   "capacidad": "CAP-INC1-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Guardar cada foto o video de evidencia tal como llegó, con su huella de integridad, la fecha de captura que trae el archivo, la hora de recepción del sistema y quién la registró",
+   "declarado": "construido",
+   "limitantes": [
+    "Un video sin duración legible queda con 0 s en vez de vacío (DT-28).",
+    "Tope por incidente: 20 fotos y 2 videos; el video espera wifi salvo que se pida con datos.",
+    "La subida misma (cálculo de la huella, lectura de la fecha de captura, copia reducida) no estuvo entre las fuentes: se levantó desde el registro que la página guarda y desde el mapa técnico."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.1",
+     "dato": "evidencia (fotos y videos) que acompaña al incidente reportado, subida desde la cola del teléfono"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-4.2",
+     "dato": "fecha de captura, hora de recepción, huella y original de cada evidencia, para verlos en el incidente"
+    },
+    {
+     "a": "CU-PG-6.1",
+     "dato": "incidente con evidencia y costo del daño, para proponer el cargo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con una foto tomada con el teléfono",
+     "cuando": "la foto sube",
+     "entonces": "el sistema guarda el original sin reducir, su huella, la fecha de captura que traiga la foto, la hora en que la recibió y el nombre de quien la subió, y una copia reducida solo para verla rápido"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una foto que no trae fecha de captura",
+     "cuando": "sube",
+     "entonces": "«Tomada» usa la hora del teléfono y «Recibida» la hora del sistema"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un video cuya duración no se puede leer",
+     "cuando": "sube",
+     "entonces": "se registra con 0 s en vez de vacío y el panel muestra «0 s»"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1",
+    "DA-25"
+   ],
+   "reglas": [
+    "RT-7",
+    "RT-10"
+   ],
+   "pendientes": [
+    "DT-28"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/upload",
+     "/api/archivo"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "La cola sube con clave ticket:<id>; _tkEvidenciaSubidaDeCola agrega a ticket.evidencias[] lo que responde la subida (url, urlMin, bytes, mime, sha256, exif {fechaCaptura, equipo, orientacion, gps}, recibidoEn, duracionSeg) más atDispositivo y por. Archivos en api/uploads/<cuenta>/{evidencia,video}/<ticketId>/<uuid>.<ext>."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de la página (cola y registro de evidencia), de housekeeping.md y del expediente; api/upload no estuvo entre las fuentes"
+   }
+  },
+  {
+   "id": "CU-INC1-2.2",
+   "capacidad": "CAP-INC1-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mantener la evidencia de un incidente como un registro que solo crece: no se quita ni se reescribe, aunque llegue una copia vieja del teléfono",
+   "declarado": "construido",
+   "limitantes": [
+    "El sistema acepta que un administrador u operador dé de baja el incidente completo, con su evidencia, por la interfaz de datos: la pantalla no lo ofrece pero el servidor no lo impide, y contradice «la evidencia nunca se borra» (por confirmar con Desarrollo).",
+    "La huella, la hora de recepción, la fecha de captura y el enlace de una evidencia nueva los manda el teléfono y el sistema no los contrasta con la subida; solo recalcula la huella al armar el expediente."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con tres evidencias en el sistema",
+     "cuando": "un teléfono con una copia vieja guarda el incidente con solo dos",
+     "entonces": "siguen las tres evidencias y se suman las nuevas que traiga el teléfono"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador que sube una evidencia nueva a su incidente",
+     "cuando": "el sistema la recibe",
+     "entonces": "queda a su nombre y nunca llega anulada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una petición que pide quitar una evidencia o vaciar la lista",
+     "cuando": "el sistema la recibe",
+     "entonces": "se ignora: la evidencia no se quita, solo se anula (CU-INC1-2.3)"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-7",
+    "RT-10",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "_colMergeEvidencias (api/col/index.php): parte de la copia del servidor leída con FOR UPDATE y agrega solo ids nuevos; fija por = quien escribe cuando es colaborador y limpia anuladaEn, anuladaPor y motivoAnulacion en lo nuevo. Los casos de esta regla viven en tests/permisos-col.test.js (unitarios, según el mapa técnico)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _colMergeEvidencias y del PUT de tickets en api/col/index.php; el borrado por deletedIds se vio en el cierre del PUT, que solo prohíbe borrar movimientos y pendientes"
+   }
+  },
+  {
+   "id": "CU-INC1-2.3",
+   "capacidad": "CAP-INC1-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Registrar la anulación de una evidencia con la hora y el autor que fija el sistema, solo si la pide un administrador u operador, una sola vez y con motivo",
+   "declarado": "construido",
+   "limitantes": [
+    "Anular necesita conexión: sin ella no se anula ni se muestra como anulada (INC-91, cerrado)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.4",
+     "dato": "pedido de anular una evidencia, con su motivo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una evidencia vigente de un incidente",
+     "cuando": "el operador la anula escribiendo el motivo",
+     "entonces": "el sistema la marca anulada con su propia hora y el nombre del operador, guarda el motivo (hasta 300 caracteres) y la evidencia sigue en el registro"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "intenta anular una evidencia",
+     "entonces": "el sistema ignora la anulación y la evidencia sigue vigente"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una anulación sin motivo o sobre una evidencia ya anulada",
+     "cuando": "llega al sistema",
+     "entonces": "no cambia nada"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-7",
+    "RT-10",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-91"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "_colMergeEvidencias con $puedeAnular = rol distinto de colaborador; anuladaEn y anuladaPor los pone el servidor; la página solo pinta «Anulada» si la respuesta trae la anulación (_tkAnulacionConfirmada)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _colMergeEvidencias y de _tkConfirmarAnular"
+   }
+  },
+  {
+   "id": "CU-INC1-3.1",
+   "capacidad": "CAP-INC1-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Ligar cada incidente al turno y la propiedad donde se reportó y a la reserva de ese turno, guardando solo el identificador de la reserva",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [
+    {
+     "de": "CU-HK-4.1",
+     "dato": "incidente reportado en el turno, con su tipo, descripción, zona y quien lo reportó"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un turno que tiene reserva",
+     "cuando": "se reporta un incidente",
+     "entonces": "el incidente queda ligado al turno, a la propiedad y a la reserva, sin nombre ni documento del huésped; la pantalla muestra solo el código de la reserva"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un teléfono que reporta el incidente sin reserva y un turno que ya la tiene en el sistema",
+     "cuando": "el sistema lo guarda",
+     "entonces": "completa la reserva desde el turno guardado"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un turno manual sin reserva",
+     "cuando": "se reporta un incidente",
+     "entonces": "el incidente queda sin reserva"
+    }
+   ],
+   "origen": [
+    "REQ-S2.1",
+    "REQ-S2"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets",
+     "turnos"
+    ],
+    "notas": "_crearTicket pone resId = turno.resId; en api/col, si resId viene vacío se toma del turno guardado (JSON_EXTRACT). Los incidentes viejos con foto en base64 (campo foto) se siguen mostrando."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _crearTicket y del PUT de tickets en api/col/index.php"
+   }
+  },
+  {
+   "id": "CU-INC1-3.2",
+   "capacidad": "CAP-INC1-3",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Sellar con la hora del sistema el registro, la resolución y el escalamiento de un incidente, y quién lo hizo",
+   "declarado": "parcial",
+   "limitantes": [
+    "La hora del escalamiento no se guarda (la línea de tiempo del expediente la espera y no la encuentra).",
+    "No se guarda quién resolvió ni quién escaló; solo quién registró el incidente.",
+    "Sin sesión, las horas son las del teléfono hasta que el incidente se envía."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.3",
+     "dato": "incidente resuelto en sitio o escalado desde el turno"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente abierto",
+     "cuando": "se resuelve en sitio con una nota",
+     "entonces": "queda «resuelto en sitio» con la hora del sistema y la nota"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente que se reporta con sesión iniciada",
+     "cuando": "se guarda",
+     "entonces": "su hora de registro es la del sistema y se conserva aparte la del teléfono"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un incidente abierto",
+     "cuando": "se escala",
+     "entonces": "pasa a «escalado» sin hora y sin saber quién lo escaló"
+    }
+   ],
+   "origen": [
+    "REQ-S2",
+    "REQ-INC1-1"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "INC-44: _saveTickets con stamps [creadoEn] y [resueltoEn] (centinela __server__ resuelto por el PUT); _escalarTicket guarda sin sello. Falta escaladoEn, resueltoPor y escaladoPor."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _crearTicket, _doResolverTicket y _escalarTicket; ningún código escribe escaladoEn"
+   }
+  },
+  {
+   "id": "CU-INC1-3.3",
+   "capacidad": "CAP-INC1-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver todos los incidentes del negocio en un solo lugar, con su propiedad, tipo, estado y antigüedad, y abrir cualquiera",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy un incidente solo se ve dentro del panel del turno donde se reportó; la lista de turnos apenas muestra cuántos incidentes abiertos tiene cada turno. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "El Tablero lee los incidentes abiertos y escalados, pero no los lista ni los abre (T-16, en la bolsa)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.1",
+     "dato": "incidentes reportados en los turnos"
+    },
+    {
+     "de": "CU-HK-4.3",
+     "dato": "incidentes resueltos o escalados desde el turno"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INC1-4.4",
+     "dato": "incidente de avería abierto o escalado, para programar su reparación"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "incidentes de dos propiedades, uno abierto y uno resuelto",
+     "cuando": "el operador abre el módulo de incidentes",
+     "entonces": "ve ambos en una lista con propiedad, tipo, estado y cuándo se reportaron, y puede filtrarla por propiedad y por estado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente de la lista",
+     "cuando": "el operador lo abre",
+     "entonces": "ve su descripción, su evidencia, sus constancias de expediente y lo que se decidió"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "intenta entrar al módulo de incidentes",
+     "entonces": "no entra: sus incidentes los ve solo dentro de su turno"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-1",
+    "DA-29"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Sin código en el sistema: el menú no tiene módulo de Incidentes ni de Mantenimiento (el panel de Mantenimiento del shell eran maquetas y ya no está) y Housekeeping solo muestra el incidente dentro del turno. La lectura existe: GET /api/col/tickets."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, el menú del shell y el servidor: ningún módulo ni lista de incidentes; solo _renderIncidentesTurno y el chip de la lista de turnos"
+   }
+  },
+  {
+   "id": "CU-INC1-3.4",
+   "capacidad": "CAP-INC1-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Indicar a qué artículo del inventario afectó el incidente",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-1) pero sin construir; el incidente de hoy no tiene campo de artículo. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-1.1",
+     "dato": "artículos activos del catálogo, para elegir el afectado por el incidente"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INC1-3.5",
+     "dato": "artículo afectado por el incidente, para decidir qué se hace con él"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente de avería",
+     "cuando": "el operador elige del catálogo el artículo afectado, por ejemplo una lámpara",
+     "entonces": "el incidente queda ligado a ese artículo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente que no afecta ningún artículo, como una plaga",
+     "cuando": "el operador lo gestiona",
+     "entonces": "se guarda sin artículo"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-1",
+    "DA-29"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "tickets",
+     "inv-articulos"
+    ],
+    "notas": "Sin código en el sistema: el menú no tiene módulo de Incidentes ni de Mantenimiento (el panel de Mantenimiento del shell eran maquetas y ya no está) y Housekeeping solo muestra el incidente dentro del turno."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-3.5",
+   "capacidad": "CAP-INC1-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Decidir qué se hace con el artículo afectado: dar de baja, reponer, comprar o no hacer nada",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-1) pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "La alerta de reposición y la lista de compra (CU-INV-10.2) tampoco existen todavía.",
+    "Por confirmar con Diseño si «dar de baja» es un ajuste de existencia (CU-INV-3.2) o desactivar el artículo (CU-INV-1.2)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-3.4",
+     "dato": "artículo afectado por el incidente"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INV-3.2",
+     "dato": "baja del artículo afectado como ajuste de existencia, con el incidente como motivo"
+    },
+    {
+     "a": "CU-INV-10.2",
+     "dato": "artículo a reponer o comprar, para la alerta de reposición y la lista de compra"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente con artículo afectado que no tiene arreglo",
+     "cuando": "el operador decide darlo de baja",
+     "entonces": "el inventario registra el ajuste de ese artículo con el incidente como motivo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un artículo que hay que reponer o comprar",
+     "cuando": "el operador decide reponer o comprar",
+     "entonces": "el artículo entra a la lista de reposición o de compra"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un incidente que no requiere acción sobre el artículo",
+     "cuando": "el operador decide «sin acción»",
+     "entonces": "la decisión queda registrada y no se mueve el inventario"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-1",
+    "DA-29"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "tickets",
+     "inv-movimientos"
+    ],
+    "notas": "Sin código en el sistema: el menú no tiene módulo de Incidentes ni de Mantenimiento (el panel de Mantenimiento del shell eran maquetas y ya no está) y Housekeeping solo muestra el incidente dentro del turno."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-3.6",
+   "capacidad": "CAP-INC1-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cerrar un incidente escalado dejando una nota de cómo terminó",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy un incidente escalado no tiene salida: los botones de resolver y escalar solo aparecen mientras está abierto y nada en el sistema pone el estado «cerrado», aunque el expediente y el borrado de turnos lo reconocen. Un escalado sigue contando como activo para el Tablero y para la lectura del colaborador. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.3",
+     "dato": "incidente escalado, a la espera de quien lo atiende"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente escalado",
+     "cuando": "el operador lo cierra con una nota de cómo terminó",
+     "entonces": "pasa a «cerrado» con la hora del sistema y deja de contar como activo"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "intenta cerrar el incidente de otra persona",
+     "entonces": "el sistema no se lo permite"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-1"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/col/tickets"
+    ],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "El estado «cerrado» existe como etiqueta (expediente, _puedeEliminarTurno) pero ningún código lo escribe; _colTicketAbierto trata abierto y escalado como activos."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _renderIncidentesTurno (acciones solo con estado abierto), _escalarTicket y api/col; búsqueda del estado cerrado en todo el código recibido"
+   }
+  },
+  {
+   "id": "CU-INC1-4.1",
+   "capacidad": "CAP-INC1-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Llevar el evento de mantenimiento al turno del colaborador de esa propiedad el día del evento, con su flujo asignado",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-MI1-2 y REQ-MI1-3) pero sin construir: el Calendario no tiene eventos de mantenimiento (CU-CAL-1.1) ni el turno los propone (CU-HK-1.10). «Entregado» significa pasado a Desarrollo, no construido.",
+    "Los criterios de REQ-MI1 no estuvieron entre las fuentes: los escenarios salen de DA-21 y de los casos de uso vecinos y Diseño debe confirmarlos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-CAL-1.1",
+     "dato": "evento de mantenimiento programado, con su responsable, su repetición y su flujo, para llevarlo al turno del colaborador",
+     "rel": "REL-31"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-1.10",
+     "dato": "evento de mantenimiento del día y la propiedad del turno, con su flujo, para proponerlo al turno"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un evento mensual de mantenimiento en la propiedad A con su flujo y un turno en A ese día",
+     "cuando": "llega el día del evento",
+     "entonces": "el sistema entrega el evento al turno para proponerlo al operador"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un evento de mantenimiento en un día sin turno en esa propiedad",
+     "cuando": "llega el día del evento",
+     "entonces": "el evento queda en el calendario con su responsable y el operador lo asigna a mano"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un evento sin flujo asignado",
+     "cuando": "llega el día del evento",
+     "entonces": "se entrega al turno sin flujo y el operador decide qué hacer"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-2",
+    "REQ-MI1-3",
+    "DA-21"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código: no hay eventos de mantenimiento en el Calendario ni propuesta en el turno (búsqueda en las páginas recibidas)."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-4.2",
+   "capacidad": "CAP-INC1-4",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Dar por realizado el evento de mantenimiento cuando se ejecuta su flujo en el turno, o crear el registro ya realizado si el turno ejecutó el flujo sin evento",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-MI1-3) pero sin construir: no existe la marca de «realizado» (CU-HK-1.10, que lo describe del lado del turno). Los criterios no estuvieron entre las fuentes y Diseño debe confirmar los escenarios.",
+    "Por confirmar con Diseño qué pasa con la siguiente ocurrencia de un evento recurrente."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-1.10",
+     "dato": "flujo del evento ejecutado en el turno, para darlo por realizado"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un evento de mantenimiento propuesto al turno y aceptado",
+     "cuando": "el colaborador ejecuta el flujo del evento",
+     "entonces": "el evento queda «realizado» con su fecha"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno que llama un flujo de mantenimiento sin evento asociado",
+     "cuando": "se ejecuta el flujo",
+     "entonces": "se crea el registro del evento ya como «realizado»"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-3",
+    "DA-21"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-4.3",
+   "capacidad": "CAP-INC1-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en Mantenimiento los flujos de la categoría Mantenimiento y abrir su edición en Flujos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-MI1-1) pero sin construir: no hay módulo de Mantenimiento y ningún flujo puede marcarse todavía con esa categoría (CU-FL-5.6).",
+    "DA-21 deja abierto qué muestra Mantenimiento del flujo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-FL-5.6",
+     "dato": "flujos de categoría Mantenimiento, para verlos y llamarlos desde el módulo de Mantenimiento"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo marcado con la categoría del sistema «Mantenimiento»",
+     "cuando": "el operador abre Mantenimiento",
+     "entonces": "lo ve en la lista y, al editarlo, se abre Flujos con ese flujo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ningún flujo con esa categoría",
+     "cuando": "el operador abre Mantenimiento",
+     "entonces": "el módulo lo dice y ofrece ir a Flujos"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-1",
+    "REQ-F11-7",
+    "DA-21"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Sin código: el menú no tiene módulo de Mantenimiento."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-4.4",
+   "capacidad": "CAP-INC1-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Programar una reparación a partir de un incidente de avería, como actividad de soporte de clase «reparación»",
+   "declarado": "no-construido",
+   "limitantes": [
+    "DA-21 nombra la reparación correctiva «desde un ticket» pero ningún REQ la detalla: por confirmar con Diseño si entra en REQ-MI1 o en REQ-S3. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-3.3",
+     "dato": "incidente de avería abierto o escalado, para programar su reparación"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-CAL-1.1",
+     "dato": "reparación a programar en la propiedad, con el incidente de origen"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente de avería abierto o escalado",
+     "cuando": "el operador programa su reparación con fecha y responsable",
+     "entonces": "la reparación queda ligada al incidente y aparece en el calendario de la propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una reparación ya realizada",
+     "cuando": "el operador revisa el incidente de origen",
+     "entonces": "puede cerrarlo con la nota de cómo terminó (CU-INC1-3.6)"
+    }
+   ],
+   "origen": [
+    "DA-21",
+    "REQ-S3",
+    "REQ-MI1-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.1",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Abrir un reclamo por daños a partir de un incidente de tipo «Daño por huésped», con el canal de la reserva",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2, DA-35 decidida) pero sin construir; el incidente solo tiene el tipo «Daño por huésped». Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "Los incidentes internos y los reclamos son cosas distintas (DA-29): el reclamo es contra el huésped o la plataforma."
+   ],
+   "entradas": [
+    {
+     "de": "CU-HK-4.1",
+     "dato": "incidente de tipo «Daño por huésped», con su reserva y su evidencia"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-INC1-5.2",
+     "dato": "canal y fechas de la reserva, para saber qué pasos y plazo aplican"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un incidente de daño por huésped de una reserva de Airbnb",
+     "cuando": "el operador abre el reclamo",
+     "entonces": "el reclamo queda ligado al incidente y a la reserva, con el canal Airbnb y sus pasos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un incidente de daño por huésped de una reserva de otro canal",
+     "cuando": "el operador abre el reclamo",
+     "entonces": "el reclamo toma los pasos y el plazo de ese canal"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35",
+    "DA-29"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "tickets",
+     "reservas"
+    ],
+    "notas": "Sin código en el sistema: el menú no tiene módulo de Incidentes ni de Mantenimiento (el panel de Mantenimiento del shell eran maquetas y ya no está) y Housekeeping solo muestra el incidente dentro del turno."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.2",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mostrar los pasos y el plazo del reclamo según el canal (Airbnb: 14 días o antes del siguiente check-in)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2) pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "Los plazos de Airbnb vienen de una fuente secundaria: se confirman en su centro de ayuda antes de un caso real (M-213).",
+    "Por confirmar con Diseño si «14 días o antes del siguiente check-in» significa lo que ocurra primero."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-5.1",
+     "dato": "canal y fechas de la reserva del reclamo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo de una reserva de Airbnb",
+     "cuando": "se abre",
+     "entonces": "el reclamo muestra los pasos del canal y su fecha límite, con la regla «14 días o antes del siguiente check-in»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un reclamo de otro canal",
+     "cuando": "se abre",
+     "entonces": "muestra los pasos y el plazo propios de ese canal"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.3",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Avanzar el reclamo marcando cada paso del canal como hecho y ver el que sigue",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2) pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "Por confirmar con Diseño si un plazo vencido bloquea el avance o solo avisa."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo de Airbnb con sus pasos",
+     "cuando": "el operador marca el primer paso como hecho",
+     "entonces": "el reclamo muestra el paso siguiente y deja la fecha y quién lo marcó"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un reclamo con el plazo vencido",
+     "cuando": "el operador intenta avanzarlo",
+     "entonces": "el reclamo avisa que el plazo venció"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.4",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Editar el plazo de cada canal cuando la plataforma lo cambie",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2: plazos editables por canal) pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "Por confirmar con Diseño quién edita (administrador u operador) y si el reclamo abierto conserva su plazo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el plazo de Airbnb confirmado distinto en su centro de ayuda",
+     "cuando": "el administrador lo edita",
+     "entonces": "los reclamos nuevos usan el plazo nuevo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un reclamo ya abierto",
+     "cuando": "se edita el plazo del canal",
+     "entonces": "el reclamo abierto conserva el plazo con que se abrió"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.5",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Armar el expediente del reclamo con la evidencia del incidente y los datos de la reserva",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2) pero sin construir; hoy el expediente del incidente existe (CU-INC1-1.1) pero no está ligado a ningún reclamo. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INC1-1.1",
+     "dato": "expediente del incidente como pieza del reclamo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo ligado a un incidente con evidencia",
+     "cuando": "el operador arma el expediente del reclamo",
+     "entonces": "obtiene el paquete con los originales, las huellas y la línea de tiempo del incidente para presentarlo a la plataforma"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la plataforma que pide el nombre del huésped",
+     "cuando": "el operador lo incluye",
+     "entonces": "el expediente lo lleva y queda constancia de que se incluyó"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-10"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [
+     "tickets"
+    ],
+    "notas": "Sin código propio; reutiliza api/expediente."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.6",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Avisar con dos días de anticipación que el plazo del reclamo está por vencer",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2, aviso a 2 días en DA-35) pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "Los avisos por mensaje dependen del módulo de comunicaciones (M6), que no existe; por confirmar con Diseño por dónde sale el aviso."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo abierto cuyo plazo vence en dos días",
+     "cuando": "llega ese momento",
+     "entonces": "el sistema avisa al operador que el plazo está por vencer"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un reclamo ya cerrado",
+     "cuando": "llega ese momento",
+     "entonces": "no avisa"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.7",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cerrar el reclamo con su resultado y los montos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2, DA-35: cierre con montos) pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "Por confirmar con Diseño qué montos se registran (reclamado, aprobado, recuperado)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo presentado a la plataforma",
+     "cuando": "el operador lo cierra con el resultado y los montos",
+     "entonces": "el reclamo queda cerrado con los montos y la fecha"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un reclamo que la plataforma rechaza",
+     "cuando": "el operador lo cierra",
+     "entonces": "queda cerrado sin monto recuperado y con el motivo"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [
+    "RT-7"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.8",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mostrar los montos de un reclamo solo al administrador y al operador con el permiso «reclamos»",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido y entregado a Desarrollo (REQ-INC1-2) pero sin construir; el permiso «reclamos» no existe entre los permisos del operador (CU-U-2.3). Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "El servidor decide quién ve los montos; la pantalla solo los oculta."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.3",
+     "dato": "permiso «reclamos» del operador"
+    },
+    {
+     "de": "CU-U-2.6",
+     "dato": "rol de la sesión y permisos efectivos del operador, para decidir qué montos entregar"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador sin el permiso «reclamos»",
+     "cuando": "abre un reclamo cerrado",
+     "entonces": "ve el reclamo sin montos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con el permiso «reclamos»",
+     "cuando": "abre el mismo reclamo",
+     "entonces": "ve los montos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "pide un reclamo",
+     "entonces": "el sistema no se lo entrega"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [
+    "RT-6",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.9",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Preparar el mensaje del reclamo con la plantilla del canal",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido en el plan de REQ-INC1-2 («plantilla Airbnb (AirCover): reglas por canal, plazos, mensajes, pagos») pero sin construir. Entregado a Desarrollo (pasado a construir), no construido. Los criterios del REQ no estuvieron entre las fuentes leídas: los escenarios salen de las decisiones, del plan y del mapa, y Diseño debe confirmarlos.",
+    "El envío por WhatsApp o correo es del módulo de comunicaciones (M6), que no existe."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un reclamo de Airbnb",
+     "cuando": "el operador pide el mensaje",
+     "entonces": "obtiene el texto base de la plantilla de la plataforma con los datos del incidente, listo para ajustar y enviar"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un reclamo de otro canal",
+     "cuando": "el operador pide el mensaje",
+     "entonces": "obtiene el texto base propio de ese canal"
+    }
+   ],
+   "origen": [
+    "REQ-INC1-2",
+    "DA-35"
+   ],
+   "reglas": [
+    "RT-6"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en la página de Housekeeping, en el menú y en el servidor de colecciones: no existe lo que este caso de uso pide"
+   }
+  },
+  {
+   "id": "CU-INC1-5.10",
+   "capacidad": "CAP-INC1-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cobrar al colaborador el daño que causó o el incidente que no reportó",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-12 está pospuesta: no se construye por ahora y se define después; vuelve al alcance si se retoma.",
+    "Antes de construirlo hay que validarlo con abogado o contador (prestación de servicios, art. 149 CST); REQ-INC1-2 no depende de esto."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un daño causado por un colaborador, con su evidencia",
+     "cuando": "el operador pide el cargo",
+     "entonces": "el colaborador lo acepta u objeta desde su aplicación y solo lo aceptado se descuenta"
+    }
+   ],
+   "origen": [
+    "DA-12",
+    "REQ-INC1-2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Sin código."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de DA-12 y de la decisión del 10-oct; sin rastro en el código"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-89",
+   "porque": "Es del botón «Eliminar turno» de Housekeeping (un turno con incidentes abiertos no se elimina); lo ejerce CU-HK-1.7. Cerrado."
+  },
+  {
+   "id": "INC-109",
+   "porque": "Es del menú del shell (el operador veía el Dashboard); no es función de Incidentes. Cerrado."
+  },
+  {
+   "id": "INC-120",
+   "porque": "Lectura acotada del colaborador (turnos, reservas, incidentes); la ejercen CU-HK-11.1 y CU-HK-11.2 y el guion INC-120-c12; Incidentes no tiene un caso de uso propio de lectura. Cerrado."
+  },
+  {
+   "id": "INC-133",
+   "porque": "Es de la cola de subida del teléfono (una foto se perdía por una carrera); la ejerce CU-HK-3.2, aunque afectaba también a la evidencia de incidentes. Cerrado."
+  },
+  {
+   "id": "INC-141",
+   "porque": "Reescritura de incidentes ajenos por un colaborador; la ejerce CU-HK-11.5 y el guion INC-141. Incidentes no repite la regla. Cerrado."
+  },
+  {
+   "id": "INC-142",
+   "porque": "Del aviso «Huésped aún en la unidad» y de la autorresolución del checkout tardío en modo colaborador (CU-HK-5.3 y CU-HK-4.3); es del turno y no de un caso de uso de Incidentes. Abierto."
+  },
+  {
+   "id": "INC-149",
+   "porque": "Intermitencia de carga de Housekeeping en el guion INC-131 b; es de la regresión, no de un caso de uso. Cerrado."
+  },
+  {
+   "id": "DA-22",
+   "porque": "Decidió el consumo de inventario y que la auditoría se programa como evento de inventario (CU-INV-12.2 y CU-CAL-1.1); Incidentes solo aparece como vecino. Decidida."
+  },
+  {
+   "id": "DA-23",
+   "porque": "Autoriza al verificador a crear datos de prueba zz-verif- en producción, entre ellos incidentes y evidencias; es de la fábrica, no del producto. Decidida."
+  },
+  {
+   "id": "DA-40",
+   "porque": "El colaborador ve en su calendario los eventos de mantenimiento e inventario donde es responsable (REQ-MI1-4): lo recogen CU-CAL-1.3 y CU-POR-1.5; Incidentes no tiene un caso de uso propio. Decidida."
+  },
+  {
+   "id": "DA-45",
+   "porque": "Tres capas de lo que ve el colaborador; la ejercen CU-HK-11.1 y CU-HK-11.2. Decidida."
+  },
+  {
+   "id": "DA-46",
+   "porque": "Un colaborador reescribe solo los incidentes que creó; la ejerce CU-HK-11.5. Decidida."
+  },
+  {
+   "id": "DA-49",
+   "porque": "Reinicio del sistema (incidentes, tickets, evidencia y expedientes incluidos); pospuesta y recogida como fuera de alcance en CU-HK-10.8 y CU-INV-8.5. Pospuesta."
+  },
+  {
+   "id": "REQ-MI1-4",
+   "porque": "El colaborador ve sus eventos de mantenimiento en su calendario: lo recogen CU-CAL-1.3 y CU-POR-1.5; Incidentes no tiene un caso de uso propio. Entregado a Desarrollo."
+  }
+ ]
+}

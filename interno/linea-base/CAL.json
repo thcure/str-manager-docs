@@ -1,7 +1,7 @@
 {
  "modulo": "CAL",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 3,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-calendario.html (3635 líneas, leída por funciones: línea de tiempo, filtros, vista Hoy, panel de reserva, formulario, cancelar y reactivar, selección por arrastre y en varias propiedades, carril de operación, importación de la pantalla, chips de estado)",
@@ -12,7 +12,18 @@
   "cal-guiones.json y guiones-e2e.json: solo INC-127 c ejerce el Calendario; se leyeron INC-127, REQ-SH-2 e INC-120-c3 para descartar los demás",
   "interno/linea-base/esquema.json, INV.json, HK.json, PR.json, POR.json, U.json y FL.json (estilo y flujos con ids reales)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-820) y Chat Desarrollo (M-821)",
+   "que": "Peso: esenciales 2, 4, 5, 6, 7, 8 y 9; necesarias 1 y 3. 1.1–1.3 con los criterios de REQ-MI1. T-29 (canal caído). INC-170 a INC-174 e INC-115 atados. Confianza de 6.x y 8.x a alta."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Arquitecto",
+   "que": "Flujos con INC1, PG y K3 enlazados a sus ids reales; pares completados."
+  }
+ ],
  "alcance": {
   "dentro": [
    "La línea de tiempo de reservas y bloqueos por propiedad: ver, recorrer, filtrar, vista Hoy, canceladas y panel de cada reserva.",
@@ -42,63 +53,63 @@
    "id": "CAP-CAL-1",
    "nombre": "Eventos de mantenimiento e inventario",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Programar en el calendario de una propiedad eventos de mantenimiento e inventario, puntuales o recurrentes, con responsable y flujo, y llevarlos al turno y al portal del colaborador. Definido y entregado a Desarrollo; aún sin construir."
   },
   {
    "id": "CAP-CAL-2",
    "nombre": "Reservas directas y bloqueos",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Crear, editar, cancelar y reactivar reservas directas; bloquear noches de una o varias propiedades y eliminar los bloqueos manuales."
   },
   {
    "id": "CAP-CAL-3",
    "nombre": "Carril de operación (turnos)",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Ver bajo cada propiedad los turnos reales de Housekeeping, filtrarlos por estado y abrir su panel; ver el turno en el panel de la reserva."
   },
   {
    "id": "CAP-CAL-4",
    "nombre": "Datos de la reserva para la operación",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Nombre y cantidad de huéspedes, horas acordadas de llegada y salida, y los datos del huésped que vendrán del check-in en línea."
   },
   {
    "id": "CAP-CAL-5",
    "nombre": "Línea de tiempo y consulta",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Ver las reservas y bloqueos de todas las propiedades por fechas, recorrerlas, filtrarlas, abrir su panel y entrar solo con el rol que corresponde."
   },
   {
    "id": "CAP-CAL-6",
    "nombre": "Importación de los calendarios de canal",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Traer las reservas y bloqueos de Airbnb, Booking.com y otros canales cada 15 minutos o a pedido, sin pisar lo del operador, y dejar visible el estado de cada canal."
   },
   {
    "id": "CAP-CAL-7",
    "nombre": "Reglas de disponibilidad y estado",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Estado de una reserva por sus fechas, aviso de sobrecupo, evaluación de un rango de noches y aviso de cambio de huésped el mismo día."
   },
   {
    "id": "CAP-CAL-8",
    "nombre": "Entrega a Housekeeping y a Airbnb",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Dejar las reservas a Housekeeping para que arme los turnos y entregar a Airbnb las noches ocupadas."
   },
   {
    "id": "CAP-CAL-9",
    "nombre": "Reservas en el sistema",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Guardar las reservas en el sistema y traerlas a cada aparato, con lo que el sistema decide sobre cada rol."
   }
  ],
@@ -113,9 +124,7 @@
    "que": "Programar en una propiedad un evento de mantenimiento o de inventario, puntual o recurrente, con su responsable y un flujo asignado",
    "declarado": "no-construido",
    "limitantes": [
-    "Definido y entregado a Desarrollo (REQ-MI1-2), pero no existe en el Calendario: no hay forma de crear un evento ni de verlo. Lo único parecido son los motivos rápidos de un bloqueo («Mantenimiento», «Limpieza profunda»), que solo reservan las fechas y no llevan responsable, flujo ni repetición.",
-    "Un mantenimiento es una actividad de soporte, sin módulo aparte (DA-21); la auditoría de inventario se programa como evento y su frecuencia la decide el operador (DA-22).",
-    "La llamada a una sola actividad de otro flujo no existe hoy: se omite (REQ-MI1-2)."
+    "Evento = tipo (mantenimiento o inventario), propiedad, fecha, clase (rutina o reparación, solo mantenimiento), flujo opcional solo de su categoría, responsable (colaborador con capacidad o proveedor, con texto listo para copiar), estado (programado · en curso · realizado · cancelado) y recurrencia; sin flujo se cierra a mano con nota (REQ-MI1-2)."
    ],
    "entradas": [
     {
@@ -125,6 +134,10 @@
     {
      "de": "CU-FL-5.6",
      "dato": "flujos de categoría Mantenimiento o Inventario, para asignar a un evento del calendario"
+    },
+    {
+     "de": "CU-INC1-4.4",
+     "dato": "reparación a programar en la propiedad, con el incidente de origen"
     }
    ],
    "salidas": [
@@ -150,30 +163,30 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "una propiedad y un flujo de categoría Mantenimiento",
-     "cuando": "el operador programa un evento con fecha, responsable y repetición mensual",
-     "entonces": "el evento aparece en el calendario de la propiedad en cada fecha y llega a su responsable y al turno de ese día"
+     "dado": "un evento de mantenimiento de rutina en una propiedad, recurrente cada 30 días desde el 15-oct, creado el 10-oct",
+     "cuando": "el operador lo guarda",
+     "entonces": "quedan programadas las ocurrencias del 15-oct, 14-nov y 14-dic (hasta 90 días adelante), cada una con estado programado y que se cierra aparte"
     },
     {
      "id": "E2",
      "tipo": "alterno",
-     "dado": "una auditoría de inventario que el operador quiere repetir",
-     "cuando": "programa el evento de inventario y elige la frecuencia",
-     "entonces": "el evento se repite con esa frecuencia hasta que el operador la cambie"
+     "dado": "una serie recurrente con ocurrencias pasadas y futuras",
+     "cuando": "el operador cancela la serie",
+     "entonces": "solo se cancelan las ocurrencias futuras; editar una ocurrencia no cambia la serie"
     },
     {
      "id": "E3",
      "tipo": "excepcion",
-     "dado": "un evento sin flujo asignado",
-     "cuando": "llega el día del evento",
-     "entonces": "el evento se ve en el calendario con su responsable y el operador lo asigna a mano al turno"
+     "dado": "un colaborador con sesión",
+     "cuando": "intenta crear o editar un evento",
+     "entonces": "el sistema lo rechaza (403)"
     }
    ],
    "origen": [
-    "REQ-MI1-2",
-    "REQ-MI1-3",
     "DA-21",
-    "DA-22"
+    "DA-22",
+    "REQ-MI1-2",
+    "REQ-MI1-3"
    ],
    "reglas": [],
    "pendientes": [],
@@ -186,7 +199,7 @@
     "colecciones": [],
     "notas": "Sin código en la página: no hay evento, recurrencia ni flujo; solo SEL_CHIPS (motivos rápidos del bloqueo). «Entregado» en REQ-MI1-2 significa pasado a Desarrollo, no construido. Los criterios de REQ-MI1 no estaban entre las fuentes: los escenarios salen de DA-21/DA-22 y de CU-HK-1.10 y deben confirmarse con Diseño."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda en la página del Calendario: sin eventos de mantenimiento ni de inventario (solo los motivos rápidos del bloqueo)"
@@ -202,7 +215,8 @@
    "que": "Ver los eventos de mantenimiento e inventario en la línea de tiempo de la propiedad, junto a las reservas y los turnos",
    "declarado": "no-construido",
    "limitantes": [
-    "Entregado a Desarrollo (REQ-MI1-2) y sin construir: la línea de tiempo muestra reservas, bloqueos y turnos, nunca un evento."
+    "Entregado a Desarrollo (REQ-MI1-2) y sin construir: la línea de tiempo muestra reservas, bloqueos y turnos, nunca un evento.",
+    "La propuesta al turno de ese día en la misma propiedad (el que empieza más cerca) entra como flujo extra al aceptarla; al completarse, el evento queda realizado con la hora del servidor (REQ-MI1-3)."
    ],
    "entradas": [
     {
@@ -241,7 +255,7 @@
     "colecciones": [],
     "notas": "Sin código: render() solo pinta reservas, bloqueos y turnos del carril de operación."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura del render de la página: sin eventos de mantenimiento ni de inventario"
@@ -279,21 +293,15 @@
     {
      "id": "E1",
      "tipo": "principal",
-     "dado": "un evento con un colaborador responsable",
+     "dado": "un evento con un colaborador como responsable y un proveedor con su contacto",
      "cuando": "el colaborador abre su calendario en el portal",
-     "entonces": "ve ese evento y ningún evento de otras personas"
-    },
-    {
-     "id": "E2",
-     "tipo": "excepcion",
-     "dado": "un evento con un proveedor externo que tiene contacto",
-     "cuando": "el colaborador lo ve en su calendario",
-     "entonces": "no ve el contacto del proveedor"
+     "entonces": "ve solo sus eventos y nunca el contacto del proveedor (REQ-MI1-4)"
     }
    ],
    "origen": [
-    "REQ-MI1-4",
-    "DA-40"
+    "DA-40",
+    "REQ-MI1-2",
+    "REQ-MI1-4"
    ],
    "reglas": [],
    "pendientes": [],
@@ -306,7 +314,7 @@
     "colecciones": [],
     "notas": "Sin código: el portal no tiene calendario de eventos; hoy solo recibe turnos de Housekeeping."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Búsqueda en la página del Calendario y en las colecciones que lee: sin eventos que entregar"
@@ -1453,7 +1461,12 @@
     "Solo navega: no crea ni cambia nada del turno."
    ],
    "entradas": [],
-   "salidas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-2.11",
+     "dato": "enlace al turno elegido"
+    }
+   ],
    "escenarios": [
     {
      "id": "E1",
@@ -1496,7 +1509,8 @@
     "Lo que escribe el operador es el dato oficial que usan Housekeeping y el portal; lo que trae el canal queda aparte («del canal: …») y ninguno pisa al otro.",
     "Vacío queda vacío: el sistema no inventa un nombre ni una cantidad por defecto; la pantalla dice «Huésped por confirmar».",
     "El colaborador ve solo el nombre, las fechas y la cantidad de huéspedes, nunca teléfono, correo, montos ni notas (DA-27, DA-45); el recorte lo hace el sistema al entregar las reservas (CU-CAL-9.1).",
-    "Por confirmar con Desarrollo: el panel de la reserva muestra primero la cantidad con que nació la reserva (2 si el canal no la dio) y no la que el operador escribe después."
+    "Por confirmar con Desarrollo: el panel de la reserva muestra primero la cantidad con que nació la reserva (2 si el canal no la dio) y no la que el operador escribe después.",
+    "El panel muestra la cantidad que trae el canal (nace en 2) y no la que edita el operador (INC-173)."
    ],
    "entradas": [],
    "salidas": [
@@ -1536,7 +1550,9 @@
     "RT-4",
     "RT-6"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-173"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1632,7 +1648,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Por construir (REL-32): sin check-in en línea no hay formulario ni enlace por reserva, y hoy la reserva no guarda documento, nacionalidad ni acompañantes.",
-    "Los datos personales del huésped van solo en la base (RT-6): queda por decidir cómo se separan de la lista de reservas que lee el colaborador (DA-45)."
+    "Los datos personales del huésped van solo en la base (RT-6): queda por decidir cómo se separan de la lista de reservas que lee el colaborador (DA-45).",
+    "Frontera de datos personales (DA-45 capa 3, RT-6): al colaborador solo nombre, horas, cantidad de huéspedes, código y canal, de hoy o mañana; nunca teléfono, documento ni correo; la lista de huéspedes del check-in nunca le llega."
    ],
    "entradas": [
     {
@@ -2199,7 +2216,8 @@
     "Una reserva nueva nace con el nombre, el canal, el código, el enlace y los últimos 4 dígitos del teléfono que da el canal; sin cantidad de huéspedes y con total 0. Un evento sin identificador se ignora.",
     "No importa las cuentas de ensayo de restauración ni la de pruebas (L-131, L-150).",
     "La fecha de «hoy» del sistema es la UTC: entre las 19:00 y las 24:00 de Bogotá una salida de hoy pasa a finalizada y una entrada de hoy ausente ya no se cancela (INC-81, pospuesto por Carlos).",
-    "Un canal que se quita de la propiedad deja vivas sus reservas y bloqueos importados: nada los cancela ni los quita (por confirmar con Desarrollo)."
+    "Un canal que se quita de la propiedad deja vivas sus reservas y bloqueos importados: nada los cancela ni los quita (por confirmar con Desarrollo).",
+    "Al quitar un canal de una propiedad, sus reservas y bloqueos importados quedan vivos y los bloqueos siguen yendo a Airbnb (INC-171, falta la regla de producto)."
    ],
    "entradas": [
     {
@@ -2263,6 +2281,7 @@
     "RT-1"
    ],
    "pendientes": [
+    "INC-171",
     "INC-81"
    ],
    "pruebas": [],
@@ -2278,7 +2297,7 @@
     ],
     "notas": "api/sync-ical/index.php: X-Cron-Key (hPanel, RT-22) o JWT admin/operador; _syncIcalCuenta en transacción, icalDownload (10 s) y parseIcal de api/lib/ical.php (no leído: las reglas de lectura del calendario del canal quedan por confirmar); upsert por (icalFeedId, icalUid) y, si no, por (propId, checkIn, checkOut, tipo reserva); ical_sync_log con las últimas 200 corridas. La frecuencia de 15 minutos sale de REL-22, no del código."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de api/sync-ical/index.php completo; api/lib/ical.php y la programación del cron no estaban entre las fuentes"
@@ -2366,7 +2385,8 @@
    "limitantes": [
     "La línea «☁ sincronizado hh:mm · servidor hh:mm» dice la última traída de reservas y la última corrida del sistema; el aviso «⚠ N feeds sin respuesta» sale solo de la última importación hecha con el Calendario abierto (CU-CAL-6.8), no de la automática ni del botón.",
     "El estado de cada canal (última vez, reservas leídas, si falló) queda solo en el aparato desde el que se importó: otra persona, otro aparato y las corridas automáticas no lo dejan en la ficha de la propiedad (CU-PR-7.2).",
-    "Un canal que falla en una corrida automática no avisa a nadie: el sistema guarda el detalle de las últimas 200 corridas, pero la pantalla solo muestra su hora (por confirmar con Diseño si debe avisarse)."
+    "Un canal que falla en una corrida automática no avisa a nadie: el sistema guarda el detalle de las últimas 200 corridas, pero la pantalla solo muestra su hora (por confirmar con Diseño si debe avisarse).",
+    "Un canal caído debe avisar a admin y operador en el tablero, y el estado del canal debe quedar en el servidor, no en un aparato (T-29, riesgo de sobreventa)."
    ],
    "entradas": [
     {
@@ -2407,7 +2427,9 @@
     "REQ-C10"
    ],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "T-29"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -2421,7 +2443,7 @@
     ],
     "notas": "_pintarSyncLine, _renderColSyncChip, _renderIcalServerChip (solo lee .ultimo.at), _updateFeedWarnChip (lee prop.icals[].status), syncIcals escribe icals[].status/lastSync/events en PROP_KEY sin pasar por _persistCol; syncNow no actualiza el chip de canales. La corrida del sistema no escribe ese estado en la ficha."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de str-calendario.html (chips y syncIcals) y de api/sync-ical (ical_sync_log y /ultimo)"
@@ -2438,7 +2460,8 @@
    "limitantes": [
     "Una reserva se reconoce por el identificador del canal; si no, por el código de la reserva en la propiedad; el sistema además la busca por propiedad y fechas exactas sin mirar si la otra es directa o está cancelada (por confirmar con Desarrollo: puede adoptar una reserva directa o cancelada con las mismas fechas).",
     "Lo que escribió el operador (nombre y cantidad de huéspedes, horas acordadas, notas, precio) nunca se pisa; las fechas, el código y el enlace los actualiza el canal.",
-    "La importación con el Calendario abierto vuelve a poner además el canal y el nombre del canal; la del sistema solo completa lo que falta."
+    "La importación con el Calendario abierto vuelve a poner además el canal y el nombre del canal; la del sistema solo completa lo que falta.",
+    "La reserva se busca por propiedad y fechas sin excluir directas ni canceladas: puede adoptar una directa o cancelada que luego se cancela por ausencia (INC-172)."
    ],
    "entradas": [],
    "salidas": [
@@ -2469,7 +2492,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-172"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -2483,7 +2508,7 @@
     ],
     "notas": "syncIcals (existingIdx por icalUid o reservationCode+propId sin icalUid; spread ...ex) y _syncIcalCuenta (porUid, matchFechaStmt; $completar solo rellena campos nulos). INC-45 punto 2 (pull primero), INC-67 y INC-69 fuera del seguimiento actual."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de str-calendario.html: syncIcals y de api/sync-ical: _syncIcalCuenta"
@@ -2500,7 +2525,8 @@
    "limitantes": [
     "Solo lo hace la importación con el Calendario abierto (al abrirlo si pasaron más de 30 minutos, y cada 30 minutos mientras está abierto); la del sistema deja la reserva cancelada aunque el canal ya la traiga otra vez.",
     "Hasta que alguien abra el Calendario la reserva sigue cancelada: Housekeeping no le arma turno y su noche no se entrega a Airbnb como ocupada (por confirmar con Desarrollo).",
-    "Al restaurar, el estado vuelve a salir de las fechas y se borra la fecha de cancelación."
+    "Al restaurar, el estado vuelve a salir de las fechas y se borra la fecha de cancelación.",
+    "La importación automática no restaura una reserva de canal cancelada que el canal vuelve a traer: queda cancelada, sin turno y con la noche libre para Airbnb hasta que alguien abre el Calendario (INC-170, riesgo de sobreventa)."
    ],
    "entradas": [],
    "salidas": [
@@ -2531,7 +2557,9 @@
    "reglas": [
     "RT-5"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-170"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -2546,7 +2574,7 @@
     ],
     "notas": "syncIcals: en la rama de actualización hace delete canceladaEn y recalcula status; segundo pase de reparación (restoredStatus). _syncIcalCuenta: la rama de actualización no toca status ni canceladaEn."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de syncIcals (str-calendario.html) y _syncIcalCuenta (api/sync-ical): la rama de actualización del sistema no restaura"
@@ -2783,7 +2811,7 @@
     ],
     "notas": "syncIcals (init: setTimeout 800 ms si _shouldAutoSync; _scheduleAutoSync cada AUTO_SYNC_INTERVAL_MS = 30 min) lee cada feed por el proxy GET /ical?url= (DT-21, exige sesión admin/operador; el proxy no estaba entre las fuentes), fusiona con _mergeResLists tras el pull y guarda con saveRes."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de str-calendario.html: init, _shouldAutoSync, _scheduleAutoSync y syncIcals; el proxy de lectura y la lectura del calendario del canal no estaban entre las fuentes"
@@ -2800,7 +2828,8 @@
    "limitantes": [
     "Solo «cancelada» se guarda; los otros estados salen de las fechas y de la fecha de hoy del aparato: una reserva está «En curso» desde la medianoche del día de entrada y «Finalizada» desde la medianoche del día de salida, sin mirar la hora de entrada ni la de salida, tampoco la acordada con el huésped (INC-116, abierto).",
     "Los bloqueos usan otras palabras: Programado, Activo, Terminado y Cancelado.",
-    "El sistema, en cambio, da por finalizada una reserva solo cuando su salida es anterior a hoy en hora UTC (INC-81, pospuesto): el estado que ve el operador y el que guarda el sistema pueden diferir unas horas cada noche."
+    "El sistema, en cambio, da por finalizada una reserva solo cuando su salida es anterior a hoy en hora UTC (INC-81, pospuesto): el estado que ve el operador y el que guarda el sistema pueden diferir unas horas cada noche.",
+    "El estado de la reserva debe seguir la hora acordada cuando existe (DA-16, REQ-PR1-4 y PR1-5); INC-116 es un defecto, no la regla (Diseño, M-820)."
    ],
    "entradas": [],
    "salidas": [
@@ -3052,7 +3081,8 @@
    "limitantes": [
     "Solo para reservas con salida de hoy en adelante, y mira solo reservas vivas (ni bloqueos ni canceladas).",
     "El texto dice siempre «antes de las 3 PM», aunque la ficha de la propiedad o la hora acordada digan otra (por confirmar con Diseño y Desarrollo: es el mismo defecto que INC-115 en el detalle del turno de Housekeeping).",
-    "Es solo un aviso: la ventana del turno y su urgencia las calcula Housekeeping."
+    "Es solo un aviso: la ventana del turno y su urgencia las calcula Housekeeping.",
+    "El aviso dice siempre «antes de las 3 PM» (INC-115)."
    ],
    "entradas": [],
    "salidas": [],
@@ -3083,7 +3113,9 @@
     "REQ-C7"
    ],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-115"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -3196,7 +3228,7 @@
     ],
     "notas": "REL-03 es la colección reservas: el Calendario escribe (saveRes → _persistCol, importaciones) y str-m1-housekeeping.html la lee; no hay mensaje ni llamada entre los dos. Lo que Housekeeping hace con ellas queda en HK.json (CU-HK-1.2)."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de str-calendario.html (saveRes, _hkDatosRefrescar) y del mapa (REL-03, INC-71); el armado del turno no se leyó aquí"
@@ -3215,7 +3247,8 @@
     "Solo fechas: «No disponible» (y «Limpieza» el día de salida si la propiedad lo pide), sin nombre, precio ni datos del huésped.",
     "No devuelve a Airbnb lo que viene de Airbnb; sí entrega las reservas directas, los bloqueos manuales y las de otros canales: una reserva de Booking.com bloquea esas noches en Airbnb.",
     "Quedan fuera las canceladas y las finalizadas y lo que terminó hace más de un día; una reserva de Airbnb cancelada por error (CU-CAL-6.5) libera sus noches para el resto de los canales.",
-    "La lectura la hace Airbnb con el enlace secreto de la propiedad (CU-PR-7.5): el Calendario no controla cuándo."
+    "La lectura la hace Airbnb con el enlace secreto de la propiedad (CU-PR-7.5): el Calendario no controla cuándo.",
+    "Ver INC-170: una reserva de canal mal cancelada sale como noche libre hacia Airbnb."
    ],
    "entradas": [
     {
@@ -3289,7 +3322,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-170"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -3305,7 +3340,7 @@
     ],
     "notas": "STRApi.reservas.exportables / icsDe (_resExportables: ventana desde ayer, omite cancelada y status finalizada guardado, omite lo que viene de un feed de Airbnb o de un canal Airbnb cuyo feed se borró); el port PHP (api/lib/ical-export.php) y su ruta no estaban entre las fuentes y tests/ical-export.test.js debe decir lo mismo. El aviso en el formulario es _avisoExportAirbnb (REQ-P2.1)."
    },
-   "confianza": "media",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura de STRApi.reservas (_resExportables y _resIcsDe en str-api.js) y de _avisoExportAirbnb; el port PHP de la lectura pública no estaba entre las fuentes"
@@ -3324,7 +3359,8 @@
     "El sistema acepta bajas de reservas de cualquier administrador u operador sin mirar el tipo ni el estado: la regla de «no se borra, se cancela» la aplica la pantalla (CU-CAL-2.5, CU-CAL-2.7), no el sistema (RT-5).",
     "Al traer, lo que llega del sistema reemplaza la reserva del aparato; lo que solo existe en el aparato (aún sin subir) se conserva y las bajas del sistema se aplican al aparato. La primera vez trae 90 días hacia atrás; después, solo lo cambiado.",
     "La hora de cancelación de una reserva directa la fija el sistema (RT-7).",
-    "Las reservas son datos de huéspedes (RT-6): al colaborador el sistema le entrega solo lo de su turno de hoy o mañana con nombre y horas, y en su historial las reservas sin datos personales (DA-45)."
+    "Las reservas son datos de huéspedes (RT-6): al colaborador el sistema le entrega solo lo de su turno de hoy o mañana con nombre y horas, y en su historial las reservas sin datos personales (DA-45).",
+    "Menores (INC-174): sin conexión la hora de cancelación es la del aparato; el guardado reescribe la fuente de la hora acordada; un bloqueo muestra «COP»; mezcla de tuteo y voseo; el servidor acepta bajas de reservas para admin y operador (RT-5)."
    ],
    "entradas": [
     {
@@ -3439,16 +3475,17 @@
     "DA-45"
    ],
    "reglas": [
+    "RT-14",
+    "RT-21",
     "RT-4",
     "RT-5",
     "RT-6",
-    "RT-7",
-    "RT-14",
-    "RT-21"
+    "RT-7"
    ],
    "pendientes": [
-    "INC-94",
-    "INC-120"
+    "INC-120",
+    "INC-174",
+    "INC-94"
    ],
    "pruebas": [],
    "tecnica": {

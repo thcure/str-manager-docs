@@ -62,8 +62,9 @@ input[type=search]{width:min(320px,80vw)}
 .flota .l{padding:4px 0;border-top:1px solid var(--linea)} .flota .l:first-of-type{border-top:0}
 .flota .s{color:var(--acento);font-weight:700} .flota .e{color:var(--entra);font-weight:700} .flota .mas{color:var(--tenue);margin-top:4px}
 .diagrama .arista{cursor:help}
-#svgCtx line.cl{cursor:help;transition:stroke-opacity .15s} #svgCtx .cn{cursor:pointer;transition:opacity .15s} #svgCtx .cn.apagado{opacity:.22}
-#svgCtx.foco line.cl{stroke-opacity:.07} #svgCtx.foco line.cl.vivo{stroke-opacity:.95}
+#svgCtx line.cl{cursor:help;stroke-opacity:0;pointer-events:none;marker-end:none;transition:stroke-opacity .15s} #svgCtx .cn{cursor:pointer;transition:opacity .15s} #svgCtx .cn.apagado{opacity:.22}
+#svgCtx.foco line.cl{stroke-opacity:0} #svgCtx.foco line.cl.vivo{stroke-opacity:.95;pointer-events:stroke}
+#svgCtx.foco line.cl.vivo[data-dir="sale"]{marker-end:url(#cS)} #svgCtx.foco line.cl.vivo[data-dir="entra"]{marker-end:url(#cE)}
 #svgCtx .cn:hover rect:first-child,#svgCtx .cn:focus rect:first-child{stroke:var(--acento);stroke-width:2} .diagrama .cuenta{pointer-events:none}
 .relpanel{margin-top:10px;background:var(--hoja);border:1px solid var(--linea);border-radius:8px;padding:12px 14px}
 .relpanel h3{margin:0 0 6px;font-size:1rem} .relpanel .grupo{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
@@ -75,10 +76,10 @@ input[type=search]{width:min(320px,80vw)}
 .pestanas button{font:600 .85rem/1 var(--f-txt);padding:7px 12px;border-radius:6px;border:1px solid var(--linea);background:var(--hoja);color:var(--tinta);cursor:pointer}
 .pestanas button[aria-selected="true"]{background:var(--acento);border-color:var(--acento);color:var(--hoja)}
 .diagrama .capa{font:600 .72rem/1 var(--f-dat);letter-spacing:.06em;text-transform:uppercase;fill:var(--tenue)}
-.diagrama .arista{stroke:var(--tenue);stroke-opacity:.28;transition:stroke-opacity .15s}
+.diagrama .arista{stroke:var(--tenue);stroke-opacity:0;pointer-events:none;marker-end:none;transition:stroke-opacity .15s}
 .diagrama .cuenta{font:600 11px var(--f-dat);fill:var(--tinta);opacity:0}
-#svgCapas.foco .arista{stroke-opacity:.06}
-#svgCapas.foco .arista.sale{stroke:var(--acento);stroke-opacity:.95} #svgCapas.foco .arista.entra{stroke:var(--entra);stroke-opacity:.95}
+#svgCapas.foco .arista{stroke-opacity:0}
+#svgCapas.foco .arista.sale{stroke:var(--acento);stroke-opacity:.95;pointer-events:stroke;marker-end:url(#flS)} #svgCapas.foco .arista.entra{stroke:var(--entra);stroke-opacity:.95;pointer-events:stroke;marker-end:url(#flE)}
 #svgCapas.foco .cuenta.sale,#svgCapas.foco .cuenta.entra{opacity:1}
 .diagrama .nodo{cursor:pointer;transition:opacity .15s} .diagrama .nodo.apagado{opacity:.25}
 .diagrama .nodo:hover rect:first-child,.diagrama .nodo:focus rect:first-child{stroke-width:2.5}
@@ -337,7 +338,7 @@ function diagramaSistema(){
   const VIS = SEL ? new Set([...SEL, ...Object.keys(ar).flatMap((k) => k.split('>'))]) : null;
   $('#fRelDesc').textContent = descTipoRel(FILTRO_REL); panelRel(null);
   if (VISTA_DG === 'matriz') return matrizSistema(ar, VIS);
-  $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Al señalar un módulo o una flecha aparece de qué se trata cada relación; el detalle completo queda debajo del mapa. En el celular, el primer toque muestra y el segundo entra.';
+  $('#dgAyuda').textContent = 'Las flechas aparecen al pasar el puntero (o tocar) un módulo; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Al señalar un módulo o una flecha aparece de qué se trata cada relación; el detalle completo queda debajo del mapa. En el celular, el primer toque muestra y el segundo entra.';
   const capas = capasOrden(VIS);
   const W = 1000, filaH = 104, top = 26, nodoW = 128, nodoH = 56, H = top + capas.length * filaH, pos = {};
   capas.forEach(([t, ms], r) => {
@@ -371,8 +372,9 @@ function diagramaSistema(){
       <text x="${x - nodoW / 2 + 8}" y="${y + 8}" class="t2">${esc(corta(nMod(m), 19))}</text>${barra}</g>`; }));
   $('#dg').innerHTML = s + '</svg>';
   const svg = $('#svgCapas');
-  let activo = null, tactil = false;
+  let activo = null, tactil = false, tiempo = null;
   svg.addEventListener('pointerdown', (e) => { tactil = e.pointerType === 'touch'; }, true); svg.addEventListener('keydown', () => { tactil = false; }, true);
+  const quedarse = () => clearTimeout(tiempo), soltar = () => { quedarse(); tiempo = setTimeout(() => marcar(F_MOD && pos[F_MOD] ? F_MOD : null), 350); };
   const centro = (g) => { const b = g.getBoundingClientRect(); return [b.left + b.width / 2, b.bottom - 6]; };
   const marcar = (m, g) => { activo = m; svg.classList.toggle('foco', !!m); if (m) panelRel(m);
     if (m && g) { const [cx, cy] = centro(g); mostrarFlota(htmlFlotaModulo(m), cx, cy); } else if (!m) mostrarFlota(null);
@@ -382,17 +384,17 @@ function diagramaSistema(){
     svg.querySelectorAll('.nodo').forEach((g) => { const v = g.dataset.m === m || (!!m && [...svg.querySelectorAll('.arista')].some((a) => (a.dataset.o === m && a.dataset.d === g.dataset.m) || (a.dataset.d === m && a.dataset.o === g.dataset.m)));
       g.classList.toggle('apagado', !!m && !v); }); };
   svg.querySelectorAll('.nodo').forEach((g) => {
-    g.addEventListener('mouseenter', () => { if (!tactil) marcar(g.dataset.m, g); }); g.addEventListener('focus', () => { if (!tactil) marcar(g.dataset.m, g); });
-    g.addEventListener('mouseleave', () => { if (!tactil) marcar(null); });
+    g.addEventListener('mouseenter', () => { if (!tactil) { quedarse(); marcar(g.dataset.m, g); } }); g.addEventListener('focus', () => { if (!tactil) marcar(g.dataset.m, g); });
+    g.addEventListener('mouseleave', () => { if (!tactil) soltar(); });
     g.addEventListener('click', () => { if (tactil && activo !== g.dataset.m) { marcar(g.dataset.m, g); return; } if (D.modulos[g.dataset.m]) ir(g.dataset.m); });
     g.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && D.modulos[g.dataset.m]) { e.preventDefault(); ir(g.dataset.m); } }); });
   svg.querySelectorAll('.arista').forEach((a) => {
     const ver = (e) => mostrarFlota(htmlFlotaArista(a.dataset.o, a.dataset.d), e.clientX, e.clientY);
-    a.addEventListener('mousemove', (e) => { if (!tactil) ver(e); });
-    a.addEventListener('mouseleave', () => { if (!tactil) mostrarFlota(activo ? htmlFlotaModulo(activo) : null, ...(activo ? centro(svg.querySelector(`.nodo[data-m="${activo}"]`)) : [0, 0])); });
+    a.addEventListener('mousemove', (e) => { if (!tactil) { quedarse(); ver(e); } });
+    a.addEventListener('mouseleave', () => { if (!tactil) soltar(); });
     a.addEventListener('click', (e) => { e.stopPropagation(); ver(e); }); });
-  svg.addEventListener('click', (e) => { if (!e.target.closest('.nodo') && !e.target.closest('.arista')) marcar(null); });
-  if (F_MOD && pos[F_MOD]) { marcar(F_MOD); svg.querySelectorAll('.nodo').forEach((g) => g.addEventListener('mouseleave', () => { if (!tactil) marcar(F_MOD); })); }
+  svg.addEventListener('click', (e) => { if (!e.target.closest('.nodo') && !e.target.closest('.arista')) marcar(F_MOD && pos[F_MOD] ? F_MOD : null); });
+  if (F_MOD && pos[F_MOD]) marcar(F_MOD);
 }
 function matrizSistema(ar, VIS){
   $('#dgAyuda').textContent = 'Fila = módulo que entrega; columna = módulo que recibe; el número es cuántos flujos van de uno a otro. Más oscuro = más dependencia. Clic en un módulo para entrar.';
@@ -427,7 +429,7 @@ function vistaModulo(m){
        <label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
        <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que entrega</option><option value="entra">Solo lo que recibe</option><option value="-">Ninguna</option></select>
        <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select></div></div>
-     <p class="tenue" style="margin:0">Izquierda: quién lo usa. Centro: sus capacidades; los cuadritos son sus casos de uso, con el color de su estado. Derecha: los módulos con los que intercambia datos, por medio de las relaciones del mapa. Línea gris: el actor usa casos de uso de esa capacidad (más gruesa = más casos). Verde azulado: la capacidad entrega a ese módulo; naranja: recibe de él. Señala cualquier cosa para ver qué es; toca un módulo dos veces para ir a él.</p>
+     <p class="tenue" style="margin:0">Izquierda: quién lo usa. Centro: sus capacidades; los cuadritos son sus casos de uso, con el color de su estado. Derecha: los módulos con los que intercambia datos, por medio de las relaciones del mapa. Línea gris: el actor usa casos de uso de esa capacidad (más gruesa = más casos). Verde azulado: la capacidad entrega a ese módulo; naranja: recibe de él. Las líneas aparecen al señalar un elemento: señala cualquier cosa para ver qué es; toca un módulo dos veces para ir a él.</p>
      <div class="diagrama" id="dg"></div></section>
    <section class="sec"><div class="fila"><h2>Capacidades</h2><span class="tenue">Cada cuadro es un caso de uso: tócalo para abrirlo. El título filtra la lista.</span></div><div class="calor" id="calor"></div></section>
    <section class="sec"><div class="fila"><h2>Casos de uso</h2><div class="filtros">
@@ -527,7 +529,7 @@ function diagramaModulo(m){
     const xs = Object.values(cm).filter((x) => x.o === id);
     return `<h4>${esc(m)} ↔ ${esc(id)} · ${esc(corta(nMod(id), 30))}</h4>` + lim(xs.map((x) => `<div class="tenue" style="margin-top:4px">${esc(corta(capN(x.cap), 50))}</div>` + lineaRel(x)), 5, 'capacidades') + (D.modulos[id] ? '<div class="mas">Clic (o segundo toque) para ir al módulo.</div>' : '');
   };
-  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'o' && D.modulos[g.dataset.id] ? g.dataset.id : null);
+  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'o' && D.modulos[g.dataset.id] ? g.dataset.id : null, fA && fA !== '-' ? `.cn[data-k="a"][data-id="${fA}"]` : null);
   $('#cAct').onchange = $('#cDir').onchange = () => diagramaModulo(m);
   $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaModulo(m); };
 }
@@ -539,29 +541,31 @@ function lineaRel(x){
     return `<div class="l"><span class="${x.dir === 'sale' ? 's' : 'e'}">${x.dir === 'sale' ? '→' : '←'} ${esc(x.o)}</span> <b>${esc(r)}</b>: ${esc(corta(I ? I.dato : [...v.datos][0], 100))}<div class="tenue">${[...v.cus].join(', ')}${I && I.mec && !/^por precisar/.test(I.mec) ? (v.cus.size ? ' · ' : '') + esc(corta(I.mec, 80)) : ''}</div></div>`; }).join('');
 }
 /* Resaltado y tarjeta comunes a los dos contextos. Nodos: .cn[data-k=a|c|o][data-id]; líneas: line.cl con data-a, data-c, data-o. */
-function interactivo(svg, html, destino){
-  let activo = null, tactil = false;
+function interactivo(svg, html, destino, inicial){
+  let activo = null, tactil = false, tiempo = null;
+  const quedarse = () => clearTimeout(tiempo), soltar = () => { quedarse(); tiempo = setTimeout(() => marcar(null), 350); };
   svg.addEventListener('pointerdown', (e) => { tactil = e.pointerType === 'touch'; }, true);
   svg.addEventListener('keydown', () => { tactil = false; }, true);
   const lineas = [...svg.querySelectorAll('line.cl, path.cl')], nodos = [...svg.querySelectorAll('.cn')];
   const foco = (lit) => { svg.classList.toggle('foco', !!lit);
     lineas.forEach((l) => l.classList.toggle('vivo', !!lit && lit.l.has(l))); nodos.forEach((g) => g.classList.toggle('apagado', !!lit && !lit.n.has(g.dataset.k + ':' + g.dataset.id))); };
-  const marcar = (g) => { if (!g) { activo = null; foco(null); mostrarFlota(null); return; }
+  const marcar = (g, sinTarjeta) => { if (!g) { const b = inicial && svg.querySelector(inicial); mostrarFlota(null); if (b) return marcar(b, true); activo = null; foco(null); return; }
     const k = g.dataset.k, id = g.dataset.id;
     const l = new Set(lineas.filter((x) => x.dataset[k] === id)), n = new Set([k + ':' + id]);
     l.forEach((x) => ['a', 'c', 'o'].forEach((t) => { if (x.dataset[t]) n.add(t + ':' + x.dataset[t]); }));
-    activo = k + ':' + id; foco({l, n}); const b = g.getBoundingClientRect(); mostrarFlota(html(k, id), b.left + b.width / 2, b.bottom - 4); };
+    activo = k + ':' + id; foco({l, n}); if (sinTarjeta) return; const b = g.getBoundingClientRect(); mostrarFlota(html(k, id), b.left + b.width / 2, b.bottom - 4); };
   const marcarLinea = (ln, e) => { const n = new Set(['a', 'c', 'o'].filter((t) => ln.dataset[t]).map((t) => t + ':' + ln.dataset[t])); foco({l: new Set([ln]), n}); mostrarFlota(html(null, null, ln), e.clientX, e.clientY); };
   nodos.forEach((g) => {
-    g.addEventListener('mouseenter', () => { if (!tactil) marcar(g); }); g.addEventListener('focus', () => { if (!tactil) marcar(g); });
-    g.addEventListener('mouseleave', () => { if (!tactil) marcar(null); });
+    g.addEventListener('mouseenter', () => { if (!tactil) { quedarse(); marcar(g); } }); g.addEventListener('focus', () => { if (!tactil) marcar(g); });
+    g.addEventListener('mouseleave', () => { if (!tactil) soltar(); });
     g.addEventListener('click', (e) => { e.stopPropagation(); const key = g.dataset.k + ':' + g.dataset.id, dst = destino(g);
       if (dst && (!tactil || activo === key)) return ir(dst);
       marcar(g); });
     g.addEventListener('keydown', (e) => { const dst = destino(g); if (e.key === 'Enter' && dst) ir(dst); }); });
-  lineas.forEach((ln) => { ln.addEventListener('mousemove', (e) => { if (!tactil) marcarLinea(ln, e); }); ln.addEventListener('mouseleave', () => { if (!tactil) marcar(null); });
+  lineas.forEach((ln) => { ln.addEventListener('mousemove', (e) => { if (!tactil) { quedarse(); marcarLinea(ln, e); } }); ln.addEventListener('mouseleave', () => { if (!tactil) soltar(); });
     ln.addEventListener('click', (e) => { e.stopPropagation(); marcarLinea(ln, e); }); });
   svg.addEventListener('click', () => marcar(null));
+  marcar(null);
 }
 
 /* Contexto del sistema: personas → módulos (por capa) → sistemas externos */
@@ -583,7 +587,7 @@ function contextoSistema(){
     <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select>`;
   $('#cAct').value = CTX_ACT; $('#cDir').value = CTX_DIR; cablearFiltrosModulo();
   const fA = CTX_ACT, fD = CTX_DIR;
-  $('#dgAyuda').textContent = 'Izquierda: las personas que usan el STR. Centro: sus módulos por capa, con la barra de estado de sus casos de uso. Derecha: los sistemas externos. Línea gris: el actor usa casos de uso de ese módulo (más gruesa = más casos). Verde azulado: el STR entrega; naranja: recibe. Línea a la caja grande: la relación vale para todos los módulos. Señala cualquier cosa para ver qué es; toca un módulo dos veces para entrar.';
+  $('#dgAyuda').textContent = 'Izquierda: las personas que usan el STR. Centro: sus módulos por capa, con la barra de estado de sus casos de uso. Derecha: los sistemas externos. Línea gris: el actor usa casos de uso de ese módulo (más gruesa = más casos). Verde azulado: el STR entrega; naranja: recibe. Línea a la caja grande: la relación vale para todos los módulos. Las líneas aparecen al señalar un elemento: señala cualquier cosa para ver qué es; toca un módulo dos veces para entrar.';
   // relaciones con el exterior (del mapa)
   const cuenta = {}, rels = [];
   relsExt.forEach(([id, r]) => { const t = (D.relTipo || {})[id] || 'por-precisar'; cuenta[t] = (cuenta[t] || 0) + 1;
@@ -624,7 +628,7 @@ function contextoSistema(){
       let bx = cx1 - 165, b = ''; ESTADOS.forEach(([e2]) => { if (!pe[e2]) return; const w = 100 * pe[e2] / tot; b += `<rect x="${bx}" y="${y - 3}" width="${w}" height="7" fill="${COLOR_EST[e2]}" ${e2 === 'no-construido' ? 'fill-opacity=".35"' : ''}/>`; bx += w; });
       const pct = I && I.cobertura.simple != null ? I.cobertura.simple.toLocaleString('es-CO') + ' %' : (I ? 'fábrica' : '—');
       s += `<g class="cn" data-k="c" data-id="${m}" tabindex="0"><rect x="${cx0}" y="${y - filaM / 2}" width="${cx1 - cx0}" height="${filaM}" rx="5" fill="var(--hoja)" stroke="${l ? 'var(--linea)' : 'var(--noc)'}" ${soloPlan(m) ? 'stroke-dasharray="5 3"' : ''}/>
-        <text x="${cx0 + 10}" y="${y + 4}"><tspan style="font-weight:700">${m}</tspan> ${esc(corta(nMod(m), 22))}</text>${b}<text x="${cx1 - 8}" y="${y + 4}" text-anchor="end" class="t2">${pct}</text></g>`; }); });
+        <text x="${cx0 + 10}" y="${y + 4}"><tspan style="font-weight:700">${m}</tspan> ${esc(corta(nMod(m), 19))}</text>${b}<text x="${cx1 - 8}" y="${y + 4}" text-anchor="end" class="t2">${pct}</text></g>`; }); });
   // externos
   externos.forEach((e, i) => { const y = ya(i, externos.length); s += `<g class="cn" data-k="o" data-id="${e}" tabindex="0" ${fA && fA !== '-' && ext(fA) && e !== fA ? 'opacity=".35"' : ''}><rect x="${W - 210}" y="${y - 15}" width="190" height="30" rx="5" fill="var(--papel)" stroke="var(--noc)" stroke-dasharray="4 3"/><text x="${W - 200}" y="${y + 4}">${esc(ACT(e))}</text></g>`; });
   $('#dg').innerHTML = s + '</svg>';
@@ -647,7 +651,8 @@ function contextoSistema(){
       (Object.keys(acts).length ? '<div class="mas">Quién lo usa:</div><div class="l">' + Object.entries(acts).sort((x, y) => y[1] - x[1]).map(([a, n]) => `${esc(ACT(a))} <span class="tenue">${n}</span>`).join(' · ') + '</div>' : '') +
       (rs.length ? '<div class="mas">Con el exterior:</div>' + rs.map(lineaRelMapa).join('') : '') + (I ? '<div class="mas">Clic (o segundo toque) para entrar al módulo.</div>' : '');
   };
-  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'c' && D.modulos[g.dataset.id] ? g.dataset.id : null);
+  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'c' && D.modulos[g.dataset.id] ? g.dataset.id : null,
+    F_MOD ? `.cn[data-k="c"][data-id="${F_MOD}"]` : fA && fA !== '-' ? `.cn[data-id="${fA}"]` : null);
   $('#cAct').onchange = (e) => { CTX_ACT = e.target.value; contextoSistema(); };
   $('#cDir').onchange = (e) => { CTX_DIR = e.target.value; contextoSistema(); };
   $('#fRel').onchange = (e) => { guardarRel(e.target.value); contextoSistema(); };

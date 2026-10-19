@@ -1,7 +1,7 @@
 {
  "modulo": "API",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-api.js (versión p5c110, 1114 líneas): leído completo (cuota, pedido con renovación, subida, archivoUrl y descarga, colecciones con copia local y cola, sesión, funciones puras de horas, reservas, turnos, direcciones y fechas, permisos, documentos del proyecto, atajos de usuarios, invitación y exportación de calendario)",
@@ -11,7 +11,18 @@
   "interno/linea-base/esquema.json y los archivos ya levantados (K3, SH, U, HK, INV, INC1, CAL, FL, PR, KN, OP, PG, POR) para espejar los flujos con sus REL-n",
   "No leído: los tests de unidad de str-api.js (tests/*.test.js no vienen en la copia del código) y la parte de str-app-shell.html que define _strRenewApiSession y _descargarRespaldo"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-839)",
+   "que": "Pesos (esenciales CAP-1, 2 y 3; necesarias 4 y 5; CAP-6 de fábrica) y decisión b: los cálculos compartidos son capacidad técnica."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-840)",
+   "que": "INC-187 (cola que pierde envíos con error), INC-189 y INC-195 atados."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Hablar con el servidor desde cualquier pantalla con la sesión de la persona, renovándola una vez ante un rechazo",
@@ -35,42 +46,42 @@
    "id": "CAP-API-1",
    "nombre": "Hablar con el servidor con la sesión de la persona",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que cualquier pantalla pida cosas al servidor con la sesión de quien la usa, y que una sesión vencida se renueve sola una vez antes de rendirse."
   },
   {
    "id": "CAP-API-2",
    "nombre": "Colecciones con copia local",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Traer del servidor las colecciones de datos y enviarle los cambios, con una copia en el aparato, un solo envío a la vez por colección y una cola de reintento cuando no hay conexión."
   },
   {
    "id": "CAP-API-3",
    "nombre": "Subir y pedir archivos",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Subir fotos, guías y demás archivos, y pedirlos o descargarlos con la sesión de la persona, que un enlace normal no puede mandar."
   },
   {
    "id": "CAP-API-4",
    "nombre": "Cálculos compartidos de horas, reservas, turnos y fechas",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Una sola forma de calcular las horas y el valor de un turno, el estado y las noches de una reserva, la clase de un turno, la dirección de una propiedad y la fecha local, para que todas las pantallas digan lo mismo."
   },
   {
    "id": "CAP-API-5",
    "nombre": "Permisos a la vista en pantalla",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Decirle a cada pantalla si la persona puede una acción, para mostrarla u ocultarla (el servidor decide de verdad, RT-14)."
   },
   {
    "id": "CAP-API-6",
    "nombre": "Documentos del proyecto",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Leer, sin credenciales, los documentos del repositorio del proyecto para las pantallas internas."
   }
  ],
@@ -278,7 +289,9 @@
     "Cada cambio sale con la hora del aparato en el momento del envío, y esa hora decide los conflictos en el servidor (CU-SRV-1.2).",
     "Solo se envía lo que la pantalla entrega: la diferencia contra el último envío la calculan los módulos, no este cliente; enviar toda la copia (reenvío total) es posible y puede revivir un dato que otro dio de baja.",
     "Sin sesión, el envío no sale ni se encola: responde que no hay conexión.",
-    "Un envío vacío (sin cambios ni bajas) no llega al servidor."
+    "Un envío vacío (sin cambios ni bajas) no llega al servidor.",
+    "Un envío que el servidor rechaza con error (también sesión vencida o falla pasajera) no se encola y se pierde (INC-187, abierto, alto).",
+    "Un aparato desactualizado que reenvía toda su copia puede revivir lo que otro dio de baja; acotado a las siembras de tipos de propiedad y de ubicación (INC-189, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -336,7 +349,10 @@
     "RT-4",
     "RT-21"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-187",
+    "INC-189"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -368,7 +384,8 @@
     "Solo se encola el fallo de red de un envío ya intentado; el envío sin sesión no se encola (CU-API-2.2 E4).",
     "Al reenviar, descarta de la cola todo envío cuyo error trae respuesta del servidor: también el rechazo por sesión vencida y los fallos transitorios del servidor (500), sin haberlos enviado, de modo que esos cambios se pierden (leído en el código, no comprobado).",
     "Cada envío queda en la cola con la hora en que se intentó por primera vez, no con la de su reenvío.",
-    "Quién llama al reenvío y cuándo lo decide cada módulo."
+    "Quién llama al reenvío y cuándo lo decide cada módulo.",
+    "La cola de envíos pendientes descarta cualquier envío con error del servidor, también 401 y 5xx: es la vía por la que los errores de INC-128 perdían cambios (INC-187, abierto, alto)."
    ],
    "entradas": [
     {
@@ -412,7 +429,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-187"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -510,7 +529,8 @@
     "La subida no pasa por el pedido genérico: si el servidor la rechaza, el error lleva solo el mensaje, no los datos del rechazo.",
     "Acepta un archivo sin nombre (la cola de subida del teléfono guarda el archivo sin su nombre) y campos extra, como la duración de un video.",
     "La cola de subida del teléfono con sus fotos pendientes es de Housekeeping (CU-HK-3.2); aquí solo la subida de un archivo.",
-    "Los límites de tamaño y de tipo los decide el servidor (CU-SRV-4.1)."
+    "Los límites de tamaño y de tipo los decide el servidor (CU-SRV-4.1).",
+    "El error de la subida no trae el detalle del servidor, a diferencia de los demás pedidos (INC-195, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -553,7 +573,9 @@
    "reglas": [
     "RT-11"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-195"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -584,7 +606,8 @@
    "limitantes": [
     "Un enlace normal de imagen no puede mandar la sesión: el archivo se trae aparte y se muestra desde la memoria de la pestaña; no se guarda en el aparato.",
     "A diferencia del pedido genérico, no renueva la sesión ante un rechazo por sesión vencida: la imagen falla y se vuelve a pedir en la siguiente llamada (leído en el código, no comprobado).",
-    "Un archivo que ya no existe porque el corte de almacenamiento lo borró responde «eliminado en el corte»; el cliente no lo recuerda como definitivo ni deja de reintentarlo (DT-45)."
+    "Un archivo que ya no existe porque el corte de almacenamiento lo borró responde «eliminado en el corte»; el cliente no lo recuerda como definitivo ni deja de reintentarlo (DT-45).",
+    "Pedir un archivo no renueva la sesión ante el rechazo por sesión vencida, a diferencia de los demás pedidos, y el error no trae el detalle del servidor (INC-195, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -629,7 +652,8 @@
     "RT-1"
    ],
    "pendientes": [
-    "DT-45"
+    "DT-45",
+    "INC-195"
    ],
    "pruebas": [],
    "tecnica": {
@@ -721,7 +745,8 @@
     "Es la única implementación: Pagos la usa para el valor del turno y el saldo (CU-PG-1.1, CU-PG-2.1) y Housekeeping para mostrarlo (CU-HK-6.1).",
     "La tarifa se escoge por fecha (la anulada o reemplazada no cuenta), pero la política de horas (banco o reales) y la modalidad de pago se leen de la ficha de pago de hoy, no de la vigente en la fecha del turno: cambiarlas recalcula todos los turnos pasados (INC-181, abierto).",
     "Sin hora de fin o sin tarifa, el valor queda sin calcular y el turno figura en curso.",
-    "Un ajuste de horas hecho por el operador manda sobre la hora real; el apoyo toma sus horas planificadas de su propio registro o de un valor por defecto de 4."
+    "Un ajuste de horas hecho por el operador manda sobre la hora real; el apoyo toma sus horas planificadas de su propio registro o de un valor por defecto de 4.",
+    "Capacidad técnica (Diseño, M-839 b): los criterios de horas, reservas y turnos viven en PG, CAL, PR y HK; API no define reglas propias."
    ],
    "entradas": [],
    "salidas": [],
@@ -1073,6 +1098,10 @@
    "salidas": [
     {
      "a": "CU-SH-6.1",
+     "dato": "documentos del proyecto y su encabezado con la fecha del último commit"
+    },
+    {
+     "a": "CU-PRJ-2.1",
      "dato": "documentos del proyecto y su encabezado con la fecha del último commit"
     }
    ],

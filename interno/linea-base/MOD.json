@@ -1,0 +1,1424 @@
+{
+ "modulo": "MOD",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "modelo/api/index.php (251 líneas), config/acceso.php, carga.php, credenciales.php, lectura.php y secrets.example.php: leídos completos",
+  "modelo/api/.htaccess y modelo/sql/001_inicial.sql, 002_complemento.sql y 003_carga.sql: leídos",
+  ".github/workflows/modelo-sync.yml y modelo-espejo.yml, herramientas/modelo/sync.py, espejo.js, paquete.py (cabecera) y README.md, herramientas/pw/modelo-llamar.js y LEEME.md: leídos, no ejecutados",
+  "tests/e2e/REQ-MOD-6*.spec.js (6 guiones) y guiones-e2e.json: leídos; solo prueban salud y los rechazos sin clave",
+  "ADR-006, interno/lotes-modelo/LM-34.md, claude/marco/requerimientos-modelo-2026-10.md (documentos del proyecto), mapa-modulos.json y seguimiento.json (INC-123, INC-124, INC-152, DT-36, DT-37)",
+  "No leído: modelo/api/config/database.php (clase ModeloDb: conexión, migrar y schema_version) y modelo/secrets.php (secretos, no se leen); tests/*.test.js y tests/lib/port-*.js (no venían en la copia); el alojamiento (cron y cuentas)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Decir si el servicio está sano y qué versión de los documentos tiene cargada",
+   "Entrar por clave y por rol: el Arquitecto y cuatro roles con clave que vence",
+   "Registrar las claves de los roles (solo su resumen)",
+   "Cargar el paquete del proyecto por tablas, en una sola operación, y migrar la base",
+   "Leer una tabla, una fila, el estado y la exportación de los documentos",
+   "La carga automática desde Git, la comparación diaria y las llamadas a mano de la cola del Arquitecto"
+  ],
+  "fuera": [
+   "Mostrar los datos del modelo en las páginas del Grupo Proyecto por un proxy del STR (REQ-TB-6, B8): es de PRJ (CU-PRJ-3.7); aquí solo se cuenta la lectura que lo atiende",
+   "Los requerimientos REQ-MOD-1 a 5 y 7 a 10 (modelo de operación v2): no describen el servicio",
+   "Validar los documentos del proyecto y armar el paquete (validar.py y paquete.py): quedan citados dentro de CU-MOD-5.1 como parte del flujo",
+   "El servidor del STR (api/): es de SRV"
+  ],
+  "nota": "MOD es una API aparte en el sitio de la fábrica, con base de datos propia, que usan la cola del Arquitecto y los flujos de GitHub; ningún usuario del STR la usa y no toca datos del negocio. Todos sus casos de uso son de fábrica y no cuentan en la cobertura de producto. Los guiones de hoy solo prueban la salud y los rechazos sin clave: la carga, la lectura y el acceso por rol con clave valida no tienen prueba."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-MOD-1",
+   "nombre": "Salud y rastro del servicio",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Decir si el servicio está vivo, con su base y qué versión de los documentos tiene cargada; probar que una llamada llega; y dejar rastro de los fallos internos sin mostrar datos."
+  },
+  {
+   "id": "CAP-MOD-2",
+   "nombre": "Acceso por rol",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Decidir quién puede llamar a cada ruta del servicio: el Arquitecto con su clave propia y cuatro roles de menos poder con claves que vencen; y registrar esas claves."
+  },
+  {
+   "id": "CAP-MOD-3",
+   "nombre": "Lectura del modelo",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Leer lo cargado: una tabla o una fila, un resumen del estado y los documentos del proyecto rehechos igual que en Git."
+  },
+  {
+   "id": "CAP-MOD-4",
+   "nombre": "Migración y carga",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Dejar la base de datos del servicio al día y reemplazar su contenido, tabla por tabla y en una sola operación, con el paquete del proyecto."
+  },
+  {
+   "id": "CAP-MOD-5",
+   "nombre": "Quién llama al servicio",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Las tres formas en que el servicio se alimenta y se vigila: la carga automática desde Git, la comparación diaria contra Git y las llamadas a mano del Arquitecto desde su cola."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-MOD-1.1",
+   "capacidad": "CAP-MOD-1",
+   "actor": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "que": "Consultar la salud del servicio sin credenciales: si responde, si tiene base, qué versión de esquema usa y qué versión de los documentos tiene cargada y cuándo",
+   "declarado": "construido",
+   "limitantes": [
+    "Es pública: cualquiera puede ver que el servicio existe, si tiene base, su versión de esquema, la versión del programa que lo ejecuta y qué versión de los documentos tiene cargada (nunca quién la cargó).",
+    "Si la base falla, dice «sin base» pero no dice por qué; el motivo solo queda en el registro del servidor.",
+    "La versión de los documentos y su hora solo salen si el esquema es 3 o más; con uno anterior salen vacías."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-5.1",
+     "dato": "pedido de salud para confirmar la versión cargada"
+    },
+    {
+     "de": "CU-MOD-5.2",
+     "dato": "pedido de salud para saber con qué versión comparar"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-5.1",
+     "dato": "salud con la versión y la hora de la última carga"
+    },
+    {
+     "a": "CU-MOD-5.2",
+     "dato": "versión de los documentos cargados"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un servicio con base, esquema al día y al menos una carga hecha",
+     "cuando": "cualquiera pide la salud, sin credenciales",
+     "entonces": "responde que está sano, con base disponible, versión del esquema, hora del servidor y la versión y la hora de la última carga, sin decir quién la hizo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un servicio sin base, sin migrar o sin ninguna carga",
+     "cuando": "se pide la salud",
+     "entonces": "responde igual, con «sin base» o sin esquema y la versión de la carga vacía; no falla"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "cualquier persona o programa",
+     "cuando": "pide la salud con un método que no es el de lectura",
+     "entonces": "el servicio responde 405 y no hace nada"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [
+    "INC-124"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6",
+     "casos": [
+      "b",
+      "e"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-MOD-6-carga",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-MOD-6-carga-rol",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "GET /modelo/api/salud"
+    ],
+    "colecciones": [
+     "carga",
+     "schema_version"
+    ],
+    "notas": "case \"salud\": conecta con ModeloDb::tryConnect (sin base → db:false), lee schema_version y, si es >= 3, SELECT sha, cargado_en FROM carga WHERE proyecto=str. Devuelve ok, servicio, version 0.1, proyecto, server_time, db, schema_version, php, sha, cargadoEn. Los guiones REQ-MOD-6 e/f y REQ-MOD-6-carga e también miran /api/health del STR (eso es de SRV). INC-124 (cerrado) fue un día con db:false por un archivo de secretos mal editado."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de modelo/api/index.php (case salud) y de los guiones REQ-MOD-6*; ModeloDb (config/database.php) no venía en la copia"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-1.2",
+   "capacidad": "CAP-MOD-1",
+   "actor": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "que": "Probar que una llamada llega al servicio y ver qué recibió, sin que guarde nada",
+   "declarado": "construido",
+   "limitantes": [
+    "Es una prueba de alcance del primer lote del servicio: no usa la base ni valida la clave; solo dice si llegó alguna.",
+    "No guarda ni registra el cuerpo ni la clave.",
+    "Acepta como máximo 4 KB."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un cuerpo de hasta 4 KB, con o sin clave",
+     "cuando": "se envía al servicio como prueba de eco",
+     "entonces": "responde cuántos bytes llegaron, el tipo de contenido, si traía clave (sí o no) y la hora; no guarda nada"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un cuerpo de más de 4 KB",
+     "cuando": "se envía como prueba de eco",
+     "entonces": "el servicio responde 413 sin leer el resto"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "cualquier persona o programa",
+     "cuando": "usa un método que no es el de envío",
+     "entonces": "el servicio responde 405"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "POST /modelo/api/eco"
+    ],
+    "colecciones": [],
+    "notas": "MODELO_ECO_MAX = 4096; lee 4097 bytes como máximo; tieneToken = cabecera X-Modelo-Token no vacía; unset del cuerpo y del token. Ningún guion de tests/e2e lo llama."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de modelo/api/index.php (case eco); sin prueba"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-1.3",
+   "capacidad": "CAP-MOD-1",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Contestar un fallo interno con un aviso sin datos y dejar una línea en el registro del servicio",
+   "declarado": "construido",
+   "limitantes": [
+    "La respuesta solo dice el tipo de fallo, el archivo y la línea; no repite el texto del error ni lo que se envió.",
+    "El registro guarda un solo respaldo: al pasar de 1 MB se reemplaza el anterior.",
+    "Que nadie de afuera pueda leer el registro depende de la configuración del alojamiento, no del programa."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un fallo inesperado dentro del servicio",
+     "cuando": "llega cualquier petición",
+     "entonces": "el servicio responde 500 con el tipo, el archivo y la línea, y añade una línea con fecha al registro"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un registro que ya pasó de 1 MB",
+     "cuando": "ocurre otro fallo",
+     "entonces": "el registro anterior pasa a ser el respaldo y empieza uno nuevo"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/index.php",
+     "modelo/api/.htaccess"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_modeloFatalJson + set_exception_handler + register_shutdown_function (E_ERROR, E_PARSE, ...); registro en modelo/api/logs/error.log con rotación a error.log.1; el bloqueo ^logs/ está en modelo/api/.htaccess. El registro sí guarda getMessage() de la excepción (el mensaje de una excepción de la base puede incluir texto de la sentencia)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de modelo/api/index.php y del .htaccess; sin prueba"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-2.1",
+   "capacidad": "CAP-MOD-2",
+   "actor": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "que": "Dejar pasar a cada llamada solo a las rutas que le corresponden según su clave: el Arquitecto a todo; los roles tablero, desarrollo y diseño a leer; el rol carga a cargar y consultar",
+   "declarado": "construido",
+   "limitantes": [
+    "Qué puede cada rol: el Arquitecto, todo; tablero, desarrollo y diseño, solo leer tablas, estado y exportación; carga, solo cargar, ver el estado y exportar. Nadie más migra ni cambia claves.",
+    "Un solo token por rol: al registrar uno nuevo, el anterior deja de valer.",
+    "El token de un rol vence a las 19:00 de Colombia del día de vencimiento, porque la fecha se compara en hora universal (DT-36, ya pagada).",
+    "No hay tope de intentos fallidos.",
+    "La clave del Arquitecto no vence y vive en un archivo de secretos fuera del repositorio.",
+    "Cada ruta pide la clave antes de leer el cuerpo y antes de tocar la base; solo si la clave no es la del Arquitecto se consulta la base."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-MOD-2.2",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    },
+    {
+     "a": "CU-MOD-3.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    },
+    {
+     "a": "CU-MOD-3.2",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    },
+    {
+     "a": "CU-MOD-3.3",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    },
+    {
+     "a": "CU-MOD-4.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    },
+    {
+     "a": "CU-MOD-4.2",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la clave del Arquitecto",
+     "cuando": "llama a cualquier ruta protegida",
+     "entonces": "pasa sin consultar la base"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la clave vigente de un rol (tablero, desarrollo, diseño o carga)",
+     "cuando": "llama a una ruta que su rol permite",
+     "entonces": "pasa; si la ruta no es de su rol, responde 403 «Sin permiso»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave",
+     "cuando": "pide una ruta protegida",
+     "entonces": "responde 403 «Token requerido» sin leer el cuerpo ni tocar la base"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una clave desconocida o vencida",
+     "cuando": "pide una ruta protegida",
+     "entonces": "responde el mismo 403 «Token requerido»: no revela si la clave existía"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "una clave de rol y el servicio sin base",
+     "cuando": "pide una ruta protegida",
+     "entonces": "responde 503 «Base de datos no disponible»"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6",
+    "DA-39"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-18"
+   ],
+   "pendientes": [
+    "DT-36"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-MOD-6-carga",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-MOD-6-lectura",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-MOD-6-complemento",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/config/acceso.php",
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "(todas menos salud y eco)"
+    ],
+    "colecciones": [
+     "credencial"
+    ],
+    "notas": "exigir($conectar, [roles]) devuelve [rol, db] o responde 403/503. Compara el token del Arquitecto con hash_equals contra MODELO_TOKEN_ARQ (modelo/secrets.php); si no es, calcula SHA-256 y lo compara con cada fila vigente de credencial (vence IS NULL o >= CURDATE()) sin cortar al encontrarla. Lista de roles por ruta en index.php: migrar y credenciales [arquitecto]; cargar [arquitecto, carga]; estado y export [arquitecto, tablero, desarrollo, diseno, carga]; <tabla> [arquitecto, tablero, desarrollo, diseno]. Réplica JS en tests/lib/port-acceso.js (no venía en la copia). Los guiones solo prueban el caso sin clave; el resto (E1, E2, E4, E5) no tiene prueba."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de config/acceso.php y de los case de index.php; los guiones solo cubren la ruta sin clave"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-2.2",
+   "capacidad": "CAP-MOD-2",
+   "actor": [
+    "cola-arquitecto"
+   ],
+   "que": "Registrar las claves de los roles tablero, desarrollo, diseño y carga: guardar solo su resumen y su fecha de vencimiento, reemplazando la anterior de cada rol",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el Arquitecto puede hacerlo.",
+    "El servicio guarda el resumen de la clave, nunca la clave; las claves reales las genera y guarda el Arquitecto en su equipo.",
+    "No se puede leer ni borrar una credencial desde el servicio: solo reemplazar la de un rol.",
+    "No hay tope de vigencia: el vencimiento puede ir vacío (sin vencer).",
+    "Ni los resúmenes ni el cuerpo se devuelven ni se registran."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-5.3",
+     "dato": "resúmenes de las claves de los roles y su vencimiento"
+    },
+    {
+     "de": "CU-MOD-2.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-5.3",
+     "dato": "roles registrados y vencimientos"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el Arquitecto con una lista de roles, resumen de clave y vencimiento",
+     "cuando": "la envía al servicio",
+     "entonces": "se reemplaza la credencial de cada rol en una sola operación y se responde solo la lista de roles y sus vencimientos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una lista con un rol repetido o desconocido, un resumen que no son 64 caracteres, un vencimiento que no es fecha, falta de vencimiento o un campo de más",
+     "cuando": "se envía al servicio",
+     "entonces": "responde 422 con el detalle por posición y no cambia nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave o con la clave de un rol",
+     "cuando": "intenta registrar credenciales",
+     "entonces": "responde 403 antes de leer el cuerpo"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "una lista vacía",
+     "cuando": "se envía al servicio",
+     "entonces": "responde bien y no cambia nada"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6",
+    "DA-39"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6-credenciales",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/config/credenciales.php",
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "POST /modelo/api/credenciales"
+    ],
+    "colecciones": [
+     "credencial"
+    ],
+    "notas": "validarCredenciales (rol en tablero|desarrollo|diseno|carga, hash /^[0-9a-f]{64}\\z/, vence AAAA-MM-DD válido o null, sin campos extra) y guardarCredenciales (BEGIN; DELETE del rol; INSERT; COMMIT; ante error ROLLBACK y RuntimeException sin el mensaje de la base). GET credencial responde 404 porque no está en la lista blanca de lectura (lo mira el guion)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de config/credenciales.php y del case credenciales; el guion solo prueba el 403 sin clave"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-3.1",
+   "capacidad": "CAP-MOD-3",
+   "actor": [
+    "cola-arquitecto",
+    "admin"
+   ],
+   "que": "Leer una tabla del modelo, con filtros, o una fila por su identificador",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo lectura y solo de las 15 tablas permitidas; las credenciales, la versión del esquema y la constancia de carga no se pueden leer (responde 404 sin pedir clave).",
+    "Cada respuesta trae como máximo 2000 filas (500 por omisión); se pagina con «desde».",
+    "El filtro «desde una hora» compara con la hora en que se escribió la fila, y cada carga reescribe todas las filas de cada tabla que trae: no sirve para saber qué cambió entre dos cargas.",
+    "La tabla de complemento no tiene lectura de una fila.",
+    "El rol carga no puede leer tablas."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-2.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    },
+    {
+     "de": "CU-PRJ-3.7",
+     "dato": "pedido de lectura de tablas del modelo hecho por el proxy del servidor del STR",
+     "rel": "REL-25"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PRJ-3.7",
+     "dato": "filas de las tablas del modelo pedidas con el rol tablero",
+     "rel": "REL-25"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos cargados y la clave del Arquitecto o de tablero, desarrollo o diseño",
+     "cuando": "pide una tabla, con o sin filtros de estado, hora, proyecto, límite o desde",
+     "entonces": "recibe el total y las filas, con los valores estructurados ya decodificados y sin el campo de proyecto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la misma clave",
+     "cuando": "pide una fila por su identificador",
+     "entonces": "recibe esa fila; si no existe, 404 «No encontrado»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un nombre de tabla que no está en la lista permitida (como credencial)",
+     "cuando": "se pide",
+     "entonces": "responde 404 sin pedir ni mirar la clave"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave a una tabla permitida",
+     "cuando": "se pide",
+     "entonces": "responde 403 «Token requerido»"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "un filtro con valor inválido (proyecto, hora) o un estado en una tabla que no lo tiene",
+     "cuando": "se pide",
+     "entonces": "responde 422 y no consulta"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6-lectura",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E3",
+      "E4"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/config/lectura.php",
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "GET /modelo/api/<tabla>",
+     "GET /modelo/api/<tabla>/<id>"
+    ],
+    "colecciones": [
+     "requisito",
+     "decision",
+     "pedido",
+     "plan_trabajo",
+     "lote",
+     "cambio",
+     "veredicto",
+     "incidente",
+     "deuda",
+     "riesgo",
+     "mensaje",
+     "evento",
+     "situacion",
+     "leccion",
+     "complemento"
+    ],
+    "notas": "lecturaEsTabla (lista de MODELO_CARGA_TABLAS) → exigir [arquitecto, tablero, desarrollo, diseno] → listar/uno. listar: proyecto /^[a-z0-9-]{1,16}$/, since ms numérico → actualizado_en >= FROM_UNIXTIME(since/1000), limite min(2000,max(1,..)) por omisión 500, desde; evento ordena por n y filtra por id, complemento por archivo y orden. uno: en evento busca por n. Es la ruta que usará el proxy del STR con el rol tablero (REQ-TB-6, REL-25, por construir)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de config/lectura.php y del default de index.php; el guion solo prueba el 404 y el 403"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-3.2",
+   "capacidad": "CAP-MOD-3",
+   "actor": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "que": "Ver el estado del modelo en un resumen: cuántas filas hay por tabla, los lotes por estado y en curso, los últimos veredictos, cuánto tarda un lote en aceptarse y cuál fue la última carga",
+   "declarado": "construido",
+   "limitantes": [
+    "Todo es de un solo proyecto («str»).",
+    "La mediana y el percentil 90 usan solo los lotes que tienen su hora de «construido» y de «aceptado» (la última de cada una).",
+    "Con un esquema anterior al 2 no cuenta el complemento; con uno anterior al 3 no dice la última carga.",
+    "Lo pueden pedir todos los roles, incluido carga."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-2.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos cargados",
+     "cuando": "se pide el estado con una clave que lo permite",
+     "entonces": "responde el conteo por tabla, los lotes por estado, los lotes en curso, los últimos cinco veredictos, la mediana y el percentil 90 en minutos de construido a aceptado y la última carga (versión, hora y rol)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un servicio sin ninguna carga",
+     "cuando": "se pide el estado",
+     "entonces": "las cuentas salen en cero, la carga sale vacía y la métrica sale sin datos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave",
+     "cuando": "se pide el estado",
+     "entonces": "responde 403 «Token requerido»"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6-lectura",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/config/lectura.php",
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "GET /modelo/api/estado"
+    ],
+    "colecciones": [
+     "lote",
+     "veredicto",
+     "evento",
+     "carga"
+    ],
+    "notas": "estado($db): COUNT por tabla, lotes por estado, lotes en MODELO_LECTURA_EN_CURSO, últimos 5 veredictos por hora, métrica _lecturaMetrica sobre eventos construido→aceptado, y carga {sha, cargadoEn, por} si el esquema es >= 3."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de estado() en config/lectura.php; el guion solo prueba el 403"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-3.3",
+   "capacidad": "CAP-MOD-3",
+   "actor": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "que": "Exportar el modelo: rehacer cada documento del proyecto entero, igual que en Git, y decir cuánto cubre y si quedó incompleto",
+   "declarado": "construido",
+   "limitantes": [
+    "Es un solo bloque con todos los documentos: crece con el proyecto y no se divide.",
+    "Rehace solo lo que se cargó por tablas y por el complemento; lo que el paquete no trae no existe en la exportación.",
+    "Las filas derivadas (veredictos y eventos calculados) no se usan para rehacer los documentos.",
+    "Si algún documento tiene listas pero no filas de complemento, avisa que la exportación es parcial y deja esas listas al final."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-5.2",
+     "dato": "pedido de exportar el modelo"
+    },
+    {
+     "de": "CU-MOD-5.3",
+     "dato": "pedido de exportar el modelo"
+    },
+    {
+     "de": "CU-MOD-2.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-5.2",
+     "dato": "documentos del proyecto rehechos desde el modelo"
+    },
+    {
+     "a": "CU-MOD-5.3",
+     "dato": "documentos del proyecto rehechos desde el modelo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un modelo cargado por tablas y complemento",
+     "cuando": "se pide la exportación con una clave que la permite",
+     "entonces": "recibe cada documento entero, con las mismas listas, el mismo orden y los mismos valores (un objeto vacío sigue vacío y un número con decimales se conserva), más las claves que cubre y cuántas filas quedaron sin origen"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un documento con listas sin filas de complemento",
+     "cuando": "se pide la exportación",
+     "entonces": "avisa que es parcial y pone esas listas al final del documento"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave",
+     "cuando": "se pide la exportación",
+     "entonces": "responde 403 «Token requerido»"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-123"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6-lectura",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/config/lectura.php",
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "GET /modelo/api/export"
+    ],
+    "colecciones": [
+     "complemento",
+     "extra de las 15 tablas"
+    ],
+    "notas": "exportar($db): agrupa extra.f (archivo.lista) por extra.i (orden) y extra.o (objeto original), arma cada archivo con complemento (es_lista=1 → lista rehecha, si no valor), ruta interno/<archivo>.json (reqs-historial en interno/archivo/). Devuelve ok, server_time, parcial, archivos, cubre, sinOrigen, complemento. Réplica JS en tests/lib/port-export.js (no venía en la copia). INC-123 (cerrado) arregló que {} se volvía []."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de exportar() en config/lectura.php; el guion solo prueba el 403"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-4.1",
+   "capacidad": "CAP-MOD-4",
+   "actor": [
+    "cola-arquitecto"
+   ],
+   "que": "Poner la base del servicio al día: aplicar en orden los esquemas que faltan y decir en qué versión quedó",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo el Arquitecto puede hacerlo.",
+    "Se pide con una llamada de lectura que sin embargo cambia la base: solo la protege la clave del Arquitecto.",
+    "No hay forma de volver a un esquema anterior.",
+    "No se pudo leer cómo decide qué esquemas faltan (la clase de conexión no venía en la copia)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-5.3",
+     "dato": "pedido de migrar la base"
+    },
+    {
+     "de": "CU-MOD-2.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-5.3",
+     "dato": "versión del esquema y esquemas aplicados"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una base sin esquema o con uno anterior",
+     "cuando": "el Arquitecto pide migrar",
+     "entonces": "se aplican los esquemas que faltan (inicial, complemento, constancia de carga) y responde la versión y cuáles aplicó"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave",
+     "cuando": "se pide migrar",
+     "entonces": "responde 403 «Token requerido»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "la clave de un rol que no es el Arquitecto",
+     "cuando": "se pide migrar",
+     "entonces": "responde 403 «Sin permiso»"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un método que no es de lectura",
+     "cuando": "se pide migrar",
+     "entonces": "responde 405"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-20"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/index.php",
+     "modelo/sql/001_inicial.sql",
+     "modelo/sql/002_complemento.sql",
+     "modelo/sql/003_carga.sql"
+    ],
+    "rutas": [
+     "GET /modelo/api/migrar"
+    ],
+    "colecciones": [
+     "schema_version"
+    ],
+    "notas": "case \"migrar\": exigir [arquitecto] → ModeloDb::migrar(ModeloDb::connect()) → {ok, schema_version, aplicadas}. La lógica de migrar y de schema_version está en modelo/api/config/database.php, que no venía en la copia (no leído). Esquema 1: 15 tablas, 2: complemento, 3: carga."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de case migrar y de los tres .sql; ModeloDb::migrar no se leyó (no venía en la copia)"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-4.2",
+   "capacidad": "CAP-MOD-4",
+   "actor": [
+    "cola-arquitecto",
+    "github"
+   ],
+   "que": "Cargar el paquete del proyecto: reemplazar, tabla por tabla y en una sola operación, lo que el modelo tiene por lo que trae el paquete, y dejar constancia de la versión, la hora y quién lo cargó",
+   "declarado": "construido",
+   "limitantes": [
+    "Reemplaza tablas enteras: no hay carga fila por fila ni historial de cargas; solo queda la última.",
+    "Las tablas que el paquete no trae no se tocan.",
+    "El paquete debe traer proyecto «str», tablas de la lista permitida, columnas conocidas, identificador de texto único por fila y un conteo igual al de filas; nunca credenciales, esquema ni carga.",
+    "Lo guardado en el campo «extra» y en el valor del complemento queda tal como llegó (INC-123, cerrado).",
+    "No hay tope al tamaño del paquete: lo limita el alojamiento.",
+    "La constancia de la carga solo se guarda con el esquema 3 o más; el complemento exige el esquema 2.",
+    "El modelo es copia: la fuente de verdad es Git (RT-4)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-5.1",
+     "dato": "paquete de carga armado con los documentos de la versión"
+    },
+    {
+     "de": "CU-MOD-5.3",
+     "dato": "paquete de carga elegido por el Arquitecto"
+    },
+    {
+     "de": "CU-MOD-2.1",
+     "dato": "permiso del rol para esta ruta (pasa o se niega)"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-5.1",
+     "dato": "resultado de la carga: conteos por tabla y versión del esquema"
+    },
+    {
+     "a": "CU-MOD-5.3",
+     "dato": "resultado de la carga: conteos por tabla y versión del esquema"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un paquete válido y la clave del Arquitecto o la del rol carga",
+     "cuando": "se envía al servicio",
+     "entonces": "cada tabla del paquete se vacía de ese proyecto y se llena con sus filas en una sola operación; se guarda la versión, la hora y el rol; responde los conteos y el esquema"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un paquete con el cuerpo roto, otro proyecto, una tabla o columna fuera de la lista, un identificador repetido o un conteo distinto",
+     "cuando": "se envía",
+     "entonces": "responde 422 con la lista de errores y la base queda igual"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un valor que no cabe en su columna o una fila que la base rechaza",
+     "cuando": "se carga",
+     "entonces": "se deshace todo y responde 422 con la tabla, el identificador y la columna"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un paquete con complemento y un esquema anterior al 2",
+     "cuando": "se envía",
+     "entonces": "responde 422 «complemento requiere schema_version 2» antes de tocar nada"
+    },
+    {
+     "id": "E5",
+     "tipo": "excepcion",
+     "dado": "una llamada sin clave",
+     "cuando": "se envía un paquete",
+     "entonces": "responde 403 «Token requerido» antes de leer el cuerpo"
+    },
+    {
+     "id": "E6",
+     "tipo": "excepcion",
+     "dado": "la clave de tablero, desarrollo o diseño",
+     "cuando": "se envía un paquete",
+     "entonces": "responde 403 «Sin permiso»"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-123",
+    "DT-36"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-MOD-6-carga",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E5"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "modelo/api/config/carga.php",
+     "modelo/api/index.php"
+    ],
+    "rutas": [
+     "POST /modelo/api/cargar"
+    ],
+    "colecciones": [
+     "las 15 tablas",
+     "carga"
+    ],
+    "notas": "validarPaquete (MODELO_CARGA_TABLAS; réplica en tests/lib/port-carga.js, no venía en la copia) y cargarPaquete: STRICT_ALL_TABLES, BEGIN, por tabla DELETE proyecto=str + INSERT (proyecto, creado_en, actualizado_en, actualizado_por = rol), extra y complemento.valor del json crudo (INC-123), con esquema >= 3 REPLACE INTO carga (sha, UTC, por); COMMIT o ROLLBACK con error de tabla/id/columna. Ningún guion hace la carga completa ni el 422; el guion carga-rol f solo mira la salud (CU-MOD-1.1)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de config/carga.php y del case cargar; el único guion que la toca prueba solo el 403 sin clave"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-5.1",
+   "capacidad": "CAP-MOD-5",
+   "actor": [
+    "github"
+   ],
+   "que": "Cargar el modelo solo con cada cambio aceptado en la rama principal que toque los documentos del proyecto: validar, armar el paquete, cargarlo y comprobar que el servicio quedó con esa versión",
+   "declarado": "construido",
+   "limitantes": [
+    "Corre solo con cambios de la rama principal o a mano; nunca con ramas ajenas, para que la clave no quede a su alcance.",
+    "Si la validación de los documentos falla, no llama al servicio y dice qué regla, qué entidad, qué identificador y qué archivo (a qué escritor le toca).",
+    "El registro es público: solo trae versión corta, códigos, conteos y tiempos; nunca textos ni títulos.",
+    "Usa la clave del rol carga, que vence: al vencer, el flujo falla hasta renovarla.",
+    "Una ejecución a la vez; no cancela la que está en curso.",
+    "Se apaga desactivando el flujo."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-4.2",
+     "dato": "resultado de la carga: conteos por tabla y versión del esquema"
+    },
+    {
+     "de": "CU-MOD-1.1",
+     "dato": "salud con la versión y la hora de la última carga"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-4.2",
+     "dato": "paquete de carga armado con los documentos de la versión"
+    },
+    {
+     "a": "CU-MOD-1.1",
+     "dato": "pedido de salud para confirmar la versión cargada"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un cambio aceptado en la rama principal que toca los documentos del proyecto",
+     "cuando": "corre la carga automática",
+     "entonces": "valida, arma el paquete de esa versión, lo carga, y la salud confirma que el servicio tiene esa versión; el resumen queda con códigos y conteos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una validación en rojo",
+     "cuando": "corre la carga automática",
+     "entonces": "no llama al servicio y lista regla, entidad, identificador y archivo"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "falta la clave o los conteos enviados no coinciden con los cargados o la salud muestra otra versión",
+     "cuando": "corre la carga automática",
+     "entonces": "termina en rojo y lo dice sin mostrar contenido"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-18",
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     ".github/workflows/modelo-sync.yml",
+     "herramientas/modelo/sync.py"
+    ],
+    "rutas": [
+     "POST /modelo/api/cargar",
+     "GET /modelo/api/salud"
+    ],
+    "colecciones": [],
+    "notas": "Disparadores: push a main con cambios en interno/** o herramientas/modelo/**, y workflow_dispatch (solo_salud opcional). sync.py cargar: validar.py --json, paquete.py --complemento --sha, POST cargar con MODELO_TOKEN (rol carga), compara conteos y pide salud (el sha debe empezar igual al commit). Prueba unitaria herramientas/modelo/sync_test.py (no ejecutada aquí); ningún guion e2e."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de modelo-sync.yml y sync.py; no se ejecutó nada"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-5.2",
+   "capacidad": "CAP-MOD-5",
+   "actor": [
+    "github"
+   ],
+   "que": "Comparar cada día lo que exporta el servicio con la versión cargada en Git, archivo por archivo y byte a byte, y avisar si algo difiere",
+   "declarado": "construido",
+   "limitantes": [
+    "Compara con la versión que el servicio dice tener cargada, no con la última de Git: si nadie cargó, sigue comparando con la vieja.",
+    "Solo mira los documentos con nombre permitido bajo la carpeta de documentos del proyecto.",
+    "Dice qué ruta difiere, no qué cambió.",
+    "Corre a las 06:10 hora de Bogotá o a mano; nunca con ramas ajenas.",
+    "El registro es público: solo versión, conteo y rutas."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-1.1",
+     "dato": "versión de los documentos cargados"
+    },
+    {
+     "de": "CU-MOD-3.3",
+     "dato": "documentos del proyecto rehechos desde el modelo"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-1.1",
+     "dato": "pedido de salud para saber con qué versión comparar"
+    },
+    {
+     "a": "CU-MOD-3.3",
+     "dato": "pedido de exportar el modelo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un servicio con una versión cargada",
+     "cuando": "corre la comparación diaria",
+     "entonces": "pide la salud, exporta, compara cada documento con el de esa versión en Git y termina en verde si ninguno difiere"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "documentos que difieren o que no están en esa versión",
+     "cuando": "corre la comparación",
+     "entonces": "termina en rojo y lista las rutas distintas"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "falta la clave, el servicio no dice qué versión tiene o la exportación falla",
+     "cuando": "corre la comparación",
+     "entonces": "termina en rojo con el motivo"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     ".github/workflows/modelo-espejo.yml",
+     "herramientas/modelo/espejo.js"
+    ],
+    "rutas": [
+     "GET /modelo/api/salud",
+     "GET /modelo/api/export"
+    ],
+    "colecciones": [],
+    "notas": "cron 10 11 * * * (06:10 Bogotá) y workflow_dispatch; node espejo.js usa el formato de pw/json-crudo.js (bonito, valorCrudo, conFinDeLinea) y git show <sha>:<ruta>; verde solo con n > 0 y 0 distintos. Ningún guion e2e."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa de modelo-espejo.yml y espejo.js; no se ejecutó nada"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-MOD-5.3",
+   "capacidad": "CAP-MOD-5",
+   "actor": [
+    "cola-arquitecto"
+   ],
+   "que": "Operar el servicio a mano desde la cola del Arquitecto: migrar, cargar un paquete, exportar, registrar las claves de los roles y probar los roles",
+   "declarado": "construido",
+   "limitantes": [
+    "Las claves viven en el equipo del Arquitecto y no se escriben en el registro ni en la salida; el registro solo guarda códigos.",
+    "Las claves de rol se generan al azar si faltan y vencen a los 180 días.",
+    "Exportar deja cada documento en una copia local con el mismo formato que Git.",
+    "El Arquitecto puede hacer a mano lo mismo que hacen los flujos automáticos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-4.1",
+     "dato": "versión del esquema y esquemas aplicados"
+    },
+    {
+     "de": "CU-MOD-4.2",
+     "dato": "resultado de la carga: conteos por tabla y versión del esquema"
+    },
+    {
+     "de": "CU-MOD-3.3",
+     "dato": "documentos del proyecto rehechos desde el modelo"
+    },
+    {
+     "de": "CU-MOD-2.2",
+     "dato": "roles registrados y vencimientos"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-4.1",
+     "dato": "pedido de migrar la base"
+    },
+    {
+     "a": "CU-MOD-4.2",
+     "dato": "paquete de carga elegido por el Arquitecto"
+    },
+    {
+     "a": "CU-MOD-3.3",
+     "dato": "pedido de exportar el modelo"
+    },
+    {
+     "a": "CU-MOD-2.2",
+     "dato": "resúmenes de las claves de los roles y su vencimiento"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un pedido del Arquitecto en la cola",
+     "cuando": "la cola llama al servicio con su clave",
+     "entonces": "ejecuta migrar, cargar, exportar, credenciales o roles y deja un registro con el resultado, sin la clave"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el pedido «roles»",
+     "cuando": "la cola prueba los roles",
+     "entonces": "con la clave de tablero se puede ver el estado y no cargar (403 «Sin permiso»), y con una clave inventada se responde 403 «Token requerido»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "falta el archivo de la clave o el paquete",
+     "cuando": "se pide la acción",
+     "entonces": "termina con error sin llamar al servicio"
+    }
+   ],
+   "origen": [
+    "REQ-MOD-6",
+    "DA-39"
+   ],
+   "reglas": [
+    "RT-18"
+   ],
+   "pendientes": [
+    "DT-37"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "herramientas/pw/modelo-llamar.js"
+    ],
+    "rutas": [
+     "GET migrar",
+     "POST cargar",
+     "GET export",
+     "POST credenciales",
+     "GET estado"
+    ],
+    "colecciones": [],
+    "notas": "node modelo-llamar.js migrar | cargar <paquete> | exportar | credenciales | roles; token de claves\\modelo-arq.txt en el equipo del Arquitecto (LENOVO); ROLES tablero, desarrollo, diseno, carga; DIAS_VIGENCIA 180. Relación REL-29 (cola-arquitecto → MOD). No hay guion e2e propio; solo el pedido «roles» comprueba los permisos."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de la cabecera y de las acciones de modelo-llamar.js; no se ejecutó"
+   },
+   "ambito": "fabrica"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "INC-152",
+   "porque": "Abierto, pero es del guion REQ-MOD-6 caso g, que pide la salud del STR (CU-SRV-7.1) y no la del modelo; el juez lo dejó como entorno. No cuelga de ningún caso de uso de MOD."
+  },
+  {
+   "id": "REQ-MOD-1",
+   "porque": "El mapa lo ancla a MOD como requerimiento raíz, pero REQ-MOD-1 a 5 y 7 a 10 son del modelo de operación v2 (la forma de trabajar del proyecto), no del servicio HTTP. Solo REQ-MOD-6 (B7-1 a B7-6) describe lo que hace /modelo/api."
+  },
+  {
+   "id": "REQ-MOD-2",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-3",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-4",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-5",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-7",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-8",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-9",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "REQ-MOD-10",
+   "porque": "Igual que REQ-MOD-1: modelo de operación v2, no del servicio."
+  },
+  {
+   "id": "DA-26",
+   "porque": "Es la decisión de Copia a Drive (K3); el mapa la cita en MOD por error o por cercanía. No toca el servicio del modelo."
+  },
+  {
+   "id": "DA-31",
+   "porque": "Decisión del modelo de operación; no se encontró qué parte del servicio la usa. Se deja sin atar para que Diseño la ubique."
+  }
+ ]
+}

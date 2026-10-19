@@ -1,7 +1,7 @@
 {
  "modulo": "SRV",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "api/index.php (router), api/.htaccess, api/lib/session.php, col-lectura.php, upload-limites.php, restauracion.php, purga-prueba.php y cuenta-pruebas.php, api/config/secrets.example.php y migrate.php (migraciones 1 a 14): leídos completos",
@@ -13,7 +13,18 @@
   "interno/linea-base/por-levantar/SRV.json (CU-K3-6.2 y CU-K3-6.3, integrados aquí como CU-SRV-8.1 y 8.3) y los archivos ya levantados: K3, SH, U, HK, INV, INC1, CAL, FL, PR, KN, OP, PG, POR",
   "No leído: api/config/cors.php, database.php, jwt.php y firebase.php; los .htaccess de backups/, logs/, uploads/ y de la raíz; la tarea programada de las 03:00 en el alojamiento; api/drive, ical, sync-ical, expediente, usuarios e invitacion (de otros módulos); tests/*.test.js (no vienen en la copia del código)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-839)",
+   "que": "Pesos (esenciales CAP-1, 2, 3, 4 y 8; necesarias 5, 6 y 7; CAP-9 de fábrica) y decisiones a, c–h: dos lados unidos por flujos; conflicto por la hora del aparato es incidente; respaldo con ficha de pago y permisos; colaborador solo lo suyo; superadmin solo lectura; /health solo ok o falla."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-840)",
+   "que": "INC-188, 189, 190, 191, 192, 193, 194 y 196 y DT-51 atados; usuarios sin restaurar en el ensayo, por diseño; superadmin como limitante; confianzas de 5.2 y 8.1 se quedan."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Guardar y entregar las 20 colecciones del negocio con baja lógica, unión de turnos y última escritura",
@@ -43,63 +54,63 @@
    "id": "CAP-SRV-1",
    "nombre": "Almacén de datos del negocio",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Guardar y entregar las colecciones de datos del negocio (propiedades, reservas, turnos, incidentes, inventario, guías, flujos) a todos los aparatos, sin pisar lo de otro y sin borrar nada de verdad."
   },
   {
    "id": "CAP-SRV-2",
    "nombre": "Lectura y escritura acotada del colaborador",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Que el colaborador reciba y pueda cambiar solo lo que le corresponde: su gestión de 90 días, los datos del huésped de hoy y de mañana, sus incidentes, su inventario y su turno hasta dos horas después de cerrarlo."
   },
   {
    "id": "CAP-SRV-3",
    "nombre": "Sesión, permisos y aislamiento por negocio",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Decidir en el servidor, en cada petición, quién es la persona, qué puede hacer y de qué negocio es, y rechazar lo demás."
   },
   {
    "id": "CAP-SRV-4",
    "nombre": "Archivos del negocio",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Recibir y entregar guías, documentos, planos y fotos con sus límites, siempre dentro del negocio de la sesión."
   },
   {
    "id": "CAP-SRV-5",
    "nombre": "Arranque, migraciones y conexión",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Dejar la base de datos al día sola, abrir las conexiones sin agotar el tope del alojamiento y dejar rastro claro cuando algo falla por dentro."
   },
   {
    "id": "CAP-SRV-6",
    "nombre": "Lectura agrupada del Tablero",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Entregar al Tablero de operación todo lo que muestra en una sola lectura, solo a quien puede verlo."
   },
   {
    "id": "CAP-SRV-7",
    "nombre": "Salud y diagnóstico del servicio",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Decir si el servicio está sano y, para la fábrica, medir las conexiones a la base de datos."
   },
   {
    "id": "CAP-SRV-8",
    "nombre": "Respaldo y restauración",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Guardar cada noche un respaldo de cada negocio, entregárselo al administrador y ensayar su restauración en una cuenta temporal antes de confiar en él (RT-12)."
   },
   {
    "id": "CAP-SRV-9",
    "nombre": "Datos de prueba de la fábrica",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Limpiar los movimientos de inventario de prueba y mantener la cuenta de pruebas aparte, solo para la fábrica de pruebas y nunca con datos reales."
   }
  ],
@@ -119,7 +130,9 @@
     "Puede pedir las reservas por una ventana de fechas y por estado, además de «desde una hora».",
     "«Lo cambiado desde la última lectura» se compara con la hora que el aparato puso al guardar, no con la que anotó el servidor: un cambio guardado con la hora atrasada o tras mucho tiempo sin conexión puede no llegar nunca a otro aparato que pide solo cambios; el Tablero lo cubre con un solape de 5 minutos y Housekeeping, Calendario e Inventario con una lectura completa diaria (leído en el código, no comprobado).",
     "Todo rol con sesión del negocio puede leer, pero al colaborador se le entrega recortado (CAP-SRV-2); el administrador legado «superadmin» lee y no escribe.",
-    "Con muchas lecturas a la vez no debe agotar las conexiones del alojamiento (RT-19; DT-40, INC-128)."
+    "Con muchas lecturas a la vez no debe agotar las conexiones del alojamiento (RT-19; DT-40, INC-128).",
+    "Lo cambiado desde la última lectura se compara con la hora del aparato: un cambio con hora vieja puede no llegar a otro equipo (INC-188).",
+    "Un colaborador recién asignado no recibe lo anterior hasta la lectura completa diaria (INC-194, abierto, bajo)."
    ],
    "entradas": [
     {
@@ -195,7 +208,9 @@
    ],
    "pendientes": [
     "DT-40",
-    "INC-94"
+    "INC-94",
+    "INC-188",
+    "INC-194"
    ],
    "pruebas": [
     {
@@ -262,7 +277,8 @@
     "Un cambio cuyo identificador no coincide con el del dato se omite en silencio; cada envío pesa como máximo 2 MB y solo acepta las 20 colecciones conocidas.",
     "Solo turnos, incidentes, movimientos de inventario y pendientes de inventario aceptan al colaborador; el resto exige administrador u operador, y el administrador legado «superadmin» no escribe (CU-SRV-3.1).",
     "Los movimientos de inventario, la evidencia y los expedientes solo crecen: la regla de cada colección es de su módulo (CU-INV, CU-INC1) y aquí se cumple al guardar.",
-    "Con las conexiones del alojamiento saturadas responde 500 «base de datos no disponible» (INC-128, abierto); el aparato ya no manda dos envíos a la vez por colección (CU-API-2.2)."
+    "Con las conexiones del alojamiento saturadas responde 500 «base de datos no disponible» (INC-128, abierto); el aparato ya no manda dos envíos a la vez por colección (CU-API-2.2).",
+    "Cuando dos aparatos cambian lo mismo gana la hora que pone el aparato, no la del servidor, y el servidor responde «ok» aunque no escriba: es pérdida de datos (Diseño, M-839 c; INC-188, abierto, medio, de arquitectura)."
    ],
    "entradas": [
     {
@@ -346,7 +362,8 @@
    ],
    "pendientes": [
     "INC-128",
-    "DT-38"
+    "DT-38",
+    "INC-188"
    ],
    "pruebas": [],
    "tecnica": {
@@ -399,7 +416,8 @@
     "El colaborador no puede dar de baja nada; solo el administrador y el operador.",
     "Una baja de un identificador que no existe cuenta como hecha y no avisa.",
     "No hay forma de borrar de verdad un dato desde la aplicación (RT-5); la baja conserva el dato y su historia.",
-    "Los archivos subidos no se pueden borrar desde la aplicación (CU-SRV-4.3)."
+    "Los archivos subidos no se pueden borrar desde la aplicación (CU-SRV-4.3).",
+    "Una baja se puede revivir con un reenvío completo de un aparato desactualizado, en las siembras de tipos (INC-189)."
    ],
    "entradas": [],
    "salidas": [
@@ -437,7 +455,9 @@
    "reglas": [
     "RT-5"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-189"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -557,7 +577,8 @@
     "Un turno de más de 90 días llega reducido a sus horas; si el colaborador lo guarda de vuelta, el servidor lo ignora y el operador lo ve completo.",
     "Un colaborador recién asignado a una propiedad no recibe lo viejo que pasa a ser suyo hasta su lectura completa diaria; con «solo lo cambiado» no le llega (leído en el código, no comprobado).",
     "La configuración de Housekeeping le llega completa, con el valor de la hora general (leído en el código, no comprobado; es una pregunta para Diseño).",
-    "Lo que ve de las demás colecciones se limita a las propiedades donde tiene turno, con listas de campos permitidos."
+    "Lo que ve de las demás colecciones se limita a las propiedades donde tiene turno, con listas de campos permitidos.",
+    "El colaborador recibe la configuración de Housekeeping completa, con el valor de la hora general. No es intencional (Diseño, M-839 e): debe recibir solo lo que necesita (INC-192, abierto)."
    ],
    "entradas": [],
    "salidas": [
@@ -600,7 +621,8 @@
    ],
    "pendientes": [
     "INC-94",
-    "INC-120"
+    "INC-120",
+    "INC-192"
    ],
    "pruebas": [
     {
@@ -996,7 +1018,8 @@
     "Cada ruta fija sus roles: respaldo, restauración, diagnóstico, purga y cuenta de pruebas solo para el administrador; el Tablero para administrador y operador; las colecciones por rol de lectura y de escritura.",
     "Hay rutas sin comprobar el rol: las capacidades del negocio las puede crear, renombrar o borrar cualquiera con sesión (INC-160, abierto; es de Identidad).",
     "Sin sesión o con sesión inválida responde 401 sin leer nada; con sesión sin permiso, 403.",
-    "No se leyó el código que firma y valida la sesión."
+    "No se leyó el código que firma y valida la sesión.",
+    "El superadmin solo lee, para soporte y como de fábrica; que escriba o exporte no se pide, y separarlo del administrador queda para la plataforma multinegocio (Diseño, M-839 g; CU-U-2.10)."
    ],
    "entradas": [
     {
@@ -1277,7 +1300,9 @@
     "Guía, documento y plano solo los suben administrador y operador; la foto también el colaborador.",
     "La evidencia y el video de un incidente entran por la misma ruta pero se guardan tal cual, con su huella y los datos de captura: eso es de Incidentes (CU-INC1-2.1).",
     "La referencia del archivo solo se valida por su forma: un colaborador puede subir una foto, evidencia o video a una referencia que no es de su turno ni de su incidente (leído en el código, no comprobado).",
-    "Los archivos viven solo en el servidor, sin copia fuera de él hasta el respaldo y la copia a Drive (CU-K3-6.4, CU-K3-2.8; T-12)."
+    "Los archivos viven solo en el servidor, sin copia fuera de él hasta el respaldo y la copia a Drive (CU-K3-6.4, CU-K3-2.8; T-12).",
+    "Acepta del colaborador archivos para cualquier referencia. No es intencional (Diseño, M-839 e): sube solo a lo suyo (su turno, su incidente, su compra) (INC-193, abierto).",
+    "Guarda también la evidencia y el video; su valor de prueba lo define CU-INC1-2.1 (Diseño, M-839 f)."
    ],
    "entradas": [
     {
@@ -1330,7 +1355,9 @@
     "RT-1",
     "RT-11"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-193"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1363,7 +1390,8 @@
     "Cualquier rol del negocio puede pedir cualquier archivo del negocio, sin comprobar que sea de su turno o de su incidente (leído en el código, no comprobado).",
     "Atiende un solo tramo por pedido, para ver un video mientras llega.",
     "Si el archivo ya no está: 404, o, si pasó por un corte de almacenamiento, lo entrega desde la copia en Drive o responde «eliminado en el corte» (CU-K3-3.2).",
-    "Las rutas con segmentos no permitidos se rechazan con 400 y las de otro negocio con 403."
+    "Las rutas con segmentos no permitidos se rechazan con 400 y las de otro negocio con 403.",
+    "Entrega cualquier archivo del negocio a cualquier persona con sesión en él; solo debería entregar los que esa persona puede ver (Diseño, M-839 e; INC-193)."
    ],
    "entradas": [
     {
@@ -1415,7 +1443,8 @@
     "RT-1"
    ],
    "pendientes": [
-    "DT-45"
+    "DT-45",
+    "INC-193"
    ],
    "pruebas": [
     {
@@ -1509,7 +1538,8 @@
    "limitantes": [
     "Corre en cada proceso nuevo, con las consultas de comprobación del esquema después de abrir la conexión (DT-39, programada).",
     "No tiene candado: dos procesos que arrancan a la vez pueden duplicar el registro de la versión aplicada (leído en el código, no comprobado).",
-    "Hay 14 migraciones, todas escritas para repetirse sin dañar; ninguna se deshace."
+    "Hay 14 migraciones, todas escritas para repetirse sin dañar; ninguna se deshace.",
+    "Sin candado, el cuerpo de una migración puede correr dos veces y la segunda petición dar error; la versión no se duplica porque es clave (DT-51)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1537,7 +1567,8 @@
     "RT-20"
    ],
    "pendientes": [
-    "DT-39"
+    "DT-39",
+    "DT-51"
    ],
    "pruebas": [],
    "tecnica": {
@@ -1632,7 +1663,8 @@
    "declarado": "construido",
    "limitantes": [
     "Un fallo inesperado responde 500 con el tipo del fallo, el archivo y la línea, y deja una línea en el registro del servidor; la respuesta revela el interior a quien llame (leído en el código, no comprobado).",
-    "Los fallos del guardado de colecciones deben escribirse también en el registro del servidor y no solo en el del alojamiento, que no se ve (DT-38, programada)."
+    "Los fallos del guardado de colecciones deben escribirse también en el registro del servidor y no solo en el del alojamiento, que no se ve (DT-38, programada).",
+    "El error interno devuelve al navegador el tipo, el nombre del archivo y la línea (no el mensaje) (INC-196, abierto, bajo)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1657,7 +1689,8 @@
    ],
    "reglas": [],
    "pendientes": [
-    "DT-38"
+    "DT-38",
+    "INC-196"
    ],
    "pruebas": [],
    "tecnica": {
@@ -1841,7 +1874,8 @@
    "limitantes": [
     "Es público: no pide sesión, y cuenta qué piezas tiene el servicio (secretos presentes, soporte de imágenes, de datos de captura, de archivos comprimidos, tamaño máximo de subida, conexión a Drive y configuración de la base de datos), sin entregar sus valores.",
     "Sirve de señal de despliegue a las pruebas: comprueban que el esquema y la versión de la interfaz sean los esperados.",
-    "A veces no responde en 30 segundos al final de una regresión larga (INC-152, abierto)."
+    "A veces no responde en 30 segundos al final de una regresión larga (INC-152, abierto).",
+    "Decidido (Diseño, M-839 h): sin sesión responde solo «ok» o «con falla»; el detalle de los indicadores pide la clave interna. Hoy entrega el detalle a cualquiera (por construir)."
    ],
    "entradas": [],
    "salidas": [],
@@ -2008,7 +2042,9 @@
     "No se pudo comprobar que la tarea programada de las 03:00 exista en el servicio de alojamiento: solo hay su descripción en el mapa técnico y el código que la atiende.",
     "El nombre del respaldo diario usa la fecha UTC y entre las 19:00 y las 24:00 de Bogotá sale con la fecha del día siguiente (INC-81, pospuesto por decisión del dueño; cosmético).",
     "Si no puede armar el archivo, responde que salió bien y deja el del día vacío o sin escribir (leído en el código, no comprobado).",
-    "Guarda el respaldo en el mismo servidor que los datos: no es una copia fuera de él."
+    "Guarda el respaldo en el mismo servidor que los datos: no es una copia fuera de él.",
+    "Si el respaldo no se puede convertir, escribe un archivo vacío sobre el del día y responde «ok» (INC-190, abierto, medio).",
+    "El respaldo no trae la ficha de pago ni los permisos de cada persona; debe ampliarse: un respaldo que no restaura a la gente no sirve (Diseño, M-839 d; INC-191, abierto, medio, de definición)."
    ],
    "entradas": [],
    "salidas": [
@@ -2052,7 +2088,9 @@
     "DT-43",
     "INC-81",
     "INC-84",
-    "INC-101"
+    "INC-101",
+    "INC-190",
+    "INC-191"
    ],
    "pruebas": [],
    "tecnica": {
@@ -2105,7 +2143,8 @@
     "Solo el administrador (el administrador legado «superadmin» no puede pedirlo).",
     "Trae lo mismo que el respaldo de la noche: datos vivos de las colecciones, usuarios sin contraseña ni ficha de pago ni permisos, y capacidades; no trae archivos ni, hoy, la cuenta, la retención, el registro de la copia a Drive ni la exportación de calendario (DT-43).",
     "Es solo de descarga: nada lo importa de vuelta desde la aplicación.",
-    "La lista de colecciones del respaldo es una copia de la del almacén y puede desfasarse (INC-84 y INC-101 ya pasaron)."
+    "La lista de colecciones del respaldo es una copia de la del almacén y puede desfasarse (INC-84 y INC-101 ya pasaron).",
+    "El respaldo no trae la ficha de pago ni los permisos de cada persona; debe ampliarse: un respaldo que no restaura a la gente no sirve (Diseño, M-839 d; INC-191, abierto, medio, de definición)."
    ],
    "entradas": [],
    "salidas": [
@@ -2148,7 +2187,8 @@
    "pendientes": [
     "DT-43",
     "INC-84",
-    "INC-101"
+    "INC-101",
+    "INC-191"
    ],
    "pruebas": [],
    "tecnica": {
@@ -2202,7 +2242,8 @@
     "Solo ensaya las colecciones vivas y las capacidades: los usuarios del respaldo se cuentan y se comparan, pero no se restauran; la constancia dice «igual» aunque el respaldo no traiga la ficha de pago ni los permisos.",
     "No existe una restauración real sobre el negocio: solo este ensayo en una cuenta temporal.",
     "Una sola copia de ensayo por cuenta a la vez; el respaldo no puede pasar de 12 MB; todo se hace como una sola operación que se deshace si algo no cuadra; la copia se borra al terminar y queda constancia del borrado.",
-    "Existe para la fábrica (antes del primer corte, MJ-6); es del Servidor y aquí se cita por RT-12."
+    "Existe para la fábrica (antes del primer corte, MJ-6); es del Servidor y aquí se cita por RT-12.",
+    "Los usuarios se cuentan y se huellan pero no se insertan, a propósito (el ingreso los buscaría en todas las cuentas); la constancia debería decir que no se comparan (Desarrollo, M-840). No hace falta restaurar sobre el negocio (R11); si se quiere más, una restauración completa en la cuenta de pruebas (Diseño, M-839 d). El arreglo de INC-137 es L-137, redactado y detenido por MJ-16."
    ],
    "entradas": [
     {
@@ -2547,14 +2588,6 @@
    "porque": "Descartado y reemplazado por REQ-INV2-7-1 (sub-ubicaciones y foto al cierre), que es de Inventario; el servidor solo las entrega (CU-SRV-2.4)."
   },
   {
-   "id": "DT-36",
-   "porque": "Es de la carga del modelo (carga.php fija actualizado_en con la hora de MySQL): servicio del modelo (MOD). Pagada."
-  },
-  {
-   "id": "DT-37",
-   "porque": "Es del espejo de la cola del modelo (exportar reescribe los números sin el .0): servicio del modelo (MOD), no del servidor del STR. Pagada."
-  },
-  {
    "id": "DT-47",
    "porque": "Los guiones de REQ-INV2-4-2 citan REL-10 donde probarían REL-11 (cierre de turno, que el servidor cumple en el guardado de turnos): es del cubrimiento de los guiones, no de un caso de uso. Abierta."
   },
@@ -2569,10 +2602,6 @@
   {
    "id": "INC-100",
    "porque": "Es del log de la CLI de un lote (archivos declarados contra tocados): proceso de la fábrica, no una función del servidor ni del cliente. Cerrado."
-  },
-  {
-   "id": "INC-124",
-   "porque": "Un secrets.php del servicio del modelo se editó por error durante la migración M4: proceso de despliegue, no una función. Cerrado."
   },
   {
    "id": "INC-149",

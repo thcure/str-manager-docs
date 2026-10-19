@@ -1,0 +1,1865 @@
+{
+ "modulo": "PRJ",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-seg-proyecto.html (1851 líneas; leído de la 221 a la 1851, sin el CSS 1-220), str-marco-trabajo.html, str-instrucciones.html, str-cobit.html, str-elementos.html, str-base-conocimiento.html y str-nomenclatura.html: leídos",
+  "str-api.js (STRApi.docs, requireSession, exigirRol, rutaInicio) y str-app-shell.html (nav-group-proyecto con siete entradas)",
+  "interno/ (documentos del proyecto): seguimiento, diseno, instrucciones, marco-trabajo, cobit, elementos, conocimiento, proyecto, mensajes y mapa-modulos; archivo/reqs-historial.json; arquitectura/guiones-e2e.json",
+  "tests/e2e/REQ-TB-3.spec.js, REQ-TB-4.spec.js y REQ-TB-5.spec.js (y los casos f, b2 de REQ-SH-2): leídos",
+  "seguimiento.json: INC-82, 102, 105, 106, 108, 118, 119, 136 y 139; diseno.json: REQ-BC-1, REQ-BC-2, REQ-TB-1 a 6, REQ-SP-3, REQ-U-8, DA-39 y la bolsa",
+  "No leído: str-lo-que-viene.html (es CU-SH-6.1); el CSS de Seg. Proyecto; tests/*.test.js (réplicas de reglas puras: no venían en la copia); las páginas no se abrieron en un navegador"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "Control de acceso de las siete páginas del grupo Proyecto (solo administrador)",
+   "Lectura de los documentos del proyecto de la última versión, con encabezado, actualización y respaldo",
+   "Seg. Proyecto: indicadores, tablero, plan de trabajo, diseño, ítems y cambios",
+   "Marco de trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento (mapa, diagrama, fichas, líneas base) y Nomenclatura",
+   "Lo que está entregado y sin construir: lectura del servicio del modelo (REQ-TB-6) y pestaña Catálogo (REQ-BC-2)"
+  ],
+  "fuera": [
+   "«Lo que viene» (str-lo-que-viene.html): es CU-SH-6.1, aunque el mapa la lista como página de PRJ",
+   "La entrada del menú «Proyecto» y su plegado: es CU-SH-8.1",
+   "Lo que el servicio del modelo hace con las llamadas (carga, lectura, acceso por rol): es MOD",
+   "Quién es administrador y cómo se decide el rol: es Identidad (CU-U-2.1 y 2.5)",
+   "El lector común de los documentos del proyecto (STRApi.docs): es CU-API-6.1; aquí se cuenta lo que cada página hace con él"
+  ],
+  "nota": "PRJ es la fábrica de software mostrando cómo trabaja: no es del negocio, solo lo ve el administrador y no escribe nada en el STR. Todos sus casos de uso son de fábrica y no cuentan en la cobertura de producto. Las siete páginas leen documentos públicos de GitHub; el control de acceso es solo de pantalla. Transitorio: el proyecto saldrá del STR a un sitio aparte (plan D4, ADR-009)."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-PRJ-1",
+   "nombre": "Acceso solo para el administrador",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Dejar ver las páginas del grupo Proyecto solo al administrador (el superadministrador cuenta como administrador)."
+  },
+  {
+   "id": "CAP-PRJ-2",
+   "nombre": "Datos del proyecto al día",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Cada página lee los documentos del proyecto de la última versión publicada, dice de cuándo son, se puede actualizar sin recargar y nunca escribe nada."
+  },
+  {
+   "id": "CAP-PRJ-3",
+   "nombre": "Seguimiento del proyecto",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver cómo va el proyecto: indicadores del ciclo de verificación, agentes, objetivos, planes y bolsa, plan de trabajo, diseño, ítems y cambios por lote."
+  },
+  {
+   "id": "CAP-PRJ-4",
+   "nombre": "Marco de trabajo",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver los pasos del ciclo de un lote: quién los hace, con qué herramienta y cuánto cuestan."
+  },
+  {
+   "id": "CAP-PRJ-5",
+   "nombre": "Instrucciones",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Buscar las instrucciones de los chats y copiar su texto."
+  },
+  {
+   "id": "CAP-PRJ-6",
+   "nombre": "Tablero COBIT",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver los 40 objetivos de COBIT 2019 con su estado en el proyecto y abrir cada uno con sus prácticas y la posición propia."
+  },
+  {
+   "id": "CAP-PRJ-7",
+   "nombre": "Elementos del proyecto",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Buscar y filtrar los elementos del proyecto (documentos, archivos de datos, páginas, herramientas, chats) y ver su ficha."
+  },
+  {
+   "id": "CAP-PRJ-8",
+   "nombre": "Base de conocimiento",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver el mapa de actores, mecanismos y lugares, su diagrama, las fichas de cada pieza y las líneas base del proyecto; buscar en ellos."
+  },
+  {
+   "id": "CAP-PRJ-9",
+   "nombre": "Nomenclatura",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Leer cómo se llaman las cosas del proyecto: roles, identificadores, entidades, camino de un lote, buzón, archivos y vocabulario."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-PRJ-1.1",
+   "capacidad": "CAP-PRJ-1",
+   "actor": [
+    "admin"
+   ],
+   "que": "Abrir cualquiera de las siete páginas del grupo Proyecto solo si se es administrador; el operador, el colaborador o quien no ha entrado no las ve",
+   "declarado": "construido",
+   "limitantes": [
+    "El control es solo de pantalla: las páginas y los documentos que leen son públicos, así que no protege nada por sí mismo (RT-14 pide que decida el servidor). Hoy no hay datos del negocio en ellos.",
+    "Seis páginas repiten su propia copia del control (con un comentario «temporal» de INC-76); solo Nomenclatura usa el control común.",
+    "El superadministrador cuenta como administrador.",
+    "Es de la fábrica de software, no del negocio: no cuenta en la cobertura de producto.",
+    "Transitorio: el proyecto saldrá del STR a un sitio aparte (plan D4, ADR-009)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SH-8.1",
+     "dato": "petición de abrir cada página del grupo Proyecto dentro del marco",
+     "rel": "REL-01"
+    },
+    {
+     "de": "CU-U-2.5",
+     "dato": "rol de la persona con sesión, para decidir si puede abrir las páginas del grupo Proyecto"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PRJ-3.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-4.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-5.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-6.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-7.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-8.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-9.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con sesión",
+     "cuando": "abre una de las siete páginas desde el menú",
+     "entonces": "la página se muestra y pinta sus datos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un operador, que abre a mano la dirección de una página del grupo",
+     "cuando": "la página carga",
+     "entonces": "dentro del marco ve «Sin permiso para este módulo»; fuera del marco vuelve a su inicio"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "alguien sin sesión",
+     "cuando": "abre una de las páginas",
+     "entonces": "lo lleva a entrar y, al entrar, vuelve a la página pedida"
+    }
+   ],
+   "origen": [
+    "REQ-SH-2",
+    "REQ-U-8",
+    "INC-108"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "b2"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html",
+     "str-marco-trabajo.html",
+     "str-instrucciones.html",
+     "str-cobit.html",
+     "str-elementos.html",
+     "str-base-conocimiento.html",
+     "str-nomenclatura.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-user"
+    ],
+    "notas": "Seis páginas llevan el mismo bloque «Acceso: superadmin o admin (temporal…INC-76)»: STRApi.requireSession y rol de STRApi.user() distinto de superadmin/admin → embebido pinta «Sin permiso para este módulo.», suelto location.replace(STRApi.rutaInicio). Nomenclatura usa STRApi.exigirRol(['admin']) con html[data-acceso=pendiente] oculto hasta que pasa (tecnica de CU-U-2.5). El menú (CU-SH-8.1) oculta el grupo con data-roles=admin. REQ-SH-2 b2 prueba que el operador no entra a mano a Lo que viene y Seg. Proyecto (no a las otras cinco)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador; INC-108 (cerrado) es la regresión que dejó a un admin nuevo sin entrada"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-2.1",
+   "capacidad": "CAP-PRJ-2",
+   "actor": [
+    "admin",
+    "github"
+   ],
+   "que": "Ver en cada página los documentos del proyecto de la última versión publicada, con un encabezado que dice la hora y la versión de los datos",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo lectura: ninguna página escribe en el STR ni en el repositorio, y las consultas van sin credenciales.",
+    "Se hace una sola consulta de la última versión por página abierta; los documentos se piden a esa versión.",
+    "Lo público de GitHub tiene un tope de consultas por dirección: en una regresión larga llegó a fallar (INC-139, abierto).",
+    "Nomenclatura no lee documentos: no tiene este encabezado.",
+    "El mismo dato de los documentos se lee en cada página por su cuenta, sin caché compartida entre páginas."
+   ],
+   "entradas": [
+    {
+     "de": "CU-API-6.1",
+     "dato": "documentos del proyecto y su encabezado con la fecha del último commit"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-PRJ-3.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    },
+    {
+     "a": "CU-PRJ-4.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    },
+    {
+     "a": "CU-PRJ-5.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    },
+    {
+     "a": "CU-PRJ-6.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    },
+    {
+     "a": "CU-PRJ-7.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    },
+    {
+     "a": "CU-PRJ-8.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "abre una página del grupo (salvo Nomenclatura)",
+     "entonces": "la página pide una vez cuál es la última versión, lee sus documentos de esa versión y el encabezado dice «Datos de las HH:MM · versión corta» (o la fecha si no es de hoy)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el administrador",
+     "cuando": "mira cualquier página",
+     "entonces": "no hay ninguna petición que escriba: todas son de lectura y la consulta de la versión no lleva credenciales"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un encabezado en un teléfono de 390 px",
+     "cuando": "se muestra",
+     "entonces": "el texto «Datos de…» y el botón Actualizar se leen completos"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3",
+    "DA-39"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-139",
+    "INC-136",
+    "INC-119"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-3",
+     "casos": [
+      "a",
+      "b",
+      "f",
+      "g"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-TB-3",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "api.github.com/repos/thcure/str-manager-docs/commits/main",
+     "raw.githubusercontent.com/thcure/str-manager-docs/<sha>/interno/*.json"
+    ],
+    "colecciones": [],
+    "notas": "STRApi.docs.commit({forzar}) (una promesa por página, credentials omit, solo acepta 200), .url(ruta, commit) y .encabezado(commit) en str-api.js (CU-API-6.1); cada página pinta el encabezado en su propio elemento. Relación REL-24 (PRJ → github). INC-136 y INC-119 (cerrados) son defectos del guion y de la guardia del verificador, no de la página."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-2.2",
+   "capacidad": "CAP-PRJ-2",
+   "actor": [
+    "admin",
+    "github"
+   ],
+   "que": "Actualizar los datos de una página con un botón, sin recargarla y sin perder la pestaña ni la búsqueda",
+   "declarado": "construido",
+   "limitantes": [
+    "Repite la consulta de la última versión y vuelve a pedir los documentos con la versión nueva.",
+    "En Seg. Proyecto vacía los mensajes ya leídos para que la próxima ficha lea la versión nueva.",
+    "El botón se bloquea mientras actualiza."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una página abierta con una pestaña elegida y un texto en la búsqueda",
+     "cuando": "se pulsa «Actualizar»",
+     "entonces": "se consulta otra vez la última versión, se piden de nuevo los documentos con ella y el encabezado cambia; la página no se recarga y conserva pestaña y búsqueda"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-3",
+     "casos": [
+      "c",
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html",
+     "str-marco-trabajo.html",
+     "str-instrucciones.html",
+     "str-cobit.html",
+     "str-elementos.html",
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Botón #btnDocsAct (data-docs-actualizar) → STRApi.docs.commit({forzar:true}) → nueva lectura del JSON; desactiva el botón y lo reactiva en finally."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-2.3",
+   "capacidad": "CAP-PRJ-2",
+   "actor": [
+    "admin",
+    "github"
+   ],
+   "que": "Seguir mostrando datos cuando no se pudo consultar cuál es la última versión, y decirlo",
+   "declarado": "construido",
+   "limitantes": [
+    "Los datos pueden tener hasta 5 minutos de atraso, porque vienen de la rama principal sin versión fija.",
+    "Si la lectura de los documentos también falla, la página muestra el error y un botón para reintentar (según la página)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la consulta de la última versión caída o sin respuesta",
+     "cuando": "se abre una página",
+     "entonces": "lee los documentos de la rama principal, el encabezado dice «Datos de main (pueden tener hasta 5 min de atraso)» y la página muestra datos"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-139"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-3",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js"
+    ],
+    "rutas": [
+     "raw.githubusercontent.com/thcure/str-manager-docs/main/interno/*.json"
+    ],
+    "colecciones": [],
+    "notas": "_docsUrl usa main cuando no hay sha válido de 40 caracteres; _docsEncabezado devuelve el texto de respaldo. INC-139 (abierto): str-elementos cayó a main en una regresión de 32 minutos por el tope de consultas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.1",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver los indicadores del ciclo de verificación de los últimos 7 días: cuánto tarda un lote desde construido hasta aceptado, cuántos pasan con más de un veredicto y si hay un lote atascado en verificación",
+   "declarado": "construido",
+   "limitantes": [
+    "Cuenta solo los lotes aceptados en los últimos 7 días que tienen la hora de construido y de aceptado; los que no la tienen se cuentan aparte, como «fuera».",
+    "El semáforo se pone en rojo si un lote lleva en verificación más de la meta de atasco; muestra su número y los minutos.",
+    "Sin datos muestra «Sin datos todavía» y la página sigue pintada.",
+    "En una regresión larga los indicadores llegaron a pintarse tarde (INC-139, abierto)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos del seguimiento con lotes aceptados esta semana",
+     "cuando": "se abre la pestaña Tablero",
+     "entonces": "se ven tres indicadores con su valor y su meta, iguales a lo calculado de los datos de esa versión"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un lote en verificación desde hace más tiempo que la meta de atasco",
+     "cuando": "se abre el Tablero",
+     "entonces": "el semáforo sale rojo con «L-n · minutos»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una fuente sin datos",
+     "cuando": "se abre el Tablero",
+     "entonces": "dice «Sin datos todavía» y el resto de la página se pinta"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "un teléfono de 390 px",
+     "cuando": "se ven los indicadores",
+     "entonces": "se leen sin desplazamiento horizontal"
+    }
+   ],
+   "origen": [
+    "REQ-TB-5"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-139"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-5",
+     "casos": [
+      "c",
+      "e"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-TB-5",
+     "casos": [
+      "f"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-TB-5",
+     "casos": [
+      "g"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-TB-5",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E4"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_tb5Metrica(seg, ahoraMs) sobre seguimiento.json (cambios[].tiempos.construido/aceptado/veredictos, cambios[].fecha, plan[].estado=verificando y desde); TB5_META.atasco; _tb5Fmt. Lee interno/seguimiento.json. El guion REQ-TB-5 g también verifica que al cargar y al pulsar Actualizar solo haya lecturas."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador; la regla del cálculo la comprueba REQ-TB-5"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.2",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el tablero del proyecto: qué hace cada agente, los objetivos, los planes de trabajo con sus ítems y la bolsa de lo que no tiene plan; abrir la ficha de cualquier ítem",
+   "declarado": "construido",
+   "limitantes": [
+    "La bolsa solo muestra los ítems que tienen una referencia: los de diseno.json sin «ref» no aparecen en ningún lado del Tablero (5 hoy, entre ellos «Diagrama de la Base de conocimiento, versión 2»).",
+    "La ficha toma la hora de «etapa actual» de una fuente y la del evento «aceptado» de otra: pueden salir horas distintas (INC-105, abierto).",
+    "A 390 px las tablas del tablero conservan varias columnas dentro de un contenedor con desplazamiento, en vez de una columna (INC-106, abierto).",
+    "Los planes y las prioridades se leen de proyecto.json cuando existe; si no, de diseno.json (L-151).",
+    "Los mensajes de un ítem se piden solo al abrir su ficha, una vez por carga de la página."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de seguimiento, diseño y proyecto",
+     "cuando": "se abre el Tablero",
+     "entonces": "se ven los agentes con su estado y su cola, los objetivos, los planes de trabajo y la bolsa sin plan con conteos por tipo y prioridad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un ítem de un plan, de la bolsa o de un agente",
+     "cuando": "se toca",
+     "entonces": "se abre su ficha con etapa, historial, decisiones y mensajes, y «Volver» regresa al punto de donde se abrió"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una fuente que no se pudo leer",
+     "cuando": "se abre el Tablero",
+     "entonces": "las partes que dependen de ella dicen «sin dato» y el resto se pinta"
+    }
+   ],
+   "origen": [
+    "REQ-TB-1",
+    "REQ-TB-2"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [
+    "INC-105",
+    "INC-106"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "renderTablero con _tbAgentes, _tbBolsa (filtra b.ref con _tbVal y descarta los que están en algún plan), renderTbAgenteDet, _tbFichaHTML, _tbCargarMsgs (interno/mensajes.json). Fuentes: interno/seguimiento.json, diseno.json, proyecto.json, mensajes.json. Ningún guion e2e comprueba los agentes, objetivos, planes ni bolsa."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador; la bolsa sin ref se comprobó con una réplica del filtro sobre los datos publicados"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.3",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el plan de trabajo agrupado por estado (en curso, siguiente, esperando a Carlos, previsto, pospuesto, hecho), con lo que hay en producción",
+   "declarado": "construido",
+   "limitantes": [
+    "Lo que espera a Carlos lista primero sus tareas.",
+    "Lo hecho va del lote más reciente al más antiguo; los lotes sin número van al final.",
+    "Los bloques «previsto», «pospuesto» y «hecho» arrancan plegados."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de seguimiento con plan",
+     "cuando": "se abre la pestaña Plan de trabajo",
+     "entonces": "se ven los contadores por estado, la versión en producción y los bloques con sus pasos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "datos sin plan",
+     "cuando": "se abre la pestaña",
+     "entonces": "dice que no hay plan y no falla"
+    }
+   ],
+   "origen": [
+    "REQ-SP1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "renderPlan, _planVista, _planProduccion(state.cambios), checkbox #pAgrupar «Agrupar por fase». Fuente: seguimiento.json plan[] y cambios[]. Sin guion e2e propio."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.4",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el diseño: prioridades, requerimientos en definición, decisiones abiertas, pedidos y lo entregado o cerrado",
+   "declarado": "construido",
+   "limitantes": [
+    "Lo entregado y cerrado va plegado.",
+    "La fecha de actualización y quién escribe salen del propio documento.",
+    "Si no existe el documento de planes y prioridades (proyecto.json), muestra las de diseno.json; si falla por otra causa, avisa en rojo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de diseño",
+     "cuando": "se abre la pestaña Diseño",
+     "entonces": "se ven cinco bloques con su cuenta: prioridades, REQ en definición, decisiones abiertas, pedidos y entregados y cerrados"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el diseño no se pudo leer",
+     "cuando": "se abre la pestaña",
+     "entonces": "dice «No se pudo cargar el diseño» con el motivo"
+    }
+   ],
+   "origen": [
+    "REQ-SP1"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "renderDiseno, _disClasificar (DIS_REQ_DEF, DIS_REQ_FIN), cargarProyecto (proyecto.json; 404 = aún no existe), fuente diseno.json. Sin guion e2e propio."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.5",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver todos los ítems del proyecto (REQ, INC, DT y DA) unidos de su fuente única, con búsqueda y filtros, sin repetidos y con el histórico aparte",
+   "declarado": "construido",
+   "limitantes": [
+    "Los REQ anteriores al buzón van en un bloque plegado «Histórico» con su cuenta.",
+    "Si una de las tres fuentes no se pudo leer, avisa en una línea y muestra el resto.",
+    "Un ítem que cambió de identificador se ve una sola vez con «antes …».",
+    "Los dos identificadores REQ-SP3 (Cobit) y REQ-SP-3 (Nomenclatura) se parecen y se confunden al buscar.",
+    "Los lotes «LM-n» no se ordenan como número (ver CU-PRJ-3.6)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de seguimiento, diseño e histórico",
+     "cuando": "se abre la pestaña Ítems",
+     "entonces": "se ve el resumen con las cuentas por tipo y los ítems agrupados por módulo, sin ningún identificador repetido"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un ítem con otro identificador anterior (REQ-K3b → REQ-K3-2)",
+     "cuando": "se busca o se recorre",
+     "entonces": "aparece una sola vez como el nuevo con «antes REQ-K3b», y buscar el nombre viejo lo encuentra"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "los chips de tipo, etapa o severidad, «Necesita tu decisión» o el módulo",
+     "cuando": "se eligen",
+     "entonces": "la lista se filtra; la pestaña elegida se recuerda al volver a abrir"
+    },
+    {
+     "id": "E4",
+     "tipo": "alterno",
+     "dado": "el bloque de histórico",
+     "cuando": "se abre",
+     "entonces": "lista los REQ anteriores con los mismos filtros"
+    },
+    {
+     "id": "E5",
+     "tipo": "alterno",
+     "dado": "un teléfono de 390 px",
+     "cuando": "se abre la pestaña",
+     "entonces": "el resumen, los chips y las filas se leen sin desplazamiento horizontal"
+    }
+   ],
+   "origen": [
+    "REQ-TB-4"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-4",
+     "casos": [
+      "a",
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-TB-4",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E4"
+     ]
+    },
+    {
+     "guion": "REQ-TB-4",
+     "casos": [
+      "g"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    },
+    {
+     "guion": "REQ-TB-4",
+     "casos": [
+      "h"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-TB-4",
+     "casos": [
+      "i"
+     ],
+     "escenarios": [
+      "E5"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage str-segproy-tab"
+    ],
+    "notas": "_tb4Unificar({seg, dis, hist}) (seguimiento.json incs/dts, diseno.json reqs/das, archivo/reqs-historial.json), _tb4Conteos, _tb4Coincide, render (filtros state.filtros), renderItemsResumen; Promise.allSettled de las tres fuentes."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.6",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el registro de cambios por lote, del más reciente al más antiguo, con búsqueda por lote, hash o REQ y filtros por estado",
+   "declarado": "construido",
+   "limitantes": [
+    "Los lotes que se llaman «LM-n» (lotes del modelo) cuentan como 0 al ordenar: quedan al final, mezclados con los que no tienen número.",
+    "El color del estado existe para aceptado, no aceptado, revertido, registrado y cerrado; un estado nuevo en los datos saldría sin color (como pasó en INC-82)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de seguimiento con cambios",
+     "cuando": "se abre la pestaña Cambios",
+     "entonces": "se ve «n lotes · último: fecha · versión» y la lista empieza por el lote de la aplicación de mayor número"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un texto de búsqueda, un estado o un REQ",
+     "cuando": "se escribe o se elige",
+     "entonces": "la lista se filtra; si nada coincide dice «Ningún cambio coincide»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "datos sin cambios",
+     "cuando": "se abre la pestaña",
+     "entonces": "dice que no hay registro de cambios"
+    }
+   ],
+   "origen": [
+    "REQ-SP4",
+    "REQ-TB-5"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-82",
+    "INC-118"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-5",
+     "casos": [
+      "i"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "renderCambios ordena con _tb5NumLote(lote) || 0 (INC-118 arregló «L-n»; «LM-n» sigue sin número), filtra por estado (data-cestado), REQ (#cReq) y texto (#cBusqueda); _irALote desde las fichas. Fuente seguimiento.json cambios[]."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-3.7",
+   "capacidad": "CAP-PRJ-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver Seg. Proyecto con los datos del servicio del modelo, al instante y sin depender de GitHub, por un paso intermedio del servidor del STR que solo lee",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Entregado a Desarrollo, aún sin construir: no existe en el servidor del STR el paso intermedio de lectura ni la clave «tablero» pegada en sus secretos.",
+    "Depende de que Carlos pegue la clave «tablero» en el archivo de secretos del STR cuando Desarrollo encole el lote (T-8).",
+    "Por ahora las páginas leen los documentos de GitHub (CU-PRJ-2.1).",
+    "Decisión DA-39 (crítica): solo lectura, con sesión de administrador y una clave que solo vive en el servidor."
+   ],
+   "entradas": [
+    {
+     "de": "CU-MOD-3.1",
+     "dato": "filas de las tablas del modelo pedidas con el rol tablero",
+     "rel": "REL-25"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-MOD-3.1",
+     "dato": "pedido de lectura de tablas del modelo hecho por el proxy del servidor del STR",
+     "rel": "REL-25"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador con el servicio del modelo cargado",
+     "cuando": "abre Seg. Proyecto",
+     "entonces": "las pestañas leen del modelo por el servidor del STR, con la clave «tablero» que nunca llega al navegador"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el servicio del modelo caído",
+     "cuando": "abre Seg. Proyecto",
+     "entonces": "sigue mostrando los datos de GitHub y lo dice"
+    }
+   ],
+   "origen": [
+    "REQ-TB-6",
+    "DA-39",
+    "ADR-006"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-18"
+   ],
+   "pendientes": [
+    "T-8"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-seg-proyecto.html",
+     "api/modelo.php (no existe)"
+    ],
+    "rutas": [
+     "proxy B8 → GET /modelo/api/<tabla> con X-Modelo-Token (rol tablero)"
+    ],
+    "colecciones": [],
+    "notas": "REQ-TB-6 está «entregado» en diseno.json; no hay api/modelo.php en la copia del código ni referencia al servicio del modelo en las páginas. Relación REL-25 (PRJ → MOD, por construir). La segunda mitad (E2) es una decisión de diseño no escrita: se supone el mismo respaldo que hoy."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Se buscó en la copia del código api/modelo.php, «modelo» en las siete páginas y en api/index.php: no está"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-4.1",
+   "capacidad": "CAP-PRJ-4",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver los pasos del ciclo de un lote en una tabla: objetivo COBIT, paso, proceso, quién lo hace, herramienta, esfuerzo, complejidad y motivo, con las notas al final",
+   "declarado": "construido",
+   "limitantes": [
+    "Los pasos de Carlos se resaltan.",
+    "Esfuerzo y complejidad se muestran de 0 a 5 puntos.",
+    "Sin pasos, dice que todavía no hay."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos del marco de trabajo",
+     "cuando": "se abre Marco de trabajo",
+     "entonces": "se ve la tabla con un paso por fila y, debajo, las notas"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "datos sin pasos",
+     "cuando": "se abre la página",
+     "entonces": "dice «Todavía no hay pasos en el marco»"
+    }
+   ],
+   "origen": [
+    "REQ-SP2",
+    "REQ-TB-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-marco-trabajo.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "render(data) sobre interno/marco-trabajo.json (pasos[], notas[]); _puntos, _quienChip. Cubierta solo por REQ-TB-3 g (lectura) y REQ-SH-2."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-5.1",
+   "capacidad": "CAP-PRJ-5",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver las instrucciones del proyecto, con fecha y para quién son (Carlos, un chat o la consola), y buscarlas por título",
+   "declarado": "construido",
+   "limitantes": [
+    "Busca solo en el título, no en el texto.",
+    "Sin instrucciones, dice que todavía no hay."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de instrucciones",
+     "cuando": "se abre Instrucciones",
+     "entonces": "se ve una tarjeta por instrucción con título, fecha, «para» y texto"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un texto en la búsqueda",
+     "cuando": "se escribe",
+     "entonces": "quedan las instrucciones cuyo título lo contiene, sin importar acentos ni mayúsculas; si ninguna, «Ninguna instrucción coincide»"
+    }
+   ],
+   "origen": [
+    "REQ-SP2",
+    "REQ-TB-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-instrucciones.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "render() sobre interno/instrucciones.json (items[]); _norm quita acentos; filtra por it.titulo. Cubierta solo por REQ-TB-3 g."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-5.2",
+   "capacidad": "CAP-PRJ-5",
+   "actor": [
+    "admin"
+   ],
+   "que": "Copiar el texto de una instrucción con un botón",
+   "declarado": "construido",
+   "limitantes": [
+    "Copia el texto de los datos, no lo que se ve en pantalla.",
+    "Si el navegador no deja copiar, selecciona el texto y pide copiarlo a mano."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una instrucción en pantalla",
+     "cuando": "se pulsa Copiar",
+     "entonces": "el texto queda en el portapapeles y el botón dice «Copiado» un momento"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un navegador sin permiso de portapapeles",
+     "cuando": "se pulsa Copiar",
+     "entonces": "selecciona el texto y el botón pide «Selecciona y copia»"
+    }
+   ],
+   "origen": [
+    "REQ-SP2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-instrucciones.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_copiar(idx, btn) usa navigator.clipboard.writeText y, si falla, textarea + execCommand(copy) y selección del <pre>."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-6.1",
+   "capacidad": "CAP-PRJ-6",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el tablero COBIT 2019: los objetivos por dominio, cada uno con su estado en el proyecto, y filtrar los de interés",
+   "declarado": "construido",
+   "limitantes": [
+    "El filtro «Solo objetivos de interés» se recuerda en el navegador.",
+    "Sin objetivos, dice que todavía no hay.",
+    "La leyenda de estados sale de los datos; un estado que los datos no declaran no se dibuja."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de COBIT",
+     "cuando": "se abre Cobit",
+     "entonces": "se ven las bandas de dominio (gobierno, y gestión con APO, BAI, DSS y MEA), una tarjeta por objetivo con su estado y una estrella en los de interés"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la casilla «Solo objetivos de interés»",
+     "cuando": "se marca",
+     "entonces": "los demás se atenúan y la elección se recuerda al volver"
+    }
+   ],
+   "origen": [
+    "REQ-SP3",
+    "REQ-TB-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-cobit.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage (str-cobit-*)"
+    ],
+    "notas": "render() sobre interno/cobit.json (objetivos[], estados, dominios); ~350 KB, una sola carga por apertura. Cubierta solo por REQ-TB-3 g (cuenta de consultas; INC-136 fue del guion)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-6.2",
+   "capacidad": "CAP-PRJ-6",
+   "actor": [
+    "admin"
+   ],
+   "que": "Abrir un objetivo COBIT y ver, en dos pestañas, lo que dice COBIT (descripción, propósito, prácticas y actividades) y la posición propia con las prácticas que hace el proyecto",
+   "declarado": "construido",
+   "limitantes": [
+    "Las prácticas «adoptadas parcialmente» (4 hoy) se dibujan como «fuera de alcance» en la pestaña «En STR Manager»: el icono solo conoce adoptado, relacionado y fuera de alcance.",
+    "La pestaña y el objetivo abiertos se recuerdan; una dirección con #código abre el objetivo.",
+    "Sin prácticas publicadas, lo dice."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el tablero COBIT",
+     "cuando": "se toca un objetivo",
+     "entonces": "se abre un panel con su estado y dos pestañas: «COBIT · ISACA» (descripción, propósito, prácticas con sus actividades) y «En STR Manager» (posición y prácticas con lo que hace el proyecto)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una dirección que termina en #BAI06",
+     "cuando": "se abre la página",
+     "entonces": "se abre ese objetivo"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una práctica del proyecto adoptada parcialmente",
+     "cuando": "se ve en la pestaña «En STR Manager»",
+     "entonces": "debería verse como parcial; hoy sale como fuera de alcance"
+    }
+   ],
+   "origen": [
+    "REQ-SP3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-cobit.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage"
+    ],
+    "notas": "_tabCobit, _tabStr (ico = {ok, rel, off}; p.estado=par cae a off), seleccionar, hashchange. cobit.json: 12 prácticas rel, 55 ok, 4 par, 2 off."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador; las 4 prácticas «par» se contaron en los datos publicados"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-7.1",
+   "capacidad": "CAP-PRJ-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Buscar y filtrar los elementos del proyecto por capa, tipo, estado, rol y objetivo COBIT, y verlos agrupados por capa con sus cuentas",
+   "declarado": "construido",
+   "limitantes": [
+    "Los filtros se combinan con «y»; cada grupo de chips es de elección única y se recuerda en el navegador.",
+    "Los elementos de tipo «registro» (2 hoy) no tienen chip de tipo: la lista de tipos de los datos no lo incluye y no se pueden aislar.",
+    "Las cuentas de cada chip salen de aplicar los demás filtros."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de elementos",
+     "cuando": "se abre Elementos",
+     "entonces": "se ven los elementos agrupados en gobierno, marco, producto, operación y archivo, con las cuentas por chip"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una búsqueda, un chip o una lista de rol u objetivo COBIT",
+     "cuando": "se usan",
+     "entonces": "la lista se filtra y la elección se recuerda; «quitar filtros» la limpia"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "filtros sin coincidencias",
+     "cuando": "se aplican",
+     "entonces": "dice «Ningún elemento coincide»"
+    }
+   ],
+   "origen": [
+    "REQ-SP5",
+    "REQ-TB-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-elementos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage str-elementos-v1"
+    ],
+    "notas": "_pasa, _chips(clave: capa, tipo, estado), _cardHTML, render sobre interno/elementos.json (elementos[], tipos, estados, capas, roles). elementos.json trae tipo registro en 2 elementos y tipos no lo lista. Cubierta solo por REQ-TB-3 g."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador; los 2 elementos «registro» se contaron en los datos publicados"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-7.2",
+   "capacidad": "CAP-PRJ-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Abrir la ficha de un elemento y ver su rol, quién lo usa, dónde vive, sus marcos, de dónde entra y a dónde sale, sus relaciones, su vigencia y sus notas",
+   "declarado": "construido",
+   "limitantes": [
+    "Una relación con un elemento que no está en el índice se muestra tal cual con «no está en el índice».",
+    "El elemento abierto se recuerda en el navegador."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la lista de elementos",
+     "cuando": "se toca uno",
+     "entonces": "se abre su ficha con todos sus campos; los vacíos salen con «—»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una relación en la ficha",
+     "cuando": "se toca",
+     "entonces": "se abre la ficha de ese otro elemento"
+    }
+   ],
+   "origen": [
+    "REQ-SP5"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-elementos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage str-elementos-v1"
+    ],
+    "notas": "_pintarPanel, abrir(id), cerrar; panel #panel con campos del elemento (rol, usa, vive, cobit, sdlc, pmi, entrada_de, salida_a, relacion, vigenciaDesde, notas)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-8.1",
+   "capacidad": "CAP-PRJ-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el mapa de la base de conocimiento: actores, mecanismos, lugares, los flujos entre ellos y lo que sigue abierto, con enlaces a la ficha y a la línea base de cada pieza",
+   "declarado": "construido",
+   "limitantes": [
+    "El resumen de cabecera cuenta nodos por tipo, flujos, abiertos, fichas y líneas base.",
+    "Un enlace a una ficha o línea base que no está en el archivo sale marcado como «falta»."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "documentos del proyecto de la última versión y su hora"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de conocimiento",
+     "cuando": "se abre Base de conocimiento (pestaña Mapa)",
+     "entonces": "se ven las columnas de actores, mecanismos y lugares, la lista de flujos con su por qué y los abiertos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el botón de una ficha o línea base en un nodo",
+     "cuando": "se toca",
+     "entonces": "cambia a esa pestaña, lleva al lugar y lo resalta un momento; si no existe, avisa «No está en el archivo»"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage str-basecon-tab"
+    ],
+    "notas": "_renderMapa, _chipFicha, _chipLinea, _irA sobre interno/conocimiento.json (mapa.nodos, flujos, abiertos; fichas; lineasBase). Cubierta solo por REQ-TB-3 g."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-8.2",
+   "capacidad": "CAP-PRJ-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el diagrama del mapa: los nodos en franjas por tipo con flechas por cada flujo, acercar y alejar, y señalar un nodo para ver sus flujos",
+   "declarado": "construido",
+   "limitantes": [
+    "La búsqueda no filtra el diagrama.",
+    "Un flujo que apunta a un nodo que no existe se omite y se avisa una vez, no dos (INC-102, cerrado).",
+    "Mejora prevista sin REQ: «Diagrama de la Base de conocimiento, versión 2» (bolsa de diseño)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de conocimiento",
+     "cuando": "se abre la pestaña Diagrama",
+     "entonces": "se dibujan franjas de actores, mecanismos, datos y lugares con una flecha por flujo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un nodo",
+     "cuando": "se selecciona",
+     "entonces": "quedan resaltados sus flujos y los demás se atenúan"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un flujo con un nodo que no existe",
+     "cuando": "se dibuja el diagrama",
+     "entonces": "el flujo se omite y se avisa una sola vez"
+    }
+   ],
+   "origen": [
+    "REQ-BC-1",
+    "INC-102"
+   ],
+   "reglas": [],
+   "pendientes": [
+    "INC-102"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_bcFranjas, _bcValidarFlujos, _bcFlujosDeNodo, _bcLayout, _dibujarDiagrama, _diaSeleccionar, _diaAplicarZoom. Las reglas puras (BC1-inicio…fin) las extrae tests/base-conocimiento-diagrama.test.js (no venía en la copia). Sin guion e2e propio."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador; INC-102 sigue cerrado"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-8.3",
+   "capacidad": "CAP-PRJ-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Leer las fichas de cada pieza del proyecto (para qué, quién, piezas, flujo, reglas, instalación, comprobación, créditos y riesgos) y copiar sus comandos",
+   "declarado": "construido",
+   "limitantes": [
+    "La búsqueda filtra por cualquier texto de la ficha.",
+    "El comando de comprobación se copia desde memoria, con aviso de «copiado»."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de conocimiento con fichas",
+     "cuando": "se abre la pestaña Fichas",
+     "entonces": "se ve una ficha por pieza con sus secciones; las vacías no se muestran"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un botón Copiar de un comando",
+     "cuando": "se pulsa",
+     "entonces": "el comando queda en el portapapeles y aparece «copiado»"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_renderFichas, _codigoHTML con _copias[], _copiar."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-8.4",
+   "capacidad": "CAP-PRJ-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver las líneas base del proyecto (qué se aprobó, con qué valor y cómo comprobarlo) y copiar sus comandos de comprobación",
+   "declarado": "construido",
+   "limitantes": [
+    "No es la línea base funcional del STR (la de los casos de uso): son las líneas base de proceso del archivo de conocimiento.",
+    "Si el nombre de la línea coincide con la búsqueda se ven todas sus filas; si no, solo las que coinciden."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de conocimiento con líneas base",
+     "cuando": "se abre la pestaña Líneas base",
+     "entonces": "se ve una tabla por línea con qué, valor y cómo comprobar, su fecha y quién la aprobó"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_renderLineas sobre conocimiento.lineasBase[] (id, nombre, fecha, aprobadaPor, items[].que/valor/comprobar, nota)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-8.5",
+   "capacidad": "CAP-PRJ-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Buscar un texto en el mapa, las fichas y las líneas base a la vez que se cambia de pestaña, y recordar la pestaña elegida",
+   "declarado": "construido",
+   "limitantes": [
+    "La búsqueda no actúa en el diagrama y su caja se oculta allí.",
+    "La pestaña elegida se recuerda en el navegador.",
+    "Sin coincidencias, lo dice."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos de conocimiento",
+     "cuando": "se escribe una búsqueda",
+     "entonces": "se filtran los nodos, flujos, abiertos, fichas y líneas base de la pestaña abierta"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una pestaña elegida",
+     "cuando": "se vuelve a abrir la página",
+     "entonces": "se abre la misma pestaña"
+    }
+   ],
+   "origen": [
+    "REQ-TB-3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "localStorage str-basecon-tab"
+    ],
+    "notas": "_coincide(...partes), setTab, K_TAB."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-8.6",
+   "capacidad": "CAP-PRJ-8",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver una pestaña Catálogo con las prácticas, patrones y herramientas de la fábrica",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Entregado a Desarrollo, aún sin construir: la página solo tiene las pestañas Mapa, Diagrama, Fichas y Líneas base.",
+    "No se sabe de qué documento saldría (conocimiento.json no tiene esa sección)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "datos con catálogo",
+     "cuando": "se abre la pestaña Catálogo",
+     "entonces": "se ven prácticas, patrones y herramientas de la fábrica con su detalle"
+    }
+   ],
+   "origen": [
+    "REQ-BC-2"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-base-conocimiento.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "REQ-BC-2 está «entregado» en diseno.json; en el código TABS = [mapa, diagrama, fichas, lineas] y no hay _renderCatalogo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Se buscó «catálogo» y TABS en str-base-conocimiento.html: no está"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-9.1",
+   "capacidad": "CAP-PRJ-9",
+   "actor": [
+    "admin"
+   ],
+   "que": "Leer la nomenclatura del modelo del proyecto: roles y chats, identificadores, entidades por capa y quién las escribe, camino de un lote, buzón y avisos, archivos y herramientas, y vocabulario",
+   "declarado": "construido",
+   "limitantes": [
+    "Es texto fijo dentro de la página: no lee los documentos del proyecto, así que no tiene encabezado de datos ni botón Actualizar y puede quedar viejo respecto de lo vigente (un dato, una fuente).",
+    "Se abre desde el enlace «Nomenclatura» de Seg. Proyecto o desde el menú."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "abre Nomenclatura",
+     "entonces": "se ven siete secciones numeradas con sus tablas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un teléfono de 390 px",
+     "cuando": "se abre la página",
+     "entonces": "se lee sin desplazamiento horizontal"
+    }
+   ],
+   "origen": [
+    "REQ-SP-3"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-TB-5",
+     "casos": [
+      "k"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-nomenclatura.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "Página estática con STRApi.exigirRol(['admin']); Seg. Proyecto la abre con _abrirNomenclatura (clic en data-fav-url del menú del marco). El guion REQ-TB-5 k comprueba el criterio 7 de REQ-SP-3 (390 px)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  }
+ ],
+ "sinAtar": []
+}

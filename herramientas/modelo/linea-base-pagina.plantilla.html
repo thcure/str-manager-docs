@@ -6,15 +6,15 @@
 /* Explorador en tres niveles (sistema › módulo › caso de uso) con migas de pan; el diagrama cambia con el nivel. */
 :root{
   --papel:#f4f6f3; --hoja:#ffffff; --tinta:#1d2a2a; --tenue:#5d6b69; --linea:#d7deda; --acento:#0f6e6a; --acentof:#e2f0ee;
-  --ok:#2f8a4e; --sinp:#c9a227; --inc:#c2412d; --noc:#8a96a3; --fuera:#d9dfdc; --sombra:rgba(20,40,40,.14);
+  --ok:#2f8a4e; --sinp:#c9a227; --inc:#c2412d; --noc:#8a96a3; --fuera:#d9dfdc; --sombra:rgba(20,40,40,.14); --entra:#c76a12;
   --f-tit:"Archivo","Arial Narrow",system-ui,sans-serif; --f-txt:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif; --f-dat:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --papel:#121a1a; --hoja:#1a2424; --tinta:#e3ebe8; --tenue:#9aaaa6; --linea:#2c3a39; --acento:#4fb3ad; --acentof:#1c3533;
-  --ok:#5cc07a; --sinp:#e0bd4a; --inc:#ef7a64; --noc:#8e9aa6; --fuera:#2a3433; --sombra:rgba(0,0,0,.5); color-scheme:dark}}
+  --ok:#5cc07a; --sinp:#e0bd4a; --inc:#ef7a64; --noc:#8e9aa6; --fuera:#2a3433; --sombra:rgba(0,0,0,.5); --entra:#f0a050; color-scheme:dark}}
 :root[data-theme="dark"]{
   --papel:#121a1a; --hoja:#1a2424; --tinta:#e3ebe8; --tenue:#9aaaa6; --linea:#2c3a39; --acento:#4fb3ad; --acentof:#1c3533;
-  --ok:#5cc07a; --sinp:#e0bd4a; --inc:#ef7a64; --noc:#8e9aa6; --fuera:#2a3433; --sombra:rgba(0,0,0,.5); color-scheme:dark}
+  --ok:#5cc07a; --sinp:#e0bd4a; --inc:#ef7a64; --noc:#8e9aa6; --fuera:#2a3433; --sombra:rgba(0,0,0,.5); --entra:#f0a050; color-scheme:dark}
 body{background:var(--papel);color:var(--tinta);font:15px/1.5 var(--f-txt)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--papel)}
 .envoltura{max-width:1200px;margin:0 auto;padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
@@ -56,6 +56,28 @@ input[type=search]{width:min(320px,80vw)}
 .tesela:hover{transform:scale(1.15)} @media (prefers-reduced-motion:reduce){.tesela:hover{transform:none}}
 .pct{font:700 .9rem/1 var(--f-dat);white-space:nowrap}
 .diagrama{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow-x:auto}
+.pestanas{display:flex;gap:6px;flex-wrap:wrap}
+.pestanas button{font:600 .85rem/1 var(--f-txt);padding:7px 12px;border-radius:6px;border:1px solid var(--linea);background:var(--hoja);color:var(--tinta);cursor:pointer}
+.pestanas button[aria-selected="true"]{background:var(--acento);border-color:var(--acento);color:var(--hoja)}
+.diagrama .capa{font:600 .72rem/1 var(--f-dat);letter-spacing:.06em;text-transform:uppercase;fill:var(--tenue)}
+.diagrama .arista{stroke:var(--tenue);stroke-opacity:.28;transition:stroke-opacity .15s}
+.diagrama .cuenta{font:600 11px var(--f-dat);fill:var(--tinta);opacity:0}
+#svgCapas.foco .arista{stroke-opacity:.06}
+#svgCapas.foco .arista.sale{stroke:var(--acento);stroke-opacity:.95} #svgCapas.foco .arista.entra{stroke:var(--entra);stroke-opacity:.95}
+#svgCapas.foco .cuenta.sale,#svgCapas.foco .cuenta.entra{opacity:1}
+.diagrama .nodo{cursor:pointer;transition:opacity .15s} .diagrama .nodo.apagado{opacity:.25}
+.diagrama .nodo:hover rect:first-child,.diagrama .nodo:focus rect:first-child{stroke-width:2.5}
+@media (prefers-reduced-motion:reduce){.diagrama .arista,.diagrama .nodo{transition:none}}
+table.matriz{border-collapse:collapse;font:12px var(--f-dat);margin:8px}
+table.matriz th,table.matriz td{border:1px solid var(--linea);padding:0;width:30px;height:28px;text-align:center;position:static}
+table.matriz td{background:color-mix(in srgb,var(--acento) calc(var(--a,0)*100%),transparent);color:var(--tinta)}
+table.matriz td[style]{font-weight:600}
+table.matriz td.diag{background:var(--fuera)} table.matriz td.tot,table.matriz th.tot{background:var(--papel);font-weight:700}
+table.matriz th.fil{text-align:left;padding:0 8px;white-space:nowrap;width:auto;font-weight:700;background:var(--hoja);position:sticky;left:0;z-index:1}
+table.matriz th.col{height:auto;padding:6px 0;vertical-align:bottom;background:var(--hoja)}
+table.matriz th.col span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:700}
+table.matriz th.esq{font:600 .65rem/1.2 var(--f-dat);color:var(--tenue);text-align:left;padding:4px 8px;background:var(--hoja);position:sticky;left:0;z-index:2}
+table.matriz .corte{border-left:2px solid var(--tinta)} table.matriz tr.corte>*{border-top:2px solid var(--tinta)}
 .diagrama svg{display:block;width:100%;height:auto}
 .diagrama text{fill:var(--tinta);font-family:var(--f-txt);font-size:12px}
 .diagrama .t2{fill:var(--tenue);font-size:11px;font-family:var(--f-dat)}
@@ -143,10 +165,14 @@ function vistaSistema(){
        return `<button class="mod" data-m="${m}"><div class="fila2"><span class="etq">${m}</span><span class="chip">${esc(A.estadoArchivo)}</span></div>
          <h3>${esc(nMod(m))}</h3><div class="fila2"><span class="tenue">${I.capacidades} capacidades · ${I.casosUso} casos de uso</span><b class="pct">${fmtPct(I.cobertura.simple)}</b></div>${barra(I.porEstado, false)}</button>`; }).join('')}
        ${pend.map((m) => `<div class="mod fantasma"><div class="fila2"><span class="etq">${m}</span><span class="chip">por levantar</span></div><h3>${esc(nMod(m))}</h3></div>`).join('')}</div></section>
-   <section class="sec"><div class="fila"><h2>Cómo se conectan</h2><span class="tenue">Flujos entre casos de uso, sumados por módulo. Borde punteado: módulo aún sin levantar.</span></div>
+   <section class="sec"><div class="fila"><h2>Cómo se conectan</h2>
+       <div class="pestanas" role="tablist"><button role="tab" data-dg="capas" aria-selected="${VISTA_DG === 'capas'}">Mapa por capas</button><button role="tab" data-dg="matriz" aria-selected="${VISTA_DG === 'matriz'}">Matriz de dependencias</button></div></div>
+     <span class="tenue" id="dgAyuda"></span>
      <div class="diagrama" id="dg"></div></section>`;
   $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
   $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
+  $$('[data-dg]').forEach((b) => b.onclick = () => { VISTA_DG = b.dataset.dg; try { localStorage.setItem('lb-vista-dg', VISTA_DG); } catch (e) {}
+    $$('[data-dg]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.dg === VISTA_DG))); diagramaSistema(); });
   diagramaSistema();
 }
 function seccionAlcance(mods){
@@ -174,29 +200,95 @@ function seccionAlcance(mods){
      <details class="caja"><summary><b>Fuera del alcance (${fuera.length})</b> <span class="tenue">· lo que se decidió no hacer por ahora, con su motivo</span></summary>
        <ul>${fuera.map(({mod, u}) => `<li><button class="enl" data-cu="${esc(u.id)}">${esc(u.id)}</button> ${esc(u.que)} <span class="tenue">— ${esc(corta((u.limitantes || [])[0] || '', 160))}</span></li>`).join('')}</ul></details></section>`;
 }
-function diagramaSistema(){
+let VISTA_DG = (() => { try { return localStorage.getItem('lb-vista-dg') || 'capas'; } catch (e) { return 'capas'; } })();
+const CAPAS = [
+  ['Lo que ve la gente', ['SH', 'OP', 'POR']],
+  ['Operación diaria', ['CAL', 'HK', 'INV', 'FL', 'KN', 'PR']],
+  ['Gestión y dinero', ['INC1', 'PG', 'CMP', 'U']],
+  ['Con terceros: huésped, Google, canales', ['K3', 'M2', 'M6', 'PC1']],
+  ['Plataforma', ['API', 'SRV']],
+  ['Fábrica (no cuenta en la cobertura)', ['PRJ', 'MOD']],
+];
+function flujosModulo(){
   const ar = {};
   const sumar = (o, d) => { if (!o || !d || o === d) return; const k = o + '>' + d; ar[k] = (ar[k] || 0) + 1; };
   Object.values(CU).forEach(({mod, u}) => {
     (u.salidas || []).forEach((f) => sumar(mod, modDe(f.a)));
     (u.entradas || []).forEach((f) => { const o = modDe(f.de); if (!D.modulos[o]) sumar(o, mod); });
   });
-  const nodos = [...new Set(Object.keys(ar).flatMap((k) => k.split('>')).concat(Object.keys(D.modulos)))];
-  const lev = nodos.filter((n) => D.modulos[n]), otros = nodos.filter((n) => !D.modulos[n]);
-  const W = 980, H = 560, cx = W / 2, cy = H / 2, pos = {};
-  const anillo = (lista, rx, ry) => lista.forEach((n, i) => { const a = (i / Math.max(lista.length, 1)) * Math.PI * 2 - Math.PI / 2, r = lista.length > 1 ? 1 : 0; pos[n] = [cx + rx * r * Math.cos(a), cy + ry * r * Math.sin(a)]; });
-  if (otros.length) { anillo(lev, 110 + 14 * lev.length, 70 + 8 * lev.length); anillo(otros, 420, 240); } else anillo(lev, 420, 238);
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Flujos entre módulos" style="min-width:720px"><defs><marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker></defs>`;
-  Object.entries(ar).forEach(([k, n]) => { const [o, d] = k.split('>'); const [x1, y1] = pos[o], [x2, y2] = pos[d];
-    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, ox = -dy / L * 6, oy = dx / L * 6;
-    const k1 = Math.min(52 / Math.abs(dx / L || 1e-9), 22 / Math.abs(dy / L || 1e-9)), k2 = k1 + 4;
-    s += `<line x1="${x1 + ox + dx / L * k1}" y1="${y1 + oy + dy / L * k1}" x2="${x2 + ox - dx / L * k2}" y2="${y2 + oy - dy / L * k2}" stroke="var(--acento)" stroke-opacity=".7" stroke-width="${Math.min(1 + n * .3, 6)}" marker-end="url(#fl)"><title>${o} → ${d}: ${n} flujo(s)</title></line>
-      <text x="${(x1 + x2) / 2 + ox * 2.2}" y="${(y1 + y2) / 2 + oy * 2.2}" class="t2" text-anchor="middle">${n}</text>`; });
-  nodos.forEach((n) => { const [x, y] = pos[n], l = !!D.modulos[n];
-    s += `<g class="${l ? 'nodo' : ''}" data-m="${n}"><rect x="${x - 52}" y="${y - 22}" width="104" height="44" rx="8" fill="${l ? 'var(--acentof)' : 'var(--papel)'}" stroke="${l ? 'var(--acento)' : 'var(--noc)'}" ${l ? '' : 'stroke-dasharray="4 3"'}/>
-      <text x="${x}" y="${y - 3}" text-anchor="middle" style="font-weight:700">${n}</text><text x="${x}" y="${y + 12}" text-anchor="middle" class="t2">${esc(corta(nMod(n), 16))}</text></g>`; });
+  return ar;
+}
+function capasOrden(){
+  const vistos = new Set(CAPAS.flatMap((c) => c[1]));
+  const resto = Object.keys(D.nombresModulo).filter((m) => !vistos.has(m));
+  const capas = CAPAS.map(([t, ms]) => [t, ms.filter((m) => D.nombresModulo[m])]);
+  if (resto.length) capas.push(['Otros', resto]);
+  return capas;
+}
+function soloPlan(m){ const A = D.modulos[m] && D.modulos[m].archivo; return !!A && A.casosUso.length > 0 && A.casosUso.every((u) => u.declarado === 'no-construido' || u.declarado === 'fuera-de-alcance'); }
+function diagramaSistema(){
+  const ar = flujosModulo();
+  if (VISTA_DG === 'matriz') return matrizSistema(ar);
+  $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir.';
+  const capas = capasOrden();
+  const W = 1000, filaH = 104, top = 26, nodoW = 128, nodoH = 56, H = top + capas.length * filaH, pos = {};
+  capas.forEach(([t, ms], r) => {
+    const y = top + r * filaH + 38, n = ms.length, x0 = 190, ancho = W - x0 - 20;
+    ms.forEach((m, i) => { pos[m] = [x0 + ancho * (i + .5) / n, y]; });
+  });
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Módulos del STR por capas y sus flujos" style="min-width:900px" id="svgCapas"><defs>
+    <marker id="flS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker>
+    <marker id="flE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--entra)"/></marker>
+    <marker id="flN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--tenue)"/></marker></defs>`;
+  capas.forEach(([t], r) => { const y = top + r * filaH; const fab = /Fábrica/.test(t);
+    s += `<rect x="4" y="${y}" width="${W - 8}" height="${filaH - 8}" rx="8" fill="${r % 2 ? 'var(--papel)' : 'var(--hoja)'}" stroke="var(--linea)" ${fab ? 'stroke-dasharray="4 3"' : ''}/>
+      <text x="16" y="${y + 22}" class="capa">${esc(t)}</text>`; });
+  const borde = (x, y, dx, dy) => { const k = Math.min((nodoW / 2) / Math.abs(dx || 1e-9), (nodoH / 2) / Math.abs(dy || 1e-9)); return [x + dx * k, y + dy * k]; };
+  Object.entries(ar).sort((a, b) => a[1] - b[1]).forEach(([k, n]) => { const [o, d] = k.split('>'); if (!pos[o] || !pos[d]) return;
+    const [x1, y1] = pos[o], [x2, y2] = pos[d]; const dx = x2 - x1, dy = y2 - y1;
+    const misma = Math.abs(dy) < 1;
+    const cx = (x1 + x2) / 2 + (misma ? 0 : dy * .12), cy = (y1 + y2) / 2 + (misma ? -Math.max(40, Math.abs(dx) * .18) : 0) - dx * .06;
+    const [ax, ay] = borde(x1, y1, cx - x1, cy - y1), [bx, by] = borde(x2, y2, cx - x2, cy - y2);
+    s += `<path class="arista" data-o="${o}" data-d="${d}" d="M${ax},${ay} Q${cx},${cy} ${bx},${by}" fill="none" stroke-width="${Math.min(1 + n * .35, 7)}" marker-end="url(#flN)"><title>${o} → ${d}: ${n} flujo(s)</title></path>
+      <text class="cuenta" data-o="${o}" data-d="${d}" x="${(ax + 2 * cx + bx) / 4}" y="${(ay + 2 * cy + by) / 4 - 3}" text-anchor="middle">${n}</text>`; });
+  capas.forEach(([t, ms]) => ms.forEach((m) => { const [x, y] = pos[m], l = !!D.modulos[m];
+    const I = l ? D.modulos[m].informe : null, pe = I ? I.porEstado : {}, tot = Object.values(pe).reduce((a, b) => a + b, 0) || 1;
+    let bx = x - nodoW / 2 + 8, barra = '';
+    ESTADOS.forEach(([e]) => { if (!pe[e]) return; const w = (nodoW - 16) * pe[e] / tot;
+      barra += `<rect x="${bx}" y="${y + 16}" width="${w}" height="7" fill="${COLOR_EST[e]}" ${e === 'no-construido' ? 'fill-opacity=".35"' : ''}/>`; bx += w; });
+    const pct = I && I.cobertura.simple != null ? I.cobertura.simple.toLocaleString('es-CO') + ' %' : (I ? 'fábrica' : '—');
+    s += `<g class="nodo" data-m="${m}" tabindex="0" role="link" aria-label="${esc(m + ' ' + nMod(m) + ', cobertura ' + pct)}">
+      <rect x="${x - nodoW / 2}" y="${y - nodoH / 2}" width="${nodoW}" height="${nodoH}" rx="8" fill="var(--hoja)" stroke="${l ? 'var(--acento)' : 'var(--noc)'}" ${soloPlan(m) || !l ? 'stroke-dasharray="5 3"' : ''}/>
+      <text x="${x - nodoW / 2 + 8}" y="${y - 9}" style="font-weight:700">${m}</text><text x="${x + nodoW / 2 - 8}" y="${y - 9}" text-anchor="end" class="t2">${pct}</text>
+      <text x="${x - nodoW / 2 + 8}" y="${y + 8}" class="t2">${esc(corta(nMod(m), 19))}</text>${barra}</g>`; }));
   $('#dg').innerHTML = s + '</svg>';
-  $$('#dg .nodo').forEach((g) => g.onclick = () => ir(g.dataset.m));
+  const svg = $('#svgCapas');
+  const marcar = (m) => { svg.classList.toggle('foco', !!m);
+    svg.querySelectorAll('.arista, .cuenta').forEach((el) => { const sale = el.dataset.o === m, entra = el.dataset.d === m;
+      el.classList.toggle('sale', !!m && sale); el.classList.toggle('entra', !!m && entra);
+      if (el.tagName === 'path') el.setAttribute('marker-end', m && sale ? 'url(#flS)' : m && entra ? 'url(#flE)' : 'url(#flN)'); });
+    svg.querySelectorAll('.nodo').forEach((g) => { const v = g.dataset.m === m || (!!m && [...svg.querySelectorAll('.arista')].some((a) => (a.dataset.o === m && a.dataset.d === g.dataset.m) || (a.dataset.d === m && a.dataset.o === g.dataset.m)));
+      g.classList.toggle('apagado', !!m && !v); }); };
+  svg.querySelectorAll('.nodo').forEach((g) => {
+    g.addEventListener('mouseenter', () => marcar(g.dataset.m)); g.addEventListener('focus', () => marcar(g.dataset.m));
+    g.addEventListener('mouseleave', () => marcar(null));
+    g.addEventListener('click', () => { if (D.modulos[g.dataset.m]) ir(g.dataset.m); });
+    g.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && D.modulos[g.dataset.m]) { e.preventDefault(); ir(g.dataset.m); } }); });
+}
+function matrizSistema(ar){
+  $('#dgAyuda').textContent = 'Fila = módulo que entrega; columna = módulo que recibe; el número es cuántos flujos van de uno a otro. Más oscuro = más dependencia. Clic en un módulo para entrar.';
+  const capas = capasOrden(), ms = capas.flatMap((c) => c[1]);
+  const max = Math.max(1, ...Object.values(ar));
+  const sale = (m) => ms.reduce((a, d) => a + (ar[m + '>' + d] || 0), 0), entra = (m) => ms.reduce((a, o) => a + (ar[o + '>' + m] || 0), 0);
+  const ini = new Set(capas.map((c) => c[1][0]));
+  let h = `<table class="matriz"><thead><tr><th class="esq">entrega ↓ · recibe →</th>${ms.map((d) => `<th class="col${ini.has(d) ? ' corte' : ''}" data-m="${d}" title="${esc(nMod(d))}"><span>${d}</span></th>`).join('')}<th class="col tot"><span>sale</span></th></tr></thead><tbody>`;
+  ms.forEach((o) => { h += `<tr class="${ini.has(o) ? 'corte' : ''}"><th class="fil" data-m="${o}" title="${esc(nMod(o))}">${o} <span class="tenue">${esc(corta(nMod(o), 18))}</span></th>`;
+    ms.forEach((d) => { const n = ar[o + '>' + d] || 0;
+      h += o === d ? `<td class="diag${ini.has(d) ? ' corte' : ''}"></td>` : `<td class="${ini.has(d) ? 'corte' : ''}" ${n ? `style="--a:${(.15 + .85 * n / max).toFixed(2)}" title="${o} → ${d}: ${n} flujo(s)"` : ''}>${n || ''}</td>`; });
+    h += `<td class="tot">${sale(o) || ''}</td></tr>`; });
+  h += `<tr class="tot"><th class="fil">entra</th>${ms.map((d) => `<td class="tot${ini.has(d) ? ' corte' : ''}">${entra(d) || ''}</td>`).join('')}<td></td></tr></tbody></table>`;
+  $('#dg').innerHTML = h;
+  $$('#dg [data-m]').forEach((el) => { if (D.modulos[el.dataset.m]) { el.style.cursor = 'pointer'; el.onclick = () => ir(el.dataset.m); } });
 }
 
 /* ---------- Módulo ---------- */

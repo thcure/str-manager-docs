@@ -97,7 +97,7 @@ table.matriz .corte{border-left:2px solid var(--tinta)} table.matriz tr.corte>*{
 .diagrama text{fill:var(--tinta);font-family:var(--f-txt);font-size:12px}
 .diagrama .t2{fill:var(--tenue);font-size:11px;font-family:var(--f-dat)}
 .diagrama .nodo{cursor:pointer} .diagrama .nodo:hover rect{stroke:var(--acento);stroke-width:2}
-.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center} .filtros .salto{flex-basis:100%;height:0}
 .tabla{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;overflow:auto;max-height:70vh}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--linea);vertical-align:top}
@@ -302,24 +302,43 @@ function flujosModulo(){
   recorrerFlujos((o, d, f) => { if (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL) return; const k = o + '>' + d; ar[k] = (ar[k] || 0) + 1; });
   return ar;
 }
-function capasOrden(){
+function capasOrden(vis){
   const vistos = new Set(CAPAS.flatMap((c) => c[1]));
   const resto = Object.keys(D.nombresModulo).filter((m) => !vistos.has(m));
   const capas = CAPAS.map(([t, ms]) => [t, ms.filter((m) => D.nombresModulo[m])]);
   if (resto.length) capas.push(['Otros', resto]);
-  return capas;
+  return vis ? capas.map(([t, ms]) => [t, ms.filter((m) => vis.has(m))]).filter(([, ms]) => ms.length) : capas;
+}
+let F_CAPA = '', F_MOD = '', F_SOLO = '';
+function selModulos(){
+  if (F_MOD) return new Set([F_MOD]);
+  if (F_CAPA) { const c = capasOrden().find(([t]) => t === F_CAPA); return new Set(c ? c[1] : []); }
+  return null;
+}
+function filtrosModulo(conSolo){
+  const capas = capasOrden();
+  return `<label class="etq" for="fCapa">Capa</label><select id="fCapa"><option value="">Todas</option>${capas.map(([t]) => `<option value="${esc(t)}" ${t === F_CAPA ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
+    <label class="etq" for="fMod">Módulo</label><select id="fMod"><option value="">Todos</option>${capas.filter(([t]) => !F_CAPA || t === F_CAPA).map(([t, ms]) => `<optgroup label="${esc(t)}">${ms.map((m) => `<option value="${m}" ${m === F_MOD ? 'selected' : ''}>${m} · ${esc(corta(nMod(m), 30))}</option>`).join('')}</optgroup>`).join('')}</select>
+    ${conSolo ? `<label class="etq" for="fSolo">Mostrar</label><select id="fSolo"><option value="">Personas, módulos y externos</option><option value="1" ${F_SOLO ? 'selected' : ''}>Solo módulos</option></select>` : ''}<span class="salto"></span>`;
+}
+function cablearFiltrosModulo(){
+  $('#fCapa').onchange = (e) => { F_CAPA = e.target.value; if (F_MOD && F_CAPA && !(capasOrden().find(([t]) => t === F_CAPA) || [, []])[1].includes(F_MOD)) F_MOD = ''; diagramaSistema(); };
+  $('#fMod').onchange = (e) => { F_MOD = e.target.value; diagramaSistema(); };
+  if ($('#fSolo')) $('#fSolo').onchange = (e) => { F_SOLO = e.target.value; diagramaSistema(); };
 }
 function soloPlan(m){ const A = D.modulos[m] && D.modulos[m].archivo; return !!A && A.casosUso.length > 0 && A.casosUso.every((u) => u.declarado === 'no-construido' || u.declarado === 'fuera-de-alcance'); }
 function diagramaSistema(){
   $('#dgRel').hidden = VISTA_DG !== 'capas';
   if (VISTA_DG === 'contexto') return contextoSistema();
-  $('#dgFiltros').innerHTML = `<label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span>`;
-  $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaSistema(); };
-  const ar = flujosModulo();
+  $('#dgFiltros').innerHTML = filtrosModulo(false) + `<label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span>`;
+  $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaSistema(); }; cablearFiltrosModulo();
+  const ar = flujosModulo(), SEL = selModulos();
+  if (SEL) Object.keys(ar).forEach((k) => { const [o, d] = k.split('>'); if (!SEL.has(o) && !SEL.has(d)) delete ar[k]; });
+  const VIS = SEL ? new Set([...SEL, ...Object.keys(ar).flatMap((k) => k.split('>'))]) : null;
   $('#fRelDesc').textContent = descTipoRel(FILTRO_REL); panelRel(null);
-  if (VISTA_DG === 'matriz') return matrizSistema(ar);
+  if (VISTA_DG === 'matriz') return matrizSistema(ar, VIS);
   $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Al señalar un módulo o una flecha aparece de qué se trata cada relación; el detalle completo queda debajo del mapa. En el celular, el primer toque muestra y el segundo entra.';
-  const capas = capasOrden();
+  const capas = capasOrden(VIS);
   const W = 1000, filaH = 104, top = 26, nodoW = 128, nodoH = 56, H = top + capas.length * filaH, pos = {};
   capas.forEach(([t, ms], r) => {
     const y = top + r * filaH + 38, n = ms.length, x0 = 190, ancho = W - x0 - 20;
@@ -373,10 +392,11 @@ function diagramaSistema(){
     a.addEventListener('mouseleave', () => { if (!tactil) mostrarFlota(activo ? htmlFlotaModulo(activo) : null, ...(activo ? centro(svg.querySelector(`.nodo[data-m="${activo}"]`)) : [0, 0])); });
     a.addEventListener('click', (e) => { e.stopPropagation(); ver(e); }); });
   svg.addEventListener('click', (e) => { if (!e.target.closest('.nodo') && !e.target.closest('.arista')) marcar(null); });
+  if (F_MOD && pos[F_MOD]) { marcar(F_MOD); svg.querySelectorAll('.nodo').forEach((g) => g.addEventListener('mouseleave', () => { if (!tactil) marcar(F_MOD); })); }
 }
-function matrizSistema(ar){
+function matrizSistema(ar, VIS){
   $('#dgAyuda').textContent = 'Fila = módulo que entrega; columna = módulo que recibe; el número es cuántos flujos van de uno a otro. Más oscuro = más dependencia. Clic en un módulo para entrar.';
-  const capas = capasOrden(), ms = capas.flatMap((c) => c[1]);
+  const capas = capasOrden(VIS), ms = capas.flatMap((c) => c[1]);
   const max = Math.max(1, ...Object.values(ar));
   const sale = (m) => ms.reduce((a, d) => a + (ar[m + '>' + d] || 0), 0), entra = (m) => ms.reduce((a, o) => a + (ar[o + '>' + m] || 0), 0);
   const ini = new Set(capas.map((c) => c[1][0]));
@@ -555,34 +575,38 @@ function contextoSistema(){
   const extSet = new Set(Object.keys(AI).filter((a) => AI[a].tipo === 'sistema').concat(relsExt.flatMap(([, r]) => [r.o, r.d]).filter(fuera)));
   const ext = (a) => extSet.has(a);
   const orden = (x, y) => Object.keys(AI).indexOf(x) - Object.keys(AI).indexOf(y);
-  const personas = usados.filter((a) => a !== 'sistema' && !ext(a)).sort(orden);
-  const externos = [...extSet].sort(orden);
-  $('#dgFiltros').innerHTML = `<label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${personas.concat(externos).map((a) => `<option value="${a}" ${a === CTX_ACT ? 'selected' : ''}>${esc(ACT(a))}</option>`).join('')}</select>
+  let personas = usados.filter((a) => a !== 'sistema' && !ext(a)).sort(orden);
+  let externos = [...extSet].sort(orden);
+  const SEL = selModulos();
+  $('#dgFiltros').innerHTML = filtrosModulo(true) + `<label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${personas.concat(externos).map((a) => `<option value="${a}" ${a === CTX_ACT ? 'selected' : ''}>${esc(ACT(a))}</option>`).join('')}</select>
     <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que el STR entrega</option><option value="entra">Solo lo que el STR recibe</option><option value="-">Ninguna</option></select>
     <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select>`;
-  $('#cAct').value = CTX_ACT; $('#cDir').value = CTX_DIR;
+  $('#cAct').value = CTX_ACT; $('#cDir').value = CTX_DIR; cablearFiltrosModulo();
   const fA = CTX_ACT, fD = CTX_DIR;
   $('#dgAyuda').textContent = 'Izquierda: las personas que usan el STR. Centro: sus módulos por capa, con la barra de estado de sus casos de uso. Derecha: los sistemas externos. Línea gris: el actor usa casos de uso de ese módulo (más gruesa = más casos). Verde azulado: el STR entrega; naranja: recibe. Línea a la caja grande: la relación vale para todos los módulos. Señala cualquier cosa para ver qué es; toca un módulo dos veces para entrar.';
   // relaciones con el exterior (del mapa)
   const cuenta = {}, rels = [];
   relsExt.forEach(([id, r]) => { const t = (D.relTipo || {})[id] || 'por-precisar'; cuenta[t] = (cuenta[t] || 0) + 1;
     const dir = fuera(r.d) ? 'sale' : 'entra', mod = dir === 'sale' ? r.o : r.d, e = dir === 'sale' ? r.d : r.o;
-    if (!pasaRel(t) || fD === '-' || (fD && fD !== dir) || (fA && fA !== '-' && ext(fA) && fA !== e)) return;
+    if (!pasaRel(t) || fD === '-' || (fD && fD !== dir) || (fA && fA !== '-' && ext(fA) && fA !== e) || (SEL && mod !== '*' && !SEL.has(mod))) return;
     rels.push({id, r, dir, mod, e}); });
   $('#fRel').innerHTML = opcionesRelCuenta(cuenta);
-  const capas = capasOrden();
+  const capas = capasOrden(SEL);
+  const usa = {};
+  todos.forEach(({mod, u}) => u.actor.forEach((a) => { const k = a + '|' + mod; usa[k] = (usa[k] || 0) + 1; }));
+  const usaEn = (a) => Object.keys(usa).some((k) => { const [x, m] = k.split('|'); return x === a && (!SEL || SEL.has(m)); });
+  if (F_SOLO) { personas = []; externos = []; }
+  else if (SEL) { personas = personas.filter(usaEn); externos = externos.filter((e) => usaEn(e) || rels.some((x) => x.e === e)); }
   const W = 1000, filaM = 30, cabC = 22, top = 40;
   const pos = {}; let yy = top + 10;
   capas.forEach(([t, ms]) => { pos['capa:' + t] = yy; yy += cabC; ms.forEach((m) => { pos[m] = yy + filaM / 2; yy += filaM + 4; }); yy += 6; });
-  const H = Math.max(yy + 10, top + 40 + Math.max(personas.length, externos.length) * 60);
+  const H = Math.max(yy + 10, top + 40 + Math.max(personas.length, externos.length) * 60, 160);
   const ya = (i, n) => top + 20 + i * ((H - top - 40) / Math.max(n, 1)) + 20;
   const cx0 = 330, cx1 = 670;
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Contexto del STR: personas, módulos y sistemas externos" style="min-width:820px" id="svgCtx">${MARCAS}`;
-  s += `<text x="20" y="24" class="t2">PERSONAS</text><text x="${cx0 + 10}" y="24" class="t2">STR MANAGER · MÓDULOS POR CAPA</text><text x="${W - 210}" y="24" class="t2">SISTEMAS EXTERNOS</text>`;
+  s += `${F_SOLO ? '' : '<text x="20" y="24" class="t2">PERSONAS</text>'}<text x="${cx0 + 10}" y="24" class="t2">STR MANAGER · MÓDULOS POR CAPA</text>${F_SOLO ? '' : `<text x="${W - 210}" y="24" class="t2">SISTEMAS EXTERNOS</text>`}`;
   s += `<rect class="cn" data-k="c" data-id="*" x="${cx0 - 10}" y="${top - 6}" width="${cx1 - cx0 + 20}" height="${H - top}" rx="10" fill="none" stroke="var(--acento)" stroke-width="1.5"/>`;
   // actor → módulo
-  const usa = {};
-  todos.forEach(({mod, u}) => u.actor.forEach((a) => { const k = a + '|' + mod; usa[k] = (usa[k] || 0) + 1; }));
   if (fA !== '-') Object.entries(usa).forEach(([k, n]) => { const [a, m] = k.split('|'); if (fA && a !== fA) return; if (!pos[m]) return;
     if (personas.includes(a)) s += `<line class="cl" data-a="${a}" data-c="${m}" x1="160" y1="${ya(personas.indexOf(a), personas.length)}" x2="${cx0}" y2="${pos[m]}" stroke="var(--tenue)" stroke-opacity=".4" stroke-width="${Math.min(.8 + n * .08, 6)}"/>`;
     else if (externos.includes(a)) s += `<line class="cl" data-o="${a}" data-c="${m}" data-usa="1" x1="${cx1}" y1="${pos[m]}" x2="${W - 210}" y2="${ya(externos.indexOf(a), externos.length)}" stroke="var(--tenue)" stroke-opacity=".4" stroke-dasharray="4 3" stroke-width="${Math.min(.8 + n * .3, 5)}"/>`; });

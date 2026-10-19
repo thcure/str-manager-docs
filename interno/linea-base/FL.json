@@ -1,0 +1,3326 @@
+{
+ "modulo": "FL",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-flujos.html (4238 líneas, leída por funciones: arranque y vínculos de entrada, datos y migraciones, copias por propiedad, lista y filtros, editor, tiempos, zonas, fotos, proceso, inventario, guías, compuestos, categorías, guardar y eliminar, importar y exportar, arrastre)",
+  "docs/claude/flujos.md (mapa técnico del módulo, fuente principal)",
+  "str-m1-housekeeping.html y str-propiedades.html (solo búsquedas: enlaces a Flujos, lectura del flujo base, estimadoNota, categorías, ámbito)",
+  "docs/claude/housekeeping.md (búsquedas: cómo HK lee flujos, etapas y claves de tarea) y str-api.js (exigirRol, colecciones y caché de flujos)",
+  "api/col/index.php (colecciones válidas, roles de escritura de flujos, filtros de lectura del colaborador; no hay reglas propias de contenido de flujos)",
+  "fl-fuentes.json: módulo FL del mapa, 20 REQ, 9 DA, 1 de la bolsa, 7 INC, 1 DT, REL-07 y REL-08 y las generales, actores y reglas transversales (varios REQ, DA e INC salieron por coincidencia de palabra y están en «sinAtar»)",
+  "fl-guiones.json y interno/arquitectura/guiones-e2e.json: REQ-FL-12 (casos a, b y c, los tres ejercen el editor) y REQ-OP-1 (solo lee emoji y nombre corto en el tablero: no se cita); el .spec.js de REQ-FL-12 se leyó para ver qué comprueba",
+  "interno/linea-base/esquema.json, sistema.json, INV.json, HK.json, PR.json, POR.json y U.json (estilo y flujos con ids reales, y sus mapeos)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "El editor de flujos: crear, editar, ordenar, descartar cambios y eliminar flujos generales con sus actividades y tareas.",
+   "Lo que lleva cada actividad y tarea: minutos y tiempo total, omisible, zonas con herencia, foto exigida con mínimo, proceso con espera y tarea de cierre, tarea de inventario, guías y nota.",
+   "Copias por propiedad: crearlas, editarlas, resolver sus zonas por definir, borrarlas, ver las huérfanas y ver dónde se usa cada flujo.",
+   "Flujos compuestos y sub-flujos: orden, paralelo, anidado, colaborador sugerido, trabajo y duración.",
+   "Categorías libres de flujo y las categorías del sistema que se deducen; emoji y nombre corto con su herencia.",
+   "Lista, búsqueda y filtros por propiedad, tipo y categoría.",
+   "Importar y exportar con Excel y CSV: plantilla, exportación, vista previa con errores y avisos, reemplazo o copia.",
+   "Acceso solo para administrador y operador, entrega de los flujos a Housekeeping y Propiedades, sincronización y ajuste de datos viejos.",
+   "Lo definido y aún por construir: apoyo con horas llamadas por sub-flujo, categorías del sistema Mantenimiento e Inventario con sus plantillas, y el reinicio del módulo (fuera de alcance por ahora)."
+  ],
+  "fuera": [
+   "Cómo el turno usa el flujo: armar el turno, marcar y omitir tareas, fotos, procesos y avance (Housekeeping).",
+   "La ficha de la propiedad, su flujo base, sus zonas y su colaborador base (Propiedades): aquí solo se cuenta cómo Flujos las lee y se enlaza con ellas.",
+   "La biblioteca de guías y el visor del checklist (Conocimiento): aquí solo se cuenta cómo se enlazan y se crea una guía desde el editor.",
+   "El catálogo de artículos y el conteo (Inventario): aquí solo se cuenta cómo una tarea elige la lista y los artículos.",
+   "Los eventos de mantenimiento e inventario del calendario y del portal (Calendario, Portal).",
+   "El tablero de operación (OP): lee emoji y nombre corto por el servidor.",
+   "El menú que lleva a Flujos y la identidad y los permisos (Shell, Identidad); el servidor de colecciones.",
+   "Los pagos y la bolsa de tiempo del apoyo (Pagos): solo se cuenta el envío del sub-flujo y su colaborador sugerido."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde str-flujos.html (4238 líneas, leída por funciones), su mapa técnico, las búsquedas en Housekeeping y Propiedades, el servidor de colecciones y los guiones e2e. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código (REQ-F11-5-2, REQ-MI1-1 y REQ-INV2-5 no están en el código). Muchas reglas del editor (REQ-F9.k a F9.p, REQ-F11, REQ-INV1, REQ-K1) están anotadas en el mapa técnico pero ya no están en la lista de REQ del diseño: se citan en la capa técnica y no en `origen`. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). Los casos de uso de los módulos vecinos sin línea base (Calendario, Conocimiento, Servidor, Menú) usan identificadores provisionales que su dueño debe confirmar. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-FL-1",
+   "nombre": "Armado de flujos",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Crear un flujo con sus actividades y tareas, editarlo, ordenarlo, descartar cambios y eliminarlo con el aviso de lo que arrastra."
+  },
+  {
+   "id": "CAP-FL-2",
+   "nombre": "Contenido de actividades y tareas",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Lo que cada actividad y tarea lleva: minutos y tiempo total, omisible, zonas, foto exigida, proceso con espera, tarea de inventario, guías y nota."
+  },
+  {
+   "id": "CAP-FL-3",
+   "nombre": "Copias por propiedad",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Personalizar un flujo general para una propiedad sin cambiar el general: crear y editar la copia, resolver sus zonas por definir, borrarla y ver dónde se usa cada flujo."
+  },
+  {
+   "id": "CAP-FL-4",
+   "nombre": "Flujos compuestos y sub-flujos",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Armar un flujo con otros flujos en orden o en paralelo, con colaborador sugerido, y calcular trabajo y duración; el apoyo con horas llamadas está por construir."
+  },
+  {
+   "id": "CAP-FL-5",
+   "nombre": "Categorías de flujo",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Categorías libres (icono y nombre) para agrupar y filtrar flujos; las categorías del sistema Mantenimiento e Inventario y las plantillas de inventario están por construir."
+  },
+  {
+   "id": "CAP-FL-6",
+   "nombre": "Lista, búsqueda y filtros",
+   "tipo": "consulta",
+   "peso": "por-confirmar",
+   "que": "Ver los flujos en tarjetas, buscarlos por nombre y filtrarlos por propiedad, tipo y categoría (incluidas las del sistema que se deducen)."
+  },
+  {
+   "id": "CAP-FL-7",
+   "nombre": "Emoji y nombre corto del flujo",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Dar a cada flujo un emoji y un nombre corto que leen el tablero y Housekeeping, con herencia en las copias y emojis del compuesto."
+  },
+  {
+   "id": "CAP-FL-8",
+   "nombre": "Importar y exportar con Excel",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Descargar la plantilla, exportar flujos generales y cargar archivos de Excel o CSV con vista previa, errores, avisos y reemplazo de flujos existentes."
+  },
+  {
+   "id": "CAP-FL-9",
+   "nombre": "Acceso y límites",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Solo el administrador y el operador abren y cambian flujos; el colaborador solo los lee en su turno."
+  },
+  {
+   "id": "CAP-FL-10",
+   "nombre": "Entrega, sincronización y datos viejos",
+   "tipo": "integracion",
+   "peso": "por-confirmar",
+   "que": "Entregar los flujos a Housekeeping y Propiedades, mantenerlos al día con el sistema, ajustar formatos viejos y retirar lo que ya no se usa."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-FL-1.1",
+   "capacidad": "CAP-FL-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear un flujo general con su nombre, sus actividades y sus tareas, y guardarlo",
+   "declarado": "construido",
+   "limitantes": [
+    "No se impide repetir el nombre de otro flujo: la importación desde Excel toma como «el mismo» al flujo de igual nombre (CU-FL-8.4).",
+    "El nombre del flujo no tiene longitud máxima; el nombre corto sí (CU-FL-7.1)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de un flujo nuevo con un nombre",
+     "cuando": "se guarda",
+     "entonces": "sale el aviso «Flujo creado», el flujo aparece en la lista de flujos y sigue ahí al recargar la página; nace simple, sin categoría y sin emoji"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo nuevo con una actividad con dos tareas y otra actividad sin nombre y sin tareas",
+     "cuando": "se guarda",
+     "entonces": "el flujo queda con la actividad que tiene contenido; la actividad vacía se descarta sin error"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un flujo sin nombre, o una actividad con tareas pero sin nombre",
+     "cuando": "se pulsa «Guardar flujo»",
+     "entonces": "sale un aviso («El flujo necesita un nombre» o «Una actividad tiene tareas pero sin nombre»), el cursor va al campo que falta y no se guarda nada"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-FL-12",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [
+     "/api/col/flujos"
+    ],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "nuevoFlujo/guardarFlujo/renderEditor; el flujo nuevo nace {tipo:'', ambito:'todos', esCompuesto:false, subFlujos:[]}; persist() → _persistCol('flujos'). REQ-FL-12 a crea un flujo sin actividades por la interfaz y lo ve tras recargar: respalda E1, no el armado de actividades (E2)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: validaciones de guardarFlujo y aviso de creado; la prueba REQ-FL-12 a ejerce E1"
+   }
+  },
+  {
+   "id": "CU-FL-1.2",
+   "capacidad": "CAP-FL-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Editar un flujo guardado y guardar sus cambios, o descartarlos con «Cancelar»",
+   "declarado": "construido",
+   "limitantes": [
+    "Editar un flujo general no cambia sus copias por propiedad ni las tareas que un turno ya tomó (decisión de diseño: cada copia es independiente).",
+    "Los cambios se guardan todos juntos al pulsar «Guardar flujo»; no hay guardado automático."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo general guardado",
+     "cuando": "se abre, se cambia algo y se guarda",
+     "entonces": "sale «Flujo actualizado»; si el flujo tiene copias por propiedad el aviso dice que esas copias no cambian"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo abierto con cambios sin guardar",
+     "cuando": "se pulsa «Cancelar» o la ✕ del editor",
+     "entonces": "el flujo vuelve a como estaba al abrirlo y la lista no muestra los cambios"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-FL-12",
+     "casos": [
+      "b",
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "editarFlujo (copia profunda en editorData) / cerrarEditor(false) → restoreEditor (snapshot de flujos al abrir, INC-10 en el código). REQ-FL-12 b y c abren un flujo existente, cambian emoji y nombre corto y guardan."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: copia profunda al abrir, snapshot al abrir y aviso de copias; REQ-FL-12 b y c editan y guardan un flujo existente"
+   }
+  },
+  {
+   "id": "CU-FL-1.3",
+   "capacidad": "CAP-FL-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Agregar, nombrar y quitar actividades y tareas del flujo",
+   "declarado": "construido",
+   "limitantes": [
+    "Quitar una actividad o una tarea no pide confirmación: se descarta con «Cancelar» o se conserva con «Guardar flujo»."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo en edición",
+     "cuando": "se agrega una actividad y dentro de ella una tarea",
+     "entonces": "la actividad y la tarea aparecen con el cursor en su nombre; la tarea nace con 10 minutos (o «repartir» si la actividad tiene tiempo total) y el resumen de tiempos se actualiza sin perder lo escrito"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad con una sola tarea",
+     "cuando": "se quita esa tarea",
+     "entonces": "la actividad pasa a ser una actividad sin tareas, con sus propios minutos, omisible, guías y zona"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una tarea que es la de cierre de otra tarea en proceso",
+     "cuando": "se quita",
+     "entonces": "la otra tarea queda sin tarea de cierre y su lista de «Cierra con» ya no la ofrece"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "addActividad/removeActividad/addTarea/removeTarea: inyectan o quitan nodos sin re-renderizar el editor (INC-54 en el código); una actividad sin tareas es «actividad-hoja» (clave actId::__self__)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: valores iniciales de la tarea nueva y paso a actividad-hoja al quitar la última tarea"
+   }
+  },
+  {
+   "id": "CU-FL-1.4",
+   "capacidad": "CAP-FL-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Reordenar las actividades de un flujo y las tareas de una actividad arrastrándolas",
+   "declarado": "construido",
+   "limitantes": [
+    "Para reordenar solo hay arrastre con el puntero; no hay botones de subir y bajar para actividades y tareas (los sub-flujos sí los tienen, CU-FL-4.1).",
+    "No está comprobado que el arrastre funcione con el dedo en el teléfono."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo con tres actividades",
+     "cuando": "se arrastra la tercera sobre la primera",
+     "entonces": "el orden de las actividades cambia en pantalla y en el flujo guardado; el turno las muestra en ese orden"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad con varias tareas",
+     "cuando": "se arrastra una tarea sobre otra de la misma actividad",
+     "entonces": "las tareas cambian de orden dentro de la actividad"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una tarea de una actividad",
+     "cuando": "se suelta sobre una tarea de otra actividad",
+     "entonces": "no pasa nada: una tarea no cambia de actividad al arrastrarla"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Arrastre nativo del navegador (dragstart/dragover/drop) en .actividad-block y .tarea-row; observadores de cambios que reasignan los manejadores. El arrastre nativo suele no responder al tacto."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: manejadores de arrastre de actividades y de tareas; el comportamiento táctil no se probó"
+   }
+  },
+  {
+   "id": "CU-FL-1.5",
+   "capacidad": "CAP-FL-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Dar a una actividad sin tareas un texto propio que el turno muestra como el nombre de su tarea",
+   "declarado": "construido",
+   "limitantes": [
+    "El texto de la actividad sin tareas es distinto de la nota corta del botón de guías (CU-FL-2.7): son dos campos, y solo la nota corta viaja por Excel; el texto propio no sale ni entra por Excel (CU-FL-8.4)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad sin tareas con el texto «Revisar el balcón»",
+     "cuando": "el colaborador abre el turno",
+     "entonces": "la tarea del turno se llama «Revisar el balcón»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad sin tareas y sin ese texto",
+     "cuando": "el colaborador abre el turno",
+     "entonces": "la tarea del turno lleva el nombre de la actividad"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Campo estimadoNota de la actividad-hoja (input «Nota (actividad sin tareas)», updateActNota); HK lo lee como act.estimadoNota||act.nombre. No es a.nota. El nombre del campo no dice que es el nombre de la tarea."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y búsqueda en Housekeeping: el turno pinta estimadoNota o, si falta, el nombre de la actividad"
+   }
+  },
+  {
+   "id": "CU-FL-1.6",
+   "capacidad": "CAP-FL-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar un flujo, con el aviso de lo que se lleva por delante",
+   "declarado": "construido",
+   "limitantes": [
+    "Eliminar es definitivo: no hay papelera ni desactivar, y la regla de «no se borra, se desactiva» no incluye a Flujos en el mapa.",
+    "El aviso no menciona los turnos ya armados con ese flujo."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo general con dos copias por propiedad",
+     "cuando": "se pulsa 🗑 y se confirma",
+     "entonces": "el aviso dice «También se eliminarán sus 2 copias por propiedad» y cuántas propiedades las usan; al confirmar desaparecen el flujo y sus copias"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo que forma parte de dos flujos compuestos",
+     "cuando": "se elimina",
+     "entonces": "el aviso nombra a los compuestos y, al confirmar, el flujo sale de cada uno y sus sub-flujos se renumeran"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un flujo que es el flujo base de una propiedad",
+     "cuando": "se elimina",
+     "entonces": "el aviso dice que esa propiedad quedará sin flujo base y su turno automático sin tareas hasta elegir otro; la ficha de la propiedad no se toca y la muestra «Sin flujo base»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [
+    "INC-77"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [
+     "/api/col/flujos"
+    ],
+    "colecciones": [
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "confirmarEliminar(id) arma el aviso; al confirmar borra el flujo y sus copias (plantillaId), quita el id de subFlujos de cada compuesto y persist() (el diff contra la última subida los manda como borrados). No toca propiedades (flujoBaseId queda huérfano; Propiedades y HK lo tratan como «sin flujo base»)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: tres líneas del aviso y la cascada de borrado; INC-77 cerrado verificado en producción según seguimiento"
+   }
+  },
+  {
+   "id": "CU-FL-2.1",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Dar minutos a cada tarea y un tiempo total a la actividad, y ver el trabajo y la duración del flujo",
+   "declarado": "construido",
+   "limitantes": [
+    "El total de la actividad solo se puede poner si tiene tareas; en una actividad sin tareas manda su propio número de minutos.",
+    "La duración suma la espera de las tareas en proceso y su tarea de cierre (CU-FL-2.5); el trabajo («manos») no suma la espera."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad con dos tareas de 10 y 15 minutos",
+     "cuando": "se mira la cabecera de la actividad y el resumen del flujo",
+     "entonces": "la actividad dice 25 minutos y el resumen suma «Trabajo» de todo el flujo (y «Duración» cuando difiere)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad con total de 30 minutos, una tarea de 10 y dos tareas sin minutos",
+     "cuando": "se miran las tareas",
+     "entonces": "las dos tareas vacías se reparten lo que falta (10 y 10) y la cabecera dice «10 asignados · 20 por repartir entre 2»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una actividad con total de 30 minutos y tareas con números que suman 35",
+     "cuando": "se intenta guardar",
+     "entonces": "la cabecera marca en rojo «supera el total en 5 min», la tarea con exceso se pinta en rojo y no se guarda: «las tareas suman 35 min y el total es 30»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_fbTiempoTarea/_fbTiempoActividad/_fbExcesoActividad (bloque [F9p-puras], copia idéntica en HK y Propiedades bajo el test tests/flujo-base.test.js), tiempoTrabajo/duracion/calcStats, _actHeaderText, _refrescarTiemposActividad. Anotado en el mapa técnico como REQ-F9.p."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: reparto del presupuesto entre tareas vacías, texto de la cabecera y rechazo al guardar"
+   }
+  },
+  {
+   "id": "CU-FL-2.2",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Marcar una tarea (o una actividad sin tareas) como omisible",
+   "declarado": "construido",
+   "limitantes": [
+    "Cómo se omite en el turno (con motivo y foto si hace falta) lo cuenta Housekeeping (CU-HK-2.3)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea sin marcar",
+     "cuando": "se pulsa «Omisible»",
+     "entonces": "el botón queda como «⚠️ Omisible» y el resumen del flujo cuenta una omisible más"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo con tareas omisibles",
+     "cuando": "se mira su tarjeta en la lista",
+     "entonces": "la tarjeta muestra cuántas tareas omisibles tiene"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "toggleOmisible; contador en calcStatsSimple y en la tarjeta (⚠️ N omisibles)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: botón omisible y contador del resumen y de la tarjeta"
+   }
+  },
+  {
+   "id": "CU-FL-2.3",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Poner zonas a una actividad y a sus tareas: las tareas sin zona propia heredan la de la actividad",
+   "declarado": "construido",
+   "limitantes": [
+    "En un flujo general el selector ofrece las zonas de todas las propiedades más las básicas (Sala, Cocina, Baño, Habitación); en una copia por propiedad, solo las de esa propiedad.",
+    "El buscador crea cualquier nombre escrito, también en una copia, aunque la propiedad no tenga esa zona; en cambio la importación desde Excel rechaza una zona que no existe en ninguna propiedad (CU-FL-8.3)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-4.1",
+     "dato": "zonas de cada propiedad, para ofrecerlas como zonas de las actividades y tareas"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad con la zona «Baño» y una tarea sin zona propia",
+     "cuando": "se miran los botones de zona",
+     "entonces": "la tarea muestra «Baño · de la actividad» atenuado, y el turno le pone la zona del baño"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una tarea con zonas propias",
+     "cuando": "se abre su selector de zonas",
+     "entonces": "el selector muestra las marcadas, las que ya usa el flujo y todas las demás (con las de la propiedad filtrada primero); ofrece «Usar la de la actividad» para volver a heredar"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "el selector de zonas abierto",
+     "cuando": "se escribe un nombre que no existe y se pulsa Enter",
+     "entonces": "la zona se crea y queda marcada en esa actividad o tarea, aunque no exista en ninguna propiedad"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "zonasEfectivas(t, a) (copia idéntica en HK): heredar = dejar t.zonas vacío, nunca copiar a.zonas; openZonaPopover/_zonaPopEnter/_usarZonaActividad/_zonasDisponibles. Lee la lista de propiedades de la caché local (str-propiedades-v1). Anotado en el mapa técnico como REQ-F9.m y F9.n."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: herencia de zonas, tres bloques del selector y creación con Enter"
+   }
+  },
+  {
+   "id": "CU-FL-2.4",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Exigir foto a una tarea, o a todas las tareas de una actividad, con un mínimo de fotos",
+   "declarado": "construido",
+   "limitantes": [
+    "La foto de la actividad no admite excepciones por tarea."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad con tres tareas",
+     "cuando": "se marca 📷 en la actividad con mínimo 2",
+     "entonces": "las tres tareas heredan la foto: sus casillas quedan marcadas, atenuadas y sin poder desmarcarse, y el turno les pide 2 fotos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una tarea suelta",
+     "cuando": "se marca su 📷 y se pone mínimo 3",
+     "entonces": "solo esa tarea pide foto, con mínimo 3 (el mínimo va de 1 a 10; vacío vale 1)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una tarea con mínimo propio de 5 fotos",
+     "cuando": "se marca 📷 en su actividad sin poner mínimo",
+     "entonces": "manda solo el mínimo de la actividad (1); el 5 de la tarea queda guardado sin aplicar y vuelve a contar si se desmarca la actividad"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-11"
+   ],
+   "pendientes": [
+    "INC-83"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_fbFotoEfectiva(t, a) (bloque [F9p-puras]); _fotoActHTML/_fotoTareaHTML/_refrescarFotosActividad; a.foto, a.fotoMin, t.foto, t.fotoMin. Anotado en el mapa técnico como REQ-F9.o. INC-83 cerrado (lote 58)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: herencia de la foto y mínimo efectivo (INC-83 cerrado)"
+   }
+  },
+  {
+   "id": "CU-FL-2.5",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Marcar una tarea como proceso con una espera y una tarea que la cierra",
+   "declarado": "construido",
+   "limitantes": [
+    "«Cierra con» solo puede apuntar a otra tarea de la misma actividad.",
+    "En una actividad sin tareas el proceso solo tiene espera (sin tarea de cierre)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una actividad con dos tareas",
+     "cuando": "una se marca como proceso con 20 minutos de espera y se elige la otra en «Cierra con»",
+     "entonces": "la duración de la actividad suma los minutos de la tarea, la espera y los de la tarea de cierre; el turno la muestra como proceso con espera"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una actividad con una sola tarea en proceso",
+     "cuando": "se pulsa «+ Agregar tarea de cierre»",
+     "entonces": "se crea una tarea manual «Cierre de …» ya enlazada como cierre"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una tarea elegida como cierre que estaba en modo proceso",
+     "cuando": "se enlaza como cierre",
+     "entonces": "pasa a manual con un aviso, porque un cierre no puede depender de otro; al guardar, un «Cierra con» que apunte a una tarea que ya no existe se limpia con aviso"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "toggleProceso/updateTarEspera/updateTarCierraCon/_agregarTareaCierre/_refreshCierraConSelects; duracion(a) = max(trabajo, tarea + espera + cierre). El botón de cierre usa la clase add-cierre-btn (nunca add-tarea-btn). Marcas INC-54 en el código; INC-54 no está en seguimiento."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: cálculo de duración, conversión del cierre a manual y limpieza al guardar"
+   }
+  },
+  {
+   "id": "CU-FL-2.6",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Marcar una tarea como de inventario: elegir qué lista se cuenta (dotación, conteo o nivel) y, si se quiere, qué artículos",
+   "declarado": "construido",
+   "limitantes": [
+    "El flujo nunca guarda cantidades: solo qué lista se cuenta y qué artículos; las cantidades las declara el colaborador en el turno.",
+    "Lista «Conteo»: artículos de unidad y circulante del depósito principal; «Nivel»: solo nivel; «Dotación»: unidad y nivel del apartamento."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-1.1",
+     "dato": "artículos activos del catálogo con su clase, para elegir cuáles cuenta la tarea"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-7.2",
+     "dato": "tarea de inventario del flujo con su lista y sus artículos, para que el colaborador declare el conteo o el nivel al marcarla",
+     "rel": "REL-07"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea en edición",
+     "cuando": "se pulsa 📦 y se elige la lista «Dotación del apartamento»",
+     "entonces": "la tarea queda como de inventario y se ofrecen los artículos de esa lista para marcar"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una tarea de inventario con artículos de la lista de dotación marcados",
+     "cuando": "se cambia a la lista «Nivel del apartamento»",
+     "entonces": "se quitan los artículos marcados que no son de esa lista"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una tarea de inventario sin ningún artículo marcado, o sin artículos en Inventario",
+     "cuando": "se guarda",
+     "entonces": "vale «todos los artículos activos de la lista»; si Inventario aún no tiene artículos, la ayuda lo dice"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "inv-articulos"
+    ],
+    "notas": "t.inventario = null | {lista:'dotacion'|'conteo'|'nivel', articulos:[ids]}; _INV_LISTAS, toggleInventario/setInvLista/toggleInvArticulo; lee el catálogo de artículos de la caché local (str-inv-articulos-v1, solo lectura; la página hace pull('inv-articulos')). Anotado en el mapa técnico como REQ-INV1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: listas, filtro por clase y quitar artículos al cambiar de lista"
+   }
+  },
+  {
+   "id": "CU-FL-2.7",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Enlazar guías de Conocimiento y una nota corta a una tarea, o a una actividad sin tareas",
+   "declarado": "construido",
+   "limitantes": [
+    "La guía de una actividad con tareas no se usa: cada tarea lleva las suyas; el botón de la actividad solo aparece si no tiene tareas."
+   ],
+   "entradas": [
+    {
+     "de": "CU-KN-1.2",
+     "dato": "guías de la biblioteca con su título y sus etiquetas, para buscarlas y elegirlas"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-KN-1.1",
+     "dato": "guía enlazada a cada tarea o actividad sin tareas, como referencia, para abrirla en el turno",
+     "rel": "REL-08"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una tarea y una biblioteca con guías",
+     "cuando": "se abre 📖, se busca una guía y se elige",
+     "entonces": "la guía queda enlazada como referencia (no se copia su texto) y el turno la abre desde la tarea"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una tarea con una guía enlazada",
+     "cuando": "se quita con ✕",
+     "entonces": "la guía deja de enlazarse y sigue en la biblioteca; si la guía se eliminó antes, el enlace se ve como «(guía eliminada)»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "la nota corta de una tarea",
+     "cuando": "se escribe un texto de más de 200 caracteres",
+     "entonces": "se conservan solo los primeros 200"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "guias"
+    ],
+    "notas": "_abrirGuiasPopover/_gpElegirGuia/_gpQuitarGuia/_gpNotaChange; tarea.guias = [guiaId], tarea.nota ≤ 200. Lee la colección guias (str-guias-v1). Anotado en el mapa técnico como REQ-K1.1/K2."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: ventana de guías, buscador, quitar y recorte de la nota a 200"
+   }
+  },
+  {
+   "id": "CU-FL-2.8",
+   "capacidad": "CAP-FL-2",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear una guía nueva desde el editor, sin salir de Flujos, y enlazarla a la tarea",
+   "declarado": "construido",
+   "limitantes": [
+    "La guía se guarda en la biblioteca al instante: si después se cancela el flujo, la guía queda creada sin enlazar a nada.",
+    "La guía creada solo lleva título y texto, con categoría «general»; adjuntos y etiquetas se editan en Conocimiento."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-KN-1.3",
+     "dato": "guía nueva con título y texto, creada desde el editor de flujos",
+     "rel": "REL-08"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la ventana de guías de una tarea abierta",
+     "cuando": "se pulsa «+ Crear guía», se escribe título y texto y se pulsa «Crear y enlazar»",
+     "entonces": "la guía se crea en la biblioteca y queda enlazada a la tarea"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "la ventana de crear guía",
+     "cuando": "se intenta crear sin título",
+     "entonces": "sale el aviso «Escribe un título para la guía» y no se crea"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "guias"
+    ],
+    "notas": "_gpCrearGuia/_gpGuardarNuevaGuia → persistGuias() inmediato (la colección guias es del módulo de Conocimiento; esta página la escribe)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: la guía se persiste al crearla y no al guardar el flujo"
+   }
+  },
+  {
+   "id": "CU-FL-3.1",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear una copia de un flujo general para una propiedad («Personalizar para…») y editarla",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo los flujos generales simples tienen copias; un flujo compuesto se usa como flujo base tal cual (CU-FL-4.1).",
+    "La copia no guarda el emoji ni el nombre corto del general: los hereda al mostrarse (CU-FL-7.2).",
+    "La copia es independiente: lo que se cambie después en el flujo general no llega a la copia."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo general simple ya guardado y una propiedad sin copia",
+     "cuando": "se elige la propiedad en «Personalizar para…»",
+     "entonces": "se crea la copia de esa propiedad, se abre para editarla con el aviso «Copia por propiedad creada · editando» y el flujo general no cambia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una copia cuyo flujo general tiene zonas que la propiedad no tiene",
+     "cuando": "se crea",
+     "entonces": "esas zonas quedan «por definir» en la copia (CU-FL-3.4) y no se pierden"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un flujo general que aún no se ha guardado, o ya tiene copia para esa propiedad",
+     "cuando": "se intenta «Personalizar para…» (o se llega con el enlace «Personalizar para esta propiedad»)",
+     "entonces": "si no está guardado sale «Guarda el flujo antes de crear una copia por propiedad»; si ya existe la copia de esa propiedad, se abre la que hay en vez de crear otra"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades",
+     "prop-tipos"
+    ],
+    "notas": "crearClon (copia profunda con los mismos ids de actividades y tareas; borra emoji y nombreCorto; zonas fuera de la propiedad → zonasPorDefinir), _personalizarDesdeEditor/_copiarParaPropiedad/_copiaDe. Esquema: esPlantilla:false, plantillaId, propId, ambito:'propiedad'."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: crearClon, zonas por definir y avisos de _copiarParaPropiedad"
+   }
+  },
+  {
+   "id": "CU-FL-3.2",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Llegar al editor desde la ficha de la propiedad o desde el turno con el flujo, su copia o una copia nueva ya abiertos",
+   "declarado": "construido",
+   "limitantes": [
+    "El enlace de edición que llega con un flujo que no existe no avisa nada."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-5.2",
+     "dato": "flujo que se edita, o flujo general que se copia para esta propiedad"
+    },
+    {
+     "de": "CU-HK-1.8",
+     "dato": "flujo de una etapa del turno que se quiere abrir en el editor"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el enlace de «Editar» de una etapa del flujo base, en Propiedades o en el turno",
+     "cuando": "se pulsa",
+     "entonces": "se abre Flujos con ese flujo en el editor (si es una copia por propiedad, la copia)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el enlace «Personalizar para esta propiedad» de una etapa que es un flujo general",
+     "cuando": "se pulsa",
+     "entonces": "se abre Flujos con la copia de esa propiedad: la existente si la hay, o una nueva con el aviso «Copia por propiedad creada · editando»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un enlace a un flujo que ya no existe, o a una propiedad que ya no existe",
+     "cuando": "se abre Flujos",
+     "entonces": "con una copia pedida sale «Ese flujo ya no existe» o «Esa propiedad no existe»; con un simple «editar» de un flujo ausente solo se ve la lista, sin aviso"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Parámetros de la página ?edit=<flujoId> y ?copiar=<flujoId>&prop=<propId> (DOMContentLoaded). Lo usan _irAFlujos de str-propiedades.html (CU-PR-5.2) y de str-m1-housekeeping.html («Abrir en Flujos» y ✏️ de cada etapa). ?asignar= viejo: CU-FL-10.4."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de las tres páginas: _irAFlujos y el manejo de los parámetros al abrir Flujos"
+   }
+  },
+  {
+   "id": "CU-FL-3.3",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Editar una copia por propiedad sin tocar el flujo general",
+   "declarado": "construido",
+   "limitantes": [
+    "Una copia no se puede convertir en compuesta ni tiene sus propias copias."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una copia por propiedad abierta",
+     "cuando": "se mira el editor",
+     "entonces": "una franja dice «Por propiedad — <propiedad>», el título dice «Editar flujo · Por propiedad» y las zonas que se ofrecen son las de esa propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una copia con cambios",
+     "cuando": "se guarda",
+     "entonces": "sale «Copia por propiedad actualizada» y el flujo general queda igual"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "editarClon → editarFlujo; clone-banner en renderEditor; _zonasDisponibles filtra por editorData.propId (si la propiedad no tiene zonas, las básicas)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: franja, título y zonas de la copia"
+   }
+  },
+  {
+   "id": "CU-FL-3.4",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Resolver o descartar las zonas «por definir» de una copia por propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "Mientras haya zonas por definir la tarea no tiene zona en esa propiedad; no hay bloqueo al guardar."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una copia con la zona «Terraza» por definir porque la propiedad no la tiene",
+     "cuando": "se pulsa el aviso y se elige una zona de la propiedad",
+     "entonces": "la tarea o actividad toma esa zona y el aviso desaparece; el contador de la franja baja"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una zona por definir que no hace falta",
+     "cuando": "se pulsa su ✕",
+     "entonces": "el aviso se descarta y la tarea queda sin esa zona"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "zonasPorDefinir por tarea y por actividad; resolverZonaPorDefinir/descartarZonaPorDefinir/_countZpd; el reparo de load() recalcula zonasPorDefinir de las copias existentes (idempotente) comparando con el flujo general."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: resolver y descartar zonas por definir"
+   }
+  },
+  {
+   "id": "CU-FL-3.5",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar la copia por propiedad de un flujo desde su editor (con doble toque)",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la lista de «Copias por propiedad» de un flujo general",
+     "cuando": "se pulsa 🗑 de una copia",
+     "entonces": "sale «Toca 🗑 otra vez para eliminar la copia por propiedad»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ese primer toque dado hace menos de 4 segundos",
+     "cuando": "se pulsa 🗑 otra vez",
+     "entonces": "la copia se elimina (esa propiedad deja de tener copia de este flujo) y sale «Copia por propiedad eliminada»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "ese primer toque sin segundo toque",
+     "cuando": "pasan 4 segundos",
+     "entonces": "la confirmación se olvida y la copia sigue ahí"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_borrarCopiaDesdeEditor con _copiaBorrarPend y temporizador de 4 s; renderPropAsignadas pinta la lista (solo general simple)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: doble toque y vencimiento a los 4 segundos"
+   }
+  },
+  {
+   "id": "CU-FL-3.6",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver las copias huérfanas con su advertencia y borrarlas a mano",
+   "declarado": "construido",
+   "limitantes": [
+    "Desde que borrar un flujo general borra sus copias, las huérfanas solo existen por borrados anteriores."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una copia por propiedad cuyo flujo general ya se eliminó (de antes de que el borrado arrastrara las copias)",
+     "cuando": "se abre la lista de flujos",
+     "entonces": "la copia se ve siempre, sin filtrar por propiedad, con «⚠ sin flujo general» y una ayuda; sigue sirviendo a las propiedades que la usan"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una copia huérfana",
+     "cuando": "se elimina con 🗑 y se confirma",
+     "entonces": "desaparece; no se borra sola"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_esCopiaHuerfana(f): esPlantilla===false y su plantillaId no existe; _flujosVisibles las incluye sin filtro de propiedad."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: marca de huérfana y visibilidad sin filtro"
+   }
+  },
+  {
+   "id": "CU-FL-3.7",
+   "capacidad": "CAP-FL-3",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver en el editor dónde se usa un flujo: de qué propiedades es flujo base, cuáles son sus copias y de qué flujo general es copia",
+   "declarado": "construido",
+   "limitantes": [
+    "La sección es de lectura: el flujo base se asigna desde la ficha de la propiedad, no desde Flujos."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-5.1",
+     "dato": "flujo base elegido en cada propiedad, para mostrar dónde se usa cada flujo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo general que es el flujo base de dos propiedades",
+     "cuando": "se abre en el editor",
+     "entonces": "la sección «Propiedades» dice «Flujo base de: …» con sus nombres"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo que ninguna propiedad usa",
+     "cuando": "se abre en el editor",
+     "entonces": "dice «Ningún turno lo usa todavía» y ofrece ir a Propiedades → Flujos del turno"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una copia por propiedad",
+     "cuando": "se abre en el editor",
+     "entonces": "dice «Copia de <flujo general> para <propiedad>»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "renderPropAsignadas (lee flujoBaseId de la lista de propiedades de la caché local). Las asignaciones por categoría y la colección prop-workflows se retiraron (CU-FL-10.4)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: renderPropAsignadas con sus tres variantes"
+   }
+  },
+  {
+   "id": "CU-FL-4.1",
+   "capacidad": "CAP-FL-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Armar un flujo compuesto con otros flujos generales como sub-flujos, en orden",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo los flujos generales entran como sub-flujo; un compuesto no tiene copias por propiedad, no se exporta a Excel y no tiene emoji propio (muestra los de sus sub-flujos, CU-FL-7.3).",
+    "Un compuesto se usa como flujo base desde la ficha de la propiedad; no se «asigna» desde Flujos.",
+    "Si un sub-flujo se elimina, sale del compuesto con renumeración (CU-FL-1.6)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo nuevo",
+     "cuando": "se marca «Flujo compuesto» y se agregan tres flujos generales con «+ Agregar sub-flujo…»",
+     "entonces": "las actividades propias se ocultan (sin borrarse), aparece la lista de sub-flujos numerada con su duración y el resumen muestra sub-flujos, tareas, trabajo y duración; se puede subir, bajar y quitar cada uno"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un compuesto sin ningún sub-flujo",
+     "cuando": "se intenta guardar",
+     "entonces": "sale «Un flujo compuesto necesita al menos un sub-flujo» y no se guarda"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un compuesto con sub-flujos cargados",
+     "cuando": "se intenta desmarcar «Flujo compuesto»",
+     "entonces": "sale «Quita los sub-flujos antes de convertirlo en flujo simple» y la casilla se vuelve a marcar"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un compuesto en edición",
+     "cuando": "se abre la lista para agregar sub-flujos",
+     "entonces": "no se ofrecen flujos que ya están en la lista, copias por propiedad ni flujos que cerrarían un ciclo; un ciclo forzado se rechaza al guardar"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Bloque [F11-puras] (_creaCiclo, _subEntradasDe, _gruposDe, _statsCompuesto; tests/flujos-compuestos.test.js): f.esCompuesto + f.subFlujos [{flujoId, orden, colaboradorId, paralelo}]; onCompuestoChange/agregarSubFlujo/moverSubFlujo/quitarSubFlujo/_subFlujosSectionHTML. HK lee subFlujos solo vía propiedad.flujoBaseId (expansión _fbExpandir, etapas secuenciales). Anotado en el mapa técnico como REQ-F11 fases 3b, 4 y 5a."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: validaciones al guardar, opciones del selector sin ciclo y avisos"
+   }
+  },
+  {
+   "id": "CU-FL-4.2",
+   "capacidad": "CAP-FL-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Poner sub-flujos en paralelo y ver el trabajo (lo que se paga) y la duración (lo que ocupa el turno)",
+   "declarado": "construido",
+   "limitantes": [
+    "Housekeeping muestra las dos medidas y avisa si la duración supera la ventana entre la salida y la entrada; aquí solo se calculan y se muestran en el editor."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "dos sub-flujos de 30 y 20 minutos en secuencia",
+     "cuando": "se mira el resumen",
+     "entonces": "trabajo 50 minutos y duración 50 minutos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "los mismos dos sub-flujos con el segundo marcado ⫽ «en paralelo con el anterior»",
+     "cuando": "se mira el resumen",
+     "entonces": "trabajo 50 minutos y duración 30 (cuenta una sola vez el más largo del grupo); la fila en paralelo se ve con un borde de color"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el primer sub-flujo de la lista",
+     "cuando": "se intenta marcar en paralelo, o se sube otro al primer puesto",
+     "entonces": "el botón ⫽ del primero está deshabilitado y, si otro pasa a ser el primero, se le apaga el paralelo"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_gruposDe/_statsCompuesto: duración = Σ por grupo del máximo (ruta crítica; un compuesto anidado aporta su propia duración); toggleParaleloSub; _subEntradasOrdenadas apaga paralelo de la primera. Anotado como REQ-F11 fase 5a."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: grupos en paralelo, ruta crítica y botón deshabilitado en el primero"
+   }
+  },
+  {
+   "id": "CU-FL-4.3",
+   "capacidad": "CAP-FL-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Sugerir un colaborador para cada sub-flujo, solo como información",
+   "declarado": "construido",
+   "limitantes": [
+    "La sugerencia es informativa: convertirla en apoyo con horas es la fase pendiente (CU-FL-4.5)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.1",
+     "dato": "colaboradores activos del equipo con su identificador y su nombre, para sugerirlos en un sub-flujo",
+     "rel": "REL-14"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un compuesto con sub-flujos y colaboradores activos en el equipo",
+     "cuando": "se elige un colaborador en la fila de un sub-flujo",
+     "entonces": "la sugerencia queda guardada en esa fila; no crea apoyo, horas ni pago"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un equipo que nunca se cargó en este aparato",
+     "cuando": "se abre el compuesto",
+     "entonces": "en lugar de la lista sale «Colaboradores: abre Usuarios una vez»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una sugerencia hacia un colaborador que ya no está en el equipo",
+     "cuando": "se abre el compuesto",
+     "entonces": "la fila muestra «⚠ colaborador no encontrado» y conserva el dato"
+    }
+   ],
+   "origen": [
+    "DA-20"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "str-usuarios-v1"
+    ],
+    "notas": "setColabSub / _colabsCache lee la caché de Equipo (str-usuarios-v1); Flujos no llama /api/usuarios. subFlujos[].colaboradorId."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: lista desde la caché, nota sin caché y opción «no encontrado»"
+   }
+  },
+  {
+   "id": "CU-FL-4.4",
+   "capacidad": "CAP-FL-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Anidar un flujo compuesto dentro de otro, con confirmación",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un compuesto en edición y otro compuesto disponible",
+     "cuando": "se elige el otro compuesto en «+ Agregar sub-flujo…»",
+     "entonces": "no se agrega de inmediato: sale la franja «Vas a anidar un flujo compuesto dentro de otro (poco usual). ¿Continuar?» con «Anidar» y «Cancelar»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "esa franja abierta",
+     "cuando": "se pulsa «Anidar»",
+     "entonces": "el compuesto entra como sub-flujo y su duración se calcula con la suya propia"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "esa franja abierta",
+     "cuando": "se pulsa «Cancelar»",
+     "entonces": "no se agrega y el selector vuelve a quedar vacío"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "agregarSubFlujo(id, _confirmado) → _mostrarAnidarConfirm/_confirmarAnidar/_cancelarAnidar (sin confirm() del navegador); anidado ≤ 20 niveles en el cálculo."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: franja de confirmación y paso por agregarSubFlujo"
+   }
+  },
+  {
+   "id": "CU-FL-4.5",
+   "capacidad": "CAP-FL-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Convertir el colaborador sugerido de un sub-flujo en apoyo del turno, con la duración llamada y su pago",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido (DA-20 decidida, cruce del 12-oct) y entregado a Desarrollo (REQ-F11-5-2, M-225), pero hoy el colaborador sugerido es solo información: no crea apoyo, horas ni pago; el mapa técnico lo llama «fase 5b pendiente».",
+    "Es un caso crítico (dinero): su construcción exige DA y cruce con Carlos (RT-23)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-6.6",
+     "dato": "sub-flujo asignado a cada colaborador con su tiempo de manos, para recomendar la duración llamada del apoyo"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un compuesto con un colaborador sugerido en un sub-flujo, como flujo base de una propiedad",
+     "cuando": "se arma el turno de esa propiedad",
+     "entonces": "el sistema propone un apoyo para ese colaborador con la duración llamada recomendada por el tiempo de manos de su sub-flujo, y el operador elige 5 h, 7 h o libre"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un apoyo llamado por 7 horas que trabaja 6",
+     "cuando": "se cierra el turno",
+     "entonces": "se le paga el turno llamado completo y la hora de menos va a su bolsa de tiempo para compensarla con trabajo futuro"
+    }
+   ],
+   "origen": [
+    "REQ-F11-5-2",
+    "DA-20"
+   ],
+   "reglas": [
+    "RT-23"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Sin código: setColabSub solo guarda subFlujos[].colaboradorId («Fase 5b pendiente» en el mapa técnico y en el texto de ayuda de la fila). «Entregado» en el REQ significa pasado a Desarrollo, no construido. La contraparte es CU-HK-6.6."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y del mapa técnico: el colaborador sugerido no genera apoyo ni horas"
+   }
+  },
+  {
+   "id": "CU-FL-5.1",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear una categoría de flujo con su icono y su nombre",
+   "declarado": "construido",
+   "limitantes": [
+    "Las categorías son libres y opcionales: no hay categorías predefinidas ni semilla; solo sirven para agrupar y filtrar.",
+    "Una categoría no cambia el comportamiento de los flujos en este módulo (en Housekeeping, la categoría «limpieza» marca las etapas que cuentan para la limpieza)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la ventana «⚙ Categorías»",
+     "cuando": "se escribe un icono y un nombre nuevos y se pulsa «+ Nueva categoría»",
+     "entonces": "sale «Categoría … creada» y aparece en la lista, en el selector del editor y como filtro cuando algún flujo la use"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un nombre vacío, o igual (sin tildes ni mayúsculas) al de otra categoría",
+     "cuando": "se pulsa crear",
+     "entonces": "sale «Ingresá un nombre para la categoría» (con voseo, a diferencia del resto de la pantalla) o «Ya existe una categoría con ese nombre» y no se crea"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [
+     "/api/col/flujo-categorias"
+    ],
+    "colecciones": [
+     "flujo-categorias"
+    ],
+    "notas": "addNewCat/_crearCategoria (id = nombre normalizado; icono por omisión 🏷); persistCats → flujo-categorias."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: crear categoría con id normalizado y rechazo de repetidas"
+   }
+  },
+  {
+   "id": "CU-FL-5.2",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cambiar el nombre o el icono de una categoría",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la ventana «⚙ Categorías» con una categoría",
+     "cuando": "se cambia su nombre o su icono y se pulsa «Guardar»",
+     "entonces": "sale «Categoría guardada», y la lista, las tarjetas y los filtros muestran el cambio"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "una categoría",
+     "cuando": "se vacía su nombre y se pulsa «Guardar»",
+     "entonces": "sale «El nombre no puede estar vacío» y no cambia nada"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujo-categorias"
+    ],
+    "notas": "saveCatInline; el id de la categoría no cambia al renombrarla."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: saveCatInline"
+   }
+  },
+  {
+   "id": "CU-FL-5.3",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Eliminar una categoría; los flujos que la tenían quedan sin categoría",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una categoría usada por 3 flujos",
+     "cuando": "se pulsa 🗑",
+     "entonces": "la ventana pide confirmar en el mismo lugar con «La usan 3 flujos; quedarán sin categoría»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "esa confirmación abierta",
+     "cuando": "se pulsa «Eliminar»",
+     "entonces": "los 3 flujos quedan sin categoría, la categoría desaparece y sale el aviso con cuántos flujos quedaron sin categoría"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "esa confirmación abierta",
+     "cuando": "se pulsa «Cancelar»",
+     "entonces": "no se borra nada"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "deleteCatModal(id, confirmado) con _catBorrarPend; pone f.tipo = '' en los flujos afectados y persiste flujos y categorías."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: confirmación en línea y efecto sobre los flujos"
+   }
+  },
+  {
+   "id": "CU-FL-5.4",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Dar a un flujo una categoría, o dejarlo sin ella",
+   "declarado": "construido",
+   "limitantes": [
+    "Un flujo lleva a lo sumo una categoría del usuario; las del sistema (flujo base, mantenimiento) no se eligen: se deducen (CU-FL-6.4)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo en edición",
+     "cuando": "se elige una categoría en «Categoría (opcional)» y se guarda",
+     "entonces": "la tarjeta muestra la categoría con su icono y el flujo se puede filtrar por ella"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo con una categoría que ya no está en el catálogo",
+     "cuando": "se abre el editor",
+     "entonces": "el selector conserva el valor con «(no está en el catálogo)» en vez de perderlo"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "Select #eTipo (primera opción «— sin categoría —»); flujo.tipo = id de la categoría o ''."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: selector de categoría y valor ausente del catálogo"
+   }
+  },
+  {
+   "id": "CU-FL-5.5",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Retirar sola, al abrir, la categoría de la semilla anterior que ningún flujo usa",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con categorías de la semilla vieja (alistamiento, inspección, limpieza, entrega, mantenimiento…) que ningún flujo usa",
+     "cuando": "se abre Flujos",
+     "entonces": "esas categorías desaparecen del catálogo y las propias del usuario se conservan"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una categoría de la semilla vieja que algún flujo sí usa",
+     "cuando": "se abre Flujos",
+     "entonces": "se conserva"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un catálogo ya migrado",
+     "cuando": "se abre Flujos otra vez",
+     "entonces": "no se vuelve a borrar nada (es idempotente)"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujo-categorias"
+    ],
+    "notas": "_migrarCatalogoCategorias (bloque [F11-categorias], tests/categorias.test.js): borra las de formato viejo (marcas sistema/ambito/orden) salvo uso; getCats() la aplica al leer y persiste solo si cambió. Anotado como REQ-F11 fase 3c."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: reglas de la migración del catálogo"
+   }
+  },
+  {
+   "id": "CU-FL-5.6",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Marcar un flujo como de Mantenimiento o de Inventario (categorías del sistema amarradas a sus módulos) para verlo y llamarlo desde esos módulos",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Definido (DA-21 decidida) y entregado a Desarrollo (REQ-MI1-1, M-64), pero nada permite marcar un flujo como de Mantenimiento o de Inventario: la categoría «Mantenimiento» solo se deduce si el flujo ya trae el ámbito, y ninguna pantalla ni la importación lo ponen; la de «Inventario» no existe.",
+    "No hay módulo de Mantenimiento en el sistema todavía (REQ-F11-7 se absorbió en REQ-MI1)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-CAL-1.1",
+     "dato": "flujos de categoría Mantenimiento o Inventario, para asignar a un evento del calendario"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo creado para ejecutar un mantenimiento",
+     "cuando": "se marca con la categoría del sistema «Mantenimiento»",
+     "entonces": "el flujo se ve y se llama desde el módulo de mantenimiento, y desde ahí «editar» abre Flujos"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un evento de mantenimiento o de inventario en el calendario",
+     "cuando": "se le asigna un flujo",
+     "entonces": "solo se ofrecen los flujos de esa categoría del sistema"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-1",
+    "REQ-F11-7",
+    "DA-21"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_categoriasSistemaDe devuelve mantenimiento: f.ambito==='mantenimiento' y flujoBaseDe; ningún código asigna ese ámbito (el mapa técnico dice «llega con el módulo de Mantenimiento»); no existe la categoría «Inventario». «Entregado» en REQ-MI1-1 significa pasado a Desarrollo, no construido."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código de la página y del shell: sin asignación del ámbito mantenimiento y sin categoría Inventario"
+   }
+  },
+  {
+   "id": "CU-FL-5.7",
+   "capacidad": "CAP-FL-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Armar un flujo de inventario a partir de una plantilla del sistema (conteo, nivel o dotación)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Entregado a Desarrollo (REQ-INV2-5, M-333, siete plantillas; REQ-MI1-3 lo reemplaza), pero no hay plantillas del sistema ni categoría «Inventario» en Flujos: la tarea de inventario se arma a mano (CU-FL-2.6)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-INV-12.1",
+     "dato": "categoría «Inventario» y tareas de inventario disponibles para armar flujos"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de flujos con la categoría del sistema «Inventario»",
+     "cuando": "el operador crea un flujo desde una de las plantillas de inventario",
+     "entonces": "el flujo queda con tareas de inventario listas para usar y se ve y se llama desde Inventario"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-5",
+    "REQ-MI1-1",
+    "DA-21"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Sin código: no hay plantillas del sistema, ni selector de plantilla, ni categoría Inventario en str-flujos.html. «Entregado» no es construido."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Búsqueda en el código de la página: sin plantillas del sistema ni categoría Inventario"
+   }
+  },
+  {
+   "id": "CU-FL-6.1",
+   "capacidad": "CAP-FL-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver la lista de flujos con su emoji, nombre, tipo, categoría, actividades, tareas y duración",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "flujos simples y compuestos",
+     "cuando": "se abre Flujos",
+     "entonces": "cada tarjeta muestra el emoji (o ▫️), el nombre con su nombre corto, «simple» o «compuesto · N», la categoría, las actividades (o sub-flujos), las tareas, la duración (con el trabajo entre paréntesis si difiere) y las omisibles"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "no hay ningún flujo",
+     "cuando": "se abre Flujos",
+     "entonces": "sale «No hay flujos» con el botón «+ Crear primer flujo»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una copia por propiedad",
+     "cuando": "se ve su tarjeta",
+     "entonces": "dice «copia personalizada en <propiedad>» y cuántas zonas están por definir; el flujo general dice cuántas copias tiene"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "renderLista/_flujosVisibles/calcStats; las copias por propiedad solo se ven filtrando por su propiedad (y las huérfanas siempre)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: contenido de la tarjeta y estado vacío"
+   }
+  },
+  {
+   "id": "CU-FL-6.2",
+   "capacidad": "CAP-FL-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Buscar un flujo por su nombre",
+   "declarado": "construido",
+   "limitantes": [
+    "La búsqueda es solo por nombre: no mira categoría, actividades ni tareas."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "varios flujos",
+     "cuando": "se escribe una parte del nombre en «Buscar flujo…»",
+     "entonces": "la lista muestra solo los flujos cuyo nombre contiene ese texto (sin distinguir mayúsculas), combinado con los filtros"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un texto que no coincide con ningún nombre",
+     "cuando": "se escribe",
+     "entonces": "sale «No hay flujos que coincidan con …»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "renderLista: filtro por f.nombre en minúsculas, aplicado después de los filtros de propiedad, tipo y categoría."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: filtro por nombre"
+   }
+  },
+  {
+   "id": "CU-FL-6.3",
+   "capacidad": "CAP-FL-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Filtrar la lista por propiedad, tipo (simples o compuestos) y categoría, y recordar el filtro",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin filtro de propiedad solo se ven los flujos generales (y las copias huérfanas): las copias por propiedad se ven filtrando por su propiedad.",
+    "El filtro se recuerda por aparato (en el navegador), no por usuario ni en el servidor."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-5.1",
+     "dato": "flujo base elegido de cada propiedad, para filtrar los flujos que corren en ella"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una propiedad con flujo base compuesto y una copia propia",
+     "cuando": "se elige esa propiedad en la fila «Propiedad»",
+     "entonces": "la lista muestra su flujo base, los flujos que ese integra (a cualquier nivel) y las copias de esa propiedad"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "los filtros de tipo y categoría",
+     "cuando": "se combinan con el de propiedad",
+     "entonces": "se aplican todos a la vez (Y) y los conteos de cada fila se calculan con los otros dos aplicados"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un filtro guardado que apunta a una propiedad o categoría que ya no existe",
+     "cuando": "se abre Flujos",
+     "entonces": "vuelve solo a «Todas»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "filtros = {prop, tipo, cat} en localStorage['str-flujos-filtros-v1'] (_cargarFiltros/_setFiltro/_validarFiltros); _flujosDePropiedad (bloque [F11-puras], recursivo con tope 20). Anotado como REQ-F11 punto 10."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: filtros combinados, reinicio de filtros inválidos y flujos de una propiedad"
+   }
+  },
+  {
+   "id": "CU-FL-6.4",
+   "capacidad": "CAP-FL-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver y filtrar las categorías del sistema, que se deducen solas: «Flujo base» y «Mantenimiento»",
+   "declarado": "parcial",
+   "limitantes": [
+    "Solo «Flujo base» funciona de punta a punta; «Mantenimiento» existe como marca y filtro pero ningún flujo puede entrar (depende de CU-FL-5.6) y falta la de «Inventario».",
+    "En la ventana «⚙ Categorías» las del sistema salen de solo lectura con 🔒."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo que es flujo base de las propiedades 1901 y 1808",
+     "cuando": "se ve su tarjeta o se elige el filtro «🏠 Flujo base»",
+     "entonces": "la tarjeta lleva la marca «🏠 Flujo base · 1901, 1808» y el filtro lo incluye; la marca no se guarda en el flujo"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el filtro «🔧 Mantenimiento»",
+     "cuando": "se elige",
+     "entonces": "siempre da 0 flujos: hay una marca para los flujos de mantenimiento pero ninguna forma de poner un flujo en ese grupo (CU-FL-5.6)"
+    }
+   ],
+   "origen": [
+    "REQ-MI1-1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades"
+    ],
+    "notas": "_categoriasSistemaDe(flujos, props, f) → {flujoBaseDe, mantenimiento: f.ambito==='mantenimiento'}; _matchCat con claves sys:base y sys:mant. Anotado como REQ-F11 punto 10."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: nada asigna el ámbito mantenimiento; no se consultó si algún flujo real lo trae"
+   }
+  },
+  {
+   "id": "CU-FL-7.1",
+   "capacidad": "CAP-FL-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Dar a un flujo un emoji (de la lista o pegando otro) y un nombre corto de hasta 12 caracteres",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo cuenta un emoji (el primero del texto); un compuesto no tiene emoji propio (CU-FL-7.3)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el editor de un flujo nuevo",
+     "cuando": "se elige un emoji de la lista sugerida (cuatro grupos), se escribe un nombre corto y se guarda",
+     "entonces": "el flujo conserva el emoji y el nombre corto tras recargar, y la tarjeta los muestra («🧺 Nombre · Nombre corto»)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo existente",
+     "cuando": "se pega un emoji que no está en la lista y se escribe un nombre corto de más de 12 caracteres",
+     "entonces": "se guarda el emoji pegado y el nombre corto se recorta a 12"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un flujo con emoji y nombre corto",
+     "cuando": "se elige «Sin emoji» y se vacía el nombre corto",
+     "entonces": "no se guarda ninguno: la tarjeta muestra el emoji neutro ▫️ y el nombre completo, y nada falla"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "el campo para pegar otro emoji",
+     "cuando": "se pega un texto que no empieza con un emoji",
+     "entonces": "sale «Pega un solo emoji» y el emoji no cambia"
+    }
+   ],
+   "origen": [
+    "REQ-FL-12"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "REQ-FL-12",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-FL-12",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "REQ-FL-12",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [
+     "/api/col/flujos"
+    ],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "Bloque [FL12-puras] (_fl12LimpiarEmoji, _fl12LimpiarCorto, _fl12Emoji, _fl12Corto; tests/flujos-emoji.test.js); f.emoji y f.nombreCorto opcionales; _fl12CampoHTML/_fl12Elegir; guardarFlujo los limpia y no guarda los vacíos. Los lee el tablero (OP-1) y Housekeeping (REL-07)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-FL-7.2",
+   "capacidad": "CAP-FL-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Heredar el emoji y el nombre corto de una copia por propiedad desde su flujo general",
+   "declarado": "construido",
+   "limitantes": [
+    "No hay prueba de la herencia: REQ-FL-12 a, b y c solo crean y editan un flujo general."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo general con emoji y nombre corto y su copia por propiedad sin valores propios",
+     "cuando": "se mira la copia",
+     "entonces": "muestra el emoji y el nombre corto del general; en el editor dice «como el general»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una copia",
+     "cuando": "se le pone a mano un emoji o un nombre corto",
+     "entonces": "la copia guarda el suyo y deja de heredar ese dato"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una copia con emoji propio",
+     "cuando": "se pulsa «Como el general»",
+     "entonces": "se borra el suyo y vuelve a heredar"
+    }
+   ],
+   "origen": [
+    "REQ-FL-12"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "crearClon borra emoji y nombreCorto; _fl12General/_fl12EmojiDe/_fl12CortoDe resuelven por plantillaId."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: crearClon y resolución por el flujo general"
+   }
+  },
+  {
+   "id": "CU-FL-7.3",
+   "capacidad": "CAP-FL-7",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver un flujo compuesto con los emojis de sus sub-flujos, en su orden",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un compuesto con tres sub-flujos con emoji distinto",
+     "cuando": "se ve su tarjeta o su editor",
+     "entonces": "muestra los tres emojis juntos en el orden de los sub-flujos y, en el editor, «de sus flujos» sin poder elegir uno propio"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un compuesto sin ningún emoji en sus sub-flujos",
+     "cuando": "se ve su tarjeta",
+     "entonces": "muestra el emoji neutro ▫️ por cada sub-flujo; un sub-flujo que ya no existe se omite"
+    }
+   ],
+   "origen": [
+    "REQ-FL-12"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_fl12EmojisDe(flujos, f) (anidados se abren, tope 8 niveles); un compuesto no guarda emoji propio (guardarFlujo lo borra)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: _fl12EmojisDe y celda de emoji del compuesto"
+   }
+  },
+  {
+   "id": "CU-FL-8.1",
+   "capacidad": "CAP-FL-8",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Descargar la plantilla de Excel para llenar flujos, para una propiedad o para todas, con listas desplegables",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo administrador y operador ven los botones de importar y exportar.",
+    "Para leer o generar archivos de Excel necesita conexión: carga una herramienta externa la primera vez y, si falla, avisa y no hace nada."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la ventana «Importar / Exportar»",
+     "cuando": "se pulsa «Descargar plantilla .xlsx», se elige una propiedad y se descarga",
+     "entonces": "baja un archivo «plantilla-flujos-<propiedad>-<fecha>.xlsx» con la hoja de flujos solo con la cabecera, una hoja de catálogo (categorías, zonas de esa propiedad, guías, sí/no, modo) y una hoja de instrucciones; las columnas de categoría, zonas, omisible, modo, foto y guía traen lista desplegable"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "la opción «Todas las propiedades»",
+     "cuando": "se descarga",
+     "entonces": "las zonas del catálogo son la unión de las de todas las propiedades, sin repetir"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una propiedad sin zonas registradas, o sin conexión para cargar el generador de Excel",
+     "cuando": "se descarga",
+     "entonces": "la hoja de instrucciones avisa que hay que crear las zonas en Propiedades antes de importar; sin conexión sale un aviso de error y no se descarga nada"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "propiedades",
+     "guias",
+     "flujo-categorias"
+    ],
+    "notas": "_ioMostrarSelectorPlantilla/_ioDescargarPlantilla/_ioCatalogo(propId)/_ioConstruirLibro con ExcelJS 4.4.0 (cdnjs, carga perezosa), hojas Flujo, Catálogo (protegida sin contraseña) e Instrucciones; validaciones en las filas 2–200. Cabeceras: Flujo|Categoría|Actividad|Tarea|Minutos|Minutos actividad|Zona 1–3|Omisible|Modo|Espera|Cierra con|Foto|Fotos mín.|Inventario|Guía|Nota|Emoji|Nombre corto. Anotado como REQ-F9.k, F9.l y F11 3c."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: columnas, catálogo por propiedad y hojas del libro"
+   }
+  },
+  {
+   "id": "CU-FL-8.2",
+   "capacidad": "CAP-FL-8",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Exportar a Excel los flujos generales que se elijan",
+   "declarado": "construido",
+   "limitantes": [
+    "No se exportan los flujos compuestos (no tienen actividades propias), ni las copias por propiedad.",
+    "El archivo no lleva los sub-flujos, el texto propio de la actividad sin tareas (CU-FL-1.5), ni las zonas por definir."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la pestaña «Exportar» con los flujos generales",
+     "cuando": "se eligen dos y se pulsa «Exportar seleccionadas»",
+     "entonces": "baja «flujos-exportados-<fecha>.xlsx» con una fila por tarea (y por actividad sin tareas), con la zona y la foto que de verdad aplican a cada tarea (las heredadas de la actividad incluidas), y sale «Exportados 2 flujos generales»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "ningún flujo marcado",
+     "cuando": "se pulsa exportar",
+     "entonces": "sale «Elige al menos un flujo general» y no baja nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una actividad con más de tres zonas",
+     "cuando": "se exporta",
+     "entonces": "las zonas sobrantes van juntas en «Zona 3» separadas por «;» y se importan bien"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "_ioRenderExportList/_ioExportarSeleccion/_ioFlujoAFilas: Foto, Fotos mín. y Zonas exportan el valor efectivo (_fbFotoEfectiva, zonasEfectivas); Minutos exporta el número de la tarea (vacío si está en «repartir») y Minutos actividad el total; emoji y nombre corto se repiten en cada fila. Archivo flujos-exportados-AAAA-MM-DD.xlsx."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: lista de exportación, filas por tarea y exclusión de compuestos"
+   }
+  },
+  {
+   "id": "CU-FL-8.3",
+   "capacidad": "CAP-FL-8",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Cargar un archivo de Excel o CSV y revisar, antes de importar, lo que trae con sus errores y avisos",
+   "declarado": "construido",
+   "limitantes": [
+    "Una fila de actividad sin tarea cuenta como actividad sin tareas: sus minutos, zona, foto y guías son los de la actividad.",
+    "No lleva sub-flujos: no se pueden importar flujos compuestos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un archivo con dos flujos bien armados",
+     "cuando": "se elige en «Elegir archivo (.xlsx, .csv)»",
+     "entonces": "la vista previa dice «✓ 2 flujos · N actividades · N tareas · 0 errores · ⚠ 0 avisos», marca cada flujo como «nuevo» o «existe» y deja «Importar» habilitado"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "filas con errores (sin nombre de flujo o de actividad, minutos o espera no numéricos, fotos mínimas fuera de 1 a 10, inventario no válido, guía que no existe, «Cierra con» sin coincidencia, minutos de actividad distintos entre filas, tareas que superan el total, o una zona que no existe en ninguna propiedad)",
+     "cuando": "se carga el archivo",
+     "entonces": "cada error sale con su fila y «Importar» queda deshabilitado, salvo que se marque «Omitir filas con error»: entonces solo esas filas se descartan, no el archivo entero"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un archivo antiguo con cabeceras «Tipo de actividad», «Tipo», «Zonas» o «Guías»",
+     "cuando": "se carga",
+     "entonces": "se lee igual que con las cabeceras nuevas"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "guias"
+    ],
+    "notas": "_ioArchivoElegido (.xlsx con SheetJS 0.18.5 de cdnjs; .csv con un lector RFC4180 propio, _ioParsearCSV) → _ioProcesarFilas (agrupa Flujo→Actividad→Tarea en orden de aparición) → _ioRenderPreview; _ioActualizarBotonImportar."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: validaciones de _ioProcesarFilas y botón Importar"
+   }
+  },
+  {
+   "id": "CU-FL-8.4",
+   "capacidad": "CAP-FL-8",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Importar los flujos del archivo: crear los nuevos, y reemplazar o copiar los que ya existen por nombre",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo crea o reemplaza flujos generales; nunca crea ni edita copias por propiedad.",
+    "Al reemplazar, la actividad sin tareas pierde su texto propio (CU-FL-1.5) porque el archivo no lo lleva.",
+    "Si el flujo que se reemplaza es compuesto, las actividades importadas quedan guardadas pero ocultas, y el flujo sigue siendo compuesto: el turno no recibe las tareas importadas (a confirmar con Desarrollo)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una vista previa sin errores con un flujo nuevo",
+     "cuando": "se pulsa «Importar»",
+     "entonces": "el flujo se crea como flujo general con sus actividades y tareas, sale «Importados N flujos · N actividades · N tareas» y la lista se actualiza"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo del archivo con el mismo nombre (sin distinguir mayúsculas ni tildes) que un flujo general",
+     "cuando": "se elige «Reemplazar flujo general» y se importa",
+     "entonces": "el flujo conserva su id y, donde el nombre de una actividad o tarea coincide, también el de ella; las copias por propiedad no se tocan (la vista previa dice cuántas son)"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "ese mismo caso",
+     "cuando": "se elige «Crear como copia» y se importa",
+     "entonces": "se crea «<nombre> (importado)» con ids nuevos y el original no cambia"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "un archivo cuyos flujos no tienen nada importable",
+     "cuando": "se pulsa «Importar»",
+     "entonces": "sale «Nada para importar (revisa los errores)»"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [
+     "/api/col/flujos"
+    ],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "_ioEjecutarImportacion: un solo persist() al final; reemplazar = Object.assign(flujo existente, {nombre, tipo, actividades, importadoDe}) (conserva esCompuesto y subFlujos); flujosExistentesPorNombre incluye compuestos y, con nombres repetidos, queda el último. Si todas las tareas de una actividad traen la misma zona o foto sube a la actividad (F9.m, F9.o). Archivo nuevo → ambito 'todos'."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: reemplazar conserva ids por nombre, copia «(importado)» y el caso de un compuesto reemplazado"
+   }
+  },
+  {
+   "id": "CU-FL-8.5",
+   "capacidad": "CAP-FL-8",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear en la importación las categorías que no existen y avisar de las zonas que solo están en algunas propiedades",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un archivo con la categoría «Lavandería» que no existe en el negocio",
+     "cuando": "se importa",
+     "entonces": "la categoría se crea sola (nunca es error) y el flujo queda con ella"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un archivo con una zona que existe en una propiedad pero no en todas",
+     "cuando": "se carga",
+     "entonces": "sale como aviso en ámbar («Zona … solo existe en …») y no impide importar"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un archivo con emoji y nombre corto en alguna fila del flujo",
+     "cuando": "se importa",
+     "entonces": "el flujo toma el primero que no esté vacío; un emoji no válido sale como aviso y el flujo queda sin emoji; un archivo sin esas columnas no cambia los que el flujo ya tiene"
+    }
+   ],
+   "origen": [
+    "REQ-FL-12"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias",
+     "propiedades"
+    ],
+    "notas": "_crearCategoria al importar si no existe; _ioZonasDeFila (aviso si la zona está solo en algunas propiedades); _fl12AplicarImport (solo si el archivo trae la columna)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: categoría nueva, avisos de zona y aplicación de emoji y nombre corto"
+   }
+  },
+  {
+   "id": "CU-FL-9.1",
+   "capacidad": "CAP-FL-9",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Permitir abrir el editor de Flujos solo al administrador y al operador",
+   "declarado": "construido",
+   "limitantes": [
+    "Un operador ve y edita todos los flujos; no hay permiso propio de Flujos ni límite por propiedad."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-2.1",
+     "dato": "rol del usuario con sesión"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-1.1",
+     "dato": "aviso de que el módulo abierto no tiene sesión, para que el menú principal pida entrar",
+     "rel": "REL-02"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador o un administrador con sesión",
+     "cuando": "abre Flujos",
+     "entonces": "ve y edita todos los flujos, categorías y guías enlazadas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador con sesión",
+     "cuando": "abre Flujos",
+     "entonces": "ve «Sin permiso para este módulo» (dentro del menú) o vuelve a su inicio, y no se cargan datos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "nadie con sesión",
+     "cuando": "se abre Flujos",
+     "entonces": "si está dentro del menú, avisa al menú para que pida entrar; suelto, va a la pantalla de entrada"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos"
+    ],
+    "notas": "STRApi.exigirRol(['admin','operador']) al cargar (superadmin cuenta como admin); sin sesión, postMessage str:sin-sesion al menú o location.replace(login.html). Importar y exportar se muestran con _ioEsAdminUOperador (incluye superadmin)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y de str-api.js: exigirRol al inicio y mensaje de sin sesión"
+   }
+  },
+  {
+   "id": "CU-FL-9.2",
+   "capacidad": "CAP-FL-9",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Rechazar que quien no es administrador ni operador cambie flujos, categorías o guías",
+   "declarado": "construido",
+   "limitantes": [
+    "El colaborador puede leer todos los flujos y categorías del negocio, no solo los de sus propiedades: el sistema no filtra esas lecturas; sí filtra guías y ubicaciones por propiedad. Hace falta porque Housekeeping los lee en su teléfono (a confirmar con Diseño)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador que intenta guardar un flujo por fuera de la pantalla",
+     "cuando": "se envía el guardado",
+     "entonces": "el sistema lo rechaza por falta de permiso"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un administrador o un operador",
+     "cuando": "guarda un flujo",
+     "entonces": "el guardado se acepta"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-14",
+    "RT-21"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/col/flujos",
+     "/api/col/flujo-categorias"
+    ],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "api/col/index.php: en PUT solo turnos, tickets, inv-movimientos e inv-pendientes admiten colaborador ($rolesEscritura); flujos y flujo-categorias quedan para admin y operador (403). El GET del colaborador no filtra flujos ni flujo-categorias (_colFiltrarLecturaColaborador solo filtra turnos, reservas, propiedades, tickets, inv-*, guias, ubicaciones y prop-workflows). El servidor no valida el contenido de un flujo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor: rolesEscritura sin colaborador para flujos y lectura sin filtro; no se probó con un colaborador"
+   }
+  },
+  {
+   "id": "CU-FL-10.1",
+   "capacidad": "CAP-FL-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar los flujos a Housekeeping y a Propiedades con todo lo que el turno necesita",
+   "declarado": "construido",
+   "limitantes": [
+    "No hay relación en el mapa entre Flujos y Propiedades: la ficha lee los flujos directamente (falta agregar PR ↔ FL al mapa).",
+    "Otros casos de Housekeeping también usan estos datos (marcar tareas con foto, tareas con espera, avance del turno, conteo de inventario); la línea base de Housekeeping solo enlaza CU-HK-1.8 y CU-HK-7.2.",
+    "El tablero (OP) lee los flujos por el servidor, no por esta página (REL-33)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-1.8",
+     "dato": "flujos con sus actividades, tareas, subflujos, zonas, fotos exigidas, tiempos, emoji y nombre corto",
+     "rel": "REL-07"
+    },
+    {
+     "a": "CU-PR-5.1",
+     "dato": "flujos generales, simples o compuestos, con sus etapas, tiempos, colaborador sugerido y copias por propiedad"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un flujo guardado con actividades, tareas, zonas, fotos exigidas, tiempos, tarea de inventario, emoji y nombre corto",
+     "cuando": "se abre un turno o la ficha de una propiedad",
+     "entonces": "el turno ofrece ese flujo para incluirlo y arma sus tareas con esos datos; la ficha lo ofrece como flujo base"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un flujo compuesto como flujo base de una propiedad",
+     "cuando": "se arma el turno",
+     "entonces": "el turno recibe las etapas de los sub-flujos en su orden, con los que van en paralelo y el colaborador sugerido, y el cálculo de trabajo y duración"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un flujo general que se edita después de armado el turno",
+     "cuando": "se abre el turno",
+     "entonces": "el turno conserva las tareas que ya tomó: editar el flujo no cambia las copias por propiedad ni lo ya armado"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/flujos"
+    ],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "Colecciones flujos y flujo-categorias leídas por HK (_fbExpandir, [F11-base]: bloque duplicado HK/Propiedades bajo tests/flujo-base.test.js) y por Propiedades; las claves de tarea son flujoId::actId::tareaId; HK solo lee subFlujos vía propiedad.flujoBaseId. persist() además lanza el evento str-flujos-updated a la página que abrió esta (window.opener), que ningún código escucha."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del mapa técnico y de las dos páginas consumidoras (búsquedas): los datos viajan por la colección de flujos"
+   }
+  },
+  {
+   "id": "CU-FL-10.2",
+   "capacidad": "CAP-FL-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Mantener los flujos, categorías y guías al día con el sistema, sin resucitar datos viejos de un aparato",
+   "declarado": "construido",
+   "limitantes": [
+    "Sin sesión la página queda con lo guardado en el aparato y no sube nada.",
+    "Con una copia vieja del cliente en el navegador, la página avisa «Actualiza la página (Ctrl+F5) para sincronizar con el servidor» y no sincroniza."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-1.1",
+     "dato": "flujos, categorías y guías del sistema, con lo cambiado desde la última lectura",
+     "rel": "REL-26"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-1.1",
+     "dato": "flujos, categorías y guías cambiados, con sus bajas",
+     "rel": "REL-26"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con sesión que abre Flujos",
+     "cuando": "la página termina de leer",
+     "entonces": "trae del sistema los flujos, las categorías y las guías en segundo plano y vuelve a pintar solo si algo cambió"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un guardado en el editor",
+     "cuando": "se pulsa «Guardar flujo»",
+     "entonces": "se manda solo lo que cambió desde la última subida y lo que se eliminó (también las copias borradas en cascada)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un aparato con datos viejos guardados y una lectura que falla",
+     "cuando": "se abre Flujos",
+     "entonces": "los ajustes al abrir no suben nada hasta que las tres lecturas salgan bien: así lo viejo no pisa lo del sistema, y un guardado hecho por la persona sí sube"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-4",
+    "RT-21"
+   ],
+   "pendientes": [
+    "INC-78"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [
+     "/api/col/flujos",
+     "/api/col/flujo-categorias",
+     "/api/col/guias"
+    ],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias",
+     "guias",
+     "inv-articulos"
+    ],
+    "notas": "_syncColFromApi (pull de flujos, flujo-categorias, guias e inv-articulos; _pullListo; _migracionPendiente), _persistCol (diff contra str-col-lastpush-v1, opts.migracion), persist/persistCats/persistGuias. Servidor primero; caché local str-flujos-v2, str-flujo-categorias-v1, str-guias-v1. INC-78 (Fundación y datos) cerrado."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: pull previo a las migraciones y diff de subida"
+   }
+  },
+  {
+   "id": "CU-FL-10.3",
+   "capacidad": "CAP-FL-10",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Ajustar al abrir los flujos guardados con formatos viejos, una sola vez",
+   "declarado": "construido",
+   "limitantes": [
+    "Es un ajuste de datos viejos: cuando ya no quede ningún flujo sin migrar, el código puede retirarse."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "flujos con manuales de texto libre en tareas y actividades",
+     "cuando": "se abre Flujos",
+     "entonces": "cada manual pasa a una guía enlazada y se marca el flujo como ya migrado; dos manuales iguales comparten una sola guía"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una copia por propiedad que editó su manual antes de migrar",
+     "cuando": "se abre Flujos",
+     "entonces": "recibe una guía propia con el nombre de la propiedad en el título para no confundirla con la del general"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "flujos sin ámbito, sin categoría, sin tiempo total, sin lista de inventario o sin el campo del paralelo y del colaborador sugerido",
+     "cuando": "se abre Flujos",
+     "entonces": "se les completan los valores por omisión sin cambiar lo que ya tenían"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "guias"
+    ],
+    "notas": "load(): valores por omisión (ambito, esCompuesto, subFlujos, paralelo, colaboradorId, tiempoTotal, inventario, guias, nota) + reparo de zonasPorDefinir de copias + _migrarManualAGuias (idempotente por flujo.migracionGuias; dedup global por texto exacto). Anotado como REQ-K1.1."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página: load() y _migrarManualAGuias"
+   }
+  },
+  {
+   "id": "CU-FL-10.4",
+   "capacidad": "CAP-FL-10",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Avisar, cuando llega un enlace viejo de asignación de flujos por categoría, que ahora el flujo base se elige en la ficha de la propiedad",
+   "declarado": "construido",
+   "limitantes": [
+    "El almacén de asignaciones por categoría quedó sin uso: nadie lo lee ni lo escribe, pero sigue declarado en el servidor, en la copia del cliente y en «Subir mis datos» del menú; se retira junto con la migración pendiente (DT-27)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un enlace antiguo con el parámetro de asignación",
+     "cuando": "se abre Flujos",
+     "entonces": "sale el aviso «Las asignaciones ahora se hacen eligiendo el flujo base en la ficha de la propiedad» y no se asigna nada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un turno automático de una propiedad",
+     "cuando": "se arma",
+     "entonces": "sale solo del flujo base de la propiedad: ya no hay asignaciones por categoría"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [
+    "DT-27"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "prop-workflows"
+    ],
+    "notas": "DOMContentLoaded: params.get('asignar') → toast. Retirados togglePropWorkflow, openAsignarModal, #asignarModal y persistPropWorkflows; prop-workflows sigue en COLECCIONES_VALIDAS (api/col/index.php), COL_KEYS de str-api.js y el menú. El mapa técnico anota una DT nueva por numerar; en seguimiento es DT-27."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la página y búsquedas de prop-workflows en el servidor, el cliente y las otras páginas"
+   }
+  },
+  {
+   "id": "CU-FL-10.5",
+   "capacidad": "CAP-FL-10",
+   "actor": [
+    "admin"
+   ],
+   "que": "Reiniciar los flujos y las categorías para dejar el sistema limpio",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-49 pospuesta por Carlos el 18-oct («de momento descartemos los borrados»); vuelve al alcance si se retoma.",
+    "Se pidió solo como limpieza puntual, sin pantalla nueva; «reiniciar módulo» queda en la bolsa (T-21)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio que se reinicia conservando sus propiedades",
+     "cuando": "se reinician los flujos y las categorías",
+     "entonces": "los flujos y las categorías se archivan sin borrarse físicamente, con respaldo antes, y las propiedades pierden la referencia a su flujo base"
+    }
+   ],
+   "origen": [
+    "DA-49"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-12"
+   ],
+   "pendientes": [
+    "T-21"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-flujos.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "flujos",
+     "flujo-categorias"
+    ],
+    "notas": "Sin código en el producto: Flujos no tiene acción de reinicio ni de archivado. Contrapartes: CU-PR-9.5, CU-INV-8.5 y CU-HK-10.8."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de DA-49 y de la página: sin acción de reinicio"
+   }
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-BC-1",
+   "porque": "Es de la Base de conocimiento (pestaña Diagrama del mapa); salió por coincidencia de palabra («flujos» del mapa). Aceptado."
+  },
+  {
+   "id": "INC-102",
+   "porque": "Es del Diagrama de la Base de conocimiento (avisos de consola y cabecera), no de Flujos. Cerrado."
+  },
+  {
+   "id": "REQ-INV2-6",
+   "porque": "Pedido de activos descartado como contenedor (partido en INV2-6-1 a 6-3); es de Inventario. Descartado."
+  },
+  {
+   "id": "REQ-INV2-6-3",
+   "porque": "Plantilla de dotación por tipo de propiedad (Inventario); ningún caso de uso de Flujos la ejerce. Entregado."
+  },
+  {
+   "id": "REQ-INV2-8",
+   "porque": "Plantillas de arranque, partido en INV2-8-1 y 8-2; es de Inventario. Descartado."
+  },
+  {
+   "id": "REQ-INV2-8-1",
+   "porque": "Aplicar una plantilla de arranque a un negocio (Inventario). Si su contenido incluye flujos o categorías, tocaría a Flujos: duda para Diseño. Definido."
+  },
+  {
+   "id": "REQ-INV2-8-2",
+   "porque": "Guardar un negocio como plantilla; espera el módulo de superadmin de la plataforma. Borrador."
+  },
+  {
+   "id": "REQ-INV2-7",
+   "porque": "Pedido descartado como contenedor (partido en INV2-7-1 y 7-2); sus casos de uso son de Inventario y Housekeeping."
+  },
+  {
+   "id": "REQ-INV2-7-2",
+   "porque": "QR por lugar de la zona que abre «el flujo de ese lugar»: es de Inventario y Puntos de control y espera el lector; el «flujo» sería un flujo de inventario (CU-FL-5.7), pero no hay nada que enlazar todavía. Borrador."
+  },
+  {
+   "id": "REQ-F11-6",
+   "porque": "Vista «mi sub-flujo» del portal (CU-POR-1.4, no construido): el portal recibe las etapas armadas por Housekeeping, sin flujo directo con Flujos. Entregado."
+  },
+  {
+   "id": "REQ-MI1-2",
+   "porque": "Eventos de mantenimiento e inventario en el calendario con un flujo asignado: es del Calendario (CU-CAL-1.1, CU-INV-12.2); Flujos solo aporta los flujos a elegir (CU-FL-5.6). Entregado."
+  },
+  {
+   "id": "REQ-MI1-3",
+   "porque": "Integrar el flujo del evento al turno y dar por realizado el evento: es de Housekeeping (CU-HK-1.10, no construido). Entregado."
+  },
+  {
+   "id": "REQ-MI1-4",
+   "porque": "El colaborador ve sus eventos en su calendario (CU-POR-1.5, no construido): es del Portal y del Calendario. Entregado."
+  },
+  {
+   "id": "REQ-BT-1",
+   "porque": "Bolsa de tiempo del colaborador, absorbida por REQ-PG1-2 y REQ-F11-5-2 (DA-41): su contraparte en Flujos es CU-FL-4.5. Descartado."
+  },
+  {
+   "id": "REQ-SH-2",
+   "porque": "Menú del STR (Shell): solo lleva a Flujos con un ítem para administrador y operador; el REQ no cambia nada de la página. Aceptado."
+  },
+  {
+   "id": "REQ-OP-1",
+   "porque": "Tablero de operación (OP): lee emoji y nombre corto de los flujos, pero no ejerce ningún caso de uso de Flujos; su caso a no se cita. Aceptado."
+  },
+  {
+   "id": "DA-22",
+   "porque": "Diferencia de conteo, consumo y auditoría de inventario (Inventario); salió por coincidencia de palabra."
+  },
+  {
+   "id": "DA-23",
+   "porque": "Autoriza al verificador a crear flujos y datos con prefijo zz-verif- en producción; es de la fábrica, no del producto."
+  },
+  {
+   "id": "DA-29",
+   "porque": "Decisiones de inventario y operación (entre ellas «compra como actividad de flujo»); la compra como actividad de un flujo pertenece a Compras y no existe todavía. Decidida."
+  },
+  {
+   "id": "DA-32",
+   "porque": "Cruce de la copia a Drive y el corte mensual (Copia a Drive y retención); ningún caso de uso de Flujos lo ejerce."
+  },
+  {
+   "id": "DA-37",
+   "porque": "Adelantos, compras y liquidación (Pagos); la base del pago por sub-flujo vive en CU-FL-4.5 y CU-HK-6.6, no en esta decisión."
+  },
+  {
+   "id": "DA-46",
+   "porque": "Es de INC-141: permisos de escritura de incidentes del colaborador en el servidor (Incidentes); ningún caso de uso de Flujos la ejerce. Decidida."
+  },
+  {
+   "id": "INC-89",
+   "porque": "Es de Housekeeping (no había forma de borrar un turno manual); el flujo extra «ya borrado» que cita es solo contexto. Cerrado."
+  },
+  {
+   "id": "INC-127",
+   "porque": "Es de Housekeeping y el portal (el mensaje de abrir un turno se perdía al abrir desde la lista en caché); usa el flujo base solo como dato de la prueba. Cerrado."
+  },
+  {
+   "id": "INC-139",
+   "porque": "Lectura intermitente de los JSON del repositorio de documentos (Proyecto); salió por coincidencia de palabra. Abierto, ajeno a Flujos."
+  },
+  {
+   "id": "INC-155",
+   "porque": "Guion REQ-OP-1 c del tablero (orden de turnos atrasados); salió por coincidencia de palabra y no ejerce Flujos. Cerrado."
+  }
+ ]
+}

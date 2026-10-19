@@ -1,7 +1,7 @@
 {
  "modulo": "U",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 3,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-usuarios.html (76 KB, leída por funciones: lista, ficha, permisos, ficha de pago, saldo, anulación de tarifa, invitación, capacidades y cuentas)",
@@ -14,7 +14,18 @@
   "guiones e2e y de la fábrica que pasan por identidad (herramientas/pw/sesiones, humo-pw, cuenta-pruebas, cuenta-pruebas-revertir, reingreso-zz, usuarios-zz y los de INC-134, INC-140, INC-146-purga, DT-41, DT-42, REQ-OP-1, REQ-SH-2 y los de inventario con operador); los .spec.js se leyeron para ver qué comprueba cada caso",
   "interno/linea-base/esquema.json, INV.json, HK.json, PR.json y POR.json (estilo y flujos con ids reales)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-810)",
+   "que": "Peso: esenciales 1, 2 y 3; necesarias 4, 5 y 6; la 7 es fábrica. T-26 (único administrador) en 1.5 y 2.2; T-27 (retirar 1.6 y la contraseña propia, color por persona) en 1.6, 3.2 y 1.3; capacidades se desactivan (RT-5) en 5.2; 3.9 enlazado a la idea de superadmin."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Desarrollo (M-811)",
+   "que": "INC-160 a INC-164 y DT-49 registrados y atados; 3.9 confirmado (confianza alta, DT-46)."
+  }
+ ],
  "alcance": {
   "dentro": [
    "El equipo: lista, búsqueda y filtro por capacidad, agregar, editar, inactivar y la vista mínima que ve el colaborador.",
@@ -42,49 +53,49 @@
    "id": "CAP-U-1",
    "nombre": "Equipo",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Ver, buscar, agregar, editar, inactivar y subir al sistema a las personas del equipo (administradores, operadores y colaboradores) con sus datos de contacto; el colaborador solo ve lo mínimo de sus compañeros."
   },
   {
    "id": "CAP-U-2",
    "nombre": "Roles y permisos",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Un solo rol por persona, permisos acotados del operador, módulos cerrados a quien no corresponden y decisión en el sistema, en cada petición, de lo que cada rol puede hacer; incluye lo definido y aún por construir."
   },
   {
    "id": "CAP-U-3",
    "nombre": "Acceso y sesión",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Entrar con la cuenta de Google o con correo y contraseña, mantener y renovar la sesión de 24 horas, avisar cuando no se puede, cerrarla, crear el primer negocio y llevar a cada rol a su inicio."
   },
   {
    "id": "CAP-U-4",
    "nombre": "Invitación de un solo uso",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Dar acceso a una persona del equipo con un enlace propio que vence en 7 días, compartirlo, aceptarlo y rechazar los enlaces vencidos, usados o inválidos."
   },
   {
    "id": "CAP-U-5",
    "nombre": "Capacidades",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Llevar el catálogo de capacidades del negocio (limpieza, mantenimiento y las que se creen) y marcar a cada persona como capacitada o nueva en cada una."
   },
   {
    "id": "CAP-U-6",
    "nombre": "Ficha de pago y saldo de horas",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Definir la ficha de pago de cada persona (modalidad, política de horas, tarifas con su historial), anular tarifas sin borrarlas, entregar la ficha a quien calcula el valor del turno y ver el saldo de horas."
   },
   {
    "id": "CAP-U-7",
    "nombre": "Cuenta de pruebas de la fábrica",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Tener personas de prueba por rol y llevarlas a una cuenta de pruebas aparte para que la cuenta real quede solo con lo real (DA-47): ensayar, mover, revertir y volver a entrar. Es de la fábrica, no del producto."
   }
  ],
@@ -122,6 +133,11 @@
     {
      "a": "CU-POR-6.2",
      "dato": "nombre y color del colaborador elegido",
+     "rel": "REL-14"
+    },
+    {
+     "a": "CU-FL-4.3",
+     "dato": "colaboradores activos del equipo con su identificador y su nombre, para sugerirlos en un sub-flujo",
      "rel": "REL-14"
     }
    ],
@@ -257,7 +273,8 @@
     "Un operador con «Editar equipo» solo crea colaboradores sin acceso propio; crear administradores u operadores, dar acceso o definir permisos es solo del administrador (la pantalla ofrece los tres roles y el sistema rechaza los que no corresponden).",
     "La persona nace «sin cuenta»: para entrar necesita una invitación (CU-U-4.1).",
     "Solo exige el nombre; no avisa si ya existe otra persona con el mismo nombre o el mismo correo.",
-    "La persona nueva no recibe color: en Equipo, Housekeeping y el portal todas las nuevas se ven del mismo verde (posible incidente nuevo)."
+    "La persona nueva no recibe color: en Equipo, Housekeeping y el portal todas las nuevas se ven del mismo verde (posible incidente nuevo).",
+    "Toda persona nueva recibe el mismo color; se pide un color distinto para cada una (T-27)."
    ],
    "entradas": [],
    "salidas": [
@@ -299,7 +316,9 @@
     "RT-14",
     "RT-15"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "T-27"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -398,7 +417,9 @@
    "declarado": "construido",
    "limitantes": [
     "«Eliminar» no borra: deja a la persona inactiva. La pantalla sin embargo pregunta «¿Eliminar este colaborador permanentemente?» y avisa «Colaborador eliminado» (texto engañoso respecto de RT-5).",
-    "Una persona inactiva no puede volver a entrar, pero la sesión que ya tenía sigue valiendo hasta que venza (24 horas): el sistema revisa el estado al entrar, no en cada petición."
+    "Una persona inactiva no puede volver a entrar, pero la sesión que ya tenía sigue valiendo hasta que venza (24 horas): el sistema revisa el estado al entrar, no en cada petición.",
+    "El único administrador puede inactivarse; no debería (T-26).",
+    "El texto dice «eliminar permanentemente» pero solo inactiva (correcto por RT-5; falla el texto, INC-164)."
    ],
    "entradas": [],
    "salidas": [
@@ -439,7 +460,10 @@
     "RT-14",
     "RT-15"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-164",
+    "T-26"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -469,7 +493,8 @@
    "que": "Subir al sistema el equipo que solo estaba guardado en el aparato",
    "declarado": "construido",
    "limitantes": [
-    "Es un resto de la migración: sin sesión ya no se puede trabajar en Equipo, así que solo sirve para copias viejas del aparato; es candidato a retirar."
+    "Es un resto de la migración: sin sesión ya no se puede trabajar en Equipo, así que solo sirve para copias viejas del aparato; es candidato a retirar.",
+    "Se retira (Diseño, M-810): ninguna pantalla lo usa; en la bolsa T-27."
    ],
    "entradas": [],
    "salidas": [],
@@ -493,7 +518,9 @@
     "REQ-U4"
    ],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "T-27"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -526,7 +553,8 @@
    "limitantes": [
     "Mientras la consulta no ha respondido, un operador limitado no ve controles de más: la pantalla usa la última copia de sus permisos y, sin ella, ninguno (INC-93, cerrado).",
     "La lista de capacidades propias que devuelve esta consulta sale siempre vacía (la consulta no la lee); quien necesita las capacidades las toma de la lista del equipo (posible incidente nuevo, sin consecuencia visible hoy).",
-    "La barra superior del menú principal muestra el nombre de la cuenta de Google y no el nombre que la persona tiene en el sistema (INC-111, abierto)."
+    "La barra superior del menú principal muestra el nombre de la cuenta de Google y no el nombre que la persona tiene en el sistema (INC-111, abierto).",
+    "Las capacidades propias siempre llegan vacías (INC-163)."
    ],
    "entradas": [],
    "salidas": [
@@ -553,6 +581,10 @@
     {
      "a": "CU-POR-6.1",
      "dato": "rol del usuario con sesión: administrador y operador ven el selector, el colaborador entra a su portal"
+    },
+    {
+     "a": "CU-FL-9.1",
+     "dato": "rol del usuario con sesión"
     }
    ],
    "escenarios": [
@@ -588,8 +620,9 @@
     "RT-14"
    ],
    "pendientes": [
-    "INC-93",
-    "INC-111"
+    "INC-111",
+    "INC-163",
+    "INC-93"
    ],
    "pruebas": [
     {
@@ -646,7 +679,8 @@
    "limitantes": [
     "Cada persona tiene un solo rol, el del sistema: ni el menú ni las pantallas leen otro (INC-108, cerrado).",
     "El rol de superadmin de plataforma existe en los datos como legado y vale como administrador; no tiene funciones propias (CU-U-2.10).",
-    "Un cambio de rol no corta de inmediato lo que la persona ya podía: el sistema usa el rol de su sesión hasta que venza (24 horas); la pantalla en cambio ya muestra el rol nuevo (posible incidente nuevo)."
+    "Un cambio de rol no corta de inmediato lo que la persona ya podía: el sistema usa el rol de su sesión hasta que venza (24 horas); la pantalla en cambio ya muestra el rol nuevo (posible incidente nuevo).",
+    "El único administrador puede quitarse el rol; no debería (T-26)."
    ],
    "entradas": [],
    "salidas": [
@@ -687,7 +721,8 @@
     "RT-14"
    ],
    "pendientes": [
-    "INC-108"
+    "INC-108",
+    "T-26"
    ],
    "pruebas": [],
    "tecnica": {
@@ -1258,7 +1293,8 @@
    "que": "Administrar la plataforma como superadmin, aparte de los administradores de cada negocio",
    "declarado": "no-construido",
    "limitantes": [
-    "REQ-U-8: el superadmin no tiene funciones ni módulo todavía; se creará como usuario aparte cuando existan. Hoy todo administrador ve lo de plataforma y el rol superadmin guardado vale como administrador (bolsa REQ-U8-superadmin: definir cuando haya clientes reales)."
+    "REQ-U-8: el superadmin no tiene funciones ni módulo todavía; se creará como usuario aparte cuando existan. Hoy todo administrador ve lo de plataforma y el rol superadmin guardado vale como administrador (bolsa REQ-U8-superadmin: definir cuando haya clientes reales).",
+    "Se define cuando haya clientes reales (decisión de Carlos)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1443,7 +1479,8 @@
    "declarado": "construido",
    "limitantes": [
     "La contraseña es la de la cuenta de Google de la persona: no hay contraseñas propias del sistema en la pantalla de entrada.",
-    "El sistema aún acepta entrar con una contraseña propia guardada en su ficha (cuentas anteriores a Google), pero la pantalla de entrada no usa esa vía y ninguna pantalla permite crear esa contraseña: es un resto candidato a retirar."
+    "El sistema aún acepta entrar con una contraseña propia guardada en su ficha (cuentas anteriores a Google), pero la pantalla de entrada no usa esa vía y ninguna pantalla permite crear esa contraseña: es un resto candidato a retirar.",
+    "Se retira (Diseño, M-810): ninguna pantalla usa la entrada con contraseña propia; en la bolsa T-27."
    ],
    "entradas": [],
    "salidas": [
@@ -1474,7 +1511,9 @@
    "reglas": [
     "RT-16"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "T-27"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1701,7 +1740,8 @@
    "declarado": "construido",
    "limitantes": [
     "Espera hasta 8 segundos a que Google recupere la cuenta guardada antes de renovar.",
-    "La renovación pasa por la misma comprobación de la entrada: si la cuenta se desactivó o dejó de existir, ya no se renueva (así surte efecto una baja, hasta 24 horas después)."
+    "La renovación pasa por la misma comprobación de la entrada: si la cuenta se desactivó o dejó de existir, ya no se renueva (así surte efecto una baja, hasta 24 horas después).",
+    "La sesión dura 24 h sin revocación: una baja o un cambio de rol tarda hasta 24 h (DT-49)."
    ],
    "entradas": [],
    "salidas": [
@@ -1740,6 +1780,7 @@
     "RT-16"
    ],
    "pendientes": [
+    "DT-49",
     "INC-134"
    ],
    "pruebas": [
@@ -1854,7 +1895,8 @@
    "declarado": "construido",
    "limitantes": [
     "En el menú principal hay dos botones de salir con el mismo símbolo: uno cierra la cuenta de Google y otro solo la sesión del sistema; ninguno de los dos hace las dos cosas (el portal sí, CU-POR-5.2).",
-    "«Cerrar sesión» del menú principal cierra la cuenta de Google pero deja guardadas en el aparato la sesión del sistema y las copias del equipo (con correos, teléfonos y fichas de pago) hasta que la sesión venza, 24 horas (posible incidente nuevo)."
+    "«Cerrar sesión» del menú principal cierra la cuenta de Google pero deja guardadas en el aparato la sesión del sistema y las copias del equipo (con correos, teléfonos y fichas de pago) hasta que la sesión venza, 24 horas (posible incidente nuevo).",
+    "Hay dos botones de salir: uno solo cierra Google; ninguno borra la copia local del equipo (INC-162)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1887,7 +1929,9 @@
    "reglas": [
     "RT-16"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-162"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1921,7 +1965,9 @@
    "limitantes": [
     "Sirve solo para la primera instalación: con usuarios ya creados el sistema responde que ya existe un negocio. El alta de negocios clientes nuevos no tiene puerta todavía (idea en la bolsa de Acceso, sin identificador).",
     "En una base como la de producción la creación del negocio fallaría porque no asigna plan (DT-46, abierta); hoy es inofensivo porque ya hay usuarios.",
-    "La pantalla pide «crear tu acceso» arriba con el mismo correo, pero ese formulario solo entra con una cuenta de Google o de correo que ya existe: no queda claro cómo se crea (duda para Diseño y Desarrollo)."
+    "La pantalla pide «crear tu acceso» arriba con el mismo correo, pero ese formulario solo entra con una cuenta de Google o de correo que ya existe: no queda claro cómo se crea (duda para Diseño y Desarrollo).",
+    "Crear un negocio nuevo y su acceso es de plataforma (superadmin, idea REQ-U8-superadmin en la bolsa); hoy no hay clientes nuevos (Diseño, M-810).",
+    "Solo funciona si no hay ningún usuario en toda la base; crea la cuenta sin plan (DT-46)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1970,10 +2016,10 @@
     ],
     "notas": "handleSetup → POST /api/setup {cuenta_nombre, nombre, email, password}; 403 si ya hay usuarios (L14–19 según DT-46); el código de api/setup/index.php no estaba entre las fuentes: lo descrito sale de la pantalla y de la nota de DT-46."
    },
-   "confianza": "baja",
+   "confianza": "alta",
    "verificado": {
     "fecha": "2026-10-18",
-    "como": "Lectura del código de la pantalla de entrada (handleSetup, toggleSetup) y de la nota de DT-46; el servidor del alta no se leyó"
+    "como": "Desarrollo (M-811): api/setup responde 403 si hay algún usuario; si no, crea la cuenta y el administrador con contraseña"
    }
   },
   {
@@ -2065,7 +2111,8 @@
     "Solo un administrador invita a otro administrador: a un operador con «Invitar» el sistema le responde que no puede.",
     "El enlace se muestra una sola vez; el sistema solo guarda una huella, así que si se pierde hay que reinvitar.",
     "La pantalla ofrece Invitar solo a quien aún no tiene la cuenta activa, pero el sistema acepta reinvitar a una persona ya activa: esa invitación, aceptada con otra cuenta de Google, reemplaza la cuenta vinculada. Un operador con solo «Invitar» podría así quedarse con la cuenta de otro operador con más permisos (posible incidente nuevo).",
-    "La dirección del enlace es una sola, escrita en el sistema, igual para todos los negocios."
+    "La dirección del enlace es una sola, escrita en el sistema, igual para todos los negocios.",
+    "Reinvitar a una persona ya activa sobrescribe su invitación (INC-161)."
    ],
    "entradas": [
     {
@@ -2111,7 +2158,9 @@
     "RT-15",
     "RT-16"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-161"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -2210,7 +2259,8 @@
    "limitantes": [
     "Para operador y colaborador no se exige que el correo de Google sea el invitado: quien tenga el enlace vincula la cuenta de Google que quiera (el enlace es la prueba).",
     "No se pide aceptar términos de privacidad al registrarse (idea T-14, DA-45 la complementa).",
-    "La página de invitación no estaba entre las fuentes: lo descrito sale del sistema que la atiende y del mapa técnico."
+    "La página de invitación no estaba entre las fuentes: lo descrito sale del sistema que la atiende y del mapa técnico.",
+    "Para quien no es admin, aceptar no exige el correo y reemplaza la cuenta de Google vinculada: se puede tomar la cuenta de otro (INC-161)."
    ],
    "entradas": [
     {
@@ -2257,6 +2307,7 @@
     "RT-16"
    ],
    "pendientes": [
+    "INC-161",
     "T-14"
    ],
    "pruebas": [],
@@ -2411,7 +2462,9 @@
    "limitantes": [
     "El sistema no pide rol para crear, renombrar ni quitar capacidades: un colaborador con sesión que lo pida por fuera de la pantalla puede hacerlo (posible incidente nuevo).",
     "Quitar una capacidad la borra del catálogo (no se desactiva), a diferencia de lo que pide RT-5; solo se protege la que alguien tiene.",
-    "El sistema no valida el nombre al renombrar (por fuera de la pantalla puede quedar vacío) y crear otra con un nombre que da el mismo identificador falla con un error genérico."
+    "El sistema no valida el nombre al renombrar (por fuera de la pantalla puede quedar vacío) y crear otra con un nombre que da el mismo identificador falla con un error genérico.",
+    "Las capacidades deben desactivarse, no borrarse (RT-5; Diseño, M-810).",
+    "La API de capacidades solo pide sesión: cualquiera, también un colaborador, puede crear, renombrar o borrar (INC-160)."
    ],
    "entradas": [],
    "salidas": [],
@@ -2443,10 +2496,12 @@
    ],
    "reglas": [
     "RT-1",
-    "RT-5",
-    "RT-14"
+    "RT-14",
+    "RT-5"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-160"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [

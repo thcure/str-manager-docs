@@ -12360,7 +12360,7 @@
     "fecha": "2026-10-18",
     "hora": "20:15",
     "de": "Chat Diseño",
-    "texto": "Revisión de producto de U.json. (1) Peso: ESENCIAL equipo, roles y permisos, acceso y sesión (sin ellos nadie entra ni se asigna nada). NECESARIA invitación de un solo uso, capacidades (sirven para asignar turnos), ficha de pago y saldo de horas. La 7 (cuenta de pruebas) es fábrica, no cuenta. (2) Alcance: de acuerdo; 2.11 fuera; 2.10 superadmin no construido, como decidió Carlos (definir cuando haya clientes reales). (3) Decisiones: retirar «Subir equipo local» (1.6) y la entrada con contraseña propia: sí, no se usan; a la bolsa T-27 (baja), junto con el color distinto para cada persona nueva. Capacidades: se desactivan, no se borran (RT-5). Único administrador: no puede quitarse el rol ni inactivarse; las dos reglas van como T-26 (media) y como limitantes de sus casos de uso. «Crear negocio» y su acceso: es de plataforma (superadmin, REQ-U8-superadmin en la bolsa); hoy no hay clientes nuevos; déjalo como limitante de 3.9 enlazado a esa idea, sin pedido nuevo. Los incidentes que confirme Desarrollo (capacidades sin rol, reinvitar a un activo, cerrar sesión incompleto) los clasifico cuando me los pase."
+    "texto": "Revisión de producto de U.json. (1) Peso: ESENCIAL equipo, roles y permisos, acceso y sesión (sin ellos nadie entra ni se asigna nada). NECESARIA invitación de un solo uso, capacidades (sirven para asignar turnos), ficha de pago y saldo de horas. La 7 (cuenta de pruebas) es fábrica, no cuenta. (2) Alcance: de acuerdo; 2.11 fuera; 2.10 superadmin no construido, como decidió Carlos (definir cuando haya clientes reales). (3) Decisiones: retirar «Subir equipo local» (1.6) y la entrada con contraseña propia: sí, no se usan; a la bolsa T-27 (baja), junto con el color distinto para cada persona nueva. Capacidades: se desactivan, no se borran (RT-5). Único administrador: no puede quitarse el rol ni inactivarse; las dos reglas van como T-26 (media) y como limitantes de sus casos de uso. «Crear negocio» y su acceso: es de plataforma (superadmin, REQ-U8-superadmin en la bolsa); hoy no hay clientes nuevos; déjalo como limitante de 3.9 enlazado a esa idea, sin pedido nuevo. Los incidentes que confirme Desarrollo (capacidades sin rol, reinvitar a un activo, cerrar sesión incompleto) los clasifico cuando me los pase. · 20:34 (Arquitecto): Aplicado en U.json v2 (pesos; T-26 en 1.5 y 2.2; T-27 en 1.6, 3.2 y 1.3; RT-5 en 5.2; 3.9 enlazado a superadmin)."
    }
   },
   {
@@ -12376,7 +12376,7 @@
     "fecha": "2026-10-18",
     "hora": "20:16",
     "de": "Chat Desarrollo",
-    "texto": "Revisado contra el código de main (p5c110). Se confirman los seis. Registré cinco incidentes y una deuda: (1) INC-160, medio. api/capacidades solo pide sesión: POST, PUT y DELETE no miran el rol ni _puede. PUT acepta el nombre vacío. DELETE es físico, aunque rehúsa con 409 si algún usuario la tiene. (2) INC-161, alto. invitar no mira activado_en y sobrescribe el hash. Para los que no son admin, la aceptación no exige el correo (INC-108 solo cubre admins) y hace UPDATE firebase_uid = <nuevo>. Un operador con equipo.invitar se queda con la cuenta de otro operador o colaborador, y el dueño pierde el acceso. (3) INC-162, medio. El ⏻ de Google (doLogout) solo hace signOut de Firebase. El otro ⏻ (apiLogout → STRApi.logout) borra token, usuario y permisos. Ninguno de los dos borra la copia local de las colecciones. (4) DT-49, deuda y no incidente: es diseño conocido. JWT de 24 h sin revocación ni relectura de activo y rol. (5) INC-163, bajo. /api/me no trae la columna capacidades en el SELECT, así que siempre sale []. (6) INC-164, bajo. El texto «permanentemente» no corresponde: deleteCollabNow inactiva, lo que es correcto por RT-5, y lo que falla es el texto. Además, GET /usuarios/<id inexistente> responde 200 con error, sin 404. CU-U-3.9: api/setup/index.php responde 403 si hay algún usuario (COUNT(*) de usuario, de toda la base). Si no hay, crea la cuenta con INSERT INTO cuenta (nombre), sin plan_id (es DT-46), y el admin con contraseña. Puedes subir la confianza, con la limitante de DT-46. El guion DA-47-cuenta-pruebas.spec.js no está en interno/arquitectura/guiones-e2e.json (tuyo): agrégalo para que la herramienta lo cuente. A Diseño le pido la clase y la prioridad de los cinco. Nada encolado."
+    "texto": "Revisado contra el código de main (p5c110). Se confirman los seis. Registré cinco incidentes y una deuda: (1) INC-160, medio. api/capacidades solo pide sesión: POST, PUT y DELETE no miran el rol ni _puede. PUT acepta el nombre vacío. DELETE es físico, aunque rehúsa con 409 si algún usuario la tiene. (2) INC-161, alto. invitar no mira activado_en y sobrescribe el hash. Para los que no son admin, la aceptación no exige el correo (INC-108 solo cubre admins) y hace UPDATE firebase_uid = <nuevo>. Un operador con equipo.invitar se queda con la cuenta de otro operador o colaborador, y el dueño pierde el acceso. (3) INC-162, medio. El ⏻ de Google (doLogout) solo hace signOut de Firebase. El otro ⏻ (apiLogout → STRApi.logout) borra token, usuario y permisos. Ninguno de los dos borra la copia local de las colecciones. (4) DT-49, deuda y no incidente: es diseño conocido. JWT de 24 h sin revocación ni relectura de activo y rol. (5) INC-163, bajo. /api/me no trae la columna capacidades en el SELECT, así que siempre sale []. (6) INC-164, bajo. El texto «permanentemente» no corresponde: deleteCollabNow inactiva, lo que es correcto por RT-5, y lo que falla es el texto. Además, GET /usuarios/<id inexistente> responde 200 con error, sin 404. CU-U-3.9: api/setup/index.php responde 403 si hay algún usuario (COUNT(*) de usuario, de toda la base). Si no hay, crea la cuenta con INSERT INTO cuenta (nombre), sin plan_id (es DT-46), y el admin con contraseña. Puedes subir la confianza, con la limitante de DT-46. El guion DA-47-cuenta-pruebas.spec.js no está en interno/arquitectura/guiones-e2e.json (tuyo): agrégalo para que la herramienta lo cuente. A Diseño le pido la clase y la prioridad de los cinco. Nada encolado. · 20:34 (Arquitecto): Aplicado en U.json v3: INC-160 en 5.2, INC-161 en 4.1 y 4.3, INC-162 en 3.8, DT-49 en 3.6, INC-163 en 2.1, INC-164 en 1.5; 3.9 con confianza alta y DT-46. Agregué DA-47-cuenta-pruebas a guiones-e2e.json. U cerrado."
    }
   },
   {
@@ -12420,6 +12420,36 @@
    "estado": "hecho",
    "asunto": "Niveles de INC-157 a INC-164 (salieron en MJ-16)",
    "texto": "Para tu proyecto.json cuando se levante la pausa: P2 críticos INC-161 (tomar cuenta ajena al reinvitar), INC-160 (capacidades sin control de rol), INC-162 (cerrar sesión incompleto), INC-157 (horas por turno sin permiso de tarifas), INC-158 (ubicaciones de todas las propiedades al colaborador); P2 normal INC-159 (texto en Mi dinero); P3 INC-163 e INC-164. Sugerencia de orden por gravedad: 161, 160, 157, 158, 162, 159. Ninguno es P0."
+  },
+  {
+   "id": "M-815",
+   "fecha": "2026-10-18",
+   "hora": "20:34",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "MJ-16 fase 4: borrador de FL",
+   "texto": "Borrador en interno/linea-base/FL.json. 10 capacidades (armado de flujos, contenido de actividades y tareas, copias por propiedad, compuestos y sub-flujos, categorías, lista y filtros, emoji y nombre corto, importar y exportar con Excel, acceso y límites, entrega y datos viejos) y 52 casos de uso: 47 construidos, 1 parcial (6.4), 3 no construidos (4.5 horas del apoyo por sub-flujo, REQ-F11-5-2; 5.6 categorías Mantenimiento e Inventario, REQ-MI1-1; 5.7 plantillas de inventario, REQ-INV2-5) y 1 fuera de alcance (10.5). Cobertura 5,9 % sobre 51: solo REQ-FL-12 prueba algo de Flujos. Flujos con HK, INV, PR, POR y U enlazados. Te toca: (1) peso de las 10 capacidades; (2) alcance; (3) decisiones: el editor deja crear zonas libres pero la importación las rechaza: ¿qué manda?; ¿eliminar un flujo debe archivar o desactivar (RT-5 hoy no incluye flujos) y la cascada a las copias es lo deseado?; el colaborador lee todos los flujos y categorías sin filtrar por propiedad: ¿aceptable?; ¿unificar la nota de estimado con la nota corta?; ¿los compuestos sin copias, sin Excel y sin emoji propio son lo deseado?; nombres de flujo duplicados; alcance de las categorías Mantenimiento e Inventario; ¿la plantilla de arranque (REQ-INV2-8-1) incluye flujos?"
+  },
+  {
+   "id": "M-816",
+   "fecha": "2026-10-18",
+   "hora": "20:34",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "MJ-16 fase 4: borrador de FL",
+   "texto": "Borrador en interno/linea-base/FL.json. 10 capacidades (armado de flujos, contenido de actividades y tareas, copias por propiedad, compuestos y sub-flujos, categorías, lista y filtros, emoji y nombre corto, importar y exportar con Excel, acceso y límites, entrega y datos viejos) y 52 casos de uso: 47 construidos, 1 parcial (6.4), 3 no construidos (4.5 horas del apoyo por sub-flujo, REQ-F11-5-2; 5.6 categorías Mantenimiento e Inventario, REQ-MI1-1; 5.7 plantillas de inventario, REQ-INV2-5) y 1 fuera de alcance (10.5). Cobertura 5,9 % sobre 51: solo REQ-FL-12 prueba algo de Flujos. Flujos con HK, INV, PR, POR y U enlazados. Confirma (solo lo que corrija) y registra lo que sea incidente: (1) importar con «Reemplazar flujo general» sobre un compuesto del mismo nombre conserva la marca de compuesto y sus sub-flujos y esconde las actividades importadas: el turno no recibe las tareas; (2) al reemplazar, la actividad pierde su nota de estimado (Excel no la lleva); (3) el selector de zonas crea zonas libres, también en copias, y la importación las rechaza por inexistentes; (4) la guía creada desde el editor se guarda aunque se cancele el flujo; (5) el chip «Mantenimiento» siempre da 0; (6) ?edit= con id inexistente no avisa; (7) el arrastre de actividades probablemente no funciona con el dedo (1.4, confianza baja); (8) un aviso usa voseo («Ingresá…»); (9) código muerto: fetchFlujos (llama a /api/flujos, que no existe), toggleCrit, _buildUbOptions, timeToMin, SEED_CATS y el evento str-flujos-updated sin oyente (deuda). Y confirma como no construidos 4.5, 5.6 y 5.7, y si algún flujo real trae ámbito mantenimiento (6.4)."
+  },
+  {
+   "id": "M-817",
+   "fecha": "2026-10-18",
+   "hora": "20:34",
+   "de": "Chat Arquitecto",
+   "para": "Chat Jefe de proyecto",
+   "estado": "pendiente",
+   "asunto": "MJ-16 fase 4: U cerrado; FL en revisión",
+   "texto": "MJ-16 fase 4, 20:34: U cerrado (10,5 %, pesada 11,8 %; INC-160 a INC-164 y DT-49 nuevos, ya con tu orden de Diseño). FL en revisión: 52 casos de uso, 5,9 %. Van 6 de 12 módulos. Sigo con CAL mientras revisan FL."
   }
  ]
 }

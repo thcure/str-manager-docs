@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 22:29",
+ "actualizadoEn": "2026-10-18 22:30",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1512,7 +1512,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 str-api.js _colPush ≈L414–437 («if (err && err.isHttpError) throw err», el llamador suele hacer console.warn) y _colFlush ≈L448–470 («El servidor lo rechazó (400/403/etc)… _colRemoveFromPending»). Arreglo: distinguir 4xx definitivos (400/403/409/422) de 401 y 5xx (408/429/5xx): estos últimos se encolan y se reintentan; avisar al usuario cuando se descarta algo. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 str-api.js _colPush ≈L414–437 («if (err && err.isHttpError) throw err», el llamador suele hacer console.warn) y _colFlush ≈L448–470 («El servidor lo rechazó (400/403/etc)… _colRemoveFromPending»). Arreglo: distinguir 4xx definitivos (400/403/409/422) de 401 y 5xx (408/429/5xx): estos últimos se encolan y se reintentan; avisar al usuario cuando se descarta algo. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-57 (cruce con Carlos): ningún cambio se descarta en silencio; con sesión vencida o error pasajero queda en cola y se reintenta; un rechazo real se muestra en pantalla; la hora del cambio la pone el servidor; el servidor solo dice «ok» si escribió. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-188",
@@ -1525,7 +1527,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
    "causaRaiz": "arquitectura",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 str-api.js _colPush ≈L418 (updated_at: new Date().toISOString()); api/col/index.php ≈L1740 (_colNormalizeDatetime($it->updated_at)), upsert ≈L1534–1540 (IF(VALUES(updated_at) >= updated_at …)) y $upserted++ ≈L1925 sin mirar rowCount; api/lib/col-lectura.php since → updated_at > cursor (server_time). Solo el Tablero tiene solape. RT-7. Arreglo de fondo: que el servidor selle updated_at con su hora al escribir (y use la del aparato solo para decidir conflictos, o versión por ítem). Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 str-api.js _colPush ≈L418 (updated_at: new Date().toISOString()); api/col/index.php ≈L1740 (_colNormalizeDatetime($it->updated_at)), upsert ≈L1534–1540 (IF(VALUES(updated_at) >= updated_at …)) y $upserted++ ≈L1925 sin mirar rowCount; api/lib/col-lectura.php since → updated_at > cursor (server_time). Solo el Tablero tiene solape. RT-7. Arreglo de fondo: que el servidor selle updated_at con su hora al escribir (y use la del aparato solo para decidir conflictos, o versión por ítem). Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-57 (cruce con Carlos): ningún cambio se descarta en silencio; con sesión vencida o error pasajero queda en cola y se reintenta; un rechazo real se muestra en pantalla; la hora del cambio la pone el servidor; el servidor solo dice «ok» si escribió. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-189",
@@ -1538,7 +1542,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 str-api.js _colPushAll ≈L440; str-propiedades.html ≈L3533–3540 y ≈L3568–3574 (Array vacío = todo borrado → se resiembra con la semilla local, cuyos ids tp-1…/edificio… pueden ser los borrados). ubicaciones solo siembra con res.empty (sin ninguna fila), así que ahí no pasa. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 str-api.js _colPushAll ≈L440; str-propiedades.html ≈L3533–3540 y ≈L3568–3574 (Array vacío = todo borrado → se resiembra con la semilla local, cuyos ids tp-1…/edificio… pueden ser los borrados). ubicaciones solo siembra con res.empty (sin ninguna fila), así que ahí no pasa. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P2. Regla: un reenvío completo no revive lo que otro dio de baja. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P2"
   },
   {
    "id": "INC-190",
@@ -1551,7 +1557,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/export/index.php ≈L86–96: $json = json_encode(...) sin comprobar false; file_put_contents($archivo, false) escribe 0 bytes; $resultados[$cuentaId] = [ok => true]. Arreglo: JSON_THROW_ON_ERROR (o comprobar false), escribir a un temporal y renombrar, y no rotar si el del día falló. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 api/export/index.php ≈L86–96: $json = json_encode(...) sin comprobar false; file_put_contents($archivo, false) escribe 0 bytes; $resultados[$cuentaId] = [ok => true]. Arreglo: JSON_THROW_ON_ERROR (o comprobar false), escribir a un temporal y renombrar, y no rotar si el del día falló. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-58 (cruce con Carlos): si el respaldo falla, no sobrescribe el bueno y avisa al admin. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-191",
@@ -1564,7 +1572,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "definición",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/export/index.php _exportCuenta ≈L38: SELECT id, nombre, email, rol, telefono, activo, capacidades, empresa, color, estado, es_cuenta, firebase_uid, created_at (sin perfil_pago ni permisos). DT-43 solo pide cuenta, cuenta_retencion, drive_copia e ical_export. El ensayo de restauración no inserta usuarios (por diseño, para no abrir sesión en la copia), así que tampoco lo detecta. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 api/export/index.php _exportCuenta ≈L38: SELECT id, nombre, email, rol, telefono, activo, capacidades, empresa, color, estado, es_cuenta, firebase_uid, created_at (sin perfil_pago ni permisos). DT-43 solo pide cuenta, cuenta_retencion, drive_copia e ical_export. El ensayo de restauración no inserta usuarios (por diseño, para no abrir sesión en la copia), así que tampoco lo detecta. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P2. Regla: el respaldo trae la ficha de pago y los permisos (M-839 d). Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P2"
   },
   {
    "id": "INC-192",
@@ -1577,7 +1587,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/col/index.php _colFiltrarLecturaColaborador: no hay case hk-config (sí para turnos, reservas, propiedades, tickets, inv-*). Hay que ver qué campos usa el portal (tolerancias, horas por defecto para «Mi dinero») y dar lista blanca; decide Diseño si el valor hora general puede verlo. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 api/col/index.php _colFiltrarLecturaColaborador: no hay case hk-config (sí para turnos, reservas, propiedades, tickets, inv-*). Hay que ver qué campos usa el portal (tolerancias, horas por defecto para «Mi dinero») y dar lista blanca; decide Diseño si el valor hora general puede verlo. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-59 (cruce con Carlos): cada rol sube y pide solo archivos de lo que puede ver; el colaborador no ve el valor hora general, recibe solo lo que usa de la configuración de HK. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-193",
@@ -1590,7 +1602,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/upload/index.php ≈L39–56 (ref libre con patrón; roles admin, operador y colaborador para foto/evidencia/video); api/archivo/index.php ≈L27–50 (solo cuenta === sesión). Los nombres son uuid de 32 hex (no se adivinan), pero las rutas viajan en turnos y tickets. RT-14. Arreglo: en upload, ref debe ser un turno o ticket que el colaborador ve; en archivo, mismo contexto de lectura del colaborador (INC-120). Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 api/upload/index.php ≈L39–56 (ref libre con patrón; roles admin, operador y colaborador para foto/evidencia/video); api/archivo/index.php ≈L27–50 (solo cuenta === sesión). Los nombres son uuid de 32 hex (no se adivinan), pero las rutas viajan en turnos y tickets. RT-14. Arreglo: en upload, ref debe ser un turno o ticket que el colaborador ve; en archivo, mismo contexto de lectura del colaborador (INC-120). Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-59 (cruce con Carlos): cada rol sube y pide solo archivos de lo que puede ver; el colaborador no ve el valor hora general, recibe solo lo que usa de la configuración de HK. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-194",
@@ -1603,7 +1617,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
    "causaRaiz": "arquitectura",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/lib/col-lectura.php (since → updated_at > cursor) y el filtro por contexto del colaborador (INC-120): al ganar acceso, las filas viejas no cambian y no entran en el since. Arreglo posible: el servidor marca un «reinicio de cursor» del colaborador al cambiar su contexto, o el cliente pide pull completo al detectar propiedades nuevas. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 api/lib/col-lectura.php (since → updated_at > cursor) y el filtro por contexto del colaborador (INC-120): al ganar acceso, las filas viejas no cambian y no entran en el since. Arreglo posible: el servidor marca un «reinicio de cursor» del colaborador al cambiar su contexto, o el cliente pide pull completo al detectar propiedades nuevas. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P3. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P3"
   },
   {
    "id": "INC-195",
@@ -1616,7 +1632,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 API (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 str-api.js _archivoUrl ≈L160–175 (throw _httpError sin reintento de 401 ni datos); request ≈L110–123 sí reintenta y adjunta err.datos (L-125). Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 str-api.js _archivoUrl ≈L160–175 (throw _httpError sin reintento de 401 ni datos); request ≈L110–123 sí reintenta y adjunta err.datos (L-125). Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P3. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P3"
   },
   {
    "id": "INC-196",
@@ -1629,7 +1647,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 SRV (M-840)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "22:29 api/index.php _strFatalJson ≈L25–38: {error, tipo, archivo: basename, linea}. El mensaje no sale (bien), pero tipo, archivo y línea dan pistas del código. Arreglo: solo error e id de registro; el detalle queda en api/logs/error.log. Clase y prioridad: Diseño (LM-48)."
+   "nota": "22:29 api/index.php _strFatalJson ≈L25–38: {error, tipo, archivo: basename, linea}. El mensaje no sale (bien), pero tipo, archivo y línea dan pistas del código. Arreglo: solo error e id de registro; el detalle queda en api/logs/error.log. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P3. Regla: el 500 muestra solo un mensaje genérico; el detalle va al registro del servidor. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P3"
   }
  ],
  "dts": [

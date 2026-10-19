@@ -427,6 +427,7 @@ function vistaModulo(m){
    <section class="sec">${barra(I.porEstado, true)}</section>
    <section class="sec"><div class="fila"><div><h2>Contexto del módulo</h2><span class="tenue">¿Quién usa este módulo, qué hace y con quién intercambia?</span></div><div class="filtros">
        <label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
+       <label class="etq" for="cEst">Estado</label><select id="cEst"><option value="">Todos</option><option value="alcance">En alcance (sin lo de fuera)</option>${ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<option value="${e}">${esc(n)} (${I.porEstado[e]})</option>`).join('')}</select>
        <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que entrega</option><option value="entra">Solo lo que recibe</option><option value="-">Ninguna</option></select>
        <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select></div></div>
      <p class="tenue" style="margin:0">Izquierda: quién lo usa. Centro: sus capacidades; los cuadritos son sus casos de uso, con el color de su estado. Derecha: los módulos con los que intercambia datos, por medio de las relaciones del mapa. Línea gris: el actor usa casos de uso de esa capacidad (más gruesa = más casos). Verde azulado: la capacidad entrega a ese módulo; naranja: recibe de él. Las líneas aparecen al señalar un elemento: señala cualquier cosa para ver qué es; toca un módulo dos veces para ir a él.</p>
@@ -485,8 +486,10 @@ function lineaRelDir(dir, lado){ return dir === 'sale' ? [`url(#cS)`, '--acento'
 function diagramaModulo(m){
   const A = D.modulos[m].archivo, caps = A.capacidades;
   const acts = [...new Set(A.casosUso.flatMap((u) => u.actor))];
-  const fA = $('#cAct').value, fD = $('#cDir').value;
-  const cusF = A.casosUso.filter((u) => !fA || fA === '-' || u.actor.includes(fA));
+  const fA = $('#cAct').value, fD = $('#cDir').value, fE = $('#cEst').value;
+  const pasaEst = (u) => !fE || (fE === 'alcance' ? est(u.id) !== 'fuera-de-alcance' : est(u.id) === fE);
+  const pasaAct = (u) => !fA || fA === '-' || u.actor.includes(fA);
+  const cusF = A.casosUso.filter((u) => pasaAct(u) && pasaEst(u));
   const cm = {}, cuentaTipo = {};
   cusF.forEach((u) => [['salidas', 'sale', 'a'], ['entradas', 'entra', 'de']].forEach(([l, dir, k]) => (u[l] || []).forEach((f) => {
     const o = modDe(f[k]); if (!o || o === m) return;
@@ -509,8 +512,9 @@ function diagramaModulo(m){
     s += `<line class="cl" data-c="${x.cap}" data-o="${x.o}" data-dir="${x.dir}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(${col})" stroke-opacity=".6" stroke-width="${Math.min(1.2 + x.fl.length * .4, 5)}" marker-end="${mk}"/>`; });
   acts.forEach((a, i) => { s += `<g class="cn" data-k="a" data-id="${a}" tabindex="0" ${fA && fA !== '-' && a !== fA ? 'opacity=".35"' : ''}><rect x="20" y="${y(i, acts.length) - 14}" width="130" height="28" rx="14" fill="var(--papel)" stroke="var(--linea)"/><text x="85" y="${y(i, acts.length) + 4}" text-anchor="middle">${esc(ACT(a))}</text></g>`; });
   caps.forEach((c, i) => { const cus = A.casosUso.filter((u) => u.capacidad === c.id), yy = y(i, caps.length);
-    s += `<g class="cn" data-k="c" data-id="${c.id}" tabindex="0"><rect x="300" y="${yy - 15}" width="380" height="30" rx="5" fill="var(--hoja)" stroke="var(--linea)"/><text x="312" y="${yy + 4}">${esc(corta(c.nombre, 40))}</text>`;
-    cus.forEach((u, k) => { const fuera = fA && fA !== '-' && !u.actor.includes(fA); s += `<rect x="${592 + (k % 12) * 7}" y="${yy - 9 + Math.floor(k / 12) * 7}" width="5" height="5" fill="${COLOR_EST[est(u.id)]}" ${fuera ? 'fill-opacity=".2"' : ''}/>`; });
+    const vacia = (fE || (fA && fA !== '-')) && !cus.some((u) => pasaAct(u) && pasaEst(u));
+    s += `<g class="cn" data-k="c" data-id="${c.id}" tabindex="0" ${vacia ? 'opacity=".35"' : ''}><rect x="300" y="${yy - 15}" width="380" height="30" rx="5" fill="var(--hoja)" stroke="var(--linea)"/><text x="312" y="${yy + 4}">${esc(corta(c.nombre, 40))}</text>`;
+    cus.forEach((u, k) => { const fuera = !pasaAct(u) || !pasaEst(u); s += `<rect x="${592 + (k % 12) * 7}" y="${yy - 9 + Math.floor(k / 12) * 7}" width="5" height="5" fill="${COLOR_EST[est(u.id)]}" ${fuera ? 'fill-opacity=".2"' : ''}/>`; });
     s += '</g>'; });
   om.forEach((o, i) => { const l = !!D.modulos[o], yy = y(i, om.length), xs = Object.values(cm).filter((x) => x.o === o);
     const sa = xs.filter((x) => x.dir === 'sale').reduce((t, x) => t + x.fl.length, 0), en = xs.filter((x) => x.dir === 'entra').reduce((t, x) => t + x.fl.length, 0);
@@ -523,14 +527,14 @@ function diagramaModulo(m){
     if (ln) { const {a, c, o, dir} = ln.dataset;
       if (a) return `<h4>${esc(ACT(a))} → ${esc(corta(capN(c), 50))}</h4>` + lim(cusF.filter((u) => u.capacidad === c && u.actor.includes(a)).map(lineaCU), 8, '(lista completa abajo)');
       return `<h4>${esc(corta(capN(c), 40))} ${dir === 'sale' ? '→' : '←'} ${esc(o)}</h4>` + lineaRel(cm[c + '|' + o + '|' + dir]); }
-    if (k === 'a') { const cus = A.casosUso.filter((u) => u.actor.includes(id)); return `<h4>${esc(ACT(id))} · ${cus.length} casos de uso en ${esc(m)}</h4>` + lim(cus.map(lineaCU), 8, '(fíltralo en la tabla de abajo)'); }
-    if (k === 'c') { const c = A.capacidades.find((x) => x.id === id), cus = A.casosUso.filter((u) => u.capacidad === id), xs = Object.values(cm).filter((x) => x.cap === id);
-      return `<h4>${esc(id)} · ${esc(c.nombre)}</h4><div class="tenue">${esc(TIPOS[c.tipo] || c.tipo)} · ${esc(c.peso)} · ${cus.length} casos de uso</div>` + lim(cus.map(lineaCU), 5, 'casos de uso') + (xs.length ? '<div class="mas">Relaciones con otros módulos:</div>' + lim(xs.map(lineaRel), 4, 'relaciones') : ''); }
+    if (k === 'a') { const cus = A.casosUso.filter((u) => u.actor.includes(id) && pasaEst(u)); return `<h4>${esc(ACT(id))} · ${cus.length} caso${cus.length === 1 ? '' : 's'} de uso en ${esc(m)}</h4>` + lim(cus.map(lineaCU), 8, '(fíltralo en la tabla de abajo)'); }
+    if (k === 'c') { const c = A.capacidades.find((x) => x.id === id), cus = A.casosUso.filter((u) => u.capacidad === id && pasaEst(u)), xs = Object.values(cm).filter((x) => x.cap === id);
+      return `<h4>${esc(id)} · ${esc(c.nombre)}</h4><div class="tenue">${esc(TIPOS[c.tipo] || c.tipo)} · ${esc(c.peso)} · ${cus.length} caso${cus.length === 1 ? '' : 's'} de uso${fE ? ' con este estado' : ''}</div>` + lim(cus.map(lineaCU), 5, 'casos de uso') + (xs.length ? '<div class="mas">Relaciones con otros módulos:</div>' + lim(xs.map(lineaRel), 4, 'relaciones') : ''); }
     const xs = Object.values(cm).filter((x) => x.o === id);
     return `<h4>${esc(m)} ↔ ${esc(id)} · ${esc(corta(nMod(id), 30))}</h4>` + lim(xs.map((x) => `<div class="tenue" style="margin-top:4px">${esc(corta(capN(x.cap), 50))}</div>` + lineaRel(x)), 5, 'capacidades') + (D.modulos[id] ? '<div class="mas">Clic (o segundo toque) para ir al módulo.</div>' : '');
   };
   interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'o' && D.modulos[g.dataset.id] ? g.dataset.id : null, fA && fA !== '-' ? `.cn[data-k="a"][data-id="${fA}"]` : null);
-  $('#cAct').onchange = $('#cDir').onchange = () => diagramaModulo(m);
+  $('#cAct').onchange = $('#cDir').onchange = $('#cEst').onchange = () => diagramaModulo(m);
   $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaModulo(m); };
 }
 const lineaCU = (u) => `<div class="l"><b>${esc(u.id)}</b> <span class="punto e-${est(u.id)}"></span>${esc(corta(u.que, 80))} <span class="tenue">· ${esc(NOMBRE_EST[est(u.id)])}</span></div>`;

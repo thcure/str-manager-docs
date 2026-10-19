@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 20:38",
+ "actualizadoEn": "2026-10-18 21:07",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -555,7 +555,8 @@
    "origen": "L-79-veredicto-3 (21:22), notas 1",
    "prioridad": "P2",
    "causaRaiz": "integración",
-   "debioDetectarse": "tests"
+   "debioDetectarse": "tests",
+   "nota": " · 18-oct 21:07 Mismo defecto en el Calendario: el aviso de cambio de huésped dice fijo «La limpieza debe completarse antes de las 3 PM» (str-calendario.html ≈L2402) sin usar la entrada de la propiedad ni la hora acordada (MJ-16 CAL, M-821, CU-CAL-7.4)."
   },
   {
    "id": "INC-116",
@@ -1242,6 +1243,71 @@
    "nota": "20:36 Deep link ≈L741–746 (si no encuentra el flujo no hace nada); toast ≈L3155. Arreglo: toast «Ese flujo ya no existe» y «Ingresa un nombre…». Clase y prioridad: Diseño (LM-48). · 20:38 Diseño (M-818): normal, P3. Regla: aviso «Ese flujo no existe» y texto con tuteo («Ingresa…»). Espera que se levante la pausa.",
    "categoria": "normal",
    "prioridad": "P3"
+  },
+  {
+   "id": "INC-170",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "fecha": "2026-10-18",
+   "titulo": "La importación automática (cron /api/sync-ical) no restaura una reserva de canal cancelada que el canal vuelve a traer: actualiza fechas y lastSeenAt pero deja status «cancelada» y canceladaEn; queda sin turno en HK y la noche sale libre en la exportación a Airbnb (riesgo de sobreventa) hasta que alguien sincroniza desde el Calendario",
+   "estado": "abierto",
+   "severidad": "alto",
+   "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "tests",
+   "nota": "21:07 api/sync-ical/index.php ≈L205–245: rama «match» (por icalUid o por fechas) no toca status ni canceladaEn. El sync del navegador sí restaura (str-calendario.html ≈L1663 «If was previously cancelled but now reappears → restore» y el repair pass ≈L1760–1771 con STRApi.reservas.estado). _icalExpExportables (api/lib/ical-export.php) excluye canceladas. Arreglo: en la rama match, si status = cancelada y vuelve a verse, status = estado por fechas (misma regla REQ-C6) y quitar canceladaEn; prueba N1 en sync-ical. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-171",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "fecha": "2026-10-18",
+   "titulo": "Al quitar un canal (iCal) de una propiedad, sus reservas y bloqueos importados quedan vivos para siempre: ni el cron ni el sync del navegador los procesan (solo recorren los feeds configurados) y los bloqueos de ese canal siguen saliendo a Airbnb como «No disponible»",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:07 str-propiedades.html removeIcal ≈L1650 solo quita el feed de p.icals; api/sync-ical recorre $prop->icals; str-calendario.html ≈L1727 «feed failed → don't touch» también aplica a un feed que ya no existe; api/lib/ical-export.php ≈L42–48 solo omite reservas de feed inexistente si el canal es airbnb. Necesita regla de producto (¿cancelar reservas futuras y eliminar bloqueos del canal quitado, o preguntar?). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-172",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "fecha": "2026-10-18",
+   "titulo": "El emparejamiento por fechas del cron (propId + checkIn + checkOut + tipo reserva) no excluye reservas directas ni canceladas: un evento de canal con las mismas fechas «adopta» una reserva directa (le pone icalFeedId e icalUid) y, cuando el canal deja de traerla, la ausencia la cancela",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:07 api/sync-ical/index.php $matchFechaStmt ≈L142–148 (sin filtro de fromIcal/icalFeedId vacío ni de status) y rama match ≈L205. Arreglo: emparejar por fechas solo reservas sin icalFeedId que vengan del iCal (fromIcal) y no canceladas, o marcar conflicto en vez de adoptar. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-173",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "fecha": "2026-10-18",
+   "titulo": "El panel de la reserva muestra «pax» (las reservas creadas por el sync del navegador nacen con pax 2) y no la cantidad de huéspedes que edita el operador (huespedCantidad, INC-52)",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:07 str-calendario.html ≈L2456 (${r.pax ?? «—»}) frente a ≈L2708/L2768 (rm-pax edita huespedCantidad); pax: 2 al crear desde el iCal ≈L1678. Arreglo: el panel muestra huespedCantidad (y pax solo como respaldo). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-174",
+   "tipo": "INC",
+   "modulo": "Calendario",
+   "fecha": "2026-10-18",
+   "titulo": "Calendario, detalles: el guardado de la reserva reescribe la fuente de la hora acordada a «operador» con la hora del aparato aunque no se haya tocado (pisa la fuente y la hora de la confirmación original); un bloqueo muestra «$0 COP»; avisos con voseo («Seleccioná», «Ingresá»); /api/col acepta bajas (lápida) de reservas de cualquier tipo y estado (RT-5: una reserva se cancela, no se borra; solo el bloqueo se elimina, DT-18)",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:07 str-calendario.html ≈L2777–2778 (llegadaConfirmada/salidaConfirmada = {hora, fuente: operador, at: new Date()} en cada guardado), ≈L2744–2746 (voseo), panel de bloqueo con stat COP; api/col/index.php: los deletedIds de reservas solo los rechaza para el colaborador. La hora de cancelación ya usa la del servidor con conexión (canceladaEn «__server__», ≈L2943); solo sin conexión usa la del aparato. Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [

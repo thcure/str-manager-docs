@@ -2281,7 +2281,7 @@
    "que": "Ensayar la restauración de un respaldo en una cuenta de pruebas nueva y temporal, sin tocar el negocio, y dejar constancia de conteos y huellas",
    "declarado": "construido",
    "limitantes": [
-    "El ensayo real del 16-oct falló con un error al crear la cuenta de ensayo (INC-137, abierto): el código sigue creándola sin su plan, que en producción es obligatorio; hasta que se corrija no se ha restaurado nunca un respaldo real.",
+    "El ensayo del 16-oct falló al crear la cuenta de ensayo sin su plan (INC-137); corregido en L-137, aceptado el 19-oct. El ensayo usa la cuenta de la sesión: desde DA-47 el perfil de pruebas vive en la cuenta zz-verif-pruebas, así que ensaya el respaldo de esa cuenta, no el de «negocio».",
     "Solo ensaya las colecciones vivas y las capacidades: los usuarios del respaldo se cuentan y se comparan, pero no se restauran; la constancia dice «igual» aunque el respaldo no traiga la ficha de pago ni los permisos.",
     "No existe una restauración real sobre el negocio: solo este ensayo en una cuenta temporal.",
     "Una sola copia de ensayo por cuenta a la vez; el respaldo no puede pasar de 12 MB; todo se hace como una sola operación que se deshace si algo no cuadra; la copia se borra al terminar y queda constancia del borrado.",
@@ -2355,6 +2355,14 @@
      "escenarios": [
       "E1"
      ]
+    },
+    {
+     "guion": "herramientas/pw/restauracion-ensayo.spec.js",
+     "casos": [
+      "a",
+      "b",
+      "c"
+     ]
     }
    ],
    "tecnica": {
@@ -2376,8 +2384,8 @@
    },
    "confianza": "alta",
    "verificado": {
-    "fecha": "2026-10-18",
-    "como": "Lectura completa de api/lib/restauracion.php y api/restauracion/index.php; INC-137 sigue en el código"
+    "fecha": "2026-10-19",
+    "como": "Ensayo real en la cola (log\\RESTAURACION-ENSAYO-guion.json, 13:01): respaldo 2026-10-19 de la cuenta de pruebas restaurado en una cuenta temporal, 20 colecciones y 7 capacidades iguales en conteo y huella, borrado con constancia 404 después"
    },
    "ambito": "fabrica",
    "idAnterior": "CU-K3-6.3"

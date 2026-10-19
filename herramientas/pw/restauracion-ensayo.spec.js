@@ -34,18 +34,24 @@ module.exports = {
     },
     {
       c: 'b', perfil: 'admin', cubre: ['DT-42', 'SRV'], pagina: '/str-app-shell.html',
-      que: 'Constancia: conteos por tabla y huellas que cuadran con el export; «negocio» intacta',
+      que: 'Constancia: cada colección y las capacidades cuadran en conteo y huella con el export; «negocio» intacta',
       async prueba(h) {
         await h.page.waitForFunction(() => window.STRApi && STRApi.online && STRApi.online(), null, { timeout: 30000 }).catch(() => {});
         h.espera(CUENTA != null, 'la cuenta del ensayo viene del caso a: ' + CUENTA);
         const r = await api(h, 'GET', '/restauracion/constancia?cuenta=' + encodeURIComponent(CUENTA));
         CONSTANCIA = r.j || null;
-        const t = (CONSTANCIA && CONSTANCIA.tablas) || {};
-        const dif = Object.entries(t).filter(([, v]) => v && v.export != null && v.restaurado != null && v.export !== v.restaurado);
+        // Forma de _resConstanciaCuenta (L-131/L-137): {colecciones: {col: {export, restaurado, huellaExport, huellaRestaurada, igual}},
+        // capacidades: {…}, usuarios: {…, igual: null, enLaCopia}, igual}. Los usuarios se cuentan y se huellan, no se insertan.
+        const cols = (CONSTANCIA && CONSTANCIA.colecciones) || {};
+        const dif = Object.entries(cols).filter(([, v]) => !v || v.igual !== true);
+        const cap = (CONSTANCIA && CONSTANCIA.capacidades) || {};
+        const us = (CONSTANCIA && CONSTANCIA.usuarios) || {};
         h.espera(r.status === 200, 'GET /api/restauracion/constancia: ' + r.status);
-        h.espera(Object.keys(t).length > 0, 'tablas en la constancia: ' + Object.keys(t).join(', '));
-        h.espera(dif.length === 0, dif.length ? 'tablas que no cuadran: ' + dif.map(([k, v]) => k + ' ' + v.export + '≠' + v.restaurado).join('; ') : 'todas las tablas cuadran con el export');
-        h.espera(!!(CONSTANCIA && CONSTANCIA.huella), 'huella del export: ' + ((CONSTANCIA && CONSTANCIA.huella) || '—'));
+        h.espera(Object.keys(cols).length > 0, 'colecciones en la constancia: ' + Object.keys(cols).length + ' (' + Object.entries(cols).map(([k, v]) => k + ' ' + (v && v.export)).join(', ') + ')');
+        h.espera(dif.length === 0, dif.length ? 'colecciones que no cuadran: ' + dif.map(([k, v]) => k + ' ' + (v && v.export) + '≠' + (v && v.restaurado)).join('; ') : 'todas las colecciones cuadran en conteo y huella');
+        h.espera(cap.igual === true, 'capacidades: ' + cap.export + ' / ' + cap.restaurado + ' · igual ' + cap.igual);
+        h.espera(us.enLaCopia === 0, 'usuarios: ' + us.export + ' en el respaldo, ' + us.enLaCopia + ' en la copia (no se insertan, a propósito)');
+        h.espera(CONSTANCIA && CONSTANCIA.igual === true, 'constancia «todo igual»: ' + (CONSTANCIA && CONSTANCIA.igual));
       },
     },
     {

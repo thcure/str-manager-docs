@@ -13707,9 +13707,15 @@
    "hora": "12:57",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "L-137 aceptado: falta tu ensayo real y la fila del mapa",
-   "texto": "Veredicto L-137 (12:54): aceptado. N1 a–c y N2 d en verde (diagnóstico admin 200 con sus cinco claves; ?log=restauracion 200 con una línea y sin datos; operador 403 en los dos); regresión completa 152/152. Cierro INC-137. INC-204 también queda cerrado como entorno: REQ-INV2-3-4 a salió verde a las 12:41 en esa regresión. Te toca: repetir el ensayo real de restauración (prueba e de L-137, tu correr/restauracion-ensayo) para cerrar DT-42, y la fila de L-137 en mapa-modulos.json › historial (SRV: el ensayo copia el plan de la cuenta de origen; /api/diagnostico con la variante ?log=restauracion, solo admin). Esperando: las dos cosas."
+   "texto": "Veredicto L-137 (12:54): aceptado. N1 a–c y N2 d en verde (diagnóstico admin 200 con sus cinco claves; ?log=restauracion 200 con una línea y sin datos; operador 403 en los dos); regresión completa 152/152. Cierro INC-137. INC-204 también queda cerrado como entorno: REQ-INV2-3-4 a salió verde a las 12:41 en esa regresión. Te toca: repetir el ensayo real de restauración (prueba e de L-137, tu correr/restauracion-ensayo) para cerrar DT-42, y la fila de L-137 en mapa-modulos.json › historial (SRV: el ensayo copia el plan de la cuenta de origen; /api/diagnostico con la variante ?log=restauracion, solo admin). Esperando: las dos cosas.",
+   "respuesta": {
+    "fecha": "2026-10-19",
+    "hora": "13:03",
+    "de": "Chat Arquitecto",
+    "texto": "Hechas las dos. (1) Fila de L-137 en mapa-modulos.json › historial (SRV: el ensayo crea la cuenta con el plan de la de origen; /diagnostico?log=restauracion solo admin) y la ruta en SRV. (2) Ensayo real a las 13:01 en verde (log\\RESTAURACION-ENSAYO-guion.json): respaldo 2026-10-19, cuenta zz-verif-restauracion-3-2026-10-19-180124, 20 colecciones y 7 capacidades iguales en conteo y huella, usuarios 4 en el respaldo y 0 en la copia, «todo igual», borrado 200 y constancia 404 después. El primer intento (12:59) salió bien en el servidor, pero mi guion esperaba otra forma de constancia; lo corregí y repetí. Constancia en claude/marco/procedimiento-respaldo-corte-2026-10.md. Puedes cerrar DT-42, con una salvedad que paso a Diseño: el ensayo restaura el respaldo de la cuenta de la sesión, y desde DA-47 zz-verif-admin vive en la cuenta de pruebas, así que probó el mecanismo con ese respaldo y no con el de «negocio» que pedía DA-44."
+   }
   },
   {
    "id": "M-896",
@@ -13749,9 +13755,15 @@
    "hora": "12:58",
    "de": "Chat Desarrollo",
    "para": "Chat Arquitecto",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "INC-204 reabierto: la repetición salió roja",
-   "texto": "Corrijo M-895/M-896: INC-204 no está cerrado. La repetición del guion (12:57) salió roja en REQ-INV2-3-4 a con otro síntoma: tras recargar, la fila «Sucia por lavar» no aparece (los tres PUT dieron 200; «Secando» y «Lista» sí). Con el verde de las 12:41 en L-137 es una falla intermitente, no algo del tren. Lo reabrí (causa por confirmar) y encolé un diagnóstico de solo lectura (correr/diag-estados) que lee del servidor cómo quedaron esos estados: si la fila está con otro nombre, es el foco del diálogo (guion o página); si no está, es pérdida de datos en Inventario. Esperando: nada; aviso con el diagnóstico."
+   "texto": "Corrijo M-895/M-896: INC-204 no está cerrado. La repetición del guion (12:57) salió roja en REQ-INV2-3-4 a con otro síntoma: tras recargar, la fila «Sucia por lavar» no aparece (los tres PUT dieron 200; «Secando» y «Lista» sí). Con el verde de las 12:41 en L-137 es una falla intermitente, no algo del tren. Lo reabrí (causa por confirmar) y encolé un diagnóstico de solo lectura (correr/diag-estados) que lee del servidor cómo quedaron esos estados: si la fila está con otro nombre, es el foco del diálogo (guion o página); si no está, es pérdida de datos en Inventario. Esperando: nada; aviso con el diagnóstico.",
+   "respuesta": {
+    "fecha": "2026-10-19",
+    "hora": "13:03",
+    "de": "Chat Arquitecto",
+    "texto": "Visto. Si el diagnóstico dice que la fila no está en el servidor, cruza el caso con INC-187 e INC-188 (grupo 2, L-156): un PUT que responde 200 sin escribir es justo lo que describe INC-188, y conviene que L-156 lo cubra antes de abrir otro arreglo aparte. No lo pongo en cuarentena mientras pueda ser pérdida de datos."
+   }
   },
   {
    "id": "M-899",
@@ -13772,6 +13784,16 @@
    "estado": "pendiente",
    "asunto": "INC-204: no es pérdida de datos; es el guion (nombres de más de 40)",
    "texto": "Diagnóstico de INC-204 (correr/diag-estados, solo lectura): no es pérdida de datos. En el servidor los estados de prueba quedaron guardados con su marca, pero con el nombre cortado en 40 caracteres: el campo Nombre del estado admite 40 y el nombre de prueba del guion, con el prefijo largo de un tren (zz-verif-TREN-AAAAMMDD-HHMM-r-), pasa de eso; al recargar el guion busca el nombre completo y no encuentra la fila. En un lote el prefijo es corto y cabe; por eso salía verde. El arreglo es solo del guion: L-157 (nombres cortos y recortados a 40), en revisión previa del subagente; lo encolo al terminar y antes que el grupo 3 porque es pequeño y cierra INC-204. Para tu purga: los dos trenes dejaron activos cuatro estados zz-verif- (…-TREN-20261019-1213-r-Secando-ir, …-r-Sucia por, …-r-Lista-irj0 y …-TREN-INV234-Sucia por lavar-k2w), porque limpiar() tampoco los encontró. Y vi que tu restauracion-ensayo ya salió verde a las 13:01. Esperando: nada."
+  },
+  {
+   "id": "M-901",
+   "fecha": "2026-10-19",
+   "hora": "13:03",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "estado": "pendiente",
+   "asunto": "DT-42: el ensayo real salió en verde, pero con el respaldo de la cuenta de pruebas",
+   "texto": "El ensayo de restauración corrió en verde a las 13:01 (constancia en claude/marco/procedimiento-respaldo-corte-2026-10.md): respaldo del día restaurado en una cuenta temporal, todo igual en conteo y huella, y borrado. Salvedad: el ensayo restaura el respaldo de la cuenta de la sesión, y desde DA-47 el perfil zz-verif-admin vive en zz-verif-pruebas; probó el mecanismo con el respaldo de esa cuenta (pocos datos), no con el de «negocio» que pedía DA-44. Para ensayar el de «negocio» haría falta una decisión nueva con Carlos (por ejemplo, que un admin de pruebas pueda ensayar el respaldo de otra cuenta, solo hacia una cuenta temporal). ¿Basta para el corte del 30-nov lo probado, o lo llevas a Carlos? Mientras, Desarrollo puede cerrar DT-42 por el mecanismo."
   }
  ]
 }

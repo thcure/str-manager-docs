@@ -175,7 +175,8 @@
    "estado": "construido",
    "que": "Marco de la aplicación: menú de 4 grupos con «Lo que viene» y solo lo que funciona (L-132), Tablero como página de inicio de admin y operador (L-143), abre cada módulo en un iframe, aplica el rol al menú, panel Configuración (Copia en Google Drive), aviso fijo del corte, respaldo ⬇; espera a Firebase antes de renovar la sesión (L-133). Desde L-132 ya no escribe colecciones (sin paneles de maqueta ni aviso «Subir mis datos»).",
    "paginas": [
-    "str-app-shell.html"
+    "str-app-shell.html",
+    "str-lo-que-viene.html (L-132, solo admin; de fábrica, CU-SH-6.1)"
    ],
    "rutas": [
     "/me",
@@ -1120,8 +1121,7 @@
     "str-cobit.html",
     "str-elementos.html",
     "str-base-conocimiento.html",
-    "str-nomenclatura.html",
-    "str-lo-que-viene.html (L-132, solo admin)"
+    "str-nomenclatura.html"
    ],
    "rutas": [
     "(ninguna del STR; GitHub raw)"
@@ -1191,7 +1191,6 @@
     "github"
    ],
    "reqRaiz": [
-    "REQ-MOD-1",
     "REQ-MOD-6"
    ],
    "mapaTecnico": "tests-y-despliegue",
@@ -1280,8 +1279,8 @@
    "id": "REL-02",
    "origen": "*",
    "destino": "SH",
-   "mecanismo": "`postMessage str:sin-sesion`; `window.top.navSub`",
-   "dato": "sin sesión; navegar a otro módulo",
+   "mecanismo": "`postMessage str:sin-sesion`",
+   "dato": "sin sesión (navegar a otro módulo desde el módulo no se pide: Diseño, M-832 j)",
    "regla": "",
    "rt": [
     "RT-16"
@@ -1691,6 +1690,1313 @@
    ],
    "estado": "vigente",
    "generica": false
+  },
+  {
+   "id": "REL-35",
+   "origen": "API",
+   "destino": "U",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "pedido rechazado por sesión vencida, que pide renovarla; pedido rechazado otra vez tras renovar, o sin renovación posible, que obliga a avisar; si la persona puede la acción, o si todavía no se sabe",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-5.1",
+    "CU-U-2.4",
+    "CU-U-3.6",
+    "CU-U-3.7"
+   ]
+  },
+  {
+   "id": "REL-36",
+   "origen": "API",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "pedido con la sesión de la persona, para que el servidor decida si puede; archivo, tipo y referencia a guardar; pedido de un archivo con la sesión de la persona",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-3.1",
+    "CU-API-3.2",
+    "CU-SRV-3.1",
+    "CU-SRV-4.1",
+    "CU-SRV-4.2"
+   ]
+  },
+  {
+   "id": "REL-37",
+   "origen": "API",
+   "destino": "SH",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "documentos del proyecto y su encabezado con la fecha del último commit",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-6.1",
+    "CU-SH-6.1"
+   ]
+  },
+  {
+   "id": "REL-38",
+   "origen": "API",
+   "destino": "PRJ",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "documentos del proyecto y su encabezado con la fecha del último commit",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-6.1",
+    "CU-PRJ-2.1"
+   ]
+  },
+  {
+   "id": "REL-39",
+   "origen": "CAL",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "evento de mantenimiento o inventario con su recurrencia, su responsable y su flujo; enlace al turno elegido",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-CAL-3.7",
+    "CU-HK-1.10",
+    "CU-HK-2.11"
+   ]
+  },
+  {
+   "id": "REL-40",
+   "origen": "CAL",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "eventos de mantenimiento e inventario con su responsable, su recurrencia y su flujo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.3",
+    "CU-POR-1.5"
+   ]
+  },
+  {
+   "id": "REL-41",
+   "origen": "CAL",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "eventos de inventario del colaborador, para su calendario",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.3",
+    "CU-INV-12.3"
+   ]
+  },
+  {
+   "id": "REL-42",
+   "origen": "CAL",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "reserva directa nueva, con su código, sus fechas y su propiedad; reserva nueva importada, con su código, sus fechas y su propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-2.1",
+    "CU-CAL-6.1",
+    "CU-M6-4.2"
+   ]
+  },
+  {
+   "id": "REL-43",
+   "origen": "CAL",
+   "destino": "M2",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "reserva directa nueva, con su código, sus fechas y su propiedad; reserva nueva importada, con su código, sus fechas y su propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-2.1",
+    "CU-CAL-6.1",
+    "CU-M2-1.1"
+   ]
+  },
+  {
+   "id": "REL-44",
+   "origen": "CAL",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "hora acordada de salida y de llegada de cada reserva; estado de cada canal tras importar: última vez, reservas leídas y si falló; reservas guardadas, de las que salen las entradas de hoy y su hora (y 2 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-4.2",
+    "CU-CAL-6.3",
+    "CU-CAL-9.1",
+    "CU-OP-1.5",
+    "CU-OP-2.1",
+    "CU-OP-2.6",
+    "CU-OP-2.9",
+    "CU-OP-3.1"
+   ]
+  },
+  {
+   "id": "REL-45",
+   "origen": "CAL",
+   "destino": "PR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "estado de la importación de cada canal: última vez, reservas importadas y si hubo error; noches ocupadas por reservas y bloqueos de la propiedad, sin lo que viene de Airbnb",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-6.3",
+    "CU-CAL-8.2",
+    "CU-PR-7.2",
+    "CU-PR-7.5"
+   ]
+  },
+  {
+   "id": "REL-46",
+   "origen": "CMP",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "monto del adelanto del encargo y su motivo; compra «por aprobar» con la foto de la factura y el detalle por artículo; marca «sin encargo» para el operador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-2.1",
+    "CU-CMP-2.4",
+    "CU-CMP-3.2",
+    "CU-PG-3.1",
+    "CU-PG-3.2",
+    "CU-PG-3.3"
+   ]
+  },
+  {
+   "id": "REL-47",
+   "origen": "CMP",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "actividad «Compra» para sumarla al turno",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-2.2",
+    "CU-HK-1.8"
+   ]
+  },
+  {
+   "id": "REL-48",
+   "origen": "CMP",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "entrada de lo comprado en la zona del encargo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-3.1",
+    "CU-INV-3.1"
+   ]
+  },
+  {
+   "id": "REL-49",
+   "origen": "CMP",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "mínimos, encargos y entradas de compra para el respaldo diario; mínimos, encargos y entradas de compra para el respaldo descargable",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-4.3",
+    "CU-SRV-8.1",
+    "CU-SRV-8.2"
+   ]
+  },
+  {
+   "id": "REL-50",
+   "origen": "FL",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "copia por propiedad de un flujo, con los dos ajustes de cada actividad; flujos guardados con formato viejo, que quedan en manual y lista",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-10.3",
+    "CU-FL-3.1",
+    "CU-PC1-1.3"
+   ]
+  },
+  {
+   "id": "REL-51",
+   "origen": "FL",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "sub-flujo asignado a cada colaborador con su tiempo de manos, para recomendar la duración llamada del apoyo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-4.5",
+    "CU-HK-6.6"
+   ]
+  },
+  {
+   "id": "REL-52",
+   "origen": "FL",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "flujos de categoría Mantenimiento o Inventario, para asignar a un evento del calendario",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-FL-5.6"
+   ]
+  },
+  {
+   "id": "REL-53",
+   "origen": "FL",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "flujos de categoría Mantenimiento, para verlos y llamarlos desde el módulo de Mantenimiento",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-5.6",
+    "CU-INC1-4.3"
+   ]
+  },
+  {
+   "id": "REL-54",
+   "origen": "FL",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "emoji y nombre corto de cada flujo, para rotular su tramo; flujos con sus actividades, tareas, tiempos y zonas, de los que salen los tramos y la duración",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-10.1",
+    "CU-FL-7.1",
+    "CU-OP-1.2"
+   ]
+  },
+  {
+   "id": "REL-55",
+   "origen": "FL",
+   "destino": "PR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "flujos generales, simples o compuestos, con sus etapas, tiempos, colaborador sugerido y copias por propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-10.1",
+    "CU-PR-5.1"
+   ]
+  },
+  {
+   "id": "REL-56",
+   "origen": "HK",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "turnos de hoy armados con la reserva que sale, su ventana y su colaborador base; turno bloqueado por el operador, con su motivo; tareas del turno marcadas como hechas, con las que sube el avance real (y 5 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.2",
+    "CU-HK-1.6",
+    "CU-HK-2.2",
+    "CU-HK-4.1",
+    "CU-HK-5.1",
+    "CU-HK-5.3",
+    "CU-HK-9.2",
+    "CU-OP-1.1",
+    "CU-OP-1.2",
+    "CU-OP-1.5",
+    "CU-OP-2.3",
+    "CU-OP-2.4",
+    "CU-OP-2.7"
+   ]
+  },
+  {
+   "id": "REL-57",
+   "origen": "HK",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "mensaje del turno armado para el colaborador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.5",
+    "CU-M6-5.1"
+   ]
+  },
+  {
+   "id": "REL-58",
+   "origen": "HK",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "flujo de una etapa del turno que se quiere abrir en el editor",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-3.2",
+    "CU-HK-1.8"
+   ]
+  },
+  {
+   "id": "REL-59",
+   "origen": "HK",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "flujo del evento ejecutado en el turno, para darlo por realizado; evidencia (fotos y videos) que acompaña al incidente reportado, subida desde la cola del teléfono; incidente reportado en el turno, con su tipo, descripción, zona y quien lo reportó (y 6 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.10",
+    "CU-HK-4.1",
+    "CU-HK-4.3",
+    "CU-HK-4.4",
+    "CU-INC1-2.1",
+    "CU-INC1-2.3",
+    "CU-INC1-3.1",
+    "CU-INC1-3.2",
+    "CU-INC1-3.3",
+    "CU-INC1-3.6",
+    "CU-INC1-4.2",
+    "CU-INC1-5.1"
+   ]
+  },
+  {
+   "id": "REL-60",
+   "origen": "HK",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "actividad del turno que quedó completa",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-2.2",
+    "CU-PC1-1.4"
+   ]
+  },
+  {
+   "id": "REL-61",
+   "origen": "HK",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "horas del turno de cada persona y su valor estimado, para la liquidación; apoyo del turno con sus horas planificadas; ajuste de las horas de una persona con su motivo (y 2 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-6.1",
+    "CU-HK-6.2",
+    "CU-HK-6.3",
+    "CU-HK-6.5",
+    "CU-HK-6.6",
+    "CU-PG-1.2",
+    "CU-PG-1.3",
+    "CU-PG-4.1"
+   ]
+  },
+  {
+   "id": "REL-62",
+   "origen": "INC1",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "fecha de captura, hora de recepción, huella y original de cada evidencia, para verlos en el incidente; evento de mantenimiento del día y la propiedad del turno, con su flujo, para proponerlo al turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.10",
+    "CU-HK-4.2",
+    "CU-INC1-2.1",
+    "CU-INC1-4.1"
+   ]
+  },
+  {
+   "id": "REL-63",
+   "origen": "INC1",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "incidente con evidencia y costo del daño, para proponer el cargo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-2.1",
+    "CU-PG-6.1"
+   ]
+  },
+  {
+   "id": "REL-64",
+   "origen": "INC1",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "baja del artículo afectado como ajuste de existencia, con el incidente como motivo; traslado de reposición desde otra zona, con el incidente como motivo; movimiento de inventario (reposición o baja) atado al cierre del reclamo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.5",
+    "CU-INC1-5.7",
+    "CU-INV-3.2",
+    "CU-INV-3.4"
+   ]
+  },
+  {
+   "id": "REL-65",
+   "origen": "INC1",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "artículo a comprar, para la lista de compra",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-1.2",
+    "CU-INC1-3.5"
+   ]
+  },
+  {
+   "id": "REL-66",
+   "origen": "INC1",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "incidente urgente reportado; evento de mantenimiento con su proveedor y su fecha; reclamo cuyo plazo está por vencer (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.9",
+    "CU-INC1-4.5",
+    "CU-INC1-5.6",
+    "CU-INC1-5.9",
+    "CU-M6-5.2",
+    "CU-M6-5.3",
+    "CU-M6-5.4",
+    "CU-M6-5.5"
+   ]
+  },
+  {
+   "id": "REL-67",
+   "origen": "INC1",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "evento de mantenimiento llevado al turno del colaborador el día del evento, con su flujo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-4.1",
+    "CU-OP-1.6"
+   ]
+  },
+  {
+   "id": "REL-68",
+   "origen": "INC1",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "reparación a programar en la propiedad, con el incidente de origen",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-INC1-4.4"
+   ]
+  },
+  {
+   "id": "REL-69",
+   "origen": "INV",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "artículos activos del catálogo con su clase, para elegir cuáles cuenta la tarea; categoría «Inventario» y tareas de inventario disponibles para armar flujos",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-2.6",
+    "CU-FL-5.7",
+    "CU-INV-1.1",
+    "CU-INV-12.1"
+   ]
+  },
+  {
+   "id": "REL-70",
+   "origen": "INV",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "artículos activos del catálogo, para elegir el afectado por el incidente",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.4",
+    "CU-INV-1.1"
+   ]
+  },
+  {
+   "id": "REL-71",
+   "origen": "INV",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "pendientes de ropa que deja el cierre de un turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-5.8",
+    "CU-OP-2.7"
+   ]
+  },
+  {
+   "id": "REL-72",
+   "origen": "INV",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "propiedades y zonas que le tocan al colaborador (reglas de acceso de INV2-4-1); activo con su código QR",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-11.2",
+    "CU-INV-7.3",
+    "CU-PC1-3.7",
+    "CU-PC1-5.2"
+   ]
+  },
+  {
+   "id": "REL-73",
+   "origen": "INV",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "orden de ensayar y purgar los movimientos de prueba, con confirmación",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-8.3",
+    "CU-SRV-9.1"
+   ]
+  },
+  {
+   "id": "REL-74",
+   "origen": "INV",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "conteo que el colaborador declara al marcar una tarea de inventario; mínimo e ideal de cada artículo por zona",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-1.1",
+    "CU-INV-10.1",
+    "CU-INV-9.2"
+   ]
+  },
+  {
+   "id": "REL-75",
+   "origen": "INV",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "evento de inventario con su recurrencia y su flujo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-INV-12.2"
+   ]
+  },
+  {
+   "id": "REL-76",
+   "origen": "INV",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "flujo del evento propuesto al turno",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.10",
+    "CU-INV-12.2"
+   ]
+  },
+  {
+   "id": "REL-77",
+   "origen": "INV",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "eventos de inventario del colaborador para su calendario",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-12.3",
+    "CU-POR-1.5"
+   ]
+  },
+  {
+   "id": "REL-78",
+   "origen": "M2",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "enlace de registro de la reserva, para enviarlo al huésped; enlace de registro de la reserva, para reenviarlo; mensaje a portería y su destinatario, para enviarlo (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-1.1",
+    "CU-M2-1.5",
+    "CU-M2-4.2",
+    "CU-M2-6.2",
+    "CU-M6-4.1",
+    "CU-M6-4.4",
+    "CU-M6-4.5"
+   ]
+  },
+  {
+   "id": "REL-79",
+   "origen": "M2",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "hora de llegada y de salida confirmada por el huésped",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-4.2",
+    "CU-M2-2.2"
+   ]
+  },
+  {
+   "id": "REL-80",
+   "origen": "M2",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "datos del huésped completos solo para el operador y el administrador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-7.1",
+    "CU-SRV-2.2"
+   ]
+  },
+  {
+   "id": "REL-81",
+   "origen": "M6",
+   "destino": "M2",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "pregunta de la hora de llegada y de salida, enviada al huésped; mensaje recibido por portería",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-2.1",
+    "CU-M2-4.3",
+    "CU-M6-4.3",
+    "CU-M6-4.5"
+   ]
+  },
+  {
+   "id": "REL-82",
+   "origen": "OP",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "turno elegido en la alerta, para abrirlo por su enlace",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-2.11",
+    "CU-OP-2.8"
+   ]
+  },
+  {
+   "id": "REL-83",
+   "origen": "OP",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "incidente elegido en la alerta, para abrirlo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.3",
+    "CU-OP-2.8"
+   ]
+  },
+  {
+   "id": "REL-84",
+   "origen": "PC1",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "fotos en vivo y calificación de cada zona, para subirlas con la cola; fotos de antes y después de cada zona, para subirlas con la cola; foto general de llegada, para subirla con la cola (y 5 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-2.10",
+    "CU-HK-3.2",
+    "CU-HK-4.1",
+    "CU-PC1-2.1",
+    "CU-PC1-2.2",
+    "CU-PC1-2.3",
+    "CU-PC1-3.2",
+    "CU-PC1-3.5",
+    "CU-PC1-3.7",
+    "CU-PC1-4.2",
+    "CU-PC1-4.4"
+   ]
+  },
+  {
+   "id": "REL-85",
+   "origen": "PC1",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "fotos del «antes» como evidencia posible del reclamo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-5.5",
+    "CU-PC1-2.2"
+   ]
+  },
+  {
+   "id": "REL-86",
+   "origen": "PC1",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "lector de códigos QR del STR, para escanear el QR de un lugar",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-2.10",
+    "CU-PC1-3.3"
+   ]
+  },
+  {
+   "id": "REL-87",
+   "origen": "PG",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "valor estimado de cada persona del turno; valor del turno de la propia persona; marca de turno liquidado, que impide eliminarlo",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.7",
+    "CU-HK-6.1",
+    "CU-HK-6.4",
+    "CU-PG-1.1",
+    "CU-PG-4.3"
+   ]
+  },
+  {
+   "id": "REL-88",
+   "origen": "PG",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "valor de los turnos cerrados del mes; valor de cada turno del mes; saldo de horas acumulado del colaborador (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PG-1.1",
+    "CU-PG-2.1",
+    "CU-PG-5.3",
+    "CU-POR-4.1",
+    "CU-POR-4.2",
+    "CU-POR-4.3"
+   ]
+  },
+  {
+   "id": "REL-89",
+   "origen": "PG",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "compra registrada por el colaborador, con o sin encargo; compra aprobada con su encargo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-3.1",
+    "CU-CMP-3.2",
+    "CU-PG-3.2",
+    "CU-PG-3.3"
+   ]
+  },
+  {
+   "id": "REL-90",
+   "origen": "PR",
+   "destino": "M2",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "ubicación, torre, apto y dirección de la propiedad; rango de check-in de la propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-2.3",
+    "CU-M2-6.2",
+    "CU-PR-2.4",
+    "CU-PR-3.1"
+   ]
+  },
+  {
+   "id": "REL-91",
+   "origen": "PR",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "bloqueo de los demás anuncios de la casa mientras se renta uno completo; canal del calendario de cada propiedad con su dirección de importación y su nombre; horario base de la propiedad (check-in y check-out) para la hora de las reservas manuales y de las alertas (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-2.1",
+    "CU-CAL-2.9",
+    "CU-CAL-5.1",
+    "CU-CAL-6.1",
+    "CU-PR-2.7",
+    "CU-PR-7.1",
+    "CU-PR-8.2"
+   ]
+  },
+  {
+   "id": "REL-92",
+   "origen": "PR",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "horas planificadas del turno en la propiedad, o las del negocio",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PG-1.2",
+    "CU-PR-3.4"
+   ]
+  },
+  {
+   "id": "REL-93",
+   "origen": "PR",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "horario de la propiedad para el colaborador; plano de la propiedad y sus marcadores; datos de las propiedades donde trabaja el colaborador (lista permitida), con su ventana de 90 días",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-POR-2.4",
+    "CU-POR-2.5",
+    "CU-POR-7.1",
+    "CU-PR-3.5",
+    "CU-PR-4.6",
+    "CU-PR-8.3"
+   ]
+  },
+  {
+   "id": "REL-94",
+   "origen": "PR",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "zonas de cada propiedad, para ofrecerlas como zonas de las actividades y tareas; flujo base elegido en cada propiedad, para mostrar dónde se usa cada flujo; flujo base elegido de cada propiedad, para filtrar los flujos que corren en ella (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-2.3",
+    "CU-FL-3.2",
+    "CU-FL-3.7",
+    "CU-FL-6.3",
+    "CU-PR-4.1",
+    "CU-PR-5.1",
+    "CU-PR-5.2"
+   ]
+  },
+  {
+   "id": "REL-95",
+   "origen": "PR",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "zonas de la propiedad para recorrerlas",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-PC1-2.1",
+    "CU-PR-8.1"
+   ]
+  },
+  {
+   "id": "REL-96",
+   "origen": "SRV",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "turnos y reservas de sus 90 días, con los más antiguos reducidos a horas; reservas y turnos del colaborador con los datos del huésped solo de hoy y de mañana; incidentes propios del colaborador, y rechazo al intentar leer o pisar uno ajeno (y 2 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-11.1",
+    "CU-HK-11.2",
+    "CU-HK-11.3",
+    "CU-HK-11.4",
+    "CU-HK-11.5",
+    "CU-SRV-2.1",
+    "CU-SRV-2.2",
+    "CU-SRV-2.3",
+    "CU-SRV-2.4",
+    "CU-SRV-2.5"
+   ]
+  },
+  {
+   "id": "REL-97",
+   "origen": "SRV",
+   "destino": "API",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "respuesta del servidor o rechazo (sin sesión, sin permiso), para que la pantalla lo muestre; dirección del archivo guardado, con su tamaño y su tipo; archivo guardado del mismo negocio, entero o por tramos",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-3.1",
+    "CU-API-3.2",
+    "CU-SRV-3.1",
+    "CU-SRV-4.1",
+    "CU-SRV-4.2"
+   ]
+  },
+  {
+   "id": "REL-98",
+   "origen": "SRV",
+   "destino": "U",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "cambio de horas o tarifas rechazado o ignorado, para el operador sin el permiso; movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SRV-3.3",
+    "CU-SRV-9.2",
+    "CU-U-2.7",
+    "CU-U-7.4"
+   ]
+  },
+  {
+   "id": "REL-99",
+   "origen": "SRV",
+   "destino": "SH",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "archivo de respaldo de la cuenta, con la fecha del día",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SH-10.1",
+    "CU-SRV-8.2"
+   ]
+  },
+  {
+   "id": "REL-100",
+   "origen": "SRV",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "identificadores de los movimientos dados de baja, para soltarlos de la copia local",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-8.4",
+    "CU-SRV-9.1"
+   ]
+  },
+  {
+   "id": "REL-101",
+   "origen": "U",
+   "destino": "PR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "colaboradores activos del equipo con su nombre y su color; rol del usuario y permiso de editar inventario del operador; rol del usuario con sesión",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PR-5.3",
+    "CU-PR-6.2",
+    "CU-PR-6.4",
+    "CU-PR-6.5",
+    "CU-PR-9.1",
+    "CU-U-1.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-102",
+   "origen": "U",
+   "destino": "SH",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "nombre, rol y permisos de la persona con sesión, para armar el menú principal y su barra",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SH-1.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-103",
+   "origen": "U",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "rol del usuario con sesión: administrador y operador ven el selector, el colaborador entra a su portal",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-POR-6.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-104",
+   "origen": "U",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "rol del usuario con sesión",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-9.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-105",
+   "origen": "U",
+   "destino": "KN",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "rol del usuario con sesión",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-KN-6.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-106",
+   "origen": "U",
+   "destino": "API",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "rol y permisos de la persona con sesión; sesión renovada, con la que se repite el pedido",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-5.1",
+    "CU-U-2.1",
+    "CU-U-3.6"
+   ]
+  },
+  {
+   "id": "REL-107",
+   "origen": "U",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "permiso «reclamos» del operador; rol de la sesión y permisos efectivos del operador, para decidir qué montos entregar",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-5.8",
+    "CU-U-2.3",
+    "CU-U-2.6"
+   ]
+  },
+  {
+   "id": "REL-108",
+   "origen": "U",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "permisos del operador definidos, con los de adelantos y de pagos; ficha de pago y tarifa vigente de la persona a la fecha del turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PG-1.1",
+    "CU-PG-5.2",
+    "CU-U-2.3",
+    "CU-U-6.2"
+   ]
+  },
+  {
+   "id": "REL-109",
+   "origen": "U",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "permisos «Tarifas y horas» y «Editar inventario» del operador; orden de mover los usuarios de prueba a la cuenta de pruebas, con confirmación y la lista de usuarios",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SRV-3.3",
+    "CU-SRV-9.2",
+    "CU-U-2.3",
+    "CU-U-7.3"
+   ]
+  },
+  {
+   "id": "REL-110",
+   "origen": "U",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "permisos inventario.editar y dinero.adelantos del operador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-4.1",
+    "CU-U-2.3"
+   ]
+  },
+  {
+   "id": "REL-111",
+   "origen": "U",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "rol de la persona y módulos que puede abrir, para saber si ve la entrada «Tablero»; decisión, en cada petición, de qué puede hacer cada rol",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-OP-4.1",
+    "CU-OP-4.2",
+    "CU-U-2.5",
+    "CU-U-2.6"
+   ]
+  },
+  {
+   "id": "REL-112",
+   "origen": "U",
+   "destino": "PRJ",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "dato": "rol de la persona con sesión, para decidir si puede abrir las páginas del grupo Proyecto",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PRJ-1.1",
+    "CU-U-2.5"
+   ]
   }
  ],
  "reglas": [
@@ -2356,36 +3662,18 @@
   "REQ-INV2-8": [],
   "REQ-F11-7": [],
   "REQ-BT-1": [],
-  "REQ-MOD-1": [
-   "MOD"
-  ],
-  "REQ-MOD-2": [
-   "MOD"
-  ],
-  "REQ-MOD-3": [
-   "MOD"
-  ],
-  "REQ-MOD-4": [
-   "MOD"
-  ],
-  "REQ-MOD-5": [
-   "MOD"
-  ],
+  "REQ-MOD-1": [],
+  "REQ-MOD-2": [],
+  "REQ-MOD-3": [],
+  "REQ-MOD-4": [],
+  "REQ-MOD-5": [],
   "REQ-MOD-6": [
    "MOD"
   ],
-  "REQ-MOD-7": [
-   "MOD"
-  ],
-  "REQ-MOD-8": [
-   "MOD"
-  ],
-  "REQ-MOD-9": [
-   "MOD"
-  ],
-  "REQ-MOD-10": [
-   "MOD"
-  ],
+  "REQ-MOD-7": [],
+  "REQ-MOD-8": [],
+  "REQ-MOD-9": [],
+  "REQ-MOD-10": [],
   "REQ-SH-2": [
    "SH",
    "PRJ"
@@ -2880,6 +4168,11 @@
    "fecha": "2026-10-18",
    "cambio": "L-153: SRV, al mover a la cuenta zz-verif-pruebas la cuenta nueva toma el plan_id de su cuenta de origen (cuenta.plan_id NOT NULL en producción; INC-156); nada más cambia en /api/cuenta-pruebas.",
    "lote": "L-153"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "Cierre de la fase 4 de MJ-16 (LM-58): 78 relaciones nuevas (REL-35 a REL-112) nacidas de los flujos de la línea base que no tenían relación, con su mecanismo por precisar y la lista de casos de uso que las usan; REL-02 sin «navegar a otro módulo» (Diseño, M-832 j); «Lo que viene» pasa de PRJ a SH (de fábrica); REQ-MOD-1 a 5 y 7 a 10 se desanclan de MOD (modelo de operación v2, Diseño, M-844 e); OP lee reservas de 30 días.",
+   "lote": "LM-58"
   }
  ],
  "lineaBaseHasta": "L-126"

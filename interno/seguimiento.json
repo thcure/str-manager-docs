@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 11:13",
+ "actualizadoEn": "2026-10-19 11:29",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1725,6 +1725,19 @@
    "nota": "06:57 str-seg-proyecto.html ≈L341–347 (control de rol «temporal, INC-76») y _docsUrl ≈L357 → STRApi.docs.url (str-api.js ≈L977–982, DOCS_RAW raw.githubusercontent.com, sin credencial). El control en pantalla no protege nada porque el repositorio es público; por eso la regla del buzón ya prohíbe nombres reales. Arreglos posibles (decide Diseño con el Arquitecto; DA, cruce con Carlos): (a) repositorio privado y que el servidor de la app sirva los documentos con sesión de admin (proxy /api/docs con token de lectura en secrets.php), o (b) aceptar que es público y mantener la regla de no poner datos reales. Clase y prioridad: Diseño (LM-48). · 06:59 Diseño (M-853): crítico, P2; el repositorio público expone además el detalle técnico de los defectos de seguridad abiertos (INC-160, INC-161, INC-193…). DA-60: (a) repositorio privado y lectura por el servidor de la app (recomendada) o (b) seguir público depurando datos reales y detalle de seguridad; el Arquitecto confirma la opción técnica y Diseño la lleva a Carlos.",
    "categoria": "crítico",
    "prioridad": "P2"
+  },
+  {
+   "id": "INC-202",
+   "tipo": "INC",
+   "modulo": "Housekeeping",
+   "fecha": "2026-10-19",
+   "titulo": "Regresión en la cuenta de pruebas: la entrega de zona no reemplaza la tarea «zz-verif-Conteo de cierre» (REQ-INV2-4-2 e, REQ-INV2-7-1-hk-turno b y d, REQ-OP-1 d en rojo)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Regresión completa en zz-verif-pruebas (reprobar L-153, 19-oct 11:22; veredicto L-153-veredicto-2)",
+   "causaRaiz": "entorno",
+   "debioDetectarse": "tests",
+   "nota": "11:29 Hipótesis leída en el código: _hkTrReemplaza solo reemplaza si TODOS los artículos de la tarea están en la entrega de la zona; la entrega toma los artículos de los lugares de la zona (A1–A3, B1–B2) y los que tienen conteo/nivel/compra/ajuste en ella. La semilla deja C1 «sin lugar» a propósito (s5); en la cuenta real C1 tenía movimientos viejos en zz-verif-Principal (purgados en DA-47), en la nueva no: la tarea sigue pidiendo conteo y fotos. No es defecto de la página: es semilla. Diagnóstico de solo lectura en marcha (correr\\diag-conteo); arreglo probable: un paso de semilla que deje a C1 dentro de la entrega de la zona sin lugar (un movimiento de existencia inicial zz-verif-), confirmado por los guiones que piden C1 sin lugar. L-153 no cambia: sus criterios propios salieron en verde (a N1, b N2)."
   }
  ],
  "dts": [
@@ -15460,6 +15473,19 @@
    "aprobacion": "Carlos 18-oct-2026 (chat del Arquitecto, adopción de MJ-16: «encárgate, de acuerdo con todo»)",
    "estado": "instalado",
    "observacion": "Pruebas a y b hechas; d (Desarrollo, M-792) hecha; c (Diseño) hecha salvo el peso de las capacidades, que lleva a Carlos."
+  },
+  {
+   "lote": "L-153",
+   "fecha": "2026-10-19",
+   "req": "INC-156",
+   "categoria": "crítico",
+   "resumen": "Regresión completa en la cuenta de pruebas (reprobar de L-153 tras DA-47); no es reaceptación",
+   "estado": "aceptado",
+   "observacion": "Reprobar 11:02–11:22, veredicto L-153-veredicto-2 «no aceptado»: criterios propios a (N1) y b (N2) en verde; 4 rojos de regresión con un solo síntoma (la tarea zz-verif-Conteo de cierre no la reemplaza la entrega de zona) → INC-202, de semilla/entorno. L-153 sigue aceptado (veredicto del 18-oct 15:32); este registro es la regresión del orden activo (M-864).",
+   "hash": "7f404ae",
+   "aceptacion": {
+    "nota": "sin cambio: rige el veredicto del 18-oct 15:32"
+   }
   }
  ],
  "esquema": {

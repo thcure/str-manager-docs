@@ -2,10 +2,10 @@
  "version": 1,
  "lineaBase": "2026-10-15",
  "codigo": {
-  "version": "p5c111",
+  "version": "p5c112",
   "schema": 14,
   "rama": "main",
-  "alDia": "2026-10-19 (lotes hasta L-158)"
+  "alDia": "2026-10-19 (lotes hasta L-159)"
  },
  "escritor": "rol-arquitecto (LM-40, MJ-14); Diseño corrige hechos de producto por el buzón; Desarrollo propone anclajes de guiones por el buzón",
  "que": "Mapa del STR legible por máquina: módulos, actores, relaciones, reglas que los cruzan, infraestructura y externos, y el anclaje de cada REQ y de cada guion e2e a sus módulos. Es la fuente del mapa gráfico (interno/arquitectura/mapa-str.html) y la columna vertebral del diseño de pruebas (OM-1). El estado de cada REQ se lee de diseno.json / reqs-historial.json; los lotes e INC de seguimiento.json; las reglas completas de claude/arquitectura/reglas-transversales.md (un dato, una fuente).",
@@ -2731,8 +2731,8 @@
    "id": "REL-91",
    "origen": "PR",
    "destino": "CAL",
-   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
-   "tipo": "por-precisar",
+   "mecanismo": "colección `reservas` (`/api/col/reservas`: Propiedades la lee con `STRApi.get` y, al quitar un canal, escribe `canalQuitado` antes de guardar la propiedad; desde L-159)",
+   "tipo": "datos",
    "dato": "bloqueo de los demás anuncios de la casa mientras se renta uno completo; canal del calendario de cada propiedad con su dirección de importación y su nombre; horario base de la propiedad (check-in y check-out) para la hora de las reservas manuales y de las alertas (y 1 más)",
    "regla": "",
    "rt": [],
@@ -4330,6 +4330,11 @@
    "fecha": "2026-10-19",
    "lote": "L-158",
    "cambio": "L-158 (p5c111; INC-170 e INC-172): SRV, `/api/sync-ical` decide por identificador del canal (reactivar, retomar o nueva), nunca por fechas; CAL, [ICAL-DEC] en str-calendario.html e `icalFeedId` en las reservas del canal; OP, alerta 6 del Tablero. REL-44 (CAL→OP) queda precisada como datos compartidos (`reservas` vía `/api/tablero`) y REL-33 (OP→SRV) deja pasar `reactivadaEn`, `reemplazaCancelada` y `firstSeenAt`. REL-22 (cron→CAL) la cubren las N1 de tests/ical-reservas-canal.test.js (A1–A6, B1–B5); un guion no puede llamar al cron (RT-22). Sin colecciones nuevas."
+  },
+  {
+   "fecha": "2026-10-19",
+   "lote": "L-159",
+   "cambio": "L-159 (p5c112; INC-171): PR, quitar un canal con resumen y confirmación; lee `/api/col/reservas` y escribe `/api/col/reservas` y luego `/api/col/propiedades`. CAL, ⚑, aviso «Canal quitado» y «Dejar como directa»; campo nuevo `canalQuitado` en `reservas`. OP, alerta 7; `/api/tablero` deja pasar `canalQuitado` (REL-44 y REL-33). REL-91 (PR→CAL) queda precisada como datos compartidos (`reservas`). REL-21 (PR→airbnb) sin cambio de forma: los bloqueos de Airbnb se eliminan y lo marcado de otros canales sigue en la exportación. Huecos de cobertura del juez: REL-21 (el guion no lee la exportación; la N1 D1 prueba qué se elimina) y REL-22 (no la toca)."
   }
  ],
  "lineaBaseHasta": "L-126"

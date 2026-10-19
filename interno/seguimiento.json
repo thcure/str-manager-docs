@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 20:16",
+ "actualizadoEn": "2026-10-18 20:18",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1104,7 +1104,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "20:16 api/capacidades/index.php: solo JWT::fromRequest() y cuenta_id; POST/PUT/DELETE sin in_array(rol) ni _puede (L19–62). PUT guarda nombre «» si no viene. DELETE rehúsa (409) si algún usuario la tiene asignada, pero si no, DELETE FROM capacidad (contra RT-5). Arreglo posible: POST/PUT/DELETE solo admin u operador con equipo.editar, nombre obligatorio en PUT y desactivar en vez de borrar. RT-14. Clase y prioridad: Diseño (LM-48)."
+   "nota": "20:16 api/capacidades/index.php: solo JWT::fromRequest() y cuenta_id; POST/PUT/DELETE sin in_array(rol) ni _puede (L19–62). PUT guarda nombre «» si no viene. DELETE rehúsa (409) si algún usuario la tiene asignada, pero si no, DELETE FROM capacidad (contra RT-5). Arreglo posible: POST/PUT/DELETE solo admin u operador con equipo.editar, nombre obligatorio en PUT y desactivar en vez de borrar. RT-14. Clase y prioridad: Diseño (LM-48). · 20:18 Diseño (M-813): crítico, P2. Regla: capacidades solo admin u operador con permiso de equipo; desactivar en vez de borrar; sin nombre vacío (cuadra con T-26). Espera que se levante la pausa; orden en P2 lo fija el Jefe de proyecto (sugerido 161, 160, 162).",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-161",
@@ -1117,7 +1119,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "20:16 api/usuarios/index.php L140–180: POST /usuarios/{id}/invitar no mira si el usuario ya está activado (activado_en) y sobrescribe invitacion_hash. api/invitacion/index.php L91–113: _invitacionCorreoValido solo exige el correo para admins (INC-108); para el resto acepta cualquier cuenta de Google y hace UPDATE usuario SET firebase_uid = <nuevo>. El dueño anterior pierde el acceso (su uid deja de casar). Arreglo posible: no reinvitar a un usuario activado (o exigir el correo vinculado en todos los roles) y, para cambiar la cuenta de Google de alguien, que lo haga un admin. Hoy no hay otro operador real que Carlos, pero el hueco es real. RT-14. Clase y prioridad: Diseño (LM-48)."
+   "nota": "20:16 api/usuarios/index.php L140–180: POST /usuarios/{id}/invitar no mira si el usuario ya está activado (activado_en) y sobrescribe invitacion_hash. api/invitacion/index.php L91–113: _invitacionCorreoValido solo exige el correo para admins (INC-108); para el resto acepta cualquier cuenta de Google y hace UPDATE usuario SET firebase_uid = <nuevo>. El dueño anterior pierde el acceso (su uid deja de casar). Arreglo posible: no reinvitar a un usuario activado (o exigir el correo vinculado en todos los roles) y, para cambiar la cuenta de Google de alguien, que lo haga un admin. Hoy no hay otro operador real que Carlos, pero el hueco es real. RT-14. Clase y prioridad: Diseño (LM-48). · 20:18 Diseño (M-813): crítico, P2. Regla: no se reinvita a un usuario activo (solo pendiente o inactivo) y aceptar una invitación nunca reemplaza una cuenta de Google ya vinculada; primero de los P2 por gravedad. Espera que se levante la pausa; orden en P2 lo fija el Jefe de proyecto (sugerido 161, 160, 162).",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-162",
@@ -1130,7 +1134,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "20:16 str-app-shell.html L930 y L936 (dos ⏻ con títulos distintos), window.doLogout ≈L1794 (solo signOut); str-api.js _logout/clearSession (L51–58, L495) solo quita str-token, str-user y str-me-permisos-v1. En un equipo compartido, la sesión del STR sigue válida hasta 24 h y la copia local queda legible. Arreglo posible: un solo botón que llame STRApi.logout, borre las claves str-* de colecciones y luego signOut. Clase y prioridad: Diseño (LM-48)."
+   "nota": "20:16 str-app-shell.html L930 y L936 (dos ⏻ con títulos distintos), window.doLogout ≈L1794 (solo signOut); str-api.js _logout/clearSession (L51–58, L495) solo quita str-token, str-user y str-me-permisos-v1. En un equipo compartido, la sesión del STR sigue válida hasta 24 h y la copia local queda legible. Arreglo posible: un solo botón que llame STRApi.logout, borre las claves str-* de colecciones y luego signOut. Clase y prioridad: Diseño (LM-48). · 20:18 Diseño (M-813): crítico, P2. Regla: «Cerrar sesión» cierra Google y el STR y borra la copia local; un solo botón ⏻ con ese efecto. Espera que se levante la pausa; orden en P2 lo fija el Jefe de proyecto (sugerido 161, 160, 162).",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-163",
@@ -1143,7 +1149,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
    "causaRaiz": "construcción",
    "debioDetectarse": "tests",
-   "nota": "20:16 api/me/index.php L16 (SELECT sin capacidades) y L24 ($user[\"capacidades\"] = json_decode($user[\"capacidades\"] ?? \"[]\")) → siempre []. Quien lea capacidades de /me (portal, HK) no las recibe; la lista de /api/usuarios sí las trae. Clase y prioridad: Diseño (LM-48)."
+   "nota": "20:16 api/me/index.php L16 (SELECT sin capacidades) y L24 ($user[\"capacidades\"] = json_decode($user[\"capacidades\"] ?? \"[]\")) → siempre []. Quien lea capacidades de /me (portal, HK) no las recibe; la lista de /api/usuarios sí las trae. Clase y prioridad: Diseño (LM-48). · 20:18 Diseño (M-813): normal, P3. Espera que se levante la pausa; orden en P2 lo fija el Jefe de proyecto (sugerido 161, 160, 162).",
+   "categoria": "normal",
+   "prioridad": "P3"
   },
   {
    "id": "INC-164",
@@ -1156,7 +1164,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "20:16 str-usuarios.html L1352 (texto) y deleteCollabNow L1369 (PUT estado inactivo, correcto por RT-5: el defecto es el texto). api/usuarios/index.php L291: sin http_response_code(404). Clase y prioridad: Diseño (LM-48)."
+   "nota": "20:16 str-usuarios.html L1352 (texto) y deleteCollabNow L1369 (PUT estado inactivo, correcto por RT-5: el defecto es el texto). api/usuarios/index.php L291: sin http_response_code(404). Clase y prioridad: Diseño (LM-48). · 20:18 Diseño (M-813): normal, P3. Regla: el texto dice «Inactivar»; id inexistente → 404. Espera que se levante la pausa; orden en P2 lo fija el Jefe de proyecto (sugerido 161, 160, 162).",
+   "categoria": "normal",
+   "prioridad": "P3"
   }
  ],
  "dts": [

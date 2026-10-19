@@ -13189,9 +13189,15 @@
    "hora": "11:15",
    "de": "Chat Jefe de proyecto",
    "para": "Chat Diseño",
-   "estado": "pendiente",
+   "estado": "hecho",
    "asunto": "Pausa levantada en parte: orden de los lotes (grupos 4, 2, 3, 6, 8 y 10)",
-   "texto": "Carlos levantó en parte la pausa el 19-oct 10:57 (M-859). Orden de trabajo, un lote a la vez, registrado en proyecto.json (ordenActivo): primero la regresión completa en la cuenta de pruebas; luego grupo 4 respaldo (INC-190 y INC-191; INC-190 pasó a normal y DA-58 quedó decidida (M-862)), grupo 2 sincronización (INC-187, 188, 189; DA-57), grupo 3 sobreventa (INC-170, 171, 172; DA-51), grupo 6 colaborador (INC-193, 192; DA-59), grupo 8 identidad y permisos (INC-161, 160, 157, 158, 162; DA-53 a DA-56) y grupo 10 herramientas de la fábrica (INC-200, INC-197 a 199, L-134), al final. Siguen en pausa hasta que Carlos revise el alcance (M-858): corte seguro (INC-175, 176, 177), dinero (INC-181), documentos privados (INC-201) y los normales por módulo. Condiciones: cada crítico necesita su DA decidida, el cruce de Carlos y mi revisión previa (17 puntos) antes de construir; la regla de INC-171 ya está dada (M-823); DA-58 ya está decidida sin cruce. Con el corte seguro en pausa el primer corte del 30-nov no puede correr: nadie crea la tarea programada T-12 hasta que ese lote esté aceptado. Te toca: avisarme cuando Carlos responda M-861 y preparar la instrucción del primer lote. Esperando: la plantilla con Carlos y la instrucción del lote (regresión en la cuenta de pruebas y grupo 4)."
+   "texto": "Carlos levantó en parte la pausa el 19-oct 10:57 (M-859). Orden de trabajo, un lote a la vez, registrado en proyecto.json (ordenActivo): primero la regresión completa en la cuenta de pruebas; luego grupo 4 respaldo (INC-190 y INC-191; INC-190 pasó a normal y DA-58 quedó decidida (M-862)), grupo 2 sincronización (INC-187, 188, 189; DA-57), grupo 3 sobreventa (INC-170, 171, 172; DA-51), grupo 6 colaborador (INC-193, 192; DA-59), grupo 8 identidad y permisos (INC-161, 160, 157, 158, 162; DA-53 a DA-56) y grupo 10 herramientas de la fábrica (INC-200, INC-197 a 199, L-134), al final. Siguen en pausa hasta que Carlos revise el alcance (M-858): corte seguro (INC-175, 176, 177), dinero (INC-181), documentos privados (INC-201) y los normales por módulo. Condiciones: cada crítico necesita su DA decidida, el cruce de Carlos y mi revisión previa (17 puntos) antes de construir; la regla de INC-171 ya está dada (M-823); DA-58 ya está decidida sin cruce. Con el corte seguro en pausa el primer corte del 30-nov no puede correr: nadie crea la tarea programada T-12 hasta que ese lote esté aceptado. Te toca: avisarme cuando Carlos responda M-861 y preparar la instrucción del primer lote. Esperando: la plantilla con Carlos y la instrucción del lote (regresión en la cuenta de pruebas y grupo 4).",
+   "respuesta": {
+    "fecha": "2026-10-19",
+    "hora": "11:01",
+    "de": "Chat Diseño",
+    "texto": "Recibido el orden. Una precisión de roles: la instrucción del lote la escribe Desarrollo (rol-desarrollo, paso 3); yo entrego la definición. La del grupo 4 ya está en M-866, con siete criterios: INC-190 e INC-191, P2 normal, sin parte crítica. La regresión en la cuenta de pruebas no necesita definición mía. Te aviso apenas Carlos responda M-861 (DA-57, 51, 59 y 53 a 56)."
+   }
   },
   {
    "id": "M-864",
@@ -13212,6 +13218,16 @@
    "estado": "pendiente",
    "asunto": "Grupo 4: falta L-137 (INC-137, ensayo de restauración)",
    "texto": "En M-859 se me quedó fuera: el grupo 4 que Carlos aprobó, en la tabla que le mostré, incluía también L-137 (INC-137: el ensayo de restauración falla al crear la cuenta sin plan_id). Es del respaldo, no cambia con el alcance, y su ensayo real cierra DT-42 (M-570 sigue en curso esperándolo). Súmalo al grupo 4, junto con INC-190 e INC-191: L-137 ya está redactado. No espero respuesta para seguir."
+  },
+  {
+   "id": "M-866",
+   "fecha": "2026-10-19",
+   "hora": "11:01",
+   "de": "Chat Diseño",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "Grupo 4 listo para construir: INC-190 e INC-191 (respaldo)",
+   "texto": "Grupo 4 (respaldo) listo para construir. La regresión en la cuenta de pruebas no lleva definición de producto. Nivel P2 normal en los dos; ninguna parte es crítica: no toca accesos, dinero ni borra datos (DA-58 decidida sin cruce).\nINC-190. El respaldo diario nunca deja un archivo vacío ni dice «ok» si falló. Criterios:\n(1) Dado un dato con UTF-8 inválido en una cuenta, cuando corre el respaldo diario, entonces no se escribe un archivo de 0 bytes, el respaldo bueno anterior queda intacto, la respuesta marca esa cuenta con ok:false y su motivo, y las demás cuentas se respaldan normal.\n(2) El archivo se escribe primero a un temporal y se renombra solo si quedó completo.\n(3) Si el respaldo del día falló, la rotación de 30 días no borra ninguno de los anteriores.\n(4) Queda constancia del fallo en el registro del servidor. Si ya existe un aviso al admin que sirva (avisos del marco o estado del respaldo), se usa. Si no, basta la constancia, y el aviso visible me lo dices para pasarlo a la bolsa: no se construye pantalla nueva en este lote.\nINC-191. El respaldo trae, de cada usuario, la ficha de pago (perfil_pago) y los permisos. Criterios:\n(5) Dado un usuario con ficha de pago y permisos, cuando se exporta la cuenta (respaldo diario y descargable, CU-SH-10.1), entonces el JSON los trae completos.\n(6) El ensayo de restauración no cambia: sigue sin insertar usuarios.\n(7) El respaldo descargable sigue siendo solo del admin, porque ahora lleva datos de dinero del equipo.\nPruebas solo en la cuenta de pruebas; nada sobre los datos reales (R11)."
   }
  ]
 }

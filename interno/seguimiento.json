@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 14:46",
+ "actualizadoEn": "2026-10-19 15:04",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1267,12 +1267,12 @@
    "modulo": "Calendario",
    "fecha": "2026-10-18",
    "titulo": "Al quitar un canal (iCal) de una propiedad, sus reservas y bloqueos importados quedan vivos para siempre: ni el cron ni el sync del navegador los procesan (solo recorren los feeds configurados) y los bloqueos de ese canal siguen saliendo a Airbnb como «No disponible»",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "origen": "Desarrollo, revisión técnica de MJ-16 CAL (M-821)",
    "causaRaiz": "definición",
    "debioDetectarse": "revisión previa",
-   "nota": "21:07 str-propiedades.html removeIcal ≈L1650 solo quita el feed de p.icals; api/sync-ical recorre $prop->icals; str-calendario.html ≈L1727 «feed failed → don't touch» también aplica a un feed que ya no existe; api/lib/ical-export.php ≈L42–48 solo omite reservas de feed inexistente si el canal es airbnb. Necesita regla de producto (¿cancelar reservas futuras y eliminar bloqueos del canal quitado, o preguntar?). Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): normal, P2. Regla: al quitar un canal, sus bloqueos se eliminan y dejan de ir a Airbnb; las reservas futuras con huésped no se cancelan solas: quedan marcadas «canal quitado» para que el operador decida; antes de quitar, resumen («N bloqueos se eliminan, M reservas quedan para revisar») y confirmación; las pasadas no se tocan. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "nota": "21:07 str-propiedades.html removeIcal ≈L1650 solo quita el feed de p.icals; api/sync-ical recorre $prop->icals; str-calendario.html ≈L1727 «feed failed → don't touch» también aplica a un feed que ya no existe; api/lib/ical-export.php ≈L42–48 solo omite reservas de feed inexistente si el canal es airbnb. Necesita regla de producto (¿cancelar reservas futuras y eliminar bloqueos del canal quitado, o preguntar?). Clase y prioridad: Diseño (LM-48). · 21:27 Diseño (M-823): normal, P2. Regla: al quitar un canal, sus bloqueos se eliminan y dejan de ir a Airbnb; las reservas futuras con huésped no se cancelan solas: quedan marcadas «canal quitado» para que el operador decida; antes de quitar, resumen («N bloqueos se eliminan, M reservas quedan para revisar») y confirmación; las pasadas no se tocan. Espera que se levante la pausa; orden del Jefe de proyecto. · 15:01 Cerrado: L-159 aceptado (255f6ff).",
    "categoria": "normal",
    "prioridad": "P2"
   },
@@ -15741,10 +15741,56 @@
    "req": "INC-171",
    "categoria": "crítico",
    "resumen": "Quitar un canal pide confirmar; elimina los bloqueos de Airbnb y deja lo demás «Canal quitado» (⚑ en el Calendario, alerta 7 del Tablero) para cancelar, eliminar o dejar como propio",
-   "estado": "instalado",
-   "observacion": "DA-51 con cruce de Carlos (19-oct 11:04, M-869). Revisor previo en tres pasadas y Jefe de proyecto 17/17 (M-906). Archivos de LENOVO tras L-158 idénticos a la base del borrador. Guardias e2e-esquema 20/0 y drive-copia 78/0. Encolado 14:37 (cmp IGUAL). Construido 255f6ff 14:39 (run.js 95/95).",
+   "estado": "aceptado",
+   "observacion": "DA-51 con cruce de Carlos (19-oct 11:04, M-869). Revisor previo en tres pasadas y Jefe de proyecto 17/17 (M-906). Archivos de LENOVO tras L-158 idénticos a la base del borrador. Guardias e2e-esquema 20/0 y drive-copia 78/0. Encolado 14:37 (cmp IGUAL). Construido 255f6ff 14:39 (run.js 95/95). Ok pleno de producto de Diseño 14:45 (M-921). Juez 15:01: ACEPTADO, fase completa. Observación menor del juez en la captura: el botón «Dejar como directa» sin el estilo de los botones del panel; fechas de check-in/out recortadas en sus cajas (no de este lote). Pasada a Diseño.",
    "version": "p5c112",
-   "hash": "255f6ff"
+   "hash": "255f6ff",
+   "aceptacion": {
+    "lote": "L-159",
+    "hash": "255f6ff",
+    "fecha": "2026-10-19",
+    "horaBogota": "15:01",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 95/95 archivos OK"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: preparación: propiedad 200 · reserva y bloqueo 200 | si: resumen antes de quitar: «1 bloqueo de Airbnb se elimina · 1 reserva o bloqueo queda para revisar.» | si: reserva: canalQuitado {\"feedId\":\"ic_zzverif_nskes\",\"en\":\"2026-10-19T19:41:17.524Z\"} · confirmada | si: bloqueo del canal: eliminado | si: la propiedad ya no tiene el canal: [] | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: alerta de canal quitado: [[\"azul\",\"Canal quitado: decide si la cancelas o la dejas como directa\",\"21–23 oct\"]]"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: el bloque de la reserva lleva ⚑: sí | si: panel: ⚑ Canal quitado Esta reserva venía de un canal que ya no está conectado a la propiedad. Cancélala si ya no va, o déjala  | si: tras «Dejar como directa»: canalQuitado null · icalFeedId null · fromIcal false | escrituras en serie (máx. 1 en vuelo)"
+     },
+     {
+      "c": "e",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "panel-canal-quitado: en el panel de la reserva zz-verif-L-159-huesped-nskes, entre el bloque de huéspedes/precio y «Turno de limpieza», el aviso con ⚑ y título rojo «Canal quitado», el texto completo (incluido «puede llegar otra vez como nuevo») y el botón «Dejar como directa»; se lee entero y no tapa nada; «Editar» y «Cancelar reserva» siguen a la vista abajo. alertas-canal: en «Alertas» del Tablero, tercera tarjeta con barra azul, cabecera «zz-verif-L-159-prop-nskes · ahora», título «Canal quitado: decide si la cancelas o la dejas como directa» en dos líneas y fechas «21–23 oct»; se lee entera a 390 px y no tapa nada"
+     }
+    ],
+    "criteriosPendientes": [],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "limpiar() corrio sin error",
+    "notas": "pruebas.json › resultado «verde», causa null; ningún \"ok\": false en el archivo (Grep). Fase «completa» (lote crítico); regresión por ruta: todos los casos en verde; los guiones de noCorren no cuentan. Deuda de cobertura (regresionSeleccion.ruta.huecos): REL-21 (PR→airbnb, la exportación no se lee en el guion; el N1 D1 prueba qué se elimina) y REL-22 (cron→CAL, no la toca el lote). Sesiones: ninguna perdida ni caída. Observación menor en la captura del panel (no cambia el criterio): el botón «Dejar como directa» se ve sin el estilo de los botones del panel (fondo gris por defecto, letra más grande), y las fechas de CHECK-IN/CHECK-OUT salen recortadas abajo en sus cajas, que no son de este lote; Diseño puede revisarlo en su ok de producto."
+   }
   }
  ],
  "esquema": {
@@ -18112,11 +18158,9 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "Quitar un canal pide confirmar; elimina los bloqueos de Airbnb y deja lo demás «Canal quitado» (⚑ en el Calendario, alerta 7 del Tablero) para cancelar, eliminar o dejar como propio",
-   "estado": "construido",
-   "desde": "2026-10-19 14:39",
-   "esperaA": "verificador",
-   "espera": "veredicto de L-159",
-   "nota": "14:03 Parte del grupo 3 (M-905); DA-51 con cruce de Carlos 19-oct 11:04 (M-869), encima de L-158. N1 tests/canal-quitado.test.js 14/0; aplicado sobre main con L-158 da idéntico. Borrador en claude/producto/borradores/L-159-instr-inc171-canal-quitado.md. ?v= p5c112. · 14:07 Segunda lectura 17/17 (M-906); corregido el comentario de P2 (tests/canal-quitado.test.js). Se encola al aceptar L-158. · 14:11 Pausa de la cola pedida por Carlos (M-909/M-912/M-913) después de aceptar L-158 y L-159: nada se encola después. · 14:13 Indicación del Jefe de proyecto (M-915): al aceptarse L-159, Desarrollo crea PAUSA en la raíz de la cola y lo confirma. · 14:37 L-158 aceptado; archivos de LENOVO idénticos a la base del borrador. Encolado (cmp IGUAL). Después de L-159 no se encola nada (pausa, M-912/M-913); PAUSA al aceptarse (M-915). · 14:39 Construido (255f6ff; run.js 95/95, canal-quitado 14/0, tablero-op 38/0). Pruebas y juez en la cola. Ok de producto pedido a Diseño. El push de la CLI a GitHub de str-manager falló por red (main local en LENOVO al día). · 14:45 Ok pleno de producto de Diseño (M-920/M-921; el texto del aviso queda como está)."
+   "estado": "aceptado",
+   "desde": "2026-10-19 15:01",
+   "nota": "14:03 Parte del grupo 3 (M-905); DA-51 con cruce de Carlos 19-oct 11:04 (M-869), encima de L-158. N1 tests/canal-quitado.test.js 14/0; aplicado sobre main con L-158 da idéntico. Borrador en claude/producto/borradores/L-159-instr-inc171-canal-quitado.md. ?v= p5c112. · 14:07 Segunda lectura 17/17 (M-906); corregido el comentario de P2 (tests/canal-quitado.test.js). Se encola al aceptar L-158. · 14:11 Pausa de la cola pedida por Carlos (M-909/M-912/M-913) después de aceptar L-158 y L-159: nada se encola después. · 14:13 Indicación del Jefe de proyecto (M-915): al aceptarse L-159, Desarrollo crea PAUSA en la raíz de la cola y lo confirma. · 14:37 L-158 aceptado; archivos de LENOVO idénticos a la base del borrador. Encolado (cmp IGUAL). Después de L-159 no se encola nada (pausa, M-912/M-913); PAUSA al aceptarse (M-915). · 14:39 Construido (255f6ff; run.js 95/95, canal-quitado 14/0, tablero-op 38/0). Pruebas y juez en la cola. Ok de producto pedido a Diseño. El push de la CLI a GitHub de str-manager falló por red (main local en LENOVO al día). · 14:45 Ok pleno de producto de Diseño (M-920/M-921; el texto del aviso queda como está). · 15:01 Aceptado (veredicto L-159: N1 95/95, N2 b, c, d y N3 e en verde, regresión por ruta en verde; huecos REL-21 y REL-22 cubiertos por N1). · 15:04 Cola en pausa: archivo PAUSA vacío en la raíz (M-915); no hay nada encolado."
   }
  ],
  "riesgos": [

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 19:44",
+ "actualizadoEn": "2026-10-18 20:16",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1092,6 +1092,71 @@
    "nota": "19:43 portal.html _periodos (3 meses, INC-120 capa 1) y _renderDinero (<strong>_esc(tr.propNombre)</strong>); HK _hkTurnoPortal manda los soloHoras sin propNombre (≈L5259); el servidor reduce los de más de 90 días (_colDesdeGestion/_colTurnoSoloHoras). Las horas y el valor sí cuentan; solo falta el nombre (y no se abre). Arreglo posible: texto fijo «Turno anterior a 90 días» cuando soloHoras, o que _colTurnoSoloHoras conserve el nombre de la propiedad (decide Diseño: DA-45 quita la propiedad a propósito). Clase y prioridad: Diseño (LM-48). · 19:44 Diseño (M-809): normal, P2. Regla: texto fijo «Turno anterior a 90 días» con su fecha, sin nombre de propiedad (respeta DA-45, sin nuevo cruce); horas y valor siguen contando. Vista previa ?como= de solo lectura: pedido T-25 en la bolsa. Espera que se levante la pausa.",
    "prioridad": "P2",
    "categoria": "normal"
+  },
+  {
+   "id": "INC-160",
+   "tipo": "INC",
+   "modulo": "Identidad, equipo y permisos",
+   "fecha": "2026-10-18",
+   "titulo": "api/capacidades no mira el rol: cualquiera con sesión (también un colaborador) puede crear, renombrar (nombre vacío permitido) o borrar capacidades del negocio por la API, fuera de la pantalla; el borrado es físico (DELETE)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:16 api/capacidades/index.php: solo JWT::fromRequest() y cuenta_id; POST/PUT/DELETE sin in_array(rol) ni _puede (L19–62). PUT guarda nombre «» si no viene. DELETE rehúsa (409) si algún usuario la tiene asignada, pero si no, DELETE FROM capacidad (contra RT-5). Arreglo posible: POST/PUT/DELETE solo admin u operador con equipo.editar, nombre obligatorio en PUT y desactivar en vez de borrar. RT-14. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-161",
+   "tipo": "INC",
+   "modulo": "Identidad, equipo y permisos",
+   "fecha": "2026-10-18",
+   "titulo": "Un operador con «Invitar» (equipo.invitar) puede reinvitar a un usuario ya activo que no es admin (otro operador con más permisos o un colaborador) y, al aceptar la invitación con OTRA cuenta de Google, la invitación reemplaza el firebase_uid vinculado: se queda con la cuenta y los permisos del otro",
+   "estado": "abierto",
+   "severidad": "alto",
+   "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:16 api/usuarios/index.php L140–180: POST /usuarios/{id}/invitar no mira si el usuario ya está activado (activado_en) y sobrescribe invitacion_hash. api/invitacion/index.php L91–113: _invitacionCorreoValido solo exige el correo para admins (INC-108); para el resto acepta cualquier cuenta de Google y hace UPDATE usuario SET firebase_uid = <nuevo>. El dueño anterior pierde el acceso (su uid deja de casar). Arreglo posible: no reinvitar a un usuario activado (o exigir el correo vinculado en todos los roles) y, para cambiar la cuenta de Google de alguien, que lo haga un admin. Hoy no hay otro operador real que Carlos, pero el hueco es real. RT-14. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-162",
+   "tipo": "INC",
+   "modulo": "Shell",
+   "fecha": "2026-10-18",
+   "titulo": "«Cerrar sesión» del shell no cierra la sesión del STR: el botón ⏻ de Google (doLogout) solo hace signOut de Firebase y va a login.html, sin borrar str-token; el otro ⏻ (apiLogout → STRApi.logout) borra token, usuario y permisos, pero ninguno borra la copia local de las colecciones (usuarios con correos y teléfonos, turnos, propiedades…)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:16 str-app-shell.html L930 y L936 (dos ⏻ con títulos distintos), window.doLogout ≈L1794 (solo signOut); str-api.js _logout/clearSession (L51–58, L495) solo quita str-token, str-user y str-me-permisos-v1. En un equipo compartido, la sesión del STR sigue válida hasta 24 h y la copia local queda legible. Arreglo posible: un solo botón que llame STRApi.logout, borre las claves str-* de colecciones y luego signOut. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-163",
+   "tipo": "INC",
+   "modulo": "Identidad, equipo y permisos",
+   "fecha": "2026-10-18",
+   "titulo": "/api/me devuelve capacidades siempre vacío: el SELECT no trae la columna capacidades",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "tests",
+   "nota": "20:16 api/me/index.php L16 (SELECT sin capacidades) y L24 ($user[\"capacidades\"] = json_decode($user[\"capacidades\"] ?? \"[]\")) → siempre []. Quien lea capacidades de /me (portal, HK) no las recibe; la lista de /api/usuarios sí las trae. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-164",
+   "tipo": "INC",
+   "modulo": "Identidad, equipo y permisos",
+   "fecha": "2026-10-18",
+   "titulo": "Textos y respuestas que no dicen lo que pasa: «¿Eliminar este colaborador permanentemente?» en Equipo solo lo deja inactivo (INC-64); GET /api/usuarios/{id} de un id inexistente responde 200 con {\"error\":\"No encontrado\"}",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 U (M-811)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "20:16 str-usuarios.html L1352 (texto) y deleteCollabNow L1369 (PUT estado inactivo, correcto por RT-5: el defecto es el texto). api/usuarios/index.php L291: sin http_response_code(404). Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -1304,6 +1369,14 @@
    "titulo": "docs/claude/shell-y-api.md (fila portal.html) desactualizado: dice «Mi dinero» con selector de mes «actual y 5 anteriores» y «HK ahora manda hasta 6 meses»; hoy Mi dinero lista 3 meses (INC-120 capa 1, DA-45) y los turnos de más de 90 días llegan reducidos",
    "estado": "abierta",
    "nota": "19:43 Visto en MJ-16 POR (M-807). El pull de HK en modo colaborador sí sigue pidiendo desde hace 6 meses (mes actual y 5 anteriores, o el inicio del saldo si es antes) para el saldo; lo que cambió es lo que se lista y que lo viejo llega soloHoras. Se corrige en el próximo lote que toque docs (solo documentación)."
+  },
+  {
+   "id": "DT-49",
+   "tipo": "DT",
+   "fecha": "2026-10-18",
+   "titulo": "El JWT lleva el rol y dura 24 h sin revocación: una baja, una inactivación o un cambio de rol no se aplican hasta que vence (salvo donde el servidor relee permisos de la base con _puede)",
+   "estado": "abierta",
+   "nota": "20:16 api/config/jwt.php L18 (exp = 24 h), L31; sin lista de revocación ni relectura de activo/rol por petición. Diseño conocido; visto en MJ-16 U (M-811). Arreglo posible: que JWT::fromRequest compruebe activo y rol contra la base (una consulta por petición) o acortar la vida del token con renovación."
   }
  ],
  "cambios": [

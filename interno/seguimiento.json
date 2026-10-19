@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 21:28",
+ "actualizadoEn": "2026-10-18 21:54",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -287,19 +287,20 @@
   {
    "id": "INC-96",
    "tipo": "INC",
-   "modulo": "Conocimiento",
+   "modulo": "Copia a Drive y corte",
    "etapa": "✔",
    "fecha": "2026-10-08",
    "severidad": "medio",
    "titulo": "Google bloqueaba el OAuth de STR Manager (403 access_denied): la app en modo prueba no tenía a la cuenta de Carlos como usuario de prueba.",
    "pendiente": "Cerrado 8-oct: cuenta agregada en Google Auth Platform → Público → Usuarios de prueba (17:23); 49-veredicto-3 conectó con ?drive=ok.",
    "estado": "cerrado",
-   "origen": "49-veredicto."
+   "origen": "49-veredicto.",
+   "nota": " · 18-oct 21:54 Módulo corregido (antes «Conocimiento»): es de K3 (M-833)."
   },
   {
    "id": "INC-97",
    "tipo": "INC",
-   "modulo": "Conocimiento",
+   "modulo": "Copia a Drive y corte",
    "etapa": "📝",
    "fecha": "2026-10-08",
    "severidad": "bajo",
@@ -307,7 +308,8 @@
    "pendiente": "Deuda: comprobar el scope concedido, redirigir con motivo (p. ej. ?drive=sin-permiso con texto 'Marca la casilla de Google Drive') y registrar el paso que falló en api/logs/error.log. Candidato a incluir en K3b.",
    "estado": "cerrado",
    "origen": "49-veredicto-3.",
-   "cierre": "15-oct 02:30: L-116 (477e6b1) aceptado: el callback detecta la falta del permiso drive.file, redirige con ?drive=sin-permiso y registra el paso en error.log. Queda N4 de Carlos con cuenta de prueba."
+   "cierre": "15-oct 02:30: L-116 (477e6b1) aceptado: el callback detecta la falta del permiso drive.file, redirige con ?drive=sin-permiso y registra el paso en error.log. Queda N4 de Carlos con cuenta de prueba.",
+   "nota": " · 18-oct 21:54 Módulo corregido (antes «Conocimiento»): es de K3 (M-833)."
   },
   {
    "id": "INC-98",
@@ -1423,6 +1425,71 @@
    "nota": "21:27 str-api.js _horasDeTurno ≈L877–878 (perfilPago.politicaHoras y perfilPago.modalidad actuales) frente a _tarifaVigente(perfilPago, fecha) ≈L601. Arreglo posible: guardar política y modalidad con fecha de vigencia (como las tarifas) y leer la vigente en la fecha del turno. Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): crítico, P2. Regla: valor y saldo de un turno usan la política y modalidad vigentes en la fecha del turno; un cambio solo rige hacia adelante. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "crítico",
    "prioridad": "P2"
+  },
+  {
+   "id": "INC-182",
+   "tipo": "INC",
+   "modulo": "Guías (Conocimiento)",
+   "fecha": "2026-10-18",
+   "titulo": "Si el servidor rechaza el guardado de una guía (cuerpo grande, 403, 500 o sin red), Conocimiento dice «Guía actualizada/creada», solo deja un console.warn y el cambio se pierde en la siguiente sincronización: la copia del último envío ya se marcó como subida antes del PUT",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, revisión técnica de MJ-16 KN (M-833)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:54 str-conocimiento.html persistGuias ≈L275–284: actualiza str-col-lastpush-v1 y la caché antes de STRApi.col.push y el .catch solo hace console.warn; guardar ≈L603–604 muestra el toast de éxito sin esperar la promesa. Arreglo posible: esperar la respuesta, avisar el error y no marcar lastpush hasta el 200 (como _put de otras páginas). Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-183",
+   "tipo": "INC",
+   "modulo": "Guías (Conocimiento)",
+   "fecha": "2026-10-18",
+   "titulo": "«¿Dónde se usa?» y la confirmación de borrado de una guía leen los flujos de la copia local (str-flujos-v2): Conocimiento nunca los pide al servidor, así que con la página abierta sola o con flujos cambiados en otro equipo puede decir «Sin uso todavía» y dejar borrar una guía en uso",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 KN (M-833)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:54 str-conocimiento.html _usosDeGuia ≈L314 lee FLUJOS_KEY de localStorage; la página solo hace pull de «guias» (≈L296). Arreglo: pull de «flujos» antes de mostrar los usos o de confirmar el borrado. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-184",
+   "tipo": "INC",
+   "modulo": "Shell",
+   "fecha": "2026-10-18",
+   "titulo": "El shell abre un módulo desde un favorito sin mirar el rol: openModule no comprueba data-roles (nav sí, INC-109), así que un favorito heredado (la migración única de la clave vieja str-favoritos-v1 al primer usuario del navegador) abre un módulo que el rol no ve y el módulo responde «Sin permiso»",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SH (M-833)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:54 str-app-shell.html favNav ≈L1505 → el.click() → onclick openModule(...) ≈L1203 sin _rolVeElemento; nav() ≈L1188 sí lo comprueba. Desde REQ-SH-2 los favoritos son por usuario (str-favoritos-v1:<id>), así que el caso queda en la migración de la clave vieja. Arreglo: el mismo control de INC-109 en openModule. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-185",
+   "tipo": "INC",
+   "modulo": "Shell",
+   "fecha": "2026-10-18",
+   "titulo": "Tocar la estrella ☆ de un ítem del menú también abre el módulo: el onclick del ítem corre antes que el oyente de la barra lateral que hace stopPropagation",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SH (M-833)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:54 str-app-shell.html: los .nav-item llevan onclick=\"openModule(...)\" en línea (≈L975–1033) y la estrella se maneja por delegación en .sidebar (≈L1566–1571); el evento llega primero al ítem. Arreglo: manejar la estrella en su propio botón con stopPropagation en el botón. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-186",
+   "tipo": "INC",
+   "modulo": "Shell",
+   "fecha": "2026-10-18",
+   "titulo": "Tras pasar de un módulo a otro con un botón propio del módulo (navegación dentro del iframe), tocar en el menú la entrada de origen muestra el destino hasta recargar: openModule reusa el panel por clave sin devolver el iframe a su página",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 SH (M-833)",
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "nota": "21:54 str-app-shell.html openModule ≈L1203–1214: si el panel panel-mod-<clave> existe, no toca el src del iframe. Arreglo: si el iframe no está en su url, volver a cargarla. Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [

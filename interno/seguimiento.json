@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 19:30",
+ "actualizadoEn": "2026-10-18 19:43",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1077,6 +1077,19 @@
    "nota": "19:28 api/col/index.php, _colFiltrarLecturaColaborador: case guias/ubicaciones/prop-workflows descarta solo si $d->propId existe y no es de sus propiedades; saveEdif (str-propiedades.html ≈L2477) guarda la ubicación sin propId (la relación va en la propiedad: ubicacionId/edificioId). Las propiedades sí van acotadas (lista blanca y contexto de INC-120). RT-14. Arreglo posible: para ubicaciones, dejar solo las que sean ubicacionId/edificioId de las propiedades que ve (el mismo $misProps). Clase y prioridad: Diseño (LM-48). · 19:30 Diseño (M-805): crítico, P2; cabe en DA-45 (el colaborador solo ve ubicaciones de sus propiedades: base, turno en la ventana o incidente abierto), sin DA nueva. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "prioridad": "P2",
    "categoria": "crítico"
+  },
+  {
+   "id": "INC-159",
+   "tipo": "INC",
+   "modulo": "Portal del colaborador",
+   "fecha": "2026-10-18",
+   "titulo": "«Mi dinero» muestra en el mes más antiguo (3 meses: actual y 2 anteriores, hasta ~92 días) filas sin nombre de propiedad: los turnos de más de 90 días llegan reducidos (soloHoras, sin propiedad) y la fila pinta el nombre vacío",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "origen": "Desarrollo, revisión técnica de MJ-16 POR (M-807, CU-POR-4.2)",
+   "causaRaiz": "integración",
+   "debioDetectarse": "revisión previa",
+   "nota": "19:43 portal.html _periodos (3 meses, INC-120 capa 1) y _renderDinero (<strong>_esc(tr.propNombre)</strong>); HK _hkTurnoPortal manda los soloHoras sin propNombre (≈L5259); el servidor reduce los de más de 90 días (_colDesdeGestion/_colTurnoSoloHoras). Las horas y el valor sí cuentan; solo falta el nombre (y no se abre). Arreglo posible: texto fijo «Turno anterior a 90 días» cuando soloHoras, o que _colTurnoSoloHoras conserve el nombre de la propiedad (decide Diseño: DA-45 quita la propiedad a propósito). Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [
@@ -1281,6 +1294,14 @@
    "titulo": "Guiones de REQ-INV2-4-2 (casos b, c, g, h, j, k y l, portal) citan REL-10 en «cubre» y no REL-11, aunque prueban pendientes que crea el servidor al cerrar el turno",
    "estado": "abierta",
    "nota": "18:32 Visto en la revisión de MJ-16 fase 2 (M-792/M-795). REL-11 = HK → SRV (PUT /col/turnos crea inv-pendientes); REL-10 = HK → INV por inv-movimientos. Se corrige en la fase 6 de MJ-16 (anclaje de guiones a casos de uso): agregar REL-11 donde corresponda. Solo guion; no toca la página."
+  },
+  {
+   "id": "DT-48",
+   "tipo": "DT",
+   "fecha": "2026-10-18",
+   "titulo": "docs/claude/shell-y-api.md (fila portal.html) desactualizado: dice «Mi dinero» con selector de mes «actual y 5 anteriores» y «HK ahora manda hasta 6 meses»; hoy Mi dinero lista 3 meses (INC-120 capa 1, DA-45) y los turnos de más de 90 días llegan reducidos",
+   "estado": "abierta",
+   "nota": "19:43 Visto en MJ-16 POR (M-807). El pull de HK en modo colaborador sí sigue pidiendo desde hace 6 meses (mes actual y 5 anteriores, o el inicio del saldo si es antes) para el saldo; lo que cambió es lo que se lista y que lo viejo llega soloHoras. Se corrige en el próximo lote que toque docs (solo documentación)."
   }
  ],
  "cambios": [

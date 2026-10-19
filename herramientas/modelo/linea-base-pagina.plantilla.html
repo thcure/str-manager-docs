@@ -174,23 +174,22 @@ function vistaSistema(){
      <span class="tenue">${mods.length} de ${Object.keys(D.nombresModulo).length} módulos levantados · ${ncu} casos de uso · resultados de ${esc(D.resultados || 'ninguna corrida')} · página ${esc(D.generado)}</span></div>
      <div class="cifras"><div class="cifra"><span class="etq">Cobertura de lo levantado</span><b class="dat">${fmtPct(alc ? Math.round(1000 * (1 - falt / alc)) / 10 : null)}</b><span class="tenue">${alc - falt} de ${alc} comprobados</span></div></div></header>
    <section class="sec">${barra(tot, true)}</section>
-   ${seccionAlcance(mods)}
+   <section class="sec"><div class="fila"><div><h2>Mapa del sistema</h2><span class="tenue">¿Cómo se conectan los módulos entre sí y con el exterior?</span></div>
+       <div class="pestanas" role="tablist">${[['contexto', 'Contexto'], ['capas', 'Mapa por capas'], ['matriz', 'Matriz de dependencias']].map(([k, t]) => `<button role="tab" data-dg="${k}" aria-selected="${VISTA_DG === k}">${t}</button>`).join('')}</div></div>
+     <div class="filtros" id="dgFiltros"></div>
+     <span class="tenue" id="dgAyuda"></span>
+     <div class="diagrama" id="dg"></div>
+     <div class="relpanel" id="dgRel" aria-live="polite"></div></section>
    <section class="sec"><div class="fila"><h2>Módulos</h2><span class="tenue">Toca un módulo para ver sus capacidades y casos de uso.</span></div>
      <div class="mods">${mods.map((m) => { const I = D.modulos[m].informe, A = D.modulos[m].archivo;
        return `<button class="mod" data-m="${m}"><div class="fila2"><span class="etq">${m}</span><span class="chip">${esc(A.estadoArchivo)}</span></div>
          <h3>${esc(nMod(m))}</h3><div class="fila2"><span class="tenue">${I.capacidades} capacidades · ${I.casosUso} casos de uso</span><b class="pct">${fmtPct(I.cobertura.simple)}</b></div>${barra(I.porEstado, false)}</button>`; }).join('')}
        ${pend.map((m) => `<div class="mod fantasma"><div class="fila2"><span class="etq">${m}</span><span class="chip">por levantar</span></div><h3>${esc(nMod(m))}</h3></div>`).join('')}</div></section>
-   <section class="sec"><div class="fila"><h2>Cómo se conectan</h2>
-       <div class="pestanas" role="tablist"><button role="tab" data-dg="capas" aria-selected="${VISTA_DG === 'capas'}">Mapa por capas</button><button role="tab" data-dg="matriz" aria-selected="${VISTA_DG === 'matriz'}">Matriz de dependencias</button></div></div>
-     <div class="filtros"><label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span></div>
-     <span class="tenue" id="dgAyuda"></span>
-     <div class="diagrama" id="dg"></div>
-     <div class="relpanel" id="dgRel" aria-live="polite"></div></section>`;
+   ${seccionAlcance(mods)}`;
   $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
   $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
   $$('[data-dg]').forEach((b) => b.onclick = () => { VISTA_DG = b.dataset.dg; try { localStorage.setItem('lb-vista-dg', VISTA_DG); } catch (e) {}
     $$('[data-dg]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.dg === VISTA_DG))); diagramaSistema(); });
-  $('#fRel').onchange = (e) => { FILTRO_REL = e.target.value; try { localStorage.setItem('lb-filtro-rel', FILTRO_REL); } catch (x) {} diagramaSistema(); };
   diagramaSistema();
 }
 function seccionAlcance(mods){
@@ -221,14 +220,15 @@ function seccionAlcance(mods){
 let FILTRO_REL = (() => { try { return localStorage.getItem('lb-filtro-rel') || ''; } catch (e) { return ''; } })();
 const tipoFlujo = (f) => f.rel ? ((D.relTipo || {})[f.rel] || 'por-precisar') : 'sin-rel';
 function nombreTipoRel(t){ if (t === 'sin-rel') return 'Sin relación asignada'; const x = (D.tiposRelacion || {})[t] || t; return x.split(':')[0]; }
-function descTipoRel(t){ if (!t) return ''; if (t === 'sin-rel') return 'Flujos de los casos de uso que todavía no apuntan a ninguna relación del mapa.'; const x = (D.tiposRelacion || {})[t] || ''; return x.includes(':') ? x.slice(x.indexOf(':') + 1).trim() : x; }
+function descTipoRel(t){ if (!t) return ''; if (t === '-') return 'Sin líneas de relación: solo las cajas.'; if (t === 'sin-rel') return 'Flujos de los casos de uso que todavía no apuntan a ninguna relación del mapa.'; const x = (D.tiposRelacion || {})[t] || ''; return x.includes(':') ? x.slice(x.indexOf(':') + 1).trim() : x; }
 function opcionesRel(){
   const n = {}; recorrerFlujos((o, d, f) => { const t = tipoFlujo(f); n[t] = (n[t] || 0) + 1; });
   const tot = Object.values(n).reduce((a, b) => a + b, 0);
   const orden = Object.keys(D.tiposRelacion || {}).concat(['sin-rel']).filter((t) => n[t]);
-  if (FILTRO_REL && !orden.includes(FILTRO_REL)) FILTRO_REL = '';
-  return `<option value="">Todas (${tot} flujos)</option>` + orden.map((t) => `<option value="${t}" ${t === FILTRO_REL ? 'selected' : ''}>${esc(nombreTipoRel(t))} (${n[t]})</option>`).join('');
+  if (FILTRO_REL && FILTRO_REL !== '-' && !orden.includes(FILTRO_REL)) FILTRO_REL = '';
+  return `<option value="">Todas (${tot} flujos)</option><option value="-" ${FILTRO_REL === '-' ? 'selected' : ''}>Ninguna</option>` + orden.map((t) => `<option value="${t}" ${t === FILTRO_REL ? 'selected' : ''}>${esc(nombreTipoRel(t))} (${n[t]})</option>`).join('');
 }
+function guardarRel(v){ FILTRO_REL = v; try { localStorage.setItem('lb-filtro-rel', v); } catch (x) {} }
 function recorrerFlujos(fn){
   Object.values(CU).forEach(({mod, u}) => {
     (u.salidas || []).forEach((f) => { const d = modDe(f.a); if (d && d !== mod) fn(mod, d, f); });
@@ -288,7 +288,7 @@ function relsArista(o, d){
   const v = {}; recorrerFlujos((a, b, f) => { if (a !== o || b !== d || (FILTRO_REL && tipoFlujo(f) !== FILTRO_REL)) return; v[f.rel || '—'] = (v[f.rel || '—'] || 0) + 1; });
   return Object.entries(v).sort((a, b) => b[1] - a[1]).map(([r]) => `${r}: ${corta(((D.relInfo || {})[r] || {}).dato || '', 90)}`).join('\n');
 }
-let VISTA_DG = (() => { try { return localStorage.getItem('lb-vista-dg') || 'capas'; } catch (e) { return 'capas'; } })();
+let VISTA_DG = (() => { try { return localStorage.getItem('lb-vista-dg') || 'contexto'; } catch (e) { return 'contexto'; } })();
 const CAPAS = [
   ['Lo que ve la gente', ['SH', 'OP', 'POR']],
   ['Operación diaria', ['CAL', 'HK', 'INV', 'FL', 'KN', 'PR']],
@@ -311,9 +311,12 @@ function capasOrden(){
 }
 function soloPlan(m){ const A = D.modulos[m] && D.modulos[m].archivo; return !!A && A.casosUso.length > 0 && A.casosUso.every((u) => u.declarado === 'no-construido' || u.declarado === 'fuera-de-alcance'); }
 function diagramaSistema(){
+  $('#dgRel').hidden = VISTA_DG !== 'capas';
+  if (VISTA_DG === 'contexto') return contextoSistema();
+  $('#dgFiltros').innerHTML = `<label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span>`;
+  $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaSistema(); };
   const ar = flujosModulo();
   $('#fRelDesc').textContent = descTipoRel(FILTRO_REL); panelRel(null);
-  if (!Object.keys(ar).length) { $('#dgAyuda').textContent = ''; $('#dg').innerHTML = '<p class="tenue">Ningún flujo entre módulos con ese tipo de relación.</p>'; return; }
   if (VISTA_DG === 'matriz') return matrizSistema(ar);
   $('#dgAyuda').textContent = 'Pasa el puntero (o toca) un módulo: se resaltan sus flechas; las que salen en verde azulado, las que entran en naranja. Clic para entrar. Grosor = cantidad de flujos. Borde punteado: módulo definido y aún sin construir. Al señalar un módulo o una flecha aparece de qué se trata cada relación; el detalle completo queda debajo del mapa. En el celular, el primer toque muestra y el segundo entra.';
   const capas = capasOrden();
@@ -400,22 +403,22 @@ function vistaModulo(m){
      <div class="cifras"><div class="cifra"><span class="etq">Cobertura funcional</span><b class="dat">${fmtPct(c.simple)}</b><span class="tenue">${c.alcance - c.faltan} de ${c.alcance} comprobados</span></div>
        <div class="cifra"><span class="etq">Pesada por importancia</span><b class="dat">${fmtPct(c.pesada)}</b><span class="tenue">esencial 3 · necesaria 2 · accesoria 1</span></div></div></header>
    <section class="sec">${barra(I.porEstado, true)}</section>
-   <section class="alcance">
-     <div class="caja"><span class="etq">Dentro del alcance</span><ul>${(A.alcance.dentro || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-     <div class="caja"><span class="etq">Fuera del alcance</span><ul>${(A.alcance.fuera || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div></section>
-   <section class="sec"><div class="fila"><h2>Capacidades</h2><span class="tenue">Cada cuadro es un caso de uso: tócalo para abrirlo. El título filtra la lista.</span></div><div class="calor" id="calor"></div></section>
-   <section class="sec"><div class="fila"><h2>Contexto</h2><div class="filtros">
-       <label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
-       <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que entrega</option><option value="entra">Solo lo que recibe</option></select>
+   <section class="sec"><div class="fila"><div><h2>Contexto del módulo</h2><span class="tenue">¿Quién usa este módulo, qué hace y con quién intercambia?</span></div><div class="filtros">
+       <label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
+       <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que entrega</option><option value="entra">Solo lo que recibe</option><option value="-">Ninguna</option></select>
        <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select></div></div>
      <p class="tenue" style="margin:0">Izquierda: quién lo usa. Centro: sus capacidades; los cuadritos son sus casos de uso, con el color de su estado. Derecha: los módulos con los que intercambia datos, por medio de las relaciones del mapa. Línea gris: el actor usa casos de uso de esa capacidad (más gruesa = más casos). Verde azulado: la capacidad entrega a ese módulo; naranja: recibe de él. Señala cualquier cosa para ver qué es; toca un módulo dos veces para ir a él.</p>
      <div class="diagrama" id="dg"></div></section>
+   <section class="sec"><div class="fila"><h2>Capacidades</h2><span class="tenue">Cada cuadro es un caso de uso: tócalo para abrirlo. El título filtra la lista.</span></div><div class="calor" id="calor"></div></section>
    <section class="sec"><div class="fila"><h2>Casos de uso</h2><div class="filtros">
        <label class="etq" for="fCap">Capacidad</label><select id="fCap"><option value="">Todas</option>${A.capacidades.map((x) => `<option value="${x.id}">${x.id.split('-').pop()} · ${esc(corta(x.nombre, 40))}</option>`).join('')}</select>
        <label class="etq" for="fAct">Actor</label><select id="fAct"><option value="">Todos</option>${acts.map((a) => `<option value="${a}">${esc(ACT(a))}</option>`).join('')}</select>
        <label class="etq" for="fEst">Estado</label><select id="fEst"><option value="">Todos</option>${ESTADOS.filter(([e]) => I.porEstado[e]).map(([e, n]) => `<option value="${e}">${esc(n)}</option>`).join('')}</select>
        <label class="etq" for="fTipo">Tipo</label><select id="fTipo"><option value="">Todos</option>${Object.entries(TIPOS).map(([t, n]) => `<option value="${t}">${n}</option>`).join('')}</select></div></div>
      <div class="tabla"><table><thead><tr><th>Id</th><th>Caso de uso</th><th>Actor</th><th>Estado</th><th>Flujos</th><th>Pruebas</th></tr></thead><tbody id="filas"></tbody></table></div></section>
+   <section class="alcance">
+     <div class="caja"><span class="etq">Dentro del alcance</span><ul>${(A.alcance.dentro || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+     <div class="caja"><span class="etq">Fuera del alcance</span><ul>${(A.alcance.fuera || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div></section>
    <section class="sec"><div class="fila"><h2>Sin atar y avisos</h2><span class="tenue">Pendientes que no cuelgan de ningún caso de uso y flujos por completar.</span></div><ul class="avisos" id="avisos"></ul></section>`;
   $('#calor').innerHTML = A.capacidades.map((cp) => {
     const cus = A.casosUso.filter((u) => u.capacidad === cp.id);
@@ -445,90 +448,185 @@ function tabla(m){
     || '<tr><td colspan="6" class="vacio">Ningún caso de uso con esos filtros.</td></tr>';
   $$('#filas tr[data-id]').forEach((tr) => { tr.onclick = () => ir(tr.dataset.id); tr.onkeydown = (e) => { if (e.key === 'Enter') ir(tr.dataset.id); }; });
 }
+const MARCAS = `<defs>
+    <marker id="cS" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker>
+    <marker id="cE" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--entra)"/></marker></defs>`;
+function opcionesRelCuenta(cuenta){
+  const tot = Object.values(cuenta).reduce((x, y) => x + y, 0);
+  if (FILTRO_REL && FILTRO_REL !== '-' && !cuenta[FILTRO_REL]) FILTRO_REL = '';
+  return `<option value="">Todas (${tot})</option><option value="-" ${FILTRO_REL === '-' ? 'selected' : ''}>Ninguna</option>` + Object.keys(D.tiposRelacion || {}).concat(['sin-rel']).filter((t) => cuenta[t]).map((t) => `<option value="${t}" ${t === FILTRO_REL ? 'selected' : ''}>${esc(nombreTipoRel(t))} (${cuenta[t]})</option>`).join('');
+}
+const pasaRel = (t) => !FILTRO_REL || FILTRO_REL === t;
+function lineaRelDir(dir, lado){ return dir === 'sale' ? [`url(#cS)`, '--acento'] : [`url(#cE)`, '--entra']; }
+
+/* Contexto del módulo: actores → capacidades → otros módulos */
 function diagramaModulo(m){
   const A = D.modulos[m].archivo, caps = A.capacidades;
   const acts = [...new Set(A.casosUso.flatMap((u) => u.actor))];
   const fA = $('#cAct').value, fD = $('#cDir').value;
-  const cusF = A.casosUso.filter((u) => !fA || u.actor.includes(fA));
-  const pasa = (f) => !FILTRO_REL || tipoFlujo(f) === FILTRO_REL;
-  // flujos capacidad ↔ otro módulo
+  const cusF = A.casosUso.filter((u) => !fA || fA === '-' || u.actor.includes(fA));
   const cm = {}, cuentaTipo = {};
   cusF.forEach((u) => [['salidas', 'sale', 'a'], ['entradas', 'entra', 'de']].forEach(([l, dir, k]) => (u[l] || []).forEach((f) => {
     const o = modDe(f[k]); if (!o || o === m) return;
     const t = tipoFlujo(f); cuentaTipo[t] = (cuentaTipo[t] || 0) + 1;
-    if (!pasa(f) || (fD && fD !== dir)) return;
+    if (!pasaRel(t) || fD === '-' || (fD && fD !== dir)) return;
     const key = u.capacidad + '|' + o + '|' + dir; (cm[key] = cm[key] || {cap: u.capacidad, o, dir, fl: []}).fl.push({f, u}); })));
-  const tot = Object.values(cuentaTipo).reduce((x, y) => x + y, 0);
-  if (FILTRO_REL && !cuentaTipo[FILTRO_REL]) FILTRO_REL = '';
-  $('#fRel').innerHTML = `<option value="">Todas (${tot} flujos)</option>` + Object.keys(D.tiposRelacion || {}).concat(['sin-rel']).filter((t) => cuentaTipo[t]).map((t) => `<option value="${t}" ${t === FILTRO_REL ? 'selected' : ''}>${esc(nombreTipoRel(t))} (${cuentaTipo[t]})</option>`).join('');
+  $('#fRel').innerHTML = opcionesRelCuenta(cuentaTipo);
   const om = [...new Set(Object.values(cm).map((x) => x.o))].sort((x, y) => (D.modulos[y] ? 1 : 0) - (D.modulos[x] ? 1 : 0) || x.localeCompare(y));
   const W = 980, n = Math.max(caps.length, acts.length, om.length, 1), H = n * 44 + 60;
   const y = (i, k) => 40 + i * ((H - 60) / Math.max(k, 1)) + 18;
   const ic = Object.fromEntries(caps.map((c, i) => [c.id, i]));
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Contexto del módulo ${m}" style="min-width:760px" id="svgCtx"><defs>
-    <marker id="cS" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--acento)"/></marker>
-    <marker id="cE" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--entra)"/></marker></defs>`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Contexto del módulo ${m}" style="min-width:760px" id="svgCtx">${MARCAS}`;
   s += `<text x="20" y="22" class="t2">ACTORES</text><text x="300" y="22" class="t2">CAPACIDADES DE ${m}</text><text x="${W - 230}" y="22" class="t2">OTROS MÓDULOS</text>`;
   s += `<rect x="290" y="30" width="400" height="${H - 40}" rx="8" fill="none" stroke="var(--acento)" stroke-width="1.5"/>`;
-  acts.forEach((a, i) => { if (fA && a !== fA) return; caps.forEach((c) => { const k = cusF.filter((u) => u.capacidad === c.id && u.actor.includes(a)).length;
+  if (fA !== '-') acts.forEach((a, i) => { if (fA && a !== fA) return; caps.forEach((c) => { const k = cusF.filter((u) => u.capacidad === c.id && u.actor.includes(a)).length;
     if (k) s += `<line class="cl" data-a="${a}" data-c="${c.id}" x1="150" y1="${y(i, acts.length)}" x2="300" y2="${y(ic[c.id], caps.length)}" stroke="var(--tenue)" stroke-opacity=".45" stroke-width="${Math.min(1 + k * .6, 5)}"/>`; }); });
   Object.values(cm).forEach((x) => { const yc = y(ic[x.cap], caps.length), yo = y(om.indexOf(x.o), om.length), dy = x.dir === 'sale' ? -3 : 3;
     const [x1, y1, x2, y2] = x.dir === 'sale' ? [680, yc + dy, W - 242, yo + dy] : [W - 240, yo + dy, 682, yc + dy];
-    s += `<line class="cl" data-c="${x.cap}" data-o="${x.o}" data-dir="${x.dir}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(${x.dir === 'sale' ? '--acento' : '--entra'})" stroke-opacity=".6" stroke-width="${Math.min(1.2 + x.fl.length * .4, 5)}" marker-end="url(#${x.dir === 'sale' ? 'cS' : 'cE'})"/>`; });
-  acts.forEach((a, i) => { s += `<g class="cn" data-k="a" data-id="${a}" tabindex="0" ${fA && a !== fA ? 'opacity=".35"' : ''}><rect x="20" y="${y(i, acts.length) - 14}" width="130" height="28" rx="14" fill="var(--papel)" stroke="var(--linea)"/><text x="85" y="${y(i, acts.length) + 4}" text-anchor="middle">${esc(ACT(a))}</text></g>`; });
+    const [mk, col] = lineaRelDir(x.dir);
+    s += `<line class="cl" data-c="${x.cap}" data-o="${x.o}" data-dir="${x.dir}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(${col})" stroke-opacity=".6" stroke-width="${Math.min(1.2 + x.fl.length * .4, 5)}" marker-end="${mk}"/>`; });
+  acts.forEach((a, i) => { s += `<g class="cn" data-k="a" data-id="${a}" tabindex="0" ${fA && fA !== '-' && a !== fA ? 'opacity=".35"' : ''}><rect x="20" y="${y(i, acts.length) - 14}" width="130" height="28" rx="14" fill="var(--papel)" stroke="var(--linea)"/><text x="85" y="${y(i, acts.length) + 4}" text-anchor="middle">${esc(ACT(a))}</text></g>`; });
   caps.forEach((c, i) => { const cus = A.casosUso.filter((u) => u.capacidad === c.id), yy = y(i, caps.length);
     s += `<g class="cn" data-k="c" data-id="${c.id}" tabindex="0"><rect x="300" y="${yy - 15}" width="380" height="30" rx="5" fill="var(--hoja)" stroke="var(--linea)"/><text x="312" y="${yy + 4}">${esc(corta(c.nombre, 40))}</text>`;
-    cus.forEach((u, k) => { const fuera = fA && !u.actor.includes(fA); s += `<rect x="${592 + (k % 12) * 7}" y="${yy - 9 + Math.floor(k / 12) * 7}" width="5" height="5" fill="${COLOR_EST[est(u.id)]}" ${fuera ? 'fill-opacity=".2"' : ''}/>`; });
+    cus.forEach((u, k) => { const fuera = fA && fA !== '-' && !u.actor.includes(fA); s += `<rect x="${592 + (k % 12) * 7}" y="${yy - 9 + Math.floor(k / 12) * 7}" width="5" height="5" fill="${COLOR_EST[est(u.id)]}" ${fuera ? 'fill-opacity=".2"' : ''}/>`; });
     s += '</g>'; });
   om.forEach((o, i) => { const l = !!D.modulos[o], yy = y(i, om.length), xs = Object.values(cm).filter((x) => x.o === o);
     const sa = xs.filter((x) => x.dir === 'sale').reduce((t, x) => t + x.fl.length, 0), en = xs.filter((x) => x.dir === 'entra').reduce((t, x) => t + x.fl.length, 0);
     s += `<g class="cn" data-k="o" data-id="${o}" tabindex="0"><rect x="${W - 240}" y="${yy - 15}" width="220" height="30" rx="5" fill="${l ? 'var(--acentof)' : 'var(--papel)'}" stroke="${l ? 'var(--acento)' : 'var(--noc)'}" ${l ? '' : 'stroke-dasharray="4 3"'}/>
       <text x="${W - 230}" y="${yy + 4}">${esc(o)} · ${esc(corta(nMod(o), 18))}</text><text x="${W - 26}" y="${yy + 4}" text-anchor="end" class="t2">${en ? '←' + en : ''} ${sa ? '→' + sa : ''}</text></g>`; });
-  if (!om.length) s += `<text x="${W - 230}" y="60" class="t2">Ninguno con estos filtros</text>`;
+  if (!om.length) s += `<text x="${W - 230}" y="60" class="t2">${FILTRO_REL === '-' || fD === '-' ? 'Ocultos por el filtro' : 'Ninguno con estos filtros'}</text>`;
   $('#dg').innerHTML = s + '</svg>';
-  contextoInteractivo(m, A, cusF, cm);
-}
-function contextoInteractivo(m, A, cusF, cm){
-  const svg = $('#svgCtx'), capN = (id) => (A.capacidades.find((c) => c.id === id) || {}).nombre || id;
-  const lineaCU = (u) => `<div class="l"><b>${esc(u.id)}</b> <span class="punto e-${est(u.id)}"></span>${esc(corta(u.que, 80))} <span class="tenue">· ${esc(NOMBRE_EST[est(u.id)])}</span></div>`;
-  const lineaRel = (x) => { const g = {}; x.fl.forEach(({f, u}) => { const k = f.rel || '—'; (g[k] = g[k] || {cus: new Set(), datos: new Set()}).cus.add(u.id); g[k].datos.add(f.dato); });
-    return Object.entries(g).map(([r, v]) => { const I = (D.relInfo || {})[r];
-      return `<div class="l"><span class="${x.dir === 'sale' ? 's' : 'e'}">${x.dir === 'sale' ? '→' : '←'} ${esc(x.o)}</span> <b>${esc(r)}</b>: ${esc(corta(I ? I.dato : [...v.datos][0], 100))}<div class="tenue">${[...v.cus].join(', ')}${I && I.mec && !/^por precisar/.test(I.mec) ? ' · ' + esc(corta(I.mec, 80)) : ''}</div></div>`; }).join(''); };
-  const lim = (arr, k, txt) => arr.slice(0, k).join('') + (arr.length > k ? `<div class="mas">y ${arr.length - k} más ${txt}</div>` : '');
+  const capN = (id) => (A.capacidades.find((c) => c.id === id) || {}).nombre || id;
   const html = (k, id, ln) => {
     if (ln) { const {a, c, o, dir} = ln.dataset;
       if (a) return `<h4>${esc(ACT(a))} → ${esc(corta(capN(c), 50))}</h4>` + lim(cusF.filter((u) => u.capacidad === c && u.actor.includes(a)).map(lineaCU), 8, '(lista completa abajo)');
       return `<h4>${esc(corta(capN(c), 40))} ${dir === 'sale' ? '→' : '←'} ${esc(o)}</h4>` + lineaRel(cm[c + '|' + o + '|' + dir]); }
-    if (k === 'a') { const cus = cusF.filter((u) => u.actor.includes(id)); return `<h4>${esc(ACT(id))} · ${cus.length} casos de uso en ${esc(m)}</h4>` + lim(cus.map(lineaCU), 8, '(fíltralo en la tabla de abajo)'); }
+    if (k === 'a') { const cus = A.casosUso.filter((u) => u.actor.includes(id)); return `<h4>${esc(ACT(id))} · ${cus.length} casos de uso en ${esc(m)}</h4>` + lim(cus.map(lineaCU), 8, '(fíltralo en la tabla de abajo)'); }
     if (k === 'c') { const c = A.capacidades.find((x) => x.id === id), cus = A.casosUso.filter((u) => u.capacidad === id), xs = Object.values(cm).filter((x) => x.cap === id);
       return `<h4>${esc(id)} · ${esc(c.nombre)}</h4><div class="tenue">${esc(TIPOS[c.tipo] || c.tipo)} · ${esc(c.peso)} · ${cus.length} casos de uso</div>` + lim(cus.map(lineaCU), 5, 'casos de uso') + (xs.length ? '<div class="mas">Relaciones con otros módulos:</div>' + lim(xs.map(lineaRel), 4, 'relaciones') : ''); }
     const xs = Object.values(cm).filter((x) => x.o === id);
     return `<h4>${esc(m)} ↔ ${esc(id)} · ${esc(corta(nMod(id), 30))}</h4>` + lim(xs.map((x) => `<div class="tenue" style="margin-top:4px">${esc(corta(capN(x.cap), 50))}</div>` + lineaRel(x)), 5, 'capacidades') + (D.modulos[id] ? '<div class="mas">Clic (o segundo toque) para ir al módulo.</div>' : '');
   };
+  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'o' && D.modulos[g.dataset.id] ? g.dataset.id : null);
+  $('#cAct').onchange = $('#cDir').onchange = () => diagramaModulo(m);
+  $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaModulo(m); };
+}
+const lineaCU = (u) => `<div class="l"><b>${esc(u.id)}</b> <span class="punto e-${est(u.id)}"></span>${esc(corta(u.que, 80))} <span class="tenue">· ${esc(NOMBRE_EST[est(u.id)])}</span></div>`;
+const lim = (arr, k, txt) => arr.slice(0, k).join('') + (arr.length > k ? `<div class="mas">y ${arr.length - k} más ${txt}</div>` : '');
+function lineaRel(x){
+  const g = {}; x.fl.forEach(({f, u}) => { const k = f.rel || '—'; (g[k] = g[k] || {cus: new Set(), datos: new Set()}); if (u) g[k].cus.add(u.id); g[k].datos.add(f.dato); });
+  return Object.entries(g).map(([r, v]) => { const I = (D.relInfo || {})[r];
+    return `<div class="l"><span class="${x.dir === 'sale' ? 's' : 'e'}">${x.dir === 'sale' ? '→' : '←'} ${esc(x.o)}</span> <b>${esc(r)}</b>: ${esc(corta(I ? I.dato : [...v.datos][0], 100))}<div class="tenue">${[...v.cus].join(', ')}${I && I.mec && !/^por precisar/.test(I.mec) ? (v.cus.size ? ' · ' : '') + esc(corta(I.mec, 80)) : ''}</div></div>`; }).join('');
+}
+/* Resaltado y tarjeta comunes a los dos contextos. Nodos: .cn[data-k=a|c|o][data-id]; líneas: line.cl con data-a, data-c, data-o. */
+function interactivo(svg, html, destino){
   let activo = null, tactil = false;
   svg.addEventListener('pointerdown', (e) => { tactil = e.pointerType === 'touch'; }, true);
   svg.addEventListener('keydown', () => { tactil = false; }, true);
-  const lineas = [...svg.querySelectorAll('line.cl')], nodos = [...svg.querySelectorAll('.cn')];
+  const lineas = [...svg.querySelectorAll('line.cl, path.cl')], nodos = [...svg.querySelectorAll('.cn')];
   const foco = (lit) => { svg.classList.toggle('foco', !!lit);
     lineas.forEach((l) => l.classList.toggle('vivo', !!lit && lit.l.has(l))); nodos.forEach((g) => g.classList.toggle('apagado', !!lit && !lit.n.has(g.dataset.k + ':' + g.dataset.id))); };
-  const marcar = (g, ev) => { if (!g) { activo = null; foco(null); mostrarFlota(null); return; }
-    const k = g.dataset.k, id = g.dataset.id, attr = {a: 'a', c: 'c', o: 'o'}[k];
-    const l = new Set(lineas.filter((x) => x.dataset[attr] === id)), n = new Set([k + ':' + id]);
+  const marcar = (g) => { if (!g) { activo = null; foco(null); mostrarFlota(null); return; }
+    const k = g.dataset.k, id = g.dataset.id;
+    const l = new Set(lineas.filter((x) => x.dataset[k] === id)), n = new Set([k + ':' + id]);
     l.forEach((x) => ['a', 'c', 'o'].forEach((t) => { if (x.dataset[t]) n.add(t + ':' + x.dataset[t]); }));
     activo = k + ':' + id; foco({l, n}); const b = g.getBoundingClientRect(); mostrarFlota(html(k, id), b.left + b.width / 2, b.bottom - 4); };
   const marcarLinea = (ln, e) => { const n = new Set(['a', 'c', 'o'].filter((t) => ln.dataset[t]).map((t) => t + ':' + ln.dataset[t])); foco({l: new Set([ln]), n}); mostrarFlota(html(null, null, ln), e.clientX, e.clientY); };
   nodos.forEach((g) => {
     g.addEventListener('mouseenter', () => { if (!tactil) marcar(g); }); g.addEventListener('focus', () => { if (!tactil) marcar(g); });
     g.addEventListener('mouseleave', () => { if (!tactil) marcar(null); });
-    g.addEventListener('click', (e) => { e.stopPropagation(); const key = g.dataset.k + ':' + g.dataset.id;
-      if (g.dataset.k === 'o' && D.modulos[g.dataset.id] && (!tactil || activo === key)) return ir(g.dataset.id);
+    g.addEventListener('click', (e) => { e.stopPropagation(); const key = g.dataset.k + ':' + g.dataset.id, dst = destino(g);
+      if (dst && (!tactil || activo === key)) return ir(dst);
       marcar(g); });
-    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' && g.dataset.k === 'o' && D.modulos[g.dataset.id]) ir(g.dataset.id); }); });
+    g.addEventListener('keydown', (e) => { const dst = destino(g); if (e.key === 'Enter' && dst) ir(dst); }); });
   lineas.forEach((ln) => { ln.addEventListener('mousemove', (e) => { if (!tactil) marcarLinea(ln, e); }); ln.addEventListener('mouseleave', () => { if (!tactil) marcar(null); });
     ln.addEventListener('click', (e) => { e.stopPropagation(); marcarLinea(ln, e); }); });
   svg.addEventListener('click', () => marcar(null));
-  $('#cAct').onchange = $('#cDir').onchange = () => diagramaModulo(m);
-  $('#fRel').onchange = (e) => { FILTRO_REL = e.target.value; try { localStorage.setItem('lb-filtro-rel', FILTRO_REL); } catch (x) {} diagramaModulo(m); };
+}
+
+/* Contexto del sistema: personas → módulos (por capa) → sistemas externos */
+let CTX_ACT = '', CTX_DIR = '';
+function contextoSistema(){
+  const AI = D.actoresInfo || {};
+  const todos = Object.values(CU);
+  const usados = [...new Set(todos.flatMap(({u}) => u.actor))];
+  const fuera = (x) => x !== '*' && !D.nombresModulo[x];
+  const relsExt = Object.entries(D.relInfo || {}).filter(([, r]) => fuera(r.o) || fuera(r.d));
+  const extSet = new Set(Object.keys(AI).filter((a) => AI[a].tipo === 'sistema').concat(relsExt.flatMap(([, r]) => [r.o, r.d]).filter(fuera)));
+  const ext = (a) => extSet.has(a);
+  const orden = (x, y) => Object.keys(AI).indexOf(x) - Object.keys(AI).indexOf(y);
+  const personas = usados.filter((a) => a !== 'sistema' && !ext(a)).sort(orden);
+  const externos = [...extSet].sort(orden);
+  $('#dgFiltros').innerHTML = `<label class="etq" for="cAct">Actor</label><select id="cAct"><option value="">Todos</option><option value="-">Ninguno</option>${personas.concat(externos).map((a) => `<option value="${a}" ${a === CTX_ACT ? 'selected' : ''}>${esc(ACT(a))}</option>`).join('')}</select>
+    <label class="etq" for="cDir">Dirección</label><select id="cDir"><option value="">Entra y sale</option><option value="sale">Solo lo que el STR entrega</option><option value="entra">Solo lo que el STR recibe</option><option value="-">Ninguna</option></select>
+    <label class="etq" for="fRel">Tipo de relación</label><select id="fRel"></select>`;
+  $('#cAct').value = CTX_ACT; $('#cDir').value = CTX_DIR;
+  const fA = CTX_ACT, fD = CTX_DIR;
+  $('#dgAyuda').textContent = 'Izquierda: las personas que usan el STR. Centro: sus módulos por capa, con la barra de estado de sus casos de uso. Derecha: los sistemas externos. Línea gris: el actor usa casos de uso de ese módulo (más gruesa = más casos). Verde azulado: el STR entrega; naranja: recibe. Línea a la caja grande: la relación vale para todos los módulos. Señala cualquier cosa para ver qué es; toca un módulo dos veces para entrar.';
+  // relaciones con el exterior (del mapa)
+  const cuenta = {}, rels = [];
+  relsExt.forEach(([id, r]) => { const t = (D.relTipo || {})[id] || 'por-precisar'; cuenta[t] = (cuenta[t] || 0) + 1;
+    const dir = fuera(r.d) ? 'sale' : 'entra', mod = dir === 'sale' ? r.o : r.d, e = dir === 'sale' ? r.d : r.o;
+    if (!pasaRel(t) || fD === '-' || (fD && fD !== dir) || (fA && fA !== '-' && ext(fA) && fA !== e)) return;
+    rels.push({id, r, dir, mod, e}); });
+  $('#fRel').innerHTML = opcionesRelCuenta(cuenta);
+  const capas = capasOrden();
+  const W = 1000, filaM = 30, cabC = 22, top = 40;
+  const pos = {}; let yy = top + 10;
+  capas.forEach(([t, ms]) => { pos['capa:' + t] = yy; yy += cabC; ms.forEach((m) => { pos[m] = yy + filaM / 2; yy += filaM + 4; }); yy += 6; });
+  const H = Math.max(yy + 10, top + 40 + Math.max(personas.length, externos.length) * 60);
+  const ya = (i, n) => top + 20 + i * ((H - top - 40) / Math.max(n, 1)) + 20;
+  const cx0 = 330, cx1 = 670;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Contexto del STR: personas, módulos y sistemas externos" style="min-width:820px" id="svgCtx">${MARCAS}`;
+  s += `<text x="20" y="24" class="t2">PERSONAS</text><text x="${cx0 + 10}" y="24" class="t2">STR MANAGER · MÓDULOS POR CAPA</text><text x="${W - 210}" y="24" class="t2">SISTEMAS EXTERNOS</text>`;
+  s += `<rect class="cn" data-k="c" data-id="*" x="${cx0 - 10}" y="${top - 6}" width="${cx1 - cx0 + 20}" height="${H - top}" rx="10" fill="none" stroke="var(--acento)" stroke-width="1.5"/>`;
+  // actor → módulo
+  const usa = {};
+  todos.forEach(({mod, u}) => u.actor.forEach((a) => { const k = a + '|' + mod; usa[k] = (usa[k] || 0) + 1; }));
+  if (fA !== '-') Object.entries(usa).forEach(([k, n]) => { const [a, m] = k.split('|'); if (fA && a !== fA) return; if (!pos[m]) return;
+    if (personas.includes(a)) s += `<line class="cl" data-a="${a}" data-c="${m}" x1="160" y1="${ya(personas.indexOf(a), personas.length)}" x2="${cx0}" y2="${pos[m]}" stroke="var(--tenue)" stroke-opacity=".4" stroke-width="${Math.min(.8 + n * .08, 6)}"/>`;
+    else if (externos.includes(a)) s += `<line class="cl" data-o="${a}" data-c="${m}" data-usa="1" x1="${cx1}" y1="${pos[m]}" x2="${W - 210}" y2="${ya(externos.indexOf(a), externos.length)}" stroke="var(--tenue)" stroke-opacity=".4" stroke-dasharray="4 3" stroke-width="${Math.min(.8 + n * .3, 5)}"/>`; });
+  // módulo ↔ externo (relaciones del mapa)
+  rels.forEach(({id, dir, mod, e}, k) => { const ye = ya(externos.indexOf(e), externos.length) + (dir === 'sale' ? -4 : 4), xm = mod === '*' ? cx1 + 10 : cx1, ym = mod === '*' ? ye : pos[mod];
+    if (ym == null || externos.indexOf(e) < 0) return;
+    const [mk, col] = lineaRelDir(dir);
+    const [x1, y1, x2, y2] = dir === 'sale' ? [xm, ym, W - 212, ye] : [W - 210, ye, xm + 2, ym];
+    s += `<line class="cl" data-c="${mod}" data-o="${e}" data-rel="${id}" data-dir="${dir}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(${col})" stroke-opacity=".75" stroke-width="2.2" marker-end="${mk}"/>`; });
+  // personas
+  personas.forEach((a, i) => { const y = ya(i, personas.length); s += `<g class="cn" data-k="a" data-id="${a}" tabindex="0" ${fA && fA !== '-' && a !== fA ? 'opacity=".35"' : ''}><rect x="20" y="${y - 15}" width="140" height="30" rx="15" fill="var(--papel)" stroke="var(--linea)"/><text x="90" y="${y + 4}" text-anchor="middle">${esc(ACT(a))}</text></g>`; });
+  // módulos por capa
+  capas.forEach(([t, ms]) => { s += `<text x="${cx0 + 4}" y="${pos['capa:' + t] + 14}" class="capa">${esc(t)}</text>`;
+    ms.forEach((m) => { const y = pos[m], l = !!D.modulos[m], I = l ? D.modulos[m].informe : null, pe = I ? I.porEstado : {}, tot = Object.values(pe).reduce((a, b) => a + b, 0) || 1;
+      let bx = cx1 - 165, b = ''; ESTADOS.forEach(([e2]) => { if (!pe[e2]) return; const w = 100 * pe[e2] / tot; b += `<rect x="${bx}" y="${y - 3}" width="${w}" height="7" fill="${COLOR_EST[e2]}" ${e2 === 'no-construido' ? 'fill-opacity=".35"' : ''}/>`; bx += w; });
+      const pct = I && I.cobertura.simple != null ? I.cobertura.simple.toLocaleString('es-CO') + ' %' : (I ? 'fábrica' : '—');
+      s += `<g class="cn" data-k="c" data-id="${m}" tabindex="0"><rect x="${cx0}" y="${y - filaM / 2}" width="${cx1 - cx0}" height="${filaM}" rx="5" fill="var(--hoja)" stroke="${l ? 'var(--linea)' : 'var(--noc)'}" ${soloPlan(m) ? 'stroke-dasharray="5 3"' : ''}/>
+        <text x="${cx0 + 10}" y="${y + 4}"><tspan style="font-weight:700">${m}</tspan> ${esc(corta(nMod(m), 22))}</text>${b}<text x="${cx1 - 8}" y="${y + 4}" text-anchor="end" class="t2">${pct}</text></g>`; }); });
+  // externos
+  externos.forEach((e, i) => { const y = ya(i, externos.length); s += `<g class="cn" data-k="o" data-id="${e}" tabindex="0" ${fA && fA !== '-' && ext(fA) && e !== fA ? 'opacity=".35"' : ''}><rect x="${W - 210}" y="${y - 15}" width="190" height="30" rx="5" fill="var(--papel)" stroke="var(--noc)" stroke-dasharray="4 3"/><text x="${W - 200}" y="${y + 4}">${esc(ACT(e))}</text></g>`; });
+  $('#dg').innerHTML = s + '</svg>';
+  const lineaRelMapa = ({id, dir, mod, e}) => { const I = D.relInfo[id];
+    return `<div class="l"><span class="${dir === 'sale' ? 's' : 'e'}">${mod === '*' ? 'todos los módulos' : esc(mod)} ${dir === 'sale' ? '→' : '←'} ${esc(ACT(e))}</span> <b>${esc(id)}</b>: ${esc(corta(I.dato, 100))}${I.mec && !/^por precisar/.test(I.mec) ? `<div class="tenue">${esc(corta(I.mec, 90))}</div>` : ''}</div>`; };
+  const cusDe = (a, m) => todos.filter(({mod, u}) => (!m || mod === m) && u.actor.includes(a)).map(({u}) => u);
+  const html = (k, id, ln) => {
+    if (ln) { const {a, c, o, rel, usa: us} = ln.dataset;
+      if (rel) return `<h4>${esc(rel)}</h4>` + lineaRelMapa(rels.find((x) => x.id === rel));
+      const act = a || o; return `<h4>${esc(ACT(act))} → ${esc(c)} · ${esc(corta(nMod(c), 30))}</h4>` + lim(cusDe(act, c).map(lineaCU), 8, '(entra al módulo para verlos todos)'); }
+    if (k === 'a' || (k === 'o' && ext(id))) { const cus = cusDe(id), por = {}; cus.forEach((u) => { const m = modDe(u.id); por[m] = (por[m] || 0) + 1; });
+      const rs = rels.filter((x) => x.e === id);
+      return `<h4>${esc((AI[id] || {}).nombre || ACT(id))}</h4>${(AI[id] || {}).que ? `<div class="tenue">${esc(corta(AI[id].que, 200))}</div>` : ''}` +
+        (cus.length ? `<div class="mas">Usa ${cus.length} caso${cus.length > 1 ? 's' : ''} de uso:</div>` + Object.entries(por).sort((x, y) => y[1] - x[1]).map(([m, n]) => `<div class="l"><b>${esc(m)}</b> ${esc(corta(nMod(m), 40))} <span class="tenue">· ${n}</span></div>`).join('') : '') +
+        (rs.length ? '<div class="mas">Relaciones del mapa:</div>' + rs.map(lineaRelMapa).join('') : ''); }
+    if (id === '*') return '<h4>STR Manager</h4><div class="tenue">Las líneas que llegan a la caja grande valen para todos los módulos.</div>';
+    const I = D.modulos[id] ? D.modulos[id].informe : null, acts = {}; todos.filter(({mod}) => mod === id).forEach(({u}) => u.actor.forEach((a) => acts[a] = (acts[a] || 0) + 1));
+    const rs = rels.filter((x) => x.mod === id || x.mod === '*');
+    return `<h4>${esc(id)} · ${esc(nMod(id))}</h4>${I ? `<div class="tenue">${I.capacidades} capacidades · ${I.casosUso} casos de uso · ${fmtPct(I.cobertura.simple)} comprobado</div>` : '<div class="tenue">Por levantar.</div>'}` +
+      (Object.keys(acts).length ? '<div class="mas">Quién lo usa:</div><div class="l">' + Object.entries(acts).sort((x, y) => y[1] - x[1]).map(([a, n]) => `${esc(ACT(a))} <span class="tenue">${n}</span>`).join(' · ') + '</div>' : '') +
+      (rs.length ? '<div class="mas">Con el exterior:</div>' + rs.map(lineaRelMapa).join('') : '') + (I ? '<div class="mas">Clic (o segundo toque) para entrar al módulo.</div>' : '');
+  };
+  interactivo($('#svgCtx'), html, (g) => g.dataset.k === 'c' && D.modulos[g.dataset.id] ? g.dataset.id : null);
+  $('#cAct').onchange = (e) => { CTX_ACT = e.target.value; contextoSistema(); };
+  $('#cDir').onchange = (e) => { CTX_DIR = e.target.value; contextoSistema(); };
+  $('#fRel').onchange = (e) => { guardarRel(e.target.value); contextoSistema(); };
 }
 
 /* ---------- Caso de uso ---------- */
@@ -543,7 +641,7 @@ function vistaCU(id){
    <header class="cab"><div class="izq"><span class="etq">${id} · ${esc(cap ? cap.nombre : '')} · ${TIPOS[cap && cap.tipo] || ''} · ${esc(cap ? cap.peso : '')}</span><h1>${esc(u.que)}</h1>
      <span><span class="punto e-${est(id)}"></span><b>${esc(NOMBRE_EST[est(id)])}</b> <span class="tenue">· declarado ${esc(u.declarado)} · confianza ${esc(u.confianza || 'media')}${u.ambito === 'fabrica' ? ' · ámbito fábrica (no cuenta en la cobertura)' : ''}</span></span></div>
      <div class="filtros">${i > 0 ? `<button class="enl" data-ir="${hermanos[i - 1].id}">← ${hermanos[i - 1].id}</button>` : ''}<span class="tenue">${i + 1} de ${hermanos.length} en la capacidad</span>${i < hermanos.length - 1 ? `<button class="enl" data-ir="${hermanos[i + 1].id}">${hermanos[i + 1].id} →</button>` : ''}</div></header>
-   <section class="sec"><div class="fila"><h2>Flujo</h2><span class="tenue">De dónde recibe y a quién entrega. Toca un caso de uso para seguir el recorrido.</span></div><div class="diagrama" id="dg"></div></section>
+   <section class="sec"><div class="fila"><div><h2>Flujo del caso de uso</h2><span class="tenue">¿Qué recibe y qué entrega este caso de uso? Toca otro caso de uso para seguir el recorrido.</span></div></div><div class="diagrama" id="dg"></div></section>
    <section class="ficha">
      <div class="caja"><span class="etq">Información</span><dl class="datos">
        <dt>Actor</dt><dd>${u.actor.map((a) => esc(ACT(a))).join(', ')}</dd>

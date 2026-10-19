@@ -1,7 +1,7 @@
 {
  "modulo": "FL",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 3,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "str-flujos.html (4238 líneas, leída por funciones: arranque y vínculos de entrada, datos y migraciones, copias por propiedad, lista y filtros, editor, tiempos, zonas, fotos, proceso, inventario, guías, compuestos, categorías, guardar y eliminar, importar y exportar, arrastre)",
@@ -13,7 +13,18 @@
   "fl-guiones.json y interno/arquitectura/guiones-e2e.json: REQ-FL-12 (casos a, b y c, los tres ejercen el editor) y REQ-OP-1 (solo lee emoji y nombre corto en el tablero: no se cita); el .spec.js de REQ-FL-12 se leyó para ver qué comprueba",
   "interno/linea-base/esquema.json, sistema.json, INV.json, HK.json, PR.json, POR.json y U.json (estilo y flujos con ids reales, y sus mapeos)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-815) y Chat Desarrollo (M-816)",
+   "que": "Peso: esenciales 1, 2 y 10; necesarias 3, 4, 6 y 9; accesorias 5, 7 y 8. T-28 (zonas del catálogo, desactivar con aviso de copias, nombres duplicados). INC-165 a INC-169 y DT-50 atados. No construidos confirmados; 1.4 sigue con confianza baja."
+  },
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Arquitecto",
+   "que": "Flujos con CAL enlazados a sus ids reales; pares completados."
+  }
+ ],
  "alcance": {
   "dentro": [
    "El editor de flujos: crear, editar, ordenar, descartar cambios y eliminar flujos generales con sus actividades y tareas.",
@@ -43,70 +54,70 @@
    "id": "CAP-FL-1",
    "nombre": "Armado de flujos",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Crear un flujo con sus actividades y tareas, editarlo, ordenarlo, descartar cambios y eliminarlo con el aviso de lo que arrastra."
   },
   {
    "id": "CAP-FL-2",
    "nombre": "Contenido de actividades y tareas",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Lo que cada actividad y tarea lleva: minutos y tiempo total, omisible, zonas, foto exigida, proceso con espera, tarea de inventario, guías y nota."
   },
   {
    "id": "CAP-FL-3",
    "nombre": "Copias por propiedad",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Personalizar un flujo general para una propiedad sin cambiar el general: crear y editar la copia, resolver sus zonas por definir, borrarla y ver dónde se usa cada flujo."
   },
   {
    "id": "CAP-FL-4",
    "nombre": "Flujos compuestos y sub-flujos",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Armar un flujo con otros flujos en orden o en paralelo, con colaborador sugerido, y calcular trabajo y duración; el apoyo con horas llamadas está por construir."
   },
   {
    "id": "CAP-FL-5",
    "nombre": "Categorías de flujo",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Categorías libres (icono y nombre) para agrupar y filtrar flujos; las categorías del sistema Mantenimiento e Inventario y las plantillas de inventario están por construir."
   },
   {
    "id": "CAP-FL-6",
    "nombre": "Lista, búsqueda y filtros",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Ver los flujos en tarjetas, buscarlos por nombre y filtrarlos por propiedad, tipo y categoría (incluidas las del sistema que se deducen)."
   },
   {
    "id": "CAP-FL-7",
    "nombre": "Emoji y nombre corto del flujo",
    "tipo": "datos",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Dar a cada flujo un emoji y un nombre corto que leen el tablero y Housekeeping, con herencia en las copias y emojis del compuesto."
   },
   {
    "id": "CAP-FL-8",
    "nombre": "Importar y exportar con Excel",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Descargar la plantilla, exportar flujos generales y cargar archivos de Excel o CSV con vista previa, errores, avisos y reemplazo de flujos existentes."
   },
   {
    "id": "CAP-FL-9",
    "nombre": "Acceso y límites",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Solo el administrador y el operador abren y cambian flujos; el colaborador solo los lee en su turno."
   },
   {
    "id": "CAP-FL-10",
    "nombre": "Entrega, sincronización y datos viejos",
    "tipo": "integracion",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Entregar los flujos a Housekeeping y Propiedades, mantenerlos al día con el sistema, ajustar formatos viejos y retirar lo que ya no se usa."
   }
  ],
@@ -122,7 +133,8 @@
    "declarado": "construido",
    "limitantes": [
     "No se impide repetir el nombre de otro flujo: la importación desde Excel toma como «el mismo» al flujo de igual nombre (CU-FL-8.4).",
-    "El nombre del flujo no tiene longitud máxima; el nombre corto sí (CU-FL-7.1)."
+    "El nombre del flujo no tiene longitud máxima; el nombre corto sí (CU-FL-7.1).",
+    "No avisa si ya existe un flujo con el mismo nombre; debe avisar, como en artículos (T-28)."
    ],
    "entradas": [],
    "salidas": [],
@@ -153,7 +165,9 @@
    "reglas": [
     "RT-21"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "T-28"
+   ],
    "pruebas": [
     {
      "guion": "REQ-FL-12",
@@ -315,7 +329,8 @@
    "declarado": "construido",
    "limitantes": [
     "Para reordenar solo hay arrastre con el puntero; no hay botones de subir y bajar para actividades y tareas (los sub-flujos sí los tienen, CU-FL-4.1).",
-    "No está comprobado que el arrastre funcione con el dedo en el teléfono."
+    "No está comprobado que el arrastre funcione con el dedo en el teléfono.",
+    "El arrastre usa solo el arrastre de escritorio, sin eventos táctiles: en la mayoría de teléfonos probablemente no funciona con el dedo (por probar en un teléfono)."
    ],
    "entradas": [],
    "salidas": [],
@@ -423,7 +438,8 @@
    "declarado": "construido",
    "limitantes": [
     "Eliminar es definitivo: no hay papelera ni desactivar, y la regla de «no se borra, se desactiva» no incluye a Flujos en el mapa.",
-    "El aviso no menciona los turnos ya armados con ese flujo."
+    "El aviso no menciona los turnos ya armados con ese flujo.",
+    "Debe desactivar, no borrar (RT-5 debe incluir flujos), y sin cascada silenciosa: avisar cuántas copias por propiedad tiene y dejarlas activas salvo que el usuario diga lo contrario (T-28)."
    ],
    "entradas": [],
    "salidas": [],
@@ -451,9 +467,12 @@
     }
    ],
    "origen": [],
-   "reglas": [],
+   "reglas": [
+    "RT-5"
+   ],
    "pendientes": [
-    "INC-77"
+    "INC-77",
+    "T-28"
    ],
    "pruebas": [],
    "tecnica": {
@@ -594,7 +613,8 @@
    "declarado": "construido",
    "limitantes": [
     "En un flujo general el selector ofrece las zonas de todas las propiedades más las básicas (Sala, Cocina, Baño, Habitación); en una copia por propiedad, solo las de esa propiedad.",
-    "El buscador crea cualquier nombre escrito, también en una copia, aunque la propiedad no tenga esa zona; en cambio la importación desde Excel rechaza una zona que no existe en ninguna propiedad (CU-FL-8.3)."
+    "El buscador crea cualquier nombre escrito, también en una copia, aunque la propiedad no tenga esa zona; en cambio la importación desde Excel rechaza una zona que no existe en ninguna propiedad (CU-FL-8.3).",
+    "El editor deja crear zonas libres y la importación las rechaza; manda el catálogo de zonas del negocio: el editor no debe crear zonas libres (Diseño, M-815; T-28)."
    ],
    "entradas": [
     {
@@ -628,7 +648,10 @@
    ],
    "origen": [],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-167",
+    "T-28"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -916,7 +939,8 @@
    "declarado": "construido",
    "limitantes": [
     "La guía se guarda en la biblioteca al instante: si después se cancela el flujo, la guía queda creada sin enlazar a nada.",
-    "La guía creada solo lleva título y texto, con categoría «general»; adjuntos y etiquetas se editan en Conocimiento."
+    "La guía creada solo lleva título y texto, con categoría «general»; adjuntos y etiquetas se editan en Conocimiento.",
+    "La guía nueva queda guardada aunque se cancele el flujo (INC-168)."
    ],
    "entradas": [],
    "salidas": [
@@ -944,7 +968,9 @@
    ],
    "origen": [],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-168"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1035,7 +1061,8 @@
    "que": "Llegar al editor desde la ficha de la propiedad o desde el turno con el flujo, su copia o una copia nueva ya abiertos",
    "declarado": "construido",
    "limitantes": [
-    "El enlace de edición que llega con un flujo que no existe no avisa nada."
+    "El enlace de edición que llega con un flujo que no existe no avisa nada.",
+    "Un enlace al editor con un flujo que no existe no avisa (INC-169)."
    ],
    "entradas": [
     {
@@ -1073,7 +1100,9 @@
    ],
    "origen": [],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-169"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1940,7 +1969,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "Definido (DA-21 decidida) y entregado a Desarrollo (REQ-MI1-1, M-64), pero nada permite marcar un flujo como de Mantenimiento o de Inventario: la categoría «Mantenimiento» solo se deduce si el flujo ya trae el ámbito, y ninguna pantalla ni la importación lo ponen; la de «Inventario» no existe.",
-    "No hay módulo de Mantenimiento en el sistema todavía (REQ-F11-7 se absorbió en REQ-MI1)."
+    "No hay módulo de Mantenimiento en el sistema todavía (REQ-F11-7 se absorbió en REQ-MI1).",
+    "El chip «Mantenimiento» existe pero siempre da 0: nada marca todavía ese ámbito (lo no construido de REQ-MI1-1)."
    ],
    "entradas": [],
    "salidas": [
@@ -1999,7 +2029,8 @@
    "que": "Armar un flujo de inventario a partir de una plantilla del sistema (conteo, nivel o dotación)",
    "declarado": "no-construido",
    "limitantes": [
-    "Entregado a Desarrollo (REQ-INV2-5, M-333, siete plantillas; REQ-MI1-3 lo reemplaza), pero no hay plantillas del sistema ni categoría «Inventario» en Flujos: la tarea de inventario se arma a mano (CU-FL-2.6)."
+    "Entregado a Desarrollo (REQ-INV2-5, M-333, siete plantillas; REQ-MI1-3 lo reemplaza), pero no hay plantillas del sistema ni categoría «Inventario» en Flujos: la tarea de inventario se arma a mano (CU-FL-2.6).",
+    "La plantilla de arranque (REQ-INV2-8-1) no trae flujos completos, solo las 7 actividades de inventario para Flujos (Diseño, M-815)."
    ],
    "entradas": [
     {
@@ -2221,7 +2252,8 @@
    "declarado": "parcial",
    "limitantes": [
     "Solo «Flujo base» funciona de punta a punta; «Mantenimiento» existe como marca y filtro pero ningún flujo puede entrar (depende de CU-FL-5.6) y falta la de «Inventario».",
-    "En la ventana «⚙ Categorías» las del sistema salen de solo lectura con 🔒."
+    "En la ventana «⚙ Categorías» las del sistema salen de solo lectura con 🔒.",
+    "Solo se puede saber si algún flujo real trae ámbito «mantenimiento» leyendo la colección de flujos de «negocio»; la página no lo escribe (Desarrollo, M-816)."
    ],
    "entradas": [],
    "salidas": [],
@@ -2660,7 +2692,8 @@
    "limitantes": [
     "Solo crea o reemplaza flujos generales; nunca crea ni edita copias por propiedad.",
     "Al reemplazar, la actividad sin tareas pierde su texto propio (CU-FL-1.5) porque el archivo no lo lleva.",
-    "Si el flujo que se reemplaza es compuesto, las actividades importadas quedan guardadas pero ocultas, y el flujo sigue siendo compuesto: el turno no recibe las tareas importadas (a confirmar con Desarrollo)."
+    "Si el flujo que se reemplaza es compuesto, las actividades importadas quedan guardadas pero ocultas, y el flujo sigue siendo compuesto: el turno no recibe las tareas importadas (a confirmar con Desarrollo).",
+    "Reemplazar sobre un flujo compuesto deja las actividades importadas escondidas y el turno no las recibe (INC-165); al reemplazar se pierde la nota de estimado de cada actividad (INC-166)."
    ],
    "entradas": [],
    "salidas": [],
@@ -2696,7 +2729,10 @@
    ],
    "origen": [],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "INC-165",
+    "INC-166"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -2787,7 +2823,8 @@
    "que": "Permitir abrir el editor de Flujos solo al administrador y al operador",
    "declarado": "construido",
    "limitantes": [
-    "Un operador ve y edita todos los flujos; no hay permiso propio de Flujos ni límite por propiedad."
+    "Un operador ve y edita todos los flujos; no hay permiso propio de Flujos ni límite por propiedad.",
+    "El colaborador lee todos los flujos y categorías, sin filtrar por propiedad: aceptado, son procedimientos y no datos personales (Diseño, M-815)."
    ],
    "entradas": [
     {
@@ -2985,7 +3022,8 @@
    "declarado": "construido",
    "limitantes": [
     "Sin sesión la página queda con lo guardado en el aparato y no sube nada.",
-    "Con una copia vieja del cliente en el navegador, la página avisa «Actualiza la página (Ctrl+F5) para sincronizar con el servidor» y no sincroniza."
+    "Con una copia vieja del cliente en el navegador, la página avisa «Actualiza la página (Ctrl+F5) para sincronizar con el servidor» y no sincroniza.",
+    "Hay código muerto por retirar en un lote de limpieza (DT-50)."
    ],
    "entradas": [
     {
@@ -3030,6 +3068,7 @@
     "RT-21"
    ],
    "pendientes": [
+    "DT-50",
     "INC-78"
    ],
    "pruebas": [],

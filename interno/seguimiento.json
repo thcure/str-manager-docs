@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 11:29",
+ "actualizadoEn": "2026-10-19 11:56",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1732,12 +1732,12 @@
    "modulo": "Housekeeping",
    "fecha": "2026-10-19",
    "titulo": "Regresión en la cuenta de pruebas: la entrega de zona no reemplaza la tarea «zz-verif-Conteo de cierre» (REQ-INV2-4-2 e, REQ-INV2-7-1-hk-turno b y d, REQ-OP-1 d en rojo)",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "origen": "Regresión completa en zz-verif-pruebas (reprobar L-153, 19-oct 11:22; veredicto L-153-veredicto-2)",
    "causaRaiz": "entorno",
    "debioDetectarse": "tests",
-   "nota": "11:29 Hipótesis leída en el código: _hkTrReemplaza solo reemplaza si TODOS los artículos de la tarea están en la entrega de la zona; la entrega toma los artículos de los lugares de la zona (A1–A3, B1–B2) y los que tienen conteo/nivel/compra/ajuste en ella. La semilla deja C1 «sin lugar» a propósito (s5); en la cuenta real C1 tenía movimientos viejos en zz-verif-Principal (purgados en DA-47), en la nueva no: la tarea sigue pidiendo conteo y fotos. No es defecto de la página: es semilla. Diagnóstico de solo lectura en marcha (correr\\diag-conteo); arreglo probable: un paso de semilla que deje a C1 dentro de la entrega de la zona sin lugar (un movimiento de existencia inicial zz-verif-), confirmado por los guiones que piden C1 sin lugar. L-153 no cambia: sus criterios propios salieron en verde (a N1, b N2). · 11:30 Diagnóstico (log\\DIAG-CONTEO-guion.json, solo lectura): la tarea zz-verif-Conteo de cierre cuenta 6 artículos (A1–A3, B1, B2 y C1); C1 no está en ningún lugar de zz-verif-Principal → confirmada la hipótesis. Semilla s14 en pw\\semilla-reponer.spec.js (cmp IGUAL): compra zz-verif- de 1 C1 en la zona principal, sin lugar; idempotente. El guion b admite «Sin lugar» al final."
+   "nota": "11:29 Hipótesis leída en el código: _hkTrReemplaza solo reemplaza si TODOS los artículos de la tarea están en la entrega de la zona; la entrega toma los artículos de los lugares de la zona (A1–A3, B1–B2) y los que tienen conteo/nivel/compra/ajuste en ella. La semilla deja C1 «sin lugar» a propósito (s5); en la cuenta real C1 tenía movimientos viejos en zz-verif-Principal (purgados en DA-47), en la nueva no: la tarea sigue pidiendo conteo y fotos. No es defecto de la página: es semilla. Diagnóstico de solo lectura en marcha (correr\\diag-conteo); arreglo probable: un paso de semilla que deje a C1 dentro de la entrega de la zona sin lugar (un movimiento de existencia inicial zz-verif-), confirmado por los guiones que piden C1 sin lugar. L-153 no cambia: sus criterios propios salieron en verde (a N1, b N2). · 11:30 Diagnóstico (log\\DIAG-CONTEO-guion.json, solo lectura): la tarea zz-verif-Conteo de cierre cuenta 6 artículos (A1–A3, B1, B2 y C1); C1 no está en ningún lugar de zz-verif-Principal → confirmada la hipótesis. Semilla s14 en pw\\semilla-reponer.spec.js (cmp IGUAL): compra zz-verif- de 1 C1 en la zona principal, sin lugar; idempotente. El guion b admite «Sin lugar» al final. · 11:56 Cerrado: semilla s0–s14 en verde (11:33) y segunda regresión completa en la cuenta de pruebas (reprobar L-153 11:35–11:54) en verde, 148 casos sin rojos; veredicto L-153-veredicto-3 aceptado."
   }
  ],
  "dts": [
@@ -15486,6 +15486,19 @@
    "aceptacion": {
     "nota": "sin cambio: rige el veredicto del 18-oct 15:32"
    }
+  },
+  {
+   "lote": "L-153",
+   "fecha": "2026-10-19",
+   "req": "INC-156",
+   "categoria": "crítico",
+   "resumen": "Segunda regresión completa en la cuenta de pruebas tras s14 (INC-202)",
+   "estado": "aceptado",
+   "observacion": "Reprobar 11:35–11:54: verde, 148 casos de regresión sin rojos; veredicto L-153-veredicto-3 aceptado (criterios a N1 y b N2 en verde). Cierra INC-202.",
+   "hash": "7f404ae",
+   "aceptacion": {
+    "nota": "rige el veredicto del 18-oct 15:32; este confirma la regresión del orden activo"
+   }
   }
  ],
  "esquema": {
@@ -17793,9 +17806,9 @@
    "categoria": "normal",
    "riesgo": "R-1",
    "resumen": "Respaldo diario sin archivo vacío ni pisado (temporal + renombrar, sin rotación si falla, constancia en el registro) y con perfil_pago y permisos de cada usuario",
-   "estado": "redactado",
+   "estado": "encolado",
    "desde": "2026-10-19 11:13",
-   "nota": "11:13 Grupo 4 del orden activo (M-864/M-867); criterios de Diseño M-866; DA-58 decidida. Borrador en claude/producto/borradores/L-154-instr-inc190-respaldo.md. N1 tests/export-respaldo.test.js 17/0 (7 FAIL con el código de hoy). Revisor previo 11/17, corregidos 1, 3, 6, 7, 13 y 15. Pedida la revisión previa del Jefe de proyecto. Va tras la regresión completa (reprobar L-153, en marcha). · 11:18 Revisión previa del Jefe de proyecto 14/17 (M-871), corregidos 4, 13 y 15. Se encola tras la regresión."
+   "nota": "11:13 Grupo 4 del orden activo (M-864/M-867); criterios de Diseño M-866; DA-58 decidida. Borrador en claude/producto/borradores/L-154-instr-inc190-respaldo.md. N1 tests/export-respaldo.test.js 17/0 (7 FAIL con el código de hoy). Revisor previo 11/17, corregidos 1, 3, 6, 7, 13 y 15. Pedida la revisión previa del Jefe de proyecto. Va tras la regresión completa (reprobar L-153, en marcha). · 11:18 Revisión previa del Jefe de proyecto 14/17 (M-871), corregidos 4, 13 y 15. Se encola tras la regresión. · 11:56 Encolado (cmp IGUAL) tras la regresión en verde."
   }
  ],
  "riesgos": [

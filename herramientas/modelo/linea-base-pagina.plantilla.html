@@ -46,6 +46,9 @@ input[type=search]{width:min(320px,80vw)}
 .sec{display:grid;gap:12px}
 .sec>.fila{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
 .mods,.calor{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.columnas{display:grid;gap:12px;padding:12px;min-width:min(100%,1080px)} .columna{display:grid;gap:10px;align-content:start}
+.cabcol{display:flex;justify-content:space-between;align-items:center;gap:6px;min-height:34px;border-bottom:2px solid var(--acento);padding-bottom:4px}
+.cabcol .flecha{color:var(--acento);font-weight:700} .columnas .mod h3{font-size:.95rem;margin:0} .mod.plan{border-style:dashed}
 .mod{background:var(--hoja);border:1px solid var(--linea);border-radius:8px;padding:14px;display:grid;gap:8px;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .mod:hover{border-color:var(--acento)} .mod.fantasma{cursor:default;opacity:.7;border-style:dashed}
 .fila2{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
@@ -177,16 +180,11 @@ function vistaSistema(){
      <div class="cifras"><div class="cifra"><span class="etq">Cobertura de lo levantado</span><b class="dat">${fmtPct(alc ? Math.round(1000 * (1 - falt / alc)) / 10 : null)}</b><span class="tenue">${alc - falt} de ${alc} comprobados</span></div></div></header>
    <section class="sec">${barra(tot, true)}</section>
    <section class="sec"><div class="fila"><div><h2>Mapa del sistema</h2><span class="tenue">¿Cómo se conectan los módulos entre sí y con el exterior?</span></div>
-       <div class="pestanas" role="tablist">${[['contexto', 'Contexto'], ['capas', 'Mapa por capas'], ['matriz', 'Matriz de dependencias']].map(([k, t]) => `<button role="tab" data-dg="${k}" aria-selected="${VISTA_DG === k}">${t}</button>`).join('')}</div></div>
+       <div class="pestanas" role="tablist">${[['contexto', 'Contexto'], ['modulos', 'Módulos'], ['capas', 'Mapa por capas'], ['matriz', 'Matriz de dependencias']].map(([k, t]) => `<button role="tab" data-dg="${k}" aria-selected="${VISTA_DG === k}">${t}</button>`).join('')}</div></div>
      <div class="filtros" id="dgFiltros"></div>
      <span class="tenue" id="dgAyuda"></span>
      <div class="diagrama" id="dg"></div>
      <div class="relpanel" id="dgRel" aria-live="polite"></div></section>
-   <section class="sec"><div class="fila"><h2>Módulos</h2><span class="tenue">Toca un módulo para ver sus capacidades y casos de uso.</span></div>
-     <div class="mods">${mods.map((m) => { const I = D.modulos[m].informe, A = D.modulos[m].archivo;
-       return `<button class="mod" data-m="${m}"><div class="fila2"><span class="etq">${m}</span><span class="chip">${esc(A.estadoArchivo)}</span></div>
-         <h3>${esc(nMod(m))}</h3><div class="fila2"><span class="tenue">${I.capacidades} capacidades · ${I.casosUso} casos de uso</span><b class="pct">${fmtPct(I.cobertura.simple)}</b></div>${barra(I.porEstado, false)}</button>`; }).join('')}
-       ${pend.map((m) => `<div class="mod fantasma"><div class="fila2"><span class="etq">${m}</span><span class="chip">por levantar</span></div><h3>${esc(nMod(m))}</h3></div>`).join('')}</div></section>
    ${seccionAlcance(mods)}`;
   $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
   $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
@@ -332,6 +330,7 @@ function soloPlan(m){ const A = D.modulos[m] && D.modulos[m].archivo; return !!A
 function diagramaSistema(){
   $('#dgRel').hidden = VISTA_DG !== 'capas';
   if (VISTA_DG === 'contexto') return contextoSistema();
+  if (VISTA_DG === 'modulos') return modulosPorCapa();
   $('#dgFiltros').innerHTML = filtrosModulo(false) + `<label class="etq" for="fRel">Tipo de relación</label><select id="fRel">${opcionesRel()}</select><span class="tenue" id="fRelDesc"></span>`;
   $('#fRel').onchange = (e) => { guardarRel(e.target.value); diagramaSistema(); }; cablearFiltrosModulo();
   const ar = flujosModulo(), SEL = selModulos();
@@ -603,6 +602,21 @@ function interactivo(svg, html, destino, inicial, alClic){
   marcar(null);
 }
 
+/* Módulos por capa: una columna por capa, de lo que ve la gente (izquierda) a la plataforma y la fábrica (derecha) */
+function modulosPorCapa(){
+  $('#dgFiltros').innerHTML = filtrosModulo(false); cablearFiltrosModulo();
+  $('#dgAyuda').textContent = 'Una columna por capa, de lo que ve la gente (izquierda) hacia la plataforma y la fábrica (derecha). Cada tarjeta muestra sus capacidades, sus casos de uso, lo comprobado y la barra de estados. Toca un módulo para entrar.';
+  const SEL = selModulos();
+  const capas = capasOrden();
+  $('#dg').innerHTML = `<div class="columnas" style="grid-template-columns:repeat(${capas.length},minmax(168px,1fr))">${capas.map(([t, ms], i) => `
+    <div class="columna"><div class="cabcol"><span class="etq">${i + 1} · ${esc(t)}</span>${i < capas.length - 1 ? '<span class="flecha" aria-hidden="true">→</span>' : ''}</div>
+      ${ms.map((m) => { const l = !!D.modulos[m], fuera = SEL && !SEL.has(m);
+        if (!l) return `<div class="mod fantasma" ${fuera ? 'style="opacity:.35"' : ''}><div class="fila2"><span class="etq">${m}</span><span class="chip">por levantar</span></div><h3>${esc(nMod(m))}</h3></div>`;
+        const I = D.modulos[m].informe, A = D.modulos[m].archivo;
+        return `<button class="mod${soloPlan(m) ? ' plan' : ''}" data-m="${m}" ${fuera ? 'style="opacity:.35"' : ''}><div class="fila2"><span class="etq">${m}</span><b class="pct">${I.cobertura.simple == null ? 'fábrica' : fmtPct(I.cobertura.simple)}</b></div>
+          <h3>${esc(nMod(m))}</h3><span class="tenue">${I.capacidades} capacidades · ${I.casosUso} casos de uso</span>${barra(I.porEstado, false)}</button>`; }).join('')}</div>`).join('')}</div>`;
+  $$('#dg .mod[data-m]').forEach((bt) => bt.onclick = () => ir(bt.dataset.m));
+}
 /* Contexto del sistema: personas → módulos (por capa) → sistemas externos */
 let CTX_ACT = '', CTX_DIR = '';
 function contextoSistema(){

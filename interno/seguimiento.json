@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-18 21:27",
+ "actualizadoEn": "2026-10-18 21:28",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1330,7 +1330,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 K3 (M-825)",
    "causaRaiz": "definición",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 api/lib/corte.php _ckCron: $tieneDrive = _dcCuentasACopiar (estado activa|error con refresh) && _driveConfigurado(); _ckDecidir devuelve «sin-copia» si !$tieneDrive, sin mirar el día ni el estado «copiado». Un negocio que tuvo Drive y lo perdió (revocado, claves borradas en secrets.php) pierde sin aviso de 3 días lo no copiado y marca como sin copia lo que sí está en Drive. Necesita regla de producto: ¿negarse a correr el corte (o aplazar) si la conexión estuvo activa y ahora está revocada o sin claves, y para lo copiado confiar en el drive_id registrado? Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 api/lib/corte.php _ckCron: $tieneDrive = _dcCuentasACopiar (estado activa|error con refresh) && _driveConfigurado(); _ckDecidir devuelve «sin-copia» si !$tieneDrive, sin mirar el día ni el estado «copiado». Un negocio que tuvo Drive y lo perdió (revocado, claves borradas en secrets.php) pierde sin aviso de 3 días lo no copiado y marca como sin copia lo que sí está en Drive. Necesita regla de producto: ¿negarse a correr el corte (o aplazar) si la conexión estuvo activa y ahora está revocada o sin claves, y para lo copiado confiar en el drive_id registrado? Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): crítico, P2. Regla: al frente de toda la fila (plazo: corte del 30-nov; pérdida irreversible). El corte nunca borra un archivo sin copia confirmada en Drive; con la conexión revocada, con error o sin claves, no corre para ese negocio: se aplaza, avisa al admin y reintenta en la siguiente pasada; nada se marca «Eliminado en el corte». Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-176",
@@ -1343,7 +1345,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 K3 (M-825)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 api/lib/corte.php: _driveArchivoInfo devuelve null para cualquier estado ≠ 200/404 y _ckRedGoogle devuelve null si no renueva; en _ckCorteCuenta $conf = false en los dos casos, igual que un 404. _ckDecidir → aplazar → $repo[\"reCopiar\"] (drive_id = NULL, enlace = NULL, copiado_en = NULL). Arreglo: distinguir «no confirmado por error» (aplazar sin tocar drive_id; no borrar mientras no haya respuesta) de «no está» (404 o tamaño/md5 distintos). Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 api/lib/corte.php: _driveArchivoInfo devuelve null para cualquier estado ≠ 200/404 y _ckRedGoogle devuelve null si no renueva; en _ckCorteCuenta $conf = false en los dos casos, igual que un 404. _ckDecidir → aplazar → $repo[\"reCopiar\"] (drive_id = NULL, enlace = NULL, copiado_en = NULL). Arreglo: distinguir «no confirmado por error» (aplazar sin tocar drive_id; no borrar mientras no haya respuesta) de «no está» (404 o tamaño/md5 distintos). Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): crítico, P2. Regla: al frente de toda la fila (corte del 30-nov). Si Google no responde, el archivo queda «por confirmar»: no pierde id ni enlace y no se borra hasta confirmarse. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   },
   {
    "id": "INC-177",
@@ -1356,7 +1360,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 K3 (M-825)",
    "causaRaiz": "integración",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 api/drive/index.php ≈L161: conectado = estado === «activa»; api/lib/corte.php _ckAvisos y _dcCuentasACopiar aceptan «activa» y «error». str-app-shell.html _corteAvisoDebeVerse/_corteAvisoTexto usan e.conectado. Efecto: con «error» el admin ve el aviso equivocado y no ve los pendientes al corte. Arreglo: un solo criterio (activa|error con refresh) y un texto propio para «con error». Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 api/drive/index.php ≈L161: conectado = estado === «activa»; api/lib/corte.php _ckAvisos y _dcCuentasACopiar aceptan «activa» y «error». str-app-shell.html _corteAvisoDebeVerse/_corteAvisoTexto usan e.conectado. Efecto: con «error» el admin ve el aviso equivocado y no ve los pendientes al corte. Arreglo: un solo criterio (activa|error con refresh) y un texto propio para «con error». Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): normal, P2. Regla: con error ≠ sin Drive; el aviso dice «la copia tiene un error». Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P2"
   },
   {
    "id": "INC-178",
@@ -1369,7 +1375,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 INC1 (M-825)",
    "causaRaiz": "definición",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 str-m1-housekeeping.html _escalarTicket ≈L6140 (solo estado = escalado), acciones solo si estado === abierto ≈L6795; _doResolverTicket ≈L6127 (estado, resueltoEn, nota; sin resueltoPor). api/col/index.php ≈L1208 (_colTicketAbierto: abierto|escalado), api/tablero (abierto, escalado), api/expediente ≈L293 (lee escaladoEn). Necesita regla de producto: quién y cómo cierra un escalado. Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 str-m1-housekeeping.html _escalarTicket ≈L6140 (solo estado = escalado), acciones solo si estado === abierto ≈L6795; _doResolverTicket ≈L6127 (estado, resueltoEn, nota; sin resueltoPor). api/col/index.php ≈L1208 (_colTicketAbierto: abierto|escalado), api/tablero (abierto, escalado), api/expediente ≈L293 (lee escaladoEn). Necesita regla de producto: quién y cómo cierra un escalado. Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): normal, P2. Regla: escalado = estado «en decisión»; lo resuelve admin u operador con permiso de incidentes eligiendo decisión (reponer, comprar, dar de baja o sin acción); luego «cerrado», a mano o al completarse la acción; se guarda quién y cuándo escaló, resolvió y cerró. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P2"
   },
   {
    "id": "INC-179",
@@ -1382,7 +1390,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 INC1 (M-825)",
    "causaRaiz": "definición",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 api/col/index.php: para tickets los deletedIds solo se rechazan al colaborador (≈L1515); $delStmt marca deleted = 1. Las evidencias se anulan con anuladaEn/anuladaPor (_colMergeEvidencias), pero el ticket entero sí se da de baja. ¿Intencional? Si no: rechazar bajas de tickets para todos los roles (como inv-movimientos e inv-pendientes). Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 api/col/index.php: para tickets los deletedIds solo se rechazan al colaborador (≈L1515); $delStmt marca deleted = 1. Las evidencias se anulan con anuladaEn/anuladaPor (_colMergeEvidencias), pero el ticket entero sí se da de baja. ¿Intencional? Si no: rechazar bajas de tickets para todos los roles (como inv-movimientos e inv-pendientes). Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): normal, P2. Regla: no es intencional: un incidente con evidencia no se borra; se quita «deleted» del PUT de tickets y, si hace falta retirarlo, se anula con motivo y queda visible con su evidencia. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P2"
   },
   {
    "id": "INC-180",
@@ -1395,7 +1405,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 INC1 (M-825)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 api/col/index.php _colMergeEvidencias ≈L425 (solo une y sella anulaciones con la hora del servidor); api/upload calcula SHA-256 y EXIF y los devuelve, pero el ticket guarda la copia que reenvía el teléfono. api/expediente ≈L229/L267 recalcula y marca «DIFIERE». Arreglo posible: al unir, tomar huella y EXIF del registro del servidor (o validarlos) y sellar recibidoEn con la hora del servidor (RT-7). Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 api/col/index.php _colMergeEvidencias ≈L425 (solo une y sella anulaciones con la hora del servidor); api/upload calcula SHA-256 y EXIF y los devuelve, pero el ticket guarda la copia que reenvía el teléfono. api/expediente ≈L229/L267 recalcula y marca «DIFIERE». Arreglo posible: al unir, tomar huella y EXIF del registro del servidor (o validarlos) y sellar recibidoEn con la hora del servidor (RT-7). Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): normal, P3. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "normal",
+   "prioridad": "P3"
   },
   {
    "id": "INC-181",
@@ -1408,7 +1420,9 @@
    "origen": "Desarrollo, revisión técnica de MJ-16 PG (M-825)",
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
-   "nota": "21:27 str-api.js _horasDeTurno ≈L877–878 (perfilPago.politicaHoras y perfilPago.modalidad actuales) frente a _tarifaVigente(perfilPago, fecha) ≈L601. Arreglo posible: guardar política y modalidad con fecha de vigencia (como las tarifas) y leer la vigente en la fecha del turno. Clase y prioridad: Diseño (LM-48)."
+   "nota": "21:27 str-api.js _horasDeTurno ≈L877–878 (perfilPago.politicaHoras y perfilPago.modalidad actuales) frente a _tarifaVigente(perfilPago, fecha) ≈L601. Arreglo posible: guardar política y modalidad con fecha de vigencia (como las tarifas) y leer la vigente en la fecha del turno. Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): crítico, P2. Regla: valor y saldo de un turno usan la política y modalidad vigentes en la fecha del turno; un cambio solo rige hacia adelante. Espera que se levante la pausa; orden del Jefe de proyecto.",
+   "categoria": "crítico",
+   "prioridad": "P2"
   }
  ],
  "dts": [

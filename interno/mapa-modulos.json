@@ -275,7 +275,7 @@
    "nombre": "Servidor PHP (str-api) y almacén /api/col",
    "familia": "transversal",
    "estado": "construido",
-   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos. Lectura común `api/lib/col-lectura.php` (L-142). El colaborador lee acotado: datos del huésped solo del turno de hoy o mañana (L-144) y su gestión 90 días atrás y adelante, con turnos viejos reducidos a horas (L-145); solo reescribe incidentes propios ya guardados (L-141). Purga suave de movimientos de prueba (L-147) y ensayo de restauración en cuentas zz-verif-restauracion-, que el respaldo y los crones dejan fuera (L-131).",
+   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos. Lectura común `api/lib/col-lectura.php` (L-142). El colaborador lee acotado: datos del huésped solo del turno de hoy o mañana (L-144) y su gestión 90 días atrás y adelante, con turnos viejos reducidos a horas (L-145); solo reescribe incidentes propios ya guardados (L-141). Purga suave de movimientos de prueba (L-147) y ensayo de restauración en cuentas zz-verif-restauracion-, que el respaldo y los crones dejan fuera (L-131). El respaldo (diario y descargable) escribe en un temporal y renombra: si falla no pisa el último bueno y deja constancia; incluye ficha de pago y permisos de cada persona (L-154, INC-190, INC-191).",
    "paginas": [
     "api/index.php",
     "api/lib/*",
@@ -4178,6 +4178,16 @@
    "fecha": "2026-10-19",
    "cambio": "M6: el enlace manual de WhatsApp es de Housekeeping y de Equipo, no del Calendario (Desarrollo, M-850).",
    "lote": "LM-58"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "L-154: SRV, respaldo diario y descargable con temporal y renombrado (si falla no sobrescribe el último bueno y deja constancia en el registro; INC-190) y con perfil_pago y permisos de cada usuario (INC-191). Sin colecciones, rutas ni relaciones nuevas.",
+   "lote": "L-154"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "L-155: solo el guion N2 tests/e2e/INC-190-respaldo.spec.js de L-154 (INC-203); sin cambios en el mapa.",
+   "lote": "L-155"
   }
  ],
  "lineaBaseHasta": "L-126"

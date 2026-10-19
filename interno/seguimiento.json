@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 06:52",
+ "actualizadoEn": "2026-10-19 06:57",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1702,6 +1702,19 @@
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
    "nota": "06:52 modelo/api/config/acceso.php ≈L30–45 (SELECT de hasta 8 filas por petición, hash_equals; responde 403 igual). Arreglo: contador por IP con espera creciente o bloqueo temporal. Clase y prioridad: Diseño (LM-48)."
+  },
+  {
+   "id": "INC-201",
+   "tipo": "INC",
+   "modulo": "Seguimiento del proyecto",
+   "fecha": "2026-10-19",
+   "titulo": "El grupo Proyecto (Seg. Proyecto, COBIT, Elementos, Instrucciones, Marco, Base de conocimiento) solo se cierra en pantalla: la página comprueba el rol en el navegador y lee los documentos del repositorio público de GitHub (raw.githubusercontent.com/thcure/str-manager-docs), así que cualquiera con la dirección los lee sin sesión; no hay servidor que decida (RT-14)",
+   "estado": "abierto",
+   "severidad": "medio",
+   "origen": "Desarrollo, a pedido de Diseño y el Arquitecto (M-844 a, M-850; CU-PRJ-1.1); ámbito fábrica",
+   "causaRaiz": "arquitectura",
+   "debioDetectarse": "revisión previa",
+   "nota": "06:57 str-seg-proyecto.html ≈L341–347 (control de rol «temporal, INC-76») y _docsUrl ≈L357 → STRApi.docs.url (str-api.js ≈L977–982, DOCS_RAW raw.githubusercontent.com, sin credencial). El control en pantalla no protege nada porque el repositorio es público; por eso la regla del buzón ya prohíbe nombres reales. Arreglos posibles (decide Diseño con el Arquitecto; DA, cruce con Carlos): (a) repositorio privado y que el servidor de la app sirva los documentos con sesión de admin (proxy /api/docs con token de lectura en secrets.php), o (b) aceptar que es público y mantener la regla de no poner datos reales. Clase y prioridad: Diseño (LM-48)."
   }
  ],
  "dts": [

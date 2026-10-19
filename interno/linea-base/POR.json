@@ -1,7 +1,7 @@
 {
  "modulo": "POR",
- "version": 1,
- "estadoArchivo": "borrador",
+ "version": 2,
+ "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
   "portal.html (621 líneas, leído completo: listas, tarjeta, barra fija, Mi dinero, perfil, vista previa y mensajes con Housekeeping)",
@@ -12,7 +12,13 @@
   "por-guiones.json: 22 guiones e2e con casos por el portal; se leyeron los .spec.js de INC-126, INC-127, INC-131, INC-132, INC-140, INC-120-c12, INC-120-c3 y REQ-K3b / K3c para ver qué comprueba cada caso",
   "interno/linea-base/esquema.json, sistema.json, INV.json, HK.json y PR.json (estilo y flujos con ids reales)"
  ],
- "revisiones": [],
+ "revisiones": [
+  {
+   "fecha": "2026-10-18",
+   "por": "Chat Diseño (M-806) y Chat Desarrollo (M-807)",
+   "que": "Peso: esenciales 1, 2 y 5; necesarias 3, 4 y 7; accesorias 6 y 8. 8.1 fuera de alcance (T-24). Nuevos 2.4 y 2.5 (pares de CU-PR-3.5 y 4.6). INC-159 en 4.2; limitantes de 2.2 (reloj del teléfono) y 6.2 (vista previa escribe). 1.4 confirmado no construido."
+  }
+ ],
  "alcance": {
   "dentro": [
    "Las listas de turnos del colaborador (Hoy, Atrasados, Próximos, Recientes) y la tarjeta de cada turno: estado, alertas, avance, esperas con cuenta regresiva, fotos, huésped, llegada y salida.",
@@ -39,56 +45,56 @@
    "id": "CAP-POR-1",
    "nombre": "Mis turnos",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Ver los turnos propios del colaborador según cuándo le tocan (hoy, atrasados, próximos, recientes), abrir uno para trabajarlo y mantener la lista al día. Por construir: su calendario con eventos propios y la vista de su sub-flujo."
   },
   {
    "id": "CAP-POR-2",
    "nombre": "Tarjeta del turno",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Mostrar en cada turno lo que el colaborador necesita para decidir sin abrirlo: estado, alertas, avance, esperas con cuenta regresiva, fotos y el huésped."
   },
   {
    "id": "CAP-POR-3",
    "nombre": "Avisos fijos de pendientes",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Mantener a la vista, desde cualquier parte del portal, lo que no puede esperar: esperas en curso y fotos que no se pudieron subir, sin tapar el pie del turno."
   },
   {
    "id": "CAP-POR-4",
    "nombre": "Mi dinero",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Mostrar al colaborador, solo con sus turnos, cuánto va ganando, cuántas horas tiene a favor o en contra y los turnos del mes. Por construir: adelantos, compras y pagos recibidos."
   },
   {
    "id": "CAP-POR-5",
    "nombre": "Sesión y perfil",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "esencial",
    "que": "Entrar al portal con la sesión abierta, volver al inicio de sesión si se pierde, salir, y ajustar lo propio del teléfono (tipo de teléfono y tema)."
   },
   {
    "id": "CAP-POR-6",
    "nombre": "Vista previa de administrador y operador",
    "tipo": "operativa",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Dejar que el administrador o el operador elija un colaborador y vea su portal tal como él lo ve."
   },
   {
    "id": "CAP-POR-7",
    "nombre": "Límites de lo que recibe el portal",
    "tipo": "control",
-   "peso": "por-confirmar",
+   "peso": "necesaria",
    "que": "Que el portal del colaborador reciba y muestre solo lo de su operación y nunca toque lo del negocio (copia a Drive, credenciales)."
   },
   {
    "id": "CAP-POR-8",
    "nombre": "Mi desempeño",
    "tipo": "consulta",
-   "peso": "por-confirmar",
+   "peso": "accesoria",
    "que": "Mostrar al colaborador su desempeño acumulado. Por construir: la pestaña existe y está deshabilitada."
   }
  ],
@@ -356,7 +362,8 @@
    "declarado": "no-construido",
    "limitantes": [
     "REQ-F11-6 figura «entregado» (pasado a Desarrollo), pero ni el portal ni la lista tienen vista ni restricción por sub-flujo; Housekeeping solo muestra el colaborador sugerido de cada etapa.",
-    "No se leyó el documento del REQ (no estaba entre las fuentes): el alcance sale del título y de la nota del seguimiento («restringe escritura del colaborador a su sub-flujo»)."
+    "No se leyó el documento del REQ (no estaba entre las fuentes): el alcance sale del título y de la nota del seguimiento («restringe escritura del colaborador a su sub-flujo»).",
+    "Confirmado no construido (Desarrollo, M-807): en HK solo existe la estructura del flujo compuesto, no «mi sub-flujo» del apoyo."
    ],
    "entradas": [],
    "salidas": [],
@@ -395,7 +402,7 @@
     "colecciones": [],
     "notas": "Sin código: búsqueda de «subflujo» y «sub-flujo» en portal.html sin resultados; en Housekeeping solo el armado de etapas desde el flujo base (_fbExpandir, colaboradorId de cada sub-flujo)."
    },
-   "confianza": "baja"
+   "confianza": "alta"
   },
   {
    "id": "CU-POR-1.5",
@@ -525,7 +532,8 @@
    "declarado": "construido",
    "limitantes": [
     "Solo avisa con el portal abierto: no hay notificación fuera de la aplicación (queda pendiente en REQ-U6.2).",
-    "Los minutos y el vencimiento se calculan con el reloj del teléfono, no con la hora del servidor: con el reloj mal puesto el aviso se adelanta o se atrasa."
+    "Los minutos y el vencimiento se calculan con el reloj del teléfono, no con la hora del servidor: con el reloj mal puesto el aviso se adelanta o se atrasa.",
+    "La cuenta regresiva y el «venció» usan el reloj del teléfono, no la hora del servidor (RT-7); no hay aviso fuera de la aplicación."
    ],
    "entradas": [],
    "salidas": [],
@@ -641,6 +649,88 @@
     "rutas": [],
     "colecciones": [],
     "notas": "Bloque huésped de _tarjetaTurno; la bandera «oculto» la pone el servidor (L-144). Housekeeping resume el huésped con _datosHuesped y nunca usa el nombre sintético del iCal (INC-48)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-2.4",
+   "capacidad": "CAP-POR-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver en la tarjeta del turno el horario de la propiedad (ingreso 24/7, hora límite, check-in y check-out)",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Depende de CU-PR-3.5, que es crítico y está en la bolsa; hoy el portal no muestra ningún horario de la propiedad."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-3.5",
+     "dato": "horario de la propiedad para el colaborador"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la propiedad tiene ingreso 24/7 y hora límite de salida 11:00",
+     "cuando": "el colaborador abre la tarjeta de su turno",
+     "entonces": "ve el ingreso 24/7 y la hora límite junto a la llegada y la salida del huésped"
+    }
+   ],
+   "origen": [
+    "REQ-PR1-3"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "notas": "por diseñar"
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-POR-2.5",
+   "capacidad": "CAP-POR-2",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver el plano de la propiedad con sus marcadores desde el turno",
+   "declarado": "no-construido",
+   "limitantes": [
+    "El plano y sus marcadores ya llegan al colaborador, pero ninguna pantalla los muestra (CU-PR-4.6)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PR-4.6",
+     "dato": "plano de la propiedad y sus marcadores"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la propiedad tiene plano con un marcador «tablero eléctrico»",
+     "cuando": "el colaborador abre el plano desde su turno",
+     "entonces": "ve el plano y el marcador en su lugar"
+    }
+   ],
+   "origen": [],
+   "reglas": [],
+   "pendientes": [
+    "T-22"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "portal.html"
+    ],
+    "notas": "por diseñar"
    },
    "confianza": "alta"
   },
@@ -926,7 +1016,8 @@
    "que": "Ver los turnos del mes con su valor, mi rol en cada uno y la diferencia de horas",
    "declarado": "construido",
    "limitantes": [
-    "Los turnos de más de 90 días llegan reducidos (solo fecha, rol y horas, sin propiedad): en los primeros días del tercer mes del selector la fila puede salir sin nombre de propiedad. Desarrollo lo confirma."
+    "Los turnos de más de 90 días llegan reducidos (solo fecha, rol y horas, sin propiedad): en los primeros días del tercer mes del selector la fila puede salir sin nombre de propiedad. Desarrollo lo confirma.",
+    "En los primeros días del mes más antiguo, los turnos de más de 90 días salen sin nombre de propiedad (las horas, el valor y el saldo sí cuentan): INC-159."
    ],
    "entradas": [
     {
@@ -958,7 +1049,9 @@
    "reglas": [
     "RT-4"
    ],
-   "pendientes": [],
+   "pendientes": [
+    "INC-159"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [
@@ -1299,7 +1392,8 @@
    "que": "Ver el portal tal como lo ve el colaborador elegido, con la etiqueta «vista previa · admin»",
    "declarado": "construido",
    "limitantes": [
-    "La vista previa no es de solo lectura: lo que se marque en un turno del colaborador se guarda con el acceso de quien mira."
+    "La vista previa no es de solo lectura: lo que se marque en un turno del colaborador se guarda con el acceso de quien mira.",
+    "La vista previa escribe con el acceso del administrador o del operador: no es de solo lectura (si se quiere así, es un pedido de Diseño). A un colaborador el parámetro de vista previa no le abre nada."
    ],
    "entradas": [
     {
@@ -1503,9 +1597,10 @@
     "colaborador"
    ],
    "que": "Ver mi desempeño acumulado: turnos completados, tiempos promedio y calificaciones",
-   "declarado": "no-construido",
+   "declarado": "fuera-de-alcance",
    "limitantes": [
-    "La pestaña existe y está deshabilitada con la leyenda «próximamente»; no hay función ni REQ propio en el seguimiento. El manual de producto del portal la nombra «métricas propias»."
+    "La pestaña existe y está deshabilitada con la leyenda «próximamente»; no hay función ni REQ propio en el seguimiento. El manual de producto del portal la nombra «métricas propias».",
+    "Fuera de alcance por ahora (Diseño, M-806): sin REQ ni pedido; hoy solo existe la pestaña deshabilitada. La idea queda en la bolsa (T-24)."
    ],
    "entradas": [],
    "salidas": [],
@@ -1520,7 +1615,9 @@
    ],
    "origen": [],
    "reglas": [],
-   "pendientes": [],
+   "pendientes": [
+    "T-24"
+   ],
    "pruebas": [],
    "tecnica": {
     "paginas": [

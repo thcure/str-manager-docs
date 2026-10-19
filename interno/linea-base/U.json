@@ -1,0 +1,3401 @@
+{
+ "modulo": "U",
+ "version": 1,
+ "estadoArchivo": "borrador",
+ "levantadoEn": "2026-10-18",
+ "fuentes": [
+  "str-usuarios.html (76 KB, leída por funciones: lista, ficha, permisos, ficha de pago, saldo, anulación de tarifa, invitación, capacidades y cuentas)",
+  "login.html (entrada con Google y con correo, restablecer contraseña, freno de inicios automáticos, primer arranque)",
+  "docs/claude/usuarios-y-roles.md (mapa técnico del módulo, fuente principal) y docs/claude/shell-y-api.md (sesión, menú y cliente compartido)",
+  "api/usuarios/index.php, api/auth/login.php, api/invitacion/index.php, api/capacidades/index.php, api/me/index.php y api/lib/session.php (servicios de identidad, completos)",
+  "str-api.js (sesión, renovación, guarda de rol, permisos del operador, horas y saldo), str-app-shell.html y portal.html (solo búsquedas: sesión, rol, salida y destino por rol)",
+  "api/col/index.php (solo búsquedas: reglas de rol y permisos de las colecciones, para CU-U-2.6 y CU-U-2.7)",
+  "u-fuentes.json: módulo U del mapa, 8 REQ, 14 DA, 13 de la bolsa, 21 INC, 5 DT, relaciones REL-14, REL-15, REL-27 y las generales, actores y reglas transversales",
+  "guiones e2e y de la fábrica que pasan por identidad (herramientas/pw/sesiones, humo-pw, cuenta-pruebas, cuenta-pruebas-revertir, reingreso-zz, usuarios-zz y los de INC-134, INC-140, INC-146-purga, DT-41, DT-42, REQ-OP-1, REQ-SH-2 y los de inventario con operador); los .spec.js se leyeron para ver qué comprueba cada caso",
+  "interno/linea-base/esquema.json, INV.json, HK.json, PR.json y POR.json (estilo y flujos con ids reales)"
+ ],
+ "revisiones": [],
+ "alcance": {
+  "dentro": [
+   "El equipo: lista, búsqueda y filtro por capacidad, agregar, editar, inactivar y la vista mínima que ve el colaborador.",
+   "Los roles (uno por persona) y los permisos del operador (tarifas y horas, editar equipo, invitar, editar inventario), con lo que cada pantalla oculta o deshabilita y lo que el sistema decide en cada petición.",
+   "La entrada: cuenta de Google, correo y contraseña, restablecer la contraseña, avisos de por qué no se entra, freno del ir y venir, renovación y vencimiento de la sesión, salida, primer arranque y destino según el rol.",
+   "La invitación de un solo uso: generar, compartir, aceptar y rechazar enlaces.",
+   "El catálogo de capacidades y el nivel de cada persona en ellas.",
+   "La ficha de pago de cada persona (modalidad, política, tarifas y su anulación) y el saldo de horas que se ve en Equipo.",
+   "La cuenta de pruebas de la fábrica (DA-47): personas de prueba, ensayo, movimiento, reversión y reingreso.",
+   "Lo definido y aún por construir: permisos de ver el valor de los activos y de configurar Drive, operador con propiedades limitadas, superadmin de plataforma, sueldo fijo; y lo fuera de alcance: cuenta o rol para el propietario de terceros."
+  ],
+  "fuera": [
+   "El menú principal y la presentación de los grupos y los módulos por rol (Shell): aquí solo se cuenta quién puede entrar y a dónde se lleva a cada rol.",
+   "El cliente compartido y el servidor con su almacén de colecciones (Servidor y Cliente): aquí solo se cuenta qué decide la identidad y qué reglas de rol ejerce.",
+   "El portal del colaborador como contenedor y su salida de sesión (Portal): CU-POR-5.1 y CU-POR-5.2 cuentan lo del portal.",
+   "El cálculo de las horas del turno y el pago, los adelantos y la liquidación (Housekeeping y Pagos): aquí solo se cuentan la ficha y el saldo que se ve en Equipo.",
+   "Lo que cada módulo hace con los permisos: Inventario (editar inventario), Propiedades y Housekeeping.",
+   "La copia a Drive y su permiso (Copia a Drive y retención).",
+   "La limpieza, el reinicio y la purga de datos de prueba en cada módulo (CU-INV-8.3, CU-HK-10.8, CU-PR-9.5)."
+  ],
+  "nota": "Borrador levantado por ingeniería inversa el 2026-10-18 desde la pantalla de Equipo (str-usuarios.html), la pantalla de entrada (login.html), el cliente compartido (sesión, roles, permisos, horas y saldo), el menú principal y el portal (solo sesión y salida), los servicios de usuarios, sesión, invitación, capacidades y «quién soy» (api/usuarios, api/auth/login.php, api/invitacion, api/capacidades, api/me, api/lib/session.php), los mapas técnicos (usuarios-y-roles y shell-y-api) y los guiones e2e y de la fábrica que pasan por identidad. En los REQ, «entregado» significa pasado a Desarrollo y no implica construido: lo construido se comprobó en el código. El peso de cada capacidad lo decide el dueño del producto (por-confirmar). No estaban entre las fuentes la página de invitación (invitacion.html), el servicio de primer arranque (api/setup) ni el núcleo de la cuenta de pruebas (api/cuenta-pruebas y api/lib/cuenta-pruebas.php): sus casos de uso salen de los mapas técnicos y quedan con confianza media o baja. Los casos de uso de módulos vecinos sin línea base (Shell SH, Servidor SRV y Pagos PG) usan identificadores provisionales que su dueño debe confirmar. Los flujos con Housekeeping, Propiedades y Portal usan los identificadores reales de HK.json, PR.json y POR.json. Los casos de uso de la cuenta de pruebas llevan ámbito fábrica. El estado calculado y la cobertura los calcula la herramienta."
+ },
+ "capacidades": [
+  {
+   "id": "CAP-U-1",
+   "nombre": "Equipo",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Ver, buscar, agregar, editar, inactivar y subir al sistema a las personas del equipo (administradores, operadores y colaboradores) con sus datos de contacto; el colaborador solo ve lo mínimo de sus compañeros."
+  },
+  {
+   "id": "CAP-U-2",
+   "nombre": "Roles y permisos",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Un solo rol por persona, permisos acotados del operador, módulos cerrados a quien no corresponden y decisión en el sistema, en cada petición, de lo que cada rol puede hacer; incluye lo definido y aún por construir."
+  },
+  {
+   "id": "CAP-U-3",
+   "nombre": "Acceso y sesión",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Entrar con la cuenta de Google o con correo y contraseña, mantener y renovar la sesión de 24 horas, avisar cuando no se puede, cerrarla, crear el primer negocio y llevar a cada rol a su inicio."
+  },
+  {
+   "id": "CAP-U-4",
+   "nombre": "Invitación de un solo uso",
+   "tipo": "operativa",
+   "peso": "por-confirmar",
+   "que": "Dar acceso a una persona del equipo con un enlace propio que vence en 7 días, compartirlo, aceptarlo y rechazar los enlaces vencidos, usados o inválidos."
+  },
+  {
+   "id": "CAP-U-5",
+   "nombre": "Capacidades",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Llevar el catálogo de capacidades del negocio (limpieza, mantenimiento y las que se creen) y marcar a cada persona como capacitada o nueva en cada una."
+  },
+  {
+   "id": "CAP-U-6",
+   "nombre": "Ficha de pago y saldo de horas",
+   "tipo": "datos",
+   "peso": "por-confirmar",
+   "que": "Definir la ficha de pago de cada persona (modalidad, política de horas, tarifas con su historial), anular tarifas sin borrarlas, entregar la ficha a quien calcula el valor del turno y ver el saldo de horas."
+  },
+  {
+   "id": "CAP-U-7",
+   "nombre": "Cuenta de pruebas de la fábrica",
+   "tipo": "control",
+   "peso": "por-confirmar",
+   "que": "Tener personas de prueba por rol y llevarlas a una cuenta de pruebas aparte para que la cuenta real quede solo con lo real (DA-47): ensayar, mover, revertir y volver a entrar. Es de la fábrica, no del producto."
+  }
+ ],
+ "casosUso": [
+  {
+   "id": "CU-U-1.1",
+   "capacidad": "CAP-U-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el equipo con el rol, las capacidades, el estado de la cuenta y si está activo, buscar por nombre y filtrar por capacidad",
+   "declarado": "construido",
+   "limitantes": [
+    "La búsqueda mira solo el nombre y el filtro por capacidad deja una sola capacidad a la vez.",
+    "El contador dice «colaboradores» aunque cuente también administradores y operadores.",
+    "Un operador sin el permiso «Tarifas y horas» también ve la tarifa y el saldo de cada persona (solo se le impide cambiarlos); hoy administrador y operador ven los mismos datos (bolsa REQ-U7-permisos)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-HK-1.4",
+     "dato": "colaboradores activos del equipo con su nombre, color y capacidades",
+     "rel": "REL-14"
+    },
+    {
+     "a": "CU-PR-5.3",
+     "dato": "colaboradores activos del equipo con su nombre y su color"
+    },
+    {
+     "a": "CU-POR-6.1",
+     "dato": "colaboradores y operadores del equipo con su nombre, su color y su rol",
+     "rel": "REL-14"
+    },
+    {
+     "a": "CU-POR-6.2",
+     "dato": "nombre y color del colaborador elegido",
+     "rel": "REL-14"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un equipo con administrador, operadores y colaboradores, algunos inactivos",
+     "cuando": "el administrador o un operador abre Equipo",
+     "entonces": "ve una tarjeta por persona con su nombre, su rol, su teléfono y sus capacidades (con «nuevo» si aún no está capacitada), el estado de su cuenta (activo, invitado con su vencimiento, invitación vencida o sin cuenta), su tarifa por hora y su saldo de horas si tiene ficha de pago, y «permisos limitados» si es un operador con permisos acotados; las personas activas van primero y las inactivas al final"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "varias personas con distintas capacidades",
+     "cuando": "se escribe parte de un nombre o se toca una capacidad de la franja",
+     "entonces": "la lista deja solo a quienes coinciden; tocar otra vez la capacidad quita el filtro"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador con sesión",
+     "cuando": "intenta abrir Equipo",
+     "entonces": "no ve el módulo: vuelve a su portal (CU-U-2.5)"
+    }
+   ],
+   "origen": [
+    "REQ-U4",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/usuarios-zz",
+     "casos": [
+      "o",
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios",
+     "/api/capacidades"
+    ],
+    "colecciones": [
+     "usuario",
+     "capacidad",
+     "str-usuarios-v1",
+     "str-capacidades-v1"
+    ],
+    "notas": "_syncWithApi → GET /usuarios y /capacidades; _filterAndRender, _renderCollabs, _cuentaChip, _pagoChips; la lista se copia en str-usuarios-v1, que leen Housekeeping, el portal, Propiedades y Flujos. usuarios-zz.spec.js es un diagnóstico de solo lectura: comprueba que la lista se lee y que existe zz-verif-colab2; no comprueba el filtro ni la búsqueda."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-1.2",
+   "capacidad": "CAP-U-1",
+   "actor": [
+    "colaborador"
+   ],
+   "que": "Ver a los compañeros del equipo con lo mínimo: nombre, rol, color, capacidades y si están activos",
+   "declarado": "construido",
+   "limitantes": [
+    "El colaborador no recibe correo, teléfono, estado de la cuenta, ficha de pago ni permisos de nadie."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con sesión",
+     "cuando": "su pantalla pide el equipo (para reconocer a un compañero o a quien le asignó el turno)",
+     "entonces": "recibe de cada persona solo el nombre, el rol, el color, las capacidades y si está activa"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un colaborador que pide por fuera de la pantalla el detalle de un compañero",
+     "cuando": "se envía la petición",
+     "entonces": "recibe los mismos datos mínimos: nunca correo, teléfono, estado de la cuenta, ficha de pago ni permisos"
+    }
+   ],
+   "origen": [
+    "REQ-U6",
+    "REQ-U4"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-m1-housekeeping.html",
+     "portal.html"
+    ],
+    "rutas": [
+     "/api/usuarios"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "_usuarioRowColaborador en api/usuarios/index.php (id, nombre, rol, color, capacidades, estado); Housekeeping lo pide con GET /usuarios en modo colaborador."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor (la versión del colaborador de la lista de usuarios) y de la lectura del equipo en Housekeeping"
+   }
+  },
+  {
+   "id": "CU-U-1.3",
+   "capacidad": "CAP-U-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Agregar una persona al equipo con su nombre, teléfono, correo, rol, empresa, estado y capacidades y, si corresponde, su ficha de pago y sus permisos",
+   "declarado": "construido",
+   "limitantes": [
+    "Un operador con «Editar equipo» solo crea colaboradores sin acceso propio; crear administradores u operadores, dar acceso o definir permisos es solo del administrador (la pantalla ofrece los tres roles y el sistema rechaza los que no corresponden).",
+    "La persona nace «sin cuenta»: para entrar necesita una invitación (CU-U-4.1).",
+    "Solo exige el nombre; no avisa si ya existe otra persona con el mismo nombre o el mismo correo.",
+    "La persona nueva no recibe color: en Equipo, Housekeeping y el portal todas las nuevas se ven del mismo verde (posible incidente nuevo)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-4.1",
+     "dato": "persona nueva con su correo, lista para invitar"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador en Equipo",
+     "cuando": "toca «＋ Colaborador», escribe el nombre y guarda",
+     "entonces": "la persona queda en el equipo como colaborador activo y sin cuenta, y la lista se actualiza"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con el permiso «Editar equipo»",
+     "cuando": "crea un colaborador, y luego intenta crear a otra persona como operador o administrador",
+     "entonces": "el colaborador queda creado; la otra persona no: el sistema responde que solo el administrador puede"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el nombre vacío",
+     "cuando": "se intenta guardar",
+     "entonces": "no se crea y se avisa «Ingresa el nombre del colaborador»"
+    }
+   ],
+   "origen": [
+    "REQ-U4",
+    "REQ-U7",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14",
+    "RT-15"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "saveCollab → POST /usuarios con es_cuenta 0 (modo local sin sesión: _uid y _nextColor); servidor: case POST de api/usuarios/index.php, ROLES_VALIDOS, regla «es_cuenta o rol admin/operador solo admin»; INSERT sin color (columna NULL, la pantalla pinta COLORS[0])."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (saveCollab, openCollabModal) y del servidor (POST de usuarios): permisos por rol, valores por omisión y ausencia de color"
+   }
+  },
+  {
+   "id": "CU-U-1.4",
+   "capacidad": "CAP-U-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Editar los datos de una persona del equipo, mandando solo lo que cambió",
+   "declarado": "construido",
+   "limitantes": [
+    "El botón «Editar» se ofrece también al operador sin «Editar equipo» y en las filas de administrador: la ficha abre en solo lectura y el sistema rechaza el guardado (INC-110, abierto).",
+    "No hay protección para el único administrador: el administrador puede quitarse el rol o inactivarse sin que el sistema lo impida (posible incidente nuevo)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona del equipo",
+     "cuando": "se cambia su teléfono y se guarda",
+     "entonces": "solo cambia el teléfono; su color, su acceso, su ficha de pago y lo demás no se tocan"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona abierta en su ficha",
+     "cuando": "se guarda sin haber cambiado nada",
+     "entonces": "avisa «Sin cambios» y cierra la ficha"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador con «Editar equipo» que abre a un operador o a un administrador",
+     "cuando": "intenta guardar un cambio",
+     "entonces": "el sistema lo rechaza: solo el administrador edita a esas personas"
+    }
+   ],
+   "origen": [
+    "REQ-U4",
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-110"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "saveCollab calcula el diff contra la copia local (INC-64); servidor: case PUT parcial con array_key_exists, tocaRolAlto, sin comprobar que quede algún admin. INC-64 e INC-65 no están en seguimiento.json: solo aparecen aquí."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (diff de saveCollab, botón de editar sin permiso) y del servidor (PUT parcial y regla de rol alto)"
+   }
+  },
+  {
+   "id": "CU-U-1.5",
+   "capacidad": "CAP-U-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Inactivar o reactivar a una persona del equipo (nunca se borra)",
+   "declarado": "construido",
+   "limitantes": [
+    "«Eliminar» no borra: deja a la persona inactiva. La pantalla sin embargo pregunta «¿Eliminar este colaborador permanentemente?» y avisa «Colaborador eliminado» (texto engañoso respecto de RT-5).",
+    "Una persona inactiva no puede volver a entrar, pero la sesión que ya tenía sigue valiendo hasta que venza (24 horas): el sistema revisa el estado al entrar, no en cada petición."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-3.1",
+     "dato": "estado de la persona (activa o inactiva), que decide si puede entrar"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona activa",
+     "cuando": "se apaga su interruptor (o se elige «Eliminar» en su ficha)",
+     "entonces": "queda inactiva, pasa al final de la lista y deja de ofrecerse para asignarle turnos; volver a encender el interruptor la reactiva y su historial sigue completo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona inactiva con cuenta de Google",
+     "cuando": "intenta entrar",
+     "entonces": "recibe «Tu cuenta está desactivada» y no entra (CU-U-3.1)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador sin el permiso «Editar equipo»",
+     "cuando": "mira el interruptor de una persona",
+     "entonces": "lo ve deshabilitado con el aviso «Sin permiso para editar el equipo»; si lo intenta por fuera de la pantalla, el sistema lo rechaza"
+    }
+   ],
+   "origen": [
+    "REQ-U4",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-14",
+    "RT-15"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "toggleEstado y deleteCollabNow mandan PUT {estado}; el servidor mantiene `activo` en sincronía con `estado`. login.php rechaza estado inactivo; /api/me y las demás rutas no lo miran (el JWT lleva el rol y no se revisa contra la base)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla y del servidor; lo de la sesión vigente sale de que ninguna ruta lee el estado y de la frase del mapa técnico «el JWT no se revisa contra la base»"
+   }
+  },
+  {
+   "id": "CU-U-1.6",
+   "capacidad": "CAP-U-1",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Subir al sistema el equipo que solo estaba guardado en el aparato",
+   "declarado": "construido",
+   "limitantes": [
+    "Es un resto de la migración: sin sesión ya no se puede trabajar en Equipo, así que solo sirve para copias viejas del aparato; es candidato a retirar."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "personas creadas antes de la migración que solo existen en el aparato",
+     "cuando": "se toca el botón «⬆ Subir equipo local»",
+     "entonces": "se crean en el sistema como colaboradores sin cuenta y se avisa cuántas se subieron y cuántas fallaron"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ninguna persona pendiente",
+     "cuando": "se abre Equipo",
+     "entonces": "el botón no aparece"
+    }
+   ],
+   "origen": [
+    "REQ-U4"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios"
+    ],
+    "colecciones": [
+     "str-usuarios-v1"
+    ],
+    "notas": "_uploadLocalToServer y botón #uploadLocalBtn (visible con sesión y personas con sincronizado=false)."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (_uploadLocalToServer, _renderCollabs)"
+   }
+  },
+  {
+   "id": "CU-U-2.1",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Conocer el rol, los permisos y la ficha de pago propios de quien tiene sesión",
+   "declarado": "construido",
+   "limitantes": [
+    "Mientras la consulta no ha respondido, un operador limitado no ve controles de más: la pantalla usa la última copia de sus permisos y, sin ella, ninguno (INC-93, cerrado).",
+    "La lista de capacidades propias que devuelve esta consulta sale siempre vacía (la consulta no la lee); quien necesita las capacidades las toma de la lista del equipo (posible incidente nuevo, sin consecuencia visible hoy).",
+    "La barra superior del menú principal muestra el nombre de la cuenta de Google y no el nombre que la persona tiene en el sistema (INC-111, abierto)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-SH-1.1",
+     "dato": "nombre, rol y permisos de la persona con sesión, para armar el menú principal y su barra"
+    },
+    {
+     "a": "CU-PR-6.2",
+     "dato": "rol del usuario y permiso de editar inventario del operador"
+    },
+    {
+     "a": "CU-PR-6.4",
+     "dato": "rol del usuario y permiso de editar inventario del operador"
+    },
+    {
+     "a": "CU-PR-6.5",
+     "dato": "rol del usuario y permiso de editar inventario del operador"
+    },
+    {
+     "a": "CU-PR-9.1",
+     "dato": "rol del usuario con sesión"
+    },
+    {
+     "a": "CU-POR-6.1",
+     "dato": "rol del usuario con sesión: administrador y operador ven el selector, el colaborador entra a su portal"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador, un operador y un colaborador con sesión",
+     "cuando": "la aplicación pregunta quién es el usuario",
+     "entonces": "cada uno recibe su nombre, su rol, el estado de su cuenta y el nombre del negocio; el administrador recibe todos los permisos, el colaborador ninguno y el operador los que se le dieron (o todos si nunca se le limitaron); el colaborador recibe además su propia ficha de pago"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con permisos limitados",
+     "cuando": "el administrador le cambia los permisos",
+     "entonces": "el cambio vale en su siguiente consulta y en su siguiente petición, sin esperar a que venza su sesión"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una sesión vencida",
+     "cuando": "se pide quién es el usuario",
+     "entonces": "el sistema la renueva con su cuenta de Google o pide entrar de nuevo (CU-U-3.6)"
+    }
+   ],
+   "origen": [
+    "REQ-U7",
+    "REQ-U-8",
+    "REQ-PG1"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-93",
+    "INC-111"
+   ],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/sesiones",
+     "casos": [
+      "s1",
+      "s2",
+      "s3",
+      "s4"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "herramientas/pw/humo-pw",
+     "casos": [
+      "s1",
+      "s2",
+      "s3"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js",
+     "str-app-shell.html",
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/me"
+    ],
+    "colecciones": [
+     "usuario",
+     "cuenta",
+     "str-user",
+     "str-me-permisos-v1"
+    ],
+    "notas": "api/me/index.php + _permisosEfectivos (lib/session.php); STRApi.me, STRApi.rol, STRApi.puede (copia local str-me-permisos-v1, INC-93). sesiones.spec.js y humo-pw.spec.js solo comprueban que /api/me responde 200 con el rol de cada perfil de prueba (el escenario E2 no tiene prueba)."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-2.2",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "admin"
+   ],
+   "que": "Asignar a cada persona un solo rol: colaborador, operador o administrador",
+   "declarado": "construido",
+   "limitantes": [
+    "Cada persona tiene un solo rol, el del sistema: ni el menú ni las pantallas leen otro (INC-108, cerrado).",
+    "El rol de superadmin de plataforma existe en los datos como legado y vale como administrador; no tiene funciones propias (CU-U-2.10).",
+    "Un cambio de rol no corta de inmediato lo que la persona ya podía: el sistema usa el rol de su sesión hasta que venza (24 horas); la pantalla en cambio ya muestra el rol nuevo (posible incidente nuevo)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-2.6",
+     "dato": "rol de cada persona, que el sistema usa para decidir lo que puede hacer"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador editando a un colaborador",
+     "cuando": "cambia su rol a operador y guarda",
+     "entonces": "la persona queda como operador, con todos los permisos hasta que se le limiten, y al volver a entrar ve el menú de operador"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el administrador que crea a otro administrador",
+     "cuando": "lo invita",
+     "entonces": "solo un administrador puede invitar a otro administrador y esa invitación solo la acepta la cuenta de Google de su correo (CU-U-4.1 y CU-U-4.3)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador con «Editar equipo»",
+     "cuando": "intenta que alguien sea administrador u operador",
+     "entonces": "el sistema lo rechaza: solo el administrador asigna esos roles"
+    }
+   ],
+   "origen": [
+    "REQ-U-8",
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-108"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "ROLES_VALIDOS (superadmin, admin, operador, colaborador); PUT con tocaRolAlto; _rolEsAdmin y _invitarRolPermitido en lib/session.php. El servidor usa $auth[rol] del JWT, no el rol guardado."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor (usuarios y sesión) y de las pantallas (rol único, selector de rol en la ficha)"
+   }
+  },
+  {
+   "id": "CU-U-2.3",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "admin"
+   ],
+   "que": "Definir los permisos de un operador: todos, o solo «Tarifas y horas», «Editar equipo», «Invitar» y «Editar inventario»",
+   "declarado": "construido",
+   "limitantes": [
+    "Son cuatro permisos; el administrador no puede decidir qué módulos ve cada rol: hoy administrador y operador ven los mismos módulos (bolsa REQ-U7-permisos, «definir después»).",
+    "Solo el administrador define permisos y solo valen para el rol operador; el cambio vale desde la siguiente petición del operador.",
+    "Los permisos de ver el valor de los activos y de configurar Drive no se pueden dar (CU-U-2.8).",
+    "Los permisos de adelantos y de pagos que pide REQ-PG1-2 (entregado a Desarrollo, DA-37) todavía no existen."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-2.6",
+     "dato": "permisos del operador guardados, que el sistema lee en cada petición"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador editando a un operador",
+     "cuando": "desmarca «Todos los permisos», marca «Editar inventario» y guarda",
+     "entonces": "la persona queda con «permisos limitados»: puede editar inventario, pero no cambiar tarifas ni editar o invitar al equipo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador al que nunca se le definieron permisos",
+     "cuando": "el administrador abre su ficha",
+     "entonces": "aparece con «Todos los permisos» marcado"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador con «Editar equipo»",
+     "cuando": "intenta mandar permisos aunque no vea la sección",
+     "entonces": "el sistema lo rechaza: solo el administrador los define"
+    }
+   ],
+   "origen": [
+    "REQ-U7",
+    "REQ-INV1",
+    "REQ-U7-permisos",
+    "REQ-PG1-2",
+    "DA-37"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "_permisosSanear acepta solo todo, dinero.tarifas, equipo.editar, equipo.invitar e inventario.editar (REQ-INV1); usuario.permisos NULL = todo; _llenarPermisosForm, _leerPermisosForm y _mismosPermisos en Equipo."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (sección Permisos) y del servidor (_permisosSanear y _permisosEfectivos)"
+   }
+  },
+  {
+   "id": "CU-U-2.4",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "operador"
+   ],
+   "que": "Ocultar o deshabilitar en las pantallas lo que el permiso del operador no le da",
+   "declarado": "construido",
+   "limitantes": [
+    "Es solo la cara de la pantalla: quien decide es el sistema (CU-U-2.6).",
+    "El botón «Editar» de Equipo sigue a la vista sin el permiso (CU-U-1.4, INC-110)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador sin «Editar inventario»",
+     "cuando": "abre Inventario o la ficha de una propiedad",
+     "entonces": "ve la información sin controles de edición ni acciones de acceso a zonas"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador sin «Editar equipo» ni «Invitar»",
+     "cuando": "abre Equipo",
+     "entonces": "no ve «＋ Colaborador», el interruptor de estado queda deshabilitado, no puede guardar y no se le ofrece «Invitar»"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "un operador sin «Tarifas y horas»",
+     "cuando": "abre la ficha de pago de una persona",
+     "entonces": "la ve en solo lectura con el aviso «Sin permiso para cambiar tarifas»"
+    }
+   ],
+   "origen": [
+    "REQ-U7",
+    "REQ-INV1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-93"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-INV2-3-4",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-INV2-4-1-interfaz",
+     "casos": [
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ],
+     "fiable": false,
+     "nota": "INC-144: defecto del guion, no de la página (M-792)"
+    },
+    {
+     "guion": "REQ-INV2-7-1",
+     "casos": [
+      "l"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js",
+     "str-usuarios.html",
+     "str-inventario.html",
+     "str-propiedades.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-me-permisos-v1"
+    ],
+    "notas": "STRApi.puede(clave); _puedeUI en Equipo; _invPuedeEditar en Propiedades; _puedeEditar en Inventario. Las tres pruebas son guiones de Inventario: comprueban el efecto de no tener «Editar inventario»; ninguna prueba cubre E2 ni E3."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-2.5",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Cerrar a cada rol los módulos que no le corresponden y llevarlo a su inicio",
+   "declarado": "construido",
+   "limitantes": [
+    "Equipo, Propiedades, Calendario, Inventario, Flujos, Conocimiento, Housekeeping y el Tablero se abren a administrador y operador; las páginas de Proyecto y «Lo que viene» solo al administrador.",
+    "El colaborador nunca ve el menú del sistema: siempre va a su portal.",
+    "Es solo la cara de la pantalla: quien decide es el sistema (CU-U-2.6)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con sesión",
+     "cuando": "abre a mano una página de administración, por ejemplo el Tablero",
+     "entonces": "vuelve a su portal sin que se lea ningún dato de esa página"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador",
+     "cuando": "abre a mano «Lo que viene» o el seguimiento del proyecto",
+     "entonces": "vuelve al sistema sin ver nada: esas páginas son solo del administrador"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un rol sin permiso para un módulo que se abre dentro del menú",
+     "cuando": "el módulo carga",
+     "entonces": "ve «Sin permiso para este módulo» y no se carga ningún dato"
+    }
+   ],
+   "origen": [
+    "REQ-U-8",
+    "REQ-U6"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-109"
+   ],
+   "pruebas": [
+    {
+     "guion": "REQ-OP-1",
+     "casos": [
+      "g"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "REQ-SH-2",
+     "casos": [
+      "b2"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js",
+     "str-app-shell.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-user"
+    ],
+    "notas": "STRApi.exigirRol(roles) al inicio de cada módulo (window._strRolOk) y rolPermitido (superadmin cuenta como admin); script síncrono del shell que manda al colaborador a portal.html. El menú por rol (data-roles) es del Shell. E3 no tiene prueba."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-2.6",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Decidir en el sistema, en cada petición, qué puede hacer cada rol y cada operador, y rechazar lo demás",
+   "declarado": "construido",
+   "limitantes": [
+    "Las reglas están repartidas: cada ruta y cada tipo de dato decide por su cuenta con el rol de la sesión; no hay una tabla central de qué exige cada operación (el permiso de las horas por turno de una propiedad, por ejemplo, no se exige: CU-U-2.7).",
+    "El rol viaja con la sesión y se usa hasta que venza (24 horas); solo los permisos del operador se leen de la base en cada petición.",
+    "La lista de capacidades no exige ningún rol (CU-U-5.1)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-SRV-3.1",
+     "dato": "cada petición a algo protegido, que pide decidir si la persona puede",
+     "rel": "REL-27"
+    },
+    {
+     "de": "CU-U-2.2",
+     "dato": "rol de cada persona, que el sistema usa para decidir lo que puede hacer"
+    },
+    {
+     "de": "CU-U-2.3",
+     "dato": "permisos del operador guardados, que el sistema lee en cada petición"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SRV-3.1",
+     "dato": "rol de la sesión y permisos efectivos del operador, para permitir o rechazar la petición",
+     "rel": "REL-27"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con sesión",
+     "cuando": "pide algo que es solo del administrador (ensayo de restauración, diagnóstico o purga de prueba)",
+     "entonces": "el sistema lo rechaza por falta de permiso"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un operador con permisos limitados",
+     "cuando": "intenta cambiar las horas por defecto o el valor hora del negocio, o dar un rol que no le corresponde",
+     "entonces": "el sistema lo rechaza con el motivo; sus otros cambios sí se guardan"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador",
+     "cuando": "intenta escribir un dato que solo pueden escribir el administrador y el operador",
+     "entonces": "recibe el aviso de que no tiene permiso para escribir ahí y no se guarda nada"
+    }
+   ],
+   "origen": [
+    "REQ-U7",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-13",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-94"
+   ],
+   "pruebas": [
+    {
+     "guion": "DT-42",
+     "casos": [
+      "a"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "DT-41",
+     "casos": [
+      "c"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "INC-146-purga",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "api/lib/session.php",
+     "api/usuarios/index.php",
+     "api/col/index.php"
+    ],
+    "rutas": [
+     "(todas las rutas del API)"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "_puede($db,$auth,$clave) (lee usuario.permisos del operador en cada petición), _permisosEfectivos, rolesEscritura y comprobaciones de rol en cada ruta. Las tres pruebas son guiones de otras zonas que comprueban el 403 del operador en rutas de administrador; E2 y E3 no tienen prueba propia. Origen REL-27 del mapa: el id CU-SRV-3.1 es provisional."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-2.7",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "operador"
+   ],
+   "que": "Impedir que un operador sin «Tarifas y horas» cambie las horas por turno o el valor hora",
+   "declarado": "parcial",
+   "limitantes": [
+    "El sistema lo exige para los valores del negocio y para cada turno y apoyo, pero no para las horas por turno de una propiedad: un operador sin el permiso puede cambiarlas y con ellas lo que se paga (INC-157, abierto, crítico, P2).",
+    "La ficha de la propiedad tampoco deshabilita el campo de horas por turno para ese operador."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador sin «Tarifas y horas»",
+     "cuando": "cambia el valor hora general del negocio, las horas por defecto o las horas y el valor hora de un turno o de un apoyo",
+     "entonces": "el sistema lo rechaza con el aviso de que no tiene permiso para cambiar horas ni valor hora"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "ese mismo operador",
+     "cuando": "cambia la tolerancia u otros ajustes del negocio",
+     "entonces": "se guardan: solo las horas y el valor hora están protegidos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "ese mismo operador",
+     "cuando": "cambia las horas por turno en la ficha de una propiedad",
+     "entonces": "hoy se guarda y con ello cambia lo que se paga (INC-157); debería rechazarse como en los demás casos"
+    }
+   ],
+   "origen": [
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-157"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "api/col/index.php",
+     "str-propiedades.html"
+    ],
+    "rutas": [
+     "/api/col/hk-config",
+     "/api/col/turnos",
+     "/api/col/propiedades"
+    ],
+    "colecciones": [
+     "hk-config",
+     "turnos",
+     "propiedades"
+    ],
+    "notas": "api/col/index.php: bloque hk-config (valorHoraGeneral, turnoHorasPorDefecto, apoyoHorasPorDefecto) y _colTurnoCambiaDinero en turnos; sin control equivalente en propiedades (horasTurno). STRApi._horasDeTurno: turno › propiedad › negocio › 7."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor (hk-config, turnos y propiedades) y de la ficha de propiedad, y del informe INC-157"
+   }
+  },
+  {
+   "id": "CU-U-2.8",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "admin"
+   ],
+   "que": "Dar a un operador los permisos de ver el valor de los activos y de configurar la copia a Drive",
+   "declarado": "no-construido",
+   "limitantes": [
+    "DA-42 decidió que el valor de compra de un activo lo ve el administrador y el operador con un permiso aparte; ese permiso no existe todavía y el sistema solo acepta cuatro permisos (REQ-INV2-6-1 está entregado a Desarrollo, no construido).",
+    "El permiso de configurar Drive aparece en el texto de REQ-K3-2 y en el aviso del corte, pero tampoco se puede dar."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador editando a un operador limitado",
+     "cuando": "marca «Ver el valor de los activos»",
+     "entonces": "el operador ve el valor de compra en la ficha del activo; sin la marca, el sistema no se lo envía"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un administrador editando a un operador limitado",
+     "cuando": "marca «Configurar Drive»",
+     "entonces": "el operador ve el aviso del corte mensual con un texto en vez del enlace de conexión, que sigue siendo solo del administrador"
+    }
+   ],
+   "origen": [
+    "REQ-INV2-6-1",
+    "DA-42",
+    "REQ-K3-2"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html",
+     "api/usuarios/index.php"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "_permisosSanear descarta cualquier clave que no sea las cuatro conocidas; el código de Drive no estaba entre las fuentes."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura de _permisosSanear y de la sección Permisos de Equipo (solo cuatro claves); REQ-INV2-6-1 y DA-42 en el diseño"
+   }
+  },
+  {
+   "id": "CU-U-2.9",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "operador"
+   ],
+   "que": "Limitar a un operador a las propiedades que le asigne el administrador",
+   "declarado": "no-construido",
+   "limitantes": [
+    "Hoy el operador ve y edita todas las propiedades (CU-PR-9.4 en Propiedades); salió del criterio 10 de OP-1 como idea (T-15)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un operador con propiedades asignadas",
+     "cuando": "abre cualquier módulo",
+     "entonces": "solo ve y opera lo de esas propiedades"
+    }
+   ],
+   "origen": [
+    "REQ-OP-1"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [
+    "T-15"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "No hay campo ni regla de propiedades por operador."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código: ni usuario.permisos ni las colecciones guardan propiedades por operador; T-15 en la bolsa"
+   }
+  },
+  {
+   "id": "CU-U-2.10",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "admin"
+   ],
+   "que": "Administrar la plataforma como superadmin, aparte de los administradores de cada negocio",
+   "declarado": "no-construido",
+   "limitantes": [
+    "REQ-U-8: el superadmin no tiene funciones ni módulo todavía; se creará como usuario aparte cuando existan. Hoy todo administrador ve lo de plataforma y el rol superadmin guardado vale como administrador (bolsa REQ-U8-superadmin: definir cuando haya clientes reales)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un superadmin de plataforma",
+     "cuando": "entra",
+     "entonces": "ve y gestiona los negocios cliente; el administrador de un negocio no ve lo de plataforma"
+    }
+   ],
+   "origen": [
+    "REQ-U-8",
+    "REQ-U8-superadmin"
+   ],
+   "reglas": [
+    "RT-13"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "El rol superadmin se acepta en ROLES_VALIDOS y cuenta como admin en _puede, _rolPermitido y el menú; no tiene pantallas ni rutas propias."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código: superadmin se trata como administrador en el servidor y en el cliente, sin funciones propias"
+   }
+  },
+  {
+   "id": "CU-U-2.11",
+   "capacidad": "CAP-U-2",
+   "actor": [
+    "propietario"
+   ],
+   "que": "Dar cuenta o rol a un propietario de terceros",
+   "declarado": "fuera-de-alcance",
+   "limitantes": [
+    "DA-8: el propietario de terceros no es usuario con cuenta, es un contacto; DA-6: no se migran sus propiedades a otro negocio por ahora (se reabre si aparece un caso real)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un propietario de terceros que quiere gestionar sus propiedades en el sistema",
+     "cuando": "se le atiende",
+     "entonces": "no tiene cuenta ni rol: sigue como contacto y, a lo sumo, recibirá un informe periódico"
+    }
+   ],
+   "origen": [
+    "REQ-U5",
+    "DA-6",
+    "DA-8"
+   ],
+   "reglas": [
+    "RT-15"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "No hay rol propietario en ROLES_VALIDOS."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código (ROLES_VALIDOS no incluye propietario) y de DA-6 y DA-8 en el diseño"
+   }
+  },
+  {
+   "id": "CU-U-3.1",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Entrar con la cuenta de Google y quedar vinculado a la persona del equipo que tiene ese correo",
+   "declarado": "construido",
+   "limitantes": [
+    "Una persona creada sin acceso propio (nunca invitada) no se vincula sola por su correo: necesita una invitación (CU-U-4.1).",
+    "La sesión que se obtiene dura 24 horas (CU-U-3.6).",
+    "El correo se compara sin distinguir mayúsculas."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.5",
+     "dato": "estado de la persona (activa o inactiva), que decide si puede entrar"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-3.10",
+     "dato": "sesión de la persona que acaba de entrar, con su rol, para llevarla a su inicio"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona del equipo con acceso y con su correo registrado",
+     "cuando": "toca «Continuar con Google» y elige su cuenta",
+     "entonces": "entra y el sistema la lleva a su inicio según su rol (CU-U-3.10); la primera vez queda vinculada su cuenta de Google y se anota la fecha de activación"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona que ya había entrado antes",
+     "cuando": "vuelve a entrar con la misma cuenta de Google",
+     "entonces": "el sistema la reconoce por esa cuenta, aunque el correo de su ficha haya cambiado"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona desactivada",
+     "cuando": "intenta entrar",
+     "entonces": "recibe «Tu cuenta está desactivada» y no entra"
+    }
+   ],
+   "origen": [
+    "REQ-U-8",
+    "REQ-U4"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-15",
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/sesiones",
+     "casos": [
+      "s1",
+      "s2",
+      "s3",
+      "s4"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "login.html"
+    ],
+    "rutas": [
+     "/api/login",
+     "/api/me"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "handleGoogleLogin (signInWithPopup) → onAuthStateChanged → _apiLoginWithFirebase → POST /api/login {firebase_id_token}; api/auth/login.php busca por firebase_uid y, si no, por email solo con es_cuenta = 1 (guarda firebase_uid y activado_en), y rechaza estado inactivo; _emitirSesion emite el JWT de 24 h (REL-23). sesiones.spec.js solo comprueba que /api/me responde 200 con el rol de cada perfil de prueba (recupera la sesión con «Continuar con Google» únicamente si cayó en la entrada); E2 y E3 no tienen prueba propia."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-3.2",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Entrar con el correo y la contraseña propios",
+   "declarado": "construido",
+   "limitantes": [
+    "La contraseña es la de la cuenta de Google de la persona: no hay contraseñas propias del sistema en la pantalla de entrada.",
+    "El sistema aún acepta entrar con una contraseña propia guardada en su ficha (cuentas anteriores a Google), pero la pantalla de entrada no usa esa vía y ninguna pantalla permite crear esa contraseña: es un resto candidato a retirar."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-3.10",
+     "dato": "sesión de la persona que acaba de entrar, con su rol, para llevarla a su inicio"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con acceso que creó su contraseña al aceptar su invitación",
+     "cuando": "escribe su correo y su contraseña y toca «Ingresar»",
+     "entonces": "entra y el sistema la lleva a su inicio según su rol (CU-U-3.10)"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un correo o una contraseña equivocados",
+     "cuando": "toca «Ingresar»",
+     "entonces": "ve «Correo o contraseña incorrectos.»; tras muchos intentos ve «Demasiados intentos. Espera unos minutos.» y sin internet ve «Sin conexión a internet.»"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "login.html"
+    ],
+    "rutas": [
+     "/api/login"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "handleLogin → signInWithEmailAndPassword; el resto del flujo es el de CU-U-3.1. api/auth/login.php conserva la rama email + contraseña con bcrypt (password_hash) que login.html no llama; str-usuarios.html no manda password."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla de entrada (handleLogin y mensajes de error) y de la rama de contraseña propia en api/auth/login.php"
+   }
+  },
+  {
+   "id": "CU-U-3.3",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Pedir por correo el restablecimiento de la contraseña",
+   "declarado": "construido",
+   "limitantes": [],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona que olvidó su contraseña y escribió su correo",
+     "cuando": "toca «¿Olvidaste tu contraseña?»",
+     "entonces": "recibe un correo para restablecerla y ve «Te enviamos un correo para restablecer tu contraseña.»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "el correo sin escribir",
+     "cuando": "toca «¿Olvidaste tu contraseña?»",
+     "entonces": "ve «Escribe tu correo arriba y vuelve a intentar.» y no se envía nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un correo que Google no puede atender",
+     "cuando": "toca «¿Olvidaste tu contraseña?»",
+     "entonces": "ve «No se pudo enviar el correo. Verifica que sea correcto.»"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "login.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "handleForgotPassword → sendPasswordResetEmail (Firebase); el sistema no interviene."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla de entrada (handleForgotPassword)"
+   }
+  },
+  {
+   "id": "CU-U-3.4",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Explicar por qué no se pudo entrar y ofrecer reintentar o usar otra cuenta",
+   "declarado": "construido",
+   "limitantes": [
+    "Quien no fue reconocido sigue viendo en la pantalla el enlace «Primer arranque: crear negocio», que confunde (idea en la bolsa de Acceso, sin identificador).",
+    "El aviso de cuenta no reconocida no dice con qué correo de Google se intentó."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una cuenta de Google que Google aceptó pero que no está en el equipo",
+     "cuando": "intenta entrar",
+     "entonces": "ve «No tienes una cuenta activa en STR Manager. Pide una invitación a tu administrador.» con el botón «Usar otra cuenta»; no pasa al sistema"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "el sistema no responde o falla la red",
+     "cuando": "se intenta entrar",
+     "entonces": "ve un aviso de que no se pudo conectar, con «Reintentar» y «Usar otra cuenta», y no pasa al sistema sin sesión"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una cuenta desactivada",
+     "cuando": "intenta entrar",
+     "entonces": "ve «Tu cuenta está desactivada» con «Usar otra cuenta»"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-15",
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "login.html"
+    ],
+    "rutas": [
+     "/api/login"
+    ],
+    "colecciones": [],
+    "notas": "_intentarApiLogin y _mostrarErrorLogin: con 403 muestra el mensaje del API y «Usar otra cuenta» (signOut); con 5xx o red muestra «Reintentar» y «Usar otra cuenta» y nunca navega sin token (INC-56, que no está en seguimiento.json)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla de entrada y de los mensajes de api/auth/login.php"
+   }
+  },
+  {
+   "id": "CU-U-3.5",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Frenar el ir y venir entre la pantalla de entrada y el sistema cuando la sesión no se puede completar",
+   "declarado": "construido",
+   "limitantes": [
+    "El freno solo cuenta los intentos automáticos; un toque explícito en «Ingresar», «Continuar con Google» o «Reintentar» nunca cuenta.",
+    "Pasar cinco veces por el portal comprueba que Housekeeping ya no provoca el bucle; el freno de la pantalla de entrada en sí no tiene prueba propia."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con la cuenta de Google abierta pero sin sesión del sistema",
+     "cuando": "la pantalla de entrada intenta entrar sola tres veces en menos de 30 segundos",
+     "entonces": "al tercer intento deja de probar sola y muestra «Detectamos varios inicios de sesión automáticos seguidos» con «Reintentar» y «Usar otra cuenta»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una pantalla del sistema que pide sesión, a los pocos segundos de haber estado en la entrada",
+     "cuando": "no encuentra sesión",
+     "entonces": "no devuelve a la persona a la entrada: muestra el aviso fijo «Tu sesión no está activa» con el enlace «Iniciar sesión»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el colaborador abre el portal cinco veces en menos de 30 segundos",
+     "cuando": "Housekeeping arranca dentro del portal",
+     "entonces": "ninguna apertura pasa por la pantalla de entrada y las cinco cargan"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [
+    "INC-140"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-140",
+     "casos": [
+      "b"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "login.html",
+     "str-api.js",
+     "str-app-shell.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-login-autos",
+     "str-login-visitado-en"
+    ],
+    "notas": "_registrarAutoInicio (sessionStorage, ventana de 30 s, más de 2 → freno), STRApi.recienEnLogin (menos de 5 s) y STRApi.avisoSinSesion; el Housekeeping embebido ya no navega a login.html (INC-140). INC-56 no está en seguimiento.json: solo aparece aquí."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-3.6",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Renovar sola la sesión vencida (dura 24 horas) mientras la cuenta de Google siga abierta",
+   "declarado": "construido",
+   "limitantes": [
+    "Espera hasta 8 segundos a que Google recupere la cuenta guardada antes de renovar.",
+    "La renovación pasa por la misma comprobación de la entrada: si la cuenta se desactivó o dejó de existir, ya no se renueva (así surte efecto una baja, hasta 24 horas después)."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-3.7",
+     "dato": "renovación fallida: la sesión no se pudo recuperar"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con la cuenta de Google abierta cuya sesión del sistema venció",
+     "cuando": "abre el sistema o pide algo",
+     "entonces": "la sesión se renueva sola, una renovación a la vez, y la persona sigue sin ver «Entrar» ni aviso rojo"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona con la cuenta de Google abierta y sin sesión del sistema guardada",
+     "cuando": "abre el menú principal",
+     "entonces": "el sistema pide la sesión en segundo plano y, al llegar, repinta la barra y el menú con su nombre y su rol"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona cuya cuenta de Google ya no está abierta",
+     "cuando": "la sesión venció y pide algo",
+     "entonces": "no se renueva y ve «Sesión vencida · Entrar» (CU-U-3.7)"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [
+    "INC-134"
+   ],
+   "pruebas": [
+    {
+     "guion": "INC-134",
+     "casos": [
+      "a",
+      "b"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js",
+     "str-app-shell.html",
+     "str-usuarios.html",
+     "str-m1-housekeeping.html"
+    ],
+    "rutas": [
+     "/api/login",
+     "/api/me"
+    ],
+    "colecciones": [
+     "str-token",
+     "str-user"
+    ],
+    "notas": "window._strRenewApiSession (shell, Equipo y Housekeeping); str-api.js la llama una sola vez ante un 401 y las páginas embebidas usan la de window.top; authStateReady con tope de 8 s (INC-134). REL-02 y REL-23."
+   },
+   "confianza": "alta"
+  },
+  {
+   "id": "CU-U-3.7",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Avisar que la sesión venció, o que no hay sesión, cuando no se puede renovar",
+   "declarado": "construido",
+   "limitantes": [
+    "Si se acaba de pasar por la entrada (menos de 5 segundos), en vez de redirigir se muestra el aviso fijo de CU-U-3.5."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-3.6",
+     "dato": "renovación fallida: la sesión no se pudo recuperar"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-SH-1.1",
+     "dato": "aviso de que el módulo abierto no tiene sesión, para que el menú principal decida a dónde llevar a la persona",
+     "rel": "REL-02"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una sesión vencida que no se pudo renovar",
+     "cuando": "una pantalla pide datos",
+     "entonces": "se borra la sesión guardada y aparece una franja roja «Sesión vencida · Entrar» con el enlace a la entrada, que vuelve a la misma página"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un módulo que se abre sin sesión",
+     "cuando": "se abre directo o dentro del menú principal o del portal",
+     "entonces": "abierto directo, lleva a la entrada con la página de destino; dentro del menú principal o del portal no se redirige: avisa al contenedor «sin sesión» y este decide"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-api.js",
+     "str-app-shell.html",
+     "portal.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-token",
+     "str-user"
+    ],
+    "notas": "showExpiredBanner y _giveUp (str-api.js, tras el 401 sin renovación) y STRApi.requireSession(next) con postMessage str:sin-sesion hacia el padre cuando está embebido (REL-02). El id CU-SH-1.1 es provisional."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de str-api.js (request, _giveUp, requireSession) y de los oyentes de str:sin-sesion en el menú principal y el portal"
+   }
+  },
+  {
+   "id": "CU-U-3.8",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Cerrar la sesión",
+   "declarado": "construido",
+   "limitantes": [
+    "En el menú principal hay dos botones de salir con el mismo símbolo: uno cierra la cuenta de Google y otro solo la sesión del sistema; ninguno de los dos hace las dos cosas (el portal sí, CU-POR-5.2).",
+    "«Cerrar sesión» del menú principal cierra la cuenta de Google pero deja guardadas en el aparato la sesión del sistema y las copias del equipo (con correos, teléfonos y fichas de pago) hasta que la sesión venza, 24 horas (posible incidente nuevo)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador en el portal",
+     "cuando": "toca «Salir»",
+     "entonces": "se borra su sesión del aparato, se cierra su cuenta de Google y vuelve a la entrada"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un administrador o un operador en el menú principal",
+     "cuando": "toca «Cerrar sesión»",
+     "entonces": "se cierra su cuenta de Google y vuelve a la entrada"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una persona en el menú principal",
+     "cuando": "toca el otro botón de salir, el de la sesión del sistema",
+     "entonces": "se borra solo la sesión del sistema: la cuenta de Google queda abierta y, al recargar, la sesión se renueva sola"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html",
+     "portal.html",
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "str-token",
+     "str-user",
+     "str-me-permisos-v1",
+     "str-usuarios-v1"
+    ],
+    "notas": "portal.html handleSalir → STRApi.logout (clearSession + _strFirebaseSignOut); shell: doLogout solo hace signOut(auth) y location.replace(login.html), y apiLogout solo borra str-token y str-user y repinta (no toca str-me-permisos-v1 ni str-usuarios-v1)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del menú principal (doLogout, apiLogout), del portal (handleSalir) y de STRApi.logout"
+   }
+  },
+  {
+   "id": "CU-U-3.9",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin"
+   ],
+   "que": "Crear el negocio y su primer administrador en el primer arranque",
+   "declarado": "construido",
+   "limitantes": [
+    "Sirve solo para la primera instalación: con usuarios ya creados el sistema responde que ya existe un negocio. El alta de negocios clientes nuevos no tiene puerta todavía (idea en la bolsa de Acceso, sin identificador).",
+    "En una base como la de producción la creación del negocio fallaría porque no asigna plan (DT-46, abierta); hoy es inofensivo porque ya hay usuarios.",
+    "La pantalla pide «crear tu acceso» arriba con el mismo correo, pero ese formulario solo entra con una cuenta de Google o de correo que ya existe: no queda claro cómo se crea (duda para Diseño y Desarrollo)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un sistema sin ningún negocio ni usuario",
+     "cuando": "se abre «Primer arranque: crear negocio», se escriben el nombre del negocio, el nombre, el correo y la contraseña y se toca «Crear negocio»",
+     "entonces": "se crean el negocio y su primer administrador y se avisa «Negocio creado. Ahora crea tu acceso (arriba) con el mismo correo para entrar al panel.»"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "ya existe un negocio",
+     "cuando": "se intenta crear otro",
+     "entonces": "se avisa «Ya existe un negocio, inicia sesión.» y no se crea nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "algún campo vacío",
+     "cuando": "se toca «Crear negocio»",
+     "entonces": "se avisa «Completa todos los campos.» y no se envía nada"
+    }
+   ],
+   "origen": [],
+   "reglas": [
+    "RT-1",
+    "RT-16"
+   ],
+   "pendientes": [
+    "DT-46"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "login.html"
+    ],
+    "rutas": [
+     "/api/setup"
+    ],
+    "colecciones": [
+     "cuenta",
+     "usuario"
+    ],
+    "notas": "handleSetup → POST /api/setup {cuenta_nombre, nombre, email, password}; 403 si ya hay usuarios (L14–19 según DT-46); el código de api/setup/index.php no estaba entre las fuentes: lo descrito sale de la pantalla y de la nota de DT-46."
+   },
+   "confianza": "baja",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla de entrada (handleSetup, toggleSetup) y de la nota de DT-46; el servidor del alta no se leyó"
+   }
+  },
+  {
+   "id": "CU-U-3.10",
+   "capacidad": "CAP-U-3",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Llevar a cada persona a su inicio según su rol y respetar la página a la que iba, solo si es propia",
+   "declarado": "construido",
+   "limitantes": [
+    "El colaborador nunca ve el menú principal: aunque llegue a él, lo devuelve a su portal (CU-U-2.5)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-3.1",
+     "dato": "sesión de la persona que acaba de entrar, con su rol, para llevarla a su inicio"
+    },
+    {
+     "de": "CU-U-3.2",
+     "dato": "sesión de la persona que acaba de entrar, con su rol, para llevarla a su inicio"
+    },
+    {
+     "de": "CU-U-4.3",
+     "dato": "sesión de la persona que acaba de activar su cuenta, con su rol, para llevarla a su inicio"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona que acaba de entrar",
+     "cuando": "la entrada termina",
+     "entonces": "el colaborador va a su portal y el administrador y el operador al menú principal"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona que llegó a la entrada desde un enlace a una página del sistema",
+     "cuando": "entra",
+     "entonces": "vuelve a esa página, también si el enlace traía la dirección completa del mismo sitio (se reduce al nombre de la página)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un enlace de entrada cuyo destino es de otro sitio",
+     "cuando": "entra",
+     "entonces": "se ignora el destino y va a su inicio, para no abrir una puerta a sitios ajenos"
+    }
+   ],
+   "origen": [
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "login.html",
+     "invitacion.html",
+     "str-api.js"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "STRApi.rutaInicio(user) (colaborador → portal.html, los demás → str-app-shell.html) y _validNext/_nextUrl en login.html (ruta propia o archivo.html; una URL absoluta del mismo origen se reduce a archivo.html?query#hash; de otro origen da null)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de str-api.js (rutaInicio) y de la pantalla de entrada (_validNext, _nextUrl)"
+   }
+  },
+  {
+   "id": "CU-U-4.1",
+   "capacidad": "CAP-U-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Invitar a una persona del equipo con un enlace propio de un solo uso que vence en 7 días",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo un administrador invita a otro administrador: a un operador con «Invitar» el sistema le responde que no puede.",
+    "El enlace se muestra una sola vez; el sistema solo guarda una huella, así que si se pierde hay que reinvitar.",
+    "La pantalla ofrece Invitar solo a quien aún no tiene la cuenta activa, pero el sistema acepta reinvitar a una persona ya activa: esa invitación, aceptada con otra cuenta de Google, reemplaza la cuenta vinculada. Un operador con solo «Invitar» podría así quedarse con la cuenta de otro operador con más permisos (posible incidente nuevo).",
+    "La dirección del enlace es una sola, escrita en el sistema, igual para todos los negocios."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-1.3",
+     "dato": "persona nueva con su correo, lista para invitar"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-4.2",
+     "dato": "enlace de invitación con su vencimiento, para compartirlo con la persona"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona del equipo sin cuenta y con su correo registrado",
+     "cuando": "el administrador, o un operador con «Invitar», toca «✉ Invitar»",
+     "entonces": "se genera un enlace propio de esa persona que vence en 7 días, su tarjeta pasa a «invitado · vence …» y se ofrece compartirlo (CU-U-4.2)"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona que ya tiene una invitación pendiente o vencida",
+     "cuando": "se toca «✉ Reinvitar»",
+     "entonces": "se genera otro enlace y el anterior deja de servir"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona sin correo registrado",
+     "cuando": "se toca «✉ Invitar»",
+     "entonces": "se avisa que necesita un correo y se abre su ficha para escribirlo; no se genera nada"
+    }
+   ],
+   "origen": [
+    "REQ-U4",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-14",
+    "RT-15",
+    "RT-16"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}/invitar"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "abrirInvitar → STRApi.usuarios.invitar → POST /usuarios/{id}/invitar: random_bytes(32) en base64url, solo se guarda sha256 en invitacion_hash, invitacion_expira = +7 días UTC e invitado_en; _invitarRolPermitido (solo admin invita admin) y _puede(equipo.invitar); 422 si no hay email. El botón se pinta solo si estadoCuenta != activo (esFilaAdmin exige rol admin). Origen DA-10, que no está en diseno.json."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (abrirInvitar, botón por fila) y del servidor (POST invitar, _invitarRolPermitido)"
+   }
+  },
+  {
+   "id": "CU-U-4.2",
+   "capacidad": "CAP-U-4",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Compartir el enlace de invitación con la persona por mensaje o por WhatsApp",
+   "declarado": "construido",
+   "limitantes": [
+    "El sistema no envía nada por sí mismo: quien invita manda el mensaje.",
+    "El mensaje dice «Crea tu contraseña» aunque la persona también puede entrar con su cuenta de Google."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-4.1",
+     "dato": "enlace de invitación con su vencimiento, para compartirlo con la persona"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-4.3",
+     "dato": "enlace de invitación entregado a la persona invitada"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un enlace de invitación recién generado",
+     "cuando": "se toca «📋 Copiar mensaje»",
+     "entonces": "se copia un mensaje listo («Hola …, te invito a STR Manager de … Crea tu contraseña aquí (vence el …)») con el enlace y su vencimiento"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona con teléfono registrado",
+     "cuando": "se toca «📱 Abrir WhatsApp»",
+     "entonces": "se abre WhatsApp con el mensaje para ese número (agrega el 57 si trae 10 dígitos)"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un aparato que no deja copiar",
+     "cuando": "se toca «📋 Copiar mensaje»",
+     "entonces": "se avisa «No se pudo copiar» y el enlace sigue a la vista para copiarlo a mano"
+    }
+   ],
+   "origen": [
+    "REQ-U4"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [],
+    "colecciones": [],
+    "notas": "_copiarMensajeInvitacion (navigator.clipboard) y _abrirWhatsappInvitacion (wa.me con 57 + 10 dígitos)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (modal de invitación)"
+   }
+  },
+  {
+   "id": "CU-U-4.3",
+   "capacidad": "CAP-U-4",
+   "actor": [
+    "invitado"
+   ],
+   "que": "Aceptar la invitación creando la contraseña o con la cuenta de Google, y quedar con la cuenta activa",
+   "declarado": "construido",
+   "limitantes": [
+    "Para operador y colaborador no se exige que el correo de Google sea el invitado: quien tenga el enlace vincula la cuenta de Google que quiera (el enlace es la prueba).",
+    "No se pide aceptar términos de privacidad al registrarse (idea T-14, DA-45 la complementa).",
+    "La página de invitación no estaba entre las fuentes: lo descrito sale del sistema que la atiende y del mapa técnico."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-4.2",
+     "dato": "enlace de invitación entregado a la persona invitada"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-3.10",
+     "dato": "sesión de la persona que acaba de activar su cuenta, con su rol, para llevarla a su inicio"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona invitada con un enlace vigente",
+     "cuando": "abre el enlace, ve su nombre, el negocio y el vencimiento, y crea su contraseña o entra con Google",
+     "entonces": "su cuenta queda activa y vinculada, el enlace deja de servir y entra directo a su inicio (CU-U-3.10)"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "la invitación de un administrador",
+     "cuando": "se acepta con una cuenta de Google de otro correo",
+     "entonces": "se rechaza con «Esta invitación es para … Entra con esa cuenta de Google.»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una cuenta de Google que ya está vinculada a otra persona",
+     "cuando": "se acepta la invitación con ella",
+     "entonces": "se rechaza con «Esa cuenta ya está vinculada a otro usuario»"
+    }
+   ],
+   "origen": [
+    "REQ-U4",
+    "REQ-U-8"
+   ],
+   "reglas": [
+    "RT-13",
+    "RT-15",
+    "RT-16"
+   ],
+   "pendientes": [
+    "T-14"
+   ],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "invitacion.html"
+    ],
+    "rutas": [
+     "/api/invitacion/{token}",
+     "/api/invitacion/aceptar"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "GET /invitacion/{token} (nombre, email, cuenta, expira) y POST /invitacion/aceptar {token, firebase_id_token}; una transacción fija firebase_uid, es_cuenta = 1 y activado_en y limpia invitacion_hash e invitacion_expira; _invitacionCorreoValido (solo admin) y 409 por firebase_uid duplicado; responde como /api/login. invitacion.html no se leyó."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del servidor (api/invitacion/index.php y _invitacionCorreoValido) y del mapa técnico; la página no se leyó"
+   }
+  },
+  {
+   "id": "CU-U-4.4",
+   "capacidad": "CAP-U-4",
+   "actor": [
+    "invitado"
+   ],
+   "que": "Rechazar el enlace de invitación vencido, ya usado, reemplazado o que no existe",
+   "declarado": "construido",
+   "limitantes": [
+    "No se puede distinguir un enlace usado de uno inventado (decidido así para no dar pistas)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un enlace que venció (más de 7 días)",
+     "cuando": "se abre",
+     "entonces": "se avisa «La invitación venció; pide una nueva» y no se puede aceptar"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un enlace que ya se usó, que una reinvitación reemplazó o que nunca existió",
+     "cuando": "se abre",
+     "entonces": "se avisa «Invitación no válida» sin distinguir entre esos casos"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "una persona desactivada con un enlace vigente",
+     "cuando": "se abre",
+     "entonces": "se avisa «Invitación no válida»: solo se reconocen invitaciones de personas activas"
+    }
+   ],
+   "origen": [
+    "REQ-U4"
+   ],
+   "reglas": [
+    "RT-15"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "invitacion.html"
+    ],
+    "rutas": [
+     "/api/invitacion/{token}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "_invitacionBuscar por hash sha256 con activo = 1 (404 «Invitación no válida»); invitacion_expira vencida → 410."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del servidor (api/invitacion/index.php, GET y aceptar)"
+   }
+  },
+  {
+   "id": "CU-U-5.1",
+   "capacidad": "CAP-U-5",
+   "actor": [
+    "admin",
+    "operador",
+    "colaborador"
+   ],
+   "que": "Ver el catálogo de capacidades del negocio con su nombre y su ícono",
+   "declarado": "construido",
+   "limitantes": [
+    "La lista no exige ningún rol: cualquier persona con sesión, también el colaborador, puede pedirla (CU-U-2.6)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un negocio con varias capacidades definidas",
+     "cuando": "se abre Equipo o la ficha de una persona",
+     "entonces": "se listan las capacidades por nombre, cada una con su ícono, para filtrar y para marcar a cada persona"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un negocio sin capacidades",
+     "cuando": "se abre la ficha de una persona",
+     "entonces": "dice «Sin capacidades configuradas aún.» y remite a ⚙ Capacidades"
+    }
+   ],
+   "origen": [
+    "REQ-U4"
+   ],
+   "reglas": [
+    "RT-1"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/capacidades"
+    ],
+    "colecciones": [
+     "capacidad",
+     "str-capacidades-v1"
+    ],
+    "notas": "GET /capacidades (id, nombre, icon de la cuenta, por nombre); _syncWithApi copia la lista a str-capacidades-v1."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del servidor (GET de api/capacidades) y de la pantalla (_renderCapFilter, _syncWithApi)"
+   }
+  },
+  {
+   "id": "CU-U-5.2",
+   "capacidad": "CAP-U-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Crear, renombrar y quitar capacidades del catálogo",
+   "declarado": "construido",
+   "limitantes": [
+    "El sistema no pide rol para crear, renombrar ni quitar capacidades: un colaborador con sesión que lo pida por fuera de la pantalla puede hacerlo (posible incidente nuevo).",
+    "Quitar una capacidad la borra del catálogo (no se desactiva), a diferencia de lo que pide RT-5; solo se protege la que alguien tiene.",
+    "El sistema no valida el nombre al renombrar (por fuera de la pantalla puede quedar vacío) y crear otra con un nombre que da el mismo identificador falla con un error genérico."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador en Equipo",
+     "cuando": "toca «⚙ Capacidades», «＋ Nueva capacidad», escribe el nombre (y un ícono si quiere) y guarda",
+     "entonces": "la capacidad queda en el catálogo y disponible para marcarla en cada persona; sin ícono usa 🏷"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una capacidad que ninguna persona tiene",
+     "cuando": "se toca «✕»",
+     "entonces": "se quita del catálogo; si alguna persona la tiene, el botón está deshabilitado («Tiene colaboradores asignados») y, por fuera de la pantalla, el sistema responde «Capacidad en uso por un colaborador»"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el nombre vacío",
+     "cuando": "se intenta guardar",
+     "entonces": "no se guarda y se avisa «Ingresa el nombre de la capacidad»"
+    }
+   ],
+   "origen": [
+    "REQ-U4"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-5",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/capacidades",
+     "/api/capacidades/{id}"
+    ],
+    "colecciones": [
+     "capacidad"
+    ],
+    "notas": "openCapsModal, saveCapsForm y deleteCap; api/capacidades: POST con _capSlug(nombre) como id, PUT que fija nombre e icon sin validar, DELETE con 409 si alguna usuario.capacidades la lleva; ninguno de los cuatro métodos lee el rol del JWT."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del servidor (POST, PUT y DELETE de api/capacidades, sin comprobación de rol) y de la pantalla (modal de capacidades)"
+   }
+  },
+  {
+   "id": "CU-U-5.3",
+   "capacidad": "CAP-U-5",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Marcar a cada persona como capacitada o nueva en cada capacidad",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo hay dos niveles, «capacitado» y «nuevo»; el nivel no cambia solo con los turnos hechos."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la ficha de una persona",
+     "cuando": "marca una capacidad y elige «Capacitado» o «Nuevo»",
+     "entonces": "la persona queda con esa capacidad y ese nivel; en su tarjeta se ve «· nuevo» si lo es"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona que tiene una capacidad",
+     "cuando": "se desmarca y se guarda",
+     "entonces": "deja de tener esa capacidad"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "una persona marcada «Nuevo» en limpieza",
+     "cuando": "se la asigna como titular de un turno de limpieza",
+     "entonces": "Housekeeping avisa que no tiene experiencia (CU-HK-1.4)"
+    }
+   ],
+   "origen": [
+    "REQ-U4"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "cm-cap-chk-<id> y cm-nivel-<id> en el modal de edición; saveCollab manda capacidades solo si cambiaron (usuario.capacidades = [{id, nivel}])."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (openCollabModal, saveCollab) y del servidor (PUT parcial con capacidades)"
+   }
+  },
+  {
+   "id": "CU-U-6.1",
+   "capacidad": "CAP-U-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Definir la ficha de pago de una persona: modalidad, política de horas y tarifa por hora con su fecha de inicio",
+   "declarado": "construido",
+   "limitantes": [
+    "Las tarifas solo se agregan: nunca se borra una; lo registrado queda como historial.",
+    "La política «solo horas reales» paga lo trabajado y no lleva saldo; «banco de horas» paga lo planificado y lleva el saldo (CU-U-6.4).",
+    "La fecha desde la que cuenta el saldo se fija al crear la ficha y la pantalla no deja cambiarla después.",
+    "Al crear una persona, el valor hora se precarga con el valor hora general del negocio si existe."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-6.2",
+     "dato": "ficha de pago guardada con sus tarifas vigentes, para entregarla a quien calcula el valor del turno"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador editando a un colaborador",
+     "cuando": "elige «por hora», la política «banco de horas», digita 10.000 de valor hora desde hoy y guarda",
+     "entonces": "la persona queda con su ficha de pago y la tarjeta muestra «10.000/h»"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "una persona con una tarifa vigente desde una fecha",
+     "cuando": "se digita otro valor con esa misma fecha",
+     "entonces": "se avisa «Reemplaza la tarifa del …»; al guardar la anterior queda reemplazada (tachada en el historial) y no se borra"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador sin el permiso «Tarifas y horas»",
+     "cuando": "abre la ficha de pago de una persona",
+     "entonces": "la ve en solo lectura con el aviso «Sin permiso para cambiar tarifas»; si lo intenta por fuera de la pantalla, el sistema lo rechaza"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios",
+     "/api/usuarios/{id}"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "sección «💰 Pago» (_llenarPagoForm, _leerPagoForm) y servidor _perfilPagoFusionar (mismo desde + mismo valor = ya registrada; otro valor reemplaza, INC-65 que no está en seguimiento.json); usuario.perfil_pago; exige _puede(dinero.tarifas) en POST y PUT. El campo desde solo se manda al crear."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (_llenarPagoForm, _leerPagoForm, _avisoTarifaMismaFecha) y del servidor (_perfilPagoFusionar, permiso dinero.tarifas)"
+   }
+  },
+  {
+   "id": "CU-U-6.2",
+   "capacidad": "CAP-U-6",
+   "actor": [
+    "sistema"
+   ],
+   "que": "Entregar la ficha de pago y la tarifa vigente de cada persona a quien calcula el valor del turno, solo al administrador y al operador",
+   "declarado": "construido",
+   "limitantes": [
+    "Las dos copias de la ficha (la del equipo y la de «quién soy») deben dar la misma tarifa vigente: el cálculo es uno solo (RT-4), el de las horas de Housekeeping."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-6.1",
+     "dato": "ficha de pago guardada con sus tarifas vigentes, para entregarla a quien calcula el valor del turno"
+    },
+    {
+     "de": "CU-U-6.3",
+     "dato": "tarifa anulada con su motivo, para que deje de contar"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-HK-6.1",
+     "dato": "perfil de pago y tarifa vigente de cada colaborador",
+     "rel": "REL-14"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador o un operador con sesión",
+     "cuando": "se pide el equipo",
+     "entonces": "cada persona llega con su ficha de pago (modalidad, política, tarifas con su historial y fecha de inicio) para calcular horas y valor estimado"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador con sesión",
+     "cuando": "pide quién es el usuario",
+     "entonces": "recibe solo su propia ficha de pago, nunca la de otra persona"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador que pide el equipo",
+     "cuando": "se envía la petición",
+     "entonces": "no recibe ficha de pago de nadie (CU-U-1.2)"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html",
+     "str-m1-housekeeping.html",
+     "str-api.js"
+    ],
+    "rutas": [
+     "/api/usuarios",
+     "/api/me"
+    ],
+    "colecciones": [
+     "usuario",
+     "str-usuarios-v1"
+    ],
+    "notas": "_usuarioRow (perfilPago de usuario.perfil_pago) solo para admin y operador, _usuarioRowColaborador sin él, /api/me con la propia; STRApi.horas.tarifaVigente la lee. REL-14."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código del servidor (_usuarioRow, _usuarioRowColaborador y /api/me) y de STRApi.horas.tarifaVigente"
+   }
+  },
+  {
+   "id": "CU-U-6.3",
+   "capacidad": "CAP-U-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Anular una tarifa registrada con un motivo, sin borrarla",
+   "declarado": "construido",
+   "limitantes": [
+    "El motivo es obligatorio y se recorta a 300 caracteres.",
+    "Anular una tarifa requiere conexión con el sistema; sin ella no hay forma de anular."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-6.2",
+     "dato": "tarifa anulada con su motivo, para que deje de contar"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona con dos tarifas vigentes (de fechas distintas) y quien anula con «Tarifas y horas»",
+     "cuando": "toca «Anular» en una, escribe el motivo y confirma",
+     "entonces": "la tarifa queda tachada con «anulada · motivo» y deja de contar; no se borra"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "la única tarifa vigente de una persona que ya tiene turnos cerrados",
+     "cuando": "se intenta anularla",
+     "entonces": "el sistema la rechaza («primero registra otra tarifa y luego anula esta») y no cambia nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "el motivo vacío",
+     "cuando": "se confirma",
+     "entonces": "se avisa «Escribe el motivo de la anulación» y no se anula"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "REQ-U7"
+   ],
+   "reglas": [
+    "RT-5",
+    "RT-14"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/usuarios/{id}/tarifas/anular"
+    ],
+    "colecciones": [
+     "usuario",
+     "turnos"
+    ],
+    "notas": "abrirAnularTarifa y confirmarAnularTarifa → STRApi.usuarios.anularTarifa → POST /usuarios/{id}/tarifas/anular {desde, valorHora, registradoEn?, motivo}; transacción con SELECT … FOR UPDATE; 404 si no hay vigente que coincida; 409 si es la única vigente y hay turno cerrado (titular, titular por defecto de la propiedad o apoyo con finReal). INC-65 no está en seguimiento.json."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del servidor (POST tarifas/anular) y de la pantalla (modal de anulación e historial de tarifas)"
+   }
+  },
+  {
+   "id": "CU-U-6.4",
+   "capacidad": "CAP-U-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Ver el saldo de horas de cada colaborador y los turnos que lo componen",
+   "declarado": "construido",
+   "limitantes": [
+    "El saldo nunca se guarda: se calcula al abrir con los turnos desde el inicio más antiguo de las fichas, con el mismo cálculo de horas de Housekeeping y del portal.",
+    "DA-41: la deuda de horas no tiene límite ni plazo, se ve siempre y nunca se descuenta dinero.",
+    "Un saldo negativo significa horas por reponer; compensarlo lo decide el operador."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-PG-2.1",
+     "dato": "saldo de horas de cada colaborador con los turnos que lo componen",
+     "rel": "REL-15"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un colaborador con ficha de pago de banco de horas y turnos cerrados",
+     "cuando": "el administrador o un operador abre Equipo",
+     "entonces": "la tarjeta muestra «Saldo: −3,5 h» (en rojo si es negativo) y la ficha lista los turnos del saldo con fecha, propiedad, rol, horas planificadas, efectivas y diferencia"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un colaborador con la política «solo horas reales»",
+     "cuando": "se abre Equipo",
+     "entonces": "no muestra saldo: esa política paga lo trabajado y no lleva banco de horas"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un colaborador sin turnos cerrados desde el inicio de su saldo",
+     "cuando": "se abre su ficha",
+     "entonces": "dice «Sin turnos cerrados todavía» y el saldo es cero"
+    }
+   ],
+   "origen": [
+    "REQ-PG1",
+    "REQ-BT-1",
+    "DA-41"
+   ],
+   "reglas": [
+    "RT-4"
+   ],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [
+     "/api/col/turnos",
+     "/api/col/hk-config"
+    ],
+    "colecciones": [
+     "turnos",
+     "hk-config"
+    ],
+    "notas": "_cargarSaldos (GET directo /col/turnos?desde= y /col/hk-config, sin tocar la caché de Housekeeping), _calcSaldo con STRApi.horas.calcular y STRApi.horas.saldo; _pagoChips y cmSaldoSection. El id CU-PG-2.1 es provisional (REL-15)."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (_cargarSaldos, _calcSaldo, _pagoChips) y de DA-41 en el diseño"
+   }
+  },
+  {
+   "id": "CU-U-6.5",
+   "capacidad": "CAP-U-6",
+   "actor": [
+    "admin",
+    "operador"
+   ],
+   "que": "Pagar a una persona con sueldo fijo",
+   "declarado": "no-construido",
+   "limitantes": [
+    "La opción «Sueldo fijo (próximamente)» aparece deshabilitada; el sistema la acepta como modalidad, pero nada calcula pagos con ella."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "una persona a la que se le paga un sueldo fijo",
+     "cuando": "se elige «Sueldo fijo» como modalidad en su ficha de pago",
+     "entonces": "la ficha guarda su sueldo y el sistema deja de calcular su pago por horas"
+    }
+   ],
+   "origen": [
+    "REQ-PG1"
+   ],
+   "reglas": [],
+   "pendientes": [],
+   "pruebas": [],
+   "tecnica": {
+    "paginas": [
+     "str-usuarios.html"
+    ],
+    "rutas": [],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "cm-modalidad con la opción sueldo-fijo disabled; _perfilPagoFusionar admite modalidad por-hora o sueldo-fijo."
+   },
+   "confianza": "media",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del código de la pantalla (opción deshabilitada) y del servidor (modalidades válidas)"
+   }
+  },
+  {
+   "id": "CU-U-7.1",
+   "capacidad": "CAP-U-7",
+   "actor": [
+    "cola-arquitecto"
+   ],
+   "que": "Tener personas de prueba por rol (administrador, operador, colaborador y segundo colaborador) para verificar como cada una",
+   "declarado": "construido",
+   "limitantes": [
+    "El operador de prueba tiene permisos limitados (sin «Editar inventario») para poder verificar esa restricción.",
+    "El verificador solo usa estos perfiles: nunca el usuario de Carlos.",
+    "Desde DA-47 los cuatro viven en la cuenta «zz-verif-pruebas» y no en «negocio» (CU-U-7.3)."
+   ],
+   "entradas": [],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "los cuatro perfiles de prueba con la sesión abierta",
+     "cuando": "la verificación diaria abre cada uno",
+     "entonces": "cada perfil responde con su rol (administrador, operador, colaborador) sin pasar por la pantalla de entrada"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un perfil de prueba cuya sesión de Google se perdió",
+     "cuando": "abre el sistema",
+     "entonces": "cae en la entrada y la fábrica intenta recuperarla con «Continuar con Google» sin escribir credenciales; si Google las pide, queda en rojo"
+    }
+   ],
+   "origen": [
+    "DA-23",
+    "DA-24",
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-24",
+    "RT-2"
+   ],
+   "pendientes": [
+    "INC-145"
+   ],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/sesiones",
+     "casos": [
+      "s1",
+      "s2",
+      "s3",
+      "s4"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-app-shell.html"
+    ],
+    "rutas": [
+     "/api/me"
+    ],
+    "colecciones": [
+     "usuario"
+    ],
+    "notas": "Perfiles de navegador por rol (abrir-perfil.js) y herramientas/pw/sesiones.spec.js (solo lectura de /api/me); usuarios zz-verif-admin, zz-verif-oper, zz-verif-colab y zz-verif-colab2. INC-145 (abierto) recoge las caídas intermitentes de sesión de estos perfiles."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-U-7.2",
+   "capacidad": "CAP-U-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ensayar el movimiento de los usuarios de prueba a la cuenta de pruebas, sin tocar nada",
+   "declarado": "construido",
+   "limitantes": [
+    "El ensayo es la guardia de CU-U-7.3: la fábrica solo mueve si la sesión está en la cuenta real, no hay movimientos sin revertir y los usuarios de prueba son exactamente los cuatro esperados."
+   ],
+   "entradas": [],
+   "salidas": [
+    {
+     "a": "CU-U-7.3",
+     "dato": "lista apta de usuarios de prueba y movimientos pendientes, para decidir si se mueve"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador de pruebas en la cuenta real",
+     "cuando": "pide el ensayo",
+     "entonces": "recibe en qué cuenta está, si la cuenta de pruebas existe, la lista de usuarios de prueba (identificador, nombre y rol) y cuántos movimientos quedan sin revertir; no cambia nada y no trae correos"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un operador",
+     "cuando": "pide el ensayo",
+     "entonces": "el sistema lo rechaza: solo el administrador"
+    }
+   ],
+   "origen": [
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/cuenta-pruebas",
+     "casos": [
+      "m"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/cuenta-pruebas"
+    ],
+    "colecciones": [
+     "usuario",
+     "cuenta",
+     "cuenta_movimiento"
+    ],
+    "notas": "GET /api/cuenta-pruebas (api/lib/cuenta-pruebas.php, no estaba entre las fuentes: se describe desde el mapa técnico y herramientas/pw/cuenta-pruebas.spec.js). El guion tests/e2e/DA-47-cuenta-pruebas.spec.js (ensayo, admin 200 y operador 403) no está en guiones-e2e.json, por eso no se cita; el caso m de cuenta-pruebas.spec.js lo recorre en sus pasos 1 y 3 (solo con el administrador; el 403 del operador no tiene prueba aquí)."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-U-7.3",
+   "capacidad": "CAP-U-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Mover los usuarios de prueba a la cuenta de pruebas «zz-verif-pruebas» para que la cuenta real quede solo con lo real",
+   "declarado": "construido",
+   "limitantes": [
+    "Una persona sin el prefijo zz-verif- nunca se mueve, ni al mover ni al revertir.",
+    "Hay una sola cuenta de pruebas para cualquier origen (hoy solo «negocio»); otra cuenta real necesitaría la suya antes de mover sus usuarios de prueba.",
+    "Con la sesión ya en una cuenta de pruebas no se puede mover; son de 1 a 10 usuarios por orden.",
+    "Tras mover, la sesión de cada perfil sigue en la cuenta vieja hasta 24 horas: hay que volver a entrar (CU-U-7.5).",
+    "Lo que nombra a una persona dentro de los turnos o de las propiedades se queda en su cuenta: en «negocio» lo quitó el barrido y en la cuenta nueva lo crea la semilla.",
+    "Las tareas programadas (copia a Drive, corte mensual, importación de calendarios) no recorren la cuenta de pruebas; el respaldo sí la incluye.",
+    "El movimiento 1 se hizo el 18-oct y es reversible; la regresión completa en la cuenta nueva quedó en pausa por orden de Carlos (cierre de DA-47)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-7.2",
+     "dato": "lista apta de usuarios de prueba y movimientos pendientes, para decidir si se mueve"
+    }
+   ],
+   "salidas": [
+    {
+     "a": "CU-U-7.4",
+     "dato": "movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo"
+    },
+    {
+     "a": "CU-U-7.5",
+     "dato": "usuarios movidos a la cuenta de pruebas, que deben volver a entrar"
+    }
+   ],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un ensayo apto (los cuatro usuarios de prueba esperados, sesión en la cuenta real, ningún movimiento sin revertir)",
+     "cuando": "el administrador confirma escribiendo «zz-verif-pruebas» con sus identificadores",
+     "entonces": "los cuatro quedan en la cuenta de pruebas (se crea si falta, con el plan de la cuenta de origen y las capacidades que falten), se anota el movimiento y un segundo ensayo muestra cero usuarios de prueba en la cuenta real"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "un identificador que no existe, no es de prueba o es de otra cuenta",
+     "cuando": "se pide mover",
+     "entonces": "se rechaza todo y no se mueve ninguno"
+    },
+    {
+     "id": "E3",
+     "tipo": "alterno",
+     "dado": "usuarios que ya estaban en la cuenta de pruebas",
+     "cuando": "se repite la orden",
+     "entonces": "salen como «ya movidos» y no cuentan: repetir no cambia nada"
+    }
+   ],
+   "origen": [
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-2",
+    "RT-24"
+   ],
+   "pendientes": [
+    "INC-156"
+   ],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/cuenta-pruebas",
+     "casos": [
+      "m"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/cuenta-pruebas"
+    ],
+    "colecciones": [
+     "usuario",
+     "cuenta",
+     "capacidad",
+     "cuenta_movimiento"
+    ],
+    "notas": "POST /api/cuenta-pruebas {confirmo, ids} en una transacción (_cpMover): crea la cuenta con el plan_id de la de origen (INC-156, L-153), copia capacidades, UPDATE usuario con cuenta_id = origen AND nombre zz-verif- AND id IN (...) y exige que mueva exactamente esos; fila en cuenta_movimiento (migración 14) y línea en api/logs/error.log. api/lib/cuenta-pruebas.php no estaba entre las fuentes; se describe desde el mapa técnico y herramientas/pw/cuenta-pruebas.spec.js (caso m)."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-U-7.4",
+   "capacidad": "CAP-U-7",
+   "actor": [
+    "admin"
+   ],
+   "que": "Revertir el último movimiento de usuarios de prueba y devolverlos a su cuenta de origen",
+   "declarado": "construido",
+   "limitantes": [
+    "Solo devuelve usuarios de prueba registrados en ese movimiento: puede pedirlo un administrador de la cuenta de origen o de la de destino.",
+    "Es el plan de reversión de DA-47 (con un solo cambio de cuenta de cada usuario); el script de la fábrica solo se corre si hace falta."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-7.3",
+     "dato": "movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un movimiento sin revertir",
+     "cuando": "el administrador de cualquiera de las dos cuentas confirma «revertir»",
+     "entonces": "los usuarios registrados en ese movimiento que siguen en la cuenta de pruebas con nombre zz-verif- vuelven a su cuenta de origen y el movimiento queda marcado como revertido"
+    },
+    {
+     "id": "E2",
+     "tipo": "excepcion",
+     "dado": "ningún movimiento sin revertir",
+     "cuando": "se pide revertir",
+     "entonces": "el sistema lo rechaza: no hay nada que deshacer"
+    }
+   ],
+   "origen": [
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-2",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/cuenta-pruebas-revertir",
+     "casos": [
+      "r"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [],
+    "rutas": [
+     "/api/cuenta-pruebas"
+    ],
+    "colecciones": [
+     "usuario",
+     "cuenta_movimiento"
+    ],
+    "notas": "POST /api/cuenta-pruebas {confirmo, revertir: true}; marca revertido_en. cuenta-pruebas-revertir.spec.js reutiliza caso(revertir) de cuenta-pruebas.spec.js; se corre solo si hace falta revertir."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-18",
+    "como": "Lectura del mapa técnico (docs/claude/usuarios-y-roles.md, cuenta de pruebas) y del guion herramientas/pw/cuenta-pruebas-revertir.spec.js; el código del servidor no estaba entre las fuentes"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-U-7.5",
+   "capacidad": "CAP-U-7",
+   "actor": [
+    "cola-arquitecto"
+   ],
+   "que": "Volver a entrar con cada perfil de prueba movido, sin llevar a la cuenta nueva las copias guardadas de la cuenta real",
+   "declarado": "construido",
+   "limitantes": [
+    "Es necesario porque la sesión lleva la cuenta y dura 24 horas sin mirar la base: sin volver a entrar, el perfil sigue en la cuenta vieja y podría subir a la nueva sus copias locales.",
+    "Cada perfil lo corre aparte y el registro lleva nombres, rol y cuenta, nunca correos ni credenciales."
+   ],
+   "entradas": [
+    {
+     "de": "CU-U-7.3",
+     "dato": "usuarios movidos a la cuenta de pruebas, que deben volver a entrar"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un perfil de prueba movido que sigue con la sesión de la cuenta vieja",
+     "cuando": "la fábrica corre el reingreso",
+     "entonces": "borra lo que la app guardó en el aparato (salvo la cuenta de Google), pide una sesión nueva con Google y comprueba que el perfil quedó en «zz-verif-pruebas» con su nombre"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un perfil que ya está en la cuenta de pruebas",
+     "cuando": "se corre el reingreso",
+     "entonces": "no toca nada"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un perfil cuyo usuario sigue en la cuenta real (no se movió)",
+     "cuando": "se corre el reingreso",
+     "entonces": "se detiene sin tocar nada"
+    }
+   ],
+   "origen": [
+    "DA-47"
+   ],
+   "reglas": [
+    "RT-1",
+    "RT-24"
+   ],
+   "pendientes": [],
+   "pruebas": [
+    {
+     "guion": "herramientas/pw/reingreso-zz",
+     "casos": [
+      "a",
+      "o",
+      "c",
+      "d"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-api.js",
+     "str-app-shell.html",
+     "login.html"
+    ],
+    "rutas": [
+     "/api/me",
+     "/api/login"
+    ],
+    "colecciones": [
+     "str-token"
+    ],
+    "notas": "reingreso-zz.spec.js: decidirPrevio, borrado de localStorage (salvo firebase:), sessionStorage e IndexedDB (salvo Firebase), shell que renueva con la sesión de Google (POST /api/login) o «Continuar con Google», y revisarReingreso contra /api/me."
+   },
+   "confianza": "alta",
+   "ambito": "fabrica"
+  }
+ ],
+ "sinAtar": [
+  {
+   "id": "REQ-INV2-3-1",
+   "porque": "Traslados, préstamos y devoluciones de Inventario; solo toca a Identidad por el rechazo al operador en una ruta de administrador, que cubre CU-U-2.6. Es de Inventario. Aceptado."
+  },
+  {
+   "id": "REQ-INV2-3-3",
+   "porque": "Circuito de la ropa de Inventario; ningún caso de uso de Identidad lo ejerce. Aceptado."
+  },
+  {
+   "id": "REQ-PC1-2",
+   "porque": "Puntos de control con lector QR y respaldo por foto (Puntos de control); menciona la capacitación del colaborador pero ningún caso de uso de Identidad lo ejerce. Entregado a Desarrollo."
+  },
+  {
+   "id": "REQ-PC1-1",
+   "porque": "Puntos de control (Puntos de control); ningún caso de uso de Identidad lo ejerce."
+  },
+  {
+   "id": "REQ-CMP-1",
+   "porque": "Compras y reposición (Compras); depende del permiso de pagos que aún no existe (CU-U-2.3), pero no es de Identidad. Entregado a Desarrollo."
+  },
+  {
+   "id": "REQ-MI1-3",
+   "porque": "Integrar el flujo del evento al turno (Flujos y Housekeeping); ningún caso de uso de Identidad lo ejerce. Entregado a Desarrollo."
+  },
+  {
+   "id": "DA-11",
+   "porque": "Betty Sarmiento es un usuario de prueba de Carlos, dato de prueba y no una función; se deja como está."
+  },
+  {
+   "id": "DA-26",
+   "porque": "Diseño de la copia a Google Drive (Copia a Drive y retención); ningún caso de uso de Identidad la ejerce."
+  },
+  {
+   "id": "DA-31",
+   "porque": "Guardias de la CLI y poda de CLAUDE.md (modelo de trabajo); no es del producto."
+  },
+  {
+   "id": "DA-35",
+   "porque": "Reclamos por daños con un permiso «reclamos» (Incidentes); ese permiso no existe y no es de Identidad, pero es otro permiso que el administrador no puede dar todavía (duda para Diseño)."
+  },
+  {
+   "id": "DA-36",
+   "porque": "Puntos de control con QR y respaldo por foto (Puntos de control); ningún caso de uso de Identidad la ejerce."
+  },
+  {
+   "id": "DA-39",
+   "porque": "Seg. Proyecto con proxy de solo lectura y credencial en el servidor (Grupo Proyecto y Servicio del modelo); ningún caso de uso de Identidad la ejerce."
+  },
+  {
+   "id": "DA-45",
+   "porque": "Qué ve el colaborador y por cuánto tiempo (tres capas, 90 días); lo ejercen CU-HK-11.1 y CU-HK-11.2 en Housekeeping y el servidor; no hay caso de uso de Identidad. Cumplida el 18-oct."
+  },
+  {
+   "id": "DA-46",
+   "porque": "El colaborador solo reescribe sus propios incidentes (INC-141); lo ejerce CU-HK-11.5; no hay caso de uso de Identidad."
+  },
+  {
+   "id": "DA-48",
+   "porque": "Anulación de movimientos de inventario de prueba; es de la fábrica y de Inventario, sustituida por DA-49."
+  },
+  {
+   "id": "DA-49",
+   "porque": "Reinicio del negocio conservando propiedades, calendario y usuarios reales; pospuesta por Carlos el 18-oct. Los usuarios reales se conservan: no hay caso de uso de Identidad que lo ejerza (lo cuentan CU-HK-10.8, CU-INV-8.5 y CU-PR-9.5)."
+  },
+  {
+   "id": "T-6",
+   "porque": "Renovar los tokens de GitHub de los chats antes del 9-nov; es de la fábrica (Seguridad), no del producto."
+  },
+  {
+   "id": "T-9",
+   "porque": "Tarea programada de la copia a Drive (hecha); es de Copia a Drive y retención."
+  },
+  {
+   "id": "T-10",
+   "porque": "Publicar la app de Google para el permiso de Drive (hecha); es de Copia a Drive y retención."
+  },
+  {
+   "id": "INC-144",
+   "porque": "Defecto del guion REQ-INV2-4-1-interfaz caso d (cuenta los controles de edición antes de que se apliquen los permisos del operador); no es de la página y ya va como nota de la prueba no fiable de CU-U-2.4. Abierto."
+  },
+  {
+   "id": "INC-80",
+   "porque": "Cola de la CLI que agotó su límite de sesión; es de la fábrica, no del producto. Cerrado."
+  },
+  {
+   "id": "INC-87",
+   "porque": "Cambio de equipo ASUS a LENOVO y arreglos de configuración de la fábrica; no es del producto. Cerrado."
+  },
+  {
+   "id": "INC-96",
+   "porque": "Google bloqueaba el OAuth de Drive porque la app estaba en modo prueba (Copia a Drive y retención). Cerrado."
+  },
+  {
+   "id": "INC-97",
+   "porque": "Conectar Drive sin la casilla de permiso volvía sin motivo (Copia a Drive y retención). Cerrado."
+  },
+  {
+   "id": "INC-128",
+   "porque": "Límite de conexiones nuevas a MySQL del alojamiento (Servidor); en vigilancia, sin caso de uso de Identidad."
+  },
+  {
+   "id": "INC-132",
+   "porque": "Aviso fijo de fotos que no suben tapa los botones del turno (Housekeeping y Portal). Cerrado."
+  },
+  {
+   "id": "INC-133",
+   "porque": "Carrera de la cola de subida de fotos (Housekeeping). Cerrado."
+  },
+  {
+   "id": "INC-135",
+   "porque": "Drive con invalid_grant guarda solo «Google retiró el permiso» (Copia a Drive y retención). Abierto."
+  },
+  {
+   "id": "DT-35",
+   "porque": "LENOVO no tiene php para correr tests del servidor (herramientas de la fábrica). Pagada."
+  },
+  {
+   "id": "DT-36",
+   "porque": "Hora por defecto de MySQL en el servicio del modelo (Servicio del modelo). Pagada."
+  },
+  {
+   "id": "DT-40",
+   "porque": "Conexión persistente a MySQL por el límite del alojamiento (Servidor). Pagada."
+  },
+  {
+   "id": "DT-45",
+   "porque": "El 410 de /api/archivo es definitivo para el cliente (Copia a Drive y Servidor)."
+  }
+ ]
+}

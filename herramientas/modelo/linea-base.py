@@ -2,7 +2,9 @@
 """linea-base.py (MJ-16) — valida la línea base funcional del STR y calcula la cobertura funcional por módulo.
 
 Uso: python3 -I herramientas/modelo/linea-base.py <raíz del repo> [--json] [--resultados <archivo.json>]
-       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md>] [--trinquetes]
+       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md>] [--req <requerimiento.md> --id REQ-X-n] [--trinquetes]
+  --req:        revisa los criterios de un REQ en su .md (letra, nivel N1–N4, caso de uso que existe o que el REQ crea,
+                palabras vagas): la lista de «listo» de Diseño (proceso de requerimientos §4, LM-61).
   --trinquetes: fija en interno/linea-base/trinquetes.json el valor actual de las medidas que solo pueden mejorar (C4, C6).
   --cu / --cap: ficha corta de uno o más casos de uso (estado, limitantes, INC, relaciones, pruebas): lista de entrada
                 de Diseño (proceso de requerimientos §3, LM-61). --cap lista todos los de una capacidad.
@@ -262,6 +264,8 @@ def main(argv):
         return ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg)
     if '--lote' in argv:
         return casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu)
+    if '--req' in argv:
+        return revisar_req(argv, raiz, todos_cu)
     if como_json:
         print(json.dumps({'errores': err, 'avisos': avi, 'modulos': informe, 'trinquetes': tr_val, 'concesiones': concesiones}, ensure_ascii=False, indent=1))
     else:
@@ -534,6 +538,94 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
         print('Declarados: ' + ('—' if decl is None else (TECNICO if tecnico else ', '.join(decl) or '—')))
         print('C2: ' + veredicto)
     return 0 if veredicto.startswith('coincide') else 2
+
+
+# ---------- --req: criterios de un REQ (Q1, Q2, Q4; LM-61) ----------
+def criterios_de(texto, req_id):
+    """Pura: líneas «- a. … · N2 · CU-…» de la sección del REQ (desde su encabezado hasta el siguiente «## REQ-» o «## » de otro REQ)."""
+    ini = 0
+    cab = 0
+    if req_id:
+        m = re.search(r'^#+ .*\b' + re.escape(req_id) + r'\b.*$', texto, re.M)
+        if m:
+            ini, cab = m.start(), m.end()
+    fin = len(texto)
+    if req_id:
+        # el siguiente encabezado que nombre OTRO REQ cierra la sección
+        for m2 in re.finditer(r'^#{1,2} .*\b(REQ-[A-Z0-9]+-[\w.]+)\b', texto[cab:], re.M):
+            if m2.group(1) != req_id:
+                fin = cab + m2.start()
+                break
+    out = []
+    for ln in texto[ini:fin].split('\n'):
+        m = re.match(r'^\s*[-*]\s+([a-z]\d?)\.\s+(.*)$', ln)
+        if m:
+            out.append((m.group(1), m.group(2).strip()))
+    return out
+
+
+def revisar_criterio(letra, cuerpo, todos_cu, crea, vagas):
+    """Pura: devuelve la lista de fallas de un criterio."""
+    fallas = []
+    partes = [x.strip() for x in cuerpo.split('·')]
+    niveles = [x for x in partes if re.fullmatch(r'N[1-4]', x)]
+    cus = re.findall(r'CU-[A-Z0-9]+-\d+\.\d+', cuerpo)
+    if not niveles:
+        fallas.append('sin nivel N1–N4 (Q4)')
+    if not cus:
+        fallas.append('sin caso de uso CU-… (Q1)')
+    for c in cus:
+        if c not in todos_cu and c not in crea:
+            fallas.append(c + ' no existe en la línea base ni lo crea el REQ (Q1)')
+    low = ' ' + cuerpo.lower() + ' '
+    for ex in vagas.get('excepciones', []):
+        low = low.replace(ex.lower(), ' ')
+    for w in vagas.get('prohibidas', []):
+        for m in re.finditer(r'(?<![\wáéíóú])' + re.escape(w.lower()) + r'(?![\wáéíóú])', low):
+            resto = low[m.end():m.end() + 25]
+            if re.match(r'\s*(de\s+)?(\d|[<>≤≥]|menos de|más de|mas de)', resto):
+                continue
+            fallas.append('término vago «%s» (Q2)' % w)
+            break
+    for pat in (vagas.get('negaciones') or {}).get('patrones', []):
+        if pat in low:
+            fallas.append('negación «%s»: escríbela como resultado observable (Q2, aviso)' % pat)
+    if ' y ' in partes[0] and re.search(r'\b(entonces|then)\b.*\by\b', partes[0].lower()):
+        fallas.append('posible criterio doble: dos resultados unidos con «y» (singular, aviso)')
+    return fallas
+
+
+def revisar_req(argv, raiz, todos_cu):
+    ruta = argv[argv.index('--req') + 1]
+    req_id = argv[argv.index('--id') + 1] if '--id' in argv else None
+    texto = open(ruta, encoding='utf-8').read()
+    vagas = cargar(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'palabras-vagas.json')) if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'palabras-vagas.json')) else {}
+    crea = set(re.findall(r'CU-[A-Z0-9]+-\d+\.\d+', texto[texto.find('crea:'):texto.find('crea:') + 400])) if 'crea:' in texto else set()
+    crea |= set(re.findall(r'^- (CU-[A-Z0-9]+-\d+\.\d+) · actor:', texto, re.M))
+    crit = criterios_de(texto, req_id)
+    como_json = '--json' in argv
+    res = []
+    letras = {}
+    for letra, cuerpo in crit:
+        f = revisar_criterio(letra, cuerpo, todos_cu, crea, vagas)
+        if letra in letras:
+            f.append('letra repetida (la usó el criterio «%s»)' % letras[letra][:40])
+        letras[letra] = cuerpo
+        res.append({'letra': letra, 'texto': cuerpo, 'fallas': f})
+    sup = re.search(r'^### Supuestos\s*\n((?:- .*\n?)*)', texto[texto.find(req_id) if req_id and req_id in texto else 0:], re.M)
+    supuestos = [l for l in (sup.group(1).split('\n') if sup else []) if l.strip().startswith('- ') and '<' not in l]
+    errores = [r_ for r_ in res if any('(Q1)' in x or '(Q2)' in x or '(Q4)' in x for x in r_['fallas'] if 'aviso' not in x)]
+    out = {'req': req_id, 'archivo': os.path.basename(ruta), 'criterios': len(res), 'conFallas': len(errores), 'supuestosAbiertos': len(supuestos), 'detalle': res}
+    if como_json:
+        print(json.dumps(out, ensure_ascii=False, indent=1))
+    else:
+        print('## %s · %d criterios · %d con fallas · supuestos abiertos: %d' % (req_id or os.path.basename(ruta), len(res), len(errores), len(supuestos)))
+        for r_ in res:
+            print('- %s. %s%s' % (r_['letra'], r_['texto'][:100] + ('…' if len(r_['texto']) > 100 else ''), ('\n     ✗ ' + '\n     ✗ '.join(r_['fallas'])) if r_['fallas'] else ' ✓'))
+        if not res:
+            print('- (ningún criterio con la forma «- a. … · N2 · CU-…»)')
+        print('Q: %s' % ('listo (%d/%d)' % (len(res) - len(errores), len(res)) if res and not errores and not supuestos else 'no listo'))
+    return 0 if res and not errores and not supuestos else 2
 
 
 if __name__ == '__main__':

@@ -207,6 +207,34 @@ try:
     if not _rl: avi('C1 linea-base', 'archivo', 'herramientas/modelo/linea-base.py', 'sin salida JSON: ' + (_lb.stderr or '')[:200])
 except Exception as ex: avi('C1 linea-base', 'archivo', 'herramientas/modelo/linea-base.py', f'no se pudo correr: {ex}')
 
+# LM-61 (proceso de requerimientos, ISO/IEC/IEEE 29148): guardias sobre los REQ nuevos (con casosUso o desde ≥ 2026-10-21).
+# Los criterios viven en el .md (fuera del repo): los revisa linea-base.py --req; aquí solo los atributos de reqs[].
+try:
+    _cus = set()
+    _lbd = os.path.join(RAIZ, 'interno', 'linea-base')
+    for _f in os.listdir(_lbd) if os.path.isdir(_lbd) else []:
+        if re.fullmatch(r'[A-Z0-9]+\.json', _f):
+            for _u in json.load(open(os.path.join(_lbd, _f), encoding='utf-8')).get('casosUso', []): _cus.add(_u.get('id'))
+    for r in reqs:
+        nuevo = isinstance(r.get('casosUso'), dict) or str(r.get('desde') or '') >= '2026-10-21'
+        if not nuevo: continue
+        cu = r.get('casosUso') if isinstance(r.get('casosUso'), dict) else {}
+        for campo in ('justificacion', 'tipo'):
+            if not r.get(campo): err('Q8 atributos', 'requisito', r.get('id'), f'sin {campo} (LM-61)')
+        if not cu: err('Q8 atributos', 'requisito', r.get('id'), 'sin casosUso {toca, crea, fuera} (LM-61)')
+        for k in ('toca', 'fuera'):
+            for c in cu.get(k) or []:
+                if c not in _cus: err('Q1 caso de uso', 'requisito', r.get('id'), f'casosUso.{k} cita {c}, que no existe en la línea base')
+        for c in cu.get('crea') or []:
+            if not re.fullmatch(r'CU-[A-Z0-9]+-\d+\.\d+', str(c)): err('Q1 caso de uso', 'requisito', r.get('id'), f'casosUso.crea con id inválido {c}')
+            elif c in _cus: avi('Q1 caso de uso', 'requisito', r.get('id'), f'casosUso.crea cita {c}, que ya existe: ¿es toca?')
+        if r.get('estado') in ('definido', 'listo', 'entregado', 'construido', 'aceptado') and (r.get('supuestosAbiertos') or 0) > 0:
+            err('Q3 supuestos', 'requisito', r.get('id'), f"estado {r.get('estado')} con {r.get('supuestosAbiertos')} supuestos abiertos (LM-61)")
+        if r.get('estado') in ('entregado', 'construido', 'aceptado') and not (isinstance(r.get('validacion'), dict) and r['validacion'].get('fecha')):
+            err('Q5 validación', 'requisito', r.get('id'), f"estado {r.get('estado')} sin validacion {{fecha, que, nota}} de Carlos (LM-61)")
+        if cu and not cu.get('fuera'): avi('Q6 frontera', 'requisito', r.get('id'), 'casosUso.fuera vacío: di qué queda fuera (LM-61)')
+except Exception as ex: avi('Q0 requisitos', 'archivo', 'interno/diseno.json', f'no se pudieron revisar las guardias Q: {ex}')
+
 # LM-56 (MJ-15 fase C): origen del fallo en cada INC. Valor fuera de la lista = error R9; INC desde la fecha de LM-56 sin
 # los dos campos = aviso (la clasificación hacia atrás la hace Desarrollo, sin plazo).
 _io = E.get('incidenteOrigen') or {}

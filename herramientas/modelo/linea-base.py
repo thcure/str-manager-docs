@@ -272,6 +272,10 @@ def ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg):
     inc_txt = {x['id']: (x.get('estado') or 'abierto', str(x.get('titulo') or x.get('descripcion') or '')[:90]) for x in seg['incs']}
     inc_txt.update({x['id']: (x.get('estado') or 'abierta', str(x.get('titulo') or x.get('descripcion') or x.get('que') or '')[:90]) for x in seg.get('dts', [])})
     como_json = '--json' in argv
+    try:
+        bolsa_items = cargar(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '..', 'interno', 'diseno.json')).get('bolsa', [])
+    except Exception:
+        bolsa_items = []
     salida = []
     for i in ids:
         if i not in todos_cu:
@@ -284,9 +288,14 @@ def ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg):
         rels = sorted({f.get('rel') for f in u.get('entradas', []) + u.get('salidas', []) if f.get('rel')})
         otros = sorted({re.sub(r'^CU-([A-Z0-9]+)-.*$', r'\1', f.get('de') or f.get('a') or '') for f in u.get('entradas', []) + u.get('salidas', [])} - {mod, ''})
         pend = [(p_, inc_txt.get(p_, ('?', ''))) for p_ in u.get('pendientes', [])]
+        abiertos = [x for x in pend if x[1][0] not in ('cerrado', 'cerrada', 'superado', 'descartado')]
+        cerrados = [x for x in pend if x not in abiertos]
+        vencidas = [l for l in u.get('limitantes', []) if any(inc_txt.get(k, ('',))[0] in ('cerrado', 'cerrada') and ('corregid' in l.lower() or 'cerrado' in l.lower() or 'leído en el código' in l.lower()) for k in re.findall(r'INC-\d+', l))]
+        bolsa = [b.get('ref') for b in bolsa_items if i in (b.get('casosUso') or []) or i in str(b.get('titulo', '')) + str(b.get('nota', ''))]
         fila = {'id': i, 'modulo': mod, 'que': u.get('que'), 'capacidad': cap.get('id'), 'capacidadNombre': cap.get('nombre'), 'tipo': cap.get('tipo'), 'peso': u.get('peso') or cap.get('peso'),
                 'actores': u.get('actor', []), 'estado': est, 'declarado': u.get('declarado'), 'confianza': u.get('confianza', 'media'),
-                'limitantes': u.get('limitantes', []), 'pendientes': [{'id': a, 'estado': b[0], 'que': b[1]} for a, b in pend],
+                'limitantes': u.get('limitantes', []), 'limitantesPorRevisar': vencidas, 'pendientes': [{'id': a, 'estado': b[0], 'que': b[1]} for a, b in abiertos],
+                'historial': [{'id': a, 'estado': b[0], 'que': b[1]} for a, b in cerrados], 'bolsa': bolsa,
                 'relaciones': [{'id': r_, 'que': rel_txt.get(r_, '')} for r_ in rels], 'modulosVecinos': otros,
                 'entradas': [f.get('de') for f in u.get('entradas', [])], 'salidas': [f.get('a') for f in u.get('salidas', [])],
                 'pruebas': [x.get('guion') + (' (' + ','.join(x.get('casos', [])) + ')' if x.get('casos') else '') for x in u.get('pruebas', [])],
@@ -297,9 +306,13 @@ def ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg):
             print('   capacidad %s «%s» · %s · %s · actores: %s' % (fila['capacidad'], fila['capacidadNombre'], fila['tipo'], fila['peso'], ', '.join(fila['actores'])))
             print('   estado: %s (declarado %s, confianza %s)%s' % (est, fila['declarado'], fila['confianza'], ' · sin resultados de regresión' if resultados is None else ''))
             for l in fila['limitantes']:
-                print('   limitante: ' + l)
+                print('   limitante' + (' (por revisar: cita un INC cerrado)' if l in vencidas else '') + ': ' + l)
             for q in fila['pendientes']:
                 print('   pendiente: %s (%s) %s' % (q['id'], q['estado'], q['que']))
+            if cerrados:
+                print('   historial: %d cerrados (%s)' % (len(cerrados), ', '.join(a for a, _ in cerrados)))
+            if bolsa:
+                print('   bolsa: ' + ', '.join(bolsa))
             for r_ in fila['relaciones']:
                 print('   relación: %s %s' % (r_['id'], r_['que']))
             print('   recibe de: %s · entrega a: %s · vecinos: %s' % (', '.join(fila['entradas']) or '—', ', '.join(fila['salidas']) or '—', ', '.join(otros) or '—'))
@@ -342,6 +355,10 @@ def casos_calculados(texto, todos_cu, gu, reqs_crea):
         for p_ in u.get('pendientes', []):
             if p_ in refs:
                 add(i, 'pendiente ' + p_)
+    for gname in set(re.findall(r'tests/e2e/([\w.-]+?)\.spec\.js', texto)):
+        for i, (mod, u) in todos_cu.items():
+            if any(x.get('guion') == gname for x in u.get('pruebas', [])):
+                add(i, 'prueba del guion ' + gname)
     for c in re.findall(r"cubre\s*:\s*\[([^\]]*)\]", texto):
         for cu in re.findall(r'CU-[A-Z0-9]+-\d+\.\d+', c):
             add(cu, 'cubre del guion')

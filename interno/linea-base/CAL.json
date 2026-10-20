@@ -1,6 +1,6 @@
 {
  "modulo": "CAL",
- "version": 3,
+ "version": 4,
  "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
@@ -22,6 +22,11 @@
    "fecha": "2026-10-18",
    "por": "Chat Arquitecto",
    "que": "Flujos con INC1, PG y K3 enlazados a sus ids reales; pares completados."
+  },
+  {
+   "fecha": "2026-10-20",
+   "por": "Chat Arquitecto (LM-60)",
+   "que": "Anclaje de L-158 (INC-170 b → CU-CAL-6.5) y L-159 (INC-171 d → CU-CAL-5.6) con sus limitantes nuevas (LM-60, fase 6 de MJ-16)."
   }
  ],
  "alcance": {
@@ -2063,7 +2068,8 @@
    "limitantes": [
     "El precio por noche y la cantidad de huéspedes solo salen en las reservas; el bloqueo muestra fechas, noches y origen, y un total de $0 que no significa nada.",
     "Los datos del canal (código, últimos 4 dígitos del teléfono y enlace a la reserva) solo salen en las reservas importadas.",
-    "Desde el panel se llega a editar (CU-CAL-2.4), cancelar o reactivar (CU-CAL-2.5, CU-CAL-2.6) y al turno de la reserva (CU-CAL-3.6)."
+    "Desde el panel se llega a editar (CU-CAL-2.4), cancelar o reactivar (CU-CAL-2.5, CU-CAL-2.6) y al turno de la reserva (CU-CAL-3.6).",
+    "Desde L-159 (INC-171): una reserva o bloqueo con canalQuitado muestra ⚑ y el aviso «Canal quitado» con «Dejar como directa» / «Dejar como bloqueo propio»; la reserva se puede cancelar y el bloqueo eliminar."
    ],
    "entradas": [
     {
@@ -2107,7 +2113,14 @@
     "RT-4"
    ],
    "pendientes": [],
-   "pruebas": [],
+   "pruebas": [
+    {
+     "guion": "INC-171",
+     "casos": [
+      "d"
+     ]
+    }
+   ],
    "tecnica": {
     "paginas": [
      "str-calendario.html"
@@ -2576,7 +2589,8 @@
     "Solo lo hace la importación con el Calendario abierto (al abrirlo si pasaron más de 30 minutos, y cada 30 minutos mientras está abierto); la del sistema deja la reserva cancelada aunque el canal ya la traiga otra vez.",
     "Hasta que alguien abra el Calendario la reserva sigue cancelada: Housekeeping no le arma turno y su noche no se entrega a Airbnb como ocupada (por confirmar con Desarrollo).",
     "Al restaurar, el estado vuelve a salir de las fechas y se borra la fecha de cancelación.",
-    "La importación automática no restaura una reserva de canal cancelada que el canal vuelve a traer: queda cancelada, sin turno y con la noche libre para Airbnb hasta que alguien abre el Calendario (INC-170, riesgo de sobreventa)."
+    "La importación automática no restaura una reserva de canal cancelada que el canal vuelve a traer: queda cancelada, sin turno y con la noche libre para Airbnb hasta que alguien abre el Calendario (INC-170, riesgo de sobreventa).",
+    "Desde L-158 (INC-170): el servidor y el navegador deciden por el identificador del canal (icalFeedId y uid), nunca por fechas: reactivar, retomar o nueva; la reactivada lleva reactivadaEn y da la alerta 6 del Tablero."
    ],
    "entradas": [],
    "salidas": [
@@ -2610,7 +2624,14 @@
    "pendientes": [
     "INC-170"
    ],
-   "pruebas": [],
+   "pruebas": [
+    {
+     "guion": "INC-170",
+     "casos": [
+      "b"
+     ]
+    }
+   ],
    "tecnica": {
     "paginas": [
      "str-calendario.html",

@@ -177,7 +177,8 @@ function vistaSistema(){
   $('#vista').innerHTML = `
    <header class="cab"><div class="izq"><span class="etq">Línea base funcional · MJ-16</span><h1>STR Manager</h1>
      <span class="tenue">${mods.length} de ${Object.keys(D.nombresModulo).length} módulos levantados · ${ncu} casos de uso · resultados de ${esc(D.resultados || 'ninguna corrida')} · página ${esc(D.generado)}</span></div>
-     <div class="cifras"><div class="cifra"><span class="etq">Cobertura de lo levantado</span><b class="dat">${fmtPct(alc ? Math.round(1000 * (1 - falt / alc)) / 10 : null)}</b><span class="tenue">${alc - falt} de ${alc} comprobados</span></div></div></header>
+     <div class="cifras"><div class="cifra"><span class="etq">Cobertura de lo levantado</span><b class="dat">${fmtPct(alc ? Math.round(1000 * (1 - falt / alc)) / 10 : null)}</b><span class="tenue">${alc - falt} de ${alc} comprobados</span></div>
+       ${trinquete('Esenciales sin guion', 'casosEsencialesSinGuion', 'C4')}${trinquete('Relaciones por precisar', 'relacionesPorPrecisar', 'C6')}</div></header>
    <section class="sec">${barra(tot, true)}</section>
    <section class="sec"><div class="fila"><div><h2>Mapa del sistema</h2><span class="tenue">¿Cómo se conectan los módulos entre sí y con el exterior?</span></div>
        <div class="pestanas" role="tablist">${[['contexto', 'Contexto'], ['modulos', 'Módulos'], ['capas', 'Mapa por capas'], ['matriz', 'Matriz de dependencias']].map(([k, t]) => `<button role="tab" data-dg="${k}" aria-selected="${VISTA_DG === k}">${t}</button>`).join('')}</div></div>
@@ -191,6 +192,12 @@ function vistaSistema(){
   $$('[data-dg]').forEach((b) => b.onclick = () => { VISTA_DG = b.dataset.dg; try { localStorage.setItem('lb-vista-dg', VISTA_DG); } catch (e) {}
     $$('[data-dg]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.dg === VISTA_DG))); diagramaSistema(); });
   diagramaSistema();
+}
+function trinquete(nombre, k, c){
+  const T = D.trinquetes || {}, v = (T.actual || {})[k], g = (T.aceptado || {})[k];
+  if (v == null) return '';
+  const peor = g != null && v > g, mejor = g != null && v < g;
+  return `<div class="cifra" title="${c}: solo puede bajar. Aceptado: ${g == null ? '—' : g}"><span class="etq">${nombre} · ${c}</span><b class="dat" style="${peor ? 'color:var(--inc)' : mejor ? 'color:var(--ok)' : ''}">${v}</b><span class="tenue">${peor ? 'subió: retrocede' : mejor ? 'bajó de ' + g : 'trinquete en ' + (g == null ? '—' : g)}</span></div>`;
 }
 function seccionAlcance(mods){
   const S = D.sistema || {}, Al = S.alcance || {}, conf = Al.confirmacion || {};

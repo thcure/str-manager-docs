@@ -2,7 +2,8 @@
 """linea-base.py (MJ-16) — valida la línea base funcional del STR y calcula la cobertura funcional por módulo.
 
 Uso: python3 -I herramientas/modelo/linea-base.py <raíz del repo> [--json] [--resultados <archivo.json>]
-       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md>]
+       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md>] [--trinquetes]
+  --trinquetes: fija en interno/linea-base/trinquetes.json el valor actual de las medidas que solo pueden mejorar (C4, C6).
   --cu / --cap: ficha corta de uno o más casos de uso (estado, limitantes, INC, relaciones, pruebas): lista de entrada
                 de Diseño (proceso de requerimientos §3, LM-61). --cap lista todos los de una capacidad.
   --lote:       casos de uso que toca un borrador de lote, calculados (REQ → origen, INC → pendientes, cubre de su guion,
@@ -20,7 +21,8 @@ import json, os, re, sys
 TIPOS = {'operativa', 'control', 'datos', 'integracion', 'consulta'}
 PESOS = {'esencial': 3, 'necesaria': 2, 'accesoria': 1, 'por-confirmar': 2}
 DECL = {'construido', 'parcial', 'no-construido', 'fuera-de-alcance'}
-EST_ARCH = {'borrador', 'revisado-diseno', 'vigente'}
+EST_ARCH = {'borrador', 'revisado-diseno', 'vigente', 'confirmado', 'anclado', 'verificado'}
+ORDEN_MADUREZ = ['borrador', 'revisado-diseno', 'confirmado', 'anclado', 'verificado']
 ESC_TIPOS = {'principal', 'alterno', 'excepcion'}
 CONF = {'alta', 'media', 'baja'}
 
@@ -94,7 +96,7 @@ def cobertura(cus, caps, estados):
         e = estados[cu['id']]
         if e == 'fuera-de-alcance' or cu.get('ambito') == 'fabrica':
             continue
-        w = peso_cap.get(cu.get('capacidad'), 2)
+        w = PESOS.get(cu.get('peso')) or peso_cap.get(cu.get('capacidad'), 2)
         B += 1; Bp += w
         if e not in ('comprobado', 'parcial'):
             A += 1; Ap += w
@@ -123,6 +125,7 @@ def main(argv):
         nombre = k[:-8] if k.endswith('.spec.js') else k
         guiones[nombre] = {c.get('c') for c in v.get('casos', [])}
     err, avi = [], []
+    concesiones = {}
     archivos = sorted(f for f in os.listdir(lb) if re.fullmatch(r'[A-Z0-9]+\.json', f))
     todos_cu, por_mod = {}, {}
     for f in archivos:
@@ -171,6 +174,16 @@ def main(argv):
                 err.append(f + ': ' + i + ' ámbito inválido')
             if cu.get('confianza', 'media') not in CONF:
                 err.append(f + ': ' + i + ' confianza inválida')
+            if cu.get('peso') is not None and cu.get('peso') not in PESOS:
+                err.append(f + ': ' + i + ' peso inválido ' + str(cu.get('peso')))
+            for cn in cu.get('concesiones', []):
+                cid_ = str(cn.get('id', ''))
+                if not re.fullmatch(r'CN-\d+', cid_) or not cn.get('que') or not cn.get('aceptoPor'):
+                    err.append(f + ': ' + i + ' concesión inválida ' + cid_ + ' (id CN-n, que, aceptoPor)')
+                elif cid_ in concesiones:
+                    err.append(f + ': ' + i + ' concesión repetida ' + cid_ + ' (también en ' + concesiones[cid_] + ')')
+                else:
+                    concesiones[cid_] = i
             if cu.get('confianza') == 'baja':
                 avi.append(f + ': ' + i + ' con confianza baja: Desarrollo lo confirma')
             for r in cu.get('reglas', []):
@@ -217,7 +230,7 @@ def main(argv):
                     continue
                 par = [x for x in todos_cu[dest][1].get(otro, []) if x.get('de' if otro == 'entradas' else 'a') == i]
                 if not par:
-                    avi.append(i + ' → ' + dest + ': falta el par en ' + otro + ' de ' + dest)
+                    err.append('C7 ' + i + ' → ' + dest + ': falta el par en ' + otro + ' de ' + dest)
     informe = {}
     for mod, d in por_mod.items():
         est = {cu['id']: estado_calculado(cu, incs, resultados) for cu in d.get('casosUso', [])}
@@ -236,12 +249,21 @@ def main(argv):
                         'sinAtar': len(d.get('sinAtar', [])), 'estados': est}
         for s in d.get('sinAtar', []):
             avi.append(mod + ': sin atar ' + str(s.get('id') if isinstance(s, dict) else s))
+    sistema = cargar(os.path.join(lb, 'sistema.json')) if os.path.exists(os.path.join(lb, 'sistema.json')) else {}
+    for mod, d in por_mod.items():
+        for e_ in madurez(mod, d, informe[mod], sistema, lb):
+            err.append(e_)
+    err += fotos(sistema)
+    tr_err, tr_avi, tr_val = trinquetes(lb, por_mod, informe, mapa, '--trinquetes' in argv)
+    err += tr_err; avi += tr_avi
+    for mod in informe:
+        informe[mod]['madurez'] = por_mod[mod].get('estadoArchivo')
     if '--cu' in argv or '--cap' in argv:
         return ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg)
     if '--lote' in argv:
         return casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu)
     if como_json:
-        print(json.dumps({'errores': err, 'avisos': avi, 'modulos': informe}, ensure_ascii=False, indent=1))
+        print(json.dumps({'errores': err, 'avisos': avi, 'modulos': informe, 'trinquetes': tr_val, 'concesiones': concesiones}, ensure_ascii=False, indent=1))
     else:
         for mod, r in informe.items():
             c = r['cobertura']
@@ -255,6 +277,89 @@ def main(argv):
         for a in avi:
             print('- ' + a)
     return 1 if err else 0
+
+
+# ---------- C9 madurez · C4/C6 trinquetes · C10 fotos (LM-60) ----------
+def peso_de(cu, caps):
+    return cu.get('peso') or next((c.get('peso') for c in caps if c['id'] == cu.get('capacidad')), 'necesaria')
+
+
+def esenciales_sin_guion(d, estados=None):
+    """Pura: casos esenciales, en alcance, construidos o parciales, sin ningún guion en pruebas[]."""
+    caps = d.get('capacidades', [])
+    return [cu['id'] for cu in d.get('casosUso', []) if peso_de(cu, caps) == 'esencial' and cu.get('declarado') in ('construido', 'parcial')
+            and cu.get('ambito') != 'fabrica' and not [x for x in cu.get('pruebas', []) if x.get('fiable', True) is not False]]
+
+
+def madurez(mod, d, inf, sistema, lb):
+    """Pura salvo la lectura de auditorias/: errores C9 si el módulo declara un estado que no cumple."""
+    est = d.get('estadoArchivo')
+    if est == 'vigente':
+        est = 'confirmado'
+    nivel = ORDEN_MADUREZ.index(est) if est in ORDEN_MADUREZ else 0
+    out = []
+    if nivel >= 1 and not any('dise' in str(r.get('por', '')).lower() for r in d.get('revisiones', [])):
+        out.append('C9 %s: estadoArchivo %s sin revisión de Diseño en revisiones[]' % (mod, est))
+    if nivel >= 2 and ((sistema.get('alcance') or {}).get('confirmacion') or {}).get('estado') != 'confirmado':
+        out.append('C9 %s: estadoArchivo %s pero el alcance del sistema no está confirmado por Carlos (sistema.json)' % (mod, est))
+    if nivel >= 3:
+        sg = esenciales_sin_guion(d)
+        if sg:
+            out.append('C9 %s: estadoArchivo %s con %d casos esenciales sin guion (%s)' % (mod, est, len(sg), ', '.join(sg[:6]) + ('…' if len(sg) > 6 else '')))
+    if nivel >= 4:
+        c = inf['cobertura']
+        if c['simple'] is None or c['simple'] < 90:
+            out.append('C9 %s: estadoArchivo verificado con cobertura %s %% (< 90)' % (mod, c['simple']))
+        if inf['porEstado'].get('con-incidente'):
+            out.append('C9 %s: estadoArchivo verificado con %d casos con incidente abierto' % (mod, inf['porEstado']['con-incidente']))
+        ad = os.path.join(lb, 'auditorias')
+        ok = False
+        if os.path.isdir(ad):
+            for f in sorted(os.listdir(ad)):
+                if f.startswith(mod + '-') and f.endswith('.json'):
+                    try:
+                        if cargar(os.path.join(ad, f)).get('resultado') == 'conforme':
+                            ok = True
+                    except Exception:
+                        pass
+        if not ok:
+            out.append('C9 %s: estadoArchivo verificado sin auditoría física «conforme» en interno/linea-base/auditorias/' % mod)
+    return out
+
+
+def fotos(sistema):
+    """Pura: C10, cada confirmación de Carlos deja su foto."""
+    conf = (sistema.get('alcance') or {}).get('confirmacion') or {}
+    if conf.get('estado') != 'confirmado':
+        return []
+    f = conf.get('fotos') or []
+    if not f or not all(x.get('commit') and x.get('lineaBaseHasta') and x.get('fecha') for x in f):
+        return ['C10 sistema.json: alcance confirmado sin foto completa en confirmacion.fotos[] ({fecha, commit, lineaBaseHasta, por})']
+    return []
+
+
+def trinquetes(lb, por_mod, informe, mapa, bajar):
+    """C4 y C6: el valor actual no puede ser peor que el guardado en trinquetes.json; con bajar=True se actualiza."""
+    p = os.path.join(lb, 'trinquetes.json')
+    guardado = cargar(p) if os.path.exists(p) else {}
+    actual = {'casosEsencialesSinGuion': sum(len(esenciales_sin_guion(d)) for d in por_mod.values()),
+              'relacionesPorPrecisar': sum(1 for r in mapa.get('relaciones', []) if r.get('tipo') == 'por-precisar')}
+    err, avi = [], []
+    for k, v in actual.items():
+        g = guardado.get(k)
+        if g is None:
+            avi.append('trinquete %s sin valor guardado (hoy %d): corre --trinquetes' % (k, v))
+        elif v > g:
+            err.append('%s trinquete %s: hoy %d, aceptado %d; solo puede bajar' % ('C4' if k.startswith('casos') else 'C6', k, v, g))
+        elif v < g:
+            avi.append('trinquete %s bajó de %d a %d: corre --trinquetes para fijarlo' % (k, g, v))
+    if bajar:
+        nuevo = dict(guardado, actualizadoEn=__import__('datetime').date.today().isoformat(), **{k: (min(v, guardado[k]) if isinstance(guardado.get(k), int) else v) for k, v in actual.items()})
+        with open(p, 'w', encoding='utf-8') as f:
+            json.dump(nuevo, f, ensure_ascii=False, indent=1)
+            f.write('\n')
+        avi.append('trinquetes fijados: ' + ', '.join('%s=%d' % (k, nuevo[k]) for k in actual))
+    return err, avi, actual
 
 
 # ---------- --cu / --cap: ficha corta de un caso de uso (LM-61, lista de entrada de Diseño) ----------

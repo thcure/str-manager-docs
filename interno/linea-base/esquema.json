@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "fecha": "2026-10-18",
  "escritor": "Chat Arquitecto (estructura y extracción); el contenido de producto lo revisa y confirma Chat Diseño con Carlos",
  "mejora": "MJ-16",
@@ -19,7 +19,7 @@
  "archivoModulo": {
   "modulo": "id del módulo en mapa-modulos.json (obligatorio)",
   "version": "entero; sube con cada revisión",
-  "estadoArchivo": "borrador | revisado-diseno | vigente",
+  "estadoArchivo": "borrador | revisado-diseno | confirmado | anclado | verificado (madurez, C9 del plan de configuración; «vigente» equivale a confirmado). Sube solo si cumple el criterio de `madurez`.",
   "levantadoEn": "AAAA-MM-DD",
   "fuentes": "lista de lo leído para levantarlo (código en main <versión>, REQ, guiones, incidentes)",
   "revisiones": "[{fecha, por, que}]",
@@ -53,7 +53,9 @@
   "verificado": "{fecha, como}: si no hay prueba y se comprobó a mano o leyendo el código",
   "confianza": "alta | media | baja: qué tan seguro está quien lo levantó (baja = Desarrollo debe confirmarlo)",
   "ambito": "producto (por omisión) | fabrica: lo que existe para la fábrica de pruebas y no para el negocio (p. ej. la purga de datos de prueba); no cuenta en la cobertura de producto",
-  "pruebas[].fiable": "false cuando el guion tiene un defecto propio (p. ej. esperas fijas) y su resultado no prueba el caso de uso; va con `nota` que nombra el INC del guion. Una prueba no fiable no comprueba nada"
+  "pruebas[].fiable": "false cuando el guion tiene un defecto propio (p. ej. esperas fijas) y su resultado no prueba el caso de uso; va con `nota` que nombra el INC del guion. Una prueba no fiable no comprueba nada",
+  "peso": "opcional: esencial | necesaria | accesoria cuando difiere del peso de su capacidad (excepción visible en el explorador; Diseño, M-925). Sin él, vale el de la capacidad.",
+  "concesiones": "[{id: CN-n, que, aceptoPor, en: AAAA-MM-DD, hasta}]: desviaciones aceptadas a propósito (ISO 10007 §5.4.1, «waiver»); id único en toda la línea base; se reportan en el explorador"
  },
  "estadoCalculado": {
   "comprobado": "construido o parcial, con al menos una prueba cuyo último resultado es verde",
@@ -67,5 +69,20 @@
   "formula": "ISO/IEC 25023, completitud funcional: X = 1 − A/B, con B = casos de uso del alcance de producto (todos salvo fuera-de-alcance y ámbito fábrica) y A = los que no están comprobados.",
   "pesada": "cada caso de uso pesa por el peso de su capacidad: esencial 3, necesaria 2, accesoria 1 (por-confirmar cuenta 2).",
   "reporte": "por módulo: % simple, % pesado, conteo por estado calculado y por tipo de capacidad; siempre con la fecha del alcance conocido."
- }
+ },
+ "madurez": {
+  "que": "Escalera de madurez de un módulo (plan de configuración A.4, C9; OpenTitan). Un módulo no sube sin cumplir el criterio; linea-base.py lo comprueba.",
+  "borrador": "levantado por el Arquitecto o un agente auxiliar; sin revisión de producto",
+  "revisado-diseno": "Diseño revisó pesos, alcance y decisiones (revisiones[] con «Diseño»)",
+  "confirmado": "Carlos confirmó el alcance del sistema (sistema.json › alcance.confirmacion.estado = confirmado) y el módulo tiene revisión de Diseño",
+  "anclado": "confirmado, y todo caso de uso esencial en alcance y construido tiene al menos un guion en pruebas[]",
+  "verificado": "anclado, cobertura simple ≥ 90 %, sin casos con incidente abierto, concesiones revisadas y una auditoría física con resultado «conforme» en interno/linea-base/auditorias/"
+ },
+ "trinquetes": {
+  "que": "interno/linea-base/trinquetes.json guarda el último valor aceptado de cada medida que solo puede mejorar (C4, C6). linea-base.py da error si el valor actual es peor; con --trinquetes lo baja al valor actual (solo el Arquitecto, en su commit).",
+  "casosEsencialesSinGuion": "casos de uso esenciales, en alcance y construidos, sin ningún guion en pruebas[] (C4)",
+  "relacionesPorPrecisar": "relaciones del mapa con tipo «por-precisar» (C6)"
+ },
+ "fotos": "sistema.json › alcance.confirmacion.fotos[]: [{fecha, commit, lineaBaseHasta: L-n, por}] — una por confirmación de Carlos (C10); la última es la línea base vigente; las anteriores se conservan para comparar",
+ "auditorias": "interno/linea-base/auditorias/<MOD>-AAAA-MM-DD.json: {modulo, fecha, por, muestra: [CU-…], resultado: conforme | con hallazgos, hallazgos: [{casoUso, que, accion: INC-n | corrección | ninguna}]} (auditoría física, ISO 10007 §5.6 b)"
 }

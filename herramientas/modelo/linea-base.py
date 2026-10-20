@@ -2,6 +2,12 @@
 """linea-base.py (MJ-16) — valida la línea base funcional del STR y calcula la cobertura funcional por módulo.
 
 Uso: python3 -I herramientas/modelo/linea-base.py <raíz del repo> [--json] [--resultados <archivo.json>]
+       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md>]
+  --cu / --cap: ficha corta de uno o más casos de uso (estado, limitantes, INC, relaciones, pruebas): lista de entrada
+                de Diseño (proceso de requerimientos §3, LM-61). --cap lista todos los de una capacidad.
+  --lote:       casos de uso que toca un borrador de lote, calculados (REQ → origen, INC → pendientes, cubre de su guion,
+                casosUso.crea del REQ) y cruzados con la línea «Casos de uso:» de la cabecera (C2 del plan de
+                configuración, LM-60). Aviso mientras Desarrollo lo use en dos lotes; luego error.
   --resultados: {"<guion>.spec.js": {"ok": true|false, "fecha": "AAAA-MM-DD", "casos": {"a": true, ...}}}
                 (última regresión; sin él, un caso de uso con prueba queda «con-prueba-sin-resultado»).
 Lee interno/linea-base/esquema.json, sistema.json y <MOD>.json; cruza con interno/mapa-modulos.json (módulos, actores,
@@ -230,6 +236,10 @@ def main(argv):
                         'sinAtar': len(d.get('sinAtar', [])), 'estados': est}
         for s in d.get('sinAtar', []):
             avi.append(mod + ': sin atar ' + str(s.get('id') if isinstance(s, dict) else s))
+    if '--cu' in argv or '--cap' in argv:
+        return ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg)
+    if '--lote' in argv:
+        return casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu)
     if como_json:
         print(json.dumps({'errores': err, 'avisos': avi, 'modulos': informe}, ensure_ascii=False, indent=1))
     else:
@@ -245,6 +255,163 @@ def main(argv):
         for a in avi:
             print('- ' + a)
     return 1 if err else 0
+
+
+# ---------- --cu / --cap: ficha corta de un caso de uso (LM-61, lista de entrada de Diseño) ----------
+def ficha_cu(argv, por_mod, todos_cu, incs, resultados, mapa, seg):
+    ids = []
+    if '--cu' in argv:
+        ids += [x.strip() for x in argv[argv.index('--cu') + 1].split(',') if x.strip()]
+    if '--cap' in argv:
+        cap = argv[argv.index('--cap') + 1].strip()
+        ids += [i for i, (m, u) in todos_cu.items() if u.get('capacidad') == cap]
+    if not ids:
+        print('Nada que mostrar: usa --cu CU-X-n.m o --cap CAP-X-n')
+        return 1
+    rel_txt = {r['id']: '%s→%s · %s · %s' % (r['origen'], r['destino'], r.get('tipo', '?'), r.get('dato', '')) for r in mapa['relaciones']}
+    inc_txt = {x['id']: (x.get('estado') or 'abierto', str(x.get('titulo') or x.get('descripcion') or '')[:90]) for x in seg['incs']}
+    inc_txt.update({x['id']: (x.get('estado') or 'abierta', str(x.get('titulo') or x.get('descripcion') or x.get('que') or '')[:90]) for x in seg.get('dts', [])})
+    como_json = '--json' in argv
+    salida = []
+    for i in ids:
+        if i not in todos_cu:
+            print('- %s: no existe en la línea base' % i)
+            continue
+        mod, u = todos_cu[i]
+        d = por_mod[mod]
+        cap = next((c for c in d.get('capacidades', []) if c['id'] == u.get('capacidad')), {})
+        est = estado_calculado(u, incs, resultados)
+        rels = sorted({f.get('rel') for f in u.get('entradas', []) + u.get('salidas', []) if f.get('rel')})
+        otros = sorted({re.sub(r'^CU-([A-Z0-9]+)-.*$', r'\1', f.get('de') or f.get('a') or '') for f in u.get('entradas', []) + u.get('salidas', [])} - {mod, ''})
+        pend = [(p_, inc_txt.get(p_, ('?', ''))) for p_ in u.get('pendientes', [])]
+        fila = {'id': i, 'modulo': mod, 'que': u.get('que'), 'capacidad': cap.get('id'), 'capacidadNombre': cap.get('nombre'), 'tipo': cap.get('tipo'), 'peso': u.get('peso') or cap.get('peso'),
+                'actores': u.get('actor', []), 'estado': est, 'declarado': u.get('declarado'), 'confianza': u.get('confianza', 'media'),
+                'limitantes': u.get('limitantes', []), 'pendientes': [{'id': a, 'estado': b[0], 'que': b[1]} for a, b in pend],
+                'relaciones': [{'id': r_, 'que': rel_txt.get(r_, '')} for r_ in rels], 'modulosVecinos': otros,
+                'entradas': [f.get('de') for f in u.get('entradas', [])], 'salidas': [f.get('a') for f in u.get('salidas', [])],
+                'pruebas': [x.get('guion') + (' (' + ','.join(x.get('casos', [])) + ')' if x.get('casos') else '') for x in u.get('pruebas', [])],
+                'origen': u.get('origen', []), 'reglas': u.get('reglas', []), 'paginas': (u.get('tecnica') or {}).get('paginas', [])}
+        salida.append(fila)
+        if not como_json:
+            print('## %s · %s · %s' % (i, fila['que'], mod))
+            print('   capacidad %s «%s» · %s · %s · actores: %s' % (fila['capacidad'], fila['capacidadNombre'], fila['tipo'], fila['peso'], ', '.join(fila['actores'])))
+            print('   estado: %s (declarado %s, confianza %s)%s' % (est, fila['declarado'], fila['confianza'], ' · sin resultados de regresión' if resultados is None else ''))
+            for l in fila['limitantes']:
+                print('   limitante: ' + l)
+            for q in fila['pendientes']:
+                print('   pendiente: %s (%s) %s' % (q['id'], q['estado'], q['que']))
+            for r_ in fila['relaciones']:
+                print('   relación: %s %s' % (r_['id'], r_['que']))
+            print('   recibe de: %s · entrega a: %s · vecinos: %s' % (', '.join(fila['entradas']) or '—', ', '.join(fila['salidas']) or '—', ', '.join(otros) or '—'))
+            print('   pruebas: %s · origen: %s · reglas: %s · páginas: %s' % (', '.join(fila['pruebas']) or 'ninguna', ', '.join(fila['origen']) or '—', ', '.join(fila['reglas']) or '—', ', '.join(fila['paginas']) or '—'))
+    if como_json:
+        print(json.dumps(salida, ensure_ascii=False, indent=1))
+    return 0
+
+
+# ---------- --lote: casos de uso que toca un borrador (C2, LM-60) ----------
+TECNICO = 'técnico, sin caso de uso'
+
+
+def casos_declarados(texto):
+    """Pura: lee la línea «Casos de uso:» de la cabecera. Devuelve (ids, tecnico, nuevos)."""
+    m = re.search(r'^Casos de uso:\s*(.+)$', texto, re.M)
+    if not m:
+        return None, False, []
+    v = m.group(1).strip()
+    if TECNICO in v.lower() or v.lower().startswith('técnico'):
+        return [], True, []
+    ids = re.findall(r'CU-[A-Z0-9]+-\d+\.\d+', v)
+    nuevos = re.findall(r'nuevo[^,;]*?(REQ-[A-Z0-9]+-[\w.]+)', v)
+    return ids, False, nuevos
+
+
+def casos_calculados(texto, todos_cu, gu, reqs_crea):
+    """Pura: casos de uso que toca el borrador, con el porqué de cada uno."""
+    porque = {}
+
+    def add(cu, why):
+        porque.setdefault(cu, set()).add(why)
+    cab = texto[:3000]
+    t = re.search(r'^# instr\s*[—-]\s*([^:\n]+)', texto, re.M)
+    refs = set(re.findall(r'\b(REQ-[A-Z0-9]+-[\w.]+|INC-\d+|DT-\d+)\b', (t.group(1) if t else '') + ' ' + ' '.join(re.findall(r'^(?:Requerimiento|Origen|Impacto):.*$', cab, re.M))))
+    for i, (mod, u) in todos_cu.items():
+        for o in u.get('origen', []):
+            if o in refs:
+                add(i, 'origen ' + o)
+        for p_ in u.get('pendientes', []):
+            if p_ in refs:
+                add(i, 'pendiente ' + p_)
+    for c in re.findall(r"cubre\s*:\s*\[([^\]]*)\]", texto):
+        for cu in re.findall(r'CU-[A-Z0-9]+-\d+\.\d+', c):
+            add(cu, 'cubre del guion')
+    for r_ in refs:
+        for cu in reqs_crea.get(r_, []):
+            add(cu, 'nuevo, definido en ' + r_)
+    # guiones ya catalogados que el lote nombra
+    for g, v in (gu or {}).items():
+        nombre = g[:-8] if g.endswith('.spec.js') else g
+        if nombre in texto:
+            for c in v.get('casos', []):
+                for cu in [x for x in c.get('cubre', []) if str(x).startswith('CU-')]:
+                    add(cu, 'cubre de ' + nombre)
+    return porque
+
+
+def es_tecnico(texto):
+    """Pura: lote de solo guiones, cola, modelo o documentación (misma regla que ruta.js, M-522)."""
+    m = re.search(r'^Alcance:\s*(.+)$', texto, re.M)
+    if not m:
+        return False
+    arch = re.findall(r'[\w./-]+\.(?:js|php|html|json|md|ps1|py|css)', m.group(1))
+    return bool(arch) and all(re.match(r'(tests/|herramientas/|docs?/|claude/|interno/|\.claude/|CLAUDE\.md|log/)', a) for a in arch)
+
+
+def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
+    ruta = argv[argv.index('--lote') + 1]
+    texto = open(ruta, encoding='utf-8').read()
+    reqs_crea = {}
+    try:
+        for r_ in cargar(os.path.join(raiz, 'interno', 'diseno.json')).get('reqs', []):
+            crea = (r_.get('casosUso') or {}).get('crea') or []
+            if crea:
+                reqs_crea[r_['id']] = crea
+    except Exception:
+        pass
+    calc = casos_calculados(texto, todos_cu, gu, reqs_crea)
+    decl, tecnico, nuevos = casos_declarados(texto)
+    tec = es_tecnico(texto)
+    como_json = '--json' in argv
+    if tecnico and not calc and tec:
+        veredicto = 'coincide (técnico, sin caso de uso)'
+    elif tecnico and (calc or not tec):
+        veredicto = 'no coincide: declarado técnico pero el lote toca ' + (', '.join(sorted(calc)) if calc else 'archivos de producto')
+    elif decl is None:
+        veredicto = ('sin línea «Casos de uso:» en la cabecera' + ('; el cálculo da: ' + ', '.join(sorted(calc)) if calc else '; el cálculo no encuentra ninguno' + (' (parece técnico: escribe «' + TECNICO + '»)' if tec else '')))
+    else:
+        faltan = sorted(set(calc) - set(decl))
+        sobran = sorted(set(decl) - set(calc) - {c for c in decl if c not in todos_cu and nuevos})
+        noexisten = sorted(c for c in decl if c not in todos_cu and c not in sum(reqs_crea.values(), []))
+        veredicto = 'coincide' if not faltan and not sobran and not noexisten else 'no coincide'
+        if faltan:
+            veredicto += ' · calculados que no declaras: ' + ', '.join(faltan)
+        if sobran:
+            veredicto += ' · declarados que el cálculo no encuentra (si son nuevos, dilo: «nuevo, definido en REQ-X»): ' + ', '.join(sobran)
+        if noexisten:
+            veredicto += ' · no existen en la línea base: ' + ', '.join(noexisten)
+    out = {'borrador': os.path.basename(ruta), 'calculados': {k: sorted(v) for k, v in sorted(calc.items())}, 'declarados': decl, 'tecnico': tecnico or tec, 'nuevos': nuevos, 'veredicto': veredicto,
+           'estados': {k: estado_calculado(todos_cu[k][1], incs, resultados) for k in calc if k in todos_cu}}
+    if como_json:
+        print(json.dumps(out, ensure_ascii=False, indent=1))
+    else:
+        print('## Casos de uso del lote · ' + out['borrador'])
+        for k, v in out['calculados'].items():
+            print('- %s (%s): %s' % (k, out['estados'].get(k, 'nuevo'), '; '.join(v)))
+        if not calc:
+            print('- (ninguno calculado)' + (' · lote técnico' if tec else ''))
+        print('Declarados: ' + ('—' if decl is None else (TECNICO if tecnico else ', '.join(decl) or '—')))
+        print('C2: ' + veredicto)
+    return 0 if veredicto.startswith('coincide') else 2
 
 
 if __name__ == '__main__':

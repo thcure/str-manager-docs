@@ -198,6 +198,15 @@ try:
     for x in _r.get('avisos', []): avi(x['regla'], 'mapa', x['id'], x['detalle'])
 except Exception as ex: avi('M0 mapa', 'archivo', 'herramientas/modelo/mapa.py', f'no se pudo correr: {ex}')
 
+# LM-60 (plan de configuración de la línea base, C1): linea-base.py con 0 errores es parte de validar.py. Sus avisos no se
+# repiten aquí (los muestra la propia herramienta y el explorador).
+try:
+    _lb = subprocess.run([sys.executable, '-I', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'linea-base.py'), RAIZ, '--json'], capture_output=True, text=True, timeout=120)
+    _rl = json.loads(_lb.stdout or '{}')
+    for x in _rl.get('errores', []): err('C1 linea-base', 'linea-base', x.split(':')[0], x)
+    if not _rl: avi('C1 linea-base', 'archivo', 'herramientas/modelo/linea-base.py', 'sin salida JSON: ' + (_lb.stderr or '')[:200])
+except Exception as ex: avi('C1 linea-base', 'archivo', 'herramientas/modelo/linea-base.py', f'no se pudo correr: {ex}')
+
 # LM-56 (MJ-15 fase C): origen del fallo en cada INC. Valor fuera de la lista = error R9; INC desde la fecha de LM-56 sin
 # los dos campos = aviso (la clasificación hacia atrás la hace Desarrollo, sin plazo).
 _io = E.get('incidenteOrigen') or {}

@@ -1,6 +1,6 @@
 # Plantilla · Instrucción de lote (la escribe el Chat Desarrollo; la ejecuta la CLI; la lee el verificador)
 
-Reglas de uso: el borrador va **sin número** (el número se asigna al encolar); las primeras 15 líneas son la **cabecera** y las lee la guardia de la cola (un crítico sin `DA-n` ni «cruce … Carlos» no arranca); todo lo que la CLI deba tocar está en **Alcance**; toda prueba derivada dice **perfil, página completa y precondición**. Ejemplo real: `hechas\67-instr-fix-inc108-un-usuario-un-rol.md` (crítico) y `hechas\69-instr-sp3-nomenclatura.md` (estándar).
+Reglas de uso: el borrador va **sin número** (el número se asigna al encolar); las primeras 16 líneas son la **cabecera** y las lee la guardia de la cola (un crítico sin `DA-n` ni «cruce … Carlos» no arranca); todo lo que la CLI deba tocar está en **Alcance**; toda prueba derivada dice **perfil, página completa y precondición**. Ejemplo real: `hechas\67-instr-fix-inc108-un-usuario-un-rol.md` (crítico) y `hechas\69-instr-sp3-nomenclatura.md` (estándar).
 
 ```
 # instr — <REQ-X-n / INC-n / DT-n>: <título en una línea>
@@ -10,6 +10,7 @@ Impacto: <qué cambia para el usuario; qué INC/DT cierra>
 Regresión: <opcional (pw 0.6.0, LM-39b): normalmente NO se escribe: la cola corre los guiones de la **ruta** del lote (§ Ruta de pruebas) más los centinelas si el lote es crítico o toca la capa común. Solo para forzar: ids de módulo o zonas, p. ej. `HK, K3` o `inventario`; `todas`; o `ninguna` con el porqué (un lote de solo guiones no la necesita: la cola corre su guion y el humo)>
 Reglas transversales que toca: <RT-n, RT-m (LM-36: `claude/arquitectura/reglas-transversales.md`); «ninguna» solo si el lote no toca datos, permisos, archivos, retención ni conexiones. Una RT «en conflicto» = el lote no se encola>
 Mapa: módulos y relaciones que cambia: <módulo(s) de la vista 1 y relación(es) de la vista 3 de `claude/arquitectura/mapa-str.md` que este lote crea, cambia o quita (colección, evento o ruta nueva); «ninguna» si solo corrige dentro de un módulo>
+Casos de uso: <los que toca, según `python3 -I herramientas/modelo/linea-base.py . --lote <este borrador>` (C2, LM-60): `CU-X-n.m, …`; los que el REQ crea van como «nuevo, definido en REQ-X»; un lote que solo toca guiones, cola, modelo o documentación dice «técnico, sin caso de uso». Si lo calculado no coincide con lo que declaras, corrige uno de los dos y dilo>
 Riesgo: <bajo | medio | alto> (<R-n>). Mitigación: <una frase>.
 ¿Datos personales o dinero?: <no | sí: …> · ¿Normativa?: <no | sí: …> · ¿Toca el modelo (capa Marco)?: <no | sí> (sí = la CLI no lo ejecuta y termina sin commit; un lote del modelo LM-n que solo toque archivos de str-manager lleva «no (lote del modelo LM-n, DA-n y cruce de Carlos)»)
 Reversión: <git revert <hash> + despliegue | script | …>

@@ -38,7 +38,7 @@ def _dt(v):
 def fila_valida(f):
     """F1/F7: una fila de trabajo[] trae ref con forma, clase de la lista y origen."""
     faltan = []
-    if not re.fullmatch(r'(REQ-[A-Z0-9]+-[\w.]+|INC-\d+|DT-\d+|LM-\d+|PT-\w+)', str(f.get('ref') or '')): faltan.append('ref')
+    if not re.fullmatch(r'(REQ-[A-Z0-9]+(?:-[\w.]+)+|INC-\d+|DT-\d+|LM-\d+|PT-\w+)', str(f.get('ref') or '')): faltan.append('ref')
     if f.get('clase') not in CLASES: faltan.append('clase')
     if not f.get('origen'): faltan.append('origen')
     return faltan

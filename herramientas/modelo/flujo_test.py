@@ -19,6 +19,7 @@ def ok(cond, que):
 ok(F.fila_valida({'ref': 'REQ-INV2-5', 'clase': 'e', 'origen': 'Diseño prioridades[]'}) == [], 'fila completa')
 ok(set(F.fila_valida({'ref': 'X', 'clase': 'z'})) == {'ref', 'clase', 'origen'}, 'fila sin nada')
 ok(F.fila_valida({'ref': 'INC-128', 'clase': 'b', 'origen': 'I1 P1'}) == [], 'INC vale')
+ok(F.fila_valida({'ref': 'REQ-INV2-6-1', 'clase': 'e', 'origen': 'Diseño'}) == [] and F.fila_valida({'ref': 'REQ-F11-5-2', 'clase': 'e', 'origen': 'Diseño'}) == [], 'ids con dos guiones (M-1028)')
 tr = [{'ref': 'INC-128', 'clase': 'b'}, {'ref': 'REQ-A-1', 'clase': 'e'}, {'ref': 'INC-142', 'clase': 'c'}, {'ref': 'DT-50', 'clase': 'g'}]
 ok(F.orden_correcto(tr) == ['INC-142'], 'c detrás de e está fuera de orden')
 ok(F.orden_correcto([tr[0], tr[2], tr[1], tr[3]]) == [], 'b, c, e, g en orden')

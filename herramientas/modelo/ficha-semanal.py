@@ -4,7 +4,7 @@ Uso: python3 -I herramientas/modelo/ficha-semanal.py <raiz> [--semana AAAA-MM-DD
 Junta lo que vive en el repo (escapes por etapa de seguimiento.json › incs[], riesgos residuales de trinquetes.json, palabras clave
 de guiones-e2e.json) con lo que la cola midió (METRICAS.json: repruebas, rojos ajenos, bloqueos, cobertura de criterios, candidatos
 a cuarentena, desviaciones). Los umbrales son los de §6 del plan; esta ficha informa, no decide."""
-import json, os, sys, datetime, collections
+import json, os, sys, datetime, collections, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 try:
     import incidentes as I
@@ -128,7 +128,8 @@ def como_vamos(fl, sem_rojas, anterior=None):
     """Pura (LM-66 §6): la tabla de seis filas. sem_rojas: lista de filas del semáforo en rojo; anterior: {rojas: [...]} de la vez pasada."""
     if not fl or 'error' in fl: return [('estado', fl.get('error') if fl else 'sin datos')]
     ac = fl['aCarlos']
-    f1 = ('; '.join('%s (%s d): %s' % (x['id'], x['dias'], (x['asunto'] or '')[:70]) for x in ac) + ' · la pregunta que sigue: ' + ((ac[0]['asunto'] or '')[:90] if ac else '')) if ac else 'nada'
+    lim = lambda s: re.sub(r'^Esperando:\s*', '', s or '').strip()
+    f1 = ('; '.join('%s (%s d): %s' % (x['id'], x['dias'], lim(x['asunto'])[:80]) for x in ac) + (' · la que sigue: ' + lim(ac[0]['asunto'])[:80] if len(ac) > 1 else '')) if ac else 'nada'
     t = fl['tanda']; f2 = ('%s desde %s (%s): entra %s' % (t['id'], t['desde'], t.get('abiertaPor') or '—', ', '.join(t.get('entra') or []) or '—')) if t else 'ninguna abierta' + (' · sin trabajo[] todavía' if fl.get('sinLista') else '')
     f3 = ', '.join(fl['enCola']) or 'cola vacía'
     f4 = ', '.join(fl['aceptadosEnTanda']) or 'ninguno todavía'

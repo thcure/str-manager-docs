@@ -2,7 +2,7 @@
 """linea-base.py (MJ-16) — valida la línea base funcional del STR y calcula la cobertura funcional por módulo.
 
 Uso: python3 -I herramientas/modelo/linea-base.py <raíz del repo> [--json] [--resultados <archivo.json>]
-       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md>] [--req <requerimiento.md> --id REQ-X-n] [--trinquetes]
+       [--cu CU-X-n.m[,CU-…]] [--cap CAP-X-n] [--lote <borrador.md> [--borrador]] [--req <requerimiento.md> --id REQ-X-n] [--trinquetes]
   --req:        revisa los criterios de un REQ en su .md (letra, nivel N1–N4, caso de uso que existe o que el REQ crea,
                 palabras vagas): la lista de «listo» de Diseño (proceso de requerimientos §4, LM-61).
   --trinquetes: fija en interno/linea-base/trinquetes.json el valor actual de las medidas que solo pueden mejorar (C4, C6).
@@ -537,6 +537,8 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
     out['hooks'] = hk
     dc = decision_del_lote(texto)
     out['decision'] = dc
+    rv = revision_del_lote(texto, '--borrador' in argv)
+    out['revision'] = rv
     if como_json:
         print(json.dumps(out, ensure_ascii=False, indent=1))
     else:
@@ -552,7 +554,29 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
             print('Hooks (INC-206): ' + hk['veredicto'] + ('' if hk['ok'] else ' → no encolar'))
         if dc['areaSensible']:
             print('Decisión (A6): ' + dc['veredicto'] + ('' if dc['ok'] else ' → no encolar'))
-    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] and dc['ok'] else 2
+        print('Revisión previa (LM-72): ' + rv['veredicto'] + ('' if rv['ok'] or rv['borrador'] else ' → no encolar'))
+    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] and dc['ok'] and (rv['ok'] or rv['borrador']) else 2
+
+
+RE_REVISION = re.compile(r'Revisi[oó]n previa:\s*(\d+)\s*/\s*(\d+)', re.I)
+RE_OK_CRITICO = re.compile(r'ok\s+(Dise[nñ]o|Jefe de proyecto|JP)[^\n]*?M-\d+', re.I)
+
+
+def revision_del_lote(texto, borrador=False):
+    """LM-72 (R1): la cabecera (primeras 20 líneas) trae «Revisión previa: 23/23 · quién · fecha hora» y, si el lote es crítico,
+    «ok Diseño M-n» (producto) u «ok Jefe de proyecto M-n» (fábrica). Sin eso no se encola (rc 2); con --borrador solo avisa."""
+    cab = '\n'.join(str(texto or '').replace('\r\n', '\n').split('\n')[:20])
+    m = RE_REVISION.search(cab)
+    critico = re.search(r'(?i)categor[ií]a[^\n]*cr[ií]tico', cab) is not None
+    out = {'linea': bool(m), 'pasados': int(m.group(1)) if m else None, 'total': int(m.group(2)) if m else None, 'critico': critico, 'okCritico': bool(RE_OK_CRITICO.search(cab)), 'borrador': borrador}
+    if not m: v = 'sin línea «Revisión previa: n/23 · quién · fecha hora» en la cabecera'
+    elif out['pasados'] < out['total']: v = 'revisión previa %d/%d: corregir y repetir' % (out['pasados'], out['total'])
+    elif critico and not out['okCritico']: v = 'crítico sin «ok Diseño M-n» (producto) ni «ok Jefe de proyecto M-n» (fábrica) en la línea de revisión previa'
+    else: v = 'revisión previa %d/%d%s' % (out['pasados'], out['total'], ' · ok de crítico citado' if critico else '')
+    out['veredicto'] = v
+    out['ok'] = bool(m) and out['pasados'] >= out['total'] and (not critico or out['okCritico'])
+    if borrador and not out['ok']: out['veredicto'] += ' (borrador: aviso; sin --borrador no encola)'
+    return out
 
 
 AREAS_SENSIBLES = ['api/config/', 'database.php', 'auth', 'jwt', 'retencion', 'retención', 'cron', 'sync-ical', 'drive', 'secrets', 'secretos']

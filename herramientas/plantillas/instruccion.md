@@ -1,6 +1,6 @@
 # Plantilla · Instrucción de lote (la escribe el Chat Desarrollo; la ejecuta la CLI; la lee el verificador)
 
-Reglas de uso: el borrador va **sin número** (el número se asigna al encolar); las primeras 16 líneas son la **cabecera** y las lee la guardia de la cola (un crítico sin `DA-n` ni «cruce … Carlos» no arranca); todo lo que la CLI deba tocar está en **Alcance**; toda prueba derivada dice **perfil, página completa y precondición**. Ejemplo real: `hechas\67-instr-fix-inc108-un-usuario-un-rol.md` (crítico) y `hechas\69-instr-sp3-nomenclatura.md` (estándar).
+Reglas de uso: el borrador va **sin número** (el número se asigna al encolar); las primeras 17 líneas son la **cabecera** (la cola lee 20) y las lee la guardia de la cola (un crítico sin `DA-n` ni «cruce … Carlos» no arranca); todo lo que la CLI deba tocar está en **Alcance**; toda prueba derivada dice **perfil, página completa y precondición**. Ejemplo real: `hechas\67-instr-fix-inc108-un-usuario-un-rol.md` (crítico) y `hechas\69-instr-sp3-nomenclatura.md` (estándar).
 
 ```
 # instr — <REQ-X-n / INC-n / DT-n>: <título en una línea>
@@ -16,6 +16,7 @@ Riesgo: <bajo | medio | alto> (R-1 del lote; si el lote toca un módulo con ries
 ¿Datos personales o dinero?: <no | sí: …> · ¿Normativa?: <no | sí: …> · ¿Toca el modelo (capa Marco)?: <no | sí> (sí = la CLI no lo ejecuta y termina sin commit; un lote del modelo LM-n que solo toque archivos de str-manager lleva «no (lote del modelo LM-n, DA-n y cruce de Carlos)»)
 Reversión: <git revert <hash> + despliegue | script | …>
 Commit: <la CLI | Carlos (obligatorio si el Alcance nombra `.claude/` o `tests/hooks.test.js`: la CLI no puede commitear su hook, INC-206; la instrucción trae entonces los comandos para Carlos —copia con md5, `git add`, `git commit -m` con la línea «Lote:», `git push`— y no la sección «El commit de este lote»; `linea-base.py --lote` lo corta)>
+Revisión previa: <n>/23 · <subagente de Desarrollo | segunda lectura> · <AAAA-MM-DD HH:MM>[ · ok Diseño M-n (crítico de producto) | ok Jefe de proyecto M-n (crítico de fábrica)] (LM-72: sin 23/23 la cola rechaza el lote como .sin-revision.md; un crítico sin el ok, como .sin-ok.md; `--lote --borrador` mientras redactas)
 Origen: <M-n…>. Requerimiento: `<ruta del REQ>` (<criterios n–m>). Decisión: <ADR-n | DA-n | ninguna (motivo)> (ARQUITECTURA-v1 A6: obligatoria con ese formato si el Alcance toca `api/config/`, `database.php`, auth/jwt, retención, cron, `sync-ical`, Drive o secretos; `--lote` lo corta; un DA-n aquí va también en la línea «Lote:» del commit (hook v5), un ADR-n no).
 Depende de: <lotes previos que deben estar aceptados | archivos que deben existir | ninguno>
 Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién los crea | permisos por rol | hora/fecha | ninguna>

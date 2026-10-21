@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v10, 17-oct-2026, LM-50: Control-Veredicto compara el veredicto con pruebas.json; un «aceptado» con rojos sin explicar repite el juez una vez con opus y, si sigue, JUEZ-INCONSISTENTE + log\L-n-inconsistente.txt) (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v11, 21-oct-2026, LM-72: guardia de revision previa «Revision previa: 23/23» en la cabecera (20 lineas) y, en criticos, «ok Diseno|Jefe de proyecto M-n»; rechazos .sin-revision.md / .sin-ok.md) (v10, 17-oct-2026, LM-50: Control-Veredicto compara el veredicto con pruebas.json; un «aceptado» con rojos sin explicar repite el juez una vez con opus y, si sigue, JUEZ-INCONSISTENTE + log\L-n-inconsistente.txt) (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -279,8 +279,18 @@ try {
 
   foreach ($f in $pendientes) {
     if (Test-Path (Join-Path $Cola 'PAUSA')) { break }   # se pidio terminar la jornada: no empezar otro lote
-    # v3: guardia de criticos. La cabecera (primeras 15 lineas) debe citar DA-n o el cruce previo con Carlos.
-    $cab = (Get-Content -Path $f.FullName -TotalCount 15 -Encoding UTF8 | Out-String)
+    # v3: guardia de criticos. La cabecera (primeras 20 lineas desde v11; antes 15) debe citar DA-n o el cruce previo con Carlos.
+    $cab = (Get-Content -Path $f.FullName -TotalCount 20 -Encoding UTF8 | Out-String)
+    # v11 (LM-72): guardia de revision previa. La cabecera debe traer «Revision previa: 23/23 · quien · fecha hora»; sin ella o con n < total, RECHAZADO.
+    $revOk = $false
+    if ($cab -match '(?i)revisi[o\u00f3]n previa:\s*(\d+)\s*/\s*(\d+)') { $revOk = ([int]$Matches[1] -ge [int]$Matches[2]) }
+    if (-not $revOk) {
+      $nuevo = Join-Path $Cola ($f.BaseName + '.sin-revision.md')
+      Move-Item -Path $f.FullName -Destination $nuevo -Force
+      Resumen "RECHAZADO | $($f.Name) | sin revision previa completa en la cabecera (LM-72: «Revision previa: 23/23 · quien · fecha hora») | renombrado a .sin-revision.md"
+      Write-Host "RECHAZADO · sin revision previa · $($f.Name)"
+      continue
+    }
     if ($cab -match '(?i)categor[i\u00ed]a[^\r\n]*cr[i\u00ed]tico') {
       $conDA = $cab -match '(DA|LM)-\d+'   # v7.3: un lote del modelo cita LM-n en lugar de DA-n
       $conCruce = $cab -match '(?i)cruce[^\r\n]*carlos'
@@ -292,6 +302,14 @@ try {
         continue
       }
       if (-not $conDA) { Resumen "AVISO | $($f.Name) | critico con cruce pero sin DA-n ni LM-n (desde el 20-oct sera obligatoria)" }
+      # v11 (LM-72): un critico ademas cita el ok de su revisor de criticos en la linea de revision previa: «ok Diseno M-n» (producto) u «ok Jefe de proyecto M-n» (fabrica).
+      if (-not ($cab -match '(?i)ok\s+(dise[n\u00f1]o|jefe de proyecto|jp)[^\r\n]*?M-\d+')) {
+        $nuevo = Join-Path $Cola ($f.BaseName + '.sin-ok.md')
+        Move-Item -Path $f.FullName -Destination $nuevo -Force
+        Resumen "RECHAZADO | $($f.Name) | critico sin «ok Diseno M-n» ni «ok Jefe de proyecto M-n» en la cabecera (LM-72) | renombrado a .sin-ok.md"
+        Write-Host "RECHAZADO · critico sin ok del revisor · $($f.Name)"
+        continue
+      }
     }
     # Repositorio al día antes de cada lote
     Write-Host "Lote: $($f.Name)"

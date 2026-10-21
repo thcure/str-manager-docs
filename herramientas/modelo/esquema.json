@@ -1,5 +1,5 @@
 {
- "version": "0.10",
+ "version": "0.11",
  "fecha": "2026-10-21",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
@@ -537,7 +537,8 @@
     "a mitad solo clases a, b, c",
     "al cerrar: salio[], lecciones y la lista reordenada",
     "la ficha semanal del Arquitecto (V8) sigue semanal y cruza las tandas de la semana"
-   ]
+   ],
+   "ficha": "LM-72 (F9): toda tanda cerrada (hasta) lleva ficha {fecha, rojas, archivo} con lo que imprimió ficha-semanal.py al cerrarla («ficha para tandas[]: …»); sin eso validar.py avisa (error desde 2026-12-01)"
   },
   "edad": {
    "que": "plan[].estados: [{estado, desde}] lista que solo crece (Desarrollo la llena en el mismo cambio); el desde actual es el último",
@@ -595,6 +596,10 @@
     "días en pausa en la ventana",
     "ritmo de salida (ítems aceptados por semana)"
    ]
+  },
+  "errorDesde": {
+   "F2": "2026-12-01",
+   "nota": "LM-72: F2 (etapas fuera de límite) pasa de aviso a error en esa fecha, con los datos del periodo de metas (22-oct → 30-nov)"
   }
  },
  "arquitectura": {
@@ -882,8 +887,13 @@
      "tests/"
     ],
     "docs/claude/historial.md": [],
-    "docs/claude/reglas-fijas.md": []
+    "docs/claude/reglas-fijas.md": [],
+    "docs/claude/entorno.md": []
    }
+  },
+  "errorDesde": {
+   "Cn2": "2026-12-01",
+   "nota": "LM-72: pieza de arranque sobre su tope pasa de aviso a error"
   }
  },
  "riesgo": {
@@ -1423,6 +1433,17 @@
   },
   "metricas": {
    "donde": "interno/METRICAS.json (copia de LENOVO log\\METRICAS.json; la trae el Arquitecto por staging al cerrar la ficha hasta que el hook v6 la copie en cada tren, Rg8)"
+  },
+  "errorDesde": {
+   "Rg7": "2026-12-01",
+   "nota": "LM-72: riesgo de nivel ≥ 6 sin respuesta probada en 90 días pasa de aviso a error"
+  }
+ },
+ "lote": {
+  "revisionPrevia": {
+   "lm": "LM-72",
+   "linea": "Revisión previa: n/23 · <quién: subagente de Desarrollo | segunda lectura> · <AAAA-MM-DD HH:MM>[ · ok Diseño M-n | ok Jefe de proyecto M-n]",
+   "regla": "en las primeras 20 líneas de la instrucción; n = total para encolar; los críticos citan el ok de su revisor de críticos (Diseño para producto, Jefe de proyecto para fábrica) con el M-n del buzón; linea-base.py --lote rc 2 sin ella (con --borrador solo avisa); ejecutar-cola.ps1 v11 rechaza (.sin-revision.md / .sin-ok.md)"
   }
  }
 }

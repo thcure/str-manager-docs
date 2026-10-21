@@ -352,6 +352,7 @@ def main(argv):
     d = out['dora']; print('- DORA (informativo, K7): %s lotes aceptados · entrega mediana %s min · tasa de fallo del cambio %s%% (%s no aceptados + %s fix de %s) · recuperación %s min' % (d['frecuencia'], d['entregaMin'] if d['entregaMin'] is not None else '—', d['tasaFalloPct'] if d['tasaFalloPct'] is not None else '—', d['noAceptados'], d['fixSemana'], d['lotesSemana'], d['recuperacionMin'] if d['recuperacionMin'] is not None else '—'))
     ti = out['tendenciaInc']; print('- INC (K9): %s abiertos esta semana · %s cerrados (%s con evidencia) · %s abiertos en total · por módulo %s' % (ti['abiertosSemana'], ti['cerradosSemana'], ti['conEvidencia'], ti['abiertosTotal'], ti['porModulo']))
     print('- palabras clave: %s' % out['palabrasClave'])
+    print('- ficha para tandas[] (F9, LM-72): ' + json.dumps({'fecha': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), 'rojas': len(rojas), 'archivo': 'ficha-%s.json (guardar --json)' % datetime.date.today().isoformat()}, ensure_ascii=False))
     print('Destino de cada escape «revisión previa» o «tests»: punto del revisor, guardia, o riesgo R-n del registro (V5, Rg2). Una roja dos fichas seguidas produce fila en trabajo[], R-n aceptado por Carlos o retiro de la medida (Rg6).')
     return 0
 

@@ -15,6 +15,7 @@ ERR, AVI = [], []
 
 def err(regla, entidad, id_, detalle): ERR.append({'regla': regla, 'entidad': entidad, 'id': id_, 'detalle': detalle})
 def avi(regla, entidad, id_, detalle): AVI.append({'regla': regla, 'entidad': entidad, 'id': id_, 'detalle': detalle})
+_ERRF, _AVIF = err, avi  # LM-72: sev() usa estas copias porque «err» se reutiliza como variable más abajo
 def carga(rel):
     try: return json.load(open(os.path.join(RAIZ, rel), encoding='utf-8'))
     except Exception as ex: err('R0 archivo', rel, '-', f'no se pudo leer: {ex}'); return {}
@@ -120,6 +121,12 @@ for m in mensajes:
         if norm_rol(m.get(campo)) not in roles_ok: err('R2 rol', 'mensaje', m.get('id'), f'{campo}={m.get(campo)!r} no es un rol conocido')
 
 # R3 estados cerrados
+
+def severidad_desde(desde):
+    """LM-72 (severidad_desde): err si hoy ≥ desde (AAAA-MM-DD), si no avi. Para los controles que empiezan como aviso y pasan a error en una fecha."""
+    try: return _ERRF if desde and datetime.date.today() >= datetime.date.fromisoformat(str(desde)[:10]) else _AVIF
+    except ValueError: return _AVIF
+
 def chk_estado(ent, lista, clave='estado', idk='id'):
     for x in lista:
         v = x.get(clave)
@@ -444,7 +451,7 @@ if _F and _ef and os.path.exists(os.path.join(RAIZ, 'interno/proyecto.json')):
     # F2 límites
     _cnt = _F.conteos_etapas(_trab, lotes, reqs, _plns)
     for k, (n, lim) in _F.fuera_de_limite(_cnt, _lim, _exc).items():
-        avi('F2 límite', 'etapa', k, '%d en curso, límite %d (F2): se termina lo abierto antes de empezar; excepción con motivo en proyecto.json › limites.excepciones' % (n, lim))
+        severidad_desde(((E.get('flujo') or {}).get('errorDesde') or {}).get('F2'))('F2 límite', 'etapa', k, '%d en curso, límite %d (F2): se termina lo abierto antes de empezar; excepción con motivo en proyecto.json › limites.excepciones' % (n, lim))
     # F3 tandas
     _ab = _F.tandas_abiertas(_tandas)
     if len(_ab) > 1: avi('F3 tanda', 'proyecto', 'tandas[]', 'más de una tanda abierta: ' + ', '.join(str(t.get('id')) for t in _ab))
@@ -553,7 +560,7 @@ if _ec:
         for f in _CN.medir(RAIZ, _con.get('piezas') or [], _hoyC):
             if not f['existe']: avi('Cn1 pieza', 'pieza', f['id'], 'ruta no existe: ' + str(f['ruta']))
             if str(f['cuando'] or '').startswith('arranque') and not f['tope']: avi('Cn1 pieza', 'pieza', f['id'], 'pieza de arranque sin tope')
-            if f['sobreTope']: avi('Cn2 tope', 'pieza', f['id'], '%s: %s caracteres, tope %s (%s %%)' % (f['nombre'], f['tamano'], f['tope'], f['pct']))
+            if f['sobreTope']: (severidad_desde((_ec.get('errorDesde') or {}).get('Cn2')) if str(f['cuando'] or '').startswith('arranque') else avi)('Cn2 tope', 'pieza', f['id'], '%s: %s caracteres, tope %s (%s %%)' % (f['nombre'], f['tamano'], f['tope'], f['pct']))
             if not f['revisarCuando']: avi('Cn5 revisión', 'pieza', f['id'], 'sin revisarCuando')
             if f['sinRevision']: avi('Cn5 revisión', 'pieza', f['id'], 'más de %d días sin revisión' % _CN.REVISAR_DIAS)
         for fi in _con.get('fichas') or []:
@@ -614,7 +621,7 @@ if _er:
             if n > 1: err('Rg1 riesgo', 'riesgo', rid, 'id repetido')
         for r in _riesgos:
             for d in _RG.fila_valida(r): err('Rg1 riesgo', 'riesgo', r.get('id'), d)
-            if _RG.respuesta_vencida(r, _hoyR): avi('Rg7 respuesta', 'riesgo', r.get('id'), 'nivel ≥ %d con respuesta no probada en %d días (probada: %s): probar y anotar la fecha' % (_RG.NIVEL_ALTO, _RG.PROBADA_CADA_DIAS, (r.get('respuesta') or {}).get('probada') or 'nunca'))
+            if _RG.respuesta_vencida(r, _hoyR): severidad_desde((_er.get('errorDesde') or {}).get('Rg7'))('Rg7 respuesta', 'riesgo', r.get('id'), 'nivel ≥ %d con respuesta no probada en %d días (probada: %s): probar y anotar la fecha' % (_RG.NIVEL_ALTO, _RG.PROBADA_CADA_DIAS, (r.get('respuesta') or {}).get('probada') or 'nunca'))
             if _RG.revision_vencida(r, _hoyR): avi('Rg1 riesgo', 'riesgo', r.get('id'), 'revisarCuando vencido (%s)' % r.get('revisarCuando'))
         if not _riesgos: avi('Rg1 riesgo', 'proyecto.json', 'riesgos[]', 'registro vacío: el Arquitecto propone la semilla (20 R-n) y el JP la escribe (LM-71 paso 3)')
         # Rg2 destinos «riesgo» con R-n real (escapes, revisiones de incidente, lecciones)
@@ -655,6 +662,13 @@ if _er:
                 if mt.get(k) in (None, ''): avi('Rg5 meta', 'meta', mt.get('id'), 'sin %s' % k)
         if not _metas: avi('Rg5 meta', 'proyecto.json', 'metas[]', 'sin metas del periodo (propuestas MT-1…MT-4 en esquema.json › riesgo.metas.propuestas; las fija el JP con Carlos)')
     except Exception as ex: avi('Rg1 riesgo', 'archivo', 'herramientas/modelo/riesgos.py', f'no se pudo revisar: {ex}')
+
+# LM-72 (F9): toda tanda cerrada lleva su ficha {fecha, rojas, archivo}; sin ella, aviso (error desde flujo.errorDesde.F2).
+try:
+    for _t in carga('interno/proyecto.json').get('tandas') or []:
+        if _t.get('hasta') and not isinstance(_t.get('ficha'), dict):
+            severidad_desde(((E.get('flujo') or {}).get('errorDesde') or {}).get('F2'))('F9 ficha', 'tanda', _t.get('id'), 'tanda cerrada sin ficha {fecha, rojas, archivo}: correr ficha-semanal.py --anterior <json pasado> y pegar la línea «ficha para tandas[]»')
+except Exception as ex: avi('F9 ficha', 'archivo', 'interno/proyecto.json', f'no se pudo revisar: {ex}')
 
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.

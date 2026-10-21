@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-21 10:08",
+ "actualizadoEn": "2026-10-21 10:14",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -807,7 +807,87 @@
    "prioridad": "P1",
    "prioridad_nota": "en vigilancia: sube a P0 si vuelve un 2002 con un colaborador real",
    "causaRaiz": "arquitectura",
-   "debioDetectarse": "revisión previa"
+   "debioDetectarse": "revisión previa",
+   "decision": {
+    "tipo": "solución temporal",
+    "ref": "L-111 + L-118 (reintentos, serie, conexión persistente); cierre con error.log 7 días sin «intento 3»",
+    "fecha": "2026-10-21 10:14",
+    "motivo": "Jefe de proyecto por K8 (M-1004): solución temporal con la prueba de cierre de la revisión (M-1002/M-1006)"
+   },
+   "solucionTemporal": "Si al marcar una tarea sale «Base de datos no disponible»: el servidor reintenta 3 veces la conexión (L-110/L-111/L-118); si aun así falla, volver a marcar, porque el cliente no reintenta y descarta el cambio (INC-187, hasta DA-57/L-156).",
+   "revision": {
+    "fecha": "2026-10-21",
+    "autor": "los tres (Arquitecto: entorno y proceso; Desarrollo: técnica; Diseño: impacto y REQ)",
+    "queVimos": "500 «Base de datos no disponible» (MySQL 2002) en PUT turnos y PUT inv-movimientos del colaborador al marcar el conteo; el resto de la corrida conectaba; la reversión de L-103 no lo quitó.",
+    "impacto": "Colaborador en turno al marcar tareas (P1); visible 14-oct ~17:00 → 15-oct 01:18, después residual y absorbido por reintentos; un 500 que agota los 3 reintentos deja el cambio fuera de la cola del cliente sin aviso (INC-187); sin evidencia de un colaborador real afectado (no descartable 14-oct 17:00–21:11); cola congelada 19:26–23:49; 5 lotes y un ticket.",
+    "lineaDeTiempo": [
+     {
+      "hora": "2026-10-14 19:13",
+      "que": "juez de L-103: primera señal; INC-128 abierto"
+     },
+     {
+      "hora": "2026-10-14 20:59",
+      "que": "causa inmediata: MySQL 2002 (pw 0.5.21)"
+     },
+     {
+      "hora": "2026-10-14 21:54",
+      "que": "Hostinger: límite de 20 conexiones nuevas/s"
+     },
+     {
+      "hora": "2026-10-14 23:49",
+      "que": "decisión 1: cierre con L-110 + L-111"
+     },
+     {
+      "hora": "2026-10-15 00:47",
+      "que": "reabierto: 20 «intento 3» con L-111"
+     },
+     {
+      "hora": "2026-10-15 01:18",
+      "que": "decisión 2: L-118 aceptado, 0 rechazos por corrida"
+     },
+     {
+      "hora": "2026-10-21",
+      "que": "revisión; P1; decisión: solución temporal + prueba de cierre de 7 días"
+     }
+    ],
+    "causas": "Entorno: el compartido rechaza más de 20 conexiones nuevas/s a MySQL y la app abría una por petición con ráfagas del cliente. Proceso: entorno no declarado; sin log legible en el momento; cierre sin criterio de evidencia (reabierto en 58 min); sin decisión registrada después (7 días); bug de HK (doble PUT) escondido detrás del entorno.",
+    "queCambia": [
+     {
+      "tipo": "LM",
+      "ref": "CLAUDE.md § Entorno (K8, L-161): límites del hosting",
+      "quien": "Desarrollo"
+     },
+     {
+      "tipo": "guardia",
+      "ref": "validar.py I1 plazo de decisión + despertador P1–P2 (LM-65)",
+      "quien": "Arquitecto"
+     },
+     {
+      "tipo": "guardia",
+      "ref": "K9: cierre de INC-128 = error.log 7 días sin «intento 3»",
+      "quien": "Arquitecto"
+     },
+     {
+      "tipo": "punto",
+      "ref": "revisor previo: conexiones nuevas/s en el peor caso (database.php, str-api.js, HK)",
+      "quien": "Arquitecto"
+     },
+     {
+      "tipo": "DT",
+      "ref": "lectura agrupada por página (DT con dueño y plazo o REQ)",
+      "quien": "Diseño"
+     },
+     {
+      "tipo": "riesgo",
+      "ref": "compartido insuficiente si crece el uso: VPS; disparador «intento 3» en uso real",
+      "quien": "Carlos vía Diseño"
+     }
+    ],
+    "revisadaPor": [
+     "M-998 (Diseño)",
+     "M-1002 (Desarrollo)"
+    ]
+   }
   },
   {
    "id": "INC-129",
@@ -987,7 +1067,14 @@
    "nota": "Visto en la revisión previa de L-141. str-m1-housekeeping.html ~L6569 (_huespedAunEnUnidad, creadoPor:'operador') y ~L6537 (_registrarCheckoutReal resuelve checkout-tardio de su turno creados por otro). Hoy ya dan 403 por la regla del creadoPor que manda; L-141 no lo cambia. Arreglo posible: creadoPor = el colaborador en el aviso y que la autorresolución no toque tickets ajenos (o la haga el servidor). Clase: la pone Diseño (LM-48).",
    "causaRaiz": "construcción",
    "debioDetectarse": "tests",
-   "prioridad": "P2"
+   "prioridad": "P2",
+   "decision": {
+    "tipo": "espera la pausa de producto",
+    "ref": "M-976",
+    "motivo": "provisional (Jefe de proyecto, M-1004): no es emergencia salvo que haya tickets perdidos en uso real; primero en su orden al levantarse la pausa",
+    "fecha": "2026-10-21 10:14"
+   },
+   "solucionTemporal": "si el colaborador ve que el aviso del huésped o la autorresolución no quedan, avisa al operador por fuera de la app y el operador crea o resuelve el ticket desde su sesión (el 403 es solo del colaborador)"
   },
   {
    "id": "INC-143",
@@ -1561,7 +1648,14 @@
    "debioDetectarse": "revisión previa",
    "nota": "21:27 api/lib/corte.php _ckCron: $tieneDrive = _dcCuentasACopiar (estado activa|error con refresh) && _driveConfigurado(); _ckDecidir devuelve «sin-copia» si !$tieneDrive, sin mirar el día ni el estado «copiado». Un negocio que tuvo Drive y lo perdió (revocado, claves borradas en secrets.php) pierde sin aviso de 3 días lo no copiado y marca como sin copia lo que sí está en Drive. Necesita regla de producto: ¿negarse a correr el corte (o aplazar) si la conexión estuvo activa y ahora está revocada o sin claves, y para lo copiado confiar en el drive_id registrado? Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): crítico, P2. Regla: al frente de toda la fila (plazo: corte del 30-nov; pérdida irreversible). El corte nunca borra un archivo sin copia confirmada en Drive; con la conexión revocada, con error o sin claves, no corre para ese negocio: se aplaza, avisa al admin y reintenta en la siguiente pasada; nada se marca «Eliminado en el corte». Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "crítico",
-   "prioridad": "P2"
+   "prioridad": "P2",
+   "decision": {
+    "tipo": "pospuesto",
+    "ref": "M-910 · M-1004",
+    "motivo": "el corte no corre: T-12 no está creada y el primer corte del 30-nov está detenido por orden de Carlos; no es emergencia (Jefe de proyecto, M-1004)",
+    "fecha": "2026-10-21 10:14"
+   },
+   "solucionTemporal": "nadie lanza un corte, ni a mano, hasta que el corte seguro esté aceptado; si alguien lo pide, se consulta antes al Jefe de proyecto (M-1004)"
   },
   {
    "id": "INC-176",
@@ -1576,7 +1670,14 @@
    "debioDetectarse": "revisión previa",
    "nota": "21:27 api/lib/corte.php: _driveArchivoInfo devuelve null para cualquier estado ≠ 200/404 y _ckRedGoogle devuelve null si no renueva; en _ckCorteCuenta $conf = false en los dos casos, igual que un 404. _ckDecidir → aplazar → $repo[\"reCopiar\"] (drive_id = NULL, enlace = NULL, copiado_en = NULL). Arreglo: distinguir «no confirmado por error» (aplazar sin tocar drive_id; no borrar mientras no haya respuesta) de «no está» (404 o tamaño/md5 distintos). Toca el primer corte real (30-nov). Clase y prioridad: Diseño (LM-48). · 21:28 Diseño (M-828): crítico, P2. Regla: al frente de toda la fila (corte del 30-nov). Si Google no responde, el archivo queda «por confirmar»: no pierde id ni enlace y no se borra hasta confirmarse. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "crítico",
-   "prioridad": "P2"
+   "prioridad": "P2",
+   "decision": {
+    "tipo": "pospuesto",
+    "ref": "M-910 · M-1004",
+    "motivo": "el corte no corre: T-12 no está creada y el primer corte del 30-nov está detenido por orden de Carlos; no es emergencia (Jefe de proyecto, M-1004)",
+    "fecha": "2026-10-21 10:14"
+   },
+   "solucionTemporal": "nadie lanza un corte, ni a mano, hasta que el corte seguro esté aceptado; si alguien lo pide, se consulta antes al Jefe de proyecto (M-1004)"
   },
   {
    "id": "INC-177",
@@ -1813,7 +1914,14 @@
    "nota": "22:29 str-api.js _colPush ≈L414–437 («if (err && err.isHttpError) throw err», el llamador suele hacer console.warn) y _colFlush ≈L448–470 («El servidor lo rechazó (400/403/etc)… _colRemoveFromPending»). Arreglo: distinguir 4xx definitivos (400/403/409/422) de 401 y 5xx (408/429/5xx): estos últimos se encolan y se reintentan; avisar al usuario cuando se descarta algo. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-57 (cruce con Carlos): ningún cambio se descarta en silencio; con sesión vencida o error pasajero queda en cola y se reintenta; un rechazo real se muestra en pantalla; la hora del cambio la pone el servidor; el servidor solo dice «ok» si escribió. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "crítico",
    "prioridad": "P2",
-   "prb": "PRB-5"
+   "prb": "PRB-5",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-156",
+    "motivo": "lote en el plan (grupo 2), en redacción hasta la carta A/B de Carlos sobre DA-57 (Jefe de proyecto, M-1004)",
+    "fecha": "2026-10-21 10:14"
+   },
+   "solucionTemporal": "(prb: PRB-5) el cambio rechazado no se reintenta ni se avisa: si la app muestra un error al guardar o pide iniciar sesión, recargar la página y comprobar que la tarea, el conteo o la foto quedaron; si no, repetirlo. El operador lo ve en el Tablero o en el panel del turno."
   },
   {
    "id": "INC-188",
@@ -1829,7 +1937,14 @@
    "nota": "22:29 str-api.js _colPush ≈L418 (updated_at: new Date().toISOString()); api/col/index.php ≈L1740 (_colNormalizeDatetime($it->updated_at)), upsert ≈L1534–1540 (IF(VALUES(updated_at) >= updated_at …)) y $upserted++ ≈L1925 sin mirar rowCount; api/lib/col-lectura.php since → updated_at > cursor (server_time). Solo el Tablero tiene solape. RT-7. Arreglo de fondo: que el servidor selle updated_at con su hora al escribir (y use la del aparato solo para decidir conflictos, o versión por ítem). Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): crítico, P2. Regla: DA-57 (cruce con Carlos): ningún cambio se descarta en silencio; con sesión vencida o error pasajero queda en cola y se reintenta; un rechazo real se muestra en pantalla; la hora del cambio la pone el servidor; el servidor solo dice «ok» si escribió. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "crítico",
    "prioridad": "P2",
-   "prb": "PRB-5"
+   "prb": "PRB-5",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-156",
+    "motivo": "lote en el plan (grupo 2), en redacción hasta la carta A/B de Carlos sobre DA-57 (Jefe de proyecto, M-1004)",
+    "fecha": "2026-10-21 10:14"
+   },
+   "solucionTemporal": "(prb: PRB-5) usar los aparatos con la hora automática del sistema activada; si dos personas editan lo mismo a la vez, el operador revisa el resultado en el panel antes de confirmar."
   },
   {
    "id": "INC-189",
@@ -1845,7 +1960,14 @@
    "nota": "22:29 str-api.js _colPushAll ≈L440; str-propiedades.html ≈L3533–3540 y ≈L3568–3574 (Array vacío = todo borrado → se resiembra con la semilla local, cuyos ids tp-1…/edificio… pueden ser los borrados). ubicaciones solo siembra con res.empty (sin ninguna fila), así que ahí no pasa. Clase y prioridad: Diseño (LM-48). · 22:30 Diseño (M-842): normal, P2. Regla: un reenvío completo no revive lo que otro dio de baja. Espera que se levante la pausa; orden del Jefe de proyecto.",
    "categoria": "normal",
    "prioridad": "P2",
-   "prb": "PRB-5"
+   "prb": "PRB-5",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-156",
+    "motivo": "lote en el plan (grupo 2), en redacción hasta la carta A/B de Carlos sobre DA-57 (Jefe de proyecto, M-1004)",
+    "fecha": "2026-10-21 10:14"
+   },
+   "solucionTemporal": "(prb: PRB-5) no dar de baja tipos de propiedad ni de ubicación mientras otro equipo siembra el catálogo; si una baja reaparece, volver a darla de baja."
   },
   {
    "id": "INC-190",

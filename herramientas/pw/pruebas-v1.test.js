@@ -430,6 +430,13 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('K2 verificarN1: sin N1 completo → ok con aviso', APL.verificarN1('# instr\nAlcance: `a.js`', {}).ok && /no trae un N1/.test(APL.verificarN1('# instr\nAlcance: `a.js`', {}).aviso));
   const tm = APL.tamano([{ archivo: 'str-a.html', mas: 3, menos: 1 }, { archivo: 'str-b.html', mas: 1, menos: 1 }, { archivo: 'tests/a.test.js', mas: 2, menos: 0 }, { archivo: 'CLAUDE.md', mas: 2, menos: 2 }], { 'str-a.html': ['a', 'b', 'c', 'd'], 'str-b.html': ['x?v=p5c1', 'x?v=p5c2'], 'CLAUDE.md': ['v p5c1', 'v p5c2', 'd p5c1', 'd p5c2'] }, { vieja: 'p5c1', nueva: 'p5c2' });
   t('K3 tamano: tres columnas (código sin los archivos que solo cambian ?v=; pruebas aparte)', tm.codigo.archivos === 1 && tm.codigo.lineas === 4 && tm.pruebas.lineas === 2 && tm.version.archivos === 2 && tm.total.archivos === 4 && tm.grande === false);
+  // M-972 (prueba c de LM-63 por Desarrollo): dos falsos positivos corregidos
+  const l159 = '# instr\nAlcance: nuevo `tests/canal-quitado.test.js` (N1) · `?v=` `p5c111` → `p5c112`\n## Tests en `tests/`\n**N1 · archivo nuevo `tests/canal-quitado.test.js`** (Parte E con `[TABP-puras]` real y `str-avance.js`, y la lista blanca). Contenido completo:\n```js\n// D1\n```\n';
+  t('K1 (M-972 A): el archivo de un «Contenido completo» es el que sigue a «archivo nuevo», no la última ruta de la prosa', APL.puntosDe(l159).find((p) => p.tipo === 'completo').archivo === 'tests/canal-quitado.test.js');
+  const arch159 = { 'tests/canal-quitado.test.js': '// D1\n', 'str-api.js': '// se sirve como str-api.js?v=<versión>\nconst STR_API_VERSION = "p5c112";', 'str-app-shell.html': '<script src="str-api.js?v=p5c112"></script>', 'str-avance.js': 'sin carga', 'CLAUDE.md': 'p5c112 · p5c112' };
+  t('K1 (M-972 B): el comentario de str-api.js no cuenta como «carga str-api.js»; con todo en orden 2/2', APL.aplicar(l159, arch159, '').ok);
+  t('K1 (M-972 B): str-api.js con STR_API_VERSION vieja falla por la versión', /STR_API_VERSION/.test(APL.aplicar(l159, Object.assign({}, arch159, { 'str-api.js': 'const STR_API_VERSION = "p5c111";' }), '').resumen));
+  t('K1 (M-972 B): un .html con <script src=…str-api.js?v=viejo> falla; la versión vieja en un .md no cuenta', !APL.aplicar(l159, Object.assign({}, arch159, { 'str-x.html': '<script src="str-api.js?v=p5c111"></script>' }), '').ok && APL.aplicar(l159, Object.assign({}, arch159, { 'docs/claude/h.md': 'antes p5c111' }), '').ok);
   t('K3 tamano: > 8 archivos de código → grande', APL.tamano([1,2,3,4,5,6,7,8,9].map((i) => ({ archivo: 'f' + i + '.js', mas: 1, menos: 0 })), {}, null).grande === true);
 }
 

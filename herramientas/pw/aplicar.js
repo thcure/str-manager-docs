@@ -26,14 +26,25 @@ function puntosDe(texto) {
   const bs = bloques(t);
   const puntos = [];
   const idDe = (antes) => { const ids = [...antes.matchAll(/\*\*([A-Z]{1,3}\d{1,2}[a-z]?)\s*[·:.]/g)]; return ids.length ? ids[ids.length - 1][1] : null; };
-  const archivoDe = (antes) => { const a = [...antes.matchAll(/`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`/g)]; return a.length ? a[a.length - 1][1] : null; };
+  const RUTA = /`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`/g;
+  const archivoDe = (antes) => { const a = [...antes.matchAll(RUTA)]; return a.length ? a[a.length - 1][1] : null; };
+  // M-972 (A): el archivo de un «Contenido completo» es el que sigue a «archivo nuevo» (o «nuevo») en el texto previo, no la última ruta
+  // entre comillas invertidas (la prosa suele nombrar otros archivos: «… real y `str-avance.js` … Contenido completo:»).
+  const archivoCompletoDe = (antes) => {
+    const parr = antes.slice(-1200);
+    const nuevo = [...parr.matchAll(/(?:archivo\s+nuevo|nuevo)\s*[`*(]*\s*`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`/gi)];
+    if (nuevo.length) return nuevo[nuevo.length - 1][1];
+    const enNegrita = [...parr.matchAll(/\*\*[^*\n]*`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`[^*\n]*\*\*/g)];
+    if (enNegrita.length) return enNegrita[enNegrita.length - 1][1];
+    return archivoDe(antes);
+  };
   for (let i = 0; i < bs.length; i++) {
     const b = bs[i], cola = b.antes.slice(-400);
     if (/Busca\s*:\s*$/i.test(cola.trimEnd()) && bs[i + 1] && /^\s*\*{0,2}Pon\s*:?\*{0,2}\s*:?\s*$/i.test(bs[i + 1].antes.trim().split('\n').pop() || '') ) {
       puntos.push({ id: idDe(b.antes) || 'punto ' + (puntos.length + 1), tipo: 'par', busca: b.codigo, pon: bs[i + 1].codigo, archivo: archivoDe(b.antes) });
       i++;
     } else if (/Contenido completo\s*:?\s*$/i.test(cola.trimEnd()) || /archivo nuevo[^\n]*$/i.test(cola.trimEnd().split('\n').pop() || '')) {
-      const arch = archivoDe(b.antes);
+      const arch = archivoCompletoDe(b.antes);
       if (arch) puntos.push({ id: idDe(b.antes) || arch, tipo: 'completo', archivo: arch, codigo: b.codigo });
     }
   }
@@ -84,14 +95,20 @@ function verificarPunto(p, archivos, opciones = {}) {
     return norm(c) === norm(p.codigo) ? { id: p.id, ok: true, archivo: p.archivo } : { id: p.id, ok: false, archivo: p.archivo, motivo: p.archivo + ' distinto del «Contenido completo» de la instrucción' };
   }
   if (p.tipo === 'version') {
-    const conVieja = A.filter(([r, c]) => /\.(html|js|md|php)$/.test(r) && String(c).includes(p.vieja)).map(([r]) => r);
-    const cargan = A.filter(([r, c]) => /\.(html|js)$/.test(r) && /str-api\.js\?v=/.test(String(c)));
+    // M-972 (B): «carga str-api.js» = un <script src="…str-api.js?v=…"> en un .html, o la cadena 'str-api.js?v=' en un .js que no sea el propio
+    // str-api.js (su comentario de cabecera la nombra); str-api.js se comprueba aparte por STR_API_VERSION. La versión vieja se busca en html/js/php.
+    const esApi = (r) => /(^|\/)str-api\.js$/.test(r);
+    const conVieja = A.filter(([r, c]) => /\.(html|js|php)$/.test(r) && String(c).includes(p.vieja)).map(([r]) => r);
+    const cargan = A.filter(([r, c]) => !esApi(r) && ((/\.html$/.test(r) && /<script[^>]*src=["']?[^"'\s>]*str-api\.js\?v=/i.test(String(c))) || (/\.js$/.test(r) && /['"`][^'"`\n]*str-api\.js\?v=/.test(String(c)))));
     const sinNueva = cargan.filter(([, c]) => !String(c).includes('str-api.js?v=' + p.nueva)).map(([r]) => r);
+    const api = A.find(([r]) => esApi(r));
+    const apiOk = api ? String(api[1]).includes(p.nueva) : null;
     const claude = archivos['CLAUDE.md'];
     const claudeOk = claude == null ? null : (String(claude).match(new RegExp(p.nueva.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length >= 2;
     const fallas = [];
     if (conVieja.length) fallas.push('queda «' + p.vieja + '» en ' + conVieja.slice(0, 6).join(', '));
     if (sinNueva.length) fallas.push('cargan str-api.js sin ?v=' + p.nueva + ': ' + sinNueva.slice(0, 6).join(', '));
+    if (apiOk === false) fallas.push('str-api.js no trae STR_API_VERSION ' + p.nueva);
     if (claudeOk === false) fallas.push('CLAUDE.md no trae las dos líneas con ' + p.nueva);
     return fallas.length ? { id: 'Versión', ok: false, motivo: fallas.join(' · ') } : { id: 'Versión', ok: true, motivo: p.vieja + ' → ' + p.nueva + ' en ' + cargan.length + ' archivo(s) que cargan str-api.js' };
   }

@@ -15,6 +15,7 @@
 // V2 un rojo repite el guion entero una vez (segundo intento manda; los que pasan quedan «inestables»). V10 P4 bloqueado por entorno o
 // dos guiones seguidos fallando por el entorno → log\suspension.json y «bloqueado»; la corrida siguiente del mismo lote es «reanudación»
 // (no cuenta como reprueba). El informe suma fase.riesgo, inestables[], cuarentena[] y cuarentenaEntradas.
+// v0.12.1 (LM-73): commitMensaje y lineaLote («Lote: L-n · …», hook v5) en el informe, para el criterio de trazabilidad del juez.
 // v0.12.0 (LM-63, CONSTRUCCIÓN-v1): pw\aplicar.js. P4.f «aplicación»: cada Busca/Pon y cada «Contenido completo» de la instrucción
 // contra el commit (K1; diferencia → bloqueado salvo «No hecho» en el commit; «Versión:» por grep; schema_version en /api/health);
 // P4.g «N1 literal»: el test de «Tests en tests/» igual byte a byte (K2); tamaño del lote en tres columnas (K3) en el informe.
@@ -321,6 +322,12 @@ async function main() {
   out.commit = (git.stdout || '').trim() || null;
   // LM-45: commit completo y árbol limpio (sin cambios sin commit) para poder reutilizar resultados de una corrida anterior
   const commitLargo = (spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).stdout || '').trim() || null;
+  // v0.12.1 (LM-73): el mensaje del commit y su línea de trazabilidad «Lote: L-n · id · Casos de uso: …» (hook v5, K5) quedan en el informe,
+  // para que el juez lea el criterio «el commit lleva la línea Lote:» de aquí y no lo infiera del hook (L-164 parcial, M-1083).
+  const msgCommit = (spawnSync('git', ['log', '-1', '--format=%B'], { cwd: repo, encoding: 'utf8' }).stdout || '').replace(/\r\n/g, '\n').trim();
+  out.commitMensaje = msgCommit || null;
+  const mLinea = msgCommit.match(/^Lote:\s*L-\d+\s*·.*$/m);
+  out.lineaLote = mLinea ? mLinea[0].trim() : null;
   const st = spawnSync('git', ['status', '--porcelain'], { cwd: repo, encoding: 'utf8' });
   const arbolLimpio = st.status === 0 && !(st.stdout || '').trim();
   const rutaMemoria = path.join(COLA, 'log', 'entrada-por-commit.json');

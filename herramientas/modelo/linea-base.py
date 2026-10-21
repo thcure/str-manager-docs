@@ -464,7 +464,10 @@ def casos_calculados(texto, todos_cu, gu, reqs_crea):
         for p_ in u.get('pendientes', []):
             if p_ in refs:
                 add(i, 'pendiente ' + p_)
-    for gname in set(re.findall(r'tests/e2e/([\w.-]+?)\.spec\.js', texto)):
+    # un guion que solo aparece dentro del N1 («## Tests en tests/», archivo completo que puede nombrar guiones existentes) no es
+    # una prueba del lote (M-1009, L-161): los guiones se buscan en el texto sin esa sección
+    sin_n1 = re.sub(r'^##+ *Tests en `?tests/`?.*?(?=^##+ |\Z)', '', texto, flags=re.M | re.S)
+    for gname in set(re.findall(r'tests/e2e/([\w.-]+?)\.spec\.js', sin_n1)):
         for i, (mod, u) in todos_cu.items():
             if any(x.get('guion') == gname for x in u.get('pruebas', [])):
                 add(i, 'prueba del guion ' + gname)
@@ -477,7 +480,7 @@ def casos_calculados(texto, todos_cu, gu, reqs_crea):
     # guiones ya catalogados que el lote nombra
     for g, v in (gu or {}).items():
         nombre = g[:-8] if g.endswith('.spec.js') else g
-        if nombre in texto:
+        if nombre in sin_n1:
             for c in v.get('casos', []):
                 for cu in [x for x in c.get('cubre', []) if str(x).startswith('CU-')]:
                     add(cu, 'cubre de ' + nombre)

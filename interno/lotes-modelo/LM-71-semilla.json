@@ -1,0 +1,427 @@
+{
+ "que": "Semilla del registro de riesgos (RIESGO-v1 Rg1, LM-71). La propone el Arquitecto; el Jefe de proyecto la escribe en interno/proyecto.json › riesgos[] (su archivo) tras validarla; las dos aceptaciones de nivel 6 (R-6, R-7) quedan con aceptadoPor pendiente hasta la DA con Carlos. R-6 y R-7 van hoy como «reducir» (lo que ya existe) y pasan a «aceptar» con aceptadoPor cuando Carlos responda la DA; así el registro valida desde el primer día.",
+ "fecha": "2026-10-21",
+ "riesgos": [
+  {
+   "id": "R-1",
+   "escenario": "Si la base de datos del hosting se corrompe o se borra, entonces se pierden turnos, reservas y evidencias desde el último respaldo",
+   "capa": "operacion",
+   "modulos": [
+    "SRV"
+   ],
+   "probabilidad": 1,
+   "impacto": 3,
+   "nivel": 3,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "respaldo diario del corte (L-154, procedimiento-respaldo-corte-2026-10.md) + export JSON y ensayo de restauración (DT-42, L-131/L-135)",
+    "probada": "2026-10-16"
+   },
+   "senal": "INC-190; MD-19 (volver a ensayar la restauración cada 90 días)",
+   "dueno": "Chat Jefe de proyecto",
+   "revisarCuando": "2026-11-30 (primer corte real)",
+   "estado": "vivo",
+   "origen": "cobit.json APO12 (23-sep)"
+  },
+  {
+   "id": "R-2",
+   "escenario": "Si alguien entra con una cuenta ajena o una pantalla muestra datos de otra cuenta, entonces se exponen datos de huéspedes y de negocio",
+   "capa": "producto",
+   "modulos": [
+    "SRV",
+    "API",
+    "U"
+   ],
+   "probabilidad": 1,
+   "impacto": 3,
+   "nivel": 3,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "RT-1 aislamiento por cuenta (guardia de escritura de pw + zz-verif-pruebas, LM-35/DA-47) · RT-14 permisos · tests de 403 en tests/",
+    "probada": "2026-10-18"
+   },
+   "senal": "guardia RT-1 en cada tren; INC con señal K4 «quién ve o cambia qué»",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "cada lote que toque U o API (punto 7 del revisor)",
+   "estado": "vivo",
+   "origen": "cobit.json APO12 (23-sep)"
+  },
+  {
+   "id": "R-3",
+   "escenario": "Si el plan de hosting o el dominio vencen sin renovarse, entonces la aplicación y la API se apagan para todos",
+   "capa": "operacion",
+   "modulos": [
+    "SRV"
+   ],
+   "probabilidad": 1,
+   "impacto": 3,
+   "nivel": 3,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "renovar 30 días antes; la fecha de vencimiento la pone Carlos en claude/arquitectura/infraestructura-configuracion.md (sin el id de la cuenta)",
+    "probada": "nunca"
+   },
+   "senal": "revisarCuando = fecha de vencimiento − 30 días (hoy no está en el repo)",
+   "dueno": "Carlos",
+   "revisarCuando": "cuando Carlos escriba la fecha (pregunta de la DA)",
+   "estado": "vivo",
+   "origen": "cobit.json APO12 (23-sep)"
+  },
+  {
+   "id": "R-4",
+   "escenario": "Si Carlos no está disponible días o semanas, entonces la fábrica se para (cola, tokens, decisiones) y la operación sigue solo con lo que ya está en producción",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 1,
+   "impacto": 2,
+   "nivel": 2,
+   "respuesta": {
+    "tipo": "aceptar",
+    "ref": "la fábrica no corre sin Carlos y producción no cambia; el respaldo del corte y el procedimiento cubren la continuidad del negocio; cuánto aguanta la operación sin él es la pregunta de la DA",
+    "probada": "2026-10-21 (pausa de producto desde el 19-oct: la operación siguió igual)"
+   },
+   "senal": "«a Carlos pendientes» > 3 días en la ficha (MD-10); pausas[] sin revisar",
+   "dueno": "Chat Jefe de proyecto",
+   "revisarCuando": "2026-11-30",
+   "estado": "vivo",
+   "origen": "cobit.json APO12 (23-sep)"
+  },
+  {
+   "id": "R-5",
+   "escenario": "Si un chat se compacta o se releva sin traspaso, entonces se repite trabajo o se vuelve a preguntar a Carlos lo ya decidido",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 2,
+   "impacto": 2,
+   "nivel": 4,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "traspaso estándar (Cn4, plantillas/traspaso.md), puntoDePausa de MJ-17, buzon.py --para, secuencia tras compactar en los encargos",
+    "probada": "2026-10-21 (tres relevos con traspaso: Desarrollo 9-oct, Arquitecto 17-oct, JP 18-oct)"
+   },
+   "senal": "MD-17 traspasos vencidos; MD-16 lecciones sin destino",
+   "dueno": "Chat Arquitecto",
+   "revisarCuando": "2026-11-21",
+   "estado": "vivo",
+   "origen": "cobit.json APO12 (23-sep); lección del token 10-oct"
+  },
+  {
+   "id": "R-6",
+   "escenario": "Si varias pantallas abren a la vez más conexiones de las que el hosting compartido permite (ráfaga), entonces la app dice «Base de datos no disponible» y se pierden marcas de tareas (INC-128 P1, errores 1040/1203); hoy no sabemos a cuántas conexiones falla porque la capacidad nunca se ha probado",
+   "capa": "operacion",
+   "modulos": [
+    "SRV",
+    "API",
+    "HK"
+   ],
+   "probabilidad": 2,
+   "impacto": 3,
+   "nivel": 6,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "hoy: reintentos del servidor (L-110/L-111/L-118) y solución temporal de INC-128. Pasa a «aceptar» con aceptadoPor {Carlos, fecha} cuando responda la DA: respuesta (a) de M-1003 que Carlos tiene en la mano: A → aceptar hasta la guardia de ráfaga de LM-68 (spec de solo lectura, 12 GET paralelas) o un «intento 3» en hora de uso real; B → cambio de hosting en trabajo[] con su DA. Mientras tanto: reintentos del servidor (L-110/L-111/L-118) y solución temporal de INC-128",
+    "probada": "nunca"
+   },
+   "senal": "RT-19 y RT-25 (críticas sin guardia automática, MD-12); MD-14 última prueba de capacidad; INC «Base de datos no disponible»",
+   "dueno": "Chat Arquitecto (LM-68) · decide Carlos",
+   "revisarCuando": "LM-68 con guardia de ráfaga o «intento 3» en hora de uso real",
+   "estado": "vivo",
+   "origen": "INC-128, ADR-011, DT-39, M-1003"
+  },
+  {
+   "id": "R-7",
+   "escenario": "Si se da de baja, se inactiva o se cambia el rol de un usuario, entonces sigue entrando con el rol viejo hasta 24 h (JWT sin revocación)",
+   "capa": "producto",
+   "modulos": [
+    "API",
+    "U"
+   ],
+   "probabilidad": 2,
+   "impacto": 3,
+   "nivel": 6,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "hoy: DA-61 abierta (opción recomendada: versión de sesión releída por petición). Pasa a «aceptar» con aceptadoPor {Carlos, fecha} cuando responda la DA: DA-61 (opción recomendada: versión de sesión en la cuenta, releída por petición) en manos de Carlos; hasta construirla, aceptado",
+    "probada": "nunca"
+   },
+   "senal": "DA-61; DT-49 (deuda alta, MD-13); INC con señal K4 «quién ve o cambia qué»",
+   "dueno": "Carlos decide · Chat Desarrollo construye",
+   "revisarCuando": "DA-61 decidida",
+   "estado": "vivo",
+   "origen": "DT-49, DA-61, MJ-16 U"
+  },
+  {
+   "id": "R-8",
+   "escenario": "Si un token, un correo, un id de cuenta o un dato de negocio entra al repo público o al buzón, entonces queda expuesto y hay que rotarlo",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 2,
+   "impacto": 3,
+   "nivel": 6,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "punto 10 del revisor; plantillas/secretos.md; token solo por staging y borrado (flujo del Arquitecto); hook v5 corta .claude/; reglas-comunes (sin nombres ni ids de personas)",
+    "probada": "2026-10-10 (token expuesto y rotado por Carlos el mismo día)"
+   },
+   "senal": "punto 10; hook v5; revisión del buzón por el Arquitecto",
+   "dueno": "Chat Arquitecto",
+   "revisarCuando": "2026-11-21",
+   "estado": "vivo",
+   "origen": "lección 10-oct; M-990"
+  },
+  {
+   "id": "R-9",
+   "escenario": "Si la CLI no puede commitear (modo automático: hooks, secretos) y nadie lo nota, entonces el lote queda «parcial» y la cola cree que pasó (INC-206)",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 2,
+   "impacto": 2,
+   "nivel": 4,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "linea-base.py --lote corta los lotes de hooks (INC-206); punto 9; plantilla «Commit:»; aplicar.js K1",
+    "probada": "2026-10-21 (L-160 cortado y commiteado a mano; L-161 con hook v5)"
+   },
+   "senal": "veredicto «parcial» o «no aceptado» con commit faltante; MD-7",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "hook v6 (D8)",
+   "estado": "vivo",
+   "origen": "INC-206, L-160"
+  },
+  {
+   "id": "R-10",
+   "escenario": "Si una prueba, un guion o un lote escribe o borra datos de la cuenta real, entonces se pierde información de negocio sin aviso",
+   "capa": "producto",
+   "modulos": [
+    "SRV",
+    "API",
+    "HK",
+    "INV",
+    "CAL"
+   ],
+   "probabilidad": 1,
+   "impacto": 3,
+   "nivel": 3,
+   "respuesta": {
+    "tipo": "evitar",
+    "ref": "guardia de escritura de pw + cuenta zz-verif-pruebas (DA-47, LM-35, L-150); regla R11 y RT-2; precondiciones zz-verif- (punto 6)",
+    "probada": "2026-10-18"
+   },
+   "senal": "guardia RT-2 en cada tren; INC con «datos reales»",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "2026-11-21",
+   "estado": "vivo",
+   "origen": "R11, RT-2, DA-47"
+  },
+  {
+   "id": "R-11",
+   "escenario": "Si lo que la CLI carga siempre (CLAUDE.md, reglas-fijas.md) pasa su tope, entonces la CLI pierde reglas o el lote falla por contexto",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 2,
+   "impacto": 2,
+   "nivel": 4,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "LM-70 (§ 1 a puntero, L-162); claude-md.test.js; MD-15; lote estándar de docs",
+    "probada": "nunca (L-162 en cola)"
+   },
+   "senal": "MD-15 piezas de arranque sobre su tope; claude-md.test.js",
+   "dueno": "Chat Desarrollo (lotes) · Chat Arquitecto (tope)",
+   "revisarCuando": "2026-11-30",
+   "estado": "vivo",
+   "origen": "LM-69 Cn2"
+  },
+  {
+   "id": "R-12",
+   "escenario": "Si un lote malo llega a main, entonces llega a producción en minutos (deploy.yml, sin escalón) y la vuelta es otro lote",
+   "capa": "fabrica",
+   "modulos": [
+    "SRV",
+    "API",
+    "SH"
+   ],
+   "probabilidad": 2,
+   "impacto": 3,
+   "nivel": 6,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "revisión previa de 24 puntos, tests en verde (hook v5), juez y tren de pruebas antes de aceptar, git revert en toda instrucción (último revert real: L-108, 14-oct), pausa de producto mientras se revisa el alcance",
+    "probada": "2026-10-14"
+   },
+   "senal": "MD-22 tasa de fallo del cambio (35 % sobre los últimos 20 lotes); INC con reversion{}",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "2026-11-30 (con la meta (a))",
+   "estado": "vivo",
+   "origen": "M-1057 a"
+  },
+  {
+   "id": "R-13",
+   "escenario": "Si un aparato tiene una página vieja en caché, entonces escribe con código viejo hasta que recarga (versiones mezcladas, INC-37)",
+   "capa": "producto",
+   "modulos": [
+    "SH",
+    "API"
+   ],
+   "probabilidad": 2,
+   "impacto": 2,
+   "nivel": 4,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "RT-20 (?v= y STR_API_VERSION suben juntos, regla 4 de reglas-fijas); aviso de versión en SH",
+    "probada": "2026-10-21 (RT-20 declarada en L-161/L-162)"
+   },
+   "senal": "guardia RT-20; INC con «versión»",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "2026-11-30",
+   "estado": "vivo",
+   "origen": "INC-37, M-1057 b"
+  },
+  {
+   "id": "R-14",
+   "escenario": "Si un campo nuevo llega sin default o schema_version sube sin vuelta atrás, entonces los datos viejos rompen al leerse o no se puede revertir el lote",
+   "capa": "producto",
+   "modulos": [
+    "SRV",
+    "API"
+   ],
+   "probabilidad": 2,
+   "impacto": 3,
+   "nivel": 6,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "regla 3 de reglas-fijas (migración al leer); respaldo del día antes de un lote que suba schema_version; «¿Toca el modelo?» y señal K4 «migración»",
+    "probada": "nunca (no hay ensayo de vuelta atrás de schema_version)"
+   },
+   "senal": "señal K4 «migración»; INC tras un lote que subió schema_version",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "2026-11-30",
+   "estado": "vivo",
+   "origen": "M-1057 c"
+  },
+  {
+   "id": "R-15",
+   "escenario": "Si Google cambia o revoca la app o el proyecto de Firebase, entonces nadie puede entrar (token de Google 1 h, JWT 24 h)",
+   "capa": "operacion",
+   "modulos": [
+    "SH",
+    "U"
+   ],
+   "probabilidad": 1,
+   "impacto": 3,
+   "nivel": 3,
+   "respuesta": {
+    "tipo": "aceptar",
+    "ref": "dependencia asumida; sin contingencia escrita (entrar sin Google no existe); INC-135 ya mostró la forma del fallo en Drive",
+    "probada": "nunca"
+   },
+   "senal": "INC-135; INC con «google» o «invalid_grant»",
+   "dueno": "Carlos (cuenta de Google) · Chat Desarrollo",
+   "revisarCuando": "2026-11-30",
+   "estado": "vivo",
+   "origen": "M-1057 d"
+  },
+  {
+   "id": "R-16",
+   "escenario": "Si el cron de sincronización iCal o la exportación fallan en silencio, entonces hay sobreventa en los canales",
+   "capa": "producto",
+   "modulos": [
+    "CAL"
+   ],
+   "probabilidad": 2,
+   "impacto": 3,
+   "nivel": 6,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "DA-51 bajó el riesgo; falta el aviso de fallo del cron (REQ al levantar la pausa de producto)",
+    "probada": "nunca"
+   },
+   "senal": "INC de canales (INC-170/171); sin aviso automático hoy",
+   "dueno": "Chat Diseño (REQ del aviso) · Chat Desarrollo",
+   "revisarCuando": "al levantar la pausa de producto (REQ del aviso del cron)",
+   "estado": "vivo",
+   "origen": "M-1057 e, DA-51"
+  },
+  {
+   "id": "R-17",
+   "escenario": "Si el corte corre con la conexión de Drive revocada o Google no responde, entonces borra archivos de evidencia (INC-175/176)",
+   "capa": "producto",
+   "modulos": [
+    "HK",
+    "POR"
+   ],
+   "probabilidad": 1,
+   "impacto": 3,
+   "nivel": 3,
+   "respuesta": {
+    "tipo": "evitar",
+    "ref": "corte detenido hasta cerrar INC-175/176; respaldo diario con temporal y renombrar (L-154)",
+    "probada": "2026-10-19"
+   },
+   "senal": "INC-175, INC-176 (abiertos); MD-5",
+   "dueno": "Chat Desarrollo",
+   "revisarCuando": "antes del primer corte real (30-nov)",
+   "estado": "vivo",
+   "origen": "M-1057 f"
+  },
+  {
+   "id": "R-18",
+   "escenario": "Si LENOVO se apaga o pierde los perfiles de prueba de Chrome, entonces la cola y el juez se paran y la fábrica no entrega",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 2,
+   "impacto": 2,
+   "nivel": 4,
+   "respuesta": {
+    "tipo": "reducir",
+    "ref": "la cola también corre en ASUS (alternancia entre equipos); respaldos en anterior\\ de cada entrega; claves en claves\\ solo de Carlos",
+    "probada": "nunca (fecha de la última alternancia: la da Carlos)"
+   },
+   "senal": "cola sin latido en la ficha; «cola bloqueada» en el buzón",
+   "dueno": "Carlos",
+   "revisarCuando": "2026-11-30",
+   "estado": "vivo",
+   "origen": "M-1057 g"
+  },
+  {
+   "id": "R-19",
+   "escenario": "Si GitHub, Actions o el token fallan, entonces no hay despliegue ni repo de documentos (la cola sigue leyendo local)",
+   "capa": "fabrica",
+   "modulos": [],
+   "probabilidad": 1,
+   "impacto": 2,
+   "nivel": 2,
+   "respuesta": {
+    "tipo": "aceptar",
+    "ref": "dependencia asumida; el repo local de cada chat y LENOVO conservan copia; se espera",
+    "probada": "nunca"
+   },
+   "senal": "push rechazado; Actions en rojo",
+   "dueno": "Chat Arquitecto",
+   "revisarCuando": "2026-12-31",
+   "estado": "vivo",
+   "origen": "M-1057 h"
+  }
+ ],
+ "impactoPorModulo": {
+  "regla": "riesgos.impacto_desde_linea_base: ≥ 5 capacidades esenciales → 3; ≥ 2 → 2; si no → 1 (Rg3, Diseño M-1058); se confirma con Carlos una sola vez; después solo se mueve la probabilidad",
+  "difierenDeHoy": {
+   "SRV": "3 (hoy 3)",
+   "CAL": "3 (hoy 3)",
+   "HK": "3 (hoy 3)",
+   "INV": "3 (hoy 3)",
+   "PR": "3 (hoy 2: 5 esenciales)",
+   "KN": "3 (hoy 1: 5 esenciales; a confirmar)",
+   "SH": "2 (hoy 3: 4 esenciales; «todo pasa por él» pesa más que la cuenta)",
+   "API": "2 (hoy 3: 3 esenciales)",
+   "POR": "2 (hoy 3)",
+   "K3": "2 (hoy 3)",
+   "INC1": "2 (hoy 3)",
+   "U": "2 (hoy 3)",
+   "PG": "2 (hoy 3)",
+   "M2": "2 (hoy 3)",
+   "PC1": "1 (hoy 2)"
+  },
+  "nota": "la regla por conteo baja módulos que Carlos y Diseño pusieron en 3 por juicio (SH, API): la confirmación única con Carlos decide si manda el conteo o el juicio; hasta entonces el mapa no cambia"
+ }
+}

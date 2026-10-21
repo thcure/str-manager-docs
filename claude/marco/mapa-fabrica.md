@@ -18,6 +18,8 @@ El conjunto de herramientas y reglas con el que se construye, verifica, acepta y
 | Grupo Proyecto en la app | Seg. Proyecto, COBIT, Elementos, Instrucciones, Marco (páginas dentro del STR) | `str-manager` (módulo PRJ) | `fabrica-servicio` (app de la fábrica) | CLI por LM-n |
 | Chats con rol | Diseño, Desarrollo, Jefe de proyecto, Arquitecto, verificador, agente CLI | proyecto de Claude «Diseño y Desarrollo» | — (el proyecto en el arranque) | Carlos |
 
+- **Riesgo y medición (RIESGO-v1, LM-71):** registro `proyecto.json › riesgos[]` (R-n con respuesta probada y dueño; JP escribe, Arquitecto propone), riesgo por módulo en el mapa (impacto desde la línea base, probabilidad que se mueve con los INC), tabla de medidas `esquema.json › riesgo.medidas[]` (20 en el semáforo, cada una con dueño y acción), metas del periodo `proyecto.json › metas[]`, `interno/METRICAS.json` (copia de la cola). La ficha de la tanda y «¿cómo vamos?» son la salida; una roja dos fichas seguidas produce una acción o un riesgo aceptado por Carlos.
+
 ## Relaciones con el producto (hoy)
 | De | A | Mecanismo | Tipo |
 |---|---|---|---|

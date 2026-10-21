@@ -10,7 +10,7 @@ Reglas de uso (proceso de requerimientos, `claude/marco/proceso-requerimientos-d
 **Capacidad y casos de uso que toca** (lee `linea-base.py --cu` antes): toca: CU-…, CU-… · crea: CU-… (nuevos, definidos abajo) · fuera: CU-… (lo que a propósito no cambia)
 **Frontera.** <qué queda fuera, dicho en casos de uso o en una frase>
 **Ya decidido.** <DA-n, T-n, M-n que tocan lo mismo; no se reabre sin DA nueva>
-**Toca decisión:** <ADR-n | DA-n | ninguna> (ARQUITECTURA-v1 A6: si el REQ cambia cómo se guarda, conecta, autentica, sincroniza, borra o respalda un dato, una dependencia, una regla transversal o el sobre de capacidad, lo dice aquí y Diseño pide consejo al Arquitecto antes de «listo»)
+**Toca decisión:** <ADR-n | DA-n | ninguna> · <riesgo R-n ≥ 6 | sin riesgo alto> (RIESGO-v1 Rg3: si el REQ toca un módulo con p × i ≥ 6 en el mapa, lo dice aquí; ARQUITECTURA-v1 A6: si el REQ cambia cómo se guarda, conecta, autentica, sincroniza, borra o respalda un dato, una dependencia, una regla transversal o el sobre de capacidad, lo dice aquí y Diseño pide consejo al Arquitecto antes de «listo»)
 **Clase.** nuevo | cambio de comportamiento | corrección (INC-n) | restricción · **¿Crítico?** no | sí → DA-n antes de definir
 **Justificación.** <por qué ahora, con la evidencia: INC, uso real, pedido P-n>
 **Dependencias.** <REQ-…, DA-…, L-… de los que depende>

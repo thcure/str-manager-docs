@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-15",
+ "actualizadoEn": "2026-10-21",
  "fuente": "ISACA, COBIT® 2019 Framework: Governance and Management Objectives (2018), capítulo 4. Traducción propia para uso interno; nombre original en inglés junto a cada objetivo.",
  "estadoProyecto": "2026-09-23 (adopciones parciales acordadas con el dueño); detalle oficial de los 40 objetivos completado el 2026-09-27.",
  "dominios": {
@@ -1349,22 +1349,34 @@
    "dominio": "APO",
    "nombre": "Riesgo",
    "nombreEn": "Managed Risk",
-   "estado": "par",
+   "estado": "ok",
    "interes": true,
    "resumen": "Identificar, analizar y gestionar el riesgo de TI.",
-   "posicion": "Adoptado parcialmente (2026-09-23): 12.03 act. 2 (servicios esenciales y eslabones débiles) y 12.06 act. 1 (plan probado para el evento grave). Registro R-n con escenario, tolerancia y respuesta para cinco riesgos: pérdida de datos, acceso indebido, hosting vencido, dueño indisponible, contexto perdido. Se incorpora al arrancar la operación real. Fuera: taxonomía y perfil agregado (12.01–.04).",
+   "posicion": "RIESGO-v1 (LM-71, 21-oct-2026, plan-riesgo-medicion.md): registro R-n vivo en proyecto.json › riesgos[] (escenario «si… entonces…», p × i, respuesta elegida con ref y «probada», señal, dueño, aceptadoPor Carlos si nivel ≥ 6 y aceptar, revisarCuando); semilla de 19 (LM-71-semilla.json); destino «riesgo» de escapes y lecciones apunta a un R-n real; riesgo por módulo con impacto desde la línea base y probabilidad que se mueve con los INC. Fuera: taxonomía y perfil agregado (12.01, resto de 12.04) y el riesgo empresarial del negocio (capa de proyectos).",
    "practicasStr": [
+    {
+     "c": "APO12.02",
+     "t": "Analizar el riesgo",
+     "estado": "ok",
+     "nuestra": "escenario «si … entonces …», probabilidad × impacto 1–3, por módulo (mapa) y por riesgo (R-n); validar.py Rg1 y Rg3."
+    },
     {
      "c": "APO12.03",
      "t": "Mantener un perfil de riesgo",
      "estado": "ok",
-     "nuestra": "Act. 2: registro R-n con escenario, tolerancia y respuesta para cinco riesgos: pérdida de datos, acceso indebido, hosting vencido, dueño indisponible, contexto perdido. Al arrancar la operación real."
+     "nuestra": "proyecto.json › riesgos[] (JP escribe, Arquitecto propone); revisarCuando por fila; ficha con bloque «riesgos»; semilla de 19 el 21-oct."
+    },
+    {
+     "c": "APO12.04",
+     "t": "Articular el riesgo",
+     "estado": "par",
+     "nuestra": "la ficha y «¿cómo vamos?» llevan a Carlos los riesgos altos sin respuesta probada y lo que acepta por escrito (DA); sin perfil agregado."
     },
     {
      "c": "APO12.06",
      "t": "Responder al riesgo",
      "estado": "ok",
-     "nuestra": "Act. 1: respuesta probada para el evento grave (restaurar respaldo, revertir despliegue, renovar hosting)."
+     "nuestra": "respuesta {evitar · reducir · compartir · aceptar} con ref y «probada: fecha»; nivel ≥ 6 vuelve a probarse cada 90 días (Rg7); aceptar de nivel ≥ 6 solo con aceptadoPor Carlos."
     }
    ],
    "detalle": {
@@ -3646,37 +3658,37 @@
    "estado": "ok",
    "interes": true,
    "resumen": "Supervisar el desempeño y la conformidad frente a metas.",
-   "posicion": "Informe de avance (\"en qué vamos\") desde estado-proyecto.md y acciones correctivas: cada lección de incidente o posimplementación entra como actividad en proceso-cambios.md.",
+   "posicion": "RIESGO-v1 (LM-71, 21-oct-2026): una tabla de medidas (esquema.json › riesgo.medidas[], 28 filas, 20 en el semáforo) con pregunta, fuente, umbral, dueño y acción; metas del periodo 22-oct → 30-nov en proyecto.json › metas[] (MT-1…4, las fija el JP con Carlos); ficha de la tanda con dueño de cada roja; una roja dos fichas seguidas produce fila en trabajo[], R-n aceptado o retiro de la medida (Rg6); METRICAS.json de la cola copiado al repo (interno/METRICAS.json).",
    "practicasStr": [
     {
      "c": "MEA01.01",
      "t": "Definir el enfoque de supervisión",
      "estado": "ok",
-     "nuestra": "Semáforo, tablero REQ × etapa y madurez por módulo."
+     "nuestra": "esquema.json › riesgo.medidas[]: cada fila del semáforo con pregunta, fuente mecánica, umbral, dirección, dueño y acción; tope 20 filas; las sin dueño son informativas."
     },
     {
      "c": "MEA01.02",
      "t": "Fijar metas de desempeño y conformidad",
      "estado": "ok",
-     "nuestra": "Act. 2: una meta SMART por paso, en términos del negocio: 5(a) \"Andrés cierra 3 turnos reales desde el celular antes del 2026-10-15\"; 5(b) \"la liquidación de octubre sale de la app\"."
+     "nuestra": "4 metas de la fábrica para el periodo 22-oct → 30-nov (fallo del cambio ≤ 15 % sobre 20 lotes, escapes en revisión previa ≤ 2/semana, casos esenciales sin guion ≤ 170, P1–P2 sin decisión = 0); las del producto se reescriben al levantar la pausa."
     },
     {
      "c": "MEA01.03",
      "t": "Recopilar y procesar datos",
      "estado": "ok",
-     "nuestra": "Verificación en producción y registro de INC/DT/DA."
+     "nuestra": "ficha-semanal.py desde seguimiento.json, proyecto.json, mapa, trinquetes y METRICAS.json (copia de la cola en interno/METRICAS.json)."
     },
     {
      "c": "MEA01.04",
      "t": "Analizar e informar",
      "estado": "ok",
-     "nuestra": "Informe \"en qué vamos\" (150–250 palabras) desde estado-proyecto.md."
+     "nuestra": "ficha de finalización de la tanda (20 filas de semáforo con dueño) y «¿cómo vamos?» de 6 filas para Carlos."
     },
     {
      "c": "MEA01.05",
      "t": "Asegurar las acciones correctivas",
      "estado": "ok",
-     "nuestra": "Cada lección entra como actividad en proceso-cambios.md con el INC que la originó."
+     "nuestra": "fila roja dos fichas seguidas → fila en trabajo[] con dueño, R-n aceptado por Carlos o retiro de la medida (Rg6, riesgos.rojas_repetidas con --anterior)."
     }
    ],
    "detalle": {

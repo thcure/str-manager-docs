@@ -601,6 +601,61 @@ if _ec:
             if tam > tope: avi('Cn6 archivo', 'archivo', rel, '%d KB, tope %d KB: archivar (archivar.py, en punto limpio y a pedido de Carlos)' % (tam // 1024, tope // 1024))
         except Exception: pass
 
+# LM-71 (RIESGO-v1, Rg1–Rg5; MJ-17 proceso 8): registro de riesgos R-n, destino «riesgo» con R-n real, probabilidad por módulo que se
+# mueve con los INC, tabla de medidas con dueño y acción, metas del periodo. Rg1 forma y Rg2 ref = error; el resto avisos (plan § 5).
+_er = E.get('riesgo') or {}
+if _er:
+    try:
+        import riesgos as _RG
+        _pyR = carga('interno/proyecto.json'); _hoyR = datetime.date.today()
+        _riesgos = _pyR.get('riesgos') or []
+        _idsR = [r.get('id') for r in _riesgos]
+        for rid, n in Counter(_idsR).items():
+            if n > 1: err('Rg1 riesgo', 'riesgo', rid, 'id repetido')
+        for r in _riesgos:
+            for d in _RG.fila_valida(r): err('Rg1 riesgo', 'riesgo', r.get('id'), d)
+            if _RG.respuesta_vencida(r, _hoyR): avi('Rg7 respuesta', 'riesgo', r.get('id'), 'nivel ≥ %d con respuesta no probada en %d días (probada: %s): probar y anotar la fecha' % (_RG.NIVEL_ALTO, _RG.PROBADA_CADA_DIAS, (r.get('respuesta') or {}).get('probada') or 'nunca'))
+            if _RG.revision_vencida(r, _hoyR): avi('Rg1 riesgo', 'riesgo', r.get('id'), 'revisarCuando vencido (%s)' % r.get('revisarCuando'))
+        if not _riesgos: avi('Rg1 riesgo', 'proyecto.json', 'riesgos[]', 'registro vacío: el Arquitecto propone la semilla (20 R-n) y el JP la escribe (LM-71 paso 3)')
+        # Rg2 destinos «riesgo» con R-n real (escapes, revisiones de incidente, lecciones)
+        _dest = []
+        for i in seg.get('incs', []):
+            _dest.append(('incidente', i.get('id'), i.get('destino')))
+            _rv = i.get('revision') or {}
+            if isinstance(_rv, dict): _dest.append(('revisión INC', i.get('id'), _rv.get('destino')))
+        for fuente, lst in (('proyecto.json', _pyR.get('lecciones')), ('diseno.json', dis.get('lecciones'))):
+            for l in lst or []:
+                if isinstance(l, dict): _dest.append((fuente, l.get('id') or str(l.get('fecha')), l.get('destino')))
+        for fuente, id_, ref in _RG.destinos_riesgo_rotos(_dest, _riesgos):
+            err('Rg2 destino', fuente, id_, 'destino {tipo: riesgo} sin R-n existente en proyecto.json › riesgos[] (ref: %s)' % (ref or '—'))
+        # Rg3 probabilidad por módulo: candidatos a subir o bajar
+        try:
+            _mmR = json.load(open(os.path.join(RAIZ, 'interno/mapa-modulos.json'), encoding='utf-8'))
+            _auto = set(((E.get('arquitectura') or {}).get('guardiasRT') or {}).get('automaticas') or [])
+            _porMod = {}
+            for rg in _mmR.get('reglas', []):
+                for mid in rg.get('modulos') or []:
+                    g = rg.get('guardia') if isinstance(rg.get('guardia'), dict) else {}
+                    _porMod.setdefault(mid, []).append(g.get('tipo') in _auto)
+            _mods = [{'id': m.get('id'), 'probabilidad': (m.get('riesgo') or {}).get('probabilidad'), 'guardiaAutomatica': all(_porMod.get(m.get('id'), [False]))} for m in _mmR.get('modulos', [])]
+            for mid, que in _RG.candidatos_modulo(seg.get('incs', []), _mods, _hoyR).items():
+                avi('Rg3 módulo', 'módulo', mid, 'candidato a %s la probabilidad (lo propone el Arquitecto en la evaluación por evento; lo confirma Diseño)' % que)
+        except Exception as ex: avi('Rg3 módulo', 'archivo', 'interno/mapa-modulos.json', f'no se pudo revisar: {ex}')
+        # Rg4 medidas con dueño y acción; tope del semáforo
+        _meds = _er.get('medidas') or []
+        for mid in _RG.medidas_sin_dueno(_meds): avi('Rg4 medida', 'medida', mid, 'medida del semáforo sin dueño o sin acción: pasa a informativa')
+        _n, _sobre = _RG.semaforo_sobre_tope(_meds, int((_er.get('semaforo') or {}).get('tope') or 20))
+        if _sobre: avi('Rg4 medida', 'esquema.json', 'medidas[]', 'semáforo con %d filas (tope %s): retirar una antes de añadir' % (_n, (_er.get('semaforo') or {}).get('tope')))
+        # Rg5 metas del periodo
+        _metas = _pyR.get('metas') or []
+        _idsM = {m.get('id') for m in _meds}
+        for mt in _metas:
+            if mt.get('medida') not in _idsM: avi('Rg5 meta', 'meta', mt.get('id'), 'medida %s no está en esquema.json › riesgo.medidas[]' % mt.get('medida'))
+            for k in ('meta', 'hoy', 'desde', 'hasta', 'dueno'):
+                if mt.get(k) in (None, ''): avi('Rg5 meta', 'meta', mt.get('id'), 'sin %s' % k)
+        if not _metas: avi('Rg5 meta', 'proyecto.json', 'metas[]', 'sin metas del periodo (propuestas MT-1…MT-4 en esquema.json › riesgo.metas.propuestas; las fija el JP con Carlos)')
+    except Exception as ex: avi('Rg1 riesgo', 'archivo', 'herramientas/modelo/riesgos.py', f'no se pudo revisar: {ex}')
+
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
 try:

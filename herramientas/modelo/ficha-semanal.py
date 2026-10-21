@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""ficha-semanal.py — informe de finalización de la tanda (V8, LM-62; ISO/IEC/IEEE 29119-3 §7.4) + llaves DORA (K7) y tendencia de INC (K9, LM-63) + incidentes y problemas (I1–I7, LM-65) + flujo (F2–F8, LM-66) y la tabla «¿cómo vamos?». Solo lee.
-Uso: python3 -I herramientas/modelo/ficha-semanal.py <raiz> [--semana AAAA-MM-DD] [--metricas <copia de log/METRICAS.json>] [--json] [--como-vamos [--anterior <copia json de la vez pasada>]]
+"""ficha-semanal.py — informe de finalización de la tanda (V8, LM-62; ISO/IEC/IEEE 29119-3 §7.4) + llaves DORA (K7) y tendencia de INC (K9, LM-63) + incidentes y problemas (I1–I7, LM-65) + flujo (F2–F8, LM-66) y la tabla «¿cómo vamos?» + riesgos, medidas con dueño y metas (Rg1–Rg8, LM-71). Solo lee.
+Uso: python3 -I herramientas/modelo/ficha-semanal.py <raiz> [--semana AAAA-MM-DD] [--metricas <copia de log/METRICAS.json>; por defecto interno/METRICAS.json] [--json] [--anterior <json de la ficha pasada>] [--como-vamos]
 Junta lo que vive en el repo (escapes por etapa de seguimiento.json › incs[], riesgos residuales de trinquetes.json, palabras clave
 de guiones-e2e.json) con lo que la cola midió (METRICAS.json: repruebas, rojos ajenos, bloqueos, cobertura de criterios, candidatos
 a cuarentena, desviaciones). Los umbrales son los de §6 del plan; esta ficha informa, no decide."""
@@ -14,6 +14,10 @@ try:
     import flujo as FL
 except Exception:
     FL = None
+try:
+    import riesgos as RG
+except Exception:
+    RG = None
 
 UMBRAL = {'repruebasPct': 15, 'rojosAjenosPct': 20, 'criteriosPct': 70, 'cuarentenaMax': 5}
 
@@ -169,8 +173,8 @@ def semaforo_arquitectura(a):
     alta = sum(v for k, v in a['deuda']['porSeveridad'].items() if k in ('alto', 'crítico'))
     return {'RT críticas sin guardia automática': (len(a['rtCriticasSinAutomatica']), len(a['rtCriticasSinAutomatica']) == 0),
             'deuda arquitectónica alta o crítica': (alta, alta == 0),
-            'última prueba de capacidad': (a['ultimaPruebaCapacidad'] or 'nunca', bool(a['ultimaPruebaCapacidad'])),
-            'lotes desde la última evaluación de arquitectura': (a['lotesDesdeEvaluacion'], not a['evaluacionPendiente'])}
+            'última prueba de capacidad': (a['ultimaPruebaCapacidad'] or 'nunca', bool(a['ultimaPruebaCapacidad']))}
+    # «lotes desde la última evaluación de arquitectura» pasó a informativo (MD-21, LM-71): el bloque de arquitectura lo imprime
 
 
 def conocimiento_bloque(raiz, seg, py, dis, ahora):
@@ -212,6 +216,36 @@ def semaforo_conocimiento(c):
             'buzón vivo (KB)': (c['buzonKB'], c['buzonKB'] <= 1024)}
 
 
+def riesgos_bloque(py, seg, esq, ahora, anteriores=None):
+    """Pura (LM-71, Rg1–Rg7): registro R-n (altos sin respuesta probada o con revisión vencida, materializados), metas del periodo con
+    su valor de hoy, rojas repetidas sin acción (si hay ficha anterior) y la tasa de fallo del cambio sobre los últimos 20 lotes."""
+    if RG is None: return {'error': 'sin riesgos.py'}
+    er = (esq or {}).get('riesgo') or {}; hoy = ahora.date()
+    riesgos = (py or {}).get('riesgos') or []; metas = (py or {}).get('metas') or []; medidas = er.get('medidas') or []
+    altos = [r.get('id') for r in riesgos if RG.respuesta_vencida(r, hoy)]
+    venc = [r.get('id') for r in riesgos if RG.revision_vencida(r, hoy)]
+    mat = [r.get('id') for r in riesgos if r.get('estado') == 'materializado']
+    tf, n = RG.tasa_fallo_ventana(seg.get('cambios', []), hoy)
+    return {'registro': len(riesgos), 'altos': sum(1 for r in riesgos if (RG.nivel(r.get('probabilidad'), r.get('impacto')) or 0) >= RG.NIVEL_ALTO and r.get('estado') != 'cerrado'),
+            'sinRespuestaProbada': altos, 'revisionVencida': venc, 'materializados': mat, 'aceptados': [r.get('id') for r in riesgos if (r.get('respuesta') or {}).get('tipo') == 'aceptar' and r.get('estado') != 'cerrado'],
+            'tasaFallo20': {'pct': tf, 'lotes': n}, 'metas': [{'id': m.get('id'), 'medida': m.get('medida'), 'meta': m.get('meta'), 'hoy': m.get('hoy'), 'hasta': m.get('hasta'), 'estado': m.get('estado')} for m in metas],
+            'medidas': len(medidas), 'semaforoFilas': sum(1 for m in medidas if m.get('semaforo', True)), 'sinDueno': RG.medidas_sin_dueno(medidas), 'anterior': anteriores is not None}
+
+
+def semaforo_riesgos(rb, rojas_hoy, anteriores, py, esq):
+    """Pura (LM-71 § 6): dos filas con dueño JP: riesgos altos sin respuesta probada o con revisión vencida; rojas repetidas sin acción."""
+    if not rb or 'error' in rb: return {}
+    n1 = len(set(rb['sinRespuestaProbada']) | set(rb['revisionVencida']))
+    rep = RG.rojas_repetidas(rojas_hoy, anteriores, (py or {}).get('trabajo'), (py or {}).get('riesgos'), ((esq or {}).get('riesgo') or {}).get('medidas')) if RG else None
+    return {'riesgos altos sin respuesta probada o con revisión vencida': (n1, n1 == 0),
+            'rojas repetidas sin acción': (None if rep is None else len(rep), rep is not None and len(rep) == 0)}
+
+
+def duenos(esq):
+    """Pura: fila del semáforo → (MD-n, dueño) desde esquema.json › riesgo.medidas[] (Rg4)."""
+    return {m.get('fila'): (m.get('id'), m.get('dueno')) for m in (((esq or {}).get('riesgo') or {}).get('medidas') or [])}
+
+
 def semaforo(sem_m, cuarentena_n):
     """Pura: las cuatro filas de §6 contra sus umbrales (None = sin dato)."""
     filas = {}
@@ -238,7 +272,9 @@ def semaforo_incidentes(inc):
 def main(argv):
     raiz = argv[1] if len(argv) > 1 and not argv[1].startswith('--') else '.'
     semana = argv[argv.index('--semana') + 1] if '--semana' in argv else lunes(datetime.date.today().isoformat())
-    met = carga(argv[argv.index('--metricas') + 1]) if '--metricas' in argv else None
+    _metDef = os.path.join(raiz, 'interno', 'METRICAS.json')
+    met = carga(argv[argv.index('--metricas') + 1]) if '--metricas' in argv else (carga(_metDef) if os.path.exists(_metDef) else None)
+    ant = carga(argv[argv.index('--anterior') + 1]) if '--anterior' in argv else None
     seg = carga(os.path.join(raiz, 'interno', 'seguimiento.json'))
     tr = carga(os.path.join(raiz, 'interno', 'linea-base', 'trinquetes.json')) if os.path.exists(os.path.join(raiz, 'interno', 'linea-base', 'trinquetes.json')) else {}
     gu = carga(os.path.join(raiz, 'interno', 'arquitectura', 'guiones-e2e.json'))
@@ -264,9 +300,13 @@ def main(argv):
            'bloqueos': (sem_m or {}).get('bloqueos'), 'desviaciones': (sem_m or {}).get('desviaciones'),
            'palabrasClave': {'desconocidas': gu.get('palabrasDesconocidas'), 'sinUso': gu.get('palabrasSinUso')} if 'referenciaCruzada' in gu else 'foto sin palabras clave (tomar con guiones-e2e.js v2)'}
     rojas = [k for d in (out['semaforo'], out['semaforoIncidentes'], out['semaforoFlujo'], out['semaforoArquitectura'], out['semaforoConocimiento']) for k, (v, okk) in d.items() if v is not None and not okk]
+    rb = riesgos_bloque(py, seg, esq if 'esq' in dir() else {}, datetime.datetime.now(), (ant or {}).get('rojas') if ant else None)
+    out['riesgos'] = rb
+    out['semaforoRiesgos'] = semaforo_riesgos(rb, rojas, (ant or {}).get('rojas') if ant else None, py, esq if 'esq' in dir() else {})
+    rojas = rojas + [k for k, (v, okk) in out['semaforoRiesgos'].items() if v is not None and not okk]
     out['rojas'] = rojas
+    _du = duenos(esq if 'esq' in dir() else {})
     if '--como-vamos' in argv:
-        ant = carga(argv[argv.index('--anterior') + 1]) if '--anterior' in argv else None
         filas = como_vamos(fl, rojas, ant)
         if '--json' in argv: print(json.dumps({'fecha': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), 'filas': filas, 'rojas': rojas}, ensure_ascii=False, indent=1)); return 0
         print('| ¿Cómo vamos? · ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M') + ' | |\n|---|---|')
@@ -274,7 +314,7 @@ def main(argv):
         return 0
     if '--json' in argv:
         print(json.dumps(out, ensure_ascii=False, indent=1)); return 0
-    print('## Ficha de finalización de la tanda · semana del ' + semana + (' · sin METRICAS.json' if not met else ''))
+    print('## Ficha de finalización de la tanda · semana del ' + semana + (' · sin METRICAS.json' if not met else (' · METRICAS.json sin esta semana (generado %s)' % str((met or {}).get('generadoEn') or '')[:10] if not sem_m else '')))
     for k, (v, ok) in out['semaforo'].items():
         print('- %s: %s %s' % (k, '—' if v is None else v, '' if v is None else ('✓' if ok else '✗ fuera de umbral')))
     for k, (v, ok) in out['semaforoIncidentes'].items():
@@ -285,9 +325,15 @@ def main(argv):
         print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
     for k, (v, ok) in out['semaforoConocimiento'].items():
         print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
+    for k, (v, ok) in out['semaforoRiesgos'].items():
+        print('- %s: %s %s' % (k, '—' if v is None else v, '' if v is None else ('✓' if ok else '✗ fuera de umbral')))
+    if rojas:
+        print('- dueño de cada roja (Rg4/Rg6): ' + '; '.join('%s → %s%s' % (k, (_du.get(k) or ('—', 'sin dueño'))[1], ' (%s)' % _du[k][0] if k in _du else '') for k in rojas))
+    if 'error' not in rb:
+        print('- riesgos (Rg1–Rg7): registro %d (altos %d; aceptados %s; materializados %s) · sin respuesta probada: %s · revisión vencida: %s · tasa de fallo últimos %s lotes: %s%% · metas: %s · medidas %d (%d en semáforo%s)%s' % (rb['registro'], rb['altos'], rb['aceptados'] or 'ninguno', rb['materializados'] or 'ninguno', rb['sinRespuestaProbada'] or 'ninguno', rb['revisionVencida'] or 'ninguno', rb['tasaFallo20']['lotes'], rb['tasaFallo20']['pct'] if rb['tasaFallo20']['pct'] is not None else '—', '; '.join('%s %s: meta %s · hoy %s · %s' % (m['id'], m['medida'], m['meta'], m['hoy'], m['estado'] or '') for m in rb['metas']) or 'sin fijar (propuestas MT-1…4 en esquema.json)', rb['medidas'], rb['semaforoFilas'], '; sin dueño: %s' % rb['sinDueno'] if rb['sinDueno'] else '', '' if rb['anterior'] else ' · rojas repetidas: sin ficha anterior (--anterior)'))
     if 'error' not in cno:
         print('- conocimiento (Cn1–Cn6): %d piezas · sobre el tope: %s · lecciones sin destino %s · traspasos vencidos %s · sin revisión > 30 d: %s' % (cno['piezas'], '; '.join('%s %s (%s %%)' % x for x in cno['sobreTope']) or 'ninguna', cno['leccionesSinDestino'], cno['traspasosVencidos'] or 'ninguno', cno['sinRevision'] or 'ninguna'))
-    print('- arquitectura (A2–A4): RT sin guardia %s · críticas sin automática %s · relaciones por precisar %d/%d · deuda arquitectónica %s %s · INC de arquitectura abiertos %s · decisiones %d (con deuda: %s) · última evaluación %s' % (arq['rtSinGuardia'] or 'ninguna', arq['rtCriticasSinAutomatica'] or 'ninguna', arq['relacionesPorPrecisar'], arq['relaciones'], arq['deuda']['abiertas'] or 'ninguna', arq['deuda']['porSeveridad'], arq['deuda']['incAbiertos'] or 'ninguno', arq['decisiones'], arq['decisionesConDeuda'] or 'ninguna', arq['ultimaEvaluacion'] or 'nunca'))
+    print('- arquitectura (A2–A4): RT sin guardia %s · críticas sin automática %s · relaciones por precisar %d/%d · deuda arquitectónica %s %s · INC de arquitectura abiertos %s · decisiones %d (con deuda: %s) · última evaluación %s (%s lotes desde entonces%s)' % (arq['rtSinGuardia'] or 'ninguna', arq['rtCriticasSinAutomatica'] or 'ninguna', arq['relacionesPorPrecisar'], arq['relaciones'], arq['deuda']['abiertas'] or 'ninguna', arq['deuda']['porSeveridad'], arq['deuda']['incAbiertos'] or 'ninguno', arq['decisiones'], arq['decisionesConDeuda'] or 'ninguna', arq['ultimaEvaluacion'] or 'nunca', arq['lotesDesdeEvaluacion'], '; toca evaluar (A6)' if arq['evaluacionPendiente'] else ''))
     if 'error' not in fl:
         m_ = fl['metricas']
         print('- flujo (F8, informativo): %s aceptados en 7 días · en cola mediana %s min · entrega REQ listo→aceptado mediana %s d · %s en curso (edad media %s h; %s sin edad) · %s a Carlos pendientes · %s días en pausa · lista: %s filas · tanda abierta: %s' % (m_['salida'], m_['enColaMinMediana'] if m_['enColaMinMediana'] is not None else '—', m_['entregaDiasMediana'] if m_['entregaDiasMediana'] is not None else '—', m_['enCurso'], m_['edadMediaEnCursoHoras'] if m_['edadMediaEnCursoHoras'] is not None else '—', m_['enCursoSinEdad'], m_['aCarlosPendientes'], m_['diasEnPausa'], m_['filasTrabajo'], fl['tanda']['id'] if fl['tanda'] else 'ninguna'))
@@ -306,7 +352,7 @@ def main(argv):
     d = out['dora']; print('- DORA (informativo, K7): %s lotes aceptados · entrega mediana %s min · tasa de fallo del cambio %s%% (%s no aceptados + %s fix de %s) · recuperación %s min' % (d['frecuencia'], d['entregaMin'] if d['entregaMin'] is not None else '—', d['tasaFalloPct'] if d['tasaFalloPct'] is not None else '—', d['noAceptados'], d['fixSemana'], d['lotesSemana'], d['recuperacionMin'] if d['recuperacionMin'] is not None else '—'))
     ti = out['tendenciaInc']; print('- INC (K9): %s abiertos esta semana · %s cerrados (%s con evidencia) · %s abiertos en total · por módulo %s' % (ti['abiertosSemana'], ti['cerradosSemana'], ti['conEvidencia'], ti['abiertosTotal'], ti['porModulo']))
     print('- palabras clave: %s' % out['palabrasClave'])
-    print('Destino de cada escape «revisión previa» o «tests»: punto del revisor, guardia, o riesgo aceptado con nota (V5).')
+    print('Destino de cada escape «revisión previa» o «tests»: punto del revisor, guardia, o riesgo R-n del registro (V5, Rg2). Una roja dos fichas seguidas produce fila en trabajo[], R-n aceptado por Carlos o retiro de la medida (Rg6).')
     return 0
 
 

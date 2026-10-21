@@ -1,0 +1,78 @@
+# Revisión de incidente · INC-128 (borrador del Arquitecto, 21-oct-2026)
+
+**Qué es:** la primera revisión de incidente de INCIDENTES-v1 (I5, LM-65; plantilla `herramientas/plantillas/revision-incidente.md`). Disparadores que cumple: crítico y, con la tabla nueva, **P1** (colaborador en turno no puede marcar el conteo); **decisión fuera de plazo** (abierto desde el 14-oct sin `decision` registrada; la vigilancia se anotó en texto, no como decisión). Causa mezclada: entorno (el que escribe: Arquitecto), construcción (Desarrollo completa la parte técnica) y producto (Diseño completa impacto y REQ). Sin culpables: hechos, horas del buzón y de `seguimiento.json`, y qué cambia.
+
+**Cómo se usa:** Diseño ya dio su parte (M-998, M-1001: incorporada); Desarrollo revisa y completa la suya (marcada «[Desarrollo]») por el buzón; cuando los dos den «visto», Desarrollo pega el bloque `revision` en el INC-128 de `seguimiento.json` con `revisadaPor: [M-n, M-n]`, pone `prioridad` y `decision`, y este archivo queda como fuente del texto largo.
+
+## Qué vimos
+Al marcar la tarea de conteo de inventario desde el portal del colaborador (perfil `zz-verif-colab`, propiedad `zz-verif-Propiedad`), el servidor respondió **500** al `PUT /api/col/turnos` y al `PUT /api/col/inv-movimientos` (6 conteos). El cuerpo, una vez que pw 0.5.21 lo mostró (20:59): `{"error":"Base de datos no disponible","detalle":2002}`. El resto de la corrida (32 de 33 peticiones) conectaba bien. Lo vio la regresión de L-103 (juez, 14-oct 19:13, caso REQ-INV2-7-1-hk-turno d). La reversión de L-103 (L-108, 19:22) no lo quitó: mismo código que el verde de las 16:53 y fallaba.
+
+## Impacto
+- **Quién:** el colaborador en turno al marcar el conteo (y, desde L-108, al marcar cualquier tarea: el `PUT` de turnos). Si el `PUT` de turnos falla, la tarea queda sin marcar y la unidad puede llegar sin preparar al huésped: por eso es P1 con la tabla nueva.
+- **Cuánto:** visible en el log del hosting desde el **14-oct ~17:00** hasta L-110 (21:11, primer reintento) y, con menos frecuencia, hasta L-118 (15-oct 01:18, conexión persistente): después, 0 rechazos por corrida en las mediciones del 15-oct; el 16-oct volvió a verse «2002 Operation not permitted» en el log, absorbido por el reintento (M-574). El 15-oct: 340 rechazos en el día, 54 llegaron al tercer intento y dieron 500, **todos dentro de corridas de la cola**.
+- **Datos:** ninguno perdido ni alterado (la escritura que falla no se guarda; HK la reintenta).
+- **Usuarios reales:** no hay evidencia de un colaborador real afectado y tampoco se puede descartar entre las 17:00 y las 21:11 del 14-oct (antes de L-110 no había reintento ni log de conexión).
+- **Producto (Diseño, M-998):** el colaborador en turno marca el conteo de cierre, el guardado falla con 500 y queda reintentando; el operador ve existencias que no son las reales y puede no reponer; el huésped no lo ve directo pero puede encontrar faltantes. No faltaba una regla de qué se guarda sino **qué ve el colaborador cuando el guardado falla y que no se pierda**: lo cubre DA-57 (grupo 2: nada se descarta en silencio, se reintenta, un rechazo real se muestra); no hace falta REQ nuevo ni ítem de bolsa. Clasificación confirmada: crítico, **P1** (M-1001: se pierden datos en curso), `contra: entorno`, no cuenta como volatilidad.
+- **Fábrica:** la cola estuvo congelada desde las 19:26 (M-415, Diseño: «prioridad 1 sobre todo el plan») hasta el cierre de las 23:49; 5 lotes (L-108, L-109, L-110, L-111, L-118) y un ticket con el proveedor.
+
+## Línea de tiempo (hora de Bogotá; fuente: buzón M-413…M-451, `seguimiento.json`)
+| Hora | Qué |
+|---|---|
+| 14-oct 16:53 | L-102 aceptado: el conteo del colaborador en verde (último verde con e0c7b9d). |
+| ~17:00 | Primeras líneas 2002 en el hosting (vistas después, M-426). |
+| 19:13 | Juez de L-103: no aceptado por el 500 del conteo. **Primera señal.** INC-128 abierto. |
+| 19:17–19:28 | Desarrollo pide el log de PHP al Arquitecto (M-413); encola la reversión L-108; tras revertir sigue el 500 y aparece en turnos (M-414, 19:26); Diseño congela la cola (M-415). |
+| 20:36 | Arquitecto con Carlos en hPanel (solo lectura): despliegue correcto (7068c95), disco y CPU bien, **no hay error_log de PHP al alcance**. |
+| 20:52–20:57 | Arquitecto: mismo código que a las 16:53 → datos o estado (M-417). Desarrollo encola L-109 (DT-36): el `catch` escribe el mensaje real en `api/logs/error.log`. |
+| 20:59 | pw 0.5.21 muestra el cuerpo: MySQL **2002**. Hipótesis de ráfaga de HK (M-419). |
+| 21:08 | Arquitecto en phpMyAdmin: límites de MySQL sin tope (`max_user_connections` 75, contadores en 0); el proxy local rechaza conexiones intermitentemente con escrituras seguidas. |
+| 21:10 | L-110 construido (2 reintentos fijos 150/400 ms). 21:15: no aceptado: HK manda **dos `PUT` de turnos en 1 ms** y los dos agotan los reintentos (M-423). |
+| 21:28 | Ticket con Hostinger (Arquitecto con Carlos). 21:51: el mensaje exacto es «[2002] Operation not permitted». 21:54: **Hostinger: límite de 20 conexiones nuevas/segundo a MySQL en compartido; no se amplía; recomienda reutilizar conexiones** (M-428). |
+| 21:38–23:25 | L-111 (un solo `PUT` de turnos en vuelo, subidas en serie por colección, reintentos con espera al azar): ok de Diseño 21:38, construido 21:48, seis corridas (dos inválidas por la guardia de login y una zona duplicada), aceptado por el Arquitecto 23:25 con nota de INC-130. |
+| 23:16–23:21 | Carlos pide revisar INC-128 entre Diseño y Arquitecto antes de seguir (M-439): L-110 «absorbido», L-111 probado, DT-39 opcional, DT-40 con disparador. |
+| 23:49 | Desarrollo cierra INC-128 (texto en `cierre`): causa = límite de 20 conexiones nuevas/s; corrección = L-110 + L-111. **Decisión 1.** |
+| 15-oct 00:47 | Arquitecto reabre del lado del alojamiento: 20 «intento 3» con L-111 (ráfagas de 8–12 lecturas en paralelo por carga de página); propone DT-40 ya (M-451). Diseño aprueba (00:46). |
+| 01:10–01:18 | L-118 (conexión persistente con prueba de vida; 3.er intento ≥ 1 s) encolado y aceptado (67/67; 12 lecturas a la vez sin 500). Medición: de ~100 rechazos por corrida a 0; 11 de 75 conexiones bajo carga (M-458, M-461). **Decisión 2.** |
+| 16-oct 00:34 y 17:04–17:14 UTC | El log vuelve a mostrar 2002 con reintento (M-574). Sin acción nueva. |
+| 21-oct | Sigue «abierto», `prioridad: P3` (JP) con nota «sube a P0 si vuelve con un colaborador real»; 7 días sin `decision` registrada. La tabla nueva lo pone en **P1 (Diseño confirma)**. |
+
+## Causas
+**Técnica (entorno):** el alojamiento compartido rechaza las conexiones nuevas a MySQL que pasen de 20 por segundo (respuesta de Hostinger; el síntoma `SQLSTATE[HY000] [2002] Operation not permitted`). La app abría **una conexión nueva por petición** y el cliente mandaba **ráfagas** (dos `PUT` de turnos en 1 ms al marcar la tarea; 8–12 colecciones en paralelo por carga de página; fotos en cola), así que dos o más conexiones del mismo cliente en el mismo instante se rechazaban en pares. [Desarrollo: confirmar en 6 líneas qué dejó cada lote: L-110 reintento fijo (absorbido), L-111 serie por colección + un `PUT` en vuelo + espera al azar, L-118 persistente + 3.er intento ≥ 1 s; y qué sigue abriendo conexiones nuevas hoy.]
+
+**De proceso (lo que dejó pasar esto y lo alargó):**
+1. **El entorno no estaba declarado.** Nadie sabía el límite de 20 conexiones nuevas/s ni que `max_user_connections` 75 no era el tope real; la arquitectura (una conexión por petición, ráfagas del cliente) se diseñó sin ese dato. `debioDetectarse: revisión previa` es generoso: ninguna lista lo habría visto sin el dato del hosting.
+2. **Sin log legible en el momento.** El `catch` devolvía «Error al guardar» sin el mensaje y no había `error_log` de PHP al alcance: 1 h 40 min entre la primera señal (19:13) y la causa inmediata (20:59), con una reversión en medio que no era la solución.
+3. **Cierre sin criterio.** Se cerró a las 23:49 con dos corridas verdes y se reabrió 58 min después porque el log seguía mostrando rechazos: no había definición de «cerrado con evidencia» (hoy K9) ni de «qué mide que la causa se fue» (hoy: 0 líneas «intento 3» en una ventana de uso real).
+4. **Sin decisión registrada después.** Desde el 15-oct el INC quedó «en vigilancia» en texto (`prioridad_nota`), sin dueño del disparador ni plazo; 7 días abierto sin que nadie tuviera que decidir nada (hoy I1: plazo de decisión por prioridad).
+5. **Un bug del cliente escondido detrás del entorno:** el doble `PUT` de turnos en 1 ms (HK) solo se vio por la cronología de pw 0.5.22; no lo cubría ningún N1.
+
+## Qué cambia
+| # | Tipo | Qué | Quién | Estado |
+|---|---|---|---|---|
+| 1 | LM | Entorno declarado en `CLAUDE.md` § «Entorno de construcción» (K8, LM-63): hosting compartido, **20 conexiones nuevas/s a MySQL**, `max_user_connections` 75, `wait_timeout` 20 s, conexión persistente desde L-118, sin `error_log` de PHP (el log es `api/logs/error.log`). | Desarrollo (lote L-161) · Arquitecto redacta el párrafo | L-161 encolable tras L-160 |
+| 2 | guardia | `validar.py` I1: un INC abierto sin `decision` pasado su plazo avisa; el despertador recuerda P1–P2 (LM-65). | Arquitecto · JP | hecho 21-oct |
+| 3 | guardia | K9 (LM-63): un INC no se cierra sin `cierre {lote, prueba}` o `{prueba}`; para INC-128 la prueba de cierre es **«0 líneas «intento 3» en `api/logs/error.log` en una ventana de 7 días con uso real»** (Arquitecto la lee con Carlos en hPanel, solo lectura). | Desarrollo registra · Arquitecto mide | pendiente: fijar la ventana |
+| 4 | punto | Revisor previo: en todo lote que toque `api/config/database.php`, `str-api.js` (subidas) o HK (orden de `PUT`), preguntar «¿cuántas conexiones nuevas por segundo provoca en el peor caso (carga de página, marcar tarea, cola de fotos)?» con el dato del entorno. | Arquitecto (plantilla) | pendiente: lo añado con L-161 |
+| 5 | DT | Lectura agrupada por página (una petición que trae las 8–12 colecciones) como DT con dueño y plazo (I6); hoy es la mayor fuente de conexiones nuevas en paralelo. Diseño ya dijo que no hace falta REQ (M-998): queda como DT técnica de Desarrollo, prioridad tras medir los 7 días. | Desarrollo | pendiente |
+| 5b | guardia | Guion N2 que marque un conteo como colaborador en la cuenta de pruebas y compruebe que llegó al servidor: CU-HK-7.2 (declarar el conteo) y CU-HK-10.5 (sincronizar sin pisar) están sin prueba (Diseño, M-998); escape a V5. | Desarrollo (guion) · Diseño (caso) | pendiente |
+| 6 | riesgo | Si el uso real crece (varias propiedades con colaboradores a la vez), el compartido no alcanza: VPS o plan con MySQL dedicado. Riesgo aceptado por ahora [Diseño: confirmar con Carlos y dejarlo en `riesgos[]` con disparador: «intento 3» en hora de uso real]. | Carlos vía Diseño | pendiente |
+| 7 | guardia | N1 en HK: «al marcar la tarea sale un solo `PUT` de turnos» (ya en L-111: confirmar que el test existe y nombrarlo aquí). [Desarrollo] | Desarrollo | confirmar |
+
+## Lo que faltó medir y se propone ahora
+- Conteo diario de «intento 2/3» y «conexión persistente muerta» en `api/logs/error.log` durante 7 días de uso real (el diagnóstico pedido en M-455 nunca se hizo en hora de uso con Carlos). Con 0 «intento 3» en 7 días, INC-128 se cierra con `cierre {prueba: "error.log 7 días sin intento 3 (fechas)"}`; con alguno, PRB con `errorConocido {sintoma: 500 «Base de datos no disponible» al marcar, solucionTemporal: volver a marcar; HK reintenta solo}` y la DT de lectura agrupada sube de prioridad.
+
+## Bloque `revision` para `seguimiento.json` (lo pega Desarrollo cuando esté revisado)
+```json
+"prioridad": "P1",
+"decision": {"tipo": "solución temporal", "ref": "L-111 + L-118 (reintentos, serie, conexión persistente); cierre con error.log 7 días sin «intento 3»", "fecha": "2026-10-21"},
+"solucionTemporal": "Si al marcar una tarea sale «Base de datos no disponible», volver a marcar: desde L-111/L-118 el servidor reintenta solo y HK no duplica el PUT.",
+"revision": {
+  "fecha": "2026-10-21", "autor": "los tres (Arquitecto: entorno y proceso; Desarrollo: técnica; Diseño: impacto y REQ)",
+  "queVimos": "500 «Base de datos no disponible» (MySQL 2002) en PUT turnos y PUT inv-movimientos del colaborador al marcar el conteo; el resto de la corrida conectaba; la reversión de L-103 no lo quitó.",
+  "impacto": "Colaborador en turno al marcar tareas (P1); visible 14-oct ~17:00 → 15-oct 01:18, después residual y absorbido por reintentos; sin datos perdidos; sin evidencia de un colaborador real afectado (no descartable 14-oct 17:00–21:11); cola congelada 19:26–23:49; 5 lotes y un ticket.",
+  "lineaDeTiempo": [{"hora": "2026-10-14 19:13", "que": "juez de L-103: primera señal; INC-128 abierto"}, {"hora": "2026-10-14 20:59", "que": "causa inmediata: MySQL 2002 (pw 0.5.21)"}, {"hora": "2026-10-14 21:54", "que": "Hostinger: límite de 20 conexiones nuevas/s"}, {"hora": "2026-10-14 23:49", "que": "decisión 1: cierre con L-110 + L-111"}, {"hora": "2026-10-15 00:47", "que": "reabierto: 20 «intento 3» con L-111"}, {"hora": "2026-10-15 01:18", "que": "decisión 2: L-118 aceptado, 0 rechazos por corrida"}, {"hora": "2026-10-21", "que": "revisión; P1; decisión: solución temporal + prueba de cierre de 7 días"}],
+  "causas": "Entorno: el compartido rechaza más de 20 conexiones nuevas/s a MySQL y la app abría una por petición con ráfagas del cliente. Proceso: entorno no declarado; sin log legible en el momento; cierre sin criterio de evidencia (reabierto en 58 min); sin decisión registrada después (7 días); bug de HK (doble PUT) escondido detrás del entorno.",
+  "queCambia": [{"tipo": "LM", "ref": "CLAUDE.md § Entorno (K8, L-161): límites del hosting", "quien": "Desarrollo"}, {"tipo": "guardia", "ref": "validar.py I1 plazo de decisión + despertador P1–P2 (LM-65)", "quien": "Arquitecto"}, {"tipo": "guardia", "ref": "K9: cierre de INC-128 = error.log 7 días sin «intento 3»", "quien": "Arquitecto"}, {"tipo": "punto", "ref": "revisor previo: conexiones nuevas/s en el peor caso (database.php, str-api.js, HK)", "quien": "Arquitecto"}, {"tipo": "DT", "ref": "lectura agrupada por página (DT con dueño y plazo o REQ)", "quien": "Diseño"}, {"tipo": "riesgo", "ref": "compartido insuficiente si crece el uso: VPS; disparador «intento 3» en uso real", "quien": "Carlos vía Diseño"}],
+  "revisadaPor": ["M-998 (Diseño: impacto, DA-57, CU-HK-7.2/10.5)", "pendiente Desarrollo"]
+}
+```

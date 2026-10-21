@@ -25,17 +25,20 @@ const PAGINAS = ['/str-tablero.html', '/str-calendario.html', '/str-inventario.h
 function tiempos(c) {
   return {
     c, perfil: 'oper', pagina: '/str-app-shell.html', tec: 'límite',
-    que: 'tiempos: /api/health y ' + PAGINAS.join(', ') + ' cargan en menos de ' + UMBRAL_MS / 1000 + ' s cada una (V9)',
+    que: 'tiempos: /api/health (en caliente; el frío se anota) y ' + PAGINAS.join(', ') + ' cargan en menos de ' + UMBRAL_MS / 1000 + ' s cada una (V9)',
     async prueba(h) {
       const p = h.page, medidas = [];
+      // M-955 (Desarrollo, 20-oct): la primera petición tras horas quietas paga el arranque en frío del hosting (INC-205: 5,7 s).
+      // Se registra como «frío» sin juzgarla (solo cuenta si no responde) y el umbral se aplica a la segunda, que es la respuesta normal.
+      const tf = Date.now(); const rf = await p.request.get(h.BASE + '/api/health').catch(() => null); const frio = { que: '/api/health (frío)', ms: Date.now() - tf, status: rf ? rf.status() : 0, informativo: true };
       const t0 = Date.now(); const r = await p.request.get(h.BASE + '/api/health').catch(() => null); medidas.push({ que: '/api/health', ms: Date.now() - t0, status: r ? r.status() : 0 });
       for (const pg of PAGINAS) {
         const t1 = Date.now();
         try { await p.goto(h.BASE + pg, { waitUntil: 'load', timeout: 30000 }); medidas.push({ que: pg, ms: Date.now() - t1, status: 200 }); }
         catch (e) { medidas.push({ que: pg, ms: Date.now() - t1, status: 0, error: String(e && e.message || e).slice(0, 80) }); }
       }
-      const lentas = medidas.filter((m) => m.ms > UMBRAL_MS || !m.status);
-      h.espera(lentas.length === 0, medidas.map((m) => m.que + ' ' + m.ms + ' ms' + (m.status ? '' : ' (sin respuesta)')).join(' · ') + (lentas.length ? ' · fuera del umbral de ' + UMBRAL_MS + ' ms: ' + lentas.map((m) => m.que).join(', ') : ' · todas bajo ' + UMBRAL_MS + ' ms'));
+      const lentas = medidas.filter((m) => m.ms > UMBRAL_MS || !m.status).concat(frio.status ? [] : [frio]);
+      h.espera(lentas.length === 0, 'frío ' + frio.ms + ' ms' + (frio.status ? '' : ' (sin respuesta)') + ' · ' + medidas.map((m) => m.que + ' ' + m.ms + ' ms' + (m.status ? '' : ' (sin respuesta)')).join(' · ') + (lentas.length ? ' · fuera del umbral de ' + UMBRAL_MS + ' ms: ' + lentas.map((m) => m.que).join(', ') : ' · todas bajo ' + UMBRAL_MS + ' ms (el frío solo se anota)'));
     },
   };
 }

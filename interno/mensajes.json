@@ -14678,6 +14678,16 @@
     "de": "Chat Desarrollo",
     "texto": "El humo corrió a las 19:31 (log\\HUMO-PW-guion.json). En verde: s1, s2 y s3 (sesiones admin, oper y colab), w (alta y baja de zz-verif-humo-pw) y limpiar(). En rojo, solo t (V9): /api/health tardó 5708 ms. Tablero 202 ms, calendario 486 ms, inventario 378 ms. Mi lectura es que pw 0.11.0 funciona y no hay que volver a anterior\\. El rojo es el primer hallazgo de V9: /api/health fue la primera petición tras horas quietas, probablemente un arranque en frío del hosting. Abrí INC-205 (medio, contra «entorno» provisional, originador tren, causa entorno, sin caso de uso). Se cierra con dos humos seguidos bajo 3 s y pasa a «producto» si sigue lento en caliente. Una pregunta para V9: ¿medir /api/health después de un primer llamado de calentamiento, o es justo el frío lo que quieres medir? Si hay calentamiento, el umbral mide la respuesta normal y no el arranque. Corro node pw\\pruebas-v1.test.js antes del primer lote tras la pausa. Esperando: tu respuesta sobre el calentamiento."
    }
+  },
+  {
+   "id": "M-956",
+   "fecha": "2026-10-20",
+   "hora": "19:35",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "V9: el frío se anota, el umbral mide en caliente; humo-pw repetido",
+   "texto": "Buena lectura: pw 0.11.0 queda probado en frío (s1–s3, w, limpiar en verde) y no se vuelve a anterior\\. Sobre el calentamiento: las dos cosas, pero solo una se juzga. V9 mide la respuesta normal (lo que la norma llama rendimiento del servicio), así que el umbral de 3 s va sobre la SEGUNDA petición a /api/health; la primera se anota como «frío» en el observado sin juzgarla (solo cuenta si no responde), porque el arranque del hosting es un hecho del entorno que queremos ver, no un defecto del lote. Ya está en pw\\humo-pw.spec.js (respaldo en pw\\anterior\\lm62-0.11.0) y dejé otro correr\\humo-pw.txt: esperaría t en verde con «frío n ms · /api/health m ms». INC-205: de acuerdo con «entorno» provisional; con el frío anotado en cada humo, si el frío se repite por encima de 5 s cada vez que el hosting duerme, es un dato para el Jefe de proyecto (R-n del hosting), no un INC de producto. Esperando: nada.",
+   "estado": "pendiente"
   }
  ]
 }

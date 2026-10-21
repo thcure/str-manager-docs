@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-19 15:04",
+ "actualizadoEn": "2026-10-20 19:11",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -822,7 +822,7 @@
    "fecha": "2026-10-16",
    "titulo": "Shell: aviso «Sesión vencida · Entrar» con sesión iniciada (renueva antes de que Firebase recupere al usuario)",
    "estado": "cerrado",
-   "severidad": "media",
+   "severidad": "medio",
    "nota": "Visto por Carlos en el STR (REQ-SH-2, supuesto). Causa: _strRenewApiSession lee currentUser antes de authStateReady; str-api.js borra la sesión y el aviso queda. Arreglo en L-133 (después de L-132); categoría según el Arquitecto (RT-16). · 17-oct 08:34 cerrado: L-133 aceptado (d37a8aa).",
    "prioridad": "P2"
   },
@@ -831,7 +831,7 @@
    "fecha": "2026-10-16",
    "titulo": "Drive: con invalid_grant se guarda solo «Google retiró el permiso» y se pierde el código y la descripción de Google",
    "estado": "abierto",
-   "severidad": "baja",
+   "severidad": "bajo",
    "nota": "M-556/M-557: la primera pasada del cron (11:30) recibió invalid_grant (token de K3a emitido con la app en «Prueba»). Arreglo normal: ultimo_error con código y descripción de Google (sin token ni datos de la cuenta) + N1. Lote detrás de L-133. · Observación (M-574): «drive-callback · paso: state-formato» a las 17:03, 17:21 y 17:53 UTC, fuera de las reconexiones de Carlos; salen antes de tocar el token. Revisar origen al cerrar L-134.",
    "prioridad": "P3",
    "causaRaiz": "construcción",
@@ -842,7 +842,7 @@
    "fecha": "2026-10-16",
    "titulo": "Regresión: REQ-TB-3 g cuenta 2 consultas a la API en str-cobit.html (guion, no la página)",
    "estado": "cerrado",
-   "severidad": "media",
+   "severidad": "medio",
    "nota": "Abierto por el juez en el veredicto de L-132 (12:27). Causa: la cola abre caso.pagina=/str-cobit.html con domcontentloaded y red(h) cuenta la consulta en vuelo de esa carga; L-132 solo cambió ?v= en cobit. Arreglo: L-136 (espera networkidle antes de contar). · 13:01 cerrado: L-136 aceptado (TB-3 g «API 1» en cobit)."
   },
   {
@@ -850,7 +850,7 @@
    "fecha": "2026-10-16",
    "titulo": "DT-42: el ensayo real de restauración da 500 en el INSERT de la cuenta de ensayo (restauracion.php:225, PDOException)",
    "estado": "cerrado",
-   "severidad": "media",
+   "severidad": "medio",
    "nota": "Ensayo real 13:02 (M-572): 500 en 174 ms, transacción deshecha, no quedó nada. Log (leído por el Arquitecto en solo lectura, M-574): «restauracion.php:225 · ensayo · PDOException» = INSERT INTO cuenta (nombre) VALUES (?). Causa probable: la tabla cuenta de producción es de agosto (migrate.php la crea IF NOT EXISTS) y difiere del esquema esperado (otra columna NOT NULL sin defecto, nombre corto para los 41 caracteres de la copia, o id sin AUTO_INCREMENT). Falta ver su estructura. Además: el log anotará paso, SQLSTATE y código del motor, y /api/diagnostico (solo admin) mostrará las últimas 5 líneas «restauracion» (va detrás de L-133/L-134). · 12:57 Cerrado: L-137 aceptado (2c97c3a, veredicto 12:54). El ensayo real que cierra DT-42 lo repite el Arquitecto.",
    "prioridad": "con fecha 2026-11-30",
    "causaRaiz": "integración",
@@ -861,7 +861,7 @@
    "fecha": "2026-10-16",
    "titulo": "Regresión: INC-132 g deja 1 foto en la cola (estaba «subiendo») y el aviso sigue (guion, no la página)",
    "estado": "cerrado",
-   "severidad": "media",
+   "severidad": "medio",
    "nota": "Abierto por el juez en el veredicto 2 de L-132 (15:04). Causa: el guion quitó 6 de 7 fotos ({\"n\":6,\"q\":6}); quitar() solo acepta en-telefono/fallida y la 7.ª estaba subiendo (reintento con la subida cortada); al fallar, el portal mostró «1 foto no se pudo subir», que es correcto. En L-131 quitó 7/7 y pasó. Arreglo: L-138 (repite hasta que no quede ninguna en-telefono/subiendo/fallida, tope 20 s). · 15:15 cerrado: L-138 aceptado."
   },
   {
@@ -869,7 +869,7 @@
    "fecha": "2026-10-16",
    "titulo": "Lectura intermitente de los JSON del repo de documentos (API de GitHub) en páginas de Proyecto al final de una regresión larga",
    "estado": "abierto",
-   "severidad": "baja",
+   "severidad": "bajo",
    "nota": "Abierto por el juez en el veredicto 4 de L-132 (16:40): str-elementos.html cayó a main en vez de raw/<sha> (REQ-TB-3 g) y str-seg-proyecto.html no pintó a tiempo indicadores y semáforo (REQ-TB-5 c, e), tras 32 min con muchas consultas a la API de GitHub. Ajeno a L-132. Sospecha: límite de consultas sin autenticar de la API de GitHub. A mirar después de FL-12; no bloquea.",
    "prioridad": "P3",
    "causaRaiz": "entorno",
@@ -880,7 +880,7 @@
    "fecha": "2026-10-16",
    "titulo": "El HK embebido en el portal navega a login.html cuando Firebase le da null al arrancar; login entra solo y vuelve: bucle que dispara el freno de INC-56 («varios inicios automáticos») desde el 3.º en 30 s",
    "estado": "cerrado",
-   "severidad": "media",
+   "severidad": "medio",
    "nota": "Visto en las repruebas de L-132 (perfil colab, M-582/M-588); acordado con el Arquitecto (M-589). Causa: str-m1-housekeeping.html L7270–7272 onAuthStateChanged → location.replace('login.html') también dentro del iframe; el freno de login.html (sessionStorage str-login-autos, 30 s, >2) es correcto. Arreglo: el HK embebido nunca navega a login.html; espera authStateReady con tope (como L-133) y, sin usuario, avisa al portal y sigue con el JWT del portal. Guion con 5 aperturas del portal del colab en < 30 s. Detrás de L-133. · 2026-10-17 09:07 cerrado: L-140 aceptado (d40dfb4, p5c102).",
    "prioridad": "P1 por destrabe"
   },
@@ -952,7 +952,7 @@
    "fecha": "2026-10-17",
    "titulo": "Regresión de L-146 cortada por caída de internet en LENOVO (net::ERR_INTERNET_DISCONNECTED en page.goto, 17:11–17:13); antes, puerta bloqueada por DNS (17:00)",
    "estado": "cerrado",
-   "severidad": "menor",
+   "severidad": "bajo",
    "prioridad": "P3",
    "nota": "Entorno, no producto: ningún caso llegó a ejecutar código. Dos cortes de red en 15 min. Se cierra con la reprueba de L-146 en verde. Si se repite, pedir a Carlos revisar la conexión de LENOVO. · 19:13 L-146 aceptado (regresión completa sin rojos). Cerrado."
   },

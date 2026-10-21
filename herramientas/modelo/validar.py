@@ -401,6 +401,83 @@ if _I and _pr:
         if ap and not re.search(r'\b(DA|M)-\d+\b', str(ap)): avi('I6 deuda', 'deuda', d.get('id'), 'aceptadaPor sin DA-n ni M-n: ' + str(ap)[:60])
     if _viejasDT: avi('I6 deuda', 'deuda', '%d abiertas' % len(_viejasDT), 'DT anteriores sin severidad, dueño o plazo/aceptadaPor (pasada de Desarrollo, sin tocar texto): ' + ', '.join(_viejasDT))
 
+# LM-66 (FLUJO-v1, F1–F7; MJ-17 proceso 5; BAI11.04/.07): lista única de trabajo con clases, límites de trabajo en curso, tanda con
+# entrada, edad por estado, pausas como filas, PT con límites, origen obligatorio. Todo como AVISO el primer mes (esquema.flujo.modo).
+_ef = E.get('flujo') or {}
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import flujo as _F
+except Exception as ex:
+    _F = None; avi('F0 módulo', 'archivo', 'herramientas/modelo/flujo.py', f'no se pudo cargar: {ex}')
+if _F and _ef and os.path.exists(os.path.join(RAIZ, 'interno/proyecto.json')):
+    _py = carga('interno/proyecto.json'); _hoyF = datetime.datetime.now()
+    _trab = _py.get('trabajo') or []; _tandas = _py.get('tandas') or []; _pausas = _py.get('pausas') or []; _plns = _py.get('planes') or []
+    _lim = dict(_F.LIMITES); _lim.update({k: v for k, v in (_ef.get('limites') or {}).items() if isinstance(v, int)})
+    _exc = (_py.get('limites') or {}).get('excepciones') or {}
+    _umb = dict(_F.UMBRALES_DIAS)
+    for k, v in ((_ef.get('edad') or {}).get('umbrales') or {}).items():
+        kk = k.replace('Dias', '').replace('Horas', 'Horas') if k != 'construidoSinVeredictoHoras' else k
+        if kk in _umb and isinstance(v, (int, float)): _umb[kk] = v
+    if not _trab:
+        avi('F1 trabajo', 'proyecto', 'trabajo[]', 'proyecto.json sin trabajo[]: la lista única de FLUJO-v1 (pasada del Jefe de proyecto, LM-66 paso 4)')
+    else:
+        for f in _trab:
+            fal = _F.fila_valida(f)
+            if fal: avi('F1 trabajo', 'proyecto', f.get('ref') or '?', 'fila de trabajo[] sin ' + ', '.join(fal) + ' (clases a–g; origen obligatorio, F7)')
+        mal = _F.orden_correcto(_trab)
+        if mal: avi('F1 orden', 'proyecto', 'trabajo[]', 'clases fuera del orden fijo a→g: ' + ', '.join(str(x) for x in mal[:10]))
+        refs = {f.get('ref') for f in _trab if f.get('estado') not in ('aceptado', 'cerrado', 'descartado')}
+        faltan = [r.get('id') for r in reqs if r.get('estado') in ('listo', 'definido') and r.get('id') not in refs]
+        faltan += [i.get('id') for i in seg.get('incs', []) if i.get('estado') == 'abierto' and i.get('prioridad') in ('P1', 'P2') and i.get('id') not in refs and not (isinstance(i.get('decision'), dict) and i['decision'].get('tipo') == 'espera la pausa de producto')]
+        if faltan: avi('F1 trabajo', 'proyecto', 'trabajo[]', 'no están en la lista: ' + ', '.join(faltan[:12]) + ('…' if len(faltan) > 12 else ''))
+        lotes_ref = {l.get('req'): l for l in lotes if l.get('estado') in _F.ESTADOS_VIVOS}
+        libre = _F.primer_libre(_trab, lotes_ref)
+        for l in lotes:
+            if l.get('estado') in _F.ESTADOS_COLA and libre and l.get('req') != libre.get('ref'):
+                fila = next((f for f in _trab if f.get('ref') == l.get('req')), None)
+                if not (fila and fila.get('motivoSalto')): avi('F1 orden', 'lote', l.get('lote'), 'en cola sin ser el primero libre de trabajo[] (%s) y sin motivoSalto' % libre.get('ref'))
+    # F2 límites
+    _cnt = _F.conteos_etapas(_trab, lotes, reqs, _plns)
+    for k, (n, lim) in _F.fuera_de_limite(_cnt, _lim, _exc).items():
+        avi('F2 límite', 'etapa', k, '%d en curso, límite %d (F2): se termina lo abierto antes de empezar; excepción con motivo en proyecto.json › limites.excepciones' % (n, lim))
+    # F3 tandas
+    _ab = _F.tandas_abiertas(_tandas)
+    if len(_ab) > 1: avi('F3 tanda', 'proyecto', 'tandas[]', 'más de una tanda abierta: ' + ', '.join(str(t.get('id')) for t in _ab))
+    if _ab:
+        if not _ab[0].get('entra'): avi('F3 tanda', 'proyecto', _ab[0].get('id'), 'tanda abierta sin entra[]')
+        for x in _F.entradas_fuera_de_tanda(_ab[0], lotes, _trab): avi('F3 tanda', 'lote', x, 'entró a mitad de tanda sin ser clase a, b o c')
+    elif _trab and any(l.get('estado') in _F.ESTADOS_COLA for l in lotes):
+        avi('F3 tanda', 'proyecto', 'tandas[]', 'hay lotes en cola y ninguna tanda abierta')
+    for t_ in _tandas:
+        if t_.get('hasta') and not t_.get('salio'): avi('F3 tanda', 'proyecto', t_.get('id'), 'tanda cerrada sin salio[]')
+    # F4 edades
+    for l in lotes:
+        if not _F.estados_crecen(l): avi('F4 edad', 'lote', l.get('lote'), 'estados[] no crece o su último estado no es el del lote')
+    _bloq = set()
+    for x in _F.vencidos(lotes, reqs, mensajes, _hoyF, _umb, bloquean=_bloq):
+        avi('F4 edad', 'ítem', x[0], '%s desde hace %s %s: pasado de umbral (dueño pregunta el JP)' % (x[1], x[2], 'horas' if x[3] == 'h' else 'días'))
+    # F5 pausas
+    for p_ in _pausas:
+        fal = _F.pausa_valida(p_)
+        if fal: avi('F5 pausa', 'proyecto', p_.get('orden') or p_.get('desde'), 'pausa sin ' + ', '.join(fal))
+        if p_.get('hasta') and not p_.get('reanudacion'): avi('F5 pausa', 'proyecto', p_.get('orden'), 'pausa cerrada sin orden de reanudación (M-n)')
+        rv = str(p_.get('revisarEn') or '')[:10]
+        if not p_.get('hasta') and rv and rv < _hoyF.date().isoformat(): avi('F5 pausa', 'proyecto', p_.get('orden'), 'revisarEn vencido (%s): una pregunta a Carlos con la plantilla' % rv)
+    _act = _F.pausas_activas(_pausas)
+    if not _act:
+        esp = [i.get('id') for i in seg.get('incs', []) if isinstance(i.get('decision'), dict) and i['decision'].get('tipo') == 'espera la pausa de producto' and i.get('estado') == 'abierto']
+        if esp: avi('F5 pausa', 'incidente', '%d INC' % len(esp), 'decisión «espera la pausa de producto» sin pausa activa en proyecto.json › pausas[]: ' + ', '.join(esp[:8]) + ('…' if len(esp) > 8 else ''))
+    for k in ('detenidos', 'ordenActivo', 'ordenAlLevantarPausa'):
+        if _py.get(k): avi('F5 pausa', 'proyecto', k, 'sigue en proyecto.json: se migra a trabajo[]/pausas[] y se borra (un dato, una fuente)')
+    # F6 PT
+    for p_ in _plns:
+        if p_.get('estado') == 'en definición':
+            t0 = _F._dt(p_.get('inicio') or p_.get('fecha') or p_.get('desde'))
+            if t0 and (_hoyF - t0).days > _umb['ptDefinicion']: avi('F6 PT', 'plan', p_.get('id'), 'en definición hace %d días (> %d): entra, se pausa con motivo o se cierra' % ((_hoyF - t0).days, _umb['ptDefinicion']))
+        if p_.get('estado') == 'activo' and _trab:
+            if not any(str(f.get('pt') or '') == p_.get('id') or p_.get('id') in str(f.get('origen') or '') for f in _trab) and not p_.get('sinItemsPorque'):
+                avi('F6 PT', 'plan', p_.get('id'), 'activo sin ningún ítem en trabajo[] ni sinItemsPorque')
+        if p_.get('estado') == 'cerrado' and not (p_.get('cierre') or p_.get('leccion')): avi('F6 PT', 'plan', p_.get('id'), 'cerrado sin cierre ni lección (BAI11.09)')
+
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
 try:

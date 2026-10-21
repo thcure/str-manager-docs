@@ -1232,5 +1232,79 @@
    "revision": "autor por causa; Desarrollo la pega en el INC",
    "tabla de equivalencias y guardias": "Arquitecto"
   }
+ },
+ "flujo": {
+  "version": "FLUJO-v1",
+  "lm": "LM-66",
+  "documento": "claude/marco/plan-flujo-trabajo.md (v2)",
+  "frontera": "solo el flujo dentro de la fábrica; inicio, planeación, cierre, beneficios y multiproyecto son de la capa de proyectos (ADR-008), que entregará objetivos y prioridades y recibirá la ficha de la tanda",
+  "normas": [
+   "COBIT BAI11.04, BAI11.07, BAI11.09, APO08.01",
+   "ISO 21502:2020 (por conocimiento): planificación, informes, problemas, control de cambios, lecciones",
+   "Kanban (Anderson), ley de Little, Reinertsen (costo de la demora, colas), DORA/Accelerate (trabajo en curso limitado)"
+  ],
+  "controles": {
+   "F1": "una lista trabajo[] con clases de servicio en orden fijo a–g; libre = no espera DA/cruce/ok; dos motivos aceptados para saltar",
+   "F2": "límites de trabajo en curso por etapa (cola 1, redacción 2 movible, listos sin lote 5, en lote sin aceptar 3, PT producto 1, PT fábrica 1 (2 con excepción), en definición 2)",
+   "F3": "tanda por evento con entra[] y salio[]; a mitad solo a, b, c; una abierta",
+   "F4": "edad por estado con plan[].estados[] que solo crece; umbrales; esperas a persona son edades, no pausas",
+   "F5": "pausas como filas con orden, alcance, archivoPAUSA, condición de reanudación y revisarEn; migración de detenidos/ordenActivo/ordenAlLevantarPausa",
+   "F6": "PT con límites, plazo de definición de 14 días y cierre con lección",
+   "F7": "origen obligatorio; el JP ordena, no define",
+   "F8": "métricas de flujo informativas un mes; luego umbrales"
+  },
+  "limites": {
+   "cola": 1,
+   "redaccion": 2,
+   "listosSinLote": 5,
+   "enLoteSinAceptar": 3,
+   "ptProducto": 1,
+   "ptFabrica": 1,
+   "ptDefinicion": 2
+  },
+  "umbralesEdad": {
+   "listoSinLoteDias": 5,
+   "redactadoSinEncolarDias": 1,
+   "construidoSinVeredictoHoras": 2,
+   "esperaDADias": 2,
+   "aCarlosBloqueaDias": 1,
+   "aCarlosNoBloqueaDias": 3,
+   "enLoteSinAceptarDias": 7,
+   "ptDefinicionDias": 14,
+   "pausaSinRevisarDias": 7
+  },
+  "criteriosEntrada": [
+   "en trabajo[] con clase y origen",
+   "REQ listo (Q1–Q8) o INC con prioridad y decision o DT con dueño y plazo o LM con ok de Carlos que use la cola",
+   "categoría del catálogo; si crítico, DA-n y cruce",
+   "no espera nada de Carlos",
+   "cabe en los límites o trae motivo por una tanda"
+  ],
+  "criteriosSalida": [
+   "salio[] con aceptado/no aceptado/devuelto",
+   "vencidos con dueño y pregunta hecha",
+   "lecciones",
+   "lista reordenada",
+   "tabla «¿cómo vamos?» pegada a Carlos"
+  ],
+  "finalizacionTanda": [
+   "etapas fuera de límite = 0",
+   "ítems vencidos sin dueño = 0",
+   "pausas sin revisarEn = 0",
+   "tiempo de entrega REQ listo→aceptado (informativo el primer mes)"
+  ],
+  "herramientas": {
+   "flujo.py": "funciones puras (+flujo_test.py, 34)",
+   "validar.py": "avisos F1–F7 (sin errores el primer mes)",
+   "ficha-semanal.py": "flujo(), semáforo de flujo, --como-vamos [--anterior]",
+   "plantillas/como-vamos.md": "la tabla para Carlos"
+  },
+  "quienEscribe": {
+   "trabajo[], tandas[], pausas[], planes[]": "Jefe de proyecto",
+   "plan[].estados[]": "Desarrollo",
+   "estado «entregado» = «en un lote»": "Diseño",
+   "esquema, guardias, ficha": "Arquitecto"
+  },
+  "primeraPruebaReal": "triage con Carlos de los 16 REQ definidos sin lote (Diseño, en M-858) antes de levantar la pausa de producto"
  }
 }

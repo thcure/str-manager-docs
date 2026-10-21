@@ -1,5 +1,5 @@
 {
- "version": "0.6",
+ "version": "0.7",
  "fecha": "2026-10-21",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
@@ -482,5 +482,119 @@
   ],
   "aceptadaPor": "DA-n (con cruce de Carlos) si la DT toca un área crítica de K4 o cambia algo que Carlos decidió; M-n de Diseño con motivo si es menor (texto, estilo, orden en pantalla)",
   "regla": "DT nueva incompleta = error; las anteriores, aviso agregado (pasada de Desarrollo sin tocar texto); DT con plazo vencido y abierta = aviso; revisión mensual en la ficha"
+ },
+ "flujo": {
+  "lm": "LM-66 (FLUJO-v1; MJ-17 proceso 5; COBIT BAI11.04/.07/.09; Kanban, ley de Little)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-flujo-trabajo.md (v2, ok de Carlos 21-oct 10:59)",
+  "archivo": "interno/proyecto.json (escritor: Jefe de proyecto)",
+  "modo": "avisos el primer mes (sin errores): se calibra con datos",
+  "trabajo": {
+   "que": "proyecto.json › trabajo[]: lista única y ordenada de lo que falta construir; contiene a prioridades[] como clase (e)",
+   "fila": "{ref: REQ-X · INC-n · DT-n · LM-n, clase: a..g, origen, desde, estado, espera?, motivoSalto?}",
+   "clases": {
+    "a": "orden de Carlos (M-n/DA-n)",
+    "b": "expedito: INC P1 o emergencia K8",
+    "c": "destrabe: libera un lote construido o una regresión (regla 4)",
+    "d": "con fecha: plazo externo",
+    "e": "producto: REQ listos por nivel de Diseño (LM-48) y dependencias; el JP ordena dentro",
+    "f": "estándar: INC P2–P3 y DT con plazo",
+    "g": "intangible: P4, fábrica, documentación, en los huecos"
+   },
+   "aMitadDeTanda": [
+    "a",
+    "b",
+    "c"
+   ],
+   "libre": "primera fila que no espera DA, cruce ni ok de Diseño",
+   "motivosSalto": [
+    "toca el mismo archivo que el lote en cola o recién construido",
+    "el anterior está bloqueado por una dependencia de código"
+   ],
+   "lmEntran": "solo los LM que necesitan la cola",
+   "origen": "obligatorio (F7): «Carlos (M-n)», «Diseño (prioridades[])», «I1 P1–P2», «DT plazo», mañana «capa de proyectos (ref)»"
+  },
+  "limites": {
+   "cola": 1,
+   "redaccion": 2,
+   "listosSinLote": 5,
+   "enLoteSinAceptar": 3,
+   "ptProducto": 1,
+   "ptFabrica": 1,
+   "ptDefinicion": 2,
+   "notas": [
+    "redacción cuenta solo lo que Desarrollo puede mover: espera DA/cruce/ok aparte con edad y dueño; la revisión previa de instrucciones ajenas no cuenta",
+    "ptFabrica 2 mientras corran PT-9 y PT-10 (excepción en proyecto.json › limites.excepciones con motivo); vuelve a 1 al cerrar uno",
+    "«entregado» (Diseño) = «en un lote»; definido sin lote = «listo»",
+    "pasar un límite: motivo escrito en proyecto.json › limites.excepciones, por una tanda"
+   ]
+  },
+  "tandas": {
+   "que": "por evento: se abre cuando Carlos levanta una pausa o da una orden, o cuando la anterior quedó aceptada y la cola vacía",
+   "fila": "{id: T-n, desde, hasta, abiertaPor: M-n, entra[], limites?, salio[]: [{ref, resultado: aceptado · no aceptado · devuelto}], nota}",
+   "reglas": [
+    "una sola tanda abierta",
+    "a mitad solo clases a, b, c",
+    "al cerrar: salio[], lecciones y la lista reordenada",
+    "la ficha semanal del Arquitecto (V8) sigue semanal y cruza las tandas de la semana"
+   ]
+  },
+  "edad": {
+   "que": "plan[].estados: [{estado, desde}] lista que solo crece (Desarrollo la llena en el mismo cambio); el desde actual es el último",
+   "umbrales": {
+    "listoSinLoteDias": 5,
+    "redactadoSinEncolarDias": 1,
+    "construidoSinVeredictoHoras": 2,
+    "esperaDADias": 2,
+    "aCarlosBloqueaDias": 1,
+    "aCarlosNoBloqueaDias": 3,
+    "enLoteSinAceptarDias": 7,
+    "ptDefinicionDias": 14,
+    "pausaSinRevisarDias": 7
+   },
+   "regla": "al vencer, el ítem sale en la ficha con su dueño y el JP pregunta al dueño por el buzón; a Carlos se reitera una vez con la plantilla; las esperas a una persona (DA, Carlos) son edades, no pausas"
+  },
+  "pausas": {
+   "que": "proyecto.json › pausas[]: toda pausa es una fila; detenidos, ordenActivo y ordenAlLevantarPausa se migran y desaparecen",
+   "fila": "{desde, orden: M-n/DA-n, alcance: producto · cola · todo, archivoPAUSA: true/false, motivo, condicionReanudacion, revisarEn, hasta?, reanudacion?: M-n}",
+   "reglas": [
+    "las decisiones «espera la pausa de producto» (I1) citan la fila",
+    "pausa con condición pendiente de Carlos > 7 días: una pregunta con la plantilla",
+    "hasta sin orden de reanudación = aviso"
+   ]
+  },
+  "planes": {
+   "fabrica": "planes[].fabrica: true para PT de fábrica (PT-9, PT-10)",
+   "reglas": [
+    "1 PT de producto activo y 1 de fábrica (2 con excepción)",
+    "PT en definición > 14 días: entra, se pausa con motivo o se cierra",
+    "todo PT activo tiene al menos un ítem en trabajo[] o dice por qué no",
+    "cierre con lo logrado, lección y lo que vuelve a Diseño (BAI11.09)"
+   ]
+  },
+  "comoVamos": {
+   "que": "ficha-semanal.py --como-vamos: tabla de seis filas desde proyecto.json, seguimiento.json y la ficha; el JP la pega, no la redacta",
+   "filas": [
+    "1. lo que espera a Carlos (edad y la única pregunta que sigue)",
+    "2. tanda abierta y qué entró",
+    "3. en cola y construido",
+    "4. aceptado en la tanda",
+    "5. pausas activas y su condición",
+    "6. semáforo: cuántas filas en rojo y solo las que cambiaron desde la última vez"
+   ]
+  },
+  "metricas": {
+   "que": "F8 informativo un mes; luego umbrales del semáforo (LM aparte)",
+   "lista": [
+    "tiempo de entrega REQ listo → aceptado (mediana)",
+    "tiempo en cola construido → aceptado",
+    "edad media de lo en curso",
+    "etapas fuera de límite",
+    "ítems vencidos",
+    "mensajes a Carlos pendientes",
+    "días en pausa en la ventana",
+    "ritmo de salida (ítems aceptados por semana)"
+   ]
+  }
  }
 }

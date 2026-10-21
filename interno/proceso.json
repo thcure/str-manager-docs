@@ -898,10 +898,10 @@
  ],
  "aprobacion": "Carlos, 12-oct-2026 11:58 («de acuerdo, así»: cruce de LM-10 y las 4 preguntas con la propuesta). Ajuste de Carlos en el mismo cruce: la DA-n y el cruce de un crítico se garantizan en definido/entregado (los conduce Diseño), no en redactado.",
  "pruebas": {
-  "version": "PRUEBAS-v1",
+  "version": "PRUEBAS-v2",
   "estado": "vigente",
-  "aprobacion": "Carlos, 12-oct-2026 20:20 («aprobado»), sobre claude/marco/proceso-pruebas-2026-10.md (LM-18).",
-  "documento": "claude/marco/proceso-pruebas-2026-10.md",
+  "aprobacion": "Carlos, 20-oct-2026 19:26 («ok» al plan v2; umbral V9 3 s), sobre claude/marco/plan-verificacion-aceptacion.md (LM-62). PRUEBAS-v1: Carlos, 12-oct-2026 20:20 (LM-18).",
+  "documento": "claude/marco/plan-verificacion-aceptacion.md",
   "cobit": [
    "BAI03.07",
    "BAI03.08",
@@ -983,7 +983,7 @@
   "metricas": [
    {
     "id": "lotesConMasDeUnVeredicto",
-    "hoy": "41 %",
+    "hoy": "23 % (7 de 30 con tiempos, 20-oct)",
     "meta": "≤ 15 %"
    },
    {
@@ -993,13 +993,28 @@
    },
    {
     "id": "criteriosConGuionOTests",
-    "hoy": "sin medir",
+    "hoy": "la mide metricas.js v2 por semana (pctCriteriosConCaso)",
     "meta": "≥ 70 %"
    },
    {
     "id": "minutosConstruidoAAceptado",
     "hoy": "mediana 12",
     "meta": "≤ 20"
+   },
+   {
+    "id": "repruebas",
+    "hoy": "41 % (semana del 12-oct)",
+    "meta": "≤ 15 %"
+   },
+   {
+    "id": "rojosAjenosAlLote",
+    "hoy": "73 % (semana del 12-oct)",
+    "meta": "≤ 20 %"
+   },
+   {
+    "id": "casosEnCuarentena",
+    "hoy": "0 (cuarentena.json vacío)",
+    "meta": "≤ 5, ninguno vencido"
    }
   ],
   "implantacion": [
@@ -1027,6 +1042,11 @@
     "n": 5,
     "que": "juicio N3 local; la tarea de Cowork queda de respaldo",
     "estado": "hecho: LM-19 (cola v7, juez\\texto-juez.md, h.captura); falta la primera corrida real"
+   },
+   {
+    "n": 6,
+    "que": "PRUEBAS-v2 (LM-62): V1–V11; pw 0.11.0 (v2.js, probar-lote, tren, humo con tiempos, metricas v2, cuarentena.json), juez v2, esquema del incidente, --lote con criterios, guiones-e2e v2, ficha-semanal.py",
+    "estado": "instalado en el repo y en LENOVO (20-oct); prueba real: primer tren tras la pausa; tec y punto 21 del revisor por lote tras la pausa"
    }
   ],
   "juezLocal": {
@@ -1036,6 +1056,59 @@
    "permisos": "Read, Glob, Grep; Write/Edit solo log\\L-n-veredicto*.json; sin Bash, red ni MCP",
    "apagar": "archivo SIN-JUEZ en la cola",
    "respaldo": "tarea de Cowork (Agente verificador / crítico) si el juez no deja veredicto o un N3 no se puede capturar"
+  },
+  "reemplaza": "PRUEBAS-v1",
+  "documentoV1": "claude/marco/proceso-pruebas-2026-10.md",
+  "normas": [
+   "ISO/IEC/IEEE 29119-1",
+   "29119-2 (TP, TMC, TC, TD, TE, IR)",
+   "29119-3 (§6.2.7 estrategia, §6.4 finalización, §7.12 incidente)",
+   "29119-4 (técnicas)",
+   "29119-5 (palabras clave)"
+  ],
+  "modeloDePrueba": "el caso de uso de la línea base (29119-2:2021: modelos de prueba); cadena: REQ/CU → módulo → criterio con letra → caso del guion con la misma letra → tests/e2e/<X>.spec.js → orden de los casos (procedimiento)",
+  "controles": {
+   "V1": "cuarentena con umbral (≥ 8 % en 30 corridas o 3 en 10; ≥ 30 % inmediata); pw\\cuarentena.json con INC abierto y causa de la lista (nunca «producto»); plazo dos lotes aceptados de cualquier grupo; vencida → la cola salta el caso; el INC queda como deuda",
+   "V2": "un rojo que no es de sesión ni de red repite el guion entero una vez tras su limpiar(); el segundo intento manda; lo que pasa queda «inestable» (inestables[])",
+   "V3": "linea-base.py --lote: ningún criterio de las «Pruebas derivadas» sin caso (N2 con la letra, N1 en tests/, N3 con captura o verificador de Cowork, N4 declarado, «no verificable» con motivo); rc 2 = no encolar",
+   "V4": "técnica por nivel: límite (N1), escenario (N2), tabla de decisión rol × acción (permisos, la marca Diseño en el REQ); campo tec del caso y punto 21 del revisor previo → lote tras la pausa",
+   "V5": "INC nuevo sin causaRaiz o debioDetectarse = error; cada «revisión previa» o «tests» produce punto del revisor, guardia, o riesgo aceptado con nota (ficha semanal)",
+   "V6": "severidad bajo · medio · alto · crítico; campos mínimos del INC (casoUso, contra, originador, contexto, evidencia); contra = REQ → Diseño y volatilidad Q7; «ningún rojo muere en silencio»",
+   "V7": "riesgo del mapa (p × i) manda la profundidad: alto ≥ 6 → ruta completa en fase 1; medio 3–5 → centinelas ahora, ruta en el tren; bajo ≤ 2 → humo y guion propio, todo al tren",
+   "V8": "informe de finalización semanal (ficha-semanal.py + METRICAS.json): semáforo de §6, escapes por etapa, riesgos residuales (trinquetes), candidatos a cuarentena, bloqueos por causa, desviaciones",
+   "V9": "humo-pw mide /api/health, tablero, calendario e inventario con zz-verif-oper; umbral 3 s → INC medio",
+   "V10": "suspensión por entorno (P4 bloqueado o dos guiones seguidos caídos por el entorno) → log\\suspension.json, bloqueado, aviso por el buzón al Jefe de proyecto y a Desarrollo; reanudación con humo y semilla en verde: fase 1 completa, no cuenta como reprueba",
+   "V11": "biblioteca de palabras clave (h de guion.js): guiones-e2e.js deja palabras por guion, referencia cruzada, desconocidas y sin uso; autoridad Arquitecto; palabra nueva o cambiada entra por lote y corre todos los guiones que la usan"
+  },
+  "criteriosEntrada": [
+   "despliegue con ?v= del lote",
+   "tests/ en verde",
+   "guion igual byte a byte",
+   "semilla íntegra",
+   "sesiones vivas",
+   "ningún criterio del REQ sin caso ni declaración (V3)",
+   "ningún caso del lote con el nombre de uno en cuarentena vencida",
+   "«Regresión:» explícita solo con motivo escrito (desviación registrada)"
+  ],
+  "criteriosSalida": [
+   "todos los N1/N2 verdes (a lo sumo un reintento del guion, contado por caso)",
+   "N3 concluyentes o «parcial» con motivo",
+   "N4 en «dispositivo»",
+   "datos zz-verif-L<n>- borrados o listados",
+   "veredicto con criterios[] por letra, inestables[], cuarentena[] y «acción sin INC» por cada rojo sin INC"
+  ],
+  "finalizacionTanda": {
+   "cuarentena": "≤ 5 casos y ninguno vencido",
+   "repruebas": "≤ 15 % (la reanudación tras suspensión no cuenta)",
+   "rojosAjenos": "≤ 20 %",
+   "criteriosConCaso": "≥ 70 % (90 % cuando bajen los trinquetes)",
+   "escapes": "cada «revisión previa» con destino",
+   "nota": "rigen desde el ok de Carlos (20-oct) como línea de partida: semana del 12-oct 41 % repruebas y 73 % ajenos"
+  },
+  "suspension": {
+   "cuando": "P4 bloquea por entorno (despliegue, semilla, sesión) o dos guiones seguidos fallan solo por el entorno",
+   "quien": "la cola (probar-lote.js / tren.js); escribe log\\suspension.json; la cola lo traduce a M-n para el Jefe de proyecto y Desarrollo",
+   "reanuda": "humo y semilla en verde; se repite la fase 1 completa del lote (o la fila del tren); sin créditos de juez mientras tanto"
   }
  },
  "mapaStr": {

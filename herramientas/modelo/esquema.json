@@ -1,6 +1,6 @@
 {
- "version": "0.5",
- "fecha": "2026-10-11",
+ "version": "0.6",
+ "fecha": "2026-10-21",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
   "REQ": "^REQ-[A-Z0-9]{1,4}-\\d+(-\\d+)?$",
@@ -291,7 +291,87 @@
    "lm": "LM-63 (K9; ISO/IEC 12207 7.2.8)",
    "que": "un INC pasa a «cerrado» solo con cierre: (a) {lote, prueba} si contra es producto, guion o REQ; (b) {prueba} si contra es entorno o herramienta; (c) {decision, motivo} cuando lo cierra producto (DA-n o M-n de Diseño). Si tenía caso en cuarentena, además 20 corridas en verde. Los INC cerrados antes de «desde» no se rehacen.",
    "prueba": "caso del guion o N1 con la letra, «humo», o «uso real: <quién lo vio>»"
-  }
+  },
+  "prioridad": {
+   "desde": "2026-10-22",
+   "lm": "LM-65 (INCIDENTES-v1, I1; ISO/IEC 20000-1 §8.6.1, DSS02.02)",
+   "valores": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+   ],
+   "que": "prioridad = severidad × quién lo sufre (huésped o tercero > colaborador en turno > operador o admin > fábrica). Piso P2 si el INC toca un área crítica de K4 (categorias.critico.lista) aunque no lo sufra nadie todavía; sobreventa o pérdida de datos en curso = P1. La propone el juez, la registra Desarrollo, la confirma Diseño cuando hay huésped, tercero o colaborador.",
+   "plazoDecision": {
+    "P1": "30 min desde el aviso (reloj de K6)",
+    "P2": "1 día",
+    "P3": "una tanda (7 días)",
+    "P4": "un mes (30 días)"
+   },
+   "plazoDecisionMin": {
+    "P1": 30,
+    "P2": 1440,
+    "P3": 10080,
+    "P4": 43200
+   },
+   "decision": {
+    "que": "el plazo es de decisión, no de construcción: decision {tipo, ref, motivo, fecha}",
+    "tipos": [
+     "lote",
+     "bolsa",
+     "pospuesto",
+     "solución temporal",
+     "espera la pausa de producto"
+    ],
+    "regla": "«espera la pausa de producto» vale como decisión solo citando la orden de Carlos en ref (M-n o DA-n); «pospuesto» exige motivo o fecha; el Jefe de proyecto ordena dentro de la prioridad, no la define"
+   },
+   "equivalencias": "herramientas/modelo/incidentes.py › equivalencia (tabla del plan §8 paso 6; prioridad.py la imprime): P0 · P1 · «P1 por destrabe» → P1 si crítico o alto, si no P2 · P2 → P2 · P3 → P3 · «con fecha …» → P3 con decision pospuesto · sin valor → crítico P1, alto o área crítica P2, medio P3, bajo P4; pisos: área crítica ≥ P2, crítico ≥ P2 (P1 si nombra a quien lo sufre), sobreventa o pérdida de datos P1; lo que nombra huésped, portal, canal o colaborador lo confirma Diseño",
+   "reglas": [
+    "I1: INC desde «desde» sin prioridad de la lista = error; antes, aviso agregado (pasada de Desarrollo con la tabla)",
+    "I1: INC abierto con prioridad y sin decision válida pasado su plazo = aviso (por prioridad); P1–P2 además los recuerda el despertador del Jefe de proyecto",
+    "I2: originador «uso real» o «Carlos» sin contexto {pantalla, hora, quienLoVio} = error desde «desde» (plantilla herramientas/plantillas/aviso-produccion.md)",
+    "I4: INC abierto P1 o P2 sin solucionTemporal («cómo opera mientras tanto» o «ninguna») = error desde «desde», aviso antes"
+   ]
+  },
+  "revision": {
+   "lm": "LM-65 (I5; Google SRE, Postmortem Culture)",
+   "desde": "2026-10-22",
+   "plazoHoras": 48,
+   "disparadores": [
+    "P1",
+    "pérdida o alteración de datos reales",
+    "revert o restauración",
+    "decisión fuera de plazo",
+    "lo vio Carlos (uso real) y debió detectarlo una prueba"
+   ],
+   "campos": {
+    "queVimos": "síntoma tal como se vio, sin culpables",
+    "impacto": "quién lo sufrió, cuánto tiempo, qué datos",
+    "lineaDeTiempo": "[{hora, que}] desde la primera señal hasta la decisión",
+    "causas": "causa raíz del proceso y técnica (no «error humano»)",
+    "queCambia": "[{tipo: punto | guardia | REQ | LM | riesgo, ref, quien}]",
+    "revisadaPor": "los otros dos chats (M-n)"
+   },
+   "autorPorCausa": {
+    "construcción · tests · guion": "Desarrollo",
+    "entorno · herramienta": "Arquitecto",
+    "REQ · producto": "Diseño",
+    "mezclada": "los tres: Diseño impacto y REQ/bolsa, Desarrollo lo técnico, Arquitecto la causa de proceso"
+   },
+   "plantilla": "herramientas/plantillas/revision-incidente.md",
+   "regla": "INC con disparador sin revision completa y revisada a las 48 h = aviso; sin revisar por los otros dos no cuenta"
+  },
+  "destino": {
+   "lm": "LM-65 (I7; V5 gana guardia)",
+   "desde": "2026-10-22",
+   "tipos": [
+    "punto",
+    "guardia",
+    "riesgo"
+   ],
+   "que": "todo INC con debioDetectarse «revisión previa» o «tests» lleva al cerrarse destino {tipo, ref, quien}: punto del revisor previo, guardia (hook, --lote, validar, pw) o riesgo aceptado con quién lo aceptó; sin eso no se cierra (error desde «desde»)"
+  },
+  "solucionTemporal": "texto: «cómo opera mientras tanto» o «ninguna»; obligatorio en P1–P2 abiertos (I4); si hay PRB, apunta a él (prb: PRB-n)"
  },
  "categorias": {
   "desde": "2026-10-21",
@@ -361,5 +441,46 @@
    "plazoHoras": 24
   },
   "desdeLote": "L-160"
+ },
+ "problema": {
+  "lm": "LM-65 (I3; ISO/IEC 20000-1 §8.6.3, DSS03)",
+  "desde": "2026-10-22",
+  "archivo": "interno/seguimiento.json › problemas[] (escritor: Desarrollo)",
+  "prefijo": "PRB",
+  "campos": [
+   "id",
+   "titulo",
+   "modulo",
+   "causa",
+   "incs",
+   "estado"
+  ],
+  "forma": "{id: PRB-n, titulo, modulo, causa (causaRaiz compartida), incs: [INC-n…], errorConocido {sintoma, solucionTemporal}, accion {tipo: REQ | DT | LM | guardia, id, aceptada: fecha}, estado, fecha, nota}",
+  "estados": [
+   "abierto",
+   "con solución temporal",
+   "resuelto",
+   "cerrado"
+  ],
+  "candidato": {
+   "minInc": 3,
+   "dias": 30,
+   "que": "≥3 INC con el mismo módulo y causaRaiz en 30 días sin PRB que los junte, o la misma causa vista en 2 por el juez o Desarrollo (aviso de validar.py y prioridad.py)"
+  },
+  "cierre": {
+   "diasLimpios": 30,
+   "que": "solo con accion.aceptada y 30 días sin INC nuevo de esa causa y módulo (§8.6.3 d); error si no"
+  }
+ },
+ "deuda": {
+  "lm": "LM-65 (I6)",
+  "desde": "2026-10-22",
+  "campos": [
+   "severidad",
+   "dueno",
+   "plazo | aceptadaPor"
+  ],
+  "aceptadaPor": "DA-n (con cruce de Carlos) si la DT toca un área crítica de K4 o cambia algo que Carlos decidió; M-n de Diseño con motivo si es menor (texto, estilo, orden en pantalla)",
+  "regla": "DT nueva incompleta = error; las anteriores, aviso agregado (pasada de Desarrollo sin tocar texto); DT con plazo vencido y abierta = aviso; revisión mensual en la ficha"
  }
 }

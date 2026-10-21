@@ -2,7 +2,7 @@
  "version": "PROC-lote-v2",
  "reemplaza": "PROC-lote-v1",
  "estado": "vigente",
- "actualizadoEn": "2026-10-15",
+ "actualizadoEn": "2026-10-21",
  "escritor": "rol-arquitecto",
  "proyecto": "str",
  "loteModelo": {
@@ -1170,5 +1170,67 @@
    "líneas y archivos registrados"
   ],
   "estado": "LM-63 parcial: K1–K3 instalados (pw 0.12.0); K4, K6, K8 (proceso), K9 instalados en esquema/validar/plantillas; K5 y CLAUDE.md por la cola tras la pausa; K7 en ficha-semanal.py"
+ },
+ "incidentes": {
+  "version": "INCIDENTES-v1",
+  "lm": "LM-65",
+  "documento": "claude/marco/plan-incidentes-problemas.md (v2)",
+  "normas": [
+   "ISO/IEC 20000-1:2018 §8.6.1 incidentes, §8.6.2 solicitudes (pedidos[] de Diseño), §8.6.3 problemas (por conocimiento de la norma; texto no legible)"
+  ],
+  "cobit": [
+   "DSS02.01",
+   "DSS02.02",
+   "DSS02.04",
+   "DSS02.05",
+   "DSS02.06",
+   "DSS03.01",
+   "DSS03.03",
+   "DSS03.04"
+  ],
+  "controles": {
+   "I1": "prioridad P1–P4 = severidad × quién lo sufre; piso P2 por área crítica de K4; P1 sobreventa o pérdida de datos en curso; plazo de DECISIÓN P1 30 min · P2 1 día · P3 una tanda · P4 un mes; decision {tipo, ref}; «espera la pausa de producto» citando M-n/DA-n vale; el Jefe de proyecto ordena dentro de la prioridad",
+   "I2": "registro desde producción ≤ 1 h con tres campos (aviso-produccion.md), originador uso real, contexto",
+   "I3": "problemas[] PRB-n (Desarrollo): candidato ≥3 INC mismo módulo+causa en 30 días; cierre con acción aceptada y 30 días limpios",
+   "I4": "solución temporal escrita en P1–P2 abiertos",
+   "I5": "revisión de incidente en 48 h, sin culpables, por disparadores fijos; autor por causa (Desarrollo · Arquitecto · Diseño); revisada por los otros dos",
+   "I6": "DT con severidad, dueño y plazo o aceptadaPor (DA-n si área crítica, M-n de Diseño si menor)",
+   "I7": "escape (revisión previa, tests) cerrado con destino {punto | guardia | riesgo}"
+  },
+  "plazosDecisionMin": {
+   "P1": 30,
+   "P2": 1440,
+   "P3": 10080,
+   "P4": 43200
+  },
+  "despertador": "recuerda P1 y P2 vencidos sin decision (lee esquema.json › incidente.prioridad.plazoDecisionMin y seguimiento.json › incs[]); P3 y P4 los mira el semáforo del Jefe de proyecto",
+  "criteriosEntrada": [
+   "INC bien abierto: título, módulo, casoUso o «sin caso de uso», severidad, prioridad, contra, originador, contexto si vino de uso real, causaRaiz, debioDetectarse"
+  ],
+  "criteriosSalida": [
+   "cierre con evidencia (K9)",
+   "destino si fue escape (I7)",
+   "revision completa y revisada si disparó (I5)",
+   "si pertenece a un PRB, el PRB lo sabe"
+  ],
+  "finalizacionTanda": [
+   "INC fuera de plazo = 0 en P1–P2",
+   "problemas abiertos con solución temporal escrita",
+   "escapes cerrados sin destino = 0",
+   "DT vencidas listadas"
+  ],
+  "herramientas": {
+   "incidentes.py": "funciones puras (plazos, candidatos, equivalencias, disparadores)",
+   "prioridad.py": "propuesta de la pasada de normalización y lista a Diseño (solo lee)",
+   "validar.py": "guardias I1–I7 (errores solo desde esquema.incidente.prioridad.desde)",
+   "ficha-semanal.py": "cuatro filas del semáforo de incidentes, soluciones temporales, problemas, DT, revisiones pendientes",
+   "juez": "propone prioridad y porquePrioridad"
+  },
+  "quienEscribe": {
+   "incs[], problemas[], dts[]": "Desarrollo",
+   "prioridad": "propone el juez, registra Desarrollo, confirma Diseño cuando hay huésped, tercero o colaborador",
+   "revision": "autor por causa; Desarrollo la pega en el INC",
+   "tabla de equivalencias y guardias": "Arquitecto"
+  }
  }
 }

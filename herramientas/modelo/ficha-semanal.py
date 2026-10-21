@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""ficha-semanal.py — informe de finalización de la tanda (V8, LM-62; ISO/IEC/IEEE 29119-3 §7.4) + llaves DORA (K7) y tendencia de INC (K9, LM-63). Solo lee.
+"""ficha-semanal.py — informe de finalización de la tanda (V8, LM-62; ISO/IEC/IEEE 29119-3 §7.4) + llaves DORA (K7) y tendencia de INC (K9, LM-63) + incidentes y problemas (I1–I7, LM-65). Solo lee.
 Uso: python3 -I herramientas/modelo/ficha-semanal.py <raiz> [--semana AAAA-MM-DD] [--metricas <copia de log/METRICAS.json>] [--json]
 Junta lo que vive en el repo (escapes por etapa de seguimiento.json › incs[], riesgos residuales de trinquetes.json, palabras clave
 de guiones-e2e.json) con lo que la cola midió (METRICAS.json: repruebas, rojos ajenos, bloqueos, cobertura de criterios, candidatos
 a cuarentena, desviaciones). Los umbrales son los de §6 del plan; esta ficha informa, no decide."""
 import json, os, sys, datetime, collections
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    import incidentes as I
+except Exception:
+    I = None
 
 UMBRAL = {'repruebasPct': 15, 'rojosAjenosPct': 20, 'criteriosPct': 70, 'cuarentenaMax': 5}
 
@@ -66,6 +71,27 @@ def tendenciaInc(incs, semana):
     return {'abiertosSemana': len(ab), 'cerradosSemana': len(ce), 'conEvidencia': sum(1 for i in ce if i['cierre'].get('prueba') or i['cierre'].get('decision')), 'abiertosTotal': sum(1 for i in incs if i.get('estado') == 'abierto'), 'porModulo': dict(porMod.most_common(5))}
 
 
+def incidentes(seg, semana, ahora, senales_k4):
+    """Pura (LM-65): las filas de §6 del plan de incidentes: INC fuera de plazo por prioridad, sin prioridad, soluciones temporales
+    de P1–P2, problemas abiertos y candidatos, DT vencidas y sin plazo, escapes con y sin destino cerrados en la semana."""
+    if I is None: return {'error': 'incidentes.py no disponible'}
+    incs = seg.get('incs', []); prbs = seg.get('problemas', []); dts = seg.get('dts', [])
+    fdp = I.fuera_de_plazo(incs, ahora)
+    ab = [i for i in incs if i.get('estado') in ('abierto', 'pospuesto')]
+    sinP = [i['id'] for i in ab if i.get('prioridad') not in I.PRIORIDADES]
+    st = [(i['id'], i.get('solucionTemporal') or '— sin escribir') for i in ab if i.get('prioridad') in ('P1', 'P2')]
+    hoy = ahora.date().isoformat()
+    cerr = [i for i in incs if i.get('estado') == 'cerrado' and isinstance(i.get('cierre'), dict) and str(i['cierre'].get('fecha') or '')[:10] and lunes(str(i['cierre']['fecha'])[:10]) == semana]
+    esc = [i for i in cerr if i.get('debioDetectarse') in ('revisión previa', 'tests')]
+    rev = [i['id'] for i in incs if I.disparadores_revision(i) and i.get('estado') != 'cerrado' and not I.revision_completa(i.get('revision'))]
+    return {'fueraDePlazo': {p: [x[0] for x in v] for p, v in sorted(fdp.items())}, 'fueraDePlazoP1P2': sum(len(v) for p, v in fdp.items() if p in ('P1', 'P2')),
+            'abiertosPorPrioridad': dict(collections.Counter(i.get('prioridad') or 'sin' for i in ab)), 'sinPrioridad': sinP,
+            'solucionesTemporales': st, 'problemas': {'abiertos': [{'id': p.get('id'), 'estado': p.get('estado'), 'titulo': p.get('titulo')} for p in prbs if p.get('estado') != 'cerrado'], 'candidatos': I.candidatos_prb(incs, prbs, ahora)},
+            'dt': {'vencidas': [d['id'] for d in dts if d.get('estado') in ('abierta', 'programada') and d.get('plazo') and str(d['plazo'])[:10] < hoy], 'sinPlazo': [d['id'] for d in dts if d.get('estado') in ('abierta', 'programada') and not (d.get('plazo') or d.get('aceptadaPor'))]},
+            'escapes': {'cerrados': len(esc), 'conDestino': sum(1 for i in esc if isinstance(i.get('destino'), dict) and i['destino'].get('ref')), 'sinDestino': [i['id'] for i in esc if not (isinstance(i.get('destino'), dict) and i['destino'].get('ref'))]},
+            'revisionesPendientes': rev}
+
+
 def semaforo(sem_m, cuarentena_n):
     """Pura: las cuatro filas de §6 contra sus umbrales (None = sin dato)."""
     filas = {}
@@ -80,6 +106,15 @@ def semaforo(sem_m, cuarentena_n):
     return filas
 
 
+def semaforo_incidentes(inc):
+    """Pura (LM-65 §6): las cuatro filas de incidentes y problemas; (valor, ok)."""
+    if not inc or 'error' in inc: return {}
+    return {'INC fuera de plazo P1–P2': (inc['fueraDePlazoP1P2'], inc['fueraDePlazoP1P2'] == 0),
+            'P1–P2 sin solución temporal escrita': (sum(1 for _, s in inc['solucionesTemporales'] if s.startswith('—')), sum(1 for _, s in inc['solucionesTemporales'] if s.startswith('—')) == 0),
+            'escapes cerrados sin destino': (len(inc['escapes']['sinDestino']), len(inc['escapes']['sinDestino']) == 0),
+            'DT vencidas': (len(inc['dt']['vencidas']), len(inc['dt']['vencidas']) == 0)}
+
+
 def main(argv):
     raiz = argv[1] if len(argv) > 1 and not argv[1].startswith('--') else '.'
     semana = argv[argv.index('--semana') + 1] if '--semana' in argv else lunes(datetime.date.today().isoformat())
@@ -91,7 +126,11 @@ def main(argv):
     sem_m = next((s for s in (met or {}).get('semanas', []) if s['semana'] == semana), None)
     cand = (met or {}).get('casosAlerta', [])
     cuar = sem_m.get('cuarentena') if sem_m and isinstance(sem_m.get('cuarentena'), int) else None
-    out = {'semana': semana, 'semaforo': semaforo(sem_m, cuar), 'escapes': esc, 'dora': dora(seg.get('cambios', []), seg.get('incs', []), semana), 'tendenciaInc': tendenciaInc(seg.get('incs', []), semana),
+    try:
+        esq = carga(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'esquema.json')); senK4 = ((esq.get('categorias') or {}).get('critico') or {}).get('senalesAlcance', [])
+    except Exception: senK4 = []
+    inc = incidentes(seg, semana, datetime.datetime.now(), senK4)
+    out = {'semana': semana, 'semaforo': semaforo(sem_m, cuar), 'semaforoIncidentes': semaforo_incidentes(inc), 'incidentes': inc, 'escapes': esc, 'dora': dora(seg.get('cambios', []), seg.get('incs', []), semana), 'tendenciaInc': tendenciaInc(seg.get('incs', []), semana),
            'riesgosResiduales': {'esencialesSinGuion': tr.get('casosEsencialesSinGuion'), 'relacionesPorPrecisar': tr.get('relacionesPorPrecisar')},
            'cuarentena': {'candidatos': [{'caso': c['guion'] + ' ' + c['c'], 'alerta': c.get('alerta'), 'inmediata': c.get('inmediata'), 'ya': c.get('yaEnCuarentena')} for c in cand]},
            'bloqueos': (sem_m or {}).get('bloqueos'), 'desviaciones': (sem_m or {}).get('desviaciones'),
@@ -101,6 +140,13 @@ def main(argv):
     print('## Ficha de finalización de la tanda · semana del ' + semana + (' · sin METRICAS.json' if not met else ''))
     for k, (v, ok) in out['semaforo'].items():
         print('- %s: %s %s' % (k, '—' if v is None else v, '' if v is None else ('✓' if ok else '✗ fuera de umbral')))
+    for k, (v, ok) in out['semaforoIncidentes'].items():
+        print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
+    if 'error' not in inc:
+        print('- INC abiertos por prioridad: %s · fuera de plazo de decisión: %s · sin prioridad P1–P4: %s' % (inc['abiertosPorPrioridad'], '; '.join('%s %s' % (p, ', '.join(v)) for p, v in inc['fueraDePlazo'].items()) or 'ninguno', ', '.join(inc['sinPrioridad']) or 'ninguno'))
+        if inc['solucionesTemporales']: print('- cómo se opera mientras tanto (P1–P2): ' + '; '.join('%s: %s' % x for x in inc['solucionesTemporales'][:10]) + ('…' if len(inc['solucionesTemporales']) > 10 else ''))
+        print('- problemas: %d abiertos %s · candidatos a PRB: %s' % (len(inc['problemas']['abiertos']), [p['id'] for p in inc['problemas']['abiertos']], '; '.join('%s · %s (%d)' % (c['modulo'], c['causaRaiz'], len(c['incs'])) for c in inc['problemas']['candidatos']) or 'ninguno'))
+        print('- DT: vencidas %s · sin plazo ni aceptadaPor %d · revisiones de incidente pendientes: %s' % (inc['dt']['vencidas'] or 'ninguna', len(inc['dt']['sinPlazo']), ', '.join(inc['revisionesPendientes']) or 'ninguna'))
     print('- escapes: %d INC nuevos · por etapa %s · contra REQ %d · abiertos %d' % (esc['incNuevos'], esc['porEtapa'], esc['contraREQ'], esc['abiertos']))
     print('- riesgos residuales: esenciales sin guion %s · relaciones por precisar %s' % (out['riesgosResiduales']['esencialesSinGuion'], out['riesgosResiduales']['relacionesPorPrecisar']))
     if cand:

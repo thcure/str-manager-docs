@@ -321,6 +321,86 @@ if _cie:
         if isinstance(r, dict) and r.get('aviso') and not (r.get('decision')):
             avi('K6 reversión', 'incidente', i.get('id'), 'aviso de reversión a las ' + str(r.get('aviso')) + ' sin decisión (revert o fix) registrada: meta ≤ 30 min, tope 1 h')
 
+# LM-65 (INCIDENTES-v1, I1–I7; ISO/IEC 20000-1 §8.6, DSS02/DSS03): prioridad con plazo de decisión, registro desde producción,
+# solución temporal, revisión de incidente, destino del escape, problemas (PRB-n) y deuda con dueño. Errores solo para lo nuevo
+# (desde esquema.incidente.prioridad.desde); lo anterior avisa agregado hasta la pasada de Desarrollo (plan §8 paso 4).
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import incidentes as _I
+except Exception as ex:
+    _I = None; avi('I0 módulo', 'archivo', 'herramientas/modelo/incidentes.py', f'no se pudo cargar: {ex}')
+_pr = (E.get('incidente') or {}).get('prioridad') or {}
+if _I and _pr:
+    _desdeI = _pr.get('desde', '9999'); _hoyI = datetime.datetime.now()
+    _senK4 = ((E.get('categorias') or {}).get('critico') or {}).get('senalesAlcance', [])
+    _incs = seg.get('incs', []); _prbs = seg.get('problemas', []); _dts = seg.get('dts', [])
+    _viejosSinP, _viejosSinST = [], []
+    for i in _incs:
+        nuevo = str(i.get('fecha') or '') >= _desdeI
+        abierto = i.get('estado') in ('abierto', 'pospuesto')
+        p = i.get('prioridad')
+        if p not in _I.PRIORIDADES:
+            if nuevo: err('I1 prioridad', 'incidente', i.get('id'), f'prioridad={p!r}: P1–P4 obligatoria en INC nuevos (LM-65; tabla: prioridad.py)')
+            elif abierto: _viejosSinP.append(i.get('id'))
+        d = i.get('decision')
+        if d is not None and not _I.decision_valida(d):
+            (err if nuevo else avi)('I1 decisión', 'incidente', i.get('id'), 'decision inválida: {tipo de ' + ', '.join(_I.TIPOS_DECISION) + '; ref M-n/DA-n si «espera la pausa de producto»; motivo o fecha si pospuesto}')
+        if nuevo and i.get('originador') in ('uso real', 'Carlos') and not isinstance(i.get('contexto'), dict):
+            err('I2 uso real', 'incidente', i.get('id'), 'INC visto en producción sin contexto {pantalla, hora, quienLoVio} (plantilla aviso-produccion.md)')
+        if abierto and p in ('P1', 'P2') and not i.get('solucionTemporal'):
+            if nuevo: err('I4 solución temporal', 'incidente', i.get('id'), 'P1–P2 abierto sin solucionTemporal («cómo opera mientras tanto» o «ninguna»)')
+            else: _viejosSinST.append(i.get('id'))
+        if nuevo:
+            disp = _I.disparadores_revision(i)
+            t0 = _I._fecha_hora(i)
+            if disp and t0 and (_hoyI - t0).total_seconds() > 48 * 3600 and not _I.revision_completa(i.get('revision')):
+                avi('I5 revisión', 'incidente', i.get('id'), 'dispara revisión (' + ', '.join(disp) + ') y a las 48 h no trae revision completa {queVimos, impacto, lineaDeTiempo, causas, queCambia[]} (plantilla revision-incidente.md)')
+            rev = i.get('revision')
+            if isinstance(rev, dict) and _I.revision_completa(rev) and not rev.get('revisadaPor'):
+                avi('I5 revisión', 'incidente', i.get('id'), 'revision sin revisadaPor (los otros dos chats, M-n): no cuenta')
+        if i.get('estado') == 'cerrado' and i.get('debioDetectarse') in ('revisión previa', 'tests'):
+            ci = i.get('cierre'); cerradoEn = str((ci.get('fecha') if isinstance(ci, dict) else '') or i.get('cerradoEn') or '')[:10]
+            if cerradoEn >= _desdeI:
+                de = i.get('destino')
+                if not (isinstance(de, dict) and de.get('tipo') in _I.TIPOS_DESTINO and de.get('ref')):
+                    err('I7 destino', 'incidente', i.get('id'), 'escape (' + str(i.get('debioDetectarse')) + ') cerrado sin destino {tipo: punto | guardia | riesgo, ref, quien}')
+    if _viejosSinP: avi('I1 prioridad', 'incidente', '%d abiertos' % len(_viejosSinP), 'INC abiertos anteriores sin prioridad P1–P4: pasada de Desarrollo con la tabla (prioridad.py): ' + ', '.join(_viejosSinP[:12]) + ('…' if len(_viejosSinP) > 12 else ''))
+    if _viejosSinST: avi('I4 solución temporal', 'incidente', '%d abiertos' % len(_viejosSinST), 'P1–P2 abiertos anteriores sin solucionTemporal: ' + ', '.join(_viejosSinST[:12]) + ('…' if len(_viejosSinST) > 12 else ''))
+    for p, lista in sorted(_I.fuera_de_plazo(_incs, _hoyI).items()):
+        avi('I1 plazo', 'incidente', '%s · %d' % (p, len(lista)), 'abiertos sin decisión pasados del plazo de decisión (%s): ' % _I.PLAZO_TEXTO[p] + ', '.join('%s (+%d min)' % x if p == 'P1' else '%s (+%d d)' % (x[0], x[1] // 1440) for x in lista[:15]) + ('…' if len(lista) > 15 else ''))
+    # I3 problemas
+    _ep = E.get('problema') or {}
+    ids_inc = {i.get('id') for i in _incs}
+    for pr in _prbs:
+        if not re.fullmatch(r'PRB-\d+', str(pr.get('id') or '')): err('I3 problema', 'problema', pr.get('id'), 'id fuera de forma PRB-n')
+        faltan = [c for c in _ep.get('campos', []) if pr.get(c) in (None, '', [])]
+        if faltan: err('I3 problema', 'problema', pr.get('id'), 'sin campos: ' + ', '.join(faltan))
+        if pr.get('estado') not in _I.ESTADOS_PRB: err('I3 problema', 'problema', pr.get('id'), f'estado={pr.get("estado")!r} fuera de {_I.ESTADOS_PRB}')
+        for x in pr.get('incs') or []:
+            if x not in ids_inc: err('I3 problema', 'problema', pr.get('id'), f'inc {x} no existe')
+        if pr.get('estado') in ('resuelto', 'cerrado') and not (pr.get('accion') or {}).get('id'):
+            err('I3 problema', 'problema', pr.get('id'), 'resuelto o cerrado sin accion {tipo, id, aceptada}')
+        if pr.get('estado') == 'cerrado':
+            ok, por = _I.prb_cerrable(pr, _incs, _hoyI, int((_ep.get('cierre') or {}).get('diasLimpios', 30)))
+            if not ok: err('I3 problema', 'problema', pr.get('id'), 'cerrado sin cumplir el cierre: ' + por)
+        if pr.get('estado') == 'con solución temporal' and not (pr.get('errorConocido') or {}).get('solucionTemporal'):
+            err('I3 problema', 'problema', pr.get('id'), 'con solución temporal pero errorConocido.solucionTemporal vacío')
+    _cnd = (_ep.get('candidato') or {})
+    for c in _I.candidatos_prb(_incs, _prbs, _hoyI, int(_cnd.get('dias', 30)), int(_cnd.get('minInc', 3))):
+        avi('I3 candidato', 'problema', c['modulo'] + ' · ' + c['causaRaiz'], '%d INC en 30 días sin PRB: %s (Desarrollo abre el PRB o anota por qué no)' % (len(c['incs']), ', '.join(c['incs'])))
+    # I6 deuda
+    _ed = E.get('deuda') or {}
+    _desdeD = _ed.get('desde', '9999'); _viejasDT = []; _hoyS = _hoyI.date().isoformat()
+    for d in _dts:
+        if d.get('estado') not in ('abierta', 'programada'): continue
+        completa = d.get('severidad') and d.get('dueno') and (d.get('plazo') or d.get('aceptadaPor'))
+        if not completa:
+            if str(d.get('fecha') or '') >= _desdeD: err('I6 deuda', 'deuda', d.get('id'), 'DT nueva sin severidad, dueno y plazo o aceptadaPor (DA-n si área crítica, M-n de Diseño si menor)')
+            else: _viejasDT.append(d.get('id'))
+        if d.get('plazo') and str(d['plazo'])[:10] < _hoyS: avi('I6 deuda', 'deuda', d.get('id'), 'plazo vencido (' + str(d['plazo']) + ') y sigue ' + str(d.get('estado')))
+        ap = d.get('aceptadaPor')
+        if ap and not re.search(r'\b(DA|M)-\d+\b', str(ap)): avi('I6 deuda', 'deuda', d.get('id'), 'aceptadaPor sin DA-n ni M-n: ' + str(ap)[:60])
+    if _viejasDT: avi('I6 deuda', 'deuda', '%d abiertas' % len(_viejasDT), 'DT anteriores sin severidad, dueño o plazo/aceptadaPor (pasada de Desarrollo, sin tocar texto): ' + ', '.join(_viejasDT))
+
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
 try:

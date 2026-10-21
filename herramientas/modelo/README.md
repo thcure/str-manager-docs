@@ -73,3 +73,10 @@ Cada pedido pasa después a `modelo-cargas\hechas\<fecha>-<nombre>`. El token nu
 - `espejo.js` compara cada día lo que exporta el servicio con `git show <sha cargado>:<ruta>`, byte a byte.
 - Los flujos viven en `.github/workflows/` (activados el 14-oct tras L-97 y el secreto `MODELO_TOKEN` del rol `carga`). Solo `push` a `main` y manual; **nunca `pull_request`**. Registro público: solo sha, códigos y conteos.
 - Con el flujo activo, la carga manual por la cola (`modelo-cargas\paquete-*`) solo se usa con el flujo apagado.
+
+
+## INCIDENTES-v1 (LM-65, 21-oct-2026)
+- `incidentes.py`: funciones puras de I1–I7 (plazo de decisión por prioridad, decisión válida, disparadores de revisión, candidatos a PRB, cierre de PRB, tabla de equivalencias). Pruebas: `python3 -I herramientas/modelo/incidentes_test.py` (40).
+- `prioridad.py <raiz> [--json] [--solo-abiertos]`: propuesta de prioridad por INC con motivo, lista «a Diseño», INC fuera de plazo tras la pasada, candidatos a PRB y DT incompletas. Solo lee; Desarrollo copia lo que acepta.
+- `validar.py`: bloque LM-65 (I1 prioridad y plazo, I2 uso real con contexto, I3 problemas y candidatos, I4 solución temporal, I5 revisión a las 48 h, I6 deuda, I7 destino). Errores solo desde `esquema.json › incidente.prioridad.desde`; antes, avisos agregados.
+- `ficha-semanal.py`: filas «INC fuera de plazo P1–P2», «P1–P2 sin solución temporal», «escapes cerrados sin destino», «DT vencidas» + problemas, candidatos y revisiones pendientes.

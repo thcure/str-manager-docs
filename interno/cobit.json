@@ -3039,19 +3039,19 @@
    "estado": "ok",
    "interes": true,
    "resumen": "Registrar, diagnosticar, resolver y cerrar incidentes.",
-   "posicion": "Incidentes INC-n: registro con lo observado, diagnóstico con causa (no síntoma), fix en su propio lote, cierre solo con verificación en producción; patrón de incidentes en la posimplementación.",
+   "posicion": "INCIDENTES-v1 (LM-65, claude/marco/plan-incidentes-problemas.md): INC con severidad (V6), prioridad P1–P4 = severidad × quién lo sufre (I1) y plazo de decisión (P1 30 min · P2 1 día · P3 una tanda · P4 un mes); registro desde producción en ≤ 1 h con tres campos (I2); solución temporal visible en P1–P2 (I4); cierre con evidencia (K9); revisión de incidente sin culpables cuando dispara (I5); escape con destino (I7).",
    "practicasStr": [
     {
      "c": "DSS02.01",
      "t": "Esquemas de clasificación de incidentes y solicitudes",
      "estado": "ok",
-     "nuestra": "Act. 1 y 4, tres niveles: crítico (pérdida de datos, acceso indebido, bloqueo) → hotfix hoy; medio → fix propio antes del siguiente lote; bajo → deuda técnica."
+     "nuestra": "Severidad bajo/medio/alto/crítico (V6) y prioridad P1–P4 por quién lo sufre (huésped o tercero > colaborador en turno > operador o admin > fábrica), piso P2 por área crítica de K4, P1 sobreventa o pérdida de datos (I1, LM-65). Tres niveles viejos traducidos con la tabla de equivalencias (prioridad.py)."
     },
     {
      "c": "DSS02.02",
      "t": "Registrar, clasificar y priorizar",
      "estado": "ok",
-     "nuestra": "Registro en la sesión con lo observado literal."
+     "nuestra": "Registro en seguimiento.json › incs[] con campos mínimos (V6), prioridad y plazo de decisión (I1); desde producción, plantilla aviso-produccion.md y registro ≤ 1 h con contexto (I2). validar.py: error en INC nuevo sin prioridad; aviso por plazo vencido; despertador para P1–P2."
     },
     {
      "c": "DSS02.03",
@@ -3063,7 +3063,7 @@
      "c": "DSS02.04",
      "t": "Investigar, diagnosticar y asignar",
      "estado": "ok",
-     "nuestra": "Reproducir en producción o por réplica; escribir la causa, no el síntoma. Act. 1: consultar la lista de errores conocidos en patrones-codigo.md antes de diagnosticar, y ampliarla con cada INC cerrado."
+     "nuestra": "Reproducir en producción o por réplica; escribir la causa, no el síntoma. Act. 1: consultar la lista de errores conocidos en patrones-codigo.md antes de diagnosticar, y ampliarla con cada INC cerrado. causaRaiz y debioDetectarse obligatorios (V5); solución temporal en P1–P2 (I4); el Jefe de proyecto ordena dentro de la prioridad, no la define."
     },
     {
      "c": "DSS02.05",
@@ -3163,18 +3163,50 @@
       ]
      }
     ]
-   }
+   },
+   "nota": "21-oct-2026: proceso 4 de MJ-17 (LM-65)."
   },
   {
    "codigo": "DSS03",
    "dominio": "DSS",
    "nombre": "Problemas",
    "nombreEn": "Managed Problems",
-   "estado": "off",
-   "interes": false,
+   "estado": "parcial",
+   "interes": true,
    "resumen": "Identificar y resolver causas raíz de incidentes recurrentes.",
-   "posicion": "Absorbido por DSS02 (cada INC lleva causa) y por la posimplementación (patrones por paso).",
-   "practicasStr": [],
+   "posicion": "INCIDENTES-v1 I3 (LM-65): seguimiento.json › problemas[] PRB-n (escritor Desarrollo) con causa, incs[], errorConocido {sintoma, solucionTemporal}, accion {tipo, id, aceptada}; candidato con ≥3 INC del mismo módulo y causaRaiz en 30 días (aviso de validar.py y prioridad.py; 7 grupos el 21-oct); cierre solo con acción aceptada y 30 días limpios (§8.6.3 d). La posimplementación sigue recogiendo patrones por paso.",
+   "practicasStr": [
+    {
+     "c": "DSS03.01",
+     "t": "Identificar y clasificar problemas",
+     "estado": "parcial",
+     "nuestra": "Candidatos automáticos (I3); Desarrollo abre el PRB o anota por qué no."
+    },
+    {
+     "c": "DSS03.02",
+     "t": "Investigar y diagnosticar",
+     "estado": "parcial",
+     "nuestra": "causa = causaRaiz compartida; revisión de incidente (I5) cuando dispara."
+    },
+    {
+     "c": "DSS03.03",
+     "t": "Errores conocidos",
+     "estado": "parcial",
+     "nuestra": "errorConocido {sintoma, solucionTemporal} en el PRB; la ficha semanal lista las soluciones temporales para Carlos."
+    },
+    {
+     "c": "DSS03.04",
+     "t": "Resolver y cerrar problemas",
+     "estado": "parcial",
+     "nuestra": "accion {REQ | DT | LM | guardia} aceptada + 30 días sin INC de esa causa; validar.py lo exige."
+    },
+    {
+     "c": "DSS03.05",
+     "t": "Gestión proactiva de problemas",
+     "estado": "off",
+     "nuestra": "Tendencia de INC por módulo en la ficha (K9); nada más por ahora."
+    }
+   ],
    "detalle": {
     "descripcion": "Identificar y clasificar los problemas y sus causas raíz. Proporcionar una resolución oportuna para prevenir incidentes recurrentes. Proporcionar recomendaciones de mejora.",
     "proposito": "Aumentar la disponibilidad, mejorar los niveles de servicio, reducir los costos, mejorar la conveniencia y la satisfacción del cliente al reducir la cantidad de problemas operativos, e identificar las causas raíz como parte de la resolución de problemas.",

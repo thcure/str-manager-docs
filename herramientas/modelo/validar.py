@@ -246,6 +246,28 @@ if _io:
         if str(i.get('fecha') or '') >= _io.get('desde', '9999') and not (i.get('causaRaiz') and i.get('debioDetectarse')):
             avi('R9 origen', 'incidente', i.get('id'), 'sin causaRaiz o debioDetectarse (LM-56: los propone el juez, los confirma Desarrollo)')
 
+# LM-62 (PRUEBAS-v2, V5 y V6): informe de incidente. Desde esquema.incidente.desde, un INC nuevo sin causaRaiz/debioDetectarse,
+# con severidad fuera de la lista o sin sus campos mínimos es error; los anteriores solo avisan (Desarrollo los normaliza sin plazo).
+_ei = E.get('incidente') or {}
+if _ei:
+    _desde = _ei.get('desde', '9999')
+    for i in seg.get('incs', []):
+        nuevo = str(i.get('fecha') or '') >= _desde
+        sev = i.get('severidad')
+        if sev is not None and sev not in _ei.get('severidad', []):
+            (err if nuevo else avi)('V6 incidente', 'incidente', i.get('id'), f'severidad={sev!r} fuera de la lista {_ei.get("severidad")} (equivalencias: {_ei.get("severidadEquivalencias")})')
+        if not nuevo: continue
+        if not (i.get('causaRaiz') and i.get('debioDetectarse')):
+            err('V5 incidente', 'incidente', i.get('id'), 'sin causaRaiz o debioDetectarse (LM-62: obligatorios en INC nuevos)')
+        faltan = [c for c in _ei.get('camposMinimos', []) if i.get(c) in (None, '')]
+        if faltan: err('V6 incidente', 'incidente', i.get('id'), 'sin campos mínimos: ' + ', '.join(faltan))
+        for campo in ('contra', 'originador'):
+            val = i.get(campo)
+            if val is not None and val not in _ei.get(campo, []): err('V6 incidente', 'incidente', i.get('id'), f'{campo}={val!r} fuera de la lista {_ei.get(campo)}')
+        cu = str(i.get('casoUso') or '')
+        if cu and cu != 'sin caso de uso' and not re.fullmatch(r'CU-[A-Z0-9]+-\d+\.\d+', cu):
+            err('V6 incidente', 'incidente', i.get('id'), f'casoUso={cu!r}: CU-X-n.m o «sin caso de uso»')
+
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
 try:

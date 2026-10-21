@@ -527,6 +527,9 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
             veredicto += ' · no existen en la línea base: ' + ', '.join(noexisten)
     out = {'borrador': os.path.basename(ruta), 'calculados': {k: sorted(v) for k, v in sorted(calc.items())}, 'declarados': decl, 'tecnico': tecnico or tec, 'nuevos': nuevos, 'veredicto': veredicto,
            'estados': {k: estado_calculado(todos_cu[k][1], incs, resultados) for k in calc if k in todos_cu}}
+    cr = criterios_del_lote(texto)
+    out['criterios'] = cr
+    v3_ok = (tecnico or tec) and not cr['criterios'] or (bool(cr['criterios']) and not cr['sinCaso'])
     if como_json:
         print(json.dumps(out, ensure_ascii=False, indent=1))
     else:
@@ -537,7 +540,64 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
             print('- (ninguno calculado)' + (' · lote técnico' if tec else ''))
         print('Declarados: ' + ('—' if decl is None else (TECNICO if tecnico else ', '.join(decl) or '—')))
         print('C2: ' + veredicto)
-    return 0 if veredicto.startswith('coincide') else 2
+        print('V3: ' + cr['veredicto'] + ('' if v3_ok else ' → no encolar') + ((' · no verificables: ' + ', '.join(cr['noVerificables'])) if cr['noVerificables'] else ''))
+    return 0 if veredicto.startswith('coincide') and v3_ok else 2
+
+
+# ---------- V3 (LM-62, PRUEBAS-v2): criterios de la instrucción sin caso ----------
+def criterios_del_lote(texto):
+    """Pura: cruza las «Pruebas derivadas» (letra · nivel) con los casos del guion N2, los tests/ y las declaraciones.
+    Devuelve dict con criterios, sinCaso, huerfanos, noVerificables y veredicto. Cuenta como caso (M-940):
+    N2 → caso `c: 'x'` del guion sin nivel N3; N3 → caso con nivel: 'N3' o «verificador de Cowork» con motivo;
+    N1 → tests/ nombrado en la línea o sección de tests; N4 → di qué se prueba y con quién."""
+    m = re.search(r'^## Pruebas derivadas.*$', texto, re.M)
+    if not m:
+        return {'criterios': [], 'sinCaso': [], 'huerfanos': [], 'noVerificables': [], 'veredicto': 'sin sección «Pruebas derivadas»'}
+    fin = re.search(r'^## ', texto[m.end():], re.M)
+    sec = texto[m.end(): m.end() + fin.start()] if fin else texto[m.end():]
+    crits = []
+    for ln in sec.split('\n'):
+        mm = re.match(r'^\s*[-*]\s+([a-z]\d?)\.\s+(.*)$', ln)
+        if not mm:
+            continue
+        letra, cuerpo = mm.group(1), mm.group(2)
+        niv = re.search(r'nivel\s*:\s*\**\s*(N[1-4])', cuerpo)
+        crits.append({'letra': letra, 'nivel': niv.group(1) if niv else None, 'linea': cuerpo,
+                      'noVerificable': bool(re.search(r'no verificable', cuerpo, re.I)),
+                      'cowork': bool(re.search(r'verificador de Cowork', cuerpo, re.I)),
+                      'tests': bool(re.search(r'tests/', cuerpo))})
+    gu = re.search(r'^### Guion N2.*$', texto, re.M)
+    gsec = texto[gu.end():] if gu else ''
+    casos = {}
+    for mm in re.finditer(r"\bc\s*:\s*'([a-z]\d?)'([^{}]*)", gsec):
+        casos[mm.group(1)] = 'N3' if re.search(r"nivel\s*:\s*'N3'", mm.group(2)) else 'N2'
+    hay_tests = bool(re.search(r'^## Tests en `?tests/', texto, re.M)) or bool(re.search(r'tests/[\w.-]+\.test\.js', texto))
+    sin, nov = [], []
+    for c in crits:
+        ok = False
+        if c['noVerificable']:
+            nov.append(c['letra'] + (' (sin motivo)' if len(c['linea']) < 60 else ''))
+            ok = True
+        elif c['nivel'] == 'N2':
+            ok = casos.get(c['letra']) == 'N2'
+        elif c['nivel'] == 'N3':
+            ok = casos.get(c['letra']) == 'N3' or c['cowork']
+        elif c['nivel'] == 'N1':
+            ok = c['tests'] or hay_tests
+        elif c['nivel'] == 'N4':
+            ok = bool(re.search(r'celular|dispositivo|iPhone|Android', c['linea'], re.I))
+        if not ok:
+            sin.append(c['letra'] + (' (' + c['nivel'] + ')' if c['nivel'] else ' (sin nivel)'))
+    huer = sorted(set(casos) - {c['letra'] for c in crits})
+    if not crits:
+        ver = 'sin criterios con letra en «Pruebas derivadas»'
+    elif sin:
+        ver = 'criterios sin caso: ' + ', '.join(sin)
+    else:
+        ver = 'todos los criterios con caso (%d)' % len(crits)
+    if huer:
+        ver += ' · casos del guion sin criterio: ' + ', '.join(huer)
+    return {'criterios': [{'letra': c['letra'], 'nivel': c['nivel']} for c in crits], 'sinCaso': sin, 'huerfanos': huer, 'noVerificables': nov, 'veredicto': ver}
 
 
 # ---------- --req: criterios de un REQ (Q1, Q2, Q4; LM-61) ----------

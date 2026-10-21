@@ -1,5 +1,5 @@
 {
- "version": "0.3",
+ "version": "0.4",
  "fecha": "2026-10-11",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
@@ -226,8 +226,65 @@
    "revisión previa",
    "tests",
    "verificación",
-   "solo en uso"
+   "solo en uso",
+   "guion"
   ],
   "nota": "LM-56 (MJ-15 fase C): el juez los propone en cada INC del veredicto; Desarrollo los confirma al registrarlo en seguimiento.json › incs[]; el campo «origen» de siempre sigue siendo de dónde salió el hallazgo."
+ },
+ "incidente": {
+  "desde": "2026-10-21",
+  "lm": "LM-62 (PRUEBAS-v2, V5 y V6)",
+  "severidad": [
+   "bajo",
+   "medio",
+   "alto",
+   "crítico"
+  ],
+  "severidadEquivalencias": {
+   "baja": "bajo",
+   "menor": "bajo",
+   "media": "medio",
+   "alta": "alto",
+   "critico": "crítico",
+   "crítica": "crítico"
+  },
+  "contra": [
+   "producto",
+   "guion",
+   "REQ",
+   "entorno",
+   "herramienta"
+  ],
+  "originador": [
+   "juez",
+   "tren",
+   "Diseño",
+   "Desarrollo",
+   "Arquitecto",
+   "Carlos",
+   "uso real"
+  ],
+  "camposMinimos": [
+   "id",
+   "titulo",
+   "modulo",
+   "fecha",
+   "estado",
+   "severidad",
+   "casoUso",
+   "contra",
+   "originador",
+   "causaRaiz",
+   "debioDetectarse"
+  ],
+  "contexto": "{lote, guion, caso, tren} cuando lo halló una prueba; evidencia: ruta en log\\ (captura, veredicto o L-n-pruebas.json)",
+  "casoUso": "CU-X-n.m de la línea base, o «sin caso de uso» (entra a diseno.json › bolsa[] como alcance incompleto, C3); lo pone Desarrollo con linea-base.py --cu, Diseño lo revisa al clasificar",
+  "reglas": [
+   "V5: INC desde «desde» sin causaRaiz o debioDetectarse = error (antes aviso R9)",
+   "V6: severidad fuera de la lista = error desde «desde», aviso antes (Desarrollo normaliza los anteriores con severidadEquivalencias, sin plazo)",
+   "V6: campos mínimos ausentes = error desde «desde»",
+   "contra = REQ → el INC pasa a Diseño y cuenta como volatilidad Q7 (M-947)",
+   "contra = producto nunca va a cuarentena: INC normal y el lote se rechaza (M-940)"
+  ]
  }
 }

@@ -176,3 +176,17 @@ function revisarCommit(texto, repo, opciones = {}) {
 }
 
 module.exports = { norm, bloques, puntosDe, archivosDe, noHechos, verificarPunto, aplicar, n1De, verificarN1, tamano, leerCommit, revisarCommit };
+
+// A mano (prueba c de LM-63, M-966: sin desplegar nada): node pw\aplicar.js --instr <instrucción.md> [--repo C:\Users\ktcol\str-manager]
+// Revisa la instrucción contra el HEAD del repo tal como está (un lote ya aceptado) e imprime aplicación, N1 y tamaño; rc 1 si K1 o K2 fallan.
+if (require.main === module) {
+  const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
+  const instr = arg('--instr'); const repo = arg('--repo', path.join(require('os').homedir(), 'str-manager'));
+  if (!instr || !fs.existsSync(instr)) { console.log('uso: node aplicar.js --instr <instrucción.md> [--repo <repo>]'); process.exit(2); }
+  const r = revisarCommit(fs.readFileSync(instr, 'utf8'), repo, {});
+  console.log('aplicación (K1): ' + r.aplicacion.resumen);
+  for (const p of r.aplicacion.puntos) console.log('  ' + (p.ok === true ? 'OK  ' : p.ok === false ? 'NO  ' : '--  ') + p.id + (p.archivo ? ' · ' + p.archivo : '') + (p.motivo ? ' · ' + p.motivo : ''));
+  console.log('N1 literal (K2): ' + (r.n1.resumen || r.n1.aviso));
+  console.log('tamaño (K3): ' + JSON.stringify(r.tamano));
+  process.exit(r.aplicacion.ok && r.n1.ok ? 0 : 1);
+}

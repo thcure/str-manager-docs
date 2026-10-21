@@ -10,6 +10,8 @@
 | `aviso-produccion.md` | Carlos o un usuario → Chat Desarrollo | Tres campos (qué, dónde, cuándo) cuando algo se ve en producción; Desarrollo registra el INC con prioridad en ≤ 1 h (I2, LM-65) |
 | `revision-incidente.md` | Desarrollo · Arquitecto · Diseño (según la causa) | Revisión de incidente en 48 h, sin culpables: qué vimos, impacto, línea de tiempo, causas, qué cambia; dentro del INC (I5, LM-65) |
 | `como-vamos.md` | Chat Jefe de proyecto | Tabla de seis filas para Carlos, generada por `ficha-semanal.py --como-vamos` (FLUJO-v1, LM-66): lo que espera a Carlos primero, tanda, cola, aceptado, pausas, semáforo |
+| `traspaso.md` | Todos los chats | Traspaso de una página en el archivo propio del rol: en curso, esperando, dónde está, no escrito, primera acción; qué hacer tras compactar (CONOCIMIENTO-v1 Cn4, LM-69) |
+| `adr.md` | Chat Arquitecto (y quien pida consejo) | Decisión de arquitectura: contexto, opciones, decisión, consecuencias, estado, decisor, revisarCuando (ARQUITECTURA-v1 A1, LM-67) |
 | `guion-e2e.js` | Chat Desarrollo | Guion N2 de Playwright (PRUEBAS-v1, LM-18): va dentro de la instrucción, la CLI lo copia a `tests/e2e/` y la cola lo corre tras el despliegue y como regresión |
 
 Las plantillas son la fuente; los encargos (`interno/instrucciones.json`) solo apuntan a ellas. Cambios: solo el Arquitecto, con prefijo `modelo:`.

@@ -43,6 +43,12 @@ for r in reqs:
     if r.get('antes'): ids['REQ'].add(r.get('antes'))
 if seg.get('dasPendientesDeTrasladar'): avi('R-B4', 'decision', ','.join(str(d.get('id')) for d in seg['dasPendientesDeTrasladar']), 'DA en seguimiento.dasPendientesDeTrasladar: Diseño las pasa a diseno.das y borra la clave')
 for m in mensajes: ids['M'].add(m.get('id'))
+# Cn6 (LM-69): los mensajes archivados siguen siendo ids válidos
+import glob as _gl
+for _fa in _gl.glob(os.path.join(RAIZ, 'interno/archivo/mensajes-*.json')):
+    try:
+        for m in json.load(open(_fa, encoding='utf-8')).get('mensajes', []): ids['M'].add(m.get('id'))
+    except Exception as ex: avi('R0 archivo', _fa, '-', f'no se pudo leer: {ex}')
 for c in cambios: ids['LM' if str(c.get('lote', '')).startswith('LM') else 'L'].add(str(c.get('lote')))
 lotes_num = {str(l.get('lote')) for l in lotes if l.get('lote') is not None}
 # B3b (12-oct): «76» y «L-76» son el mismo lote; se comparan por número
@@ -536,6 +542,64 @@ if _ea:
             try: primera = open(f, encoding='utf-8').read(400)
             except Exception: continue
             if 'Histórico' not in primera and 'Historico' not in primera: avi('A5 fuente', 'archivo', os.path.relpath(f, RAIZ), 'documento de agosto sin la marca «Histórico · sustituido por …»')
+
+# LM-69 (CONOCIMIENTO-v1, Cn1/Cn3/Cn4/Cn5/Cn6; MJ-17 proceso 7): mapa de piezas, lecciones con destino, traspasos, evaluar y retirar,
+# archivo. Todo AVISO.
+_ec = E.get('conocimiento') or {}
+if _ec:
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import conocimiento as _CN
+        _con = carga('interno/conocimiento.json'); _hoyC = datetime.date.today()
+        for f in _CN.medir(RAIZ, _con.get('piezas') or [], _hoyC):
+            if not f['existe']: avi('Cn1 pieza', 'pieza', f['id'], 'ruta no existe: ' + str(f['ruta']))
+            if str(f['cuando'] or '').startswith('arranque') and not f['tope']: avi('Cn1 pieza', 'pieza', f['id'], 'pieza de arranque sin tope')
+            if f['sobreTope']: avi('Cn2 tope', 'pieza', f['id'], '%s: %s caracteres, tope %s (%s %%)' % (f['nombre'], f['tamano'], f['tope'], f['pct']))
+            if not f['revisarCuando']: avi('Cn5 revisión', 'pieza', f['id'], 'sin revisarCuando')
+            if f['sinRevision']: avi('Cn5 revisión', 'pieza', f['id'], 'más de %d días sin revisión' % _CN.REVISAR_DIAS)
+        for fi in _con.get('fichas') or []:
+            if not fi.get('revisarCuando'): avi('Cn5 revisión', 'ficha', fi.get('codigo'), 'ficha sin revisarCuando')
+        for it in (_con.get('catalogo') or {}).get('items') or []:
+            if not it.get('revisarCuando'): avi('Cn5 revisión', 'catalogo', it.get('id'), 'ítem sin revisarCuando')
+    except Exception as ex: avi('Cn1 pieza', 'archivo', 'herramientas/modelo/conocimiento.py', f'no se pudo medir: {ex}')
+    # Cn3 lecciones con destino
+    _tipos = set(((_ec.get('lecciones') or {}).get('destino') or {}).get('tipos') or [])
+    def _lecciones(lista, fuente):
+        for l in lista or []:
+            if not isinstance(l, dict): continue
+            d = l.get('destino'); pe = l.get('pendiente')
+            ok = isinstance(d, dict) and d.get('tipo') in _tipos and (d.get('ref') or d.get('tipo') == 'retirada')
+            if ok: continue
+            desde = str((pe or {}).get('desde') or l.get('fecha') or '')[:10]
+            try: dias = (_hoyC - datetime.date.fromisoformat(desde)).days if desde else 99
+            except ValueError: dias = 99
+            if dias > 7: avi('Cn3 lección', fuente, l.get('id') or desde or '?', 'lección sin destino {tipo, ref} ni pendiente con dueño hace %s días: %s' % (dias, str(l.get('leccion') or l.get('tema') or '')[:80]))
+    try:
+        _lecciones(carga('interno/proyecto.json').get('lecciones'), 'proyecto.json')
+        _lecciones(dis.get('lecciones'), 'diseno.json')
+    except Exception: pass
+    # Cn4 traspasos
+    _tr = (_ec.get('traspaso') or {}).get('donde') or {}
+    def _chk_traspaso(obj, fuente):
+        if not isinstance(obj, dict) or not obj: avi('Cn4 traspaso', fuente, 'traspaso', 'sin traspaso (plantilla traspaso.md)'); return
+        f = str(obj.get('fecha') or '')[:10]
+        try: dias = (_hoyC - datetime.date.fromisoformat(f)).days if f else 99
+        except ValueError: dias = 99
+        if dias > 7: avi('Cn4 traspaso', fuente, 'traspaso', 'traspaso de hace %s días (> 7): renovar' % dias)
+        if not obj.get('primeraAccion'): avi('Cn4 traspaso', fuente, 'traspaso', 'traspaso sin primeraAccion')
+    try:
+        _chk_traspaso(carga('interno/proyecto.json').get('traspaso'), 'proyecto.json')
+        _chk_traspaso(dis.get('traspaso'), 'diseno.json')
+        _chk_traspaso(seg.get('traspaso'), 'seguimiento.json')
+        _mjs = carga('interno/mejoras.json')
+        _pp = next((x.get('puntoDePausa') for x in _mjs.get('mejoras', []) if x.get('id') == 'MJ-17'), None)
+        if not isinstance(_pp, dict) or not _pp.get('estadoPorFase'): avi('Cn4 traspaso', 'mejoras.json', 'puntoDePausa', 'el Arquitecto sin punto de pausa escrito')
+    except Exception: pass
+    # Cn6 tamaño de lo vivo
+    for rel, tope in (('interno/mensajes.json', 1048576), ('interno/seguimiento.json', 2097152)):
+        try:
+            tam = os.path.getsize(os.path.join(RAIZ, rel))
+            if tam > tope: avi('Cn6 archivo', 'archivo', rel, '%d KB, tope %d KB: archivar (archivar.py, en punto limpio y a pedido de Carlos)' % (tam // 1024, tope // 1024))
+        except Exception: pass
 
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.

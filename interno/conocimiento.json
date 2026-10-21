@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-15",
+ "actualizadoEn": "2026-10-21",
  "titulo": "Base de conocimiento del modelo de operación",
  "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
  "cobit": {
@@ -276,7 +276,9 @@
    "riesgos": [
     "Mientras dure INC-87, el Chat de desarrollo sube sus respuestas por la web y con retraso.",
     "Al abrir un chat nuevo hay que cambiar su sesión en destinatarios.json."
-   ]
+   ],
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "APO01.10-a",
@@ -300,7 +302,9 @@
     "Para volver a encolar un lote fallido no basta con poner la copia corregida en la cola: hay que borrar la de fallidas\\ (lo hace Carlos o un chat con shell en LENOVO); mientras siga ahí no corre ningún lote (lote 67, 10-oct-2026)."
    ],
    "instalacion": "ins-005 y ins-006",
-   "comprobacion": "$t=Get-ScheduledTask -TaskName \"STR cola CLI\"; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; $t.Actions|Select Execute,Arguments; $t.Settings|Select DisallowStartIfOnBatteries"
+   "comprobacion": "$t=Get-ScheduledTask -TaskName \"STR cola CLI\"; $t.Triggers|Select @{n='Cada';e={$_.Repetition.Interval}}; $t.Actions|Select Execute,Arguments; $t.Settings|Select DisallowStartIfOnBatteries",
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "BAI07.05-v",
@@ -326,7 +330,9 @@
     "Autorizaciones en la tarea (lección INC-104, aprobada por Carlos el 10-oct-2026): toda autorización de Carlos que un agente programado deba invocar va escrita en el texto de su tarea, que es lo que Carlos firma; el repositorio guarda la copia de referencia, pero el modo automático no toma un archivo como permiso.",
     "Tras un reinicio de LENOVO (o de la app de Claude), las tareas del verificador pueden arrancar sin las carpetas aunque las muestren configuradas (11-oct-2026, lotes 70 y 71): antes del primer lanzamiento del día o tras un reinicio, Carlos abre cada tarea en la app y la guarda; si una ejecución termina en segundos sin veredicto ni bloqueado, es ese caso."
    ],
-   "instalacion": "ins-006, paso 11 (recrear al cambiar de equipo)"
+   "instalacion": "ins-006, paso 11 (recrear al cambiar de equipo)",
+   "revisarCuando": "LM-68 (spec de ráfaga) y el primer tren tras la pausa (PRUEBAS-v2)",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 2 de MJ-17"
   },
   {
    "codigo": "BAI11-d",
@@ -366,7 +372,9 @@
    "riesgos": [
     "Dos chats más que coordinar: el buzón es la única vía entre ellos.",
     "Un ítem de plan[] mal marcado (sin espera cuando sí espera a Carlos) produce avisos inútiles; el Chat de diseño lo corrige pidiéndolo al Chat de desarrollo."
-   ]
+   ],
+   "revisarCuando": "capa de proyectos (ADR-009) y la primera tanda de FLUJO-v1",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 5 de MJ-17"
   },
   {
    "codigo": "APO01.11-g",
@@ -416,7 +424,9 @@
    "creditos": "El costo es del Arquitecto y de los avisos por el buzón.",
    "riesgos": [
     "Un documento que nadie actualiza queda contradiciendo al modelo (pasó con las instrucciones del proyecto hasta el 9-oct)."
-   ]
+   ],
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "BAI08.03-t",
@@ -435,10 +445,11 @@
     "interno/destinatarios.json",
     "lb-sesiones",
     "interno/mensajes.json",
-    "encargo del rol"
+    "encargo del rol",
+    "herramientas/plantillas/traspaso.md (LM-69)"
    ],
    "flujo": [
-    "Relevo: mensaje al chat que sale; termina lo que tiene en curso, escribe su traspaso, deja 'Traspaso listo: arranca' para el nuevo y deja de escribir.",
+    "Relevo: mensaje al chat que sale; termina lo que tiene en curso, escribe su traspaso con la plantilla traspaso.md en su archivo (fecha, en curso, esperando, dónde está, no escrito vacío, primera acción), deja «Traspaso listo: arranca» para el nuevo y deja de escribir.",
     "El Arquitecto crea el chat en el proyecto: equipo LENOVO, modelo según el rol, permisos Auto; primer mensaje con el arranque del rol.",
     "Carlos crea el token del chat y lo guarda en str-instr-cola\\claves\\<rol>.txt (un archivo por chat, fuera de todo repositorio); el chat comprueba git push --dry-run y da su identificador cse_….",
     "El Arquitecto registra la sesión en destinatarios.json y lb-sesiones; el despertador empieza a avisarle.",
@@ -455,7 +466,10 @@
    "creditos": "Un arranque de chat (lectura inicial) por relevo.",
    "riesgos": [
     "Si no se registra la sesión, los avisos quedan en espera (sin perderse) hasta registrarla."
-   ]
+   ],
+   "revisarCuando": "servicio de conocimiento de la fábrica (ADR-010) y el primer relevo con traspaso.md",
+   "revisionPendiente": null,
+   "ultimaRevision": "2026-10-21"
   },
   {
    "codigo": "DSS02-i",
@@ -496,7 +510,9 @@
    "creditos": "Un lote fix por INC medio o crítico.",
    "riesgos": [
     "Registrar el síntoma y no la causa hace que el error vuelva."
-   ]
+   ],
+   "revisarCuando": "primer aviso desde producción con la plantilla (I2)",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 4 de MJ-17"
   },
   {
    "codigo": "BAI10.05-e",
@@ -537,7 +553,9 @@
    "creditos": "Una prueba del verificador por cambio.",
    "riesgos": [
     "Volver a ASUS exige recrear otra vez los verificadores y copiar el despertador v3."
-   ]
+   ],
+   "revisarCuando": "migración a pruebas. (ADR-007) y la prueba d de LM-60",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0 de MJ-17"
   },
   {
    "codigo": "BAI11-p",
@@ -578,7 +596,9 @@
    "creditos": "La organización inicial es un turno largo del Chat de diseño; después, solo al preparar o cerrar un plan.",
    "riesgos": [
     "Si los ítems de la bolsa no se categorizan al entrar, armar el siguiente plan vuelve a ser perderse entre pendientes."
-   ]
+   ],
+   "revisarCuando": "capa de proyectos (ADR-009) y la primera tanda de FLUJO-v1",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 5 de MJ-17"
   },
   {
    "codigo": "APO06-u",
@@ -619,7 +639,9 @@
    "creditos": "Esta ficha existe para eso.",
    "riesgos": [
     "Los chats no ven el uso semanal: si Carlos no lo informa, nadie entra en modo ahorro a tiempo."
-   ]
+   ],
+   "revisarCuando": "mensual con el uso de créditos",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso — de MJ-17"
   },
   {
    "codigo": "BAI08-l",
@@ -634,13 +656,15 @@
     "aprueba": "Carlos (lo que cambia la forma de trabajar)"
    },
    "piezas": [
-    "claude/marco/patrones-codigo.md (Chat de desarrollo)",
     "CLAUDE.md del código (Agente CLI)",
     "log\\NN-veredicto.json → lecciones (Agente verificador)",
     "diseno.json y claude/producto/requerimientos-*.md (Chat de diseño)",
-    "marco-trabajo.json, conocimiento.json e instrucciones.json (Arquitecto)",
     "interno/mensajes.json (propuestas con asunto 'Lección:')",
-    "conocimiento.json › catalogo (LM-32): prácticas, patrones y herramientas reutilizables con alcance, madurez y evidencia"
+    "conocimiento.json › catalogo (LM-32): prácticas, patrones y herramientas reutilizables con alcance, madurez y evidencia",
+    "seguimiento.json › incs[] con destino y la sección «Lección» del cierre de cada lote (Chat Desarrollo; LM-69)",
+    "proyecto.json › lecciones[] con destino (Chat Jefe de proyecto)",
+    "diseno.json › lecciones[] con destino (Chat Diseño)",
+    "conocimiento.json › piezas[] (mapa del conocimiento, LM-69) y plantilla traspaso.md"
    ],
    "flujo": [
     "Error o patrón del código (algo que vuelve a fallar o una trampa del sistema): el Chat de desarrollo lo anota en patrones-codigo.md › errores conocidos al cerrar el INC o el lote; la CLI lo deja en CLAUDE.md en el mismo commit del lote que lo corrige.",
@@ -664,7 +688,11 @@
    "creditos": "Una lección bien guardada ahorra repetir el error; escribirla es parte del cierre, no un turno aparte.",
    "riesgos": [
     "Lecciones solo en la conversación de un chat se pierden en el relevo."
-   ]
+   ],
+   "revisarCuando": "servicio de conocimiento de la fábrica (ADR-010) y el primer relevo con traspaso.md",
+   "revisionPendiente": null,
+   "nota": "21-oct-2026 (LM-69, CONOCIMIENTO-v1): toda lección lleva destino {tipo, ref}; patrones-codigo.md y marco-trabajo no son fuentes; situaciones/ queda histórico.",
+   "ultimaRevision": "2026-10-21"
   },
   {
    "codigo": "APO01.10-j",
@@ -701,7 +729,9 @@
    "creditos": "Cero; en pausa evita todo despertar de chats.",
    "riesgos": [
     "Si la jornada queda en pausa por olvido, nada avanza: el chip de arriba lo muestra."
-   ]
+   ],
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "APO01.10-k",
@@ -744,7 +774,9 @@
    "creditos": "Ahorra: cada bloqueo evitado son 5–20 min de una sesión.",
    "riesgos": [
     "La lista envejece con cada versión de la plataforma: se revisa en la revisión semanal con las situaciones nuevas."
-   ]
+   ],
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "BAI10-m",
@@ -787,7 +819,9 @@
    "riesgos": [
     "Un chat que escriba un estado fuera de la lista: lo marca validar.py; se corrige antes del commit.",
     "Si proceso.json deja de estar «vigente», el despertador vuelve a sus constantes (mismos valores)."
-   ]
+   ],
+   "revisarCuando": "migración a pruebas. (ADR-007) y la prueba d de LM-60",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0 de MJ-17"
   },
   {
    "codigo": "APO01.11-n",
@@ -820,7 +854,9 @@
    "creditos": "Nulos.",
    "riesgos": [
     "Preguntar demasiado: se agrupa lo que pueda decidirse junto (una tabla, no cinco mensajes)."
-   ]
+   ],
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "BAI07.05-p",
@@ -859,7 +895,9 @@
    "riesgos": [
     "Sin el freno de la plataforma, el límite lo pone la guardia: revisar la bitácora en cada corrida.",
     "Chrome se actualiza solo: si deja de arrancar, subir Playwright."
-   ]
+   ],
+   "revisarCuando": "LM-68 (spec de ráfaga) y el primer tren tras la pausa (PRUEBAS-v2)",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 2 de MJ-17"
   },
   {
    "codigo": "BAI10.02-h",
@@ -897,7 +935,9 @@
    "riesgos": [
     "El dominio raíz apartamentosbucaramanga.com quedó sin sitio (antes solo tenía la página por defecto)",
     "bucaramangastays.com vence el 3-nov: decisión de Carlos"
-   ]
+   ],
+   "revisarCuando": "migración a pruebas. (ADR-007) y la prueba d de LM-60",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0 de MJ-17"
   },
   {
    "codigo": "APO01.11-m",
@@ -924,7 +964,9 @@
     "Lo pospuesto lleva una condición para volver a decidirse, nunca una fecha.",
     "Lo obsoleto se marca «retirada», no se borra."
    ],
-   "instalacion": "LM-38 (15-oct-2026)"
+   "instalacion": "LM-38 (15-oct-2026)",
+   "revisarCuando": "proceso 8 de MJ-17 (riesgo y medición) y cada LM que toque buzón, cola o despertador",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 0/5/8 de MJ-17"
   },
   {
    "codigo": "APO03.02-m",
@@ -960,7 +1002,9 @@
     "Referencia de pruebas adoptada: ISO/IEC/IEEE 29119 + ISTQB CTFL 4.0 (COBIT BAI07/BAI03 no cita estándar de diseño de pruebas); módulo = feature set, REQ = test item, RT = test condition, REL = condición de integración, guion = test procedure.",
     "Ninguna prueba fuera de la ruta: un caso que no toca un nodo de la ruta del lote no corre en ese lote; un caso que no cubre nada va a cuarentena (LM-39a)."
    ],
-   "instalacion": "LM-40 (15-oct-2026)"
+   "instalacion": "LM-40 (15-oct-2026)",
+   "revisarCuando": "capa de proyectos (arquitectura de la fábrica) y la primera evaluación disparada por el JP",
+   "revisionPendiente": "LM-69 paso 6: contrastar el texto con el plan del proceso 6 de MJ-17"
   }
  ],
  "lineasBase": [
@@ -1222,7 +1266,9 @@
      "lecciones": [
       "marco-trabajo 2026-10-13 (migración M7)"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PRA-2",
@@ -1256,7 +1302,9 @@
      "lecciones": [
       "marco-trabajo 2026-10-13 (secretos)"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PRA-3",
@@ -1289,7 +1337,9 @@
      "lecciones": [
       "marco-trabajo 2026-10-10 (M-105)"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PRA-4",
@@ -1322,7 +1372,9 @@
       "BAI07.05-p"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PRA-5",
@@ -1350,7 +1402,9 @@
       "BAI08-l"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PRA-6",
@@ -1384,7 +1438,9 @@
       "S-cd-31",
       "LM-33"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-1",
@@ -1419,7 +1475,9 @@
      "lecciones": [
       "S-arq-23"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-2",
@@ -1455,7 +1513,9 @@
      "ver": [
       "PAT-8"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-3",
@@ -1483,7 +1543,9 @@
       "BAI10.02-h"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-4",
@@ -1513,7 +1575,9 @@
       "BAI07.05-p"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-5",
@@ -1546,7 +1610,9 @@
      "lecciones": [
       "S-arq-24"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-6",
@@ -1574,7 +1640,9 @@
       "BAI10.02-h"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-1",
@@ -1602,7 +1670,9 @@
       "APO01.10-j"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-2",
@@ -1630,7 +1700,9 @@
       "APO01.10-a"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-3",
@@ -1658,7 +1730,9 @@
       "BAI07.05-p"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-4",
@@ -1685,7 +1759,9 @@
       "BAI07.05-v"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-5",
@@ -1712,7 +1788,9 @@
       "BAI10-m"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-6",
@@ -1739,7 +1817,9 @@
       "BAI10.02-h"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "HER-7",
@@ -1766,7 +1846,9 @@
       "APO01.03-b"
      ],
      "lecciones": []
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-7",
@@ -1800,7 +1882,9 @@
      "lecciones": [
       "M-329"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    },
    {
     "id": "PAT-8",
@@ -1833,8 +1917,699 @@
      "lecciones": [
       "M-329"
      ]
-    }
+    },
+    "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplace",
+    "estado": "vigente"
    }
   ]
+ },
+ "piezas": [
+  {
+   "id": "PZ-1",
+   "nombre": "Reglas comunes",
+   "ruta": "interno/instrucciones.json",
+   "tipo": "reglamento",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "todos los chats"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 4000,
+   "revisarCuando": "al cerrar MJ-17 (proceso 8) y cuando un rol cambie",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "el ítem reglas-comunes (3 354 car.)",
+   "medida": {
+    "json": "interno/instrucciones.json",
+    "items": [
+     "reglas-comunes"
+    ],
+    "campo": "texto"
+   }
+  },
+  {
+   "id": "PZ-2",
+   "nombre": "Encargos por rol",
+   "ruta": "interno/instrucciones.json",
+   "tipo": "reglamento",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "el rol"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 6000,
+   "revisarCuando": "cuando el proceso que vive el rol cambie (LM-n)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "rol-arquitecto, rol-diseno, rol-desarrollo, rol-jefe-proyecto, rol-verificador, rol-agente-cli; tope por encargo",
+   "medida": {
+    "json": "interno/instrucciones.json",
+    "items": [
+     "rol-arquitecto",
+     "rol-diseno",
+     "rol-desarrollo",
+     "rol-jefe-proyecto",
+     "rol-verificador",
+     "rol-agente-cli"
+    ],
+    "campo": "texto",
+    "topePor": "item"
+   }
+  },
+  {
+   "id": "PZ-3",
+   "nombre": "CLAUDE.md del código",
+   "ruta": "str-manager/CLAUDE.md",
+   "tipo": "referencia",
+   "capa": "proyecto",
+   "escritor": "Desarrollo (CLI por lote)",
+   "lectores": [
+    "CLI"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 12000,
+   "revisarCuando": "al pasar de 9 000 (meta) o con LM-70",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "tamanoDeclarado": 11981,
+   "nota": "índice de docs/claude + reglas de git/cola + plantilla del mensaje + entorno; § 1 pasa a puntero (LM-70)"
+  },
+  {
+   "id": "PZ-4",
+   "nombre": "Reglas fijas de la CLI",
+   "ruta": "herramientas/hooks-cli/ctx.js",
+   "tipo": "reglamento",
+   "capa": "fábrica",
+   "escritor": "Arquitecto (copia Carlos)",
+   "lectores": [
+    "CLI (inyectadas por ctx.js)"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 3000,
+   "revisarCuando": "con cada hook v+1",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "tamanoDeclarado": 2717,
+   "nota": "docs/claude/reglas-fijas.md en str-manager; fuente en herramientas/hooks-cli"
+  },
+  {
+   "id": "PZ-5",
+   "nombre": "Mapas por área del código",
+   "ruta": "str-manager/docs/claude/",
+   "tipo": "referencia",
+   "capa": "proyecto",
+   "escritor": "Desarrollo (CLI por lote)",
+   "lectores": [
+    "CLI (el doc del área del lote)",
+    "Desarrollo"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": 40000,
+   "revisarCuando": "por lote: cabecera «Al día hasta L-n»",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "tamanoDeclarado": 60945,
+   "nota": "14 archivos; housekeeping 61 KB, servidor-php 59 KB, tests-y-despliegue 59 KB: se parten (Cn2); tope por archivo; tamanoDeclarado = el archivo más grande (housekeeping.md)",
+   "topePor": "archivo"
+  },
+  {
+   "id": "PZ-6",
+   "nombre": "Texto del juez",
+   "ruta": "herramientas/juez/texto-juez.md",
+   "tipo": "reglamento",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "juez (cada veredicto)"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": 16000,
+   "revisarCuando": "con cada proceso de MJ-17 que lo toque; no crece sin fundir",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-7",
+   "nombre": "Revisor previo",
+   "ruta": "herramientas/plantillas/revisor-previo.md",
+   "tipo": "guía",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Desarrollo (cada lote)",
+    "JP (críticos)"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": 12000,
+   "revisarCuando": "tope de 24 puntos: el 24 entra si otro sale o se funde",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-8",
+   "nombre": "Plantilla de instrucción",
+   "ruta": "herramientas/plantillas/instruccion.md",
+   "tipo": "guía",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Desarrollo"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": 12000,
+   "revisarCuando": "con cada control nuevo que toque la cabecera",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-9",
+   "nombre": "Plantilla de REQ",
+   "ruta": "herramientas/plantillas/requerimiento.md",
+   "tipo": "guía",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Diseño"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": 10000,
+   "revisarCuando": "con el proceso 1 (Q1–Q8)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-10",
+   "nombre": "LEEME de la cola y pw",
+   "ruta": "herramientas/pw/LEEME.md",
+   "tipo": "referencia",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Arquitecto",
+    "Desarrollo"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada versión de pw",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-11",
+   "nombre": "Otras plantillas",
+   "ruta": "herramientas/plantillas/",
+   "tipo": "guía",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "el rol que la usa"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con el proceso que la creó",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "adr, aviso-produccion, revision-incidente, como-vamos, traspaso, pregunta-a-carlos, secretos, guion-e2e, verificar.json"
+  },
+  {
+   "id": "PZ-12",
+   "nombre": "Fichas COBIT",
+   "ruta": "interno/conocimiento.json",
+   "tipo": "explicación",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "todos (a demanda)",
+    "página Conocimiento"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "al cerrar el proceso de MJ-17 que la toca (fichas[].revisarCuando)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "19 fichas"
+  },
+  {
+   "id": "PZ-13",
+   "nombre": "Catálogo de prácticas, patrones y herramientas",
+   "ruta": "interno/conocimiento.json",
+   "tipo": "explicación",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "kit de arranque de un proyecto nuevo"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "al segundo proyecto (ADR-008): «probada» → «estándar»; «retirada» cuando una guardia la reemplaza",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "21 ítems"
+  },
+  {
+   "id": "PZ-14",
+   "nombre": "Decisiones de arquitectura (ADR)",
+   "ruta": "str-manager-docs/decisiones/",
+   "tipo": "explicación",
+   "capa": "producto y fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "todos (a demanda)",
+    "revisor punto 23"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "cada ADR trae revisarCuando (A1)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "índice interno/arquitectura/decisiones.json"
+  },
+  {
+   "id": "PZ-15",
+   "nombre": "Reglas transversales",
+   "ruta": "claude/arquitectura/reglas-transversales.md",
+   "tipo": "reglamento",
+   "capa": "producto",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Desarrollo (cabecera RT)",
+    "revisor 15",
+    "Diseño"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": null,
+   "revisarCuando": "con cada DA o LM que la cambie; guardias (A2)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "nota": "documento del proyecto; copia legible por máquina en mapa-modulos.json › reglas[]",
+   "ubicacion": "proyecto de Claude (project_read)"
+  },
+  {
+   "id": "PZ-16",
+   "nombre": "Mapa del STR",
+   "ruta": "interno/mapa-modulos.json",
+   "tipo": "referencia",
+   "capa": "producto",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "mapa.py --ruta (cola)",
+    "explorador",
+    "Desarrollo (línea Mapa:)"
+   ],
+   "cuandoSeLee": "por lote",
+   "tope": null,
+   "revisarCuando": "por lote (M7) y pasada de relaciones (A3)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false
+  },
+  {
+   "id": "PZ-17",
+   "nombre": "Línea base funcional",
+   "ruta": "interno/linea-base/",
+   "tipo": "referencia",
+   "capa": "producto",
+   "escritor": "Arquitecto (linea-base.py)",
+   "lectores": [
+    "Diseño (--cu, --cap)",
+    "explorador"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "por lote aceptado (C-n, trinquetes)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false
+  },
+  {
+   "id": "PZ-18",
+   "nombre": "Planes de proceso de la fábrica",
+   "ruta": "claude/marco/",
+   "tipo": "explicación",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "todos (a demanda)",
+    "capa de proyectos"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "al cerrar cada proceso; estado en la cabecera",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "plan-configuracion-linea-base, proceso-requerimientos-diseno, plan-verificacion-aceptacion, plan-construccion, plan-incidentes-problemas, plan-flujo-trabajo, plan-arquitectura, plan-conocimiento, metodo-formalizacion-fabrica"
+  },
+  {
+   "id": "PZ-19",
+   "nombre": "Lotes del modelo (LM-n)",
+   "ruta": "interno/lotes-modelo/",
+   "tipo": "explicación",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Arquitecto"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con el LM siguiente que lo toque",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-20",
+   "nombre": "Proceso y COBIT",
+   "ruta": "interno/proceso.json",
+   "tipo": "reglamento",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "todos (a demanda)",
+    "despertador"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada LM",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "también interno/cobit.json"
+  },
+  {
+   "id": "PZ-21",
+   "nombre": "Esquema del modelo y guardias",
+   "ruta": "herramientas/modelo/esquema.json",
+   "tipo": "reglamento",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "validar.py",
+    "linea-base.py",
+    "ficha"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada LM",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true
+  },
+  {
+   "id": "PZ-22",
+   "nombre": "Lecciones del Jefe de proyecto",
+   "ruta": "interno/proyecto.json",
+   "tipo": "lección",
+   "capa": "fábrica",
+   "escritor": "Jefe de proyecto",
+   "lectores": [
+    "JP",
+    "Arquitecto (conversión)"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "cada lección con destino (Cn3)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "proyecto.json › lecciones[]"
+  },
+  {
+   "id": "PZ-23",
+   "nombre": "Lecciones de Desarrollo",
+   "ruta": "interno/seguimiento.json",
+   "tipo": "lección",
+   "capa": "proyecto",
+   "escritor": "Desarrollo",
+   "lectores": [
+    "Desarrollo",
+    "Arquitecto"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "cada INC con destino y cada cierre de lote con «Lección»",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "los INC (causaRaiz, debioDetectarse, destino) y la sección «Lección» del cierre de cada lote; patrones-codigo.md no existe y no se crea (M-1044)"
+  },
+  {
+   "id": "PZ-24",
+   "nombre": "Lecciones de Diseño",
+   "ruta": "interno/diseno.json",
+   "tipo": "lección",
+   "capa": "proyecto",
+   "escritor": "Diseño",
+   "lectores": [
+    "Diseño",
+    "Arquitecto"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "cada lección con destino (Cn3)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "diseno.json › lecciones[] (nuevo, LM-69)"
+  },
+  {
+   "id": "PZ-25",
+   "nombre": "Mejoras y punto de pausa del Arquitecto",
+   "ruta": "interno/mejoras.json",
+   "tipo": "lección",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Arquitecto"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 160000,
+   "revisarCuando": "cada MJ con revisarCuando; puntoDePausa al cerrar cada proceso",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "MJ-n e historial; puntoDePausa es el traspaso del Arquitecto"
+  },
+  {
+   "id": "PZ-26",
+   "nombre": "Revisiones de incidente",
+   "ruta": "interno/seguimiento.json",
+   "tipo": "lección",
+   "capa": "proyecto",
+   "escritor": "quien tiene la causa; Desarrollo la pega",
+   "lectores": [
+    "todos"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "cada queCambia con dueño (I5)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "incs[].revision; la primera: INC-128 (claude/marco/revision-inc-128.md)"
+  },
+  {
+   "id": "PZ-27",
+   "nombre": "Traspasos",
+   "ruta": "interno/proyecto.json · diseno.json · seguimiento.json · mejoras.json",
+   "tipo": "guía",
+   "capa": "fábrica",
+   "escritor": "cada chat en su archivo",
+   "lectores": [
+    "el que llega"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 3000,
+   "revisarCuando": "al cerrar cada tanda o cada 7 días (Cn4)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "nota": "plantilla herramientas/plantillas/traspaso.md; traspaso del JP, traspaso de Diseño, traspaso de Desarrollo, puntoDePausa del Arquitecto (+ claude/marco/cierre-arquitecto-*.md al cerrar un chat)",
+   "ubicacion": "varios archivos"
+  },
+  {
+   "id": "PZ-28",
+   "nombre": "Buzón",
+   "ruta": "interno/mensajes.json",
+   "tipo": "canal",
+   "capa": "fábrica",
+   "escritor": "todos (cada uno su mensaje)",
+   "lectores": [
+    "todos, filtrado con buzon.py --para"
+   ],
+   "cuandoSeLee": "arranque (filtrado)",
+   "tope": 1048576,
+   "revisarCuando": "archivo mensual (Cn6, archivar.py): «hecho» > 14 días salvo citados por filas vivas",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "nota": "tope 1 MB para el archivo vivo"
+  },
+  {
+   "id": "PZ-29",
+   "nombre": "Seguimiento del proyecto",
+   "ruta": "interno/seguimiento.json",
+   "tipo": "referencia",
+   "capa": "proyecto",
+   "escritor": "Desarrollo",
+   "lectores": [
+    "todos (lo vivo; por id a demanda)",
+    "validar",
+    "ficha"
+   ],
+   "cuandoSeLee": "arranque (lo vivo)",
+   "tope": 2097152,
+   "revisarCuando": "archivo de INC cerrados y lotes aceptados > 60 días (Cn6)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false
+  },
+  {
+   "id": "PZ-30",
+   "nombre": "Diseño del producto",
+   "ruta": "interno/diseno.json",
+   "tipo": "referencia",
+   "capa": "proyecto",
+   "escritor": "Diseño",
+   "lectores": [
+    "Diseño (vivo)",
+    "todos (DA, REQ por id)"
+   ],
+   "cuandoSeLee": "arranque (lo vivo)",
+   "tope": 400000,
+   "revisarCuando": "con cada REQ y DA",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false
+  },
+  {
+   "id": "PZ-31",
+   "nombre": "Orden del trabajo",
+   "ruta": "interno/proyecto.json",
+   "tipo": "referencia",
+   "capa": "proyecto",
+   "escritor": "Jefe de proyecto",
+   "lectores": [
+    "todos (trabajo[], pausas[])"
+   ],
+   "cuandoSeLee": "arranque",
+   "tope": 200000,
+   "revisarCuando": "por tanda (FLUJO-v1)",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false
+  },
+  {
+   "id": "PZ-32",
+   "nombre": "Situaciones por rol (histórico)",
+   "ruta": "interno/situaciones/",
+   "tipo": "lección",
+   "capa": "fábrica",
+   "escritor": "cada rol (cerrado 21-oct)",
+   "lectores": [
+    "nadie: histórico"
+   ],
+   "cuandoSeLee": "nunca",
+   "tope": null,
+   "revisarCuando": "—",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "nota": "106 entradas hasta el 13-oct; cerrado como histórico (Cn3, M-1045): lo cubren las lecciones con destino y las revisiones de incidente"
+  },
+  {
+   "id": "PZ-33",
+   "nombre": "Documentos históricos del repo",
+   "ruta": "str-manager-docs/",
+   "tipo": "explicación",
+   "capa": "producto",
+   "escritor": "nadie (histórico)",
+   "lectores": [
+    "nadie"
+   ],
+   "cuandoSeLee": "nunca",
+   "tope": null,
+   "revisarCuando": "—",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "nota": "arquitectura/, modulos/, producto/ de agosto, marcados «Histórico · sustituido por …» (A5)"
+  },
+  {
+   "id": "PZ-34",
+   "nombre": "Infraestructura y configuración",
+   "ruta": "claude/arquitectura/infraestructura-configuracion.md",
+   "tipo": "referencia",
+   "capa": "producto",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Arquitecto",
+    "Desarrollo (entorno)"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada cambio de configuración (C-n) y lectura de hPanel",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "ubicacion": "proyecto de Claude (project_read)"
+  },
+  {
+   "id": "PZ-35",
+   "nombre": "Ciclo de vida de los datos",
+   "ruta": "claude/arquitectura/datos-ciclo-vida.md",
+   "tipo": "referencia",
+   "capa": "producto",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Diseño",
+    "Desarrollo"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada DA de retención o módulo nuevo",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "ubicacion": "proyecto de Claude (project_read)"
+  },
+  {
+   "id": "PZ-36",
+   "nombre": "Explorador de la línea base y mapa gráfico",
+   "ruta": "interno/arquitectura/",
+   "tipo": "referencia",
+   "capa": "producto",
+   "escritor": "Arquitecto (generado)",
+   "lectores": [
+    "Carlos",
+    "Diseño"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "regenerado por linea-base-pagina.py y mapa.py",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false
+  },
+  {
+   "id": "PZ-37",
+   "nombre": "Artefacto «Procesos de la fábrica STR»",
+   "ruta": "claude.ai/artifact/RoqDb1QF3bfxg4EK4BJp2G",
+   "tipo": "explicación",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Carlos"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada proceso de MJ-17",
+   "ultimaRevision": "2026-10-21",
+   "exportable": true,
+   "ubicacion": "url"
+  },
+  {
+   "id": "PZ-38",
+   "nombre": "Comandos de usuario y procedimientos de Carlos",
+   "ruta": "claude/marco/comandos-usuario.md",
+   "tipo": "guía",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "lectores": [
+    "Carlos"
+   ],
+   "cuandoSeLee": "a demanda",
+   "tope": null,
+   "revisarCuando": "con cada cambio de equipo, cola o hosting",
+   "ultimaRevision": "2026-10-21",
+   "exportable": false,
+   "ubicacion": "proyecto de Claude (project_read)"
+  }
+ ],
+ "mapaConocimiento": {
+  "lm": "LM-69 (CONOCIMIENTO-v1 Cn1)",
+  "que": "Una fila por pieza de conocimiento de la fábrica y del proyecto: qué es (tipo Diátaxis: reglamento · referencia · guía · explicación · lección · canal), de qué capa, quién la escribe, quién la lee y cuándo (arranque · arranque (filtrado) · por lote · a demanda · nunca), tope en caracteres o null, revisarCuando, ultimaRevision, exportable (lo que el servicio de conocimiento de la fábrica cargará, ADR-010). conocimiento.py mide tamaño y edad; validar.py avisa (Cn1: ruta que no existe, pieza de arranque sin tope, pieza sobre su tope).",
+  "medicion": "python3 -I herramientas/modelo/conocimiento.py ."
  }
 }

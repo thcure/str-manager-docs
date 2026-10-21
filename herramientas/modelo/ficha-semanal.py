@@ -173,6 +173,45 @@ def semaforo_arquitectura(a):
             'lotes desde la última evaluación de arquitectura': (a['lotesDesdeEvaluacion'], not a['evaluacionPendiente'])}
 
 
+def conocimiento_bloque(raiz, seg, py, dis, ahora):
+    """Pura salvo lectura (LM-69, Cn1–Cn6): piezas sobre tope, lecciones sin destino, traspasos vencidos, tamaño del buzón."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import conocimiento as CN
+        con = carga(os.path.join(raiz, 'interno', 'conocimiento.json')); filas = CN.medir(raiz, con.get('piezas') or [], ahora.date())
+    except Exception as ex:
+        return {'error': str(ex)}
+    hoy = ahora.date()
+    def sin_destino(lst):
+        n = 0
+        for l in lst or []:
+            d = l.get('destino') if isinstance(l, dict) else None
+            if isinstance(d, dict) and d.get('tipo'): continue
+            f = str((l.get('pendiente') or {}).get('desde') or l.get('fecha') or '')[:10] if isinstance(l, dict) else ''
+            try: dias = (hoy - datetime.date.fromisoformat(f)).days if f else 99
+            except ValueError: dias = 99
+            if dias > 7: n += 1
+        return n
+    def venc(obj):
+        if not isinstance(obj, dict) or not obj: return True
+        f = str(obj.get('fecha') or '')[:10]
+        try: return (hoy - datetime.date.fromisoformat(f)).days > 7 if f else True
+        except ValueError: return True
+    tr = {'proyecto.json': venc((py or {}).get('traspaso')), 'diseno.json': venc((dis or {}).get('traspaso')), 'seguimiento.json': venc(seg.get('traspaso'))}
+    buz = os.path.getsize(os.path.join(raiz, 'interno', 'mensajes.json')) if os.path.exists(os.path.join(raiz, 'interno', 'mensajes.json')) else 0
+    return {'piezas': len(filas), 'sobreTope': [(f['id'], f['nombre'], f['pct']) for f in filas if f['sobreTope']], 'arranqueSobreTope': [f['id'] for f in filas if f['sobreTope'] and str(f['cuando'] or '').startswith('arranque')],
+            'leccionesSinDestino': {'JP': sin_destino((py or {}).get('lecciones')), 'Diseño': sin_destino((dis or {}).get('lecciones'))}, 'traspasosVencidos': [k for k, v in tr.items() if v], 'buzonKB': buz // 1024,
+            'sinRevision': [f['id'] for f in filas if f['sinRevision']]}
+
+
+def semaforo_conocimiento(c):
+    if not c or 'error' in c: return {}
+    ld = sum(c['leccionesSinDestino'].values())
+    return {'piezas de arranque sobre su tope': (len(c['arranqueSobreTope']), len(c['arranqueSobreTope']) == 0),
+            'lecciones sin destino > 7 días': (ld, ld == 0),
+            'traspasos vencidos': (len(c['traspasosVencidos']), len(c['traspasosVencidos']) == 0),
+            'buzón vivo (KB)': (c['buzonKB'], c['buzonKB'] <= 1024)}
+
+
 def semaforo(sem_m, cuarentena_n):
     """Pura: las cuatro filas de §6 contra sus umbrales (None = sin dato)."""
     filas = {}
@@ -218,12 +257,13 @@ def main(argv):
     mapa_ = carga(os.path.join(raiz, 'interno', 'mapa-modulos.json')) if os.path.exists(os.path.join(raiz, 'interno', 'mapa-modulos.json')) else {}
     dec_ = carga(os.path.join(raiz, 'interno', 'arquitectura', 'decisiones.json')) if os.path.exists(os.path.join(raiz, 'interno', 'arquitectura', 'decisiones.json')) else {}
     arq = arquitectura(seg, py, mapa_, dec_, esq if 'esq' in dir() else {}, datetime.datetime.now())
-    out = {'semana': semana, 'semaforo': semaforo(sem_m, cuar), 'semaforoIncidentes': semaforo_incidentes(inc), 'semaforoFlujo': semaforo_flujo(fl), 'semaforoArquitectura': semaforo_arquitectura(arq), 'flujo': fl, 'arquitectura': arq, 'incidentes': inc, 'escapes': esc, 'dora': dora(seg.get('cambios', []), seg.get('incs', []), semana), 'tendenciaInc': tendenciaInc(seg.get('incs', []), semana),
+    cno = conocimiento_bloque(raiz, seg, py, dis, datetime.datetime.now())
+    out = {'semana': semana, 'semaforo': semaforo(sem_m, cuar), 'semaforoIncidentes': semaforo_incidentes(inc), 'semaforoFlujo': semaforo_flujo(fl), 'semaforoArquitectura': semaforo_arquitectura(arq), 'semaforoConocimiento': semaforo_conocimiento(cno), 'flujo': fl, 'arquitectura': arq, 'conocimiento': cno, 'incidentes': inc, 'escapes': esc, 'dora': dora(seg.get('cambios', []), seg.get('incs', []), semana), 'tendenciaInc': tendenciaInc(seg.get('incs', []), semana),
            'riesgosResiduales': {'esencialesSinGuion': tr.get('casosEsencialesSinGuion'), 'relacionesPorPrecisar': tr.get('relacionesPorPrecisar')},
            'cuarentena': {'candidatos': [{'caso': c['guion'] + ' ' + c['c'], 'alerta': c.get('alerta'), 'inmediata': c.get('inmediata'), 'ya': c.get('yaEnCuarentena')} for c in cand]},
            'bloqueos': (sem_m or {}).get('bloqueos'), 'desviaciones': (sem_m or {}).get('desviaciones'),
            'palabrasClave': {'desconocidas': gu.get('palabrasDesconocidas'), 'sinUso': gu.get('palabrasSinUso')} if 'referenciaCruzada' in gu else 'foto sin palabras clave (tomar con guiones-e2e.js v2)'}
-    rojas = [k for d in (out['semaforo'], out['semaforoIncidentes'], out['semaforoFlujo'], out['semaforoArquitectura']) for k, (v, okk) in d.items() if v is not None and not okk]
+    rojas = [k for d in (out['semaforo'], out['semaforoIncidentes'], out['semaforoFlujo'], out['semaforoArquitectura'], out['semaforoConocimiento']) for k, (v, okk) in d.items() if v is not None and not okk]
     out['rojas'] = rojas
     if '--como-vamos' in argv:
         ant = carga(argv[argv.index('--anterior') + 1]) if '--anterior' in argv else None
@@ -243,6 +283,10 @@ def main(argv):
         print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
     for k, (v, ok) in out['semaforoArquitectura'].items():
         print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
+    for k, (v, ok) in out['semaforoConocimiento'].items():
+        print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
+    if 'error' not in cno:
+        print('- conocimiento (Cn1–Cn6): %d piezas · sobre el tope: %s · lecciones sin destino %s · traspasos vencidos %s · sin revisión > 30 d: %s' % (cno['piezas'], '; '.join('%s %s (%s %%)' % x for x in cno['sobreTope']) or 'ninguna', cno['leccionesSinDestino'], cno['traspasosVencidos'] or 'ninguno', cno['sinRevision'] or 'ninguna'))
     print('- arquitectura (A2–A4): RT sin guardia %s · críticas sin automática %s · relaciones por precisar %d/%d · deuda arquitectónica %s %s · INC de arquitectura abiertos %s · decisiones %d (con deuda: %s) · última evaluación %s' % (arq['rtSinGuardia'] or 'ninguna', arq['rtCriticasSinAutomatica'] or 'ninguna', arq['relacionesPorPrecisar'], arq['relaciones'], arq['deuda']['abiertas'] or 'ninguna', arq['deuda']['porSeveridad'], arq['deuda']['incAbiertos'] or 'ninguno', arq['decisiones'], arq['decisionesConDeuda'] or 'ninguna', arq['ultimaEvaluacion'] or 'nunca'))
     if 'error' not in fl:
         m_ = fl['metricas']

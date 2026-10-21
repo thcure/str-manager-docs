@@ -1,5 +1,5 @@
 {
- "version": "0.8",
+ "version": "0.9",
  "fecha": "2026-10-21",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
@@ -727,6 +727,163 @@
     "str-manager-docs/producto/*.md"
    ],
    "marca": "primera línea «> Histórico (agosto-2026) · sustituido por …»"
+  }
+ },
+ "conocimiento": {
+  "lm": "LM-69 (CONOCIMIENTO-v1; MJ-17 proceso 7; BAI08.01–.04, APO14; ISO 30401 por conocimiento; ADR-010; Diátaxis)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-conocimiento.md (v2, ok de Carlos 21-oct 12:46)",
+  "modo": "avisos",
+  "piezas": {
+   "donde": "interno/conocimiento.json › piezas[]",
+   "tipos": [
+    "reglamento",
+    "referencia",
+    "guía",
+    "explicación",
+    "lección",
+    "canal"
+   ],
+   "cuandoSeLee": [
+    "arranque",
+    "arranque (filtrado)",
+    "arranque (lo vivo)",
+    "por lote",
+    "a demanda",
+    "nunca"
+   ],
+   "regla": "pieza de arranque sin tope = aviso; pieza sobre su tope = aviso; ruta local que no existe = aviso; medición con conocimiento.py"
+  },
+  "arranque": {
+   "cli": {
+    "CLAUDE.md": {
+     "tope": 12000,
+     "meta": 9000,
+     "nota": "§ 1 pasa a puntero (LM-70); § 2 índice, líneas de versión y plantilla § 4 no se tocan"
+    },
+    "reglas-fijas.md": {
+     "tope": 3000
+    },
+    "docs/claude por archivo": {
+     "tope": 40000
+    }
+   },
+   "chats": {
+    "encargo": {
+     "tope": 6000
+    },
+    "buzon": "filtrado con herramientas/modelo/buzon.py --para <rol> [--horas 48]: pendientes para el rol, respuestas de 48 h, lo que espera, lo que espera Carlos",
+    "seguimiento": "lo vivo; por id a demanda"
+   },
+   "regla": "nada entra a una pieza de arranque sin sacar algo del mismo tamaño (K1 Busca/Pon)"
+  },
+  "lecciones": {
+   "destino": {
+    "tipos": [
+     "guardia",
+     "punto",
+     "plantilla",
+     "ficha",
+     "ADR",
+     "catalogo",
+     "riesgo",
+     "regla",
+     "retirada"
+    ],
+    "forma": "{tipo, ref, fecha} o pendiente {dueno, desde}"
+   },
+   "fuentes": {
+    "Jefe de proyecto": "proyecto.json › lecciones[]",
+    "Desarrollo": "incs[] con destino y sección «Lección» del cierre de cada lote (patrones-codigo.md no existe)",
+    "Diseño": "diseno.json › lecciones[]",
+    "Arquitecto": "mejoras.json (MJ-n) y fichas"
+   },
+   "regla": "lección sin destino ni pendiente con dueño > 7 días = aviso",
+   "situaciones": "interno/situaciones/*.json cerrado como histórico el 21-oct (M-1045, M-1046)"
+  },
+  "traspaso": {
+   "plantilla": "herramientas/plantillas/traspaso.md",
+   "campos": [
+    "fecha",
+    "quienSoy",
+    "enCurso",
+    "esperando",
+    "dondeEsta",
+    "noEscrito",
+    "primeraAccion"
+   ],
+   "donde": {
+    "Jefe de proyecto": "proyecto.json › traspaso",
+    "Diseño": "diseno.json › traspaso",
+    "Desarrollo": "seguimiento.json › traspaso (sustituye a estado-proyecto.md y transiciones-chat.md, que no existen)",
+    "Arquitecto": "mejoras.json › puntoDePausa (+ claude/marco/cierre-arquitecto-*.md al cerrar un chat)"
+   },
+   "renovar": "al cerrar cada tanda (Diseño: cada sesión) o cada 7 días",
+   "trasCompactar": [
+    "releer encargo y reglas-comunes",
+    "python3 -I herramientas/modelo/validar.py .",
+    "python3 -I herramientas/modelo/ficha-semanal.py . --como-vamos",
+    "python3 -I herramientas/modelo/buzon.py . --para <rol>",
+    "leer el traspaso propio",
+    "cero preguntas a Carlos salvo lo que el traspaso diga «decide Carlos»"
+   ],
+   "regla": "traspaso con fecha > 7 días o sin primeraAccion = aviso"
+  },
+  "evaluarRetirar": {
+   "regla": "fichas[] e ítems del catálogo con revisarCuando y estado (vigente · retirada · sustituida); al cerrar cada proceso de MJ-17 se revisan las fichas que toca; texto-juez.md, revisor-previo.md (tope 24 puntos) y LEEME no crecen sin fundir",
+   "avisos": "ficha o ítem sin revisarCuando; pieza sin revisión > 30 días (informativo)"
+  },
+  "archivo": {
+   "herramienta": "herramientas/modelo/archivar.py <raiz> [--dias 14] [--aplicar]",
+   "mensajes": "hecho/superado > 14 días no citados por filas vivas → interno/archivo/mensajes-AAAA-MM.json; tope del vivo 1 MB",
+   "seguimiento": "INC cerrados y lotes aceptados > 60 días → interno/archivo/seguimiento-AAAA-MM.json (pendiente de herramienta; tope 2 MB)",
+   "quien": "Arquitecto, en punto limpio, a pedido de Carlos (autorizado 21-oct 12:46)"
+  },
+  "docsCodigo": {
+   "cabecera": "Al día hasta L-n · dueño: <módulo del mapa>",
+   "regla": "el lote que toca el área actualiza el doc y sube el L-n (par Busca/Pon); --lote avisa (no corta) si el Alcance toca un área cuyo doc no está en el Alcance",
+   "areas": {
+    "docs/claude/housekeeping.md": [
+     "HK"
+    ],
+    "docs/claude/housekeeping-2.md": [
+     "HK"
+    ],
+    "docs/claude/inventario.md": [
+     "INV"
+    ],
+    "docs/claude/calendario.md": [
+     "CAL"
+    ],
+    "docs/claude/flujos.md": [
+     "FL"
+    ],
+    "docs/claude/propiedades.md": [
+     "PR"
+    ],
+    "docs/claude/operacion.md": [
+     "OP"
+    ],
+    "docs/claude/usuarios-y-roles.md": [
+     "U"
+    ],
+    "docs/claude/servidor-php.md": [
+     "SRV"
+    ],
+    "docs/claude/shell-y-api.md": [
+     "SH",
+     "API"
+    ],
+    "docs/claude/proyecto.md": [
+     "PRJ",
+     "MOD"
+    ],
+    "docs/claude/tests-y-despliegue.md": [
+     "tests/"
+    ],
+    "docs/claude/historial.md": [],
+    "docs/claude/reglas-fijas.md": []
+   }
   }
  }
 }

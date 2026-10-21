@@ -1,0 +1,99 @@
+# Proceso 6 · Arquitectura (ARQUITECTURA-v1) · plan en cruce
+
+**Estado:** v1 · en cruce (Desarrollo, Diseño, Jefe de proyecto) · **Autor:** Chat Arquitecto · **Marco:** MJ-17 paso 6 (recorte acordado con Carlos el 21-oct: **la arquitectura del STR como está hoy**; la de la fábrica y la multiproyecto se diseñan cuando se construya la capa de proyectos, ADR-008/009, pero las decisiones del STR quedan en una forma que puedan heredar) · COBIT APO03.02 (arquitectura de referencia), APO03.05 (servicios de arquitectura: guiar y comprobar cada cambio), BAI03.01–.02 (diseño), APO04.06 (deuda), BAI10 (configuración, ya C1–C10) · ISO/IEC/IEEE 42010:2022 (por conocimiento de la norma: interesados y sus preocupaciones, puntos de vista y vistas, **decisiones de arquitectura con su razón**, reglas de correspondencia entre vistas, evaluación) · Referencias: Nygard, *Documenting Architecture Decisions* (ADR); Brown, modelo C4 (contexto, contenedores, componentes); Ford, Parsons, Kua, *Building Evolutionary Architectures* (funciones de aptitud: la regla de arquitectura como prueba automática); Harmel-Law, *Architecture Advice Process* (quien cambia decide, pero pide consejo y deja registro).
+
+## 0. Frontera
+
+Es **la arquitectura del producto STR tal como existe**: sus vistas (sistema, módulos, funcionalidades, relaciones, infraestructura, datos), las **reglas transversales** que la gobiernan, las **decisiones** que la formaron y la **deuda** que arrastra, y el proceso por el que cada lote la respeta o la cambia a propósito. **No es** la arquitectura de la fábrica (cola, `pw`, juez, hooks, servicio del modelo) ni la multiproyecto: esas se diseñan con la capa de proyectos. Lo que sí hace este proceso por ellas: dejar la **frontera dibujada** (qué piezas del mapa son del STR y cuáles de la fábrica) y el **registro de decisiones en una forma heredable** (una decisión = un archivo con estado, decisor y «revisar cuando»), para que la capa de proyectos no tenga que rehacerlo.
+
+## 1. Qué pide la norma y qué dicen los que la aplican
+
+La 42010 no pide diagramas: pide que la arquitectura tenga **interesados identificados con sus preocupaciones**, **vistas** que respondan a esas preocupaciones desde **puntos de vista** declarados, **correspondencia** entre vistas (que lo que dice una no contradiga otra) y, sobre todo, **decisiones registradas con su razón, sus alternativas y sus consecuencias**, más una **evaluación** periódica. COBIT APO03 añade que cada cambio se revise contra la arquitectura (03.05) y que la deuda se gestione (APO04.06). Lo que se aprende en la práctica:
+
+- **ADR (Nygard):** una decisión por archivo, corta, con contexto, decisión, consecuencias y **estado** (propuesta, aceptada, sustituida, derogada); lo que vale es la secuencia, no el documento perfecto; una decisión sustituida no se borra, se enlaza.
+- **C4 (Brown):** pocas vistas, cada una para un lector; el nivel de contexto y el de contenedores bastan casi siempre; el de componentes solo donde duele.
+- **Funciones de aptitud (Ford et al.):** una regla de arquitectura que nadie comprueba automáticamente se erosiona; cada regla importante debe ser una prueba, una guardia o una métrica con umbral, y se corre en cada cambio.
+- **Proceso de consejo (Harmel-Law):** no hay comité; quien va a cambiar una decisión pide consejo a los afectados y a quien sabe, y deja el ADR; así se decide rápido sin perder la trazabilidad.
+
+## 2. Lo que ya tenemos (la propuesta de arquitectura viva del 15-oct, cumplida en gran parte)
+
+Mapa del STR (`claude/arquitectura/mapa-str.md` + `interno/mapa-modulos.json`: 21 módulos con estado, 112 relaciones con tipo, 24 reglas, infraestructura, anclajes a REQ y guiones; explorador web). Reglas transversales RT-1…RT-25 con origen, dueño, módulos, excepciones, estado y una tabla de conflictos resuelta (S2.1/DA-32). Ficha de infraestructura y configuración (BAI10, línea base del 15-oct con lectura de hPanel). Ciclo de vida de los datos. ADR-001…ADR-010 en `str-manager-docs/decisiones/`. Líneas «Reglas transversales que toca» y «Mapa: módulos y relaciones que cambia» en la instrucción, puntos 15 y 16 del revisor previo, guardia M7 (todo lote aceptado deja fila en el historial del mapa), trinquete de relaciones por precisar (C6), rutas de regresión calculadas desde el mapa (`mapa.py --ruta`). Entorno declarado en `CLAUDE.md` § 5 (L-161). INC con `causaRaiz: arquitectura` (V5).
+
+## 3. Los datos de hoy (21-oct)
+
+| Dato | Valor | Lectura |
+|---|---|---|
+| Relaciones del mapa | 112; **76 «por precisar»** (68 %); 92 sin regla transversal asociada | el mapa sabe que dos módulos se tocan, pero no cómo ni bajo qué regla; la regresión por ruta se calcula sobre eso |
+| Reglas transversales | 25; **ninguna declara su guardia**: RT-19 (conexiones) se mide con `/api/diagnostico` a mano; RT-20 (`?v=`) la vigila el hook; RT-23 la cola; RT-24 `pw`; RT-1 (tenant) y RT-2 (datos reales) dependen de la guardia de `pw` y de la regla; RT-25 (sobre de capacidad) pide una prueba de ráfaga mensual **que nunca se ha corrido** | las reglas importantes viven como texto; la erosión no se nota hasta el INC |
+| Decisiones | 10 ADR: 5 de agosto (ADR-005 «localStorage temporal» sigue «aceptada» aunque ADR-001 la dejó atrás), 5 de octubre (006–010, de la fábrica, no del producto); **las decisiones de arquitectura del producto de octubre no tienen ADR**: conexión persistente y subidas en serie (INC-128, L-111/L-118), corte mensual único (DA-32), un rol por usuario (PT-7), cuenta de pruebas aparte (DA-47), JWT de 24 h sin revocación (DT-49) | las decisiones viven en DA, lotes e INC; nadie las encuentra como decisiones de arquitectura; 47 DA mezclan producto y arquitectura |
+| Deuda arquitectónica | sin etiqueta: DT-39 y DT-51 (`Migrate::run` en cada proceso, sin candado), DT-46 (setup con INSERT directo), **DT-49 (JWT con rol y 24 h sin revocación, severidad alto)**, DT-53 (API del modelo con GET que escribe), INC-188 (reloj del aparato manda el `updated_at`), INC-194 (el colaborador nuevo no recibe lo existente), INC-201 | 7 deudas de arquitectura entre 19 DT y 60 INC, sin plan ni dueño distinto del resto |
+| Dos fuentes | `str-manager-docs/arquitectura/*.md` (agosto: modelo de datos, auth y roles, multi-tenant, stack, contratos de API) frente a `mapa-str.md`, `reglas-transversales.md` y `datos-ciclo-vida.md` (octubre) | el lector que llega por el README del repo encuentra la versión de agosto |
+| Fábrica dentro del producto | PRJ y MOD son módulos del mapa del STR; ADR-006…010 están en `decisiones/` del STR; `mapa-str.md` tiene «Fábrica» en el índice de decisiones | la frontera de ADR-008/009 existe en el papel, no en el mapa |
+| INC por causa | arquitectura 6 (INC-128 crítico entre ellos), integración 8 | la causa se registra (V5) pero no vuelve al registro de decisiones ni a la deuda |
+| Línea base del mapa | hasta L-126; M7 obliga a dejar fila por lote (34 filas de historial) | el mapa sí se mantiene por lote; lo que no se mantiene es lo que no es «fila»: decisiones, reglas, deuda |
+
+## 4. Brechas
+
+| # | Brecha | Norma / referencia | Dato |
+|---|---|---|---|
+| Ba1 | Las decisiones de arquitectura del producto no se registran como decisiones: viven en DA, lotes e INC, sin estado ni «revisar cuando» | 42010 decisiones con razón; ADR | 0 ADR de producto en octubre; ADR-005 sin sustituir |
+| Ba2 | Las reglas transversales no declaran su guardia; la de capacidad no se ha corrido nunca | funciones de aptitud; APO03.05 | 25 RT, 0 con campo guardia |
+| Ba3 | 68 % de las relaciones sin tipo ni regla | 42010 correspondencia entre vistas; mapa como base de la regresión (RT-24) | 76 de 112 |
+| Ba4 | La deuda arquitectónica no se distingue de la deuda común ni tiene evaluación | APO04.06; 42010 evaluación | 7 deudas sin etiqueta; DT-49 alto sin decisión |
+| Ba5 | Dos fuentes para la misma vista (agosto / octubre) | un dato, una fuente; 42010 vistas declaradas | 9 archivos de agosto sin marca |
+| Ba6 | Nadie pregunta, al redactar un lote, «¿esto cambia una decisión?»: el revisor comprueba RT y mapa, no decisiones | APO03.05; proceso de consejo | L-118 cambió cómo se conecta a la base sin ADR |
+| Ba7 | La frontera fábrica / producto no está en el mapa | ADR-008/009 | PRJ, MOD y 5 ADR de fábrica dentro del mapa del STR |
+| Ba8 | La causa «arquitectura» de un INC no alimenta el registro: se cierra el INC y la decisión queda implícita | 42010 evaluación; K9 | 6 INC |
+
+## 5. Controles propuestos (A1–A8)
+
+| # | Control | Regla | Guardia |
+|---|---|---|---|
+| A1 | **Registro de decisiones vivo** | Una decisión de arquitectura del producto = un ADR en `str-manager-docs/decisiones/` (plantilla `herramientas/plantillas/adr.md`: contexto, opciones, decisión, consecuencias, **decisor** (Carlos vía DA-n, o Arquitecto), **estado** propuesta · aceptada · sustituida por · derogada, **revisarCuando**, y qué RT, relaciones, datos o infraestructura cambia) e índice `interno/arquitectura/decisiones.json` {id, titulo, fecha, estado, decisor, capa: producto · fábrica, sustituyeA, refs}. **Qué merece ADR:** cambiar cómo se guarda, se conecta, se autentica, se sincroniza, se borra o se respalda un dato; una dependencia nueva (servicio, librería, proveedor); una regla transversal nueva o cambiada; el sobre de capacidad; una estructura de módulos. Lo demás es DA (producto) o lote. Una DA que decide arquitectura se referencia desde un ADR corto, no se duplica. Primera pasada: ADR-005 → «sustituida por ADR-001»; ADR-011 conexión persistente y subidas en serie (INC-128); ADR-012 corte único (DA-32); ADR-013 un rol por usuario; ADR-014 cuenta de pruebas (DA-47); ADR-015 JWT (hoy) con `revisarCuando` ligado a DT-49. | `validar.py`: ADR sin estado, decisor o `revisarCuando` = aviso; INC `causaRaiz: arquitectura` cerrado sin `decision.ref` a un ADR o DT = aviso (A8) |
+| A2 | **Reglas transversales con guardia (funciones de aptitud)** | Cada RT declara `guardia: {tipo: hook · cola · pw · validar · prueba · manual · ninguna, ref, ultimaCorrida?}`. Las RT **críticas** (RT-1 tenant, RT-2 datos reales, RT-19 conexiones, RT-20 versión, RT-23 crítico, RT-24 regresión, RT-25 capacidad) deben tener guardia automática o «riesgo aceptado» con DA. RT-25 gana su prueba: guion de ráfaga en la cuenta de pruebas, una vez por tanda de 10 lotes aceptados o al tocar `database.php`/`str-api.js`, nunca en «negocio»; la ficha muestra la última corrida. | `validar.py`: RT sin `guardia` = aviso; RT crítica con `ninguna` sin DA = aviso · ficha: «RT críticas sin guardia», «última prueba de capacidad» |
+| A3 | **Relaciones precisadas por lote y por pasada** | Todo lote cuya ruta pasa por una relación «por precisar» la precisa en su fila del mapa (tipo, dato, regla o «sin regla»): ya existe la línea «Mapa:»; ahora es obligatoria para esas relaciones. Pasada del Arquitecto: 10 relaciones por tanda de fábrica hasta llegar a 0; el trinquete (C6) no retrocede. | `validar.py`: lote aceptado cuya ruta (`mapa.py --ruta`) cruza una relación por precisar y cuya fila del historial no la precisa = aviso · trinquete |
+| A4 | **Deuda arquitectónica con etiqueta, dueño y evaluación** | DT e INC con `arquitectura: true` (los 7 de hoy en la primera pasada); dueño Arquitecto o Desarrollo; entran a `trabajo[]` por su severidad (I6); **evaluación de arquitectura** por evento, no por calendario: cuando un módulo cambia de estado en el mapa, cuando un INC `arquitectura` es alto o crítico, o cada 20 lotes aceptados: media página en el ADR o en la ficha (qué se erosionó, qué deuda sube, qué decisión toca revisar). DT-49 (JWT) va a Carlos como DA con opciones en la primera evaluación. | `validar.py`: DT `arquitectura` sin dueño ni plazo = aviso (ya I6) · ficha: deuda arquitectónica abierta por severidad |
+| A5 | **Una fuente por vista** | Las vistas vigentes son: 0 sistema y 1 módulos (`mapa-str.md`), 2 funcionalidades (línea base `interno/linea-base/*.json` y explorador), 3 relaciones (`mapa-modulos.json`), infraestructura (`infraestructura-configuracion.md`), datos (`datos-ciclo-vida.md`), reglas (`reglas-transversales.md`), decisiones (`decisiones/`). Los archivos de agosto (`arquitectura/*.md`, `modulos/M*.md`, `producto/*.md` del repo) se marcan «histórico, sustituido por …» en su primera línea; no se borran. El README del repo apunta a las vistas vigentes. | `validar.py` (catálogo): archivo de agosto sin la marca = aviso |
+| A6 | **Revisión de arquitectura en cada lote** | Revisor previo, punto 23: «¿la instrucción cambia una decisión (ADR/DA), crea una dependencia, toca cómo se guarda, conecta, autentica, sincroniza, borra o respalda un dato, o el sobre de capacidad? → ADR o DA antes de encolar y línea `Decisión:` en la cabecera». `linea-base.py --lote`: Alcance con `api/config/`, `database.php`, `auth`, `jwt`, `retencion`, `cron`, `sync-ical`, `drive`, `secrets` sin línea «Decisión: ADR-n | DA-n | ninguna (motivo)» = rc 2. Proceso de consejo: quien redacta pide consejo al Arquitecto por el buzón (una pregunta) antes de escribir el ADR; el Arquitecto no veta, registra. | `--lote` rc 2 · punto 23 |
+| A7 | **Frontera fábrica / producto en el mapa** | PRJ y MOD pasan a `familia: fabrica` en el mapa (siguen en el explorador, en gris, con sus relaciones al producto como «terceros»); ADR-006…010 llevan `capa: fabrica` en el índice; `claude/marco/mapa-fabrica.md` nace con la vista 0 de la fábrica (cola, `pw`, juez, hooks, despertador, panel, servicio del modelo, repos) y nada más: es el punto de partida de la arquitectura de la fábrica cuando llegue la capa de proyectos. | `validar.py`: módulo sin `familia` = aviso · nada más |
+| A8 | **El INC de arquitectura vuelve al registro** | Un INC con `causaRaiz: arquitectura` se cierra con `decision.ref` a un ADR (si cambió una decisión) o a una DT `arquitectura` (si quedó deuda); la revisión de incidente (I5) lo exige en `queCambia`. INC-128 → ADR-011. | `validar.py` aviso (A1) |
+
+Lo que **no** cambia: el mapa lo mantiene el Arquitecto y Diseño corrige los hechos de producto; las DA siguen siendo de Diseño con Carlos; M7, las líneas «RT» y «Mapa» y los puntos 15–16 siguen; C1–C10 (configuración) y la ficha de infraestructura no cambian; nada de esto toca el código del STR salvo la prueba de ráfaga (guion en `pw`, lote de fábrica).
+
+## 6. Criterios
+
+**Una decisión está bien tomada (entrada al registro):** contexto con el dato que la motivó (INC, DA, límite del entorno), al menos dos opciones con su consecuencia, decisor y fecha, estado, qué RT/relación/dato/infraestructura cambia, `revisarCuando` (un dato o un evento, no una fecha).
+**Un lote respeta la arquitectura (salida del lote):** línea `Decisión:` coherente con lo que toca · RT citadas existen y ninguna «en conflicto» · fila del mapa (M7) con las relaciones por precisar que cruzó, precisadas · si cambió una decisión, ADR con estado antes del commit.
+**Evaluación (por evento):** deuda arquitectónica por severidad con dueño · RT críticas con guardia 7/7 · relaciones por precisar con tendencia a 0 · última prueba de capacidad dentro de la tanda · decisiones con `revisarCuando` vencido = 0.
+**Finalización de tanda (filas nuevas del semáforo):** RT críticas sin guardia · deuda arquitectónica alta o crítica sin decisión · relaciones por precisar (trinquete) · última prueba de capacidad.
+
+## 7. Quién, cuándo, cómo
+
+| Quién | Cuándo | Qué |
+|---|---|---|
+| Carlos | Cuando una decisión toca datos reales, dinero, seguridad o el proveedor | Decide por DA (Diseño la lleva); el ADR la registra. Primera: DT-49 (JWT). |
+| Arquitecto | Al redactarse un lote que cambia una decisión · en cada evaluación · por tanda | Registra ADR, mantiene el índice, las RT con guardia, el mapa y la frontera; pasada de relaciones; la evaluación; convierte INC `arquitectura` en ADR o DT. |
+| Desarrollo | Al redactar | Línea `Decisión:`; pide consejo por el buzón cuando toca una de las áreas de A6; precisa en la fila del mapa las relaciones que cruza; `arquitectura: true` en DT e INC cuando la causa lo es. |
+| Diseño | Al definir un REQ · al clasificar | Señala en el REQ si toca una regla transversal o una decisión; lleva a Carlos las DA de arquitectura con impacto en producto; corrige hechos de producto del mapa. |
+| Jefe de proyecto | Al ordenar | La deuda arquitectónica entra a `trabajo[]` por su severidad (clase f o g); la evaluación por evento la dispara él al ver el módulo cambiar de estado o los 20 lotes. |
+| Juez | En el veredicto | Propone `arquitectura: true` cuando la causa lo es (ya propone `causaRaiz`). |
+
+## 8. Orden de instalación (LM-67)
+
+1. `herramientas/plantillas/adr.md`, `interno/arquitectura/decisiones.json` (índice con los 10 ADR: estado, decisor, capa; ADR-005 sustituida), `esquema.json › arquitectura` (qué merece ADR, áreas de A6, RT críticas, forma de `guardia`), `validar.py` A1/A2/A4/A5/A7/A8 como **avisos** y `--lote` con la línea `Decisión:` (rc 2 solo para las áreas de A6).
+2. Primera pasada de decisiones: ADR-011 (conexión persistente y subidas en serie, INC-128), ADR-012 (corte único, DA-32), ADR-013 (un rol por usuario), ADR-014 (cuenta de pruebas, DA-47), ADR-015 (JWT, con DT-49); `reglas-transversales.md` y `mapa-modulos.json › reglas[]` con `guardia` en las 25 RT.
+3. Deuda: `arquitectura: true` en DT-39, 46, 49, 51, 53 e INC-188, 194, 201 (Desarrollo escribe; yo le paso la lista); DT-49 a Carlos por Diseño como DA con opciones.
+4. Fuentes: marca «histórico, sustituido por …» en los archivos de agosto; README del repo con las vistas vigentes; PRJ y MOD a `familia: fabrica`; `mapa-fabrica.md` vista 0.
+5. Revisor previo punto 23 y plantilla de instrucción con `Decisión:`; ficha con las filas nuevas.
+6. Prueba de ráfaga de RT-25 como guion de `pw` en la cuenta de pruebas (lote de fábrica aparte, LM-68, cuando la cola lo permita); hasta entonces la ficha dice «nunca» en rojo: línea de partida.
+7. Pasada de relaciones: 10 por tanda de fábrica (Arquitecto), empezando por las que cruzan las rutas de los lotes previstos.
+
+## 9. Cruce
+
+1. **Desarrollo:** la línea `Decisión:` y el rc 2 de `--lote` solo en las áreas de A6 (`api/config/`, `database.php`, auth/jwt, retención, cron, iCal, Drive, secretos): ¿te cabe o frena? ¿`arquitectura: true` en DT e INC te cuesta algo? Para la prueba de ráfaga (A2): ¿qué guion de `pw` reutilizas (12 lecturas a la vez de L-118, `diagnostico.spec.js`) y qué umbral propones (RT-19: cualquier 1040/1203 = rojo)?
+2. **Diseño:** DT-49 (JWT con rol y 24 h sin revocación) a Carlos como DA: ¿opciones que ves desde producto (cerrar sesión al cambiar rol o dar de baja; token corto con renovación; lista de revocados)? ¿Qué RT de las 25 tienen impacto directo en lo que ve el huésped o el colaborador y quieres que su guardia sea prueba N2 y no solo regla?
+3. **Jefe de proyecto:** la deuda arquitectónica entra a `trabajo[]` por severidad: ¿clase f o g? ¿La evaluación por evento (módulo cambia de estado · INC `arquitectura` alto/crítico · 20 lotes aceptados) la disparas tú o la ficha?
+4. **Carlos (tras el cruce):** DT-49 como DA; si tienes la ISO/IEC/IEEE 42010 en PDF, pásamela y contrasto; la frontera (PRJ y MOD a «fábrica», `mapa-fabrica.md` solo vista 0).
+
+## Fuentes
+COBIT 2019 APO03, APO04, BAI03, BAI10 (`interno/cobit.json`) · ISO/IEC/IEEE 42010:2022 (por conocimiento) · Nygard 2011 · Brown, C4 · Ford, Parsons, Kua 2017 · Harmel-Law 2021 · `claude/marco/propuesta-arquitectura-viva-2026-10.md` · `claude/arquitectura/mapa-str.md`, `reglas-transversales.md`, `infraestructura-configuracion.md`, `datos-ciclo-vida.md` · `interno/mapa-modulos.json`, `linea-base/trinquetes.json`, `seguimiento.json` (21-oct) · `str-manager-docs/decisiones/ADR-001…010`.

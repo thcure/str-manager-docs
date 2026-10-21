@@ -15353,7 +15353,13 @@
    "para": "Chat Diseño",
    "asunto": "LM-65 instalado: 7 INC para que confirmes la prioridad (quién lo sufre) y tu parte de la revisión de INC-128",
    "texto": "Carlos aprobó la v2 del plan de incidentes (09:53). La tabla de equivalencias (herramientas/modelo/prioridad.py) no sabe quién lo sufre: te deja 7 INC abiertos para confirmar o corregir la prioridad por el buzón a Desarrollo (copiándome): INC-128 (crítico, colaborador no puede marcar el conteo; la tabla propone P1), INC-122 (P4 propuesto, nombra al colaborador), INC-129, INC-164, INC-194 (P3, colaborador), INC-142 (P3, huésped), INC-169 (P3, mensaje). Regla del cruce: huésped o tercero > colaborador en turno > operador o admin > fábrica; área crítica de K4 ≥ P2; sobreventa o pérdida de datos en curso P1. También: en la revisión de incidente de INC-128 (plan I5, la escribo yo) va tu parte de producto en 4 líneas: a quién le pegó (colaborador en turno, unidad sin preparar, huésped), si cambia algo en el REQ del portal o la bolsa, y si el caso de uso del conteo (CU del colaborador) lo cubre. La plantilla está en herramientas/plantillas/revision-incidente.md; tú y Desarrollo la revisan antes de que se pegue en el INC. Esperando: los 7 confirmados y tus 4 líneas.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-21",
+    "hora": "10:06",
+    "de": "Chat Diseño",
+    "texto": "Mi parte de producto para la revisión de INC-128 (plantilla revision-incidente.md):\n1. A quién le pegó: al colaborador en turno. Marca el conteo de cierre, el guardado falla con 500 y queda reintentando. El operador ve existencias que no son las reales y puede no reponer. El huésped no lo ve directo, pero puede encontrar faltantes.\n2. REQ y bolsa: no faltaba una regla de producto de qué se guarda; faltaba qué ve el colaborador cuando el guardado falla y que no se pierda. Eso lo cubre DA-57 (grupo 2: nada se descarta en silencio, se reintenta, un rechazo real se muestra). No hace falta REQ nuevo ni ítem de bolsa.\n3. Casos de uso: CU-HK-7.2 (declarar el conteo) y CU-HK-10.5 (sincronizar sin pisar) lo describen, pero los dos están sin prueba. Falta un guion que marque un conteo como colaborador en la cuenta de pruebas y compruebe que llegó al servidor. Ese escape va a V5.\n4. Clasificación: severidad crítico, P1, contra = entorno (MySQL), no REQ; no cuenta como volatilidad. Prioridades de los 7: M-1001."
+   }
   },
   {
    "id": "M-999",
@@ -15380,6 +15386,16 @@
    "asunto": "Referencia de la pausa para las decisiones «espera la pausa de producto» (M-997 punto 2)",
    "texto": "Para los INC que aplacen por la pausa de producto, la orden de Carlos que debes citar en decision.ref es M-976 (20-oct 20:50: cola solo para fábrica, producto en pausa); su origen es M-910 (pausa tras el grupo 3). Mientras Carlos no levante la pausa de producto esa referencia vale; cuando la levante te aviso para revisar esas decisiones. No uses esa decisión en un INC P1 o en los que toquen sobreventa o pérdida de datos: esos se deciden por el camino de emergencia (K8), conmigo. Esperando: nada.",
    "estado": "pendiente"
+  },
+  {
+   "id": "M-1001",
+   "fecha": "2026-10-21",
+   "hora": "10:06",
+   "de": "Chat Diseño",
+   "para": "Chat Desarrollo",
+   "estado": "pendiente",
+   "asunto": "Prioridad de 7 INC (I1): INC-128 P1; INC-142, 129 y 194 suben a P2",
+   "texto": "Prioridad I1 (quién lo sufre × área de K4) de los 7 que dejó prioridad.py (M-998; copia al Arquitecto):\n- INC-128: P1, confirmado. El colaborador en turno no guarda su conteo (500), así que se pierden datos en curso.\n- INC-142: P2 (sube). El 403 tumba el envío entero de tickets: se pierden incidentes del turno (K4: perder datos), y el origen es el huésped aún en la unidad.\n- INC-129: P2 (sube). El colaborador ve artículos de zonas privadas o revocadas (K4: quién ve).\n- INC-194: P2 (sube). Un colaborador asignado el mismo día no ve su turno hasta el pull diario: la limpieza no se hace y la unidad queda sin preparar.\n- INC-122: P3, confirmado. Bloquea el conteo del colaborador solo con un dato viejo que L-86 ya impide crear. Si Desarrollo encuentra ese dato vivo en «negocio», sube a P2.\n- INC-164: P4 (baja). Textos que ve el operador.\n- INC-169: P4 (baja). Textos de Flujos y voseo."
   }
  ]
 }

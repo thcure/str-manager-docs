@@ -1,0 +1,94 @@
+# Proceso 7 · Conocimiento y relevos (CONOCIMIENTO-v1) · plan en cruce
+
+**Estado:** v1 · en cruce (Desarrollo, Diseño, Jefe de proyecto) · **Autor:** Chat Arquitecto · **Marco:** MJ-17 paso 7 · COBIT BAI08.01 (identificar y clasificar fuentes), BAI08.02 (organizar y contextualizar), BAI08.03 (usar y compartir), BAI08.04 (evaluar y retirar), APO14 (datos: retención de lo que la fábrica produce) · ISO 30401:2018 (sistemas de gestión del conocimiento, por conocimiento de la norma: adquirir, aplicar, **retener** y **manejar el conocimiento obsoleto**; el conocimiento tácito se vuelve explícito donde sirve, no en todas partes) · ADR-010 (el conocimiento vive fuera de Claude; política de memoria y depuración) · Referencias: Diátaxis (cuatro tipos de documento: tutorial, guía, referencia, explicación; mezclarlos es lo que hace ilegible un documento), Google *Software Engineering at Google* cap. 3 y 10 (compartir conocimiento; la documentación como código, con dueño y revisión), Nonaka (SECI: la lección pasa de tácita a explícita y luego a rutina), y la práctica de los agentes con contexto limitado: **revelación progresiva** (lo que se carga siempre es un índice corto; el detalle se lee a demanda).
+
+## 0. Frontera
+
+Es **cómo la fábrica sabe lo que sabe**: qué piezas de conocimiento existen, dónde vive cada una, quién la escribe, quién la lee y cuándo (al arrancar o a demanda), cómo una lección se vuelve regla, cómo se releva un chat o se sobrevive a una compactación sin preguntarle a Carlos, y qué se retira o se archiva. **No es** el diseño del servicio de conocimiento de la fábrica ni los agentes por proyecto (ADR-010 F-n, capa de proyectos): eso llega después; lo que se haga aquí (mapa del conocimiento, lecciones con destino, traspaso estándar, archivo del buzón) es lo que ese servicio cargará.
+
+## 1. Qué pide la norma y qué dicen los que la aplican
+
+BAI08 pide cuatro cosas en orden: saber qué fuentes de conocimiento hay y clasificarlas (08.01), darles contexto y estructura para que se encuentren (08.02), que se usen de verdad (08.03) y **evaluarlas y retirarlas** cuando caducan (08.04). La 30401 añade que el sistema debe decir cómo se retiene el conocimiento cuando alguien se va (aquí: cuando un chat se cierra o se compacta) y cómo se maneja lo obsoleto. Lo que se aprende en la práctica:
+
+- **Diátaxis:** un documento sirve a un lector en un momento: referencia (consultar), guía (hacer una tarea), explicación (entender), tutorial (aprender). Nuestro `CLAUDE.md` es a la vez referencia, guía y reglamento, y por eso está lleno.
+- **Google (documentación como código):** cada documento tiene dueño, se revisa como el código y se borra cuando caduca; lo que nadie lee, sobra.
+- **Revelación progresiva (agentes):** el contexto que un agente carga siempre debe ser pequeño y estable (un índice y las reglas); el detalle se abre cuando la tarea lo pide. Cada carácter que entra al arranque se paga en todos los lotes y en todos los chats.
+- **SECI:** una lección que se queda en una nota es tácita; se vuelve conocimiento cuando cambia una plantilla, una guardia, una ficha o un ADR (ya lo exigen V5, I5 e I7 para los escapes: el principio se extiende a toda lección).
+
+## 2. Lo que ya tenemos
+
+Encargos por rol y `reglas-comunes` (`instrucciones.json`); `CLAUDE.md` con tope de 12 000 caracteres vigilado por `claude-md.test.js` y `ctx.js` que inyecta `reglas-fijas.md` a la CLI; `docs/claude/<área>.md` (14 archivos) que la CLI lee por lote; fichas COBIT (19) y catálogo de prácticas, patrones y herramientas (21, LM-32) en `conocimiento.json`; `situaciones/<rol>.json`; lecciones del JP (`proyecto.json`), `patrones-codigo.md` (Desarrollo), revisiones de incidente (I5) con `queCambia`, escapes con `destino` (I7); ADR (15) y RT (25); planes de proceso en `claude/marco/`; ficha BAI08.03-t (relevo entre chats) y BAI08-l (dónde se guarda cada lección); regla «tras cada compactación, relee tu encargo y reglas-comunes»; `puntoDePausa` de MJ-17; `traspaso` del JP; `interno/archivo/` (REQ históricos, B4).
+
+## 3. Los datos de hoy (21-oct)
+
+| Dato | Valor | Lectura |
+|---|---|---|
+| Lo que la CLI carga siempre | `CLAUDE.md` **11 981 / 12 000** caracteres + `reglas-fijas.md` 2 717 inyectados; `docs/claude/` 408 KB en 14 archivos (housekeeping 61 KB, servidor-php 59 KB, tests-y-despliegue 59 KB) | el índice está lleno; el detalle crece sin tope ni cabecera «al día hasta L-n» |
+| Lo que un chat carga al arrancar | encargo 1 000–5 400 caracteres + reglas-comunes 3 354 + «lees al arrancar»: `proyecto.json`, `diseno.json` (156 KB), `seguimiento.json` (**1,4 MB**), `mensajes.json` (**1,8 MB, 1 042 mensajes, +195 esta semana**) | cada visita al buzón lee 1,8 MB; nada se archiva; el buzón es el archivo de todo (lecciones, decisiones, evidencias) |
+| Lecciones | en 7 sitios: `proyecto.json › lecciones[]` (8), `patrones-codigo.md`, revisiones de incidente (1), `situaciones/*.json` (106 entradas, **ninguna desde el 13-oct**), `mejoras.json` (17 MJ), fichas (19), catálogo (21, todas «probada», ninguna «estándar» ni «retirada») | la lección existe, pero no hay regla de a dónde va a parar ni quién la convierte; `situaciones` murió sin que nadie lo decidiera |
+| Documentación del código desactualizada | DT-32, DT-33, DT-34, DT-48 (`tests/README.md`, `tests-y-despliegue.md`, `shell-y-api.md` dicen cosas de antes de la poda de reglas) | el hook exige tocar `CLAUDE.md` o el mapa del área por lote, pero no que lo que ya está siga siendo cierto |
+| Relevos | chat de Desarrollo relevado el 9-oct (`desarrollo-anterior.json`), Arquitecto cerrado el 17-oct con `cierre-arquitecto-2026-10-17.md`, JP nuevo el 18-oct con `traspaso` en `proyecto.json`; esta sesión del Arquitecto lleva varias compactaciones (resumen al inicio + regla de releer) | tres formas distintas de traspaso; ninguna plantilla; lo que no quedó escrito se perdió (lección del token del 10-oct) |
+| Fichas y catálogo | 19 fichas vigentes, última revisión 15-oct; 21 ítems del catálogo sin `revisarCuando`; `cobit.json` sí se actualizó en cada proceso de MJ-17, las fichas no | sin BAI08.04: nada se evalúa ni se retira |
+| Texto que crece por acumulación | `texto-juez.md` 13,9 KB (36 líneas-regla), `revisor-previo.md` 23 puntos (9,6 KB), `instruccion.md` 9,2 KB, `pw/LEEME.md` 13,8 KB | cada proceso de MJ-17 añadió; nadie ha quitado |
+
+## 4. Brechas
+
+| # | Brecha | Norma / referencia | Dato |
+|---|---|---|---|
+| Bc1 | No hay un mapa del conocimiento: qué pieza vive dónde, quién la escribe, quién la lee y cuándo, cuánto pesa | BAI08.01/.02 | 7 sitios de lecciones; 3 formas de traspaso |
+| Bc2 | El contexto fijo no tiene presupuesto por rol: `CLAUDE.md` lleno, el buzón de 1,8 MB se lee entero, `docs/claude` sin tope | revelación progresiva; Diátaxis | 11 981/12 000; 1,8 MB |
+| Bc3 | Las lecciones no tienen destino obligatorio ni dueño de la conversión | SECI; BAI08.03 | `situaciones` muerto; 8 lecciones del JP sin guardia salvo las de MJ-17 |
+| Bc4 | El relevo y la compactación no tienen plantilla ni prueba («arranca sin preguntar») | 30401 retención; BAI08.03-t | tres traspasos distintos |
+| Bc5 | Nada se evalúa ni se retira: fichas, catálogo, reglas del juez, puntos del revisor solo crecen | BAI08.04; 30401 obsoleto | 0 retiradas; 19 fichas sin revisar desde el 15-oct |
+| Bc6 | El buzón y `seguimiento.json` no se archivan: son a la vez canal y memoria | APO14 retención | 1 042 mensajes, +195/semana |
+| Bc7 | La documentación del código puede quedar falsa sin que nadie lo note | Google: docs como código | 4 DT de docs |
+| Bc8 | La frontera con el servicio de conocimiento de la fábrica (ADR-010) no está escrita en términos de piezas | ADR-010 | — |
+
+## 5. Controles propuestos (Cn1–Cn8)
+
+| # | Control | Regla | Guardia |
+|---|---|---|---|
+| Cn1 | **Mapa del conocimiento** | `conocimiento.json › piezas[]`: una fila por pieza {id, nombre, ruta, tipo Diátaxis (reglamento · referencia · guía · explicación · lección), capa (fábrica · proyecto), escritor, lectores, **cuándo se lee** (arranque · por lote · a demanda), tope (caracteres) o «sin tope», revisarCuando, ultimaRevision}. `conocimiento.py` mide tamaño y edad de cada pieza y las imprime en la ficha. Entran de inmediato: encargos, reglas-comunes, `CLAUDE.md` y sus secciones, `reglas-fijas.md`, `docs/claude/*`, `texto-juez.md`, `LEEME` de pw, plantillas, fichas, catálogo, ADR, RT, mapa, planes de proceso, lecciones, traspasos, buzón. | `validar.py`: pieza con ruta que no existe = aviso; pieza de arranque sin tope = aviso · ficha: tamaño y edad |
+| Cn2 | **Presupuesto de arranque por rol** (revelación progresiva) | Lo que se lee **siempre** tiene tope y es índice + reglas; el detalle va a piezas «por lote» o «a demanda». CLI: `CLAUDE.md` ≤ 12 000 (tope actual) **podado**: § 1 reglas fijas (igual que `reglas-fijas.md`), § 2 índice de `docs/claude` con una línea por área, § 3 reglas de git/cola, § 4 plantilla del mensaje en 4 líneas, § 5 entorno en **6 líneas** y el detalle en `docs/claude/entorno.md` (nuevo); meta ≤ 9 000 para dejar 3 000 de margen. `docs/claude/<área>.md` ≤ 40 000 (housekeeping, servidor-php y tests-y-despliegue se parten por tema). Chats: encargo ≤ 6 000; «lees al arrancar» con lectura **parcial** del buzón (solo pendientes y los últimos 7 días; el resto a demanda) y de `seguimiento.json` (lo vivo). Nada entra a una pieza de arranque sin sacar algo del mismo tamaño (Busca/Pon, K1). | `claude-md.test.js` (ya) · P4: `aplicar.js` registra el tamaño de `CLAUDE.md` y de `docs/claude` en `pruebas.json › tamano` (K3) · ficha: piezas de arranque sobre su tope |
+| Cn3 | **Toda lección tiene destino** | Una lección (del JP, de Desarrollo, de Diseño, del juez, de una revisión de incidente, de Carlos) lleva `destino {tipo: guardia · punto · plantilla · ficha · ADR · catálogo · riesgo, ref}` o `pendiente` con dueño de la conversión (el Arquitecto para lo de proceso; cada rol para lo suyo). Fuente única por rol: JP `proyecto.json › lecciones[]`; Desarrollo `patrones-codigo.md` (código) y sus `revision` (proceso); Diseño sus `lecciones[]` en `diseno.json`; Arquitecto `mejoras.json` y las fichas. **`situaciones/*.json` se cierran** (históricos): lo que registraban lo cubren hoy las lecciones con destino, las revisiones de incidente y los INC con `causaRaiz: proceso`. La ficha cuenta lecciones sin destino y su edad. | `validar.py`: lección sin destino > 7 días = aviso · ficha |
+| Cn4 | **Traspaso estándar y prueba de arranque** | Plantilla `herramientas/plantillas/traspaso.md` (una página): quién soy y qué escribo · en curso (con ref) · esperando (de quién) · dónde está cada cosa que no sea obvia · lo que no está escrito en ningún lado · primera acción del que llega. Cada chat mantiene su traspaso en **su** archivo (JP `proyecto.json › traspaso`; Diseño `diseno.json › traspaso`; Desarrollo `seguimiento.json › traspaso`; Arquitecto `mejoras.json › puntoDePausa` + `claude/marco/cierre-arquitecto-*.md`) con fecha; se renueva al cerrar cada tanda o cada 7 días. **Tras una compactación**, la primera acción es fija: releer encargo y reglas-comunes, correr `validar.py` y `--como-vamos`, leer el traspaso propio y los pendientes del buzón; **cero preguntas a Carlos** salvo lo que el traspaso diga «decide Carlos». Prueba de arranque: un chat nuevo del rol debe decir en su primer mensaje qué tiene en curso y qué espera, sin que Carlos aclare nada. | `validar.py`: traspaso con fecha > 7 días o sin `primeraAccion` = aviso · ficha |
+| Cn5 | **Evaluar y retirar** (BAI08.04) | Cada ficha COBIT, ítem del catálogo, regla del juez y punto del revisor tiene `revisarCuando` (evento o «al cerrar el proceso n de MJ-17») y estado vigente · retirada · sustituida. Al cerrar cada proceso de MJ-17 se revisan las fichas que toca (hoy: 0–7 pendientes de esa revisión); el catálogo pasa un ítem a «estándar» solo con evidencia en dos proyectos (ADR-008) y a «retirada» cuando una guardia lo reemplaza. Regla de crecimiento: `texto-juez.md`, `revisor-previo.md` y `LEEME` no crecen sin quitar o fundir: tope de 24 puntos en el revisor (el 24 entra si otro sale o se funde). | `validar.py`: ficha o ítem sin `revisarCuando` = aviso; pieza por encima del tope = aviso · ficha: piezas sin revisión > 30 días |
+| Cn6 | **Archivo del buzón y de lo vivo** | `herramientas/modelo/archivar.py` (Arquitecto, en punto limpio): mueve a `interno/archivo/mensajes-AAAA-MM.json` los mensajes «hecho» o «superado» de más de **14 días**, conservando ids (validar y el panel siguen viéndolos por el archivo, como `reqs-historial.json`); meta: `mensajes.json` < 400 KB. `seguimiento.json`: INC cerrados y lotes aceptados de más de 60 días a `archivo/seguimiento-AAAA-MM.json` (los contadores y trinquetes leen ambos). Carlos pide el archivo; no corre solo. | `validar.py`: `mensajes.json` > 1 MB o `seguimiento.json` > 2 MB = aviso · ficha |
+| Cn7 | **Documentación del código cierta** | Cada `docs/claude/<área>.md` abre con «Al día hasta L-n · dueño: <módulo del mapa>»; el lote que toca el área la actualiza **y sube el L-n** (hook: ya exige tocar el doc; ahora el `Busca/Pon` de la cabecera es parte de la instrucción); las 4 DT de docs (32, 33, 34, 48) salen en **un lote estándar de documentación**. | `--lote`: Alcance con un área cuyo doc no está en el Alcance = aviso (no corta) · ficha: áreas con «al día hasta» más viejo que su último lote |
+| Cn8 | **Frontera con ADR-010** | El mapa de piezas marca `capa` y `exportable: sí/no` (lo que el servicio de conocimiento de la fábrica cargará: reglas, fichas, catálogo, ADR, plantillas; no: buzón, seguimiento del proyecto). Nada más por ahora. | — |
+
+Lo que **no** cambia: un escritor por archivo; el hook exige `CLAUDE.md` o el mapa del área en el mismo commit; `reglas-fijas.md` = `CLAUDE.md` § 1; el buzón sigue siendo el canal; las fichas COBIT y el catálogo siguen en `conocimiento.json`; la política de memoria y depuración de ADR-010.
+
+## 6. Criterios
+
+**Una pieza está bien puesta:** tiene fila en el mapa (tipo, capa, escritor, lectores, cuándo se lee, tope o sin tope, revisarCuando) y su ruta existe. **Un arranque está bien hecho:** el chat o la CLI carga solo piezas «arranque» dentro de su tope; lo demás a demanda. **Una lección está cerrada:** tiene destino con ref, o pendiente con dueño y menos de 7 días. **Un relevo está bien hecho:** traspaso con fecha ≤ 7 días y primera acción; el que llega no pregunta. **Finalización de tanda (filas nuevas del semáforo):** piezas de arranque sobre su tope = 0 · lecciones sin destino > 7 días = 0 · traspasos vencidos = 0 · piezas sin revisión > 30 días (informativo el primer mes) · tamaño del buzón.
+
+## 7. Quién, cuándo, cómo
+
+| Quién | Cuándo | Qué |
+|---|---|---|
+| Carlos | Ahora · cuando se le pida el archivo | Decide el tope de `CLAUDE.md` (podar a 9 000 con `entorno.md` aparte, o subir el tope); pide el archivo del buzón; cierra `situaciones`. |
+| Arquitecto | LM-69 · al cerrar cada proceso · semanal | Mapa de piezas, `conocimiento.py`, `archivar.py`, plantilla de traspaso, poda de `CLAUDE.md` (instrucción para Desarrollo), revisión de fichas y catálogo, conversión de lecciones de proceso. |
+| Desarrollo | Al redactar · por lote | `CLAUDE.md` dentro del presupuesto; cabecera «al día hasta L-n» en `docs/claude`; sus lecciones con destino; `traspaso` en `seguimiento.json`; lote estándar de documentación. |
+| Diseño | Al definir · al cerrar tanda | `lecciones[]` con destino en `diseno.json`; `traspaso`; revisión de las piezas de producto (`requerimientos-*.md`, lecturas). |
+| Jefe de proyecto | Al cerrar cada tanda | `lecciones[]` con destino; `traspaso` renovado; fila de la ficha en «¿cómo vamos?» si hay rojos de conocimiento. |
+| CLI | Por lote | Lee `CLAUDE.md` (índice) + el doc del área; actualiza la cabecera del doc. |
+
+## 8. Orden de instalación (LM-69)
+
+1. `conocimiento.json › piezas[]` (mapa inicial: ~40 piezas con tope y revisarCuando), `conocimiento.py` (tamaño, edad, topes), `esquema.json › conocimiento`, `validar.py` Cn1/Cn3/Cn4/Cn5/Cn6 como avisos; `ficha-semanal.py` con el bloque de conocimiento.
+2. Plantilla `traspaso.md`; `traspaso` con fecha en los cuatro archivos; `situaciones/*.json` marcados históricos.
+3. `destino` en las lecciones existentes (JP 8, Desarrollo las de `patrones-codigo.md`, Arquitecto las de MJ-17) y `revisarCuando` en las 19 fichas y los 21 ítems del catálogo (Arquitecto).
+4. Poda de `CLAUDE.md` (instrucción de Desarrollo, lote estándar: § 4 y § 5 a 4 y 6 líneas, `docs/claude/entorno.md` nuevo, cabeceras «al día hasta L-n» en los 14 docs, las 4 DT de docs); `aplicar.js` mide `CLAUDE.md` y `docs/claude` en K3.
+5. `archivar.py` y primer archivo del buzón (mensajes «hecho» de más de 14 días) a pedido de Carlos, en punto limpio.
+6. Revisión de las fichas de los procesos 0–7 (BAI10, BAI02, BAI07, BAI03/06, DSS02, BAI11, APO03, BAI08) con `revisarCuando`.
+
+## 9. Cruce
+
+1. **Desarrollo:** la poda de `CLAUDE.md` a ~9 000 (§ 4 plantilla en 4 líneas, § 5 entorno en 6 líneas + `docs/claude/entorno.md`): ¿qué sacarías tú primero, y qué no se puede sacar porque la CLI lo necesita en cada lote? ¿Partir `housekeeping.md`, `servidor-php.md` y `tests-y-despliegue.md` (≈60 KB cada uno) por tema te ayuda o te estorba al redactar? La cabecera «Al día hasta L-n» y el aviso de `--lote` cuando el Alcance toca un área sin su doc: ¿te cabe? `traspaso` en `seguimiento.json`: ¿lo mantienes tú?
+2. **Diseño:** `lecciones[]` con destino en `diseno.json` y `traspaso` ahí: ¿te cabe? ¿Qué piezas de producto (`requerimientos-*.md`, lecturas, `diseno.json › bolsa`) quieres en el mapa como «a demanda» y cuáles lees al arrancar? ¿Cerrar `situaciones/diseno.json` como histórico?
+3. **Jefe de proyecto:** `destino` en tus 8 lecciones (la de L-160 ya es guardia); traspaso renovado por tanda; lectura parcial del buzón (pendientes + 7 días): ¿pierdes algo? ¿Qué filas de conocimiento quieres en «¿cómo vamos?» (propongo ninguna salvo rojos)?
+4. **Carlos (tras el cruce):** podar `CLAUDE.md` a 9 000 (recomendado) o subir el tope; autorizar el primer archivo del buzón; cerrar `situaciones`.
+
+## Fuentes
+COBIT 2019 BAI08, APO14 (`interno/cobit.json`) · ISO 30401:2018 (por conocimiento) · ADR-010 y `claude/marco/adr-conocimiento-y-agentes-2026-10.md`, `memoria-y-depuracion-2026-10.md` · Diátaxis (Procida) · *Software Engineering at Google* (2020) · Nonaka y Takeuchi (1995) · `interno/conocimiento.json` (fichas BAI08-l, BAI08.03-t, catálogo LM-32) · `interno/situaciones/`, `proyecto.json › lecciones`, `mensajes.json`, `seguimiento.json`, `instrucciones.json` (21-oct) · `str-manager/CLAUDE.md` y `docs/claude/` (tamaños leídos en LENOVO, 21-oct).

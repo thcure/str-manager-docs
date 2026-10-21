@@ -39,13 +39,46 @@ test('calcular: corridas, repruebas, rojos ajenos, minutos de cola, aceptados y 
   assert.strictEqual(r.semanas[0].semana, '2026-10-05'); assert.strictEqual(r.semanas[0].lotes, 1);
 });
 
-test('calcular: tasa de fallo por caso con alerta a 2 de 5', () => {
+test('calcular (v2, V1): 2 fallos de 5 = cuarentena inmediata (≥ 30 % en las últimas 10); 1 de 5 no', () => {
   const p = {};
-  for (let i = 1; i <= 5; i++) p['L-' + i] = { regresion: [{ guion: 'X.spec.js', c: 'd', ok: i <= 2 ? false : true }, { guion: 'X.spec.js', c: 'e', ok: i === 1 ? false : true }] };
+  for (let i = 1; i <= 5; i++) p['L-' + i] = { inicio: '2026-10-1' + i + 'T10:00:00Z', regresion: [{ guion: 'X.spec.js', c: 'd', ok: i <= 2 ? false : true }, { guion: 'X.spec.js', c: 'e', ok: i === 1 ? false : true }] };
   const r = calcular([], p, {});
   assert.strictEqual(r.casosAlerta.length, 1);
-  assert.strictEqual(r.casosAlerta[0].alerta, 'falló 2 de 5 corridas'); assert.deepStrictEqual(r.casosAlerta[0].lotes, ['L-1', 'L-2']);
-  assert.strictEqual(r.casos['X.spec.js e'].fallos, 1);
+  assert.strictEqual(r.casosAlerta[0].inmediata, true); assert.match(r.casosAlerta[0].alerta, /cuarentena inmediata/); assert.deepStrictEqual(r.casosAlerta[0].lotes, ['L-1', 'L-2']);
+  assert.strictEqual(r.casos['X.spec.js e'].fallos, 1); assert.deepStrictEqual(r.casos['X.spec.js d'].historial, [0, 0, 1, 1, 1]);
+});
+
+test('calcular (v2, V1): ventana de 30 (3 de 30 = 10 % ≥ 8 %) y 3 en 10; los trenes entran al historial en orden', () => {
+  const p = {}, trenes = {};
+  for (let i = 1; i <= 27; i++) p['L-' + (100 + i)] = { inicio: '2026-09-' + String(i).padStart(2, '0') + 'T10:00:00Z', regresion: [{ guion: 'V.spec.js', c: 'a', ok: i !== 5 }, { guion: 'W.spec.js', c: 'a', ok: true }] };
+  // tres trenes al final: V falla en dos → 3 de 30 (ventana); W falla en los tres → 3 en 10 (y 30 %: inmediata)
+  for (let j = 1; j <= 3; j++) trenes['TREN-' + j] = { inicio: '2026-10-0' + j + 'T10:00:00Z', regresion: [{ guion: 'V.spec.js', c: 'a', ok: j === 3 }, { guion: 'W.spec.js', c: 'a', ok: false }] };
+  const r = calcular([], p, {}, { trenes });
+  const v = r.casosAlerta.find((c) => c.guion === 'V.spec.js'), w = r.casosAlerta.find((c) => c.guion === 'W.spec.js');
+  assert.ok(v && !v.inmediata); assert.match(v.alerta, /3 de las últimas 30/); assert.strictEqual(v.tasa, 0.1);
+  assert.ok(w && w.inmediata); assert.strictEqual(w.fallos10, 3);
+  assert.strictEqual(r.casos['V.spec.js a'].corridas, 30); assert.deepStrictEqual(r.casos['V.spec.js a'].lotes, ['L-105', 'TREN-1', 'TREN-2']);
+  assert.strictEqual(r.umbrales.ventana, 30);
+});
+
+test('calcular (v2): una reanudación tras suspensión no es reprueba; bloqueos por causa; cobertura de criterios; desviación declarada; cuarentena contada', () => {
+  const ev = leerResumen([
+    '2026-10-26 10:00 | OK | L-200-instr-x.md | aaa | commit y push',
+    '2026-10-26 10:10 | PRUEBAS | L-200-instr-x.md | codigo 1 | Pruebas L-200: bloqueado - oper: sin sesion - log\\L-200-pruebas.json',
+    '2026-10-26 10:40 | PRUEBAS | L-200-instr-x.md | codigo 0 | Pruebas L-200: verde - reanudacion tras suspension por entorno - log\\L-200-pruebas.json',
+    '2026-10-26 10:45 | JUEZ | L-200-instr-x.md | local | L-200-veredicto.json',
+    '2026-10-27 09:00 | OK | L-201-instr-y.md | bbb | commit y push',
+    '2026-10-27 09:10 | PRUEBAS | L-201-instr-y.md | codigo 1 | Pruebas L-201: bloqueado - semilla: falta zz-verif-Propiedad-2 - log\\L-201-pruebas.json',
+    '2026-10-27 09:30 | PRUEBAS | L-201-instr-y.md | codigo 0 | Pruebas L-201: verde - log\\L-201-pruebas.json',
+  ].join('\n'));
+  const r = calcular(ev, { 'L-201': { inicio: '2026-10-27T14:00:00Z', fin: '2026-10-27T14:05:00Z', fase: { fase: 'completa', motivo: 'regresión declarada en la instrucción' }, regresion: [] } },
+    { 'L-200-veredicto.json': { resultado: 'aceptado', criterios: [{ c: 'a', nivel: 'N1', ok: true }, { c: 'b', nivel: 'N2', ok: true }, { c: 'c', nivel: 'N3', ok: true }, { c: 'd', nivel: 'N2', ok: false }] } },
+    { cuarentena: [{ guion: 'Z.spec.js', c: 'a' }] });
+  const w = r.semanas.find((s) => s.semana === '2026-10-26');
+  assert.strictEqual(w.corridas, 4); assert.strictEqual(w.repruebas, 1); assert.strictEqual(w.reanudaciones, 1);   // L-200 no suma; L-201 sí
+  assert.strictEqual(w.bloqueadas, 2); assert.deepStrictEqual(w.bloqueos, { oper: 1, semilla: 1 });
+  assert.strictEqual(w.criterios, 4); assert.strictEqual(w.pctCriteriosConCaso, 50);
+  assert.strictEqual(w.desviaciones, 1); assert.strictEqual(w.cuarentena, 1);
 });
 
 test('semanaDe: lunes de la semana', () => {

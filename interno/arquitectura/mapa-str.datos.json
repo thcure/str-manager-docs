@@ -1,11 +1,11 @@
 {
- "generadoEn": "2026-10-18 15:03",
+ "generadoEn": "2026-10-20 19:15",
  "lineaBase": "2026-10-15",
  "codigo": {
-  "version": "p5c110",
+  "version": "p5c112",
   "schema": 14,
   "rama": "main",
-  "alDia": "2026-10-18 (lotes hasta L-152)"
+  "alDia": "2026-10-19 (lotes hasta L-159)"
  },
  "que": "Mapa del STR legible por máquina: módulos, actores, relaciones, reglas que los cruzan, infraestructura y externos, y el anclaje de cada REQ y de cada guion e2e a sus módulos. Es la fuente del mapa gráfico (interno/arquitectura/mapa-str.html) y la columna vertebral del diseño de pruebas (OM-1). El estado de cada REQ se lee de diseno.json / reqs-historial.json; los lotes e INC de seguimiento.json; las reglas completas de claude/arquitectura/reglas-transversales.md (un dato, una fuente).",
  "marcoPruebas": {
@@ -174,7 +174,8 @@
    "estado": "construido",
    "que": "Marco de la aplicación: menú de 4 grupos con «Lo que viene» y solo lo que funciona (L-132), Tablero como página de inicio de admin y operador (L-143), abre cada módulo en un iframe, aplica el rol al menú, panel Configuración (Copia en Google Drive), aviso fijo del corte, respaldo ⬇; espera a Firebase antes de renovar la sesión (L-133). Desde L-132 ya no escribe colecciones (sin paneles de maqueta ni aviso «Subir mis datos»).",
    "paginas": [
-    "str-app-shell.html"
+    "str-app-shell.html",
+    "str-lo-que-viene.html (L-132, solo admin; de fábrica, CU-SH-6.1)"
    ],
    "rutas": [
     "/me",
@@ -273,7 +274,7 @@
    "nombre": "Servidor PHP (str-api) y almacén /api/col",
    "familia": "transversal",
    "estado": "construido",
-   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos. Lectura común `api/lib/col-lectura.php` (L-142). El colaborador lee acotado: datos del huésped solo del turno de hoy o mañana (L-144) y su gestión 90 días atrás y adelante, con turnos viejos reducidos a horas (L-145); solo reescribe incidentes propios ya guardados (L-141). Purga suave de movimientos de prueba (L-147) y ensayo de restauración en cuentas zz-verif-restauracion-, que el respaldo y los crones dejan fuera (L-131).",
+   "que": "`api/index.php` router único sobre MySQL: sesión y permisos (`_puede`), almacén genérico `/api/col/<col>` (tabla `col_item`, borrado lógico, merge por clave, filtro por rol), `/upload` y `/archivo`, migraciones idempotentes (`Migrate::run`), conexión persistente con reintentos. Lectura común `api/lib/col-lectura.php` (L-142). El colaborador lee acotado: datos del huésped solo del turno de hoy o mañana (L-144) y su gestión 90 días atrás y adelante, con turnos viejos reducidos a horas (L-145); solo reescribe incidentes propios ya guardados (L-141). Purga suave de movimientos de prueba (L-147) y ensayo de restauración en cuentas zz-verif-restauracion-, que el respaldo y los crones dejan fuera (L-131). El respaldo (diario y descargable) escribe en un temporal y renombra: si falla no pisa el último bueno y deja constancia; incluye ficha de pago y permisos de cada persona (L-154, INC-190, INC-191).",
    "paginas": [
     "api/index.php",
     "api/lib/*",
@@ -289,7 +290,8 @@
     "/export/cron",
     "/restauracion/{ensayo,constancia,borrar} (L-131, solo admin)",
     "GET/POST /purga-prueba/movimientos (L-147, solo admin)",
-    "GET/POST /cuenta-pruebas (L-150, solo admin; POST solo desde cuenta-pruebas.spec.js por la guardia v8)"
+    "GET/POST /cuenta-pruebas (L-150, solo admin; POST solo desde cuenta-pruebas.spec.js por la guardia v8)",
+    "/diagnostico?log=restauracion (L-137, solo admin)"
    ],
    "colecciones": {
     "escribe": [
@@ -1079,7 +1081,7 @@
    "nombre": "Comunicaciones (WhatsApp / correo)",
    "familia": "operativo",
    "estado": "no-existe",
-   "que": "No existe como módulo: hoy enlaces manuales a WhatsApp desde Equipo (invitación) y Calendario.",
+   "que": "No existe como módulo: hoy enlaces manuales a WhatsApp desde Equipo (invitación) y Housekeeping (mensaje del turno para el colaborador, con el enlace ?turno=). El Calendario no tiene ninguno (Desarrollo, M-850).",
    "paginas": [],
    "rutas": [],
    "colecciones": {
@@ -1119,8 +1121,7 @@
     "str-cobit.html",
     "str-elementos.html",
     "str-base-conocimiento.html",
-    "str-nomenclatura.html",
-    "str-lo-que-viene.html (L-132, solo admin)"
+    "str-nomenclatura.html"
    ],
    "rutas": [
     "(ninguna del STR; GitHub raw)"
@@ -1190,7 +1191,6 @@
     "github"
    ],
    "reqRaiz": [
-    "REQ-MOD-1",
     "REQ-MOD-6"
    ],
    "mapaTecnico": "tests-y-despliegue",
@@ -1269,6 +1269,7 @@
    "origen": "SH",
    "destino": "*",
    "mecanismo": "iframe `openModule`",
+   "tipo": "navegacion",
    "dato": "URL del módulo, tema",
    "regla": "",
    "rt": [],
@@ -1279,8 +1280,9 @@
    "id": "REL-02",
    "origen": "*",
    "destino": "SH",
-   "mecanismo": "`postMessage str:sin-sesion`; `window.top.navSub`",
-   "dato": "sin sesión; navegar a otro módulo",
+   "mecanismo": "`postMessage str:sin-sesion`",
+   "tipo": "navegacion",
+   "dato": "sin sesión (navegar a otro módulo desde el módulo no se pide: Diseño, M-832 j)",
    "regla": "",
    "rt": [
     "RT-16"
@@ -1293,6 +1295,7 @@
    "origen": "CAL",
    "destino": "HK",
    "mecanismo": "colección `reservas`",
+   "tipo": "datos",
    "dato": "reserva saliente → HK arma el turno automático (ventana de check-out/in, hora acordada)",
    "regla": "El Calendario no crea ni calcula turnos (INC-71)",
    "rt": [],
@@ -1304,6 +1307,7 @@
    "origen": "HK",
    "destino": "CAL",
    "mecanismo": "iframe oculto `?modo=datos` + `postMessage hk:turnos`",
+   "tipo": "navegacion",
    "dato": "todos los turnos (carril de operación, panel de la reserva)",
    "regla": "",
    "rt": [
@@ -1317,6 +1321,7 @@
    "origen": "HK",
    "destino": "POR",
    "mecanismo": "iframe `#hkFrame` + `postMessage` (hk:turnos, hk:cerrar, portal:abrir, portal:refrescar)",
+   "tipo": "navegacion",
    "dato": "turnos míos con horas, procesos, fotos pendientes, alertas, pago",
    "regla": "El portal nunca reimplementa HK",
    "rt": [],
@@ -1328,6 +1333,7 @@
    "origen": "PR",
    "destino": "HK",
    "mecanismo": "colección `propiedades`",
+   "tipo": "datos",
    "dato": "flujoBaseId, colaboradorBaseId, horasTurno, toleranciaSalidaMin, horarios, invPrincipalId, zonas",
    "regla": "",
    "rt": [],
@@ -1339,6 +1345,7 @@
    "origen": "FL",
    "destino": "HK",
    "mecanismo": "colección `flujos` (+ `flujo-categorias`)",
+   "tipo": "datos",
    "dato": "actividades, tareas, subflujos, zonas, fotos exigidas, tiempos, tarea de inventario; emoji y nombre corto del flujo (L-139).",
    "regla": "Editar la plantilla no cambia las copias",
    "rt": [],
@@ -1350,6 +1357,7 @@
    "origen": "FL",
    "destino": "KN",
    "mecanismo": "`guias` referenciadas por `tarea.guias`; `?edit=`",
+   "tipo": "datos",
    "dato": "guías en el checklist (visor compartido)",
    "regla": "",
    "rt": [],
@@ -1361,6 +1369,7 @@
    "origen": "INV",
    "destino": "HK",
    "mecanismo": "colecciones `inv-*`",
+   "tipo": "datos",
    "dato": "catálogo, zona principal/apto, lugares, estados, proveedores, pendientes",
    "regla": "",
    "rt": [
@@ -1374,6 +1383,7 @@
    "origen": "HK",
    "destino": "INV",
    "mecanismo": "colección `inv-movimientos`",
+   "tipo": "datos",
    "dato": "conteo/nivel al marcar tarea; traspaso de entrega/recepción en todos los turnos (DA-43); cierre de pendientes",
    "regla": "Inmutable; se corrige con `anulaA`",
    "rt": [
@@ -1387,6 +1397,7 @@
    "origen": "HK",
    "destino": "SRV",
    "mecanismo": "`PUT /col/turnos` (cierre de turno, misma transacción)",
+   "tipo": "servidor",
    "dato": "el servidor sella `primerCierreAt` y crea `inv-pendientes` del circuito de la ropa",
    "regla": "Solo el servidor los crea; nunca se borran",
    "rt": [
@@ -1400,6 +1411,7 @@
    "origen": "INV",
    "destino": "HK",
    "mecanismo": "`PUT inv-pendientes` (reasignar)",
+   "tipo": "datos",
    "dato": "tarea lavar/llevar + proveedor al siguiente turno",
    "regla": "",
    "rt": [],
@@ -1411,6 +1423,7 @@
    "origen": "PR",
    "destino": "INV",
    "mecanismo": "`col.push(inv-depositos)` + `str-inv-tab`",
+   "tipo": "datos",
    "dato": "zona con propIds, revocados",
    "regla": "",
    "rt": [],
@@ -1422,6 +1435,7 @@
    "origen": "U",
    "destino": "HK",
    "mecanismo": "`/api/usuarios` + caché `str-usuarios-v1`",
+   "tipo": "servidor",
    "dato": "ids, nombres, colores, perfilPago, permisos (también a POR, PR, FL, INV)",
    "regla": "",
    "rt": [
@@ -1435,6 +1449,7 @@
    "origen": "U",
    "destino": "PG",
    "mecanismo": "`GET /col/turnos?desde=` + `STRApi.horas.saldo`",
+   "tipo": "servidor",
    "dato": "saldo de horas del colaborador",
    "regla": "Un solo cálculo de horas",
    "rt": [
@@ -1448,6 +1463,7 @@
    "origen": "HK",
    "destino": "K3",
    "mecanismo": "`POST /upload` → `api/uploads/` → `POST /drive/cron`",
+   "tipo": "terceros",
    "dato": "fotos, evidencia, video → Drive; insignia ☁ por `drive/copias`",
    "regla": "",
    "rt": [
@@ -1463,6 +1479,7 @@
    "origen": "K3",
    "destino": "HK",
    "mecanismo": "corte mensual (L-124) + vista (L-125)",
+   "tipo": "programada",
    "dato": "borra binarios (también *.min.jpg); el registro conserva fecha, huella, corte y enlace; la app muestra el archivo desde Drive; /archivo y /expediente traen de Drive lo borrado o responden 410 (L-125).",
    "regla": "",
    "rt": [
@@ -1477,6 +1494,7 @@
    "origen": "K3",
    "destino": "SH",
    "mecanismo": "`GET /drive/estado` → `avisoCorte`",
+   "tipo": "servidor",
    "dato": "aviso fijo del próximo corte; recordatorios 7/3/1 días (admin y operador con config.drive)",
    "regla": "",
    "rt": [
@@ -1491,6 +1509,7 @@
    "origen": "K3",
    "destino": "INC1",
    "mecanismo": "`GET /expediente/{ticketId}` (desde L-125)",
+   "tipo": "servidor",
    "dato": "la evidencia borrada en el corte aparece como «Eliminado en el corte del <fecha>»",
    "regla": "",
    "rt": [
@@ -1505,6 +1524,7 @@
    "origen": "HK",
    "destino": "INC1",
    "mecanismo": "`GET /expediente/{ticketId}`",
+   "tipo": "servidor",
    "dato": "ZIP con originales, SHA256SUMS, línea de tiempo; anota `ticket.expedientes[]`",
    "regla": "",
    "rt": [
@@ -1519,6 +1539,7 @@
    "origen": "PR",
    "destino": "airbnb",
    "mecanismo": "`/ical-export` + `/api/ical/salida/<prop>/<token>.ics` (pública)",
+   "tipo": "terceros",
    "dato": "«No disponible (STR Manager)» + día de limpieza",
    "regla": "Token aleatorio por propiedad; regenerar lo invalida",
    "rt": [],
@@ -1530,6 +1551,7 @@
    "origen": "cron",
    "destino": "CAL",
    "mecanismo": "`POST /sync-ical` cada 15 min",
+   "tipo": "programada",
    "dato": "reservas nuevas, canceladas, finalizadas; bloqueos de feed",
    "regla": "El historial nunca se borra. Deja fuera las cuentas zz-verif-restauracion- (L-131); también la cuenta zz-verif-pruebas (L-150).",
    "rt": [
@@ -1543,6 +1565,7 @@
    "origen": "*",
    "destino": "google-drive",
    "mecanismo": "SDK de Firebase en la página → `POST /api/login`",
+   "tipo": "terceros",
    "dato": "identidad; renovación ante 401",
    "regla": "",
    "rt": [
@@ -1556,6 +1579,7 @@
    "origen": "PRJ",
    "destino": "github",
    "mecanismo": "`STRApi.docs` (raw `<sha>/interno/*.json`; `commit()`)",
+   "tipo": "terceros",
    "dato": "seguimiento, diseño, mensajes, marco, instrucciones, cobit, elementos, conocimiento",
    "regla": "No escribe en el STR",
    "rt": [],
@@ -1567,6 +1591,7 @@
    "origen": "PRJ",
    "destino": "MOD",
    "mecanismo": "proxy B8 (REQ-TB-6)",
+   "tipo": "servidor",
    "dato": "tablas del modelo",
    "regla": "ADR-006",
    "rt": [],
@@ -1578,6 +1603,7 @@
    "origen": "*",
    "destino": "SRV",
    "mecanismo": "`STRApi.col.pull/push` + `str-<col>-v1`",
+   "tipo": "transversal",
    "dato": "diff contra lastpush, cursor, tombstones explícitos",
    "regla": "El servidor manda si conoce la colección",
    "rt": [
@@ -1592,6 +1618,7 @@
    "origen": "SRV",
    "destino": "U",
    "mecanismo": "`_puede()` en cada petición",
+   "tipo": "transversal",
    "dato": "permisos efectivos por rol y `usuario.permisos`",
    "regla": "El servidor decide; el front solo oculta",
    "rt": [
@@ -1605,6 +1632,7 @@
    "origen": "cron",
    "destino": "K3",
    "mecanismo": "`POST /drive/cron` y `POST /drive/corte` cada 15 min (por crear)",
+   "tipo": "programada",
    "dato": "pasada de copia; corte solo en la ventana del día 30; deja fuera las cuentas zz-verif-restauracion- (L-131); también la cuenta zz-verif-pruebas (L-150).",
    "regla": "Sin respaldo de api/uploads/ no se crea la tarea del corte",
    "rt": [
@@ -1619,6 +1647,7 @@
    "origen": "cola-arquitecto",
    "destino": "MOD",
    "mecanismo": "`POST /modelo/api/cargar` con `X-Modelo-Token`",
+   "tipo": "servidor",
    "dato": "carga completa del modelo por tabla",
    "regla": "ADR-006",
    "rt": [],
@@ -1630,6 +1659,7 @@
    "origen": "HK",
    "destino": "KN",
    "mecanismo": "`str-guia-visor.js`",
+   "tipo": "codigo",
    "dato": "la guía de la tarea se abre en el checklist",
    "regla": "",
    "rt": [],
@@ -1641,6 +1671,7 @@
    "origen": "CAL",
    "destino": "INC1",
    "mecanismo": "eventos de mantenimiento en el calendario (MI1-2…4)",
+   "tipo": "datos",
    "dato": "evento → turno del colaborador",
    "regla": "",
    "rt": [],
@@ -1652,6 +1683,7 @@
    "origen": "M2",
    "destino": "CAL",
    "mecanismo": "`reservas.huespedes[]`",
+   "tipo": "datos",
    "dato": "datos del huésped por reserva (TRA/SIRE)",
    "regla": "",
    "rt": [
@@ -1665,6 +1697,7 @@
    "origen": "OP",
    "destino": "SRV",
    "mecanismo": "`GET /api/tablero?since=` con `api/lib/col-lectura.php` (`_colLeerFilas`, la misma lectura de `/api/col`)",
+   "tipo": "servidor",
    "dato": "turnos, reservas, incidentes, pendientes, propiedades, flujos y usuarios mínimos en una respuesta",
    "regla": "una conexión por petición; 403 al colaborador antes de abrir la base; datos del huésped solo nombre y fechas",
    "rt": [
@@ -1683,6 +1716,7 @@
    "origen": "OP",
    "destino": "HK",
    "mecanismo": "`str-avance.js` ([AV-puras]) cargado por los dos; bloques de HK copiados con test de igualdad",
+   "tipo": "codigo",
    "dato": "avance esperado y real del turno en minutos, estado del tramo (al día, atrás, adelante, bloqueado)",
    "regla": "«atrasado» significa lo mismo en el tablero y en HK",
    "rt": [
@@ -1690,6 +1724,1391 @@
    ],
    "estado": "vigente",
    "generica": false
+  },
+  {
+   "id": "REL-35",
+   "origen": "API",
+   "destino": "U",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "pedido rechazado por sesión vencida, que pide renovarla; pedido rechazado otra vez tras renovar, o sin renovación posible, que obliga a avisar; si la persona puede la acción, o si todavía no se sabe",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-5.1",
+    "CU-U-2.4",
+    "CU-U-3.6",
+    "CU-U-3.7"
+   ]
+  },
+  {
+   "id": "REL-36",
+   "origen": "API",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "pedido con la sesión de la persona, para que el servidor decida si puede; archivo, tipo y referencia a guardar; pedido de un archivo con la sesión de la persona",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-3.1",
+    "CU-API-3.2",
+    "CU-SRV-3.1",
+    "CU-SRV-4.1",
+    "CU-SRV-4.2"
+   ]
+  },
+  {
+   "id": "REL-37",
+   "origen": "API",
+   "destino": "SH",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "documentos del proyecto y su encabezado con la fecha del último commit",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-6.1",
+    "CU-SH-6.1"
+   ]
+  },
+  {
+   "id": "REL-38",
+   "origen": "API",
+   "destino": "PRJ",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "documentos del proyecto y su encabezado con la fecha del último commit",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-6.1",
+    "CU-PRJ-2.1"
+   ]
+  },
+  {
+   "id": "REL-39",
+   "origen": "CAL",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "evento de mantenimiento o inventario con su recurrencia, su responsable y su flujo; enlace al turno elegido",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-CAL-3.7",
+    "CU-HK-1.10",
+    "CU-HK-2.11"
+   ]
+  },
+  {
+   "id": "REL-40",
+   "origen": "CAL",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "eventos de mantenimiento e inventario con su responsable, su recurrencia y su flujo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.3",
+    "CU-POR-1.5"
+   ]
+  },
+  {
+   "id": "REL-41",
+   "origen": "CAL",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "eventos de inventario del colaborador, para su calendario",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.3",
+    "CU-INV-12.3"
+   ]
+  },
+  {
+   "id": "REL-42",
+   "origen": "CAL",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "reserva directa nueva, con su código, sus fechas y su propiedad; reserva nueva importada, con su código, sus fechas y su propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-2.1",
+    "CU-CAL-6.1",
+    "CU-M6-4.2"
+   ]
+  },
+  {
+   "id": "REL-43",
+   "origen": "CAL",
+   "destino": "M2",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "reserva directa nueva, con su código, sus fechas y su propiedad; reserva nueva importada, con su código, sus fechas y su propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-2.1",
+    "CU-CAL-6.1",
+    "CU-M2-1.1"
+   ]
+  },
+  {
+   "id": "REL-44",
+   "origen": "CAL",
+   "destino": "OP",
+   "mecanismo": "colección `reservas` leída por `GET /api/tablero` (alerta 6: `reactivadaEn`, `reemplazaCancelada`, `firstSeenAt`; desde L-158)",
+   "tipo": "datos",
+   "dato": "hora acordada de salida y de llegada de cada reserva; estado de cada canal tras importar: última vez, reservas leídas y si falló; reservas guardadas, de las que salen las entradas de hoy y su hora (y 2 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-4.2",
+    "CU-CAL-6.3",
+    "CU-CAL-9.1",
+    "CU-OP-1.5",
+    "CU-OP-2.1",
+    "CU-OP-2.6",
+    "CU-OP-2.9",
+    "CU-OP-3.1"
+   ]
+  },
+  {
+   "id": "REL-45",
+   "origen": "CAL",
+   "destino": "PR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "estado de la importación de cada canal: última vez, reservas importadas y si hubo error; noches ocupadas por reservas y bloqueos de la propiedad, sin lo que viene de Airbnb",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-6.3",
+    "CU-CAL-8.2",
+    "CU-PR-7.2",
+    "CU-PR-7.5"
+   ]
+  },
+  {
+   "id": "REL-46",
+   "origen": "CMP",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "monto del adelanto del encargo y su motivo; compra «por aprobar» con la foto de la factura y el detalle por artículo; marca «sin encargo» para el operador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-2.1",
+    "CU-CMP-2.4",
+    "CU-CMP-3.2",
+    "CU-PG-3.1",
+    "CU-PG-3.2",
+    "CU-PG-3.3"
+   ]
+  },
+  {
+   "id": "REL-47",
+   "origen": "CMP",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "actividad «Compra» para sumarla al turno",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-2.2",
+    "CU-HK-1.8"
+   ]
+  },
+  {
+   "id": "REL-48",
+   "origen": "CMP",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "entrada de lo comprado en la zona del encargo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-3.1",
+    "CU-INV-3.1"
+   ]
+  },
+  {
+   "id": "REL-49",
+   "origen": "CMP",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "mínimos, encargos y entradas de compra para el respaldo diario; mínimos, encargos y entradas de compra para el respaldo descargable",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-4.3",
+    "CU-SRV-8.1",
+    "CU-SRV-8.2"
+   ]
+  },
+  {
+   "id": "REL-50",
+   "origen": "FL",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "copia por propiedad de un flujo, con los dos ajustes de cada actividad; flujos guardados con formato viejo, que quedan en manual y lista",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-10.3",
+    "CU-FL-3.1",
+    "CU-PC1-1.3"
+   ]
+  },
+  {
+   "id": "REL-51",
+   "origen": "FL",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "sub-flujo asignado a cada colaborador con su tiempo de manos, para recomendar la duración llamada del apoyo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-4.5",
+    "CU-HK-6.6"
+   ]
+  },
+  {
+   "id": "REL-52",
+   "origen": "FL",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "flujos de categoría Mantenimiento o Inventario, para asignar a un evento del calendario",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-FL-5.6"
+   ]
+  },
+  {
+   "id": "REL-53",
+   "origen": "FL",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "flujos de categoría Mantenimiento, para verlos y llamarlos desde el módulo de Mantenimiento",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-5.6",
+    "CU-INC1-4.3"
+   ]
+  },
+  {
+   "id": "REL-54",
+   "origen": "FL",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "emoji y nombre corto de cada flujo, para rotular su tramo; flujos con sus actividades, tareas, tiempos y zonas, de los que salen los tramos y la duración",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-10.1",
+    "CU-FL-7.1",
+    "CU-OP-1.2"
+   ]
+  },
+  {
+   "id": "REL-55",
+   "origen": "FL",
+   "destino": "PR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "flujos generales, simples o compuestos, con sus etapas, tiempos, colaborador sugerido y copias por propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-10.1",
+    "CU-PR-5.1"
+   ]
+  },
+  {
+   "id": "REL-56",
+   "origen": "HK",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "turnos de hoy armados con la reserva que sale, su ventana y su colaborador base; turno bloqueado por el operador, con su motivo; tareas del turno marcadas como hechas, con las que sube el avance real (y 5 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.2",
+    "CU-HK-1.6",
+    "CU-HK-2.2",
+    "CU-HK-4.1",
+    "CU-HK-5.1",
+    "CU-HK-5.3",
+    "CU-HK-9.2",
+    "CU-OP-1.1",
+    "CU-OP-1.2",
+    "CU-OP-1.5",
+    "CU-OP-2.3",
+    "CU-OP-2.4",
+    "CU-OP-2.7"
+   ]
+  },
+  {
+   "id": "REL-57",
+   "origen": "HK",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "mensaje del turno armado para el colaborador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.5",
+    "CU-M6-5.1"
+   ]
+  },
+  {
+   "id": "REL-58",
+   "origen": "HK",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "flujo de una etapa del turno que se quiere abrir en el editor",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-3.2",
+    "CU-HK-1.8"
+   ]
+  },
+  {
+   "id": "REL-59",
+   "origen": "HK",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "flujo del evento ejecutado en el turno, para darlo por realizado; evidencia (fotos y videos) que acompaña al incidente reportado, subida desde la cola del teléfono; incidente reportado en el turno, con su tipo, descripción, zona y quien lo reportó (y 6 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.10",
+    "CU-HK-4.1",
+    "CU-HK-4.3",
+    "CU-HK-4.4",
+    "CU-INC1-2.1",
+    "CU-INC1-2.3",
+    "CU-INC1-3.1",
+    "CU-INC1-3.2",
+    "CU-INC1-3.3",
+    "CU-INC1-3.6",
+    "CU-INC1-4.2",
+    "CU-INC1-5.1"
+   ]
+  },
+  {
+   "id": "REL-60",
+   "origen": "HK",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "actividad del turno que quedó completa",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-2.2",
+    "CU-PC1-1.4"
+   ]
+  },
+  {
+   "id": "REL-61",
+   "origen": "HK",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "horas del turno de cada persona y su valor estimado, para la liquidación; apoyo del turno con sus horas planificadas; ajuste de las horas de una persona con su motivo (y 2 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-6.1",
+    "CU-HK-6.2",
+    "CU-HK-6.3",
+    "CU-HK-6.5",
+    "CU-HK-6.6",
+    "CU-PG-1.2",
+    "CU-PG-1.3",
+    "CU-PG-4.1"
+   ]
+  },
+  {
+   "id": "REL-62",
+   "origen": "INC1",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "fecha de captura, hora de recepción, huella y original de cada evidencia, para verlos en el incidente; evento de mantenimiento del día y la propiedad del turno, con su flujo, para proponerlo al turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.10",
+    "CU-HK-4.2",
+    "CU-INC1-2.1",
+    "CU-INC1-4.1"
+   ]
+  },
+  {
+   "id": "REL-63",
+   "origen": "INC1",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "incidente con evidencia y costo del daño, para proponer el cargo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-2.1",
+    "CU-PG-6.1"
+   ]
+  },
+  {
+   "id": "REL-64",
+   "origen": "INC1",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "baja del artículo afectado como ajuste de existencia, con el incidente como motivo; traslado de reposición desde otra zona, con el incidente como motivo; movimiento de inventario (reposición o baja) atado al cierre del reclamo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.5",
+    "CU-INC1-5.7",
+    "CU-INV-3.2",
+    "CU-INV-3.4"
+   ]
+  },
+  {
+   "id": "REL-65",
+   "origen": "INC1",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "artículo a comprar, para la lista de compra",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-1.2",
+    "CU-INC1-3.5"
+   ]
+  },
+  {
+   "id": "REL-66",
+   "origen": "INC1",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "incidente urgente reportado; evento de mantenimiento con su proveedor y su fecha; reclamo cuyo plazo está por vencer (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.9",
+    "CU-INC1-4.5",
+    "CU-INC1-5.6",
+    "CU-INC1-5.9",
+    "CU-M6-5.2",
+    "CU-M6-5.3",
+    "CU-M6-5.4",
+    "CU-M6-5.5"
+   ]
+  },
+  {
+   "id": "REL-67",
+   "origen": "INC1",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "evento de mantenimiento llevado al turno del colaborador el día del evento, con su flujo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-4.1",
+    "CU-OP-1.6"
+   ]
+  },
+  {
+   "id": "REL-68",
+   "origen": "INC1",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "reparación a programar en la propiedad, con el incidente de origen",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-INC1-4.4"
+   ]
+  },
+  {
+   "id": "REL-69",
+   "origen": "INV",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "artículos activos del catálogo con su clase, para elegir cuáles cuenta la tarea; categoría «Inventario» y tareas de inventario disponibles para armar flujos",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-2.6",
+    "CU-FL-5.7",
+    "CU-INV-1.1",
+    "CU-INV-12.1"
+   ]
+  },
+  {
+   "id": "REL-70",
+   "origen": "INV",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "artículos activos del catálogo, para elegir el afectado por el incidente",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.4",
+    "CU-INV-1.1"
+   ]
+  },
+  {
+   "id": "REL-71",
+   "origen": "INV",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "pendientes de ropa que deja el cierre de un turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-5.8",
+    "CU-OP-2.7"
+   ]
+  },
+  {
+   "id": "REL-72",
+   "origen": "INV",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "propiedades y zonas que le tocan al colaborador (reglas de acceso de INV2-4-1); activo con su código QR",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-11.2",
+    "CU-INV-7.3",
+    "CU-PC1-3.7",
+    "CU-PC1-5.2"
+   ]
+  },
+  {
+   "id": "REL-73",
+   "origen": "INV",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "orden de ensayar y purgar los movimientos de prueba, con confirmación",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-8.3",
+    "CU-SRV-9.1"
+   ]
+  },
+  {
+   "id": "REL-74",
+   "origen": "INV",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "conteo que el colaborador declara al marcar una tarea de inventario; mínimo e ideal de cada artículo por zona",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-1.1",
+    "CU-INV-10.1",
+    "CU-INV-9.2"
+   ]
+  },
+  {
+   "id": "REL-75",
+   "origen": "INV",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "evento de inventario con su recurrencia y su flujo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-1.1",
+    "CU-INV-12.2"
+   ]
+  },
+  {
+   "id": "REL-76",
+   "origen": "INV",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "flujo del evento propuesto al turno",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.10",
+    "CU-INV-12.2"
+   ]
+  },
+  {
+   "id": "REL-77",
+   "origen": "INV",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "eventos de inventario del colaborador para su calendario",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-12.3",
+    "CU-POR-1.5"
+   ]
+  },
+  {
+   "id": "REL-78",
+   "origen": "M2",
+   "destino": "M6",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "enlace de registro de la reserva, para enviarlo al huésped; enlace de registro de la reserva, para reenviarlo; mensaje a portería y su destinatario, para enviarlo (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-1.1",
+    "CU-M2-1.5",
+    "CU-M2-4.2",
+    "CU-M2-6.2",
+    "CU-M6-4.1",
+    "CU-M6-4.4",
+    "CU-M6-4.5"
+   ]
+  },
+  {
+   "id": "REL-79",
+   "origen": "M2",
+   "destino": "CAL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "hora de llegada y de salida confirmada por el huésped",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-4.2",
+    "CU-M2-2.2"
+   ]
+  },
+  {
+   "id": "REL-80",
+   "origen": "M2",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "datos del huésped completos solo para el operador y el administrador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-7.1",
+    "CU-SRV-2.2"
+   ]
+  },
+  {
+   "id": "REL-81",
+   "origen": "M6",
+   "destino": "M2",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "pregunta de la hora de llegada y de salida, enviada al huésped; mensaje recibido por portería",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-2.1",
+    "CU-M2-4.3",
+    "CU-M6-4.3",
+    "CU-M6-4.5"
+   ]
+  },
+  {
+   "id": "REL-82",
+   "origen": "OP",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "turno elegido en la alerta, para abrirlo por su enlace",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-2.11",
+    "CU-OP-2.8"
+   ]
+  },
+  {
+   "id": "REL-83",
+   "origen": "OP",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "incidente elegido en la alerta, para abrirlo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-3.3",
+    "CU-OP-2.8"
+   ]
+  },
+  {
+   "id": "REL-84",
+   "origen": "PC1",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "fotos en vivo y calificación de cada zona, para subirlas con la cola; fotos de antes y después de cada zona, para subirlas con la cola; foto general de llegada, para subirla con la cola (y 5 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-2.10",
+    "CU-HK-3.2",
+    "CU-HK-4.1",
+    "CU-PC1-2.1",
+    "CU-PC1-2.2",
+    "CU-PC1-2.3",
+    "CU-PC1-3.2",
+    "CU-PC1-3.5",
+    "CU-PC1-3.7",
+    "CU-PC1-4.2",
+    "CU-PC1-4.4"
+   ]
+  },
+  {
+   "id": "REL-85",
+   "origen": "PC1",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "fotos del «antes» como evidencia posible del reclamo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-5.5",
+    "CU-PC1-2.2"
+   ]
+  },
+  {
+   "id": "REL-86",
+   "origen": "PC1",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "lector de códigos QR del STR, para escanear el QR de un lugar",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-2.10",
+    "CU-PC1-3.3"
+   ]
+  },
+  {
+   "id": "REL-87",
+   "origen": "PG",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "valor estimado de cada persona del turno; valor del turno de la propia persona; marca de turno liquidado, que impide eliminarlo",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-1.7",
+    "CU-HK-6.1",
+    "CU-HK-6.4",
+    "CU-PG-1.1",
+    "CU-PG-4.3"
+   ]
+  },
+  {
+   "id": "REL-88",
+   "origen": "PG",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "valor de los turnos cerrados del mes; valor de cada turno del mes; saldo de horas acumulado del colaborador (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PG-1.1",
+    "CU-PG-2.1",
+    "CU-PG-5.3",
+    "CU-POR-4.1",
+    "CU-POR-4.2",
+    "CU-POR-4.3"
+   ]
+  },
+  {
+   "id": "REL-89",
+   "origen": "PG",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "compra registrada por el colaborador, con o sin encargo; compra aprobada con su encargo",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-3.1",
+    "CU-CMP-3.2",
+    "CU-PG-3.2",
+    "CU-PG-3.3"
+   ]
+  },
+  {
+   "id": "REL-90",
+   "origen": "PR",
+   "destino": "M2",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "ubicación, torre, apto y dirección de la propiedad; rango de check-in de la propiedad",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-M2-2.3",
+    "CU-M2-6.2",
+    "CU-PR-2.4",
+    "CU-PR-3.1"
+   ]
+  },
+  {
+   "id": "REL-91",
+   "origen": "PR",
+   "destino": "CAL",
+   "mecanismo": "colección `reservas` (`/api/col/reservas`: Propiedades la lee con `STRApi.get` y, al quitar un canal, escribe `canalQuitado` antes de guardar la propiedad; desde L-159)",
+   "tipo": "datos",
+   "dato": "bloqueo de los demás anuncios de la casa mientras se renta uno completo; canal del calendario de cada propiedad con su dirección de importación y su nombre; horario base de la propiedad (check-in y check-out) para la hora de las reservas manuales y de las alertas (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-CAL-2.1",
+    "CU-CAL-2.9",
+    "CU-CAL-5.1",
+    "CU-CAL-6.1",
+    "CU-PR-2.7",
+    "CU-PR-7.1",
+    "CU-PR-8.2"
+   ]
+  },
+  {
+   "id": "REL-92",
+   "origen": "PR",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "horas planificadas del turno en la propiedad, o las del negocio",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PG-1.2",
+    "CU-PR-3.4"
+   ]
+  },
+  {
+   "id": "REL-93",
+   "origen": "PR",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "horario de la propiedad para el colaborador; plano de la propiedad y sus marcadores; datos de las propiedades donde trabaja el colaborador (lista permitida), con su ventana de 90 días",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-POR-2.4",
+    "CU-POR-2.5",
+    "CU-POR-7.1",
+    "CU-PR-3.5",
+    "CU-PR-4.6",
+    "CU-PR-8.3"
+   ]
+  },
+  {
+   "id": "REL-94",
+   "origen": "PR",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "zonas de cada propiedad, para ofrecerlas como zonas de las actividades y tareas; flujo base elegido en cada propiedad, para mostrar dónde se usa cada flujo; flujo base elegido de cada propiedad, para filtrar los flujos que corren en ella (y 1 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-2.3",
+    "CU-FL-3.2",
+    "CU-FL-3.7",
+    "CU-FL-6.3",
+    "CU-PR-4.1",
+    "CU-PR-5.1",
+    "CU-PR-5.2"
+   ]
+  },
+  {
+   "id": "REL-95",
+   "origen": "PR",
+   "destino": "PC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "zonas de la propiedad para recorrerlas",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-PC1-2.1",
+    "CU-PR-8.1"
+   ]
+  },
+  {
+   "id": "REL-96",
+   "origen": "SRV",
+   "destino": "HK",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "turnos y reservas de sus 90 días, con los más antiguos reducidos a horas; reservas y turnos del colaborador con los datos del huésped solo de hoy y de mañana; incidentes propios del colaborador, y rechazo al intentar leer o pisar uno ajeno (y 2 más)",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-HK-11.1",
+    "CU-HK-11.2",
+    "CU-HK-11.3",
+    "CU-HK-11.4",
+    "CU-HK-11.5",
+    "CU-SRV-2.1",
+    "CU-SRV-2.2",
+    "CU-SRV-2.3",
+    "CU-SRV-2.4",
+    "CU-SRV-2.5"
+   ]
+  },
+  {
+   "id": "REL-97",
+   "origen": "SRV",
+   "destino": "API",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "respuesta del servidor o rechazo (sin sesión, sin permiso), para que la pantalla lo muestre; dirección del archivo guardado, con su tamaño y su tipo; archivo guardado del mismo negocio, entero o por tramos",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-3.1",
+    "CU-API-3.2",
+    "CU-SRV-3.1",
+    "CU-SRV-4.1",
+    "CU-SRV-4.2"
+   ]
+  },
+  {
+   "id": "REL-98",
+   "origen": "SRV",
+   "destino": "U",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "cambio de horas o tarifas rechazado o ignorado, para el operador sin el permiso; movimiento registrado con sus usuarios y su cuenta de origen, para poder revertirlo",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SRV-3.3",
+    "CU-SRV-9.2",
+    "CU-U-2.7",
+    "CU-U-7.4"
+   ]
+  },
+  {
+   "id": "REL-99",
+   "origen": "SRV",
+   "destino": "SH",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "archivo de respaldo de la cuenta, con la fecha del día",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SH-10.1",
+    "CU-SRV-8.2"
+   ]
+  },
+  {
+   "id": "REL-100",
+   "origen": "SRV",
+   "destino": "INV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "identificadores de los movimientos dados de baja, para soltarlos de la copia local",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-INV-8.4",
+    "CU-SRV-9.1"
+   ]
+  },
+  {
+   "id": "REL-101",
+   "origen": "U",
+   "destino": "PR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "colaboradores activos del equipo con su nombre y su color; rol del usuario y permiso de editar inventario del operador; rol del usuario con sesión",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PR-5.3",
+    "CU-PR-6.2",
+    "CU-PR-6.4",
+    "CU-PR-6.5",
+    "CU-PR-9.1",
+    "CU-U-1.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-102",
+   "origen": "U",
+   "destino": "SH",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "nombre, rol y permisos de la persona con sesión, para armar el menú principal y su barra",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SH-1.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-103",
+   "origen": "U",
+   "destino": "POR",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "rol del usuario con sesión: administrador y operador ven el selector, el colaborador entra a su portal",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-POR-6.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-104",
+   "origen": "U",
+   "destino": "FL",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "rol del usuario con sesión",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-FL-9.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-105",
+   "origen": "U",
+   "destino": "KN",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "rol del usuario con sesión",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-KN-6.1",
+    "CU-U-2.1"
+   ]
+  },
+  {
+   "id": "REL-106",
+   "origen": "U",
+   "destino": "API",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "rol y permisos de la persona con sesión; sesión renovada, con la que se repite el pedido",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-API-1.1",
+    "CU-API-5.1",
+    "CU-U-2.1",
+    "CU-U-3.6"
+   ]
+  },
+  {
+   "id": "REL-107",
+   "origen": "U",
+   "destino": "INC1",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "permiso «reclamos» del operador; rol de la sesión y permisos efectivos del operador, para decidir qué montos entregar",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-INC1-5.8",
+    "CU-U-2.3",
+    "CU-U-2.6"
+   ]
+  },
+  {
+   "id": "REL-108",
+   "origen": "U",
+   "destino": "PG",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "permisos del operador definidos, con los de adelantos y de pagos; ficha de pago y tarifa vigente de la persona a la fecha del turno",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PG-1.1",
+    "CU-PG-5.2",
+    "CU-U-2.3",
+    "CU-U-6.2"
+   ]
+  },
+  {
+   "id": "REL-109",
+   "origen": "U",
+   "destino": "SRV",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "permisos «Tarifas y horas» y «Editar inventario» del operador; orden de mover los usuarios de prueba a la cuenta de pruebas, con confirmación y la lista de usuarios",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-SRV-3.3",
+    "CU-SRV-9.2",
+    "CU-U-2.3",
+    "CU-U-7.3"
+   ]
+  },
+  {
+   "id": "REL-110",
+   "origen": "U",
+   "destino": "CMP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "permisos inventario.editar y dinero.adelantos del operador",
+   "regla": "",
+   "rt": [],
+   "estado": "por construir",
+   "generica": false,
+   "casosUso": [
+    "CU-CMP-4.1",
+    "CU-U-2.3"
+   ]
+  },
+  {
+   "id": "REL-111",
+   "origen": "U",
+   "destino": "OP",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "rol de la persona y módulos que puede abrir, para saber si ve la entrada «Tablero»; decisión, en cada petición, de qué puede hacer cada rol",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-OP-4.1",
+    "CU-OP-4.2",
+    "CU-U-2.5",
+    "CU-U-2.6"
+   ]
+  },
+  {
+   "id": "REL-112",
+   "origen": "U",
+   "destino": "PRJ",
+   "mecanismo": "por precisar (nació de los flujos de la línea base, MJ-16)",
+   "tipo": "por-precisar",
+   "dato": "rol de la persona con sesión, para decidir si puede abrir las páginas del grupo Proyecto",
+   "regla": "",
+   "rt": [],
+   "estado": "vigente",
+   "generica": false,
+   "casosUso": [
+    "CU-PRJ-1.1",
+    "CU-U-2.5"
+   ]
   }
  ],
  "reglas": [
@@ -3261,133 +4680,7 @@
    "historico": false
   },
   {
-   "id": "REQ-MOD-1",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-10",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-2",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-3",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-4",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-5",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
    "id": "REQ-MOD-6",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-7",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-8",
-   "titulo": null,
-   "estado": "sin registro",
-   "documento": null,
-   "das": [],
-   "prioridad": null,
-   "nota": "solo en el anclaje (REQ-MOD-n: claude/marco)",
-   "modulos": [
-    "MOD"
-   ],
-   "origen": "mapa",
-   "historico": false
-  },
-  {
-   "id": "REQ-MOD-9",
    "titulo": null,
    "estado": "sin registro",
    "documento": null,
@@ -4353,6 +5646,58 @@
   }
  ],
  "guiones": [
+  {
+   "archivo": "DA-47-cuenta-pruebas.spec.js",
+   "req": "DA-47",
+   "zona": [
+    "SRV"
+   ],
+   "modulos": [
+    "INV"
+   ],
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "oper",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Operador: el ensayo de la cuenta de pruebas da 403",
+     "camara": false,
+     "cubre": [
+      "SRV",
+      "RT-14"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "admin",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Admin: el ensayo responde la forma acordada, solo usuarios zz-verif- y sin correos (antes o después del movimiento)",
+     "camara": false,
+     "cubre": [
+      "SRV",
+      "RT-1",
+      "RT-14"
+     ],
+     "modulos": []
+    }
+   ],
+   "nCasos": 2,
+   "paginas": {
+    "/str-inventario.html": 2
+   },
+   "perfiles": {
+    "oper": 1,
+    "admin": 1
+   },
+   "niveles": {
+    "N2": 2
+   },
+   "origen": "tests/e2e",
+   "anclaje": "pagina"
+  },
   {
    "archivo": "DT-35.spec.js",
    "req": "DT-35",
@@ -5613,6 +6958,193 @@
    "perfiles": {
     "admin": 1,
     "oper": 1
+   },
+   "niveles": {
+    "N2": 2
+   },
+   "origen": "tests/e2e",
+   "anclaje": "pagina"
+  },
+  {
+   "archivo": "INC-170.spec.js",
+   "req": "INC-170",
+   "zona": [
+    "CAL",
+    "SRV",
+    "OP"
+   ],
+   "modulos": [
+    "CAL"
+   ],
+   "casos": [
+    {
+     "c": "b",
+     "perfil": "admin",
+     "pagina": "/str-calendario.html",
+     "nivel": "N2",
+     "que": "Una reserva de canal cancelada que vuelve a aparecer en el calendario del canal se reactiva por su identificador (no por fechas) y da la alerta 6 del Tablero",
+     "camara": false,
+     "cubre": [
+      "INC-170",
+      "CAL",
+      "SRV",
+      "REL-22",
+      "CU-CAL-6.5"
+     ],
+     "modulos": []
+    }
+   ],
+   "nCasos": 1,
+   "paginas": {
+    "/str-calendario.html": 1
+   },
+   "perfiles": {
+    "admin": 1
+   },
+   "niveles": {
+    "N2": 1
+   },
+   "origen": "tests/e2e",
+   "anclaje": "pagina"
+  },
+  {
+   "archivo": "INC-171.spec.js",
+   "req": "INC-171",
+   "zona": [
+    "PR",
+    "CAL",
+    "OP",
+    "SRV"
+   ],
+   "modulos": [
+    "CAL",
+    "OP",
+    "PR"
+   ],
+   "casos": [
+    {
+     "c": "b",
+     "perfil": "admin",
+     "pagina": "/str-propiedades.html",
+     "nivel": "N2",
+     "que": "Quitar un canal de Airbnb: resumen y confirmación; el bloqueo se elimina, la reserva queda con canalQuitado y el canal sale de la propiedad",
+     "camara": false,
+     "cubre": [
+      "INC-171",
+      "PR",
+      "CAL",
+      "CU-PR-7.1"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "c",
+     "perfil": "admin",
+     "pagina": "/str-tablero.html",
+     "nivel": "N2",
+     "que": "Tablero: alerta azul 7 «Canal quitado» de la reserva marcada",
+     "camara": false,
+     "cubre": [
+      "INC-171",
+      "OP",
+      "SRV",
+      "REL-44",
+      "REL-33",
+      "CU-OP-2.2"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "e",
+     "perfil": "admin",
+     "pagina": "/str-calendario.html",
+     "nivel": "N3",
+     "que": "Cómo se ven a 390 px el aviso «Canal quitado» y la alerta 7",
+     "camara": false,
+     "cubre": [
+      "INC-171",
+      "CAL",
+      "OP"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "d",
+     "perfil": "admin",
+     "pagina": "/str-calendario.html",
+     "nivel": "N2",
+     "que": "Calendario: la reserva marcada lleva ⚑ y «Dejar como directa» le quita canal y marca",
+     "camara": false,
+     "cubre": [
+      "INC-171",
+      "CAL",
+      "CU-CAL-5.6"
+     ],
+     "modulos": []
+    }
+   ],
+   "nCasos": 4,
+   "paginas": {
+    "/str-propiedades.html": 1,
+    "/str-tablero.html": 1,
+    "/str-calendario.html": 2
+   },
+   "perfiles": {
+    "admin": 4
+   },
+   "niveles": {
+    "N2": 3,
+    "N3": 1
+   },
+   "origen": "tests/e2e",
+   "anclaje": "pagina"
+  },
+  {
+   "archivo": "INC-190-respaldo.spec.js",
+   "req": "INC-190",
+   "zona": [
+    "SRV"
+   ],
+   "modulos": [
+    "INV"
+   ],
+   "casos": [
+    {
+     "c": "a",
+     "perfil": "oper",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Operador: el respaldo descargable da 403 (lleva datos de dinero del equipo)",
+     "camara": false,
+     "cubre": [
+      "INC-191",
+      "SRV",
+      "RT-14"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "b",
+     "perfil": "admin",
+     "pagina": "/str-inventario.html",
+     "nivel": "N2",
+     "que": "Admin en la cuenta de pruebas: el respaldo trae a cada usuario con perfil_pago y permisos, sin password_hash",
+     "camara": false,
+     "cubre": [
+      "INC-191",
+      "SRV",
+      "RT-1"
+     ],
+     "modulos": []
+    }
+   ],
+   "nCasos": 2,
+   "paginas": {
+    "/str-inventario.html": 2
+   },
+   "perfiles": {
+    "oper": 1,
+    "admin": 1
    },
    "niveles": {
     "N2": 2
@@ -9012,6 +10544,13 @@
     "req": "INC-155",
     "resumen": "Guion REQ-OP-1 c: orden por atención con la regla de _avOrden (valor conocido, mayor primero, empate por nombre)",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-157",
+    "fecha": "2026-10-19",
+    "req": "INC-204",
+    "resumen": "Guion REQ-INV2-3-4: nombres de estado que caben en los 40 caracteres del campo",
+    "estado": "aceptado"
    }
   ],
   "PRJ": [
@@ -9305,6 +10844,13 @@
     "req": "INC-155",
     "resumen": "Guion REQ-OP-1 c: orden por atención con la regla de _avOrden (valor conocido, mayor primero, empate por nombre)",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-159",
+    "fecha": "2026-10-19",
+    "req": "INC-171",
+    "resumen": "Quitar un canal pide confirmar; elimina los bloqueos de Airbnb y deja lo demás «Canal quitado» (⚑ en el Calendario, alerta 7 del Tablero) para cancelar, elimina",
+    "estado": "aceptado"
    }
   ],
   "INC1": [
@@ -9512,6 +11058,13 @@
     "req": "INC-155",
     "resumen": "Guion REQ-OP-1 c: orden por atención con la regla de _avOrden (valor conocido, mayor primero, empate por nombre)",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-157",
+    "fecha": "2026-10-19",
+    "req": "INC-204",
+    "resumen": "Guion REQ-INV2-3-4: nombres de estado que caben en los 40 caracteres del campo",
+    "estado": "aceptado"
    }
   ],
   "PR": [
@@ -9670,6 +11223,13 @@
     "req": "REQ-K3-3 (2/2)",
     "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-157",
+    "fecha": "2026-10-19",
+    "req": "INC-204",
+    "resumen": "Guion REQ-INV2-3-4: nombres de estado que caben en los 40 caracteres del campo",
+    "estado": "aceptado"
    }
   ],
   "K3": [
@@ -9797,78 +11357,6 @@
     "estado": "aceptado"
    }
   ],
-  "MOD": [
-   {
-    "lote": 70,
-    "fecha": "2026-10-11",
-    "req": "REQ-MOD-5",
-    "resumen": "A7a (LM-7a): CLAUDE.md podado (≤ 12 000 caracteres) con mapas por área en docs/claude/ y test claude-md.test.js (conservación ≥ 98 %).",
-    "estado": "aceptado"
-   },
-   {
-    "lote": 71,
-    "fecha": "2026-10-11",
-    "req": "REQ-MOD-3",
-    "resumen": "A7b (LM-7b): hooks de la CLI (.claude/settings.json; guard-bash.js, stop-check.js, ctx.js) y tests/hooks.test.js (17 pruebas) con fixtures.",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-78",
-    "fecha": "2026-10-12",
-    "req": "REQ-MOD-6",
-    "resumen": "Servicio del modelo, prueba técnica B7-1: modelo/api con salud (GET) y eco (POST ≤ 4 KB), independiente de api/.",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-84",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-16)",
-    "resumen": "Servicio del modelo con base propia: ModeloDb, secrets fuera del repo, 001_inicial.sql, salud con db y schema_version, GET migrar con X-Modelo-Token (403 {error",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-87",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-20, B7-3)",
-    "resumen": "Servicio del modelo: POST /modelo/api/cargar con el token del Arquitecto (403 sin token, 422 paquete inválido con detalle); carga.php con lista blanca de 14 tab",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-88",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-21, B7-4)",
-    "resumen": "Servicio del modelo: GET estado, export, <tabla> y <tabla>/<id> con el token del Arquitecto (403 antes de conectar; credencial y schema_version → 404); lectura.",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-91",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-27a, B7-5a)",
-    "resumen": "Servicio del modelo: esquema 2 con la tabla complemento (clave archivo+clave, sin id), exportación completa (parcial:false cuando todo archivo tiene complemento",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-92",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-27b, B7-5b)",
-    "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida: 403 sin cabecera sin conectar, Arquitecto sin base, hash_equals sobre credenciales vigentes, ",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-93",
-    "fecha": "2026-10-13",
-    "req": "INC-123 (LM-28)",
-    "resumen": "Servicio del modelo: extra se guarda tal cual llega en las 15 tablas (sin json_decode con true, JSON_PRESERVE_ZERO_FRACTION); la exportación del servicio devuel",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-97",
-    "fecha": "2026-10-14",
-    "req": "REQ-MOD-6 (rol carga, LM-34)",
-    "resumen": "Servicio del modelo: rol «carga» (cargar, estado, export; migrar, credenciales y tablas sueltas 403), LIMIT 8; sha opcional; tabla carga (esquema 3) con sha, ho",
-    "estado": "aceptado"
-   }
-  ],
   "SRV": [
    {
     "lote": "L-78",
@@ -9980,6 +11468,71 @@
     "fecha": "2026-10-15",
     "req": "REQ-K3-3 (2/2)",
     "resumen": "Lo borrado en un corte se ve desde Drive o con «Eliminado en el corte del…» (también en el portal, desde el 410), recordatorios 7/3/1, aviso de pendientes, repo",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-154",
+    "fecha": "2026-10-19",
+    "req": "INC-190, INC-191",
+    "resumen": "Respaldo diario con temporal + renombrar y perfil_pago/permisos",
+    "estado": "aceptado"
+   }
+  ],
+  "MOD": [
+   {
+    "lote": "L-78",
+    "fecha": "2026-10-12",
+    "req": "REQ-MOD-6",
+    "resumen": "Servicio del modelo, prueba técnica B7-1: modelo/api con salud (GET) y eco (POST ≤ 4 KB), independiente de api/.",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-84",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-16)",
+    "resumen": "Servicio del modelo con base propia: ModeloDb, secrets fuera del repo, 001_inicial.sql, salud con db y schema_version, GET migrar con X-Modelo-Token (403 {error",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-87",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-20, B7-3)",
+    "resumen": "Servicio del modelo: POST /modelo/api/cargar con el token del Arquitecto (403 sin token, 422 paquete inválido con detalle); carga.php con lista blanca de 14 tab",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-88",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-21, B7-4)",
+    "resumen": "Servicio del modelo: GET estado, export, <tabla> y <tabla>/<id> con el token del Arquitecto (403 antes de conectar; credencial y schema_version → 404); lectura.",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-91",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-27a, B7-5a)",
+    "resumen": "Servicio del modelo: esquema 2 con la tabla complemento (clave archivo+clave, sin id), exportación completa (parcial:false cuando todo archivo tiene complemento",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-92",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-27b, B7-5b)",
+    "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida: 403 sin cabecera sin conectar, Arquitecto sin base, hash_equals sobre credenciales vigentes, ",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-93",
+    "fecha": "2026-10-13",
+    "req": "INC-123 (LM-28)",
+    "resumen": "Servicio del modelo: extra se guarda tal cual llega en las 15 tablas (sin json_decode con true, JSON_PRESERVE_ZERO_FRACTION); la exportación del servicio devuel",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-97",
+    "fecha": "2026-10-14",
+    "req": "REQ-MOD-6 (rol carga, LM-34)",
+    "resumen": "Servicio del modelo: rol «carga» (cargar, estado, export; migrar, credenciales y tablas sueltas 403), LIMIT 8; sha opcional; tabla carga (esquema 3) con sha, ho",
     "estado": "aceptado"
    }
   ],
@@ -10123,14 +11676,14 @@
    {
     "id": "INC-138",
     "fecha": "2026-10-16",
-    "severidad": "media",
+    "severidad": "medio",
     "etapa": null,
     "titulo": "Regresión: INC-132 g deja 1 foto en la cola (estaba «subiendo») y el aviso sigue (guion, no la página)"
    },
    {
     "id": "INC-140",
     "fecha": "2026-10-16",
-    "severidad": "media",
+    "severidad": "medio",
     "etapa": null,
     "titulo": "El HK embebido en el portal navega a login.html cuando Firebase le da null al arrancar; login entra solo y vuelve: bucle que dispara el freno de INC-56 («varios"
    },
@@ -10161,6 +11714,27 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
+   },
+   {
+    "id": "INC-178",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "Un incidente escalado no tiene salida: HK solo ofrece Resolver y Escalar con estado «abierto» y nada escribe «cerrado»; queda activo para el Tablero, para el co"
+   },
+   {
+    "id": "INC-202",
+    "fecha": "2026-10-19",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "Regresión en la cuenta de pruebas: la entrega de zona no reemplaza la tarea «zz-verif-Conteo de cierre» (REQ-INV2-4-2 e, REQ-INV2-7-1-hk-turno b y d, REQ-OP-1 d"
+   },
+   {
+    "id": "INC-204",
+    "fecha": "2026-10-19",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "REQ-INV2-3-4 a falla en los trenes: el nombre de prueba de un estado pasa de los 40 caracteres de #esNombre con el prefijo largo del tren, se corta y la fila no"
    }
   ],
   "CAL": [
@@ -10212,6 +11786,41 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
+   },
+   {
+    "id": "INC-170",
+    "fecha": "2026-10-18",
+    "severidad": "alto",
+    "etapa": null,
+    "titulo": "La importación automática (cron /api/sync-ical) no restaura una reserva de canal cancelada que el canal vuelve a traer: actualiza fechas y lastSeenAt pero deja "
+   },
+   {
+    "id": "INC-171",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "Al quitar un canal (iCal) de una propiedad, sus reservas y bloqueos importados quedan vivos para siempre: ni el cron ni el sync del navegador los procesan (solo"
+   },
+   {
+    "id": "INC-172",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El emparejamiento por fechas del cron (propId + checkIn + checkOut + tipo reserva) no excluye reservas directas ni canceladas: un evento de canal con las mismas"
+   },
+   {
+    "id": "INC-173",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "El panel de la reserva muestra «pax» (las reservas creadas por el sync del navegador nacen con pax 2) y no la cantidad de huéspedes que edita el operador (huesp"
+   },
+   {
+    "id": "INC-174",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Calendario, detalles: el guardado de la reserva reescribe la fuente de la hora acordada a «operador» con la hora del aparato aunque no se haya tocado (pisa la f"
    }
   ],
   "FL": [
@@ -10242,6 +11851,41 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
+   },
+   {
+    "id": "INC-165",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "Importar con «Reemplazar flujo general» sobre un flujo compuesto del mismo nombre conserva esCompuesto y subFlujos y solo cambia las actividades: el turno expan"
+   },
+   {
+    "id": "INC-166",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Al importar con «Reemplazar», la actividad pierde su nota de estimado (estimadoNota): el Excel no la exporta ni la importa"
+   },
+   {
+    "id": "INC-167",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "El selector de zonas del editor deja crear zonas libres («Buscar o crear zona…»), también en copias por propiedad, pero la importación rechaza como ERROR una zo"
+   },
+   {
+    "id": "INC-168",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Crear una guía desde el editor del flujo la guarda en la biblioteca al instante, aunque luego se cancele el flujo: queda una guía suelta"
+   },
+   {
+    "id": "INC-169",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Avisos de Flujos: ?edit= con un id inexistente abre la lista sin avisar; un mensaje usa voseo («Ingresá un nombre para la categoría»)"
    }
   ],
   "API": [
@@ -10269,16 +11913,65 @@
    {
     "id": "INC-136",
     "fecha": "2026-10-16",
-    "severidad": "media",
+    "severidad": "medio",
     "etapa": null,
     "titulo": "Regresión: REQ-TB-3 g cuenta 2 consultas a la API en str-cobit.html (guion, no la página)"
    },
    {
     "id": "INC-139",
     "fecha": "2026-10-16",
-    "severidad": "baja",
+    "severidad": "bajo",
     "etapa": null,
     "titulo": "Lectura intermitente de los JSON del repo de documentos (API de GitHub) en páginas de Proyecto al final de una regresión larga"
+   },
+   {
+    "id": "INC-187",
+    "fecha": "2026-10-18",
+    "severidad": "alto",
+    "etapa": null,
+    "titulo": "La subida de cambios descarta lo que el servidor rechaza con cualquier error HTTP, también 401 (sesión vencida) y 5xx pasajeros (MySQL 2002, INC-128): _colPush "
+   },
+   {
+    "id": "INC-188",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El updated_at de cada ítem lo pone el reloj del aparato: en el PUT de /api/col un aparato atrasado pierde siempre la última-escritura-gana y el servidor respond"
+   },
+   {
+    "id": "INC-189",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "_colPushAll reenvía la copia local completa con updated_at de ahora y el upsert pone deleted = 0: en las siembras de catálogos (prop-tipos y ubic-tipos con el s"
+   },
+   {
+    "id": "INC-194",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Un colaborador recién asignado a una propiedad no recibe lo que ya existía de ella (turnos, zonas, reservas) hasta el siguiente pull completo: los pulls con sin"
+   },
+   {
+    "id": "INC-195",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Detalles de str-api.js: _archivoUrl no renueva la sesión ante 401 (request y descargar sí) y _upload y _archivoUrl no adjuntan err.datos con el cuerpo del error"
+   },
+   {
+    "id": "INC-200",
+    "fecha": "2026-10-19",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "La API del modelo no limita los intentos de token: cada token falso cuesta una consulta a credencial y se puede probar sin freno (RT-19)"
+   },
+   {
+    "id": "INC-203",
+    "fecha": "2026-10-19",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "L-154 bloqueado en la puerta de pruebas: el comentario del guion INC-190 nombraba la cabecera del cron y las guardias de tests/e2e lo rechazaron; la CLI no lo c"
    }
   ],
   "PRJ": [
@@ -10327,16 +12020,30 @@
    {
     "id": "INC-136",
     "fecha": "2026-10-16",
-    "severidad": "media",
+    "severidad": "medio",
     "etapa": null,
     "titulo": "Regresión: REQ-TB-3 g cuenta 2 consultas a la API en str-cobit.html (guion, no la página)"
    },
    {
     "id": "INC-139",
     "fecha": "2026-10-16",
-    "severidad": "baja",
+    "severidad": "bajo",
     "etapa": null,
     "titulo": "Lectura intermitente de los JSON del repo de documentos (API de GitHub) en páginas de Proyecto al final de una regresión larga"
+   },
+   {
+    "id": "INC-197",
+    "fecha": "2026-10-19",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Páginas internas del proyecto, defectos de presentación: Seg. Proyecto no muestra los ítems de la bolsa sin ref (5 de 69), el aviso de cobertura no se oculta tr"
+   },
+   {
+    "id": "INC-201",
+    "fecha": "2026-10-19",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El grupo Proyecto (Seg. Proyecto, COBIT, Elementos, Instrucciones, Marco, Base de conocimiento) solo se cierra en pantalla: la página comprueba el rol en el nav"
    }
   ],
   "SRV": [
@@ -10462,9 +12169,23 @@
     "severidad": "bajo",
     "etapa": null,
     "titulo": "INC-131.spec.js b: page.goto de HK (admin) sin cargar en 45 s en la regresión de L-146 (18:15); c en cascada"
+   },
+   {
+    "id": "INC-159",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "«Mi dinero» muestra en el mes más antiguo (3 meses: actual y 2 anteriores, hasta ~92 días) filas sin nombre de propiedad: los turnos de más de 90 días llegan re"
+   },
+   {
+    "id": "INC-204",
+    "fecha": "2026-10-19",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "REQ-INV2-3-4 a falla en los trenes: el nombre de prueba de un estado pasa de los 40 caracteres de #esNombre con el prefijo largo del tren, se corta y la fila no"
    }
   ],
-  "KN": [
+  "K3": [
    {
     "id": "INC-96",
     "fecha": "2026-10-08",
@@ -10478,29 +12199,55 @@
     "severidad": "bajo",
     "etapa": "📝",
     "titulo": "Conectar Drive sin marcar la casilla de permiso de Google (desmarcada por defecto) vuelve con ?drive=error sin motivo; el callback no anota ultimo_error ni log "
-   }
-  ],
-  "K3": [
-   {
-    "id": "INC-97",
-    "fecha": "2026-10-08",
-    "severidad": "bajo",
-    "etapa": "📝",
-    "titulo": "Conectar Drive sin marcar la casilla de permiso de Google (desmarcada por defecto) vuelve con ?drive=error sin motivo; el callback no anota ultimo_error ni log "
    },
    {
     "id": "INC-135",
     "fecha": "2026-10-16",
-    "severidad": "baja",
+    "severidad": "bajo",
     "etapa": null,
     "titulo": "Drive: con invalid_grant se guarda solo «Google retiró el permiso» y se pierde el código y la descripción de Google"
    },
    {
     "id": "INC-138",
     "fecha": "2026-10-16",
-    "severidad": "media",
+    "severidad": "medio",
     "etapa": null,
     "titulo": "Regresión: INC-132 g deja 1 foto en la cola (estaba «subiendo») y el aviso sigue (guion, no la página)"
+   },
+   {
+    "id": "INC-175",
+    "fecha": "2026-10-18",
+    "severidad": "alto",
+    "etapa": null,
+    "titulo": "Corte con la conexión de Drive revocada o sin claves de Google: el cron trata al negocio como «sin Drive» y el día 0 (23:00) borra todos los archivos hasta el c"
+   },
+   {
+    "id": "INC-176",
+    "fecha": "2026-10-18",
+    "severidad": "alto",
+    "etapa": null,
+    "titulo": "Si Google no responde al confirmar un archivo copiado (error de red o token que no renueva), el corte lo trata como «no está en Drive»: en los días 0 a 2 reCopi"
+   },
+   {
+    "id": "INC-177",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El aviso fijo del corte trata una conexión de Drive «con error» como «sin Drive» (dice que se eliminarán las fotos y pide conectar) aunque la copia y el corte l"
+   },
+   {
+    "id": "INC-190",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El respaldo diario (POST /api/export modo cron) escribe un archivo vacío sobre el del día y responde ok si json_encode falla (por ejemplo UTF-8 inválido en un d"
+   },
+   {
+    "id": "INC-191",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El respaldo (/api/export) no trae de los usuarios la ficha de pago (perfil_pago: tarifas, política de horas, saldo desde) ni los permisos: restaurar desde él pe"
    }
   ],
   "INV": [
@@ -10573,6 +12320,13 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
+   },
+   {
+    "id": "INC-204",
+    "fecha": "2026-10-19",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "REQ-INV2-3-4 a falla en los trenes: el nombre de prueba de un estado pasa de los 40 caracteres de #esNombre con el prefijo largo del tren, se corta y la fila no"
    }
   ],
   "PR": [
@@ -10589,6 +12343,20 @@
     "severidad": "medio",
     "etapa": "📝",
     "titulo": "En un navegador sin datos guardados, str-propiedades.html sube al servidor propiedades y tipos de demostración antes de traer los reales."
+   },
+   {
+    "id": "INC-157",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "Un operador sin el permiso dinero.tarifas puede cambiar las horas por turno de una propiedad (horasTurno) y con ellas las horas que se pagan: el PUT de propieda"
+   },
+   {
+    "id": "INC-158",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "El colaborador recibe todas las ubicaciones comunes del negocio (nombre, dirección, barrio e indicaciones de llegada), también las de propiedades donde no traba"
    }
   ],
   "SH": [
@@ -10623,7 +12391,7 @@
    {
     "id": "INC-134",
     "fecha": "2026-10-16",
-    "severidad": "media",
+    "severidad": "medio",
     "etapa": null,
     "titulo": "Shell: aviso «Sesión vencida · Entrar» con sesión iniciada (renueva antes de que Firebase recupere al usuario)"
    },
@@ -10640,6 +12408,34 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
+   },
+   {
+    "id": "INC-162",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "«Cerrar sesión» del shell no cierra la sesión del STR: el botón ⏻ de Google (doLogout) solo hace signOut de Firebase y va a login.html, sin borrar str-token; el"
+   },
+   {
+    "id": "INC-184",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "El shell abre un módulo desde un favorito sin mirar el rol: openModule no comprueba data-roles (nav sí, INC-109), así que un favorito heredado (la migración úni"
+   },
+   {
+    "id": "INC-185",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Tocar la estrella ☆ de un ítem del menú también abre el módulo: el onclick del ítem corre antes que el oyente de la barra lateral que hace stopPropagation"
+   },
+   {
+    "id": "INC-186",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Tras pasar de un módulo a otro con un botón propio del módulo (navegación dentro del iframe), tocar en el menú la entrada de origen muestra el destino hasta rec"
    }
   ],
   "U": [
@@ -10656,6 +12452,34 @@
     "severidad": "bajo",
     "etapa": "📝",
     "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
+   },
+   {
+    "id": "INC-160",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "api/capacidades no mira el rol: cualquiera con sesión (también un colaborador) puede crear, renombrar (nombre vacío permitido) o borrar capacidades del negocio "
+   },
+   {
+    "id": "INC-161",
+    "fecha": "2026-10-18",
+    "severidad": "alto",
+    "etapa": null,
+    "titulo": "Un operador con «Invitar» (equipo.invitar) puede reinvitar a un usuario ya activo que no es admin (otro operador con más permisos o un colaborador) y, al acepta"
+   },
+   {
+    "id": "INC-163",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "/api/me devuelve capacidades siempre vacío: el SELECT no trae la columna capacidades"
+   },
+   {
+    "id": "INC-164",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Textos y respuestas que no dicen lo que pasa: «¿Eliminar este colaborador permanentemente?» en Equipo solo lo deja inactivo (INC-64); GET /api/usuarios/{id} de "
    }
   ],
   "OP": [
@@ -10674,8 +12498,32 @@
     "titulo": "Guion REQ-OP-1 c: con dos turnos «atrasado» lee el motivo «Sin empezar · debía empezar H (+N min)» como número (parseInt → NaN) y compara minutos contra el orde"
    }
   ],
+  "PG": [
+   {
+    "id": "INC-159",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "«Mi dinero» muestra en el mes más antiguo (3 meses: actual y 2 anteriores, hasta ~92 días) filas sin nombre de propiedad: los turnos de más de 90 días llegan re"
+   }
+  ],
+  "KN": [
+   {
+    "id": "INC-182",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "Si el servidor rechaza el guardado de una guía (cuerpo grande, 403, 500 o sin red), Conocimiento dice «Guía actualizada/creada», solo deja un console.warn y el "
+   },
+   {
+    "id": "INC-183",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "«¿Dónde se usa?» y la confirmación de borrado de una guía leen los flujos de la copia local (str-flujos-v2): Conocimiento nunca los pide al servidor, así que co"
+   }
+  ],
   "INC1": [],
-  "PG": [],
   "M2": [],
   "CMP": [],
   "PC1": [],
@@ -10697,8 +12545,8 @@
    ],
    "lotes30d": 12,
    "lotesTotal": 12,
-   "incidentes": 7,
-   "incidentesAbiertos": 5,
+   "incidentes": 11,
+   "incidentesAbiertos": 9,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
    "hotspot": 78
@@ -10717,8 +12565,8 @@
    ],
    "lotes30d": 5,
    "lotesTotal": 5,
-   "incidentes": 5,
-   "incidentesAbiertos": 2,
+   "incidentes": 12,
+   "incidentesAbiertos": 9,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
    "hotspot": 36
@@ -10736,13 +12584,13 @@
     "colab",
     "oper"
    ],
-   "lotes30d": 16,
-   "lotesTotal": 16,
+   "lotes30d": 17,
+   "lotesTotal": 17,
    "incidentes": 8,
    "incidentesAbiertos": 5,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 102
+   "hotspot": 108
   },
   "U": {
    "reqVigentes": 1,
@@ -10755,8 +12603,8 @@
    "perfiles": [],
    "lotes30d": 2,
    "lotesTotal": 2,
-   "incidentes": 2,
-   "incidentesAbiertos": 1,
+   "incidentes": 6,
+   "incidentesAbiertos": 5,
    "riesgo": "medio",
    "puntajeRiesgo": 3,
    "hotspot": 9
@@ -10767,8 +12615,8 @@
    "reqAceptadosConGuion": 0,
    "reqEntregados": 0,
    "reqHistoricos": 12,
-   "guiones": 3,
-   "casos": 7,
+   "guiones": 4,
+   "casos": 11,
    "perfiles": [
     "admin",
     "colab",
@@ -10776,8 +12624,8 @@
    ],
    "lotes30d": 4,
    "lotesTotal": 4,
-   "incidentes": 2,
-   "incidentesAbiertos": 1,
+   "incidentes": 4,
+   "incidentesAbiertos": 3,
    "riesgo": "bajo",
    "puntajeRiesgo": 2,
    "hotspot": 10
@@ -10788,20 +12636,20 @@
    "reqAceptadosConGuion": 1,
    "reqEntregados": 3,
    "reqHistoricos": 11,
-   "guiones": 3,
-   "casos": 17,
+   "guiones": 5,
+   "casos": 22,
    "perfiles": [
     "admin",
     "colab",
     "oper"
    ],
-   "lotes30d": 9,
-   "lotesTotal": 9,
-   "incidentes": 7,
-   "incidentesAbiertos": 5,
+   "lotes30d": 10,
+   "lotesTotal": 10,
+   "incidentes": 12,
+   "incidentesAbiertos": 10,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 60
+   "hotspot": 66
   },
   "FL": {
    "reqVigentes": 10,
@@ -10818,8 +12666,8 @@
    ],
    "lotes30d": 16,
    "lotesTotal": 16,
-   "incidentes": 4,
-   "incidentesAbiertos": 2,
+   "incidentes": 9,
+   "incidentesAbiertos": 7,
    "riesgo": "bajo",
    "puntajeRiesgo": 2,
    "hotspot": 34
@@ -10838,13 +12686,13 @@
     "colab2",
     "oper"
    ],
-   "lotes30d": 48,
-   "lotesTotal": 48,
-   "incidentes": 19,
-   "incidentesAbiertos": 10,
+   "lotes30d": 49,
+   "lotesTotal": 49,
+   "incidentes": 22,
+   "incidentesAbiertos": 13,
    "riesgo": "alto",
    "puntajeRiesgo": 9,
-   "hotspot": 441
+   "hotspot": 450
   },
   "POR": {
    "reqVigentes": 9,
@@ -10860,13 +12708,13 @@
     "colab2",
     "oper"
    ],
-   "lotes30d": 18,
-   "lotesTotal": 18,
-   "incidentes": 4,
-   "incidentesAbiertos": 2,
+   "lotes30d": 19,
+   "lotesTotal": 19,
+   "incidentes": 6,
+   "incidentesAbiertos": 4,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 114
+   "hotspot": 120
   },
   "INV": {
    "reqVigentes": 22,
@@ -10874,21 +12722,21 @@
    "reqAceptadosConGuion": 5,
    "reqEntregados": 9,
    "reqHistoricos": 2,
-   "guiones": 16,
-   "casos": 94,
+   "guiones": 18,
+   "casos": 98,
    "perfiles": [
     "admin",
     "colab",
     "colab2",
     "oper"
    ],
-   "lotes30d": 25,
-   "lotesTotal": 25,
-   "incidentes": 10,
-   "incidentesAbiertos": 8,
+   "lotes30d": 26,
+   "lotesTotal": 26,
+   "incidentes": 11,
+   "incidentesAbiertos": 9,
    "riesgo": "alto",
    "puntajeRiesgo": 9,
-   "hotspot": 234
+   "hotspot": 243
   },
   "KN": {
    "reqVigentes": 0,
@@ -10902,7 +12750,7 @@
    "lotes30d": 0,
    "lotesTotal": 0,
    "incidentes": 2,
-   "incidentesAbiertos": 1,
+   "incidentesAbiertos": 2,
    "riesgo": "bajo",
    "puntajeRiesgo": 1,
    "hotspot": 1
@@ -10922,8 +12770,8 @@
    ],
    "lotes30d": 10,
    "lotesTotal": 10,
-   "incidentes": 3,
-   "incidentesAbiertos": 3,
+   "incidentes": 9,
+   "incidentesAbiertos": 8,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
    "hotspot": 66
@@ -10960,8 +12808,8 @@
    "perfiles": [],
    "lotes30d": 0,
    "lotesTotal": 0,
-   "incidentes": 0,
-   "incidentesAbiertos": 0,
+   "incidentes": 1,
+   "incidentesAbiertos": 1,
    "riesgo": "medio",
    "puntajeRiesgo": 3,
    "hotspot": 3
@@ -11048,14 +12896,14 @@
    ],
    "lotes30d": 20,
    "lotesTotal": 20,
-   "incidentes": 8,
-   "incidentesAbiertos": 5,
+   "incidentes": 10,
+   "incidentesAbiertos": 7,
    "riesgo": "bajo",
    "puntajeRiesgo": 2,
    "hotspot": 42
   },
   "MOD": {
-   "reqVigentes": 11,
+   "reqVigentes": 2,
    "reqAceptados": 0,
    "reqAceptadosConGuion": 0,
    "reqEntregados": 1,
@@ -11065,13 +12913,13 @@
    "perfiles": [
     "admin"
    ],
-   "lotes30d": 10,
-   "lotesTotal": 10,
+   "lotes30d": 8,
+   "lotesTotal": 8,
    "incidentes": 5,
    "incidentesAbiertos": 3,
    "riesgo": "bajo",
    "puntajeRiesgo": 1,
-   "hotspot": 11
+   "hotspot": 9
   },
   "OP": {
    "reqVigentes": 1,
@@ -11079,8 +12927,8 @@
    "reqAceptadosConGuion": 1,
    "reqEntregados": 0,
    "reqHistoricos": 0,
-   "guiones": 2,
-   "casos": 15,
+   "guiones": 3,
+   "casos": 19,
    "perfiles": [
     "admin",
     "colab",
@@ -11212,6 +13060,21 @@
     "REQ-INV2-7-1-hk.spec.js h",
     "REQ-INV2-7-1.spec.js f"
    ],
+   "REL-22": [
+    "INC-170.spec.js b"
+   ],
+   "REL-44": [
+    "INC-171.spec.js c"
+   ],
+   "REL-33": [
+    "INC-171.spec.js c",
+    "REQ-OP-1.spec.js a",
+    "REQ-OP-1.spec.js g",
+    "REQ-OP-1.spec.js c",
+    "REQ-OP-1.spec.js d",
+    "REQ-OP-1b.spec.js b",
+    "REQ-OP-1b.spec.js c"
+   ],
    "REL-12": [
     "REQ-INV2-3-4-hk.spec.js e",
     "REQ-INV2-3-4-hk.spec.js h"
@@ -11234,14 +13097,6 @@
     "REQ-K3c-vista.spec.js d",
     "REQ-K3c-vista.spec.js i",
     "REQ-K3c.spec.js d"
-   ],
-   "REL-33": [
-    "REQ-OP-1.spec.js a",
-    "REQ-OP-1.spec.js g",
-    "REQ-OP-1.spec.js c",
-    "REQ-OP-1.spec.js d",
-    "REQ-OP-1b.spec.js b",
-    "REQ-OP-1b.spec.js c"
    ],
    "REL-34": [
     "REQ-OP-1.spec.js a",
@@ -11269,14 +13124,9 @@
    ]
   },
   "reglas": {
-   "RT-19": [
-    "DT-40.spec.js b",
-    "DT-41.spec.js b",
-    "DT-42.spec.js d",
-    "REQ-OP-1.spec.js d",
-    "REQ-OP-1b.spec.js h"
-   ],
    "RT-14": [
+    "DA-47-cuenta-pruebas.spec.js a",
+    "DA-47-cuenta-pruebas.spec.js b",
     "DT-41.spec.js c",
     "DT-42.spec.js a",
     "INC-120-c12.spec.js b",
@@ -11284,19 +13134,29 @@
     "INC-141.spec.js b",
     "INC-146-purga.spec.js d",
     "INC-146-purga.spec.js e",
+    "INC-190-respaldo.spec.js a",
     "REQ-INV2-4-1-interfaz.spec.js c",
     "REQ-INV2-4-2.spec.js d",
     "REQ-INV2-7-1.spec.js f",
     "REQ-OP-1.spec.js g",
     "REQ-SH-2.spec.js b2"
    ],
-   "RT-2": [
-    "DT-42.spec.js b"
-   ],
    "RT-1": [
+    "DA-47-cuenta-pruebas.spec.js b",
     "DT-42.spec.js c",
     "INC-120-c12.spec.js b",
-    "INC-141.spec.js b"
+    "INC-141.spec.js b",
+    "INC-190-respaldo.spec.js b"
+   ],
+   "RT-19": [
+    "DT-40.spec.js b",
+    "DT-41.spec.js b",
+    "DT-42.spec.js d",
+    "REQ-OP-1.spec.js d",
+    "REQ-OP-1b.spec.js h"
+   ],
+   "RT-2": [
+    "DT-42.spec.js b"
    ],
    "RT-5": [
     "DT-42.spec.js c",
@@ -11373,6 +13233,26 @@
    ]
   },
   "modulos": {
+   "INV": [
+    "DA-47-cuenta-pruebas.spec.js",
+    "DT-42.spec.js",
+    "INC-121.spec.js",
+    "INC-125.spec.js",
+    "INC-141.spec.js",
+    "INC-146-purga.spec.js",
+    "INC-190-respaldo.spec.js",
+    "REQ-INV2-3-4-hk.spec.js",
+    "REQ-INV2-3-4.spec.js",
+    "REQ-INV2-4-1-interfaz.spec.js",
+    "REQ-INV2-4-1.spec.js",
+    "REQ-INV2-4-2-dif.spec.js",
+    "REQ-INV2-4-2.spec.js",
+    "REQ-INV2-7-1-hk-turno.spec.js",
+    "REQ-INV2-7-1-hk.spec.js",
+    "REQ-INV2-7-1.spec.js",
+    "REQ-OP-1.spec.js",
+    "REQ-OP-1b.spec.js"
+   ],
    "API": [
     "DT-35.spec.js",
     "DT-40.spec.js",
@@ -11388,28 +13268,11 @@
     "REQ-INV2-4-1-interfaz.spec.js",
     "REQ-INV2-4-1.spec.js"
    ],
-   "INV": [
-    "DT-42.spec.js",
-    "INC-121.spec.js",
-    "INC-125.spec.js",
-    "INC-141.spec.js",
-    "INC-146-purga.spec.js",
-    "REQ-INV2-3-4-hk.spec.js",
-    "REQ-INV2-3-4.spec.js",
-    "REQ-INV2-4-1-interfaz.spec.js",
-    "REQ-INV2-4-1.spec.js",
-    "REQ-INV2-4-2-dif.spec.js",
-    "REQ-INV2-4-2.spec.js",
-    "REQ-INV2-7-1-hk-turno.spec.js",
-    "REQ-INV2-7-1-hk.spec.js",
-    "REQ-INV2-7-1.spec.js",
-    "REQ-OP-1.spec.js",
-    "REQ-OP-1b.spec.js"
-   ],
    "PR": [
     "INC-117.spec.js",
     "INC-120-c12.spec.js",
-    "INC-120-c3.spec.js"
+    "INC-120-c3.spec.js",
+    "INC-171.spec.js"
    ],
    "POR": [
     "INC-120-c12.spec.js",
@@ -11459,6 +13322,8 @@
    ],
    "CAL": [
     "INC-127.spec.js",
+    "INC-170.spec.js",
+    "INC-171.spec.js",
     "REQ-OP-1.spec.js",
     "REQ-OP-1b.spec.js"
    ],
@@ -11480,6 +13345,11 @@
     "REQ-SH-2.spec.js",
     "herramientas/pw/humo-pw.spec.js"
    ],
+   "OP": [
+    "INC-171.spec.js",
+    "REQ-OP-1.spec.js",
+    "REQ-OP-1b.spec.js"
+   ],
    "FL": [
     "REQ-FL-12.spec.js",
     "REQ-OP-1.spec.js",
@@ -11497,10 +13367,6 @@
     "REQ-MOD-6-lectura.spec.js",
     "REQ-MOD-6.spec.js"
    ],
-   "OP": [
-    "REQ-OP-1.spec.js",
-    "REQ-OP-1b.spec.js"
-   ],
    "PRJ": [
     "REQ-SH-2.spec.js",
     "REQ-TB-3.spec.js",
@@ -11513,7 +13379,7 @@
    ]
   },
   "casosSinCubre": 0,
-  "casos": 198
+  "casos": 207
  },
  "zonasPw": {
   "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»). LM-39b: zona = id de módulo o lista de ids; «sesiones» sigue como zona especial (no es módulo); cambio de las 37 cabeceras y de plantillas/guion-e2e.js en el mismo lote (Desarrollo M-520).",
@@ -11720,36 +13586,18 @@
   "REQ-INV2-8": [],
   "REQ-F11-7": [],
   "REQ-BT-1": [],
-  "REQ-MOD-1": [
-   "MOD"
-  ],
-  "REQ-MOD-2": [
-   "MOD"
-  ],
-  "REQ-MOD-3": [
-   "MOD"
-  ],
-  "REQ-MOD-4": [
-   "MOD"
-  ],
-  "REQ-MOD-5": [
-   "MOD"
-  ],
+  "REQ-MOD-1": [],
+  "REQ-MOD-2": [],
+  "REQ-MOD-3": [],
+  "REQ-MOD-4": [],
+  "REQ-MOD-5": [],
   "REQ-MOD-6": [
    "MOD"
   ],
-  "REQ-MOD-7": [
-   "MOD"
-  ],
-  "REQ-MOD-8": [
-   "MOD"
-  ],
-  "REQ-MOD-9": [
-   "MOD"
-  ],
-  "REQ-MOD-10": [
-   "MOD"
-  ],
+  "REQ-MOD-7": [],
+  "REQ-MOD-8": [],
+  "REQ-MOD-9": [],
+  "REQ-MOD-10": [],
   "REQ-SH-2": [
    "SH",
    "PRJ"
@@ -12100,6 +13948,55 @@
    "fecha": "2026-10-18",
    "cambio": "L-150: SRV, ruta nueva /api/cuenta-pruebas (ensayo, mover y revertir usuarios zz-verif- a la cuenta zz-verif-pruebas; solo admin), tabla cuenta_movimiento (migración 14); los crones de copia a Drive, corte y sync-ical dejan fuera esa cuenta (REL-22, REL-28); el respaldo la incluye (DA-47).",
    "lote": "L-150"
+  },
+  {
+   "fecha": "2026-10-18",
+   "cambio": "L-153: SRV, al mover a la cuenta zz-verif-pruebas la cuenta nueva toma el plan_id de su cuenta de origen (cuenta.plan_id NOT NULL en producción; INC-156); nada más cambia en /api/cuenta-pruebas.",
+   "lote": "L-153"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "Cierre de la fase 4 de MJ-16 (LM-58): 78 relaciones nuevas (REL-35 a REL-112) nacidas de los flujos de la línea base que no tenían relación, con su mecanismo por precisar y la lista de casos de uso que las usan; REL-02 sin «navegar a otro módulo» (Diseño, M-832 j); «Lo que viene» pasa de PRJ a SH (de fábrica); REQ-MOD-1 a 5 y 7 a 10 se desanclan de MOD (modelo de operación v2, Diseño, M-844 e); OP lee reservas de 30 días.",
+   "lote": "LM-58"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "M6: el enlace manual de WhatsApp es de Housekeeping y de Equipo, no del Calendario (Desarrollo, M-850).",
+   "lote": "LM-58"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "L-154: SRV, respaldo diario y descargable con temporal y renombrado (si falla no sobrescribe el último bueno y deja constancia en el registro; INC-190) y con perfil_pago y permisos de cada usuario (INC-191). Sin colecciones, rutas ni relaciones nuevas.",
+   "lote": "L-154"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "L-155: solo el guion N2 tests/e2e/INC-190-respaldo.spec.js de L-154 (INC-203); sin cambios en el mapa.",
+   "lote": "L-155"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "L-137: SRV, el ensayo de restauración crea la cuenta zz-verif-restauracion- con el plan de la cuenta de origen (INC-137); /api/diagnostico suma la variante ?log=restauracion (solo admin, una línea, sin datos). Sin colecciones ni relaciones nuevas.",
+   "lote": "L-137"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "L-157: solo el guion de REQ-INV2-3-4 (nombres de prueba cortos y recortados a 40, INC-204); sin cambios en el mapa.",
+   "lote": "L-157"
+  },
+  {
+   "fecha": "2026-10-19",
+   "cambio": "14:39 (Arquitecto): cada relación lleva `tipo` (catálogo en `tiposRelacion`): 4 de navegación, 10 de datos compartidos, 9 de llamada al servidor, 3 programadas, 2 de código compartido, 4 con terceros, 2 transversales y 78 por precisar (con L-158, REL-44 pasa a datos: 11 y 77). El explorador de la línea base filtra los flujos por tipo de relación (pedido de Carlos)."
+  },
+  {
+   "fecha": "2026-10-19",
+   "lote": "L-158",
+   "cambio": "L-158 (p5c111; INC-170 e INC-172): SRV, `/api/sync-ical` decide por identificador del canal (reactivar, retomar o nueva), nunca por fechas; CAL, [ICAL-DEC] en str-calendario.html e `icalFeedId` en las reservas del canal; OP, alerta 6 del Tablero. REL-44 (CAL→OP) queda precisada como datos compartidos (`reservas` vía `/api/tablero`) y REL-33 (OP→SRV) deja pasar `reactivadaEn`, `reemplazaCancelada` y `firstSeenAt`. REL-22 (cron→CAL) la cubren las N1 de tests/ical-reservas-canal.test.js (A1–A6, B1–B5); un guion no puede llamar al cron (RT-22). Sin colecciones nuevas."
+  },
+  {
+   "fecha": "2026-10-19",
+   "lote": "L-159",
+   "cambio": "L-159 (p5c112; INC-171): PR, quitar un canal con resumen y confirmación; lee `/api/col/reservas` y escribe `/api/col/reservas` y luego `/api/col/propiedades`. CAL, ⚑, aviso «Canal quitado» y «Dejar como directa»; campo nuevo `canalQuitado` en `reservas`. OP, alerta 7; `/api/tablero` deja pasar `canalQuitado` (REL-44 y REL-33). REL-91 (PR→CAL) queda precisada como datos compartidos (`reservas`). REL-21 (PR→airbnb) sin cambio de forma: los bloqueos de Airbnb se eliminan y lo marcado de otros canales sigue en la exportación. Huecos de cobertura del juez: REL-21 (el guion no lee la exportación; la N1 D1 prueba qué se elimina) y REL-22 (no la toca)."
   }
  ],
  "avisos": [

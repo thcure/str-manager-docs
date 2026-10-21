@@ -15,6 +15,9 @@
 // V2 un rojo repite el guion entero una vez (segundo intento manda; los que pasan quedan «inestables»). V10 P4 bloqueado por entorno o
 // dos guiones seguidos fallando por el entorno → log\suspension.json y «bloqueado»; la corrida siguiente del mismo lote es «reanudación»
 // (no cuenta como reprueba). El informe suma fase.riesgo, inestables[], cuarentena[] y cuarentenaEntradas.
+// v0.12.0 (LM-63, CONSTRUCCIÓN-v1): pw\aplicar.js. P4.f «aplicación»: cada Busca/Pon y cada «Contenido completo» de la instrucción
+// contra el commit (K1; diferencia → bloqueado salvo «No hecho» en el commit; «Versión:» por grep; schema_version en /api/health);
+// P4.g «N1 literal»: el test de «Tests en tests/» igual byte a byte (K2); tamaño del lote en tres columnas (K3) en el informe.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -23,6 +26,7 @@ const { BASE, COLA, abrir, explicarError, recuperarSesion, recuperarConChrome } 
 const { extraerGuion, igual, loteDe, correrGuion, cargar, horaBogota } = require('./guion');
 const { comprobarSemilla } = require('./semilla');
 const V2 = require('./v2');
+const APL = require('./aplicar');   // v0.12.0 (LM-63, CONSTRUCCIÓN-v1): K1 aplicación literal, K2 N1 literal, K3 tamaño
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
 const dormir = ms => new Promise(r => setTimeout(r, ms));
@@ -336,11 +340,12 @@ async function main() {
 
   // P4.a despliegue: /api/health y, si el lote cambia ?v=, la version en el HTML (espera hasta 10 min al despliegue)
   const v = versionNueva(texto);
-  let desplegado = false, obs = '';
+  let desplegado = false, obs = '', salud = null;
   for (let i = 0; i < (process.argv.includes('--sin-espera') ? 1 : 20); i++) {
     try {
       const h = await fetch(BASE + '/api/health'); const j = await h.json();
       if (h.status === 200 && j.ok) {
+        salud = j;
         if (!v) { desplegado = true; obs = '/api/health 200; el lote no cambia ?v='; break; }
         const html = await (await fetch(BASE + '/str-app-shell.html?nc=' + Date.now())).text();
         if (html.includes('v=' + v)) { desplegado = true; obs = '/api/health 200 y ?v=' + v + ' en str-app-shell.html'; break; }
@@ -380,6 +385,16 @@ async function main() {
     try { spec = cargar(rutaSpec); } catch (e) { return entra('guion N2', false, 'no carga: ' + e.message), fin('bloqueado', 'el guion no carga: ' + e.message); }
     entra('guion N2', true, g.ruta + ' igual a la instruccion · ' + (spec.casos || []).length + ' caso(s)' + (yaG ? ' (comparado con este commit a las ' + yaG.hora + '; no se repite, LM-45)' : ''));
   }
+
+  // P4.f aplicación literal (K1), P4.g N1 literal (K2) y tamaño (K3) — LM-63, sin créditos ni navegador
+  try {
+    const rev = APL.revisarCommit(texto, repo, { health: salud });
+    out.aplicacion = rev.aplicacion; out.n1Literal = rev.n1; out.tamano = rev.tamano;
+    if (!entra('aplicación', rev.aplicacion.ok, rev.aplicacion.resumen)) return fin('bloqueado', 'el commit no aplica la instrucción tal cual (K1): ' + rev.aplicacion.resumen.slice(0, 300));
+    if (!entra('N1 literal', rev.n1.ok, rev.n1.resumen || rev.n1.aviso)) return fin('bloqueado', 'el N1 del commit no es igual al de la instrucción (K2, independencia): ' + rev.n1.resumen);
+    if (rev.n1.sinPrueba && rev.n1.sinPrueba.length) console.log('aviso K2: puntos sin caso N1 que los nombre: ' + rev.n1.sinPrueba.join(', '));
+    const tm = rev.tamano; console.log('tamaño (K3): código ' + tm.codigo.lineas + ' líneas / ' + tm.codigo.archivos + ' archivos · pruebas ' + tm.pruebas.lineas + ' · versión ' + tm.version.archivos + ' archivos' + (tm.grande ? ' · LOTE GRANDE (aviso: > 400 líneas o > 8 archivos de código)' : ''));
+  } catch (e) { entra('aplicación', true, 'no se pudo revisar (sigue, aviso): ' + String(e && e.message || e).slice(0, 160)); }
 
   // P4.d semilla zz-verif- y P4.e sesiones de los perfiles que usa el guion
   const sem = await comprobarSemilla({ lote });

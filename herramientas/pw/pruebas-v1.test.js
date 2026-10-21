@@ -401,6 +401,38 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   })();
 }
 
+
+// --- LM-63 (CONSTRUCCIÓN-v1): aplicar.js, puras ---
+{
+  const APL = require('./aplicar');
+  const instr = ['# instr — INC-900', 'Categoría: **normal**', 'Alcance: `str-a.html` (A1–A2) · `api/x/index.php` (X1) · nuevo `tests/a.test.js` (N1) · `CLAUDE.md` · `?v=` `p5c1` → `p5c2` · `schema_version` 14 → 15', '',
+    '## 1. `str-a.html`', '**A1 · título.** Busca:', '```html', '<h1>Hola</h1>', '```', 'Pon:', '```html', '<h1>Hola mundo</h1>', '```',
+    '**A2 · función.** Busca:', '```js', 'function f() { return 1; }', '```', 'Pon:', '```js', 'function f() { return 1; }', 'function g() { return 2; } // A2', '```',
+    '## 2. `api/x/index.php`', '**X1 · lista.** Busca:', '```php', "$campos = ['a'];", '```', 'Pon:', '```php', "$campos = ['a', 'b'];", '```',
+    '## Tests en `tests/`', '**N1 · archivo nuevo `tests/a.test.js`** (A1, A2, X1). Contenido completo:', '```js', '// A1 A2 X1', "console.log('ok');", '```',
+    '### Guion N2 → `tests/e2e/INC-900.spec.js`', '```js', "module.exports = { req: 'INC-900', zona: ['A'], casos: [] };", '```'].join('\r\n');
+  const ps = APL.puntosDe(instr);
+  t('K1 puntosDe: tres pares con su id, un archivo completo, la versión y el schema', ps.map((p) => p.id + ':' + p.tipo).join(',') === 'A1:par,A2:par,X1:par,N1:completo,Versión:version,schema_version:schema' && ps[0].archivo === 'str-a.html' && ps[4].vieja === 'p5c1' && ps[4].nueva === 'p5c2' && ps[5].a === '15');
+  t('K1 archivosDe: Alcance y nombrados, sin lo que va tras «no toques»', APL.archivosDe(instr).join(',') === 'str-a.html,api/x/index.php,tests/a.test.js,CLAUDE.md,tests/e2e/INC-900.spec.js' && !APL.archivosDe('Alcance: `a.js`; no toques `b.js`').includes('b.js'));
+  const bien = { 'str-a.html': '<script src="str-api.js?v=p5c2"></script>\n<h1>Hola mundo</h1>\nfunction f() { return 1; }\nfunction g() { return 2; } // A2\n', 'api/x/index.php': "$campos = ['a', 'b'];\n", 'tests/a.test.js': '// A1 A2 X1\r\nconsole.log(\'ok\');\r\n', 'CLAUDE.md': 'hoy `p5c2`\ndesde p5c2', 'str-b.html': '<script src="str-api.js?v=p5c2"></script>' };
+  const r1 = APL.aplicar(instr, bien, 'Hecho: todo', { health: { schema_version: 15 } });
+  t('K1 aplicar: bien aplicado → 6/6 (CRLF y espacios finales no cuentan)', r1.ok && /6\/6/.test(r1.resumen));
+  const mal = Object.assign({}, bien, { 'str-a.html': '<script src="str-api.js?v=p5c1"></script>\n<h1>Hola</h1>\n<h1>Hola mundo</h1>\nfunction f() { return 1; }\n' });
+  const r2 = APL.aplicar(instr, mal, 'No hecho: X1 (el archivo no existe)', { health: { schema_version: 14 } });
+  t('K1 aplicar: Busca que sigue, Pon ausente, versión vieja, schema distinto → fallan; «No hecho» en el commit salta X1', !r2.ok && r2.puntos.find((x) => x.id === 'A1').ok === false && r2.puntos.find((x) => x.id === 'A2').ok === false && r2.puntos.find((x) => x.id === 'Versión').ok === false && r2.puntos.find((x) => x.id === 'schema_version').ok === false && r2.puntos.find((x) => x.id === 'X1').saltado === true);
+  t('K1 verificarPunto: un Pon que contiene su Busca no falla por «Busca sigue»', APL.verificarPunto({ id: 'A2', tipo: 'par', busca: 'function f() { return 1; }', pon: 'function f() { return 1; }\nfunction g() { return 2; } // A2' }, bien).ok === true);
+  t('K1 noHechos: lee ids y «versión» de las líneas No hecho', [...APL.noHechos('Hecho: A1, A2\nNo hecho: X1 (sin php), versión no subió')].sort().join(',') === 'Versión,X1' && APL.noHechos('todo hecho').size === 0);
+  t('K1 aplicar: instrucción sin pares → no juzga y lo dice', /no trae pares/.test(APL.aplicar('# instr\nAlcance: `a.js`\nañade un campo', { 'a.js': 'x' }, '').resumen));
+  const n1 = APL.verificarN1(instr, bien);
+  t('K2 verificarN1: igual byte a byte, sin puntos huérfanos', n1.ok && n1.archivos[0].archivo === 'tests/a.test.js' && n1.sinPrueba.length === 0);
+  const n1b = APL.verificarN1(instr.replace('// A1 A2 X1', '// A1 X1'), bien);
+  t('K2 verificarN1: distinto → no ok; punto sin caso N1 que lo nombre → listado', !n1b.ok && n1b.sinPrueba.join(',') === 'A2');
+  t('K2 verificarN1: sin N1 completo → ok con aviso', APL.verificarN1('# instr\nAlcance: `a.js`', {}).ok && /no trae un N1/.test(APL.verificarN1('# instr\nAlcance: `a.js`', {}).aviso));
+  const tm = APL.tamano([{ archivo: 'str-a.html', mas: 3, menos: 1 }, { archivo: 'str-b.html', mas: 1, menos: 1 }, { archivo: 'tests/a.test.js', mas: 2, menos: 0 }, { archivo: 'CLAUDE.md', mas: 2, menos: 2 }], { 'str-a.html': ['a', 'b', 'c', 'd'], 'str-b.html': ['x?v=p5c1', 'x?v=p5c2'], 'CLAUDE.md': ['v p5c1', 'v p5c2', 'd p5c1', 'd p5c2'] }, { vieja: 'p5c1', nueva: 'p5c2' });
+  t('K3 tamano: tres columnas (código sin los archivos que solo cambian ?v=; pruebas aparte)', tm.codigo.archivos === 1 && tm.codigo.lineas === 4 && tm.pruebas.lineas === 2 && tm.version.archivos === 2 && tm.total.archivos === 4 && tm.grande === false);
+  t('K3 tamano: > 8 archivos de código → grande', APL.tamano([1,2,3,4,5,6,7,8,9].map((i) => ({ archivo: 'f' + i + '.js', mas: 1, menos: 0 })), {}, null).grande === true);
+}
+
 // --- LM-62 (PRUEBAS-v2): v2.js, puras ---
 {
   const V2 = require('./v2');

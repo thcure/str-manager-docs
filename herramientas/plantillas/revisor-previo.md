@@ -1,4 +1,4 @@
-# Revisor previo al encolado · lista de 20 puntos
+# Revisor previo al encolado · lista de 21 puntos
 
 Quién: el Chat Desarrollo la pasa **siempre** antes de copiar la instrucción a la cola, en un subagente (Writer/Reviewer: quien redactó no revisa) o, si no tiene subagentes, en una segunda lectura con la lista a la vista. Para **críticos**, además la pasa el Chat Diseño por el buzón (asunto «Revisión previa: <lote>») y responde «ok» o los puntos que fallan; sin ese «ok» no se encola. Cuesta 2–3 min; cada punto viene de una situación real (G-n en `interno/situaciones/_consolidado.json`).
 
@@ -24,5 +24,6 @@ Quién: el Chat Desarrollo la pasa **siempre** antes de copiar la instrucción a
 | 18 | ¿Pasaste las guardias de `tests/e2e` (`tests/e2e-esquema.test.js` y la A8 de `tests/drive-copia.test.js`) con el guion del lote copiado en `tests/e2e`? Si alguna falla, no se encola | Corregir el guion antes de encolar | INC-203 (LM-59, M-884) |
 | 19 | ¿La cabecera trae **«Casos de uso:»** y coincide con `linea-base.py --lote <borrador>` (o dice «técnico, sin caso de uso» y el lote solo toca guiones, cola, modelo o documentación)? Los que el REQ crea van como «nuevo, definido en REQ-X» | Corregir la cabecera o el cálculo; mientras C2 sea aviso, basta con decir por qué no coincide | C2 del plan de configuración (LM-60) |
 | 20 | ¿Los escenarios nuevos o cambiados que el lote construye ya están escritos **en el REQ** en la forma de la línea base (actor, flujos, dado/cuando/entonces, letra, nivel y caso de uso)? Un INC con caso de uso no necesita REQ | Pedir a Diseño que los escriba antes de encolar | C11 del plan de configuración (LM-60); proceso de requerimientos §4 (LM-61) |
+| 21 | ¿Cada caso N1 y N2 declara su **técnica** (V4, PRUEBAS-v2): `tec: 'límite'` (valor límite por campo numérico, fecha o longitud), `'escenario'` (camino principal + un alterno + un negativo) o `'decisión'` (tabla rol × acción del REQ para casos de uso con más de un rol)? ¿Los negativos de permisos salen de la tabla del REQ y no se deducen? (rige desde que `tests/e2e-esquema.test.js` admita `tec`, lote L-161) | Añadir `tec` y los negativos | V4 |
 
-Resultado: en el mensaje de encolado (o en el log del chat) una línea «Revisión previa: 20/20» o «Revisión previa: fallan 5 y 9, corregidos». Diseño, para críticos, deja su «ok» en la respuesta del buzón; Desarrollo lo cita en la cabecera junto al cruce.
+Resultado: en el mensaje de encolado (o en el log del chat) una línea «Revisión previa: 21/21» o «Revisión previa: fallan 5 y 9, corregidos». Diseño, para críticos, deja su «ok» en la respuesta del buzón; Desarrollo lo cita en la cabecera junto al cruce.

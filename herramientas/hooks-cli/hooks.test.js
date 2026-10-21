@@ -1,5 +1,5 @@
 // tests/hooks.test.js — pruebas de los hooks (A7): funciones puras + dos de proceso con los fixtures de tests/fixtures/hooks/.
-// Fuente única: str-manager-docs/herramientas/hooks-cli/hooks.test.js (lo mantiene el Arquitecto; L-130 lo copia a tests/).
+// Fuente única: str-manager-docs/herramientas/hooks-cli/hooks.test.js (lo mantiene el Arquitecto; L-130 lo copió a tests/; L-160 (LM-64, v5) lo vuelve a copiar).
 const assert = require('assert');
 const g = require('../.claude/hooks/guard-bash.js');
 const s = require('../.claude/hooks/stop-check.js');
@@ -39,6 +39,16 @@ t('git restore con comodín bloqueado', () => assert.equal(g.evaluar('git restor
 t('git restore --source bloqueado', () => assert.equal(g.evaluar('git restore --source HEAD~1 str-api.js', [], alcance, null).ok, false));
 t('git restore --staged archivo pasa', () => assert.equal(g.evaluar('git restore --staged str-api.js', [], alcance, null).ok, true));
 t('sin alcance: git restore archivo suelto pasa, «.» no', () => { assert.equal(g.evaluar('git restore loquesea.html', [], null, null).ok, true); assert.equal(g.evaluar('git restore .', [], null, null).ok, false); });
+// v5 (LM-64, K5 de CONSTRUCCIÓN-v1): la línea de trazabilidad del commit coincide con la cabecera de la instrucción.
+const cabTr = '# instr — INC-171: quitar un canal\nCategoría: **crítico** (sobreventa: DA-51, cruce previo con Carlos: 19-oct)\nAlcance: `str-api.js` · `CLAUDE.md`\nCasos de uso: CU-CAL-5.6, CU-PR-7.1\n';
+const tr = g.leerTrazabilidad('C:\\cola\\hechas\\L-159-instr-inc171.md', cabTr);
+t('v5: leerTrazabilidad saca lote, id, DA y casos de uso de la cabecera', () => { assert.equal(tr.lote, 'L-159'); assert.deepEqual(tr.ids, ['INC-171']); assert.equal(tr.da, 'DA-51'); assert.deepEqual(tr.casos, ['CU-CAL-5.6', 'CU-PR-7.1']); });
+t('v5: mensajeDeCommit une varios -m y lee -F', () => { assert.equal(g.mensajeDeCommit('git commit -m "a" -m "Lote: L-1"'), 'a\nLote: L-1'); assert.equal(g.mensajeDeCommit('git commit -F msg.txt', () => 'de archivo'), 'de archivo'); });
+t('v5: commit con la línea completa pasa', () => assert.equal(g.evaluar('git commit -m "x" -m "Lote: L-159 · INC-171 · DA-51 · Casos de uso: CU-CAL-5.6, CU-PR-7.1"', ['str-api.js', 'CLAUDE.md'], alcance, true, { tr, mensaje: 'x\nLote: L-159 · INC-171 · DA-51 · Casos de uso: CU-CAL-5.6, CU-PR-7.1' }).ok, true));
+t('v5: commit sin la línea bloqueado con la línea esperada en el motivo', () => { const r = g.evaluar('git commit -m "x"', ['str-api.js', 'CLAUDE.md'], alcance, true, { tr, mensaje: 'x' }); assert.equal(r.ok, false); assert.ok(/Lote: L-159 · INC-171 · DA-51 · Casos de uso: CU-CAL-5.6, CU-PR-7.1/.test(r.motivo)); });
+t('v5: línea con otro lote, sin DA o con otros casos bloqueada', () => { assert.equal(g.trazabilidadOk('Lote: L-158 · INC-171 · DA-51 · Casos de uso: CU-CAL-5.6, CU-PR-7.1', tr).ok, false); assert.equal(g.trazabilidadOk('Lote: L-159 · INC-171 · Casos de uso: CU-CAL-5.6, CU-PR-7.1', tr).ok, false); assert.equal(g.trazabilidadOk('Lote: L-159 · INC-171 · DA-51 · Casos de uso: CU-CAL-5.6', tr).ok, false); });
+t('v5: lote técnico y lote del modelo (LM-n sin DA)', () => { const trT = g.leerTrazabilidad('L-160-instr-hook-v5.md', '# instr — LM-64: hook v5\nCategoría: **crítico** (lote del modelo LM-64)\nAlcance: `.claude/hooks/guard-bash.js`\nCasos de uso: técnico, sin caso de uso\n'); assert.equal(g.trazabilidadOk('Lote: L-160 · LM-64 · Casos de uso: técnico, sin caso de uso', trT).ok, true); assert.equal(g.trazabilidadOk('Lote: L-160 · LM-64 · Casos de uso: CU-X-1.1', trT).ok, false); });
+t('v5: sin traza (fuera de la cola) no se exige', () => assert.equal(g.evaluar('git commit -m "x"', ['str-api.js', 'CLAUDE.md'], alcance, true, null).ok, true));
 t('stop: tests rojos bloquea', () => assert.equal(s.evaluar(false, { sucio: [], testsOk: false, detalle: '' }).ok, false));
 t('stop: cambios sin commit bloquea', () => assert.equal(s.evaluar(false, { sucio: [' M str-api.js'], testsOk: true }).ok, false));
 t('stop: limpio y verde pasa', () => assert.equal(s.evaluar(false, { sucio: [], testsOk: true }).ok, true));

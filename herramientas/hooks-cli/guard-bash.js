@@ -1,9 +1,11 @@
-// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; v3 M-467 15-oct-2026; v4 LM-42: el Alcance se corta en «no toques»; lo mantiene el Arquitecto, lo instala Carlos).
+// .claude/hooks/guard-bash.js — hook PreToolUse (Bash) de la CLI del STR (A7, 11-oct-2026; v2 LM-22 13-oct-2026; v3 M-467 15-oct-2026; v4 LM-42: el Alcance se corta en «no toques»; v5 LM-64 (K5, CONSTRUCCIÓN-v1): el commit lleva la línea de trazabilidad «Lote: L-n · REQ/INC · DA · Casos de uso: …» copiada de la cabecera; lo mantiene el Arquitecto, lo instala Carlos).
 // Bloquea (exit 2 + motivo en stderr) tres cosas, de forma determinista:
 //  1. Comandos destructivos de git (reset --hard, push --force, checkout -- <archivo>, clean -f, branch -D).
 //  2. `git commit` con archivos fuera del Alcance de la instrucción del lote (env STR_INSTR), salvo que el mensaje
 //     del commit los declare con la línea «Fuera de alcance: <archivo> - <causa>».
 //  3. `git commit` sin CLAUDE.md ni docs/claude/*.md en el índice cuando se tocó código, o con tests en rojo.
+//  4. (v5, K5) `git commit` sin la línea «Lote: L-n · <REQ-X-n | INC-n | DT-n | LM-n> [· DA-n] · Casos de uso: <CU-… | técnico, sin caso de uso>»
+//     que coincida con la cabecera de la instrucción (solo con STR_INSTR; el mensaje se lee de -m/-F; sin mensaje legible se bloquea).
 // Si no hay STR_INSTR (corrida fuera de la cola) no se comprueba el Alcance; siguen aplicando destructivos, mapa y tests.
 'use strict';
 const fs = require('fs');
@@ -70,8 +72,43 @@ function restaurarPermitido(cmd, alcanceTexto) {
   return { ok: true };
 }
 
-// Función pura, con test en tests/hooks.test.js.
-function evaluar(cmd, staged, alcanceTexto, testsOk) {
+// v5 (LM-64, K5): lo que la cabecera de la instrucción manda al commit. Pura.
+function leerTrazabilidad(rutaInstr, texto) {
+  const lote = (String(rutaInstr || '').split(/[\\/]/).pop().match(/^(?:L-)?(\d+)-instr/) || [])[1];
+  const cab = String(texto || '').replace(/\r\n/g, '\n').split('\n').slice(0, 20).join('\n');
+  const titulo = (cab.split('\n')[0] || '');
+  const ids = [...new Set((titulo + ' ' + ((cab.match(/^(?:Requerimiento|Origen)[^\n]*$/m) || [''])[0])).match(/\b(?:REQ-[A-Z0-9]+-[\w.]+|INC-\d+|DT-\d+|LM-\d+[a-d]?)\b/g) || [])];
+  const da = (cab.match(/\bDA-\d+\b/) || [])[0] || null;
+  const cu = (cab.match(/^Casos de uso:\s*(.+)$/m) || [])[1] || null;
+  const casos = cu ? (/t[ée]cnico/i.test(cu) ? [] : (cu.match(/CU-[A-Z0-9]+-\d+\.\d+/g) || [])) : null;
+  return { lote: lote ? 'L-' + lote : null, ids, da, casos, tecnico: !!(cu && /t[ée]cnico/i.test(cu)), tieneLinea: cu !== null };
+}
+// Pura: el mensaje del commit a partir del comando (-m, varios -m, -F archivo leído por el llamador).
+function mensajeDeCommit(cmd, leerArchivo) {
+  const partes = [];
+  const re = /(?:^|\s)(?:-m|--message)(?:=|\s+)("((?:[^"\\]|\\.)*)"|'([^']*)'|(\S+))/g;
+  let m; while ((m = re.exec(cmd))) partes.push((m[2] != null ? m[2].replace(/\\"/g, '"') : m[3] != null ? m[3] : m[4]) || '');
+  const f = cmd.match(/(?:^|\s)(?:-F|--file)(?:=|\s+)("([^"]*)"|'([^']*)'|(\S+))/);
+  if (f && leerArchivo) { try { partes.push(String(leerArchivo((f[2] || f[3] || f[4] || '').trim()) || '')); } catch (e) { } }
+  return partes.join('\n');
+}
+// Pura: la línea «Lote: …» del mensaje coincide con la cabecera. Devuelve {ok, motivo}.
+function trazabilidadOk(mensaje, tr) {
+  if (!tr || !tr.lote) return { ok: true };
+  const esperado = 'Lote: ' + tr.lote + ' · ' + (tr.ids[0] || '<REQ-X-n | INC-n>') + (tr.da ? ' · ' + tr.da : '') + ' · Casos de uso: ' + (tr.tecnico ? 'técnico, sin caso de uso' : (tr.casos && tr.casos.length ? tr.casos.join(', ') : '<CU-…>'));
+  const linea = (String(mensaje || '').split(/\r?\n/).find((l) => /^\s*Lote:\s*L-\d+/.test(l)) || '').trim();
+  if (!linea) return { ok: false, motivo: 'El mensaje del commit no trae la línea de trazabilidad (K5, LM-64). Añade, copiada de la cabecera: «' + esperado + '».' };
+  const fallas = [];
+  if (!new RegExp('^\\s*Lote:\\s*' + tr.lote + '\\b').test(linea)) fallas.push('el lote no es ' + tr.lote);
+  if (tr.ids.length && !tr.ids.some((i) => linea.includes(i))) fallas.push('falta ' + tr.ids.join(' o '));
+  if (tr.da && !linea.includes(tr.da)) fallas.push('falta ' + tr.da);
+  if (!/Casos de uso:/.test(linea)) fallas.push('falta «Casos de uso:»');
+  else if (tr.tecnico ? !/t[ée]cnico/i.test(linea) : (tr.casos || []).some((c) => !linea.includes(c))) fallas.push('los casos de uso no son los de la cabecera (' + (tr.tecnico ? 'técnico, sin caso de uso' : (tr.casos || []).join(', ')) + ')');
+  return fallas.length ? { ok: false, motivo: 'Línea de trazabilidad incompleta (K5): ' + fallas.join('; ') + '. Esperada: «' + esperado + '».' } : { ok: true };
+}
+
+// Función pura, con test en tests/hooks.test.js. `traza` (v5) = { tr: leerTrazabilidad(...), mensaje } o null fuera de la cola.
+function evaluar(cmd, staged, alcanceTexto, testsOk, traza) {
   if (/git\s+(reset\s+--hard|push\s+[^\n]*--force|push\s+-f\b|checkout\s+--\s|clean\s+-f|branch\s+-D)/.test(cmd)) {
     return { ok: false, motivo: 'Comando destructivo de git bloqueado por el hook del proyecto: usa git revert, git stash o una rama nueva (ficha APO01.10-k); ' + VIA_RESTAURAR };
   }
@@ -86,6 +123,10 @@ function evaluar(cmd, staged, alcanceTexto, testsOk) {
   const codigo = staged.filter(f => !SIEMPRE.some(r => r.test(f.replace(/\\/g, '/'))));
   if (codigo.length && !staged.some(f => /^CLAUDE\.md$|^docs\/claude\//.test(f.replace(/\\/g, '/')))) {
     return { ok: false, motivo: 'El commit toca código pero no actualiza CLAUDE.md ni docs/claude/: anota el cambio en el mapa del área y vuelve a intentar.' };
+  }
+  if (traza && traza.tr) {
+    const tz = trazabilidadOk(traza.mensaje, traza.tr);
+    if (!tz.ok) return tz;
   }
   if (alcanceTexto) {
     const fuera = codigo.filter(f => !cubierto(f, pats));
@@ -112,11 +153,17 @@ function main() {
       try { execSync('node tests/run.js', { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 90000 }); testsOk = true; } catch (e) { testsOk = false; }
     }
     const alcance = leerAlcance(process.env.STR_INSTR);
-    const r = evaluar(cmd, staged, alcance, testsOk);
+    let traza = null;
+    if (/git\s+commit\b/.test(cmd) && process.env.STR_INSTR && fs.existsSync(process.env.STR_INSTR)) {
+      const tr = leerTrazabilidad(process.env.STR_INSTR, fs.readFileSync(process.env.STR_INSTR, 'utf8'));
+      const mensaje = mensajeDeCommit(cmd, (f) => fs.readFileSync(path.isAbsolute(f) ? f : path.join(cwd, f), 'utf8'));
+      traza = { tr, mensaje };
+    }
+    const r = evaluar(cmd, staged, alcance, testsOk, traza);
     if (!r.ok) { process.stderr.write(r.motivo); process.exit(2); }
     process.exit(0);
   });
 }
 
 if (require.main === module) main();
-module.exports = { cortarNoToques, evaluar, patronesAlcance, leerAlcance, cubierto, restaurarPermitido };
+module.exports = { cortarNoToques, evaluar, patronesAlcance, leerAlcance, cubierto, restaurarPermitido, leerTrazabilidad, mensajeDeCommit, trazabilidadOk };

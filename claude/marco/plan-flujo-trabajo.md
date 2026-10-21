@@ -1,0 +1,99 @@
+# Proceso 5 · Orden del trabajo y prioridades (FLUJO-v1) · plan en cruce
+
+**Estado:** v1 · en cruce (Jefe de proyecto, Diseño, Desarrollo) · **Autor:** Chat Arquitecto · **Marco:** MJ-17 paso 5 (recortado por Carlos el 21-oct 10:36: solo el flujo de la fábrica; inicio, planeación, cierre y multiproyecto son de la capa de proyectos, ADR-008) · COBIT BAI11.04 (planear), BAI11.07 (seguir y controlar), BAI11.09 (cerrar una iteración), APO08.01 · Referencias: ISO 21502:2020 (prácticas 7.4 planificación, 7.15 informes, 7.17 problemas, 7.18 control de cambios, 7.19 lecciones; por conocimiento de la norma), Kanban (Anderson: visualizar, limitar el trabajo en curso, gestionar el flujo, políticas explícitas, ciclos de retroalimentación), ley de Little (tiempo de entrega = trabajo en curso ÷ ritmo de salida), Reinertsen (*The Principles of Product Development Flow*: costo de la demora, colas invisibles), DORA/*Accelerate* (trabajar en lotes pequeños y con trabajo en curso limitado).
+
+## 0. Frontera (lo que este proceso es y lo que no)
+
+Es **el flujo dentro de la fábrica**: cómo entra el trabajo en una lista única, en qué orden se construye, cuánto puede haber en curso a la vez, qué es una tanda, cómo se para y se reanuda, y cómo sabe Carlos «cómo vamos» con una sola fuente. Lo hace el **Jefe de proyecto** con lo que le llega. **No es** la gestión del proyecto en el sentido PMI: los objetivos, el alcance y el nivel de prioridad **le llegan** (hoy de Carlos y de Diseño; mañana de la capa de proyectos) y él solo **ordena dentro de ellos**, igual que en el proceso 4 ordena dentro de la prioridad del incidente sin definirla. Inicio, planeación, cierre de proyecto, beneficios, presupuesto y la visión multiproyecto quedan fuera; cuando exista la capa de proyectos, este proceso es el servicio que ella llama: le entrega objetivos y prioridades, y recibe de vuelta la ficha de la tanda.
+
+## 1. Qué pide la norma y qué dicen los que la aplican
+
+COBIT BAI11 pide, además de iniciar (11.02) y cerrar (11.09) que ya tenemos, **planificar** el trabajo con alcance y secuencia conocidos (11.04), **seguir y controlar** con informes de avance contra lo previsto y acciones cuando se desvía (11.07) y gestionar riesgos y problemas del trabajo (11.06). ISO 21502 lo dice igual con otras palabras: plan como base de comparación, informes periódicos a quien decide, registro de problemas con dueño, control de cambios sobre el plan, lecciones. Lo que se aprende en la práctica, y es lo que nos falta, viene de la gestión de flujo:
+
+- **Kanban:** una sola lista visible; **límite explícito de trabajo en curso** por etapa (sin límite, el trabajo se acumula a medio hacer y nadie termina nada); políticas escritas de qué entra y en qué orden; ciclos de retroalimentación cortos (la revisión de la tanda).
+- **Ley de Little:** con el mismo ritmo de salida, cada ítem de más en curso alarga el tiempo de entrega de todos. Dieciocho requerimientos entregados y sin aceptar no son avance: son cola.
+- **Reinertsen:** las colas son invisibles si no se miden; el costo de la demora, no la urgencia de quien grita, es lo que ordena; los lotes pequeños y las clases de servicio (expedito, con fecha, estándar, intangible) hacen que lo urgente no desordene todo lo demás.
+- **DORA/*Accelerate*:** limitar el trabajo en curso y visualizarlo predice mejor desempeño; «parar de empezar, empezar a terminar».
+
+## 2. Lo que ya tenemos
+
+Encargo del Jefe de proyecto (LM-57): `proyecto.json` con `planes[]` PT-n (ficha BAI11.02 y cierre 11.09), `prioridades[]` (nivel P0–P3 de Diseño, orden del JP, regla 4: lo que destraba un lote construido va primero; LM-48 v2 con el criterio de Carlos del 17-oct: solo se adelanta al producto lo que impide ejecutar el STR), `lecciones[]`, `detenidos`, `ordenAlLevantarPausa`, `ordenActivo`, `traspaso`. «Nadie espera en silencio» con «Esperando:» en el buzón y despertador (verificador 25 min, CLI, trabajo libre). Un lote a la vez en la cola. Semáforo por tanda con las filas de PRUEBAS-v2, CONSTRUCCIÓN-v1 (DORA) e INCIDENTES-v1 en `ficha-semanal.py`. Catálogo de cambio (K4) y prioridad P1–P4 con plazo de decisión (I1), que ya dan dos de las cuatro clases de servicio.
+
+## 3. Los datos de hoy (21-oct)
+
+| Dato | Valor | Lectura |
+|---|---|---|
+| Mensajes del buzón en 15 días | 1 015 (173 el 18-oct) | la coordinación cuesta; respuesta en el mismo día: mediana 3 min, p90 33 min; 12 tardaron > 2 h y 17 se respondieron otro día |
+| Lotes de producto con tiempos (30) | construido → aceptado: mediana 18 min, p75 104 min, máximo 15 h; 7 de 30 con ≥ 2 veredictos; 5 con bloqueos en la puerta (9 bloqueos) | el tiempo de la cola está medido; **el tiempo antes de la cola (REQ listo → encolado) y después (aceptado → en uso) no** |
+| REQ | 25 aceptados · **18 entregados sin aceptar** · 4 borradores · 1 definido · bolsa 73 · pedidos 8 nuevos | el trabajo en curso está en la aceptación, no en la construcción: 18 cosas «casi» |
+| Lotes previstos en `plan[]` | 27 (10 críticos, 12 normales) sin fecha de entrada ni edad | cola invisible: no se sabe cuánto lleva cada uno esperando |
+| Planes PT | 12: 4 cerrados, **2 activos (los dos de fábrica)**, 2 pausados (producto), 4 «en definición» | ningún plan de producto activo; cuatro abiertos a medias |
+| INC abiertos | 60; 53 con decisión «espera la pausa de producto» (M-976) | una sola orden de Carlos sostiene 53 decisiones: cuando la levante, hay que reordenar de golpe |
+| Pausas | 21 mensajes con «pausa» en el asunto entre el 13 y el 21-oct; pausa total 18-oct 18:08, parcial 19-oct 10:57, producto en pausa desde el 19-oct 14:09 (M-910) y 20-oct 20:50 (M-976) | la pausa se decide bien pero se registra en prosa en varios sitios; la condición de reanudación (M-858: Carlos revisa el alcance con Diseño) lleva **2 días pendiente** sin reiterarse |
+| Paradas silenciosas (lecciones del JP) | 3 el 10-oct, 2 h el 18-oct (purga sin aviso), «¿por qué no los estás gestionando?» (14-oct), «estamos fallando en la priorización» (17-oct) | cada regla nació de una parada; ninguna tiene guardia, solo memoria |
+| COBIT BAI11 | parcial: 11.02 y 11.09; sin 11.04, 11.06, 11.07 | planificar y seguir no están formalizados |
+
+## 4. Brechas
+
+| # | Brecha | Norma / referencia | Dato |
+|---|---|---|---|
+| Bf1 | No hay una sola lista de trabajo ordenada: REQ en `prioridades[]`, INC en `seguimiento.json` con su prioridad, deuda en `dts[]`, LM en `mejoras.json`; el orden real vive en `ordenActivo` y en prosa | Kanban: una lista visible; BAI11.04 | 36 REQ ordenados, 60 INC aparte, 27 previstos sin edad |
+| Bf2 | Sin límite de trabajo en curso: se define, se entrega y se construye sin tope de lo abierto | Kanban, ley de Little, DORA | 18 REQ entregados sin aceptar; 4 PT en definición |
+| Bf3 | La cola se mide (18 min mediana) pero el camino completo no: nadie sabe cuánto tarda un REQ de «listo» a «aceptado» ni cuánto lleva cada previsto esperando | Reinertsen: colas invisibles; BAI11.07 | `plan[]` sin fecha de entrada en 27 previstos |
+| Bf4 | La tanda no tiene entrada: el semáforo mide la salida de la semana, pero nadie fija qué entra en ella | BAI11.04; Kanban: cadencia de reposición | semáforo sí, lista de entrada no |
+| Bf5 | Pausas y reanudaciones en prosa repartida (`detenidos`, `ordenAlLevantarPausa`, mensajes); la condición de reanudación no se vigila | ISO 21502 7.18 control de cambios; BAI11.07 | M-858 2 días sin reiterar; 53 INC colgando de M-976 |
+| Bf6 | «¿Cómo vamos?» se arma a mano cada vez; tres fuentes (proyecto, seguimiento, ficha) | ISO 21502 7.15 informes; APO08.01 | cada estado a Carlos es un mensaje distinto |
+| Bf7 | Las reglas de paradas (nadie espera en silencio, seguimiento de lo entregado) son lecciones, no guardias | BAI11.07 | 4 lecciones sin guardia |
+| Bf8 | La frontera con la capa de proyectos no está escrita: ¿quién fija objetivos, quién nivel, quién orden? | ADR-008; BAI11.01 | hoy lo hace Carlos en el chat y Diseño en `prioridades[]` |
+
+## 5. Controles propuestos (F1–F8; F de flujo)
+
+| # | Control | Regla | Guardia |
+|---|---|---|---|
+| F1 | **Una lista** | `proyecto.json › cola[]` (nombre a decidir con el JP): la lista única y ordenada de lo que falta construir, con una fila por ítem: `{ref: REQ-X · INC-n · DT-n · LM-n, clase, origen, desde, estado}`. **Clases de servicio**, en este orden fijo: **(a) orden de Carlos** (M-n o DA-n) · **(b) expedito**: INC P1 y emergencia K8 · **(c) destrabe**: lo que libera un lote construido o una regresión (regla 4) · **(d) con fecha**: lo que tiene plazo externo (corte del 30-nov, obligación legal) · **(e) producto**: REQ listos por valor y dependencias (nivel de Diseño; el JP ordena dentro) · **(f) estándar**: INC P2–P3 y DT con plazo · **(g) intangible**: P4, mejoras de fábrica, documentación, en los huecos. Dentro de cada clase ordena el JP; cambiar de clase no es del JP (Carlos, Diseño o la prioridad del incidente). | `validar.py`: lote encolado o construido que no sea el primero libre de la lista sin `motivo` = aviso; REQ «listo», INC P1–P2 abierto o DT vencida que no esté en la lista = aviso |
+| F2 | **Límites de trabajo en curso** | Por etapa, escritos en `proceso.json › flujo.limites` y visibles en la ficha: cola **1** (ya) · instrucciones en redacción **2** · REQ «listo» sin lote **5** · **REQ entregados sin aceptar 3** · PT de producto activos **1** (más 1 de fábrica) · PT «en definición» **2**. Al tope, no se empieza lo siguiente de esa etapa: se termina lo abierto («parar de empezar, empezar a terminar»). Pasar un límite se puede, pero con motivo escrito y por una tanda. Los 18 entregados de hoy se bajan a 3 con una **tanda de aceptación** antes de levantar la pausa de producto. | `validar.py` aviso por etapa fuera de límite · ficha: fila «etapas fuera de límite» |
+| F3 | **La tanda tiene entrada y salida** | Tanda = semana (lunes). **Entrada:** al abrirla, el JP toma de la lista los primeros ítems hasta llenar los límites (≤ 7) y los anota en `proyecto.json › tandas[] {semana, entra[], limites, nota}`; nada entra a mitad de tanda salvo clases (a) y (b), y queda anotado. **Salida:** `ficha-semanal.py` (ya) + `salio[]` + lecciones + la lista reordenada para la siguiente. | `validar.py`: tanda de la semana sin `entra[]` = aviso; ítem en cola fuera de `entra[]` sin clase (a)/(b) = aviso · ficha |
+| F4 | **Edad del trabajo y paradas con dueño** | Todo ítem en curso lleva `desde` al cambiar de estado. Umbrales por estado: REQ «listo» sin lote **5 días** · instrucción redactada sin encolar **1 día** · construido sin veredicto **2 h** (despertador) · «espera DA» **2 días** · mensaje a Carlos sin respuesta **1 día** (se reitera una vez con la plantilla y, si no, pasa a `detenidos` con `esperaA: Carlos`) · REQ entregado sin aceptar **7 días**. Al vencer, el ítem sale en la ficha con su dueño y el JP pregunta al dueño por el buzón (ya es su regla). | `validar.py` aviso por edad; ficha: «ítems vencidos por estado»; despertador para las horas |
+| F5 | **Pausa escrita y reanudación vigilada** | Toda pausa es una fila en `proyecto.json › pausas[] {desde, orden: M-n/DA-n, alcance: producto · cola · todo, motivo, condicionReanudacion, revisarEn, hasta}`. Las decisiones «espera la pausa de producto» (I1) citan esa fila. Al reanudar: `hasta` + orden escrita (`ordenAlLevantarPausa` pasa a ser `entra[]` de la primera tanda). Una pausa con `condicionReanudacion` pendiente de Carlos más de **7 días** se le reitera con una sola pregunta; una pausa sin `revisarEn` no vale. | `validar.py`: INC «espera la pausa» sin pausa activa = aviso; pausa > 7 días sin `revisarEn` = aviso; `hasta` sin orden de reanudación = aviso |
+| F6 | **PT con entrada, límite y cierre** | PT-n sigue siendo la ficha BAI11.02 (alcance, meta, criterios de éxito, riesgos) y el cierre 11.09 (logrado, lección, lo que vuelve a Diseño). Nuevo: límite F2 (1 de producto activo + 1 de fábrica); un PT «en definición» más de **14 días** entra, se pausa con motivo o se cierra; todo PT activo tiene al menos un ítem en la tanda o dice por qué no. | `validar.py` aviso |
+| F7 | **Frontera con la capa de proyectos** | `proyecto.json › objetivos[]` (o `origen` en cada fila de la lista): de dónde viene lo que se ordena: hoy «Carlos (M-n)» o «Diseño (prioridades[])»; mañana «capa de proyectos (ref)». El JP **no** define objetivos ni nivel ni alcance; cuando falten, pregunta (una pregunta, plantilla). Nada entra a la lista sin origen. Es la interfaz que la capa de proyectos usará tal cual. | `validar.py`: fila sin `origen` = aviso · texto en el encargo del JP |
+| F8 | **Métricas de flujo** (informativas, un mes) | En la ficha, junto a DORA: tiempo de entrega **REQ listo → aceptado** (mediana), tiempo en cola (encolado → aceptado), edad media de lo en curso, ítems fuera de límite, ítems vencidos, mensajes a Carlos pendientes, días de pausa en la tanda, ritmo de salida (ítems terminados por tanda). Con un mes se fijan umbrales del semáforo; hasta entonces, línea de partida. | `ficha-semanal.py › flujo()` · `proceso.json › flujo.metricas` |
+
+Lo que **no** cambia: el nivel P0–P3 de REQ lo propone Diseño (LM-48) y la prioridad P1–P4 de INC viene del proceso 4; la cola corre un lote a la vez; «Esperando:» en el buzón; el despertador; el JP no da órdenes técnicas ni toca `diseno.json` ni `seguimiento.json`; `planes[]`, `prioridades[]` y `lecciones[]` siguen donde están (`prioridades[]` pasa a ser la parte «producto» de la lista única o se funde con ella: lo decide el JP en el cruce).
+
+## 6. Criterios
+
+**Entrada (un ítem entra a la tanda):** está en la lista con clase y origen · REQ «listo» (Q1–Q8) o INC con prioridad y `decision` o DT con dueño y plazo o LM con ok de Carlos · categoría del catálogo (K4) y, si crítico, DA-n y cruce hechos · no espera nada de Carlos · cabe en los límites de F2 (o trae motivo por una tanda).
+**Salida (la tanda cierra):** ficha semanal corrida · `salio[]` con lo aceptado, lo no aceptado y lo que volvió a Diseño · ítems vencidos con dueño y pregunta hecha · lecciones anotadas · lista reordenada y `entra[]` de la siguiente · estado a Carlos en el formato fijo.
+**Finalización de tanda (semáforo, filas nuevas):** etapas fuera de límite = 0 · ítems vencidos sin dueño = 0 · pausas sin `revisarEn` = 0 · tiempo de entrega REQ listo → aceptado (informativo el primer mes).
+**«¿Cómo vamos?» (una sola fuente, seis líneas):** tanda y qué entró · en cola y construido · aceptado en la tanda · lo que espera a Carlos (con edad) · pausas activas y su condición · semáforo (las filas en rojo). Lo arma `ficha-semanal.py --como-vamos` desde `proyecto.json`, `seguimiento.json` y la ficha; el JP lo pega, no lo redacta.
+
+## 7. Quién, cuándo, cómo
+
+| Quién | Cuándo | Qué |
+|---|---|---|
+| Carlos | Cuando quiera | Da objetivos y órdenes (M-n/DA-n); decide pausas y reanudaciones; responde una pregunta por mensaje. No ordena la lista: la cambia cuando quiera. |
+| Jefe de proyecto | Al abrir y cerrar la tanda · en cada visita al buzón | Mantiene la lista y las clases; fija `entra[]`; vigila límites, edades y pausas; pregunta a los dueños; arma «¿cómo vamos?» desde la fuente única; lecciones. |
+| Diseño | Al dejar un REQ «listo» · al clasificar INC | Propone nivel (LM-48) y confirma prioridad de incidentes (I1); respeta el límite de «listos sin lote» (5): si está lleno, termina aceptaciones antes de definir más. |
+| Desarrollo | Al redactar y encolar | Respeta el límite de 2 instrucciones en redacción y 1 en cola; toma el primero libre de la lista o escribe el motivo; `desde` al cambiar de estado. |
+| Juez / cola | En cada veredicto | Sin cambio; el tiempo encolado → aceptado ya se mide. |
+| Arquitecto | LM-66 · semanal | Esquema y guardias; `flujo()` en la ficha; convierte lecciones del JP en guardias; interfaz con la capa de proyectos cuando exista. |
+
+## 8. Orden de instalación (LM-66)
+
+1. `esquema.json › flujo` (clases, límites, umbrales de edad, forma de `cola[]`, `tandas[]`, `pausas[]`, `objetivos[]`) y `proceso.json › flujo`; `validar.py` F1–F7 como **avisos** (sin errores el primer mes: es el proceso del JP y se calibra con datos).
+2. `ficha-semanal.py`: `flujo()` (F8) y `--como-vamos` (seis líneas).
+3. Encargo del JP v2 (`instrucciones.json › rol-jefe-proyecto`): lista única, clases, límites, tanda con entrada, pausas, frontera F7; plantilla `como-vamos.md`.
+4. Pasada del JP: construir `cola[]` desde `prioridades[]`, `ordenActivo`, `ordenAlLevantarPausa`, INC P1–P2 y DT con plazo (con `origen` y `desde`); `pausas[]` con la pausa de producto vigente (M-910/M-976, condición M-858); primera `tandas[]`.
+5. Tanda de aceptación: bajar los 18 REQ entregados sin aceptar a ≤ 3 (Diseño acepta o devuelve) **antes** de levantar la pausa de producto; es la primera prueba real del proceso.
+6. Un mes de métricas de flujo → umbrales del semáforo (LM aparte).
+
+## 9. Cruce
+
+1. **Jefe de proyecto (dueño del proceso):** ¿la lista única sustituye a `prioridades[]` o la contiene? ¿los límites de F2 (2 en redacción, 5 listos sin lote, 3 entregados sin aceptar, 1 PT de producto) son vivibles o los ajustas con tus datos? ¿los umbrales de edad de F4? ¿la tanda semanal con `entra[]` te cabe en tu visita del lunes? ¿`pausas[]` recoge bien lo que hoy está en `detenidos` y `ordenAlLevantarPausa`? ¿Qué le falta a las seis líneas de «¿cómo vamos?»?
+2. **Diseño:** el límite de 5 REQ «listos» sin lote y la tanda de aceptación de los 18 entregados: ¿los aceptas o devuelves tú, con Carlos? ¿La clase (e) «producto» con tu nivel P0–P3 dentro basta, o quieres una clase aparte para lo que Carlos pidió en su revisión del STR?
+3. **Desarrollo:** el límite de 2 instrucciones en redacción, `desde` al cambiar de estado en `plan[]`, y tomar «el primero libre de la lista o motivo»: ¿te cabe sin frenar?
+4. **Carlos (después del cruce):** el formato de seis líneas de «¿cómo vamos?»; que las órdenes de pausa y reanudación queden como una fila con condición y fecha de revisión; y la tanda de aceptación antes de levantar la pausa.
+
+## Fuentes
+COBIT 2019 BAI11 (`interno/cobit.json`) · ISO 21502:2020 (por conocimiento) · D. J. Anderson, *Kanban* (2010) · D. Reinertsen, *The Principles of Product Development Flow* (2009) · Forsgren, Humble, Kim, *Accelerate* (2018) · `interno/proyecto.json`, `seguimiento.json`, `diseno.json`, `mensajes.json` (21-oct) · `interno/instrucciones.json › rol-jefe-proyecto` (LM-57) · lecciones del Jefe de proyecto (10, 14, 17, 18 y 21-oct).

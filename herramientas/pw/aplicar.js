@@ -41,7 +41,10 @@ function puntosDe(texto) {
   for (let i = 0; i < bs.length; i++) {
     const b = bs[i], cola = b.antes.slice(-400);
     if (/Busca\s*:\s*$/i.test(cola.trimEnd()) && bs[i + 1] && /^\s*\*{0,2}Pon\s*:?\*{0,2}\s*:?\s*$/i.test(bs[i + 1].antes.trim().split('\n').pop() || '') ) {
-      puntos.push({ id: idDe(b.antes) || 'punto ' + (puntos.length + 1), tipo: 'par', busca: b.codigo, pon: bs[i + 1].codigo, archivo: archivoDe(b.antes) });
+      // «el mismo par en A y en B» / «en los dos archivos» (L-160): el Pon debe estar en cada archivo nombrado en esa frase
+      const frase = cola.split('\n').slice(-3).join(' ');
+      const varios = /mismo par|los dos archivos|en ambos|en cada uno/i.test(frase) ? [...new Set([...frase.matchAll(RUTA)].map((m) => m[1]))] : [];
+      puntos.push({ id: idDe(b.antes) || 'punto ' + (puntos.length + 1), tipo: 'par', busca: b.codigo, pon: bs[i + 1].codigo, archivo: archivoDe(b.antes), archivos: varios.length > 1 ? varios : undefined });
       i++;
     } else if (/Contenido completo\s*:?\s*$/i.test(cola.trimEnd()) || /archivo nuevo[^\n]*$/i.test(cola.trimEnd().split('\n').pop() || '')) {
       const arch = archivoCompletoDe(b.antes);
@@ -82,6 +85,13 @@ function verificarPunto(p, archivos, opciones = {}) {
   if (p.tipo === 'par') {
     const pon = norm(p.pon), busca = norm(p.busca);
     if (!pon) return { id: p.id, ok: false, motivo: 'bloque «Pon:» vacío' };
+    if (p.archivos && p.archivos.length > 1) {   // el mismo par en varios archivos
+      const faltan = p.archivos.filter((r) => archivos[r] == null || !norm(archivos[r]).includes(pon));
+      const quedan = p.archivos.filter((r) => busca && !pon.includes(busca) && archivos[r] != null && norm(archivos[r]).includes(busca));
+      if (faltan.length) return { id: p.id, ok: false, archivo: faltan.join(', '), motivo: 'el bloque «Pon:» falta en ' + faltan.join(', ') + ' (el par va en ' + p.archivos.join(' y ') + ')' };
+      if (quedan.length) return { id: p.id, ok: false, archivo: quedan.join(', '), motivo: 'el bloque «Busca:» sigue en ' + quedan.join(', ') };
+      return { id: p.id, ok: true, archivo: p.archivos.join(', ') };
+    }
     const candidatos = p.archivo && archivos[p.archivo] != null ? [[p.archivo, archivos[p.archivo]]] : A;
     const con = candidatos.filter(([, c]) => norm(c).includes(pon));
     if (!con.length) return { id: p.id, ok: false, archivo: p.archivo, motivo: 'ningún archivo del Alcance contiene el bloque «Pon:»' + (p.archivo ? ' (' + p.archivo + ')' : '') };

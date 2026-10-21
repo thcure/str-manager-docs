@@ -405,6 +405,7 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
 // --- LM-63 (CONSTRUCCIÓN-v1): aplicar.js, puras ---
 {
   const APL = require('./aplicar');
+  const A_ok = (r) => r.ok === true;
   const instr = ['# instr — INC-900', 'Categoría: **normal**', 'Alcance: `str-a.html` (A1–A2) · `api/x/index.php` (X1) · nuevo `tests/a.test.js` (N1) · `CLAUDE.md` · `?v=` `p5c1` → `p5c2` · `schema_version` 14 → 15', '',
     '## 1. `str-a.html`', '**A1 · título.** Busca:', '```html', '<h1>Hola</h1>', '```', 'Pon:', '```html', '<h1>Hola mundo</h1>', '```',
     '**A2 · función.** Busca:', '```js', 'function f() { return 1; }', '```', 'Pon:', '```js', 'function f() { return 1; }', 'function g() { return 2; } // A2', '```',
@@ -437,6 +438,8 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('K1 (M-972 B): el comentario de str-api.js no cuenta como «carga str-api.js»; con todo en orden 2/2', APL.aplicar(l159, arch159, '').ok);
   t('K1 (M-972 B): str-api.js con STR_API_VERSION vieja falla por la versión', /STR_API_VERSION/.test(APL.aplicar(l159, Object.assign({}, arch159, { 'str-api.js': 'const STR_API_VERSION = "p5c111";' }), '').resumen));
   t('K1 (M-972 B): un .html con <script src=…str-api.js?v=viejo> falla; la versión vieja en un .md no cuenta', !APL.aplicar(l159, Object.assign({}, arch159, { 'str-x.html': '<script src="str-api.js?v=p5c111"></script>' }), '').ok && APL.aplicar(l159, Object.assign({}, arch159, { 'docs/claude/h.md': 'antes p5c111' }), '').ok);
+  const dos = '# instr\nAlcance: `a.md` · `b.md`\n## 3. `a.md` y `b.md` — regla 13 (el mismo par en los dos archivos)\n**R13 · regla.** Aplica el mismo par en `a.md` y en `b.md`. Busca:\n```md\n12. x\n```\nPon:\n```md\n12. x\n13. y\n```\n';
+  t('K1 (L-160): «el mismo par en A y en B» exige el Pon en los dos archivos', A_ok(APL.aplicar(dos, { 'a.md': '12. x\n13. y', 'b.md': '12. x\n13. y' }, '')) && !A_ok(APL.aplicar(dos, { 'a.md': '12. x', 'b.md': '12. x\n13. y' }, '')) && /falta en a\.md/.test(APL.aplicar(dos, { 'a.md': '12. x', 'b.md': '12. x\n13. y' }, '').resumen));
   t('K3 tamano: > 8 archivos de código → grande', APL.tamano([1,2,3,4,5,6,7,8,9].map((i) => ({ archivo: 'f' + i + '.js', mas: 1, menos: 0 })), {}, null).grande === true);
 }
 

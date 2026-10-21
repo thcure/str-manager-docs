@@ -15,6 +15,7 @@ Casos de uso: <los que toca, según `python3 -I herramientas/modelo/linea-base.p
 Riesgo: <bajo | medio | alto> (<R-n>). Mitigación: <una frase>.
 ¿Datos personales o dinero?: <no | sí: …> · ¿Normativa?: <no | sí: …> · ¿Toca el modelo (capa Marco)?: <no | sí> (sí = la CLI no lo ejecuta y termina sin commit; un lote del modelo LM-n que solo toque archivos de str-manager lleva «no (lote del modelo LM-n, DA-n y cruce de Carlos)»)
 Reversión: <git revert <hash> + despliegue | script | …>
+Commit: <la CLI | Carlos (obligatorio si el Alcance nombra `.claude/` o `tests/hooks.test.js`: la CLI no puede commitear su hook, INC-206; la instrucción trae entonces los comandos para Carlos —copia con md5, `git add`, `git commit -m` con la línea «Lote:», `git push`— y no la sección «El commit de este lote»; `linea-base.py --lote` lo corta)>
 Origen: <M-n…>. Requerimiento: `<ruta del REQ>` (<criterios n–m>). Decisión: <DA-n | no aplica>.
 Depende de: <lotes previos que deben estar aceptados | archivos que deben existir | ninguno>
 Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién los crea | permisos por rol | hora/fecha | ninguna>

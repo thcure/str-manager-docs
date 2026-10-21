@@ -530,6 +530,8 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
     cr = criterios_del_lote(texto)
     out['criterios'] = cr
     v3_ok = (tecnico or tec) and not cr['criterios'] or (bool(cr['criterios']) and not cr['sinCaso'])
+    hk = hooks_del_lote(texto)
+    out['hooks'] = hk
     if como_json:
         print(json.dumps(out, ensure_ascii=False, indent=1))
     else:
@@ -541,7 +543,31 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
         print('Declarados: ' + ('—' if decl is None else (TECNICO if tecnico else ', '.join(decl) or '—')))
         print('C2: ' + veredicto)
         print('V3: ' + cr['veredicto'] + ('' if v3_ok else ' → no encolar') + ((' · no verificables: ' + ', '.join(cr['noVerificables'])) if cr['noVerificables'] else ''))
-    return 0 if veredicto.startswith('coincide') and v3_ok else 2
+        if hk['tocaHooks']:
+            print('Hooks (INC-206): ' + hk['veredicto'] + ('' if hk['ok'] else ' → no encolar'))
+    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] else 2
+
+
+HOOKS_RE = re.compile(r'\.claude/|\.claude\\|tests/hooks\.test\.js|tests\\hooks\.test\.js|guard-bash\.js|stop-check\.js|ctx\.js')
+
+
+def hooks_del_lote(texto):
+    """Pura (INC-206, L-130/L-160): un lote cuyo Alcance nombra .claude/ o los archivos del hook no lleva commit de la CLI
+    (el modo automático lo corta como «Self-Modification» y «Auto-Mode Bypass»): la instrucción debe decir que el commit lo hace Carlos
+    y no puede pedírselo a la CLI. Devuelve {tocaHooks, commitCarlos, pideCommitCli, ok, veredicto}."""
+    m = re.search(r'^Alcance:(.*)$', texto, re.M)
+    alcance = m.group(1) if m else ''
+    toca = bool(HOOKS_RE.search(alcance))
+    if not toca:
+        return {'tocaHooks': False, 'commitCarlos': None, 'pideCommitCli': None, 'ok': True, 'veredicto': 'no toca .claude/'}
+    carlos = bool(re.search(r'commit[^.\n]{0,80}\bCarlos\b|\bCarlos\b[^.\n]{0,80}\bcommit', texto, re.I))
+    # pide el commit a la CLI: sección «El commit de este lote» o un «git commit» en bloque de código fuera de una frase que lo atribuya a Carlos
+    pide = any('Carlos' not in h for h in re.findall(r'^##+ .*\bcommit de este lote\b.*$', texto, re.M | re.I)) or any(
+        'Carlos' not in texto[max(0, mm.start() - 300):mm.start()] for mm in re.finditer(r'^\s*git commit\b', texto, re.M))
+    ok = carlos and not pide
+    ver = ('la instrucción dice que el commit lo hace Carlos' if carlos else 'falta decir que el commit lo hace Carlos (la CLI no puede commitear su hook)') + \
+          ('; pide el commit a la CLI (sección «El commit de este lote» o «git commit» sin atribuir a Carlos): quítalo' if pide else '')
+    return {'tocaHooks': True, 'commitCarlos': carlos, 'pideCommitCli': pide, 'ok': ok, 'veredicto': ver}
 
 
 # ---------- V3 (LM-62, PRUEBAS-v2): criterios de la instrucción sin caso ----------

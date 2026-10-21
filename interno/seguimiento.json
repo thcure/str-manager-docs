@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-21 11:10",
+ "actualizadoEn": "2026-10-21 11:56",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -2478,7 +2478,8 @@
    "nota": "Diseño (M-429): después de L-103 y antes de K3-2; normal si mantiene la migración automática al cambiar el esquema, con N1 esquema igual → no migra / distinto → migra; si puede dejar una base sin migrar, crítico. · 23:21: fuera de INC-128; Migrate::run($this->conn) usa la misma conexión PDO (ahorra consultas, no conexiones): deuda baja opcional (M-441)",
    "severidad": "medio",
    "dueno": "Desarrollo",
-   "plazo": "2026-11-04"
+   "plazo": "2026-11-04",
+   "arquitectura": true
   },
   {
    "id": "DT-40",
@@ -2545,7 +2546,8 @@
    "nota": "Visto en INC-137 (L-137). Hoy inofensivo: setup responde 403 si ya hay usuarios (L14–19). Arquitecto M-579: anotarlo como DT. Arreglo posible: alinear cuenta en migrate.php o que setup elija un plan.",
    "severidad": "medio",
    "dueno": "Desarrollo",
-   "plazo": "2026-11-04"
+   "plazo": "2026-11-04",
+   "arquitectura": true
   },
   {
    "id": "DT-47",
@@ -2578,7 +2580,8 @@
    "nota": "20:16 api/config/jwt.php L18 (exp = 24 h), L31; sin lista de revocación ni relectura de activo/rol por petición. Diseño conocido; visto en MJ-16 U (M-811). Arreglo posible: que JWT::fromRequest compruebe activo y rol contra la base (una consulta por petición) o acortar la vida del token con renovación.",
    "severidad": "alto",
    "dueno": "Desarrollo",
-   "plazo": "2026-10-28"
+   "plazo": "2026-10-28",
+   "arquitectura": true
   },
   {
    "id": "DT-50",
@@ -2600,7 +2603,8 @@
    "nota": "22:29 api/config/migrate.php: lee schema_version, ejecuta y luego inserta (version INT PRIMARY KEY, así que no se duplica la fila). Riesgo: un ALTER no idempotente corre dos veces. DT-39 (correr Migrate solo si cambia la versión) lo reduce. Visto en MJ-16 SRV (M-840).",
    "severidad": "medio",
    "dueno": "Desarrollo",
-   "plazo": "2026-11-04"
+   "plazo": "2026-11-04",
+   "arquitectura": true
   },
   {
    "id": "DT-52",
@@ -2622,7 +2626,8 @@
    "nota": "06:52 modelo/api/index.php case migrar (exige GET), carga que reescribe todo (updated_at nuevo en cada fila) y _modeloLog. Pasar migrar a POST, conservar updated_at de filas sin cambio y registrar solo tipo/archivo/línea (el mensaje puede llevar datos). Visto en MJ-16 MOD (M-845).",
    "severidad": "medio",
    "dueno": "Arquitecto",
-   "plazo": "2026-11-04"
+   "plazo": "2026-11-04",
+   "arquitectura": true
   }
  ],
  "cambios": [

@@ -10,6 +10,11 @@
 // v0.6.1 (M-528, Desarrollo): al empezar cada corrida, las capturas de la corrida anterior del mismo lote se APARTAN a
 // log\capturas\anterior\<lote>-<AAAAMMDD-HHMM>\ (no se borran: R11 y «no se borra, se desactiva»), para que el juez solo vea
 // las de esta corrida y no los *-error.png de una reprueba vieja.
+// v0.11.0 (LM-62, PRUEBAS-v2): pw\v2.js. V7 el riesgo del mapa ajusta la fase (alto → ruta completa en fase 1; bajo → humo y guion
+// propio, todo al tren). V1 cuarentena con plazo (pw\cuarentena.json; INC abierto en seguimiento.json; vencida → la cola salta el caso).
+// V2 un rojo repite el guion entero una vez (segundo intento manda; los que pasan quedan «inestables»). V10 P4 bloqueado por entorno o
+// dos guiones seguidos fallando por el entorno → log\suspension.json y «bloqueado»; la corrida siguiente del mismo lote es «reanudación»
+// (no cuenta como reprueba). El informe suma fase.riesgo, inestables[], cuarentena[] y cuarentenaEntradas.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -17,6 +22,7 @@ const { spawnSync } = require('child_process');
 const { BASE, COLA, abrir, explicarError, recuperarSesion, recuperarConChrome } = require('./comun');   // v0.5.32: recuperarSesion
 const { extraerGuion, igual, loteDe, correrGuion, cargar, horaBogota } = require('./guion');
 const { comprobarSemilla } = require('./semilla');
+const V2 = require('./v2');
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
 const dormir = ms => new Promise(r => setTimeout(r, ms));
@@ -303,7 +309,10 @@ async function main() {
   if (!instr || !fs.existsSync(instr)) { console.log('Uso: node probar-lote.js --instr <archivo de la instruccion>'); process.exit(2); }
   const texto = fs.readFileSync(instr, 'utf8');
   const lote = loteDe(instr) || 'L-0';
-  const out = { lote, instruccion: path.basename(instr), proceso: 'PRUEBAS-v1', inicio: new Date().toISOString(), entrada: [], n1: null, n2: [], regresion: [], limpiezaRegresion: [], resultado: null, causa: null };
+  const out = { lote, instruccion: path.basename(instr), proceso: 'PRUEBAS-v2', inicio: new Date().toISOString(), entrada: [], n1: null, n2: [], regresion: [], limpiezaRegresion: [], cuarentena: [], inestables: [], resultado: null, causa: null };
+  // V10: si este lote quedó suspendido por entorno en la corrida anterior, esta es su reanudación (fase 1 completa; no es reprueba)
+  const suspPrev = V2.leerSuspension(COLA);
+  if (V2.esReanudacion(suspPrev, lote)) out.reanudacion = { de: suspPrev.hora, causa: suspPrev.causa };
   const git = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: repo, encoding: 'utf8' });
   out.commit = (git.stdout || '').trim() || null;
   // LM-45: commit completo y árbol limpio (sin cambios sin commit) para poder reutilizar resultados de una corrida anterior
@@ -314,7 +323,9 @@ async function main() {
   let memoria = leerJson(rutaMemoria, {});
   const guardarMemoria = (que, dato) => { if (!commitLargo || !arbolLimpio) return; memoria = anotar(memoria, commitLargo, que, dato); try { fs.writeFileSync(rutaMemoria, JSON.stringify(memoria, null, 1)); } catch (e) { } };
   const entra = (c, ok, observado) => { out.entrada.push({ c, ok, observado }); console.log((ok ? 'OK  ' : 'NO  ') + 'P4 ' + c + ' · ' + observado); return ok; };
-  const fin = (resultado, causa) => {
+  const fin = (resultado, causa, suspension) => {
+    if (suspension) { V2.escribirSuspension(COLA, { estado: 'suspendido', lote, hora: horaBogota(), causa: suspension, avisar: ['Chat Jefe de proyecto', 'Chat Desarrollo'], reanuda: 'con humo y semilla en verde se repite la fase 1 completa del lote (V10)' }); out.suspension = suspension; }
+    else if (out.reanudacion && resultado !== 'bloqueado') { V2.escribirSuspension(COLA, { estado: 'reanudado', lote, hora: horaBogota(), de: out.reanudacion }); causa = ['reanudacion tras suspension por entorno', causa].filter(Boolean).join(' · '); }
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
     if (out.sesiones && out.sesiones.red) out.red = out.sesiones.red;   // LM-52
     if (out.sesiones && out.sesiones.caidos instanceof Set) out.sesiones = { recuperadas: out.sesiones.recuperadas, perdidas: out.sesiones.perdidas, caidos: [...out.sesiones.caidos] };   // LM-51
@@ -338,7 +349,7 @@ async function main() {
     } catch (e) { obs = e.message; }
     await dormir(30000);
   }
-  if (!entra('despliegue', desplegado, obs)) return fin('bloqueado', 'despliegue: ' + obs);
+  if (!entra('despliegue', desplegado, obs)) return fin('bloqueado', 'despliegue: ' + obs, 'P4 despliegue: ' + obs);
 
   // P4.b tests/ en verde (N1) en el commit del lote
   const yaN1 = puedeSaltar(memoria, commitLargo, arbolLimpio, 'n1');
@@ -375,7 +386,7 @@ async function main() {
   out.semilla = sem;
   // Sin guion N2 la cola no usa la semilla: queda como aviso y no bloquea (v0.3.1)
   if (!spec && sem.estado === 'incompleta') entra('semilla zz-verif- (aviso, el lote no trae guion)', true, sem.grupos.filter(x => x.estado === 'falta').map(x => x.id + ': ' + x.observado).join('; '));
-  else if (!entra('semilla zz-verif-', sem.estado !== 'incompleta', sem.estado + (sem.error ? ' · ' + sem.error : '') + ' · ' + sem.grupos.map(x => x.id + ' ' + x.estado).join(', '))) return fin('bloqueado', 'semilla incompleta: ' + sem.grupos.filter(x => x.estado === 'falta').map(x => x.observado).join('; '));
+  else if (!entra('semilla zz-verif-', sem.estado !== 'incompleta', sem.estado + (sem.error ? ' · ' + sem.error : '') + ' · ' + sem.grupos.map(x => x.id + ' ' + x.estado).join(', '))) return fin('bloqueado', 'semilla incompleta: ' + sem.grupos.filter(x => x.estado === 'falta').map(x => x.observado).join('; '), 'P4 semilla incompleta');
   // v0.6.0 (LM-39b): la regresion la elige la ruta del lote (seleccionRegresion); «Regresión:» explicita manda; sin mapa, zona.
   const dirE2e = rutaSpec ? path.dirname(rutaSpec) : path.join(repo, 'tests', 'e2e');
   const mapa = leerJson(path.join(__dirname, 'mapa-modulos.json'), null);
@@ -383,11 +394,12 @@ async function main() {
   const guiones = cargarGuiones(dirE2e, rutaSpec ? path.basename(rutaSpec) : null);
   const sel = seleccionRegresion(texto, spec, guiones, mapa, centinelas);
   // LM-49: fase 1 → solo corren los centinelas que caen en la ruta; lo demás va al tren. Humo siempre en fase 1.
-  const fase = faseDelLote(texto, { forzar: fs.existsSync(path.join(COLA, 'FASE-COMPLETA')) });
+  const riesgo = V2.riesgoDeRuta(mapa, sel.ruta ? sel.ruta.modulos : []);   // V7
+  const fase = V2.faseConRiesgo(faseDelLote(texto, { forzar: fs.existsSync(path.join(COLA, 'FASE-COMPLETA')) }), riesgo);
   const esCentinela = (a) => centinelas.some((c) => c.guion === a);
-  const diferidos = fase.fase === '1' ? sel.corren.filter((c) => !esCentinela(c.archivo)).map((c) => c.archivo) : [];
-  if (fase.fase === '1') sel.corren = sel.corren.filter((c) => esCentinela(c.archivo));
-  out.fase = { fase: fase.fase, motivo: fase.motivo, corren: sel.corren.map((c) => c.archivo), diferidos };
+  const diferidos = fase.fase === '1' ? sel.corren.filter((c) => fase.minima || !esCentinela(c.archivo)).map((c) => c.archivo) : [];
+  if (fase.fase === '1') sel.corren = fase.minima ? [] : sel.corren.filter((c) => esCentinela(c.archivo));
+  out.fase = { fase: fase.fase, motivo: fase.motivo, riesgo: fase.riesgo || null, minima: !!fase.minima, corren: sel.corren.map((c) => c.archivo), diferidos };
   console.log('fase ' + fase.fase + ' (' + fase.motivo + ')' + (diferidos.length ? ' · al tren: ' + diferidos.join(', ') : ''));
   const humoSpec = (sel.humo || fase.fase === '1') && fs.existsSync(path.join(__dirname, 'humo-pw.spec.js')) ? cargar(path.join(__dirname, 'humo-pw.spec.js')) : null;
   // v0.5.28 (M-474): P4.e comprueba la sesion de TODOS los perfiles que van a correr (guion del lote + regresion), no solo
@@ -395,7 +407,15 @@ async function main() {
   const perfiles = new Set(((spec && spec.casos) || []).map(c => c.perfil));
   for (const c of sel.corren) { const g = guiones.find(x => x.archivo === c.archivo); if (g) (g.spec.casos || []).forEach(k => { if (k.nivel !== 'N3' && k.perfil) perfiles.add(k.perfil); }); }
   if (humoSpec) (humoSpec.casos || []).forEach(k => { if (k.perfil) perfiles.add(k.perfil); });
-  for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado); }
+  for (const p of perfiles) { const s = await sesionViva(p); if (!entra('sesion ' + p, s.ok, s.observado)) return fin('bloqueado', s.observado, 'P4 sesión ' + p + ': ' + s.observado); }
+  // V1: entradas de cuarentena válidas para esta corrida (INC abierto en seguimiento.json del repo público; plazo en lotes aceptados)
+  const entradasQ = leerJson(path.join(__dirname, 'cuarentena.json'), []);
+  let seguimiento = null;
+  if (entradasQ.length) { try { seguimiento = await (await fetch('https://raw.githubusercontent.com/thcure/str-manager-docs/main/interno/seguimiento.json')).json(); } catch (e) { seguimiento = null; } }
+  const cq = V2.validarCuarentena(entradasQ, { incs: (seguimiento && seguimiento.incs) || [], guionPropio: rutaSpec ? path.basename(rutaSpec) : null, modulosLote: sel.ruta ? sel.ruta.modulos : [], lotesAceptados: (desde) => V2.lotesAceptadosDesde((seguimiento && seguimiento.cambios) || [], desde) });
+  if (entradasQ.length && !seguimiento) cq.rechazadas.push({ porQue: 'no se pudo leer seguimiento.json del repo: ninguna entrada vale en esta corrida' }), cq.validas = [];
+  out.cuarentenaEntradas = { validas: cq.validas.map((e) => ({ guion: e.guion, caso: e.caso, inc: e.inc, vencida: e.vencida, aceptadosDesde: e.aceptadosDesde })), rechazadas: cq.rechazadas.map((r) => ({ guion: r.entrada && r.entrada.guion, caso: r.entrada && r.entrada.caso, porQue: r.porQue })) };
+  if (entradasQ.length) console.log('cuarentena: ' + cq.validas.length + ' entrada(s) válida(s)' + (cq.validas.some((e) => e.vencida) ? ' (' + cq.validas.filter((e) => e.vencida).length + ' vencida(s): se saltan)' : '') + ', ' + cq.rechazadas.length + ' rechazada(s)');
 
   // P5 guion del lote + regresion (sin Claude). v0.6.1: las capturas de la corrida anterior de este lote se apartan antes.
   const apartadas = apartarCapturas(lote);
@@ -413,7 +433,8 @@ async function main() {
     entra('restos', true, rz.casos.map((x) => x.observado).join(' | ').slice(0, 400) || 'sin casos');
   } catch (e) { entra('restos', true, 'no se pudo limpiar (sigue): ' + String(e && e.message || e).slice(0, 200)); }
   if (spec) {
-    const r = await correrConSesion(spec, { lote, dirGuion: path.dirname(rutaSpec) }, estadoSesion, 'guion del lote'); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
+    const r = await V2.correrConReintento(correrConSesion, spec, { lote, dirGuion: path.dirname(rutaSpec) }, estadoSesion, 'guion del lote', () => cargar(rutaSpec), esSinRed); out.n2 = r.casos; out.limpieza = r.limpieza; out.perfiles = r.perfiles;   /* v0.5.31 (M-499): aperturas y cierres por perfil */
+    if (r.reintentado) { out.reintentoGuion = { inestables: r.inestables, primeraLimpieza: r.primeraLimpieza }; r.inestables.forEach((x) => out.inestables.push(Object.assign({ guion: path.basename(rutaSpec) }, x))); console.log('reintento del guion del lote (V2): ' + r.inestables.length + ' caso(s) inestable(s)'); }
     r.casos.forEach(x => console.log((x.ok ? 'OK  ' : x.ok === null ? 'N3  ' : 'NO  ') + x.nivel + ' ' + x.c + ' · ' + x.observado));
   }
   if (estadoSesion.red && estadoSesion.red.bloqueada) return fin('bloqueado', 'sin internet en LENOVO desde ' + estadoSesion.red.cortes[estadoSesion.red.cortes.length - 1].desde + ' (LM-52): se repite con reprobar cuando vuelva la red');
@@ -427,13 +448,28 @@ async function main() {
   }
   {
     const lista = sel.corren.map(c => (guiones.find(g => g.archivo === c.archivo) || {}).ruta).filter(Boolean);
+    const porGuion = [];   // V10: resultados por guion en orden, para detectar dos seguidos caídos por el entorno
     for (const f of lista) {
       if (estadoSesion.red && estadoSesion.red.bloqueada) break;   // LM-52
-      try { const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3'); const rr = await correrConSesion(sp, { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: path.basename(f).replace(/\.spec\.js$/, '') }, estadoSesion, path.basename(f));   /* v0.5.25: capturas <guion>-<letra>-error.png */ /* la regresion no repite los N3 */ rr.casos.forEach(x => out.regresion.push(Object.assign({ guion: path.basename(f) }, x))); out.limpiezaRegresion.push({ guion: path.basename(f), limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */ }
-      catch (e) { out.regresion.push({ guion: path.basename(f), ok: false, observado: e.message }); }
+      const nombreG = path.basename(f);
+      try {
+        const sp = cargar(f); sp.casos = (sp.casos || []).filter(c => c.nivel !== 'N3');   /* la regresion no repite los N3 */
+        const salto = V2.casosASaltar(sp, cq.validas, nombreG); sp.casos = salto.casos; salto.saltados.forEach((x) => out.cuarentena.push(Object.assign({ guion: nombreG }, x)));   /* V1: vencidas */
+        const opts = { lote, prefijo: 'zz-verif-' + lote + '-r-', dirGuion: path.dirname(f), nombreGuion: nombreG.replace(/\.spec\.js$/, '') };
+        const rr = sp.casos.length ? await V2.correrConReintento(correrConSesion, sp, opts, estadoSesion, nombreG, () => { const s2 = cargar(f); s2.casos = (s2.casos || []).filter(c => c.nivel !== 'N3'); return s2; }, esSinRed) : { casos: [], limpieza: 'sin casos (todos en cuarentena vencida)', perfiles: [] };   /* V2 */
+        if (rr.reintentado) rr.inestables.forEach((x) => out.inestables.push(Object.assign({ guion: nombreG }, x)));
+        const sep = V2.aplicarCuarentena(rr.casos, cq.validas, nombreG);   /* V1 */
+        sep.regresion.forEach(x => out.regresion.push(Object.assign({ guion: nombreG }, x))); sep.cuarentena.forEach(x => out.cuarentena.push(Object.assign({ guion: nombreG }, x)));   /* v0.5.25: capturas <guion>-<letra>-error.png */
+        out.limpiezaRegresion.push({ guion: nombreG, limpieza: rr.limpieza, perfiles: rr.perfiles }); /* v0.5.12 (M-390) */
+        porGuion.push({ guion: nombreG, casos: sep.regresion });
+      }
+      catch (e) { out.regresion.push({ guion: nombreG, ok: false, observado: e.message }); porGuion.push({ guion: nombreG, casos: [{ ok: false, observado: e.message }] }); }
+      const susp = V2.detectarSuspension(porGuion);   /* V10 */
+      if (susp.suspender) { out.regresionSuspendida = { en: nombreG, causa: susp.causa }; return fin('bloqueado', 'suspendido por entorno (V10): ' + susp.causa + ' · se reanuda con humo y semilla en verde', susp.causa); }
     }
     if (estadoSesion.red && estadoSesion.red.bloqueada) return fin('bloqueado', 'sin internet en LENOVO desde ' + estadoSesion.red.cortes[estadoSesion.red.cortes.length - 1].desde + ' (LM-52): se repite con reprobar cuando vuelva la red');
-    out.regresion.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + 'regresion ' + x.guion + ' ' + (x.c || '') + ' · ' + x.observado));
+    out.regresion.forEach(x => console.log((x.ok ? 'OK  ' : 'NO  ') + 'regresion ' + x.guion + ' ' + (x.c || '') + (x.inestable ? ' (inestable)' : '') + ' · ' + x.observado));
+    out.cuarentena.forEach(x => console.log('Q   cuarentena ' + x.guion + ' ' + (x.c || '') + ' · ' + (x.inc || '') + ' · ' + x.observado));
     out.limpiezaRegresion.forEach(x => console.log('limpieza regresion ' + x.guion + ' · ' + x.limpieza));
   }
   if (fase.fase === '1') {   // LM-49: deja la regresión diferida en la fila del tren

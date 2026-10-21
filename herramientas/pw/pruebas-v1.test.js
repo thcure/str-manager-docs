@@ -400,6 +400,68 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
     t('LM-52: no vuelve en el tope → bloqueada, sin repetir ni tocar sesiones', n === 1 && e2.red.bloqueada === true && e2.caidos.size === 0);
   })();
 }
+
+// --- LM-62 (PRUEBAS-v2): v2.js, puras ---
+{
+  const V2 = require('./v2');
+  const mapa = { modulos: [{ id: 'SRV', riesgo: { probabilidad: 2, impacto: 3 } }, { id: 'CAL', riesgo: { probabilidad: 1, impacto: 3 } }, { id: 'KN', riesgo: { probabilidad: 1, impacto: 2 } }, { id: 'X' }] };
+  t('V7 riesgoDeRuta: el mayor p×i de la ruta', JSON.stringify(V2.riesgoDeRuta(mapa, ['CAL', 'SRV'])) === JSON.stringify({ modulo: 'SRV', valor: 6, nivel: 'alto', detalle: '2×3' }));
+  t('V7 riesgoDeRuta: medio y bajo; sin riesgo → null', V2.riesgoDeRuta(mapa, ['CAL']).nivel === 'medio' && V2.riesgoDeRuta(mapa, ['KN']).nivel === 'bajo' && V2.riesgoDeRuta(mapa, ['X']).nivel === null && V2.riesgoDeRuta(null, ['SRV']).nivel === null);
+  const f1 = { fase: '1', motivo: 'lote normal' };
+  t('V7 faseConRiesgo: alto → completa; bajo → fase 1 mínima; medio → fase 1', V2.faseConRiesgo(f1, V2.riesgoDeRuta(mapa, ['SRV'])).fase === 'completa' && V2.faseConRiesgo(f1, V2.riesgoDeRuta(mapa, ['KN'])).minima === true && V2.faseConRiesgo(f1, V2.riesgoDeRuta(mapa, ['CAL'])).fase === '1' && !V2.faseConRiesgo(f1, V2.riesgoDeRuta(mapa, ['CAL'])).minima);
+  t('V7 faseConRiesgo: lo que ya era completa (crítico) no baja aunque el riesgo sea bajo', V2.faseConRiesgo({ fase: 'completa', motivo: 'lote crítico' }, V2.riesgoDeRuta(mapa, ['KN'])).fase === 'completa');
+  // V1
+  const incs = [{ id: 'INC-301', estado: 'abierto' }, { id: 'INC-302', estado: 'cerrado' }, { id: 'INC-303', estado: 'abierto', contra: 'producto' }, { id: 'INC-304', estado: 'abierto' }];
+  const cambios = [{ lote: 'L-300', estado: 'aceptado', fecha: '2026-10-21' }, { lote: 'L-301', estado: 'aceptado', fecha: '2026-10-22' }, { lote: 'LM-62', tipo: 'modelo', estado: 'aceptado', fecha: '2026-10-22' }, { lote: 'L-302', estado: 'no aceptado', fecha: '2026-10-23' }];
+  t('V1 lotesAceptadosDesde: solo lotes de producto aceptados desde la fecha', V2.lotesAceptadosDesde(cambios, '2026-10-22') === 1 && V2.lotesAceptadosDesde(cambios, '2026-10-20') === 2);
+  const ctx = { incs, guionPropio: 'P.spec.js', modulosLote: ['CAL'], lotesAceptados: (d) => V2.lotesAceptadosDesde(cambios, d) };
+  const base = { dueno: 'Chat Desarrollo', desde: '2026-10-22', causa: 'selector' };
+  const r1 = V2.validarCuarentena([Object.assign({ guion: 'A.spec.js', caso: 'b', inc: 'INC-301' }, base)], ctx);
+  t('V1 validar: entrada con INC abierto y causa de la lista vale, no vencida (1 aceptado < 2)', r1.validas.length === 1 && r1.validas[0].vencida === false && r1.validas[0].aceptadosDesde === 1);
+  const r2 = V2.validarCuarentena([Object.assign({ guion: 'A.spec.js', caso: 'b', inc: 'INC-301', desde: '2026-10-20' }, base, { desde: '2026-10-20' })], ctx);
+  t('V1 validar: con 2 lotes aceptados desde «desde», la entrada está vencida', r2.validas.length === 1 && r2.validas[0].vencida === true);
+  const malas = V2.validarCuarentena([
+    Object.assign({ guion: 'B.spec.js', caso: 'a', inc: 'INC-302' }, base),            // cerrado
+    Object.assign({ guion: 'C.spec.js', caso: 'a', inc: 'INC-303' }, base),            // contra producto
+    Object.assign({ guion: 'D.spec.js', caso: 'a', inc: 'INC-304', causa: 'producto' }, base, { causa: 'producto' }),
+    Object.assign({ guion: 'P.spec.js', caso: 'a', inc: 'INC-304' }, base),            // guion propio
+    Object.assign({ guion: 'E.spec.js', caso: 'a', inc: 'INC-304', modulo: 'CAL' }, base, { modulo: 'CAL' }),   // módulo tocado
+  ], ctx);
+  t('V1 validar: INC cerrado, producto (por INC o por causa), guion propio y módulo tocado se rechazan', malas.validas.length === 0 && malas.rechazadas.length === 5 && /producto/.test(malas.rechazadas[1].porQue) && /propio/.test(malas.rechazadas[3].porQue) && /módulo CAL/.test(malas.rechazadas[4].porQue));
+  const seis = V2.validarCuarentena([1, 2, 3, 4, 5, 6].map((i) => Object.assign({ guion: 'G' + i + '.spec.js', caso: 'a', inc: 'INC-301' }, base)), ctx);
+  t('V1 validar: más de 5 entradas, ninguna vale', seis.validas.length === 0 && seis.rechazadas.length === 6);
+  const validas = [Object.assign({ guion: 'A.spec.js', caso: 'b', inc: 'INC-301', firma: 'sin respuesta de /api/upload', vencida: false }, base), Object.assign({ guion: 'A.spec.js', caso: 'c', inc: 'INC-304', vencida: true, aceptadosDesde: 3 }, base)];
+  const sep = V2.aplicarCuarentena([{ c: 'a', ok: true }, { c: 'b', ok: false, observado: 'no: sin respuesta de /api/upload' }, { c: 'd', ok: false, observado: 'otra cosa' }], validas, 'A.spec.js');
+  t('V1 aplicar: el rojo con entrada y firma va a cuarentena[]; el rojo sin entrada sigue en regresion[]', sep.cuarentena.length === 1 && sep.cuarentena[0].inc === 'INC-301' && sep.regresion.map((x) => x.c).join('') === 'ad');
+  const sep2 = V2.aplicarCuarentena([{ c: 'b', ok: false, observado: 'pantalla de login' }, { c: 'b', ok: true, observado: 'si' }], [validas[0]], 'A.spec.js');
+  t('V1 aplicar: firma distinta → rojo normal con nota; verde con entrada → aviso «posiblemente resuelto»', sep2.regresion.length === 2 && /firma/.test(sep2.regresion[0].nota) && sep2.cuarentena.length === 1 && sep2.cuarentena[0].posiblementeResuelto === true);
+  const salto = V2.casosASaltar({ casos: [{ c: 'b' }, { c: 'c' }] }, validas, 'A.spec.js');
+  t('V1 saltar: la vencida se salta (ok null, saltado) y la vigente corre', salto.casos.map((x) => x.c).join('') === 'b' && salto.saltados.length === 1 && salto.saltados[0].saltado && salto.saltados[0].inc === 'INC-304');
+  t('V1 aplicar: una entrada vencida ya no absorbe rojos (los salta antes)', V2.aplicarCuarentena([{ c: 'c', ok: false, observado: 'x' }], validas, 'A.spec.js').regresion.length === 1);
+  // V2
+  const prim = { casos: [{ c: 'a', ok: true, observado: 'si' }, { c: 'b', ok: false, observado: 'no: tardó' }, { c: 'c', ok: false, observado: 'no: 500' }], limpieza: 'l1' };
+  const seg = { casos: [{ c: 'a', ok: true, observado: 'si' }, { c: 'b', ok: true, observado: 'si' }, { c: 'c', ok: false, observado: 'no: 500 otra vez' }], limpieza: 'l2', perfiles: [] };
+  const fus = V2.fusionarReintento(prim, seg);
+  t('V2 fusionar: el segundo intento manda; b pasa → inestable; c falla dos veces → rojo con intento 2', fus.reintentado && fus.inestables.length === 1 && fus.inestables[0].c === 'b' && fus.casos[1].inestable === true && fus.casos[1].primerFallo === 'no: tardó' && fus.casos[2].ok === false && fus.casos[2].intento === 2 && fus.casos[0].inestable === undefined);
+  t('V2 fusionar: pasó y luego falló → rojo e inestable', V2.fusionarReintento({ casos: [{ c: 'a', ok: true }] }, { casos: [{ c: 'a', ok: false, observado: 'no' }] }).casos[0].inestable === true);
+  const sinRed = (o) => /sin internet/.test(o);
+  t('V2 mereceReintento: rojo normal sí; solo sesión o red, no; todo verde, no', V2.mereceReintento(prim, sinRed) && !V2.mereceReintento({ casos: [{ c: 'a', ok: false, sinSesion: true }] }, sinRed) && !V2.mereceReintento({ casos: [{ c: 'a', ok: false, observado: 'sin internet' }] }, sinRed) && !V2.mereceReintento({ casos: [{ c: 'a', ok: true }] }, sinRed));
+  (async () => {
+    let n = 0; const correr = async (sp) => { n++; return n === 1 ? { casos: [{ c: 'a', ok: false, observado: 'no' }, { c: 'z', ok: true }], limpieza: 'x' } : { casos: sp.casos.map((c) => ({ c: c.c, ok: true, observado: 'si' })), limpieza: 'y' }; };
+    const r = await V2.correrConReintento(correr, { casos: [{ c: 'a' }, { c: 'z' }] }, {}, {}, 'G', () => ({ casos: [{ c: 'a' }, { c: 'z' }, { c: 'n3', nivel: 'N3' }] }), sinRed);
+    t('V2 correrConReintento: una sola repetición, con los mismos casos (sin los N3 del spec recargado), a inestable', n === 2 && r.reintentado && r.casos.length === 2 && r.inestables.length === 1 && r.inestables[0].c === 'a');
+    let m = 0; const verde = async () => { m++; return { casos: [{ c: 'a', ok: true }] }; };
+    const rv = await V2.correrConReintento(verde, { casos: [{ c: 'a' }] }, {}, {}, 'G', null, sinRed);
+    t('V2 correrConReintento: en verde no repite', m === 1 && !rv.reintentado);
+  })();
+  // V10
+  t('V10 esFalloEntorno: sesión, red, health, timeout de navegación', V2.esFalloEntorno('sin sesión de oper') && V2.esFalloEntorno('net::ERR_CONNECTION_RESET') && V2.esFalloEntorno('/api/health 503') && V2.esFalloEntorno('page.goto: Timeout 30000ms exceeded') && !V2.esFalloEntorno('el botón Guardar no aparece'));
+  const gE = (n) => ({ guion: n, casos: [{ c: 'a', ok: false, observado: 'net::ERR_CONNECTION_RESET' }, { c: 'b', ok: true }] });
+  t('V10 detectarSuspension: dos guiones seguidos con todos sus rojos de entorno → suspender; uno solo, no; un rojo de producto en medio, no',
+    V2.detectarSuspension([gE('A'), gE('B')]).suspender === true && V2.detectarSuspension([gE('A')]).suspender === false && V2.detectarSuspension([gE('A'), { guion: 'B', casos: [{ c: 'a', ok: false, observado: 'el botón no aparece' }] }]).suspender === false && V2.detectarSuspension([{ guion: 'A', casos: [{ c: 'a', ok: true }] }, gE('B')]).suspender === false);
+  t('V10 esReanudacion: solo el mismo lote suspendido', V2.esReanudacion({ estado: 'suspendido', lote: 'L-9' }, 'L-9') && !V2.esReanudacion({ estado: 'reanudado', lote: 'L-9' }, 'L-9') && !V2.esReanudacion({ estado: 'suspendido', lote: 'L-8' }, 'L-9') && !V2.esReanudacion(null, 'L-9'));
+}
+
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];

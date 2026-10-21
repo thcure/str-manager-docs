@@ -1,4 +1,4 @@
-// tren.js (v3, LM-52: sin red a mitad del tren espera hasta 10 min, repite el guion o queda bloqueado sin vaciar la fila) (v2, LM-51: los guiones corren con correrConSesion: sesión caída → recuperar y repetir una vez) - fase 2 de LM-49 (pruebas por fases, cruce de Carlos 17-oct-2026). Lo mantiene el Arquitecto.
+// tren.js (v4, LM-62 PRUEBAS-v2: reintento del guion entero contado por caso (V2), cuarentena con plazo (V1) y suspensión cuando dos guiones seguidos caen por el entorno (V10): bloqueado sin vaciar la fila; el tren siguiente vuelve a correrlos) (v3, LM-52: sin red a mitad del tren espera hasta 10 min, repite el guion o queda bloqueado sin vaciar la fila) (v2, LM-51: los guiones corren con correrConSesion: sesión caída → recuperar y repetir una vez) - fase 2 de LM-49 (pruebas por fases, cruce de Carlos 17-oct-2026). Lo mantiene el Arquitecto.
 // Corre UNA vez la regresión que la fase 1 de varios lotes dejó diferida en log\tren-pendiente.json: une los guiones de
 // todos los lotes, comprueba las sesiones de los perfiles que van a correr, corre cada guion una sola vez (sin N3) y deja
 // log\TREN-<AAAAMMDD-HHMM>.json con cada caso y los lotes que lo pidieron. No juzga ni acepta: un rojo es un INC que se
@@ -12,7 +12,8 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { COLA } = require('./comun');
 const { correrGuion, cargar, horaBogota } = require('./guion');
-const { cargarGuiones, sesionViva, correrConSesion } = require('./probar-lote');
+const { cargarGuiones, sesionViva, correrConSesion, esSinRed } = require('./probar-lote');
+const V2 = require('./v2');
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : d; };
 const leer = (r, d) => { try { return JSON.parse(fs.readFileSync(r, 'utf8')); } catch (e) { return d; } };
@@ -37,9 +38,10 @@ async function main() {
   const d = new Date(); const pad = (n) => String(n).padStart(2, '0');
   const id = 'TREN-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + horaBogota().slice(0, 5).replace(':', '');
   const commit = (spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: repo, encoding: 'utf8' }).stdout || '').trim() || null;
-  const out = { tren: id, proceso: 'LM-49 fase 2', commit, inicio: new Date().toISOString(), lotes: pendiente.map((e) => e.lote), guiones: union, entrada: [], regresion: [], limpieza: [], resultado: null, causa: null };
+  const out = { tren: id, proceso: 'LM-49 fase 2 · PRUEBAS-v2', commit, inicio: new Date().toISOString(), lotes: pendiente.map((e) => e.lote), guiones: union, entrada: [], regresion: [], cuarentena: [], inestables: [], limpieza: [], resultado: null, causa: null };
   const estadoSesion = { caidos: new Set(), recuperadas: [], perdidas: [] };   // LM-51: sesión caída a mitad del tren
-  const fin = (resultado, causa, vaciar) => {
+  const fin = (resultado, causa, vaciar, suspension) => {
+    if (suspension) { V2.escribirSuspension(COLA, { estado: 'suspendido', lote: id, tren: true, hora: horaBogota(), causa: suspension, avisar: ['Chat Jefe de proyecto', 'Chat Desarrollo'], reanuda: 'el tren siguiente vuelve a correr la fila completa (V10)' }); out.suspension = suspension; }
     out.resultado = resultado; out.causa = causa || null; out.fin = new Date().toISOString();
     if (estadoSesion.red) out.red = estadoSesion.red;   // LM-52
     out.sesiones = { recuperadas: estadoSesion.recuperadas, perdidas: estadoSesion.perdidas, caidos: [...estadoSesion.caidos] };
@@ -61,16 +63,32 @@ async function main() {
   lista.filter((x) => x.g).forEach((x) => (x.g.spec.casos || []).forEach((k) => { if (k.nivel !== 'N3' && k.perfil) perfiles.add(k.perfil); }));
   for (const p of perfiles) {
     const s = await sesionViva(p); out.entrada.push({ c: 'sesion ' + p, ok: s.ok, observado: s.observado });
-    if (!s.ok) return fin('bloqueado', s.observado, false);
+    if (!s.ok) return fin('bloqueado', s.observado, false, 'P4 sesión ' + p + ': ' + s.observado);
   }
+  // V1: cuarentena (INC abierto en seguimiento.json del repo público; en el tren no hay guion propio ni módulos del lote)
+  const entradasQ = leer(path.join(__dirname, 'cuarentena.json'), []);
+  let seguimiento = null;
+  if (entradasQ.length) { try { seguimiento = await (await fetch('https://raw.githubusercontent.com/thcure/str-manager-docs/main/interno/seguimiento.json')).json(); } catch (e) { seguimiento = null; } }
+  const cq = V2.validarCuarentena(entradasQ, { incs: (seguimiento && seguimiento.incs) || [], lotesAceptados: (desde) => V2.lotesAceptadosDesde((seguimiento && seguimiento.cambios) || [], desde) });
+  if (entradasQ.length && !seguimiento) cq.validas = [];
+  out.cuarentenaEntradas = { validas: cq.validas.map((e) => ({ guion: e.guion, caso: e.caso, inc: e.inc, vencida: e.vencida })), rechazadas: cq.rechazadas.map((r) => ({ guion: r.entrada && r.entrada.guion, porQue: r.porQue })) };
+  const porGuion = [];   // V10
   for (const x of lista.filter((y) => y.g)) {
     if (estadoSesion.red && estadoSesion.red.bloqueada) break;   // LM-52
     try {
       const sp = cargar(x.g.ruta); sp.casos = (sp.casos || []).filter((c) => c.nivel !== 'N3');
-      const rr = await correrConSesion(sp, { lote: id, prefijo: 'zz-verif-' + id + '-r-', dirGuion: path.dirname(x.g.ruta), nombreGuion: x.archivo.replace(/\.spec\.js$/, '') }, estadoSesion, x.archivo);   // LM-51
-      rr.casos.forEach((c) => out.regresion.push(Object.assign({ guion: x.archivo, lotes: x.lotes }, c)));
+      const salto = V2.casosASaltar(sp, cq.validas, x.archivo); sp.casos = salto.casos; salto.saltados.forEach((c) => out.cuarentena.push(Object.assign({ guion: x.archivo, lotes: x.lotes }, c)));
+      const opts = { lote: id, prefijo: 'zz-verif-' + id + '-r-', dirGuion: path.dirname(x.g.ruta), nombreGuion: x.archivo.replace(/\.spec\.js$/, '') };
+      const rr = sp.casos.length ? await V2.correrConReintento(correrConSesion, sp, opts, estadoSesion, x.archivo, () => { const s2 = cargar(x.g.ruta); s2.casos = (s2.casos || []).filter((c) => c.nivel !== 'N3'); return s2; }, esSinRed) : { casos: [], limpieza: 'sin casos (todos en cuarentena vencida)' };   // LM-51 + V2
+      if (rr.reintentado) rr.inestables.forEach((c) => out.inestables.push(Object.assign({ guion: x.archivo, lotes: x.lotes }, c)));
+      const sep = V2.aplicarCuarentena(rr.casos, cq.validas, x.archivo);
+      sep.regresion.forEach((c) => out.regresion.push(Object.assign({ guion: x.archivo, lotes: x.lotes }, c)));
+      sep.cuarentena.forEach((c) => out.cuarentena.push(Object.assign({ guion: x.archivo, lotes: x.lotes }, c)));
       out.limpieza.push({ guion: x.archivo, limpieza: rr.limpieza });
-    } catch (e) { out.regresion.push({ guion: x.archivo, lotes: x.lotes, ok: false, observado: e.message }); }
+      porGuion.push({ guion: x.archivo, casos: sep.regresion });
+    } catch (e) { out.regresion.push({ guion: x.archivo, lotes: x.lotes, ok: false, observado: e.message }); porGuion.push({ guion: x.archivo, casos: [{ ok: false, observado: e.message }] }); }
+    const susp = V2.detectarSuspension(porGuion);
+    if (susp.suspender) return fin('bloqueado', 'suspendido por entorno (V10): ' + susp.causa, false, susp.causa);
   }
   if (estadoSesion.red && estadoSesion.red.bloqueada) return fin('bloqueado', 'sin internet en LENOVO desde ' + estadoSesion.red.cortes[estadoSesion.red.cortes.length - 1].desde + ' (LM-52)', false);
   const rojos = out.regresion.filter((c) => c.ok === false);

@@ -1,6 +1,6 @@
 // REQ-MOD-5 / A7a (lote 70): CLAUDE.md podado + mapas por área en docs/claude/.
 // Vigila tamaños, que el índice nombre cada archivo/carpeta y que no se haya perdido contenido al mover.
-// v2 (LM-70, 21-oct-2026): § 1 es un puntero a reglas-fijas.md, no una copia; fuente: str-manager-docs/herramientas/hooks-cli/claude-md.test.js.
+// v2.1 (LM-70, 21-oct-2026; revisión previa de Desarrollo M-1053): § 1 es un puntero a reglas-fijas.md, no una copia; fuente: str-manager-docs/herramientas/hooks-cli/claude-md.test.js.
 const fs = require('fs');
 const { leerTexto } = require('./lib/leer-texto.js');
 const path = require('path');
@@ -29,9 +29,9 @@ const sec1 = i1 >= 0 ? claude.slice(i1, claude.indexOf('\n## ', i1 + 5)) : '';
 check('CLAUDE.md tiene § 1', sec1.length > 0);
 check('§ 0 dice que ctx.js inyecta las reglas (P0)', claude.includes('te las inyecta `ctx.js`'));
 check('§ 1 apunta a docs/claude/reglas-fijas.md y a ctx.js (P1)', sec1.includes('docs/claude/reglas-fijas.md') && sec1.includes('ctx.js'));
-const regla2 = (reglas.match(/^2\. .*$/m) || [''])[0].trim();
-check('§ 1 no copia las reglas: la regla 2 no está en CLAUDE.md (P1)', regla2.length > 20 && !claude.includes(regla2));
-check('CLAUDE.md ≤ 9 000 caracteres (meta Cn2; informativo hasta el lote estándar de docs)', true, claude.length);
+const lineasReglas = reglas.split('\n').filter(l => /^\d+\. .{20,}/.test(l)).map(l => l.trim());
+check('§ 1 no copia las reglas: ninguna de las 13 está en CLAUDE.md (P1)', lineasReglas.length >= 13 && lineasReglas.every(l => !claude.includes(l)), lineasReglas.filter(l => claude.includes(l)).length);
+check('CLAUDE.md: ' + claude.length + ' caracteres (meta Cn2 ≤ 9 000; informativo hasta el lote estándar de docs)', true);
 
 const idx = claude.indexOf('## 2.');
 const indice = idx >= 0 ? claude.slice(idx, claude.indexOf('\n## ', idx + 5)) : '';

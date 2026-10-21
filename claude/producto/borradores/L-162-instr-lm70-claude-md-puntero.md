@@ -1,7 +1,7 @@
 # instr — L-162 · LM-70: `CLAUDE.md` § 1 pasa a ser un puntero a `docs/claude/reglas-fijas.md` (ya las inyecta `ctx.js`); `tests/claude-md.test.js` v2 lo comprueba; CLAUDE.md baja de 11 981 a ~9 800 caracteres
 Categoría: **crítico** (toca `tests/claude-md.test.js`, prueba de la fábrica, y la sección de reglas de `CLAUDE.md`; lote del modelo LM-70; cruce previo con Carlos: 21-oct-2026 12:46, chat del Arquitecto, «ok» a CONOCIMIENTO-v1 v2 con la poda de § 1 vía LM-70; datos y vía de Desarrollo en M-1044)
-Revisión previa: pendiente (Desarrollo, subagente, 23 puntos; después revisión del Jefe de proyecto por ser crítico) · fuente única del test: `str-manager-docs/herramientas/hooks-cli/claude-md.test.js` (md5 `7fea29401a3975092f0132e1b267d372`, 3 623 bytes)
-Alcance: `CLAUDE.md` (§ 0: una viñeta; § 1: el apartado entero, § 1) · `tests/claude-md.test.js` (archivo completo, § 2) · `?v=` igual · `schema_version` igual · sin cambios de base de datos · **no toca** `.claude/hooks/*`, `tests/hooks.test.js` ni `docs/claude/reglas-fijas.md`
+Commit: la CLI (el Alcance no toca `.claude/` ni `tests/hooks.test.js`) · fuente única del test: `str-manager-docs/herramientas/hooks-cli/claude-md.test.js` (md5 `3b365d147bd3d0c0123d7fb6dad93912`, 3791 bytes) · revisión previa: Desarrollo (M-1053, 17/23 → corregida; segunda pasada pendiente) y revisión del Jefe de proyecto por ser crítico
+Alcance: `CLAUDE.md` (§ 0: una viñeta; § 1: el apartado entero, § 1) · `tests/claude-md.test.js` (archivo completo, § 2) · `?v=` igual · `schema_version` igual · sin cambios de base de datos (lo que no se toca, en § 0)
 Versión: `?v=` igual · `schema_version` igual
 Impacto: la CLI deja de cargar dos veces las 13 reglas fijas (una en `CLAUDE.md` § 1 y otra inyectada por `ctx.js`): ahorra ~2 200 caracteres de contexto por lote y deja `CLAUDE.md` en ~9 800 (tope 12 000; meta 9 000 con el lote estándar de docs que viene después). Nada cambia para el usuario del STR ni para la cola: `ctx.js` sigue inyectando `reglas-fijas.md` al arrancar y tras compactar, y `reglas-fijas.md` no se toca.
 Reglas transversales que toca: RT-20 (versión igual, declarada) · RT-23 (crítico = cruce con Carlos, citado)
@@ -10,7 +10,7 @@ Casos de uso: técnico, sin caso de uso
 Riesgo: bajo (R-1): si `ctx.js` dejara de inyectar las reglas, la CLI quedaría sin ellas; mitigación: `ctx.js` no se toca, `hooks.test.js` (38) las cubre, y el cierre de este lote cita la primera línea inyectada («Reglas fijas recibidas al arrancar: sí»).
 ¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (lote del modelo LM-70, cruce de Carlos citado; solo toca `CLAUDE.md` y `tests/` de este repositorio)
 Reversión: `git revert <hash>` (vuelve § 1 completo y el test v1).
-Origen: `claude/marco/plan-conocimiento.md` Cn2 (Arquitecto; LM-69). Requerimiento: `interno/lotes-modelo/LM-70.md`. Decisión: LM-70 (cruce de Carlos 21-oct 12:46).
+Origen: `claude/marco/plan-conocimiento.md` Cn2 (Arquitecto; LM-69). Requerimiento: `interno/lotes-modelo/LM-70.md`. Decisión: ninguna (lote del modelo LM-70: solo documentación de la CLI y su test; no cambia ADR ni DA; cruce de Carlos 21-oct 12:46).
 Depende de: nada (L-160 y L-161 ya están en `main`; el hook v5 rige: el commit lleva la línea de trazabilidad, § 4).
 Precondiciones para verificar: ninguna (sin guion N2; la cola corre humo-pw por ser lote de solo documentación y tests).
 ¿Quién más depende de lo que cambia?: toda sesión de la CLI (lee `CLAUDE.md` al arrancar); `tests/run.js` corre `claude-md.test.js`; el lote estándar de docs que viene después (§ 0, § 3, § 5, cabeceras «Al día hasta L-n») parte de este estado; `herramientas/hooks-cli/claude-md.test.js` del repo de documentos queda como fuente (escritor: Arquitecto).
@@ -54,12 +54,12 @@ Pon:
 Las reglas fijas viven en `docs/claude/reglas-fijas.md` (fuente única, tope 3 000 caracteres, 13 reglas): el hook `ctx.js` te las inyecta completas al arrancar y después de cada compactación, así que ya las tienes en el contexto; léelas ahí si te hace falta volver a verlas. Este apartado no las copia (LM-70, CONOCIMIENTO-v1): `tests/claude-md.test.js` comprueba que apunte a ese archivo y que no lo duplique.
 ```
 
-## 2. El test de la fábrica, archivo completo (v2)
+## 2. El test de la fábrica, archivo completo (v2.1)
 Es el mismo test v1 con el check de § 1 cambiado: ya no exige que § 1 sea igual a las reglas, sino que § 1 apunte al archivo de reglas y a `ctx.js` y que la regla 2 no esté copiada; añade una línea informativa con el tamaño. Reemplaza el archivo entero. **Archivo:** `tests/claude-md.test.js`. Contenido completo:
 ```js
 // REQ-MOD-5 / A7a (lote 70): CLAUDE.md podado + mapas por área en docs/claude/.
 // Vigila tamaños, que el índice nombre cada archivo/carpeta y que no se haya perdido contenido al mover.
-// v2 (LM-70, 21-oct-2026): § 1 es un puntero a reglas-fijas.md, no una copia; fuente: str-manager-docs/herramientas/hooks-cli/claude-md.test.js.
+// v2.1 (LM-70, 21-oct-2026; revisión previa de Desarrollo M-1053): § 1 es un puntero a reglas-fijas.md, no una copia; fuente: str-manager-docs/herramientas/hooks-cli/claude-md.test.js.
 const fs = require('fs');
 const { leerTexto } = require('./lib/leer-texto.js');
 const path = require('path');
@@ -88,9 +88,9 @@ const sec1 = i1 >= 0 ? claude.slice(i1, claude.indexOf('\n## ', i1 + 5)) : '';
 check('CLAUDE.md tiene § 1', sec1.length > 0);
 check('§ 0 dice que ctx.js inyecta las reglas (P0)', claude.includes('te las inyecta `ctx.js`'));
 check('§ 1 apunta a docs/claude/reglas-fijas.md y a ctx.js (P1)', sec1.includes('docs/claude/reglas-fijas.md') && sec1.includes('ctx.js'));
-const regla2 = (reglas.match(/^2\. .*$/m) || [''])[0].trim();
-check('§ 1 no copia las reglas: la regla 2 no está en CLAUDE.md (P1)', regla2.length > 20 && !claude.includes(regla2));
-check('CLAUDE.md ≤ 9 000 caracteres (meta Cn2; informativo hasta el lote estándar de docs)', true, claude.length);
+const lineasReglas = reglas.split('\n').filter(l => /^\d+\. .{20,}/.test(l)).map(l => l.trim());
+check('§ 1 no copia las reglas: ninguna de las 13 está en CLAUDE.md (P1)', lineasReglas.length >= 13 && lineasReglas.every(l => !claude.includes(l)), lineasReglas.filter(l => claude.includes(l)).length);
+check('CLAUDE.md: ' + claude.length + ' caracteres (meta Cn2 ≤ 9 000; informativo hasta el lote estándar de docs)', true);
 
 const idx = claude.indexOf('## 2.');
 const indice = idx >= 0 ? claude.slice(idx, claude.indexOf('\n## ', idx + 5)) : '';
@@ -134,26 +134,20 @@ Co-Authored-By: <como siempre>"
 Sin comillas dobles, comillas invertidas ni `$` dentro del mensaje.
 
 ## Tests en `tests/`
-`node tests/run.js` en verde; `claude-md.test.js` con sus checks nuevos en OK («§ 0 dice que ctx.js inyecta las reglas (P0)», «§ 1 apunta a docs/claude/reglas-fijas.md y a ctx.js (P1)», «§ 1 no copia las reglas (P1)») y «conservación ≥ 98 %» en OK (la poda quita ~2 200 de ~420 000 en total).
+`node tests/run.js` en verde; `claude-md.test.js` con sus checks nuevos en OK («§ 0 dice que ctx.js inyecta las reglas (P0)», «§ 1 apunta a docs/claude/reglas-fijas.md y a ctx.js (P1)», «§ 1 no copia las reglas: ninguna de las 13 está en CLAUDE.md (P1)») y «conservación ≥ 98 %» en OK (la poda quita ~2 200 de ~420 000 en total).
 
 ## Ruta de pruebas (mapa.py --ruta)
 ```
-## Ruta de pruebas (mapa.py --ruta) · 0 módulos · 0 relaciones · 2 reglas · corren 1 guiones (1 casos) · no corren 52 · huecos: 0 relaciones, 0 reglas
-- Módulos: ninguno: revisa Alcance y «Mapa:»
-- Relaciones por las que pasa: —
-- Reglas que cruza: — (de proceso, las garantiza la fábrica: RT-20, RT-23)
-- Corren (regresión por ruta): herramientas/pw/humo-pw (1/1)
-- No corren: 52 guiones fuera de la ruta
-- Huecos de la ruta (nadie pasa): ninguno
-- A declarar: ninguna
+## Ruta de pruebas (mapa.py --ruta) · lote de solo guiones o herramientas (no toca el producto): corre su guion y el humo; sin ruta ni huecos
+- Lote de solo guiones o herramientas: corren herramientas/pw/humo-pw; nada más.
 ```
 
 ## Pruebas derivadas (juez; verificador estándar)
 ```
-- a. `node tests/run.js` en verde con `claude-md.test.js` OK (checks nuevos incluidos) · nivel: N1 · perfil: tests/ · precondición: ninguna · espera: n/n OK; los checks (P0) y (P1) en OK · **Detener**
-- b. `CLAUDE.md` § 1 es el puntero y § 0 trae la viñeta nueva · nivel: N1 · perfil: tests/ · precondición: a en verde · espera: `aplicar.js` P0 y P1 hechos; `CLAUDE.md` entre 9 500 y 10 000 caracteres (lo imprime el test) · **Detener**
+- a. `node tests/run.js` en verde con `claude-md.test.js` OK · nivel: N1 · perfil: tests/ · precondición: ninguna · espera: `claude-md.test.js` n OK, 0 FAIL en la salida de `run.js` · **Detener**
+- b. `CLAUDE.md` § 1 es el puntero y § 0 trae la viñeta nueva · nivel: N1 · perfil: tests/ · precondición: a en verde · espera: `aplicar.js` K1 3/3 (P0, P1, `tests/claude-md.test.js`) y K2 igual; el tamaño de `CLAUDE.md` lo da el cierre (no se juzga) · **Detener**
 - c. El commit lleva «Lote: L-162 · LM-70 · Casos de uso: técnico, sin caso de uso» · nivel: N1 · perfil: tests/ · precondición: a y b · espera: `git log -1 --format=%B` la contiene · **Detener**
-- d. La CLI y la cola siguen andando · nivel: N2 · perfil: cola · precondición: commit hecho · espera: humo-pw en verde · **Revertir**
+- d. La CLI y la cola siguen andando · nivel: N2 (humo de la cola, sin guion propio: lote de solo docs y tests) · perfil: cola · precondición: commit hecho · espera: `herramientas/pw/humo-pw` en verde · **Revertir**
 - Datos de prueba: ninguno nuevo.
 ```
 

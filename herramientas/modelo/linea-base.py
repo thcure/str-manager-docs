@@ -582,6 +582,7 @@ def hooks_del_lote(texto):
     y no puede pedírselo a la CLI. Devuelve {tocaHooks, commitCarlos, pideCommitCli, ok, veredicto}."""
     m = re.search(r'^Alcance:(.*)$', texto, re.M)
     alcance = m.group(1) if m else ''
+    alcance = re.split(r'\*{0,2}no toca\*{0,2}', alcance, flags=re.I)[0]   # lo que va tras «no toca» no es alcance (M-1050 / L-162)
     toca = bool(HOOKS_RE.search(alcance))
     if not toca:
         return {'tocaHooks': False, 'commitCarlos': None, 'pideCommitCli': None, 'ok': True, 'veredicto': 'no toca .claude/'}

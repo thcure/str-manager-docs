@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-21 10:31",
+ "actualizadoEn": "2026-10-21 10:37",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -16500,10 +16500,49 @@
    "req": "LM-63, LM-62",
    "categoria": "estándar",
    "resumen": "CLAUDE.md § 5 Entorno de construcción y de producción (K8) y campo tec en los guiones (V4)",
-   "estado": "instalado",
-   "observacion": "Revisor previo 22/22. Primer commit dentro de la cola con el hook v5 (prueba d de LM-64). Encolado 10:27 (cmp IGUAL). Construido 1579a2e 10:31 (95/95); el hook v5 aceptó la línea de trazabilidad.",
+   "estado": "parcial",
+   "observacion": "Revisor previo 22/22. Primer commit dentro de la cola con el hook v5 (prueba d de LM-64). Encolado 10:27 (cmp IGUAL). Construido 1579a2e 10:31 (95/95); el hook v5 aceptó la línea de trazabilidad. Juez 10:32: parcial (b en null: línea de Node sin evidencia para el juez).",
    "version": "p5c112",
-   "hash": "1579a2e"
+   "hash": "1579a2e",
+   "aceptacion": {
+    "lote": "L-161",
+    "hash": "1579a2e",
+    "fecha": "2026-10-21",
+    "horaBogota": "10:32",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1: node tests/run.js: 95/95 archivos OK. n1Literal: tests/e2e-esquema.test.js igual byte a byte al contenido esperado (incluye los checks E1·decisión, E2·límite, E3·límite); si alguno hubiera fallado, e2e-esquema.test.js habría salido con fail>0 y el 95/95 no estaría en verde."
+     },
+     {
+      "c": "b",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "aplicacion confirma E1 aplicado en CLAUDE.md (puntos: E1 ok, archivo CLAUDE.md; resumen \"aplicación literal 2/2\"). No hay evidencia en pruebas.json de la línea «Node en LENOVO»: la propia instrucción (E2) dice que es el único punto en prosa y que la cola no lo juzga, así que aplicar.js no lo registra. No puedo confirmarlo sin abrir CLAUDE.md, que no está entre los tres archivos permitidos."
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "commit: 1579a2e (coincide con el hash del lote); el perfil del criterio dice que esto lo cubre el hook v5 (regla 13: sin la línea de trazabilidad no hay commit), así que el hash presente ya acredita la línea. Caso 'humo' de n2 en verde: s1 si /api/me 200 rol admin, w escrituras zz-verif- en serie (máx. 1 en vuelo) con alta y baja 200, s2 si /api/me 200 rol operador, t tiempos bajo 3000 ms, s3 si /api/me 200 rol colaborador."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "b",
+      "motivo": "pruebas.json no verifica la línea «Node en LENOVO» (E2 es el único punto en prosa de la instrucción; esta dice explícitamente que la cola no lo juzga). Sin capturas ni acceso a CLAUDE.md (fuera de los tres archivos permitidos) no puedo decidir esa parte del criterio."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "Instrucción: «ninguno nuevo». humo.limpieza: \"limpiar() corrio sin error\"; limpiezaRegresion: [] (sin pendientes).",
+    "notas": "pruebas.json › resultado: verde · causa: null (LM-50): sin rojos escondidos, no aplica regla de regresión ajena. Lote de solo guiones/herramientas (regresionSeleccion.modo: ruta, soloGuiones: true): corre su guion y humo-pw; ruta.huecos (relaciones y reglas) vienen vacíos, no hay deuda de cobertura que anotar; los archivos en noCorren no son evidencia ni ausencia de ella (regla de Regresión). fase.fase es \"completa\": no aplica la regla de Fase 1 (LM-49). Sin regresión, cuarentena, inestables ni sesiones caídas. Único punto abierto: criterio b (línea «Node en LENOVO» de E2), en criteriosPendientes; por eso resultado \"parcial\" y no \"aceptado\"."
+   }
   }
  ],
  "esquema": {
@@ -18895,11 +18934,11 @@
    "categoria": "estándar",
    "riesgo": "R-1",
    "resumen": "Campo tec en los guiones (V4) y CLAUDE.md § 4 línea «Lote:» y § 5 Entorno de construcción (K8)",
-   "estado": "construido",
-   "desde": "2026-10-21 10:31",
-   "esperaA": "verificador",
-   "espera": "pruebas, humo-pw y juez de L-161",
-   "nota": "21:02 Estándar por el catálogo (solo tests/ y CLAUDE.md): sin cruce ni revisión del Jefe de proyecto. Armado: tests/e2e-esquema.test.js con tec (23/0 sobre main). Los Busca salen de LENOVO después de L-160, porque L-160 cambia CLAUDE.md § 1. · 10:27 Texto de § 5 del Arquitecto (M-1009) con correcciones: PHP de C:\\php en LENOVO, PHP 8.3.35 en el hosting, 3 intentos (no reintentos). Revisor previo 20/22 → 22/22 (13 y 19). Base comprobada contra main 9179e2d de LENOVO. Simulación: aplicar.js 2/2, K2 igual, e2e-esquema 23/0, claude-md 86/0, hook v5 acepta la línea. Encolado (cmp IGUAL); la cola arranca cuando L-160 salga de fallidas\\. Borrador en claude/producto/borradores/L-161-instr-entorno-y-tec.md. · 10:31 Construido 1579a2e (run.js 95/95, e2e-esquema 23/0). Primer commit de la cola con el hook v5: aceptado con «Lote: L-161 · LM-63 · Casos de uso: técnico, sin caso de uso». Node en LENOVO v24.19.0 (E2). Pruebas y juez en la cola."
+   "estado": "parcial",
+   "desde": "2026-10-21 10:32",
+   "esperaA": "Arquitecto",
+   "espera": "evidencia independiente del criterio b (línea «Node en LENOVO» en CLAUDE.md de 1579a2e)",
+   "nota": "21:02 Estándar por el catálogo (solo tests/ y CLAUDE.md): sin cruce ni revisión del Jefe de proyecto. Armado: tests/e2e-esquema.test.js con tec (23/0 sobre main). Los Busca salen de LENOVO después de L-160, porque L-160 cambia CLAUDE.md § 1. · 10:27 Texto de § 5 del Arquitecto (M-1009) con correcciones: PHP de C:\\php en LENOVO, PHP 8.3.35 en el hosting, 3 intentos (no reintentos). Revisor previo 20/22 → 22/22 (13 y 19). Base comprobada contra main 9179e2d de LENOVO. Simulación: aplicar.js 2/2, K2 igual, e2e-esquema 23/0, claude-md 86/0, hook v5 acepta la línea. Encolado (cmp IGUAL); la cola arranca cuando L-160 salga de fallidas\\. Borrador en claude/producto/borradores/L-161-instr-entorno-y-tec.md. · 10:31 Construido 1579a2e (run.js 95/95, e2e-esquema 23/0). Primer commit de la cola con el hook v5: aceptado con «Lote: L-161 · LM-63 · Casos de uso: técnico, sin caso de uso». Node en LENOVO v24.19.0 (E2). Pruebas y juez en la cola. · 10:32 Juez: PARCIAL. a y c en verde (95/95, N1 igual, humo-pw verde con t bajo 3 s, commit con el hook v5); b en null: E1 aplicado (aplicar.js 2/2), pero la línea de Node (E2, en prosa) no está en pruebas.json y el juez no lee CLAUDE.md. Defecto de la instrucción (Desarrollo): metí un punto en prosa dentro de un criterio que el juez no puede ver. En LENOVO, CLAUDE.md de main termina en «- **Node en LENOVO:** v24.19.0, …» y tiene 11 981 caracteres."
   }
  ],
  "riesgos": [

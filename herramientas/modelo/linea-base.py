@@ -572,6 +572,8 @@ def criterios_del_lote(texto):
     for mm in re.finditer(r"\bc\s*:\s*'([a-z]\d?)'([^{}]*)", gsec):
         casos[mm.group(1)] = 'N3' if re.search(r"nivel\s*:\s*'N3'", mm.group(2)) else 'N2'
     hay_tests = bool(re.search(r'^## Tests en `?tests/', texto, re.M)) or bool(re.search(r'tests/[\w.-]+\.test\.js', texto))
+    _decl, _tec_decl, _ = casos_declarados(texto)
+    tecnico_lote = bool(_tec_decl and es_tecnico(texto))
     sin, nov = [], []
     for c in crits:
         ok = False
@@ -579,7 +581,9 @@ def criterios_del_lote(texto):
             nov.append(c['letra'] + (' (sin motivo)' if len(c['linea']) < 60 else ''))
             ok = True
         elif c['nivel'] == 'N2':
-            ok = casos.get(c['letra']) == 'N2'
+            # M-983: en un lote técnico (sin caso de uso, Alcance solo de herramientas/tests/docs) la cola corre humo-pw;
+            # un N2 que diga «humo» cuenta como caso aunque no haya guion propio
+            ok = casos.get(c['letra']) == 'N2' or (tecnico_lote and re.search(r'\bhumo(-pw)?\b', c['linea'], re.I) is not None)
         elif c['nivel'] == 'N3':
             ok = casos.get(c['letra']) == 'N3' or c['cowork']
         elif c['nivel'] == 'N1':

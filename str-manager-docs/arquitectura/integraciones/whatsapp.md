@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por módulo M6 del mapa (definido, no construido) (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Integración WhatsApp — STR Manager
 
 WhatsApp es el canal principal de comunicación con huéspedes y colaboradores en Colombia.

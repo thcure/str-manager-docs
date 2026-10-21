@@ -140,6 +140,39 @@ def como_vamos(fl, sem_rojas, anterior=None):
     return [('1. Espera a Carlos', f1), ('2. Tanda', f2), ('3. En cola / construido', f3), ('4. Aceptado en la tanda', f4), ('5. Pausas', f5), ('6. Semáforo', f6)]
 
 
+def arquitectura(seg, py, mapa, dec, esq, ahora):
+    """Pura (LM-67, A2–A4, A8): RT críticas sin guardia automática, deuda arquitectónica por severidad, relaciones por precisar,
+    última prueba de capacidad, lotes aceptados desde la última evaluación, decisiones con revisarCuando vencido (texto)."""
+    ea = (esq or {}).get('arquitectura') or {}; gr = ea.get('guardiasRT') or {}
+    auto = set(gr.get('automaticas') or []); crit = set(gr.get('criticas') or [])
+    reglas = (mapa or {}).get('reglas', [])
+    sin_g = [r.get('id') for r in reglas if not isinstance(r.get('guardia'), dict)]
+    crit_sin = [r.get('id') for r in reglas if r.get('id') in crit and isinstance(r.get('guardia'), dict) and r['guardia'].get('tipo') not in auto]
+    rel = (mapa or {}).get('relaciones', []); por_prec = sum(1 for r in rel if (r.get('tipo') or 'por-precisar') == 'por-precisar')
+    dts = [d for d in seg.get('dts', []) if d.get('arquitectura') and d.get('estado') in ('abierta', 'programada')]
+    incs = [i for i in seg.get('incs', []) if i.get('causaRaiz') == 'arquitectura' and i.get('estado') == 'abierto']
+    por_sev = collections.Counter((d.get('severidad') or '?') for d in dts)
+    ev = (py or {}).get('evaluacionesArquitectura') or []
+    ult = max((e.get('fecha') or '' for e in ev), default=None)
+    import re as _re
+    acept = [c for c in seg.get('cambios', []) if _re.fullmatch(r'L-\d+', str(c.get('lote') or '')) and c.get('tipo') != 'modelo' and c.get('estado') in ('aceptado', 'cerrado') and str(c.get('fecha') or '') > (ult or '')]
+    cap = (ea.get('capacidad') or {}).get('ultimaCorrida')
+    return {'rtSinGuardia': sin_g, 'rtCriticasSinAutomatica': crit_sin, 'relacionesPorPrecisar': por_prec, 'relaciones': len(rel),
+            'deuda': {'abiertas': [d.get('id') for d in dts], 'porSeveridad': dict(por_sev), 'incAbiertos': [i.get('id') for i in incs]},
+            'ultimaPruebaCapacidad': cap, 'ultimaEvaluacion': ult, 'lotesDesdeEvaluacion': len(acept), 'evaluacionPendiente': len(acept) >= int(((ea.get('deuda') or {}).get('evaluacion') or {}).get('fichaAvisaA', 20)),
+            'decisiones': len((dec or {}).get('decisiones', [])), 'decisionesConDeuda': [d.get('id') for d in (dec or {}).get('decisiones', []) if 'deuda' in str(d.get('estado') or '')]}
+
+
+def semaforo_arquitectura(a):
+    """Pura (LM-67 §6): filas de arquitectura; (valor, ok)."""
+    if not a: return {}
+    alta = sum(v for k, v in a['deuda']['porSeveridad'].items() if k in ('alto', 'crítico'))
+    return {'RT críticas sin guardia automática': (len(a['rtCriticasSinAutomatica']), len(a['rtCriticasSinAutomatica']) == 0),
+            'deuda arquitectónica alta o crítica': (alta, alta == 0),
+            'última prueba de capacidad': (a['ultimaPruebaCapacidad'] or 'nunca', bool(a['ultimaPruebaCapacidad'])),
+            'lotes desde la última evaluación de arquitectura': (a['lotesDesdeEvaluacion'], not a['evaluacionPendiente'])}
+
+
 def semaforo(sem_m, cuarentena_n):
     """Pura: las cuatro filas de §6 contra sus umbrales (None = sin dato)."""
     filas = {}
@@ -182,12 +215,15 @@ def main(argv):
     dis = carga(os.path.join(raiz, 'interno', 'diseno.json')) if os.path.exists(os.path.join(raiz, 'interno', 'diseno.json')) else {}
     men = carga(os.path.join(raiz, 'interno', 'mensajes.json')).get('mensajes', []) if os.path.exists(os.path.join(raiz, 'interno', 'mensajes.json')) else []
     fl = flujo(seg, py, dis, men, datetime.datetime.now(), esq if 'esq' in dir() else {})
-    out = {'semana': semana, 'semaforo': semaforo(sem_m, cuar), 'semaforoIncidentes': semaforo_incidentes(inc), 'semaforoFlujo': semaforo_flujo(fl), 'flujo': fl, 'incidentes': inc, 'escapes': esc, 'dora': dora(seg.get('cambios', []), seg.get('incs', []), semana), 'tendenciaInc': tendenciaInc(seg.get('incs', []), semana),
+    mapa_ = carga(os.path.join(raiz, 'interno', 'mapa-modulos.json')) if os.path.exists(os.path.join(raiz, 'interno', 'mapa-modulos.json')) else {}
+    dec_ = carga(os.path.join(raiz, 'interno', 'arquitectura', 'decisiones.json')) if os.path.exists(os.path.join(raiz, 'interno', 'arquitectura', 'decisiones.json')) else {}
+    arq = arquitectura(seg, py, mapa_, dec_, esq if 'esq' in dir() else {}, datetime.datetime.now())
+    out = {'semana': semana, 'semaforo': semaforo(sem_m, cuar), 'semaforoIncidentes': semaforo_incidentes(inc), 'semaforoFlujo': semaforo_flujo(fl), 'semaforoArquitectura': semaforo_arquitectura(arq), 'flujo': fl, 'arquitectura': arq, 'incidentes': inc, 'escapes': esc, 'dora': dora(seg.get('cambios', []), seg.get('incs', []), semana), 'tendenciaInc': tendenciaInc(seg.get('incs', []), semana),
            'riesgosResiduales': {'esencialesSinGuion': tr.get('casosEsencialesSinGuion'), 'relacionesPorPrecisar': tr.get('relacionesPorPrecisar')},
            'cuarentena': {'candidatos': [{'caso': c['guion'] + ' ' + c['c'], 'alerta': c.get('alerta'), 'inmediata': c.get('inmediata'), 'ya': c.get('yaEnCuarentena')} for c in cand]},
            'bloqueos': (sem_m or {}).get('bloqueos'), 'desviaciones': (sem_m or {}).get('desviaciones'),
            'palabrasClave': {'desconocidas': gu.get('palabrasDesconocidas'), 'sinUso': gu.get('palabrasSinUso')} if 'referenciaCruzada' in gu else 'foto sin palabras clave (tomar con guiones-e2e.js v2)'}
-    rojas = [k for d in (out['semaforo'], out['semaforoIncidentes'], out['semaforoFlujo']) for k, (v, okk) in d.items() if v is not None and not okk]
+    rojas = [k for d in (out['semaforo'], out['semaforoIncidentes'], out['semaforoFlujo'], out['semaforoArquitectura']) for k, (v, okk) in d.items() if v is not None and not okk]
     out['rojas'] = rojas
     if '--como-vamos' in argv:
         ant = carga(argv[argv.index('--anterior') + 1]) if '--anterior' in argv else None
@@ -205,6 +241,9 @@ def main(argv):
         print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
     for k, (v, ok) in out['semaforoFlujo'].items():
         print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
+    for k, (v, ok) in out['semaforoArquitectura'].items():
+        print('- %s: %s %s' % (k, v, '✓' if ok else '✗ fuera de umbral'))
+    print('- arquitectura (A2–A4): RT sin guardia %s · críticas sin automática %s · relaciones por precisar %d/%d · deuda arquitectónica %s %s · INC de arquitectura abiertos %s · decisiones %d (con deuda: %s) · última evaluación %s' % (arq['rtSinGuardia'] or 'ninguna', arq['rtCriticasSinAutomatica'] or 'ninguna', arq['relacionesPorPrecisar'], arq['relaciones'], arq['deuda']['abiertas'] or 'ninguna', arq['deuda']['porSeveridad'], arq['deuda']['incAbiertos'] or 'ninguno', arq['decisiones'], arq['decisionesConDeuda'] or 'ninguna', arq['ultimaEvaluacion'] or 'nunca'))
     if 'error' not in fl:
         m_ = fl['metricas']
         print('- flujo (F8, informativo): %s aceptados en 7 días · en cola mediana %s min · entrega REQ listo→aceptado mediana %s d · %s en curso (edad media %s h; %s sin edad) · %s a Carlos pendientes · %s días en pausa · lista: %s filas · tanda abierta: %s' % (m_['salida'], m_['enColaMinMediana'] if m_['enColaMinMediana'] is not None else '—', m_['entregaDiasMediana'] if m_['entregaDiasMediana'] is not None else '—', m_['enCurso'], m_['edadMediaEnCursoHoras'] if m_['edadMediaEnCursoHoras'] is not None else '—', m_['enCursoSinEdad'], m_['aCarlosPendientes'], m_['diasEnPausa'], m_['filasTrabajo'], fl['tanda']['id'] if fl['tanda'] else 'ninguna'))

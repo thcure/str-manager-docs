@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por la línea base del módulo (interno/linea-base/*.json, explorador) y claude/arquitectura/mapa-str.md (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # M3 — Mantenimiento
 
 **Sprint:** 3 · **Estado:** 📋 Planificado (no iniciado)

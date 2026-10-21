@@ -49,7 +49,7 @@ for m in modulos:
     for a in m.get('actores', []):
         if a not in AID: err('M2 actor', m['id'], f'actor «{a}» no existe')
     if m.get('estado') not in ('construido', 'parcial', 'definido', 'no-existe'): err('M2 estado', m['id'], f'estado «{m.get("estado")}» no permitido')
-    if m.get('familia') not in ('operativo', 'transversal', 'interno'): err('M2 familia', m['id'], f'familia «{m.get("familia")}» no permitida')
+    if m.get('familia') not in ('operativo', 'transversal', 'interno', 'fabrica'): err('M2 familia', m['id'], f'familia «{m.get("familia")}» no permitida (operativo · transversal · interno · fabrica, A7 LM-67)')
     r = m.get('riesgo') or {}
     if not (1 <= int(r.get('probabilidad', 0)) <= 3 and 1 <= int(r.get('impacto', 0)) <= 3): err('M2 riesgo', m['id'], 'probabilidad e impacto van de 1 a 3')
 for r in relaciones:

@@ -478,6 +478,65 @@ if _F and _ef and os.path.exists(os.path.join(RAIZ, 'interno/proyecto.json')):
                 avi('F6 PT', 'plan', p_.get('id'), 'activo sin ningún ítem en trabajo[] ni sinItemsPorque')
         if p_.get('estado') == 'cerrado' and not (p_.get('cierre') or p_.get('leccion')): avi('F6 PT', 'plan', p_.get('id'), 'cerrado sin cierre ni lección (BAI11.09)')
 
+# LM-67 (ARQUITECTURA-v1, A1/A2/A4/A5/A7/A8; MJ-17 proceso 6): registro de decisiones, RT con guardia, deuda arquitectónica,
+# una fuente por vista, frontera fábrica/producto, el INC de arquitectura vuelve al registro. Todo AVISO.
+_ea = E.get('arquitectura') or {}
+if _ea:
+    try:
+        _dec = json.load(open(os.path.join(RAIZ, 'interno/arquitectura/decisiones.json'), encoding='utf-8'))
+        _adrs = _dec.get('decisiones', [])
+        _camp = (_ea.get('decisiones') or {}).get('camposMinimos', [])
+        _est = (_ea.get('decisiones') or {}).get('estados', [])
+        for a in _adrs:
+            fal = [c for c in _camp if not a.get(c)]
+            if fal: avi('A1 decisión', 'adr', a.get('id'), 'ADR sin ' + ', '.join(fal))
+            es = str(a.get('estado') or '')
+            if es and not any(es == x or (x.endswith('ADR-n') and es.startswith(x[:-5])) for x in _est): avi('A1 decisión', 'adr', a.get('id'), f'estado {es!r} fuera de {_est}')
+            if a.get('archivo') and not os.path.exists(os.path.join(RAIZ, a['archivo'])): avi('A1 decisión', 'adr', a.get('id'), 'archivo no existe: ' + a['archivo'])
+            if a.get('capa') not in ('producto', 'fábrica'): avi('A7 frontera', 'adr', a.get('id'), 'capa debe ser producto o fábrica')
+        _adr_ids = {a.get('id') for a in _adrs}
+        import glob as _g
+        for f in _g.glob(os.path.join(RAIZ, 'str-manager-docs/decisiones/ADR-*.md')):
+            if os.path.basename(f)[:7] not in _adr_ids: avi('A1 decisión', 'adr', os.path.basename(f), 'archivo de ADR sin fila en decisiones.json')
+    except Exception as ex: avi('A1 decisión', 'archivo', 'interno/arquitectura/decisiones.json', f'no se pudo leer: {ex}')
+    # A8: INC de arquitectura cerrado desde la instalación sin referencia a ADR o DT
+    _desdeA = _ea.get('desde', '9999')
+    for i in seg.get('incs', []):
+        if i.get('causaRaiz') != 'arquitectura' or i.get('estado') != 'cerrado': continue
+        ci = i.get('cierre') if isinstance(i.get('cierre'), dict) else {}
+        if str(ci.get('fecha') or '')[:10] < _desdeA: continue
+        txt = json.dumps({k: i.get(k) for k in ('decision', 'cierre', 'destino')}, ensure_ascii=False)
+        if not re.search(r'\b(ADR|DT)-\d+\b', txt): avi('A8 arquitectura', 'incidente', i.get('id'), 'INC de arquitectura cerrado sin referencia a un ADR o a una DT arquitectura (decision.ref o cierre)')
+    # A2: RT con guardia
+    try:
+        _mmj = json.load(open(os.path.join(RAIZ, 'interno/mapa-modulos.json'), encoding='utf-8'))
+        _gr = _ea.get('guardiasRT') or {}; _auto = set(_gr.get('automaticas') or []); _crit = set(_gr.get('criticas') or [])
+        for r in _mmj.get('reglas', []):
+            g = r.get('guardia')
+            if not isinstance(g, dict) or g.get('tipo') not in (_gr.get('tipos') or []): avi('A2 guardia', 'regla', r.get('id'), 'RT sin guardia {tipo, ref} (tipos: ' + ', '.join(_gr.get('tipos') or []) + ')'); continue
+            if r.get('id') in _crit and g.get('tipo') not in _auto and not re.search(r'\bDA-\d+\b', str(g.get('ref') or '')):
+                avi('A2 guardia', 'regla', r.get('id'), 'RT crítica con guardia «%s» y sin riesgo aceptado (DA-n en ref): prueba automática pendiente' % g.get('tipo'))
+        for mo in _mmj.get('modulos', []):
+            if not mo.get('familia'): avi('A7 frontera', 'modulo', mo.get('id'), 'módulo sin familia (operativo · transversal · interno · fabrica)')
+        _cap = _ea.get('capacidad') or {}
+        if not _cap.get('ultimaCorrida'): avi('A2 guardia', 'regla', 'RT-25', 'prueba de capacidad nunca corrida (spec de ráfaga, LM-68): línea de partida')
+    except Exception as ex: avi('A2 guardia', 'archivo', 'interno/mapa-modulos.json', f'no se pudo leer: {ex}')
+    # A4: deuda arquitectónica
+    _lista = set((_ea.get('deuda') or {}).get('lista') or [])
+    for d in seg.get('dts', []):
+        if d.get('id') in _lista and d.get('estado') in ('abierta', 'programada') and not d.get('arquitectura'):
+            avi('A4 deuda', 'deuda', d.get('id'), 'deuda de arquitectura sin arquitectura: true (pasada de Desarrollo, LM-67)')
+        if d.get('arquitectura') and d.get('estado') in ('abierta', 'programada') and not (d.get('dueno') and (d.get('plazo') or d.get('aceptadaPor'))):
+            avi('A4 deuda', 'deuda', d.get('id'), 'deuda de arquitectura sin dueño o plazo/aceptadaPor')
+    # A5: fuentes históricas marcadas
+    _fu = _ea.get('fuentes') or {}
+    import glob as _g2
+    for pat in _fu.get('historicos') or []:
+        for f in _g2.glob(os.path.join(RAIZ, pat)):
+            try: primera = open(f, encoding='utf-8').read(400)
+            except Exception: continue
+            if 'Histórico' not in primera and 'Historico' not in primera: avi('A5 fuente', 'archivo', os.path.relpath(f, RAIZ), 'documento de agosto sin la marca «Histórico · sustituido por …»')
+
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
 try:

@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por claude/arquitectura/mapa-str.md § Externos (CAL, iCal) (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Integración Booking.com — STR Manager
 
 ---

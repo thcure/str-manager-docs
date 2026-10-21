@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por claude/arquitectura/mapa-str.md vista 3 e interno/mapa-modulos.json › relaciones (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Flujos Cross-Módulo — STR Manager
 
 Flujos de trabajo que atraviesan más de un módulo. Estos flujos son los que demuestran el valor real del sistema como plataforma integrada, no como conjunto de herramientas sueltas.

@@ -1,7 +1,7 @@
 # ADR-005 — localStorage como capa de datos en el prototipo
 
 **Fecha:** 2026-08-24
-**Estado:** Aceptada (temporal — fase de prototipo)
+**Estado:** Sustituida por ADR-001 (21-oct-2026, LM-67): la copia local del navegador es caché (RT-4, RT-21); la fuente de verdad es MySQL vía `/api/col`. Se conserva como historia del prototipo.
 
 ---
 

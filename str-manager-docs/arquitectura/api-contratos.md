@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por interno/linea-base/*.json (rutas por módulo) y claude/arquitectura/mapa-str.md vista 3 (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # API Contratos — STR Manager
 
 Base URL: `https://app.apartamentosbucaramanga.com/str-api/`

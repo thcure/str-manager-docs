@@ -1112,7 +1112,7 @@
   {
    "id": "PRJ",
    "nombre": "Grupo Proyecto (interno)",
-   "familia": "interno",
+   "familia": "fabrica",
    "estado": "construido",
    "que": "Seg. Proyecto, Marco, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura: leen los JSON de `str-manager-docs/interno/` por GitHub raw; no escriben en la base del STR. B8 (proxy al servicio del modelo) pendiente.",
    "paginas": [
@@ -1162,12 +1162,13 @@
     "probabilidad": 2,
     "impacto": 1,
     "motivo": "Solo lo ve el admin; no toca datos del negocio; cambia con cada tablero."
-   }
+   },
+   "nota": "ARQUITECTURA-v1 A7 (LM-67): pieza de la fábrica dentro del repo del STR; su arquitectura se diseña con la capa de proyectos (ADR-008/009); en el explorador va en gris y sus relaciones con el producto cuentan como «terceros»."
   },
   {
    "id": "MOD",
    "nombre": "Servicio del modelo (/modelo/api)",
-   "familia": "interno",
+   "familia": "fabrica",
    "estado": "construido",
    "que": "API aparte en `fabrica.` con base propia (esquema 3): salud, eco, migrar, cargar (reemplazo por tabla), credenciales por rol, lectura por tabla y export. Lo usan la cola del Arquitecto y el flujo de GitHub; ningún usuario del STR.",
    "paginas": [
@@ -1212,7 +1213,8 @@
     "probabilidad": 1,
     "impacto": 1,
     "motivo": "Aislado del producto (base y sitio aparte); solo la fábrica lo usa."
-   }
+   },
+   "nota": "ARQUITECTURA-v1 A7 (LM-67): pieza de la fábrica dentro del repo del STR; su arquitectura se diseña con la capa de proyectos (ADR-008/009); en el explorador va en gris y sus relaciones con el producto cuentan como «terceros»."
   },
   {
    "id": "OP",
@@ -3131,7 +3133,14 @@
     "API"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "guardia de escritura de pw + cuenta zz-verif-pruebas (LM-35, DA-47)",
+    "automatica": true,
+    "critica": true,
+    "n2Orden": 2
+   }
   },
   {
    "id": "RT-2",
@@ -3140,7 +3149,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "guardia de red/escritura de pw (LM-35); solo ids zz-verif-",
+    "automatica": true,
+    "critica": true
+   }
   },
   {
    "id": "RT-3",
@@ -3150,7 +3165,13 @@
     "SRV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "pw 0.5.29 corta rutas de copia/terceros con datos zz",
+    "automatica": true,
+    "critica": false
+   }
   },
   {
    "id": "RT-4",
@@ -3159,7 +3180,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisor previo (un dato, una fuente)",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-5",
@@ -3172,7 +3199,14 @@
     "INV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisor previo; N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 4
+   }
   },
   {
    "id": "RT-6",
@@ -3186,7 +3220,14 @@
     "CAL"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisión de Diseño; N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 3
+   }
   },
   {
    "id": "RT-7",
@@ -3198,7 +3239,13 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisión de código",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-8",
@@ -3210,7 +3257,13 @@
     "SH"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "ninguna",
+    "ref": "el corte no está activo (T-12 por crear); al activarse: tarea programada + ensayo DT-42",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-9",
@@ -3220,7 +3273,13 @@
     "HK"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "lectura de hPanel/Drive",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-10",
@@ -3231,7 +3290,14 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 5
+   }
   },
   {
    "id": "RT-11",
@@ -3242,7 +3308,13 @@
     "SH"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "—",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-12",
@@ -3251,7 +3323,13 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "procedimiento de respaldo (claude/marco/procedimiento-respaldo-corte-2026-10.md)",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-13",
@@ -3262,7 +3340,13 @@
     "SRV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "prueba",
+    "ref": "tests/ de roles (PT-7)",
+    "automatica": true,
+    "critica": false
+   }
   },
   {
    "id": "RT-14",
@@ -3277,7 +3361,14 @@
     "POR"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "prueba",
+    "ref": "tests/ (403 por rol × acción); N2 pendiente, primera de la lista",
+    "automatica": true,
+    "critica": false,
+    "n2Orden": 1
+   }
   },
   {
    "id": "RT-15",
@@ -3287,7 +3378,13 @@
     "POR"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "—",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-16",
@@ -3299,7 +3396,13 @@
     "SRV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "sesiones de pw (LM-51) vigilan la renovación en pruebas",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-17",
@@ -3310,7 +3413,14 @@
     "POR"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 6
+   }
   },
   {
    "id": "RT-18",
@@ -3321,7 +3431,13 @@
     "MOD"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "plantilla secretos.md; revisión; RT-18 sin guardia automática",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-19",
@@ -3331,7 +3447,13 @@
     "API"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "GET /api/diagnostico a mano; spec de ráfaga desde LM-68",
+    "automatica": false,
+    "critica": true
+   }
   },
   {
    "id": "RT-20",
@@ -3340,7 +3462,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "cola",
+    "ref": "hook stop-check (?v=, CLAUDE.md) + P4 aplicar.js «Versión:» (K1)",
+    "automatica": true,
+    "critica": true
+   }
   },
   {
    "id": "RT-21",
@@ -3350,7 +3478,13 @@
     "API"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "—",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-22",
@@ -3361,7 +3495,13 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "guardia de pw corta /api/*/cron y sync-ical",
+    "automatica": true,
+    "critica": false
+   }
   },
   {
    "id": "RT-23",
@@ -3370,7 +3510,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "cola",
+    "ref": "probar-lote rechaza crítico sin DA-n/LM-n y cruce",
+    "automatica": true,
+    "critica": true
+   }
   },
   {
    "id": "RT-24",
@@ -3379,7 +3525,32 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "cola",
+    "ref": "ruta.js: regresión por la ruta del lote; humo",
+    "automatica": true,
+    "critica": true
+   }
+  },
+  {
+   "id": "RT-25",
+   "titulo": "Sobre de capacidad v1",
+   "modulos": [
+    "SRV",
+    "API",
+    "HK",
+    "INV",
+    "K3"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md",
+   "prueba": "ráfaga",
+   "guardia": {
+    "tipo": "ninguna",
+    "ref": "prueba de ráfaga nunca corrida; spec de pw desde LM-68",
+    "automatica": false,
+    "critica": true
+   }
   }
  ],
  "infraestructura": [
@@ -4340,6 +4511,11 @@
    "fecha": "2026-10-21",
    "lote": "L-160, L-161",
    "cambio": "L-160 (hook v5, LM-64; 9179e2d, commit a mano de Carlos) y L-161 (CLAUDE.md § 5 entorno y tec en tests/e2e-esquema.test.js; 1579a2e): herramientas de la fábrica y documentación; sin cambios en el mapa."
+  },
+  {
+   "fecha": "2026-10-21",
+   "lote": "LM-67",
+   "cambio": "ARQUITECTURA-v1: reglas[] con guardia {tipo, ref, automatica, critica, n2Orden}; RT-25 añadida; PRJ y MOD pasan a familia «fabrica» (frontera ADR-008/009); índice de decisiones en interno/arquitectura/decisiones.json (ADR-001…015)."
   }
  ],
  "lineaBaseHasta": "L-126"

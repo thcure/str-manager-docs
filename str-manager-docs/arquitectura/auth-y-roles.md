@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por RT-13, RT-14, RT-16 en claude/arquitectura/reglas-transversales.md; ADR-013 y ADR-015 (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Autenticación y Roles — STR Manager
 
 ---

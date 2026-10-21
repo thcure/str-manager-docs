@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por RT-1 y RT-2 en claude/arquitectura/reglas-transversales.md; ADR-014 (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Multi-tenant y Modelo de Suscripción — STR Manager
 
 ---

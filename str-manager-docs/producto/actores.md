@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por interno/mapa-modulos.json › actores y claude/arquitectura/mapa-str.md vista 0 (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Actores del Sistema — STR Manager
 
 Todo actor que interactúa con el sistema, directa o indirectamente. Cada actor tiene un propósito claro, permisos definidos y una experiencia diseñada para su contexto.

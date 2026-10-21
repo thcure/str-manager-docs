@@ -7,7 +7,7 @@
   --bg:#eef1f3; --surface:#ffffff; --surface-2:#f7f9fa; --fg:#182230; --muted:#5b6b7a; --line:#d3dbe2; --line-strong:#a9b6c1;
   --accent:#0f766e; --accent-ink:#0b5a54; --accent-soft:#d9efec; --amber:#b45309;
   --ok:#2f8f5b; --warn:#c7861a; --crit:#c0392b; --ok-soft:#e1f2e8; --warn-soft:#fbeedb; --crit-soft:#f9e1de;
-  --op:#1d4ed8; --tr:#0f766e; --in:#6b7280; --ac:#7c3aed; --ex:#b45309;
+  --op:#1d4ed8; --tr:#0f766e; --in:#6b7280; --fa:#9ca3af; --ac:#7c3aed; --ex:#b45309;
   --font-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
   --font-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -17,12 +17,12 @@
   --bg:#0f1519; --surface:#171f26; --surface-2:#1d2730; --fg:#e6ebef; --muted:#93a1ad; --line:#2a3640; --line-strong:#3f4f5c;
   --accent:#2dd4bf; --accent-ink:#8ff0e3; --accent-soft:#123b38; --amber:#f0a44a;
   --ok:#4ade80; --warn:#f2b35a; --crit:#f87171; --ok-soft:#133224; --warn-soft:#3a2a12; --crit-soft:#3d1a18;
-  --op:#7ea2ff; --tr:#2dd4bf; --in:#9aa5b1; --ac:#c4a5ff; --ex:#f0a44a; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}}
+  --op:#7ea2ff; --tr:#2dd4bf; --in:#9aa5b1; --fa:#6b7280; --ac:#c4a5ff; --ex:#f0a44a; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1519; --surface:#171f26; --surface-2:#1d2730; --fg:#e6ebef; --muted:#93a1ad; --line:#2a3640; --line-strong:#3f4f5c;
   --accent:#2dd4bf; --accent-ink:#8ff0e3; --accent-soft:#123b38; --amber:#f0a44a;
   --ok:#4ade80; --warn:#f2b35a; --crit:#f87171; --ok-soft:#133224; --warn-soft:#3a2a12; --crit-soft:#3d1a18;
-  --op:#7ea2ff; --tr:#2dd4bf; --in:#9aa5b1; --ac:#c4a5ff; --ex:#f0a44a; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}
+  --op:#7ea2ff; --tr:#2dd4bf; --in:#9aa5b1; --fa:#6b7280; --ac:#c4a5ff; --ex:#f0a44a; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-body);display:flex;flex-direction:column;min-height:100%}
@@ -154,7 +154,7 @@ const EC = Object.fromEntries(D.infraestructura.map((e) => [e.id, e]));
 const REQ = Object.fromEntries(D.reqs.map((r) => [r.id, r]));
 const GUI = Object.fromEntries(D.guiones.map((g) => [g.archivo, g]));
 const COB = D.cobertura;
-const FAM = {operativo: ['Operación', 'var(--op)'], transversal: ['Transversal', 'var(--tr)'], interno: ['Interno', 'var(--in)']};
+const FAM = {operativo: ['Operación', 'var(--op)'], transversal: ['Transversal', 'var(--tr)'], interno: ['Interno', 'var(--in)'], fabrica: ['Fábrica (ADR-008: su arquitectura va con la capa de proyectos)', 'var(--fa)']};
 const equiv = {'REQ-K3b': 'REQ-K3-2', 'REQ-K3c': 'REQ-K3-3'};
 
 // ---------- posiciones del mapa (bandas) ----------
@@ -191,7 +191,7 @@ function curva(a, b) {
 }
 
 // ---------- estado ----------
-let vista = 'mapa', sel = null, filtroFam = new Set(['operativo', 'transversal', 'interno']), verEdges = true;
+let vista = 'mapa', sel = null, filtroFam = new Set(['operativo', 'transversal', 'interno', 'fabrica']), verEdges = true;
 
 function render() {
   const v = $('#vista');

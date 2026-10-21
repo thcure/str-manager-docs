@@ -535,6 +535,8 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
     v3_ok = (tecnico or tec) and not cr['criterios'] or (bool(cr['criterios']) and not cr['sinCaso'])
     hk = hooks_del_lote(texto)
     out['hooks'] = hk
+    dc = decision_del_lote(texto)
+    out['decision'] = dc
     if como_json:
         print(json.dumps(out, ensure_ascii=False, indent=1))
     else:
@@ -548,7 +550,27 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
         print('V3: ' + cr['veredicto'] + ('' if v3_ok else ' → no encolar') + ((' · no verificables: ' + ', '.join(cr['noVerificables'])) if cr['noVerificables'] else ''))
         if hk['tocaHooks']:
             print('Hooks (INC-206): ' + hk['veredicto'] + ('' if hk['ok'] else ' → no encolar'))
-    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] else 2
+        if dc['areaSensible']:
+            print('Decisión (A6): ' + dc['veredicto'] + ('' if dc['ok'] else ' → no encolar'))
+    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] and dc['ok'] else 2
+
+
+AREAS_SENSIBLES = ['api/config/', 'database.php', 'auth', 'jwt', 'retencion', 'retención', 'cron', 'sync-ical', 'drive', 'secrets', 'secretos']
+
+
+def decision_del_lote(texto):
+    """Pura (ARQUITECTURA-v1 A6, LM-67): si el Alcance toca un área sensible (cómo se guarda, conecta, autentica, sincroniza, borra
+    o respalda un dato), la cabecera trae «Decisión: ADR-n | DA-n | ninguna (motivo)». Devuelve {areaSensible, decision, ok, veredicto}."""
+    m = re.search(r'^Alcance:(.*)$', texto, re.M)
+    alcance = (m.group(1) if m else '').lower()
+    areas = [a for a in AREAS_SENSIBLES if a in alcance]
+    cab = texto[:4000]
+    md = re.search(r'Decisi[óo]n:\s*((?:ADR-\d+|DA-\d+)(?:\s*[,y·]\s*(?:ADR-\d+|DA-\d+))*|ninguna\s*\(([^)\n]{3,})\))', cab)
+    if not areas:
+        return {'areaSensible': [], 'decision': md.group(1) if md else None, 'ok': True, 'veredicto': 'sin área sensible'}
+    if not md:
+        return {'areaSensible': areas, 'decision': None, 'ok': False, 'veredicto': 'toca ' + ', '.join(areas) + ' y la cabecera no trae «Decisión: ADR-n | DA-n | ninguna (motivo)»'}
+    return {'areaSensible': areas, 'decision': md.group(1), 'ok': True, 'veredicto': 'toca ' + ', '.join(areas) + ' con «Decisión: ' + md.group(1) + '»'}
 
 
 HOOKS_RE = re.compile(r'\.claude/|\.claude\\|tests/hooks\.test\.js|tests\\hooks\.test\.js|guard-bash\.js|stop-check\.js|ctx\.js')

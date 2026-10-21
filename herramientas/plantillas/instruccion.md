@@ -16,7 +16,7 @@ Riesgo: <bajo | medio | alto> (<R-n>). Mitigación: <una frase>.
 ¿Datos personales o dinero?: <no | sí: …> · ¿Normativa?: <no | sí: …> · ¿Toca el modelo (capa Marco)?: <no | sí> (sí = la CLI no lo ejecuta y termina sin commit; un lote del modelo LM-n que solo toque archivos de str-manager lleva «no (lote del modelo LM-n, DA-n y cruce de Carlos)»)
 Reversión: <git revert <hash> + despliegue | script | …>
 Commit: <la CLI | Carlos (obligatorio si el Alcance nombra `.claude/` o `tests/hooks.test.js`: la CLI no puede commitear su hook, INC-206; la instrucción trae entonces los comandos para Carlos —copia con md5, `git add`, `git commit -m` con la línea «Lote:», `git push`— y no la sección «El commit de este lote»; `linea-base.py --lote` lo corta)>
-Origen: <M-n…>. Requerimiento: `<ruta del REQ>` (<criterios n–m>). Decisión: <DA-n | no aplica>.
+Origen: <M-n…>. Requerimiento: `<ruta del REQ>` (<criterios n–m>). Decisión: <ADR-n | DA-n | ninguna (motivo)> (ARQUITECTURA-v1 A6: obligatoria con ese formato si el Alcance toca `api/config/`, `database.php`, auth/jwt, retención, cron, `sync-ical`, Drive o secretos; `--lote` lo corta; un DA-n aquí va también en la línea «Lote:» del commit (hook v5), un ADR-n no).
 Depende de: <lotes previos que deben estar aceptados | archivos que deben existir | ninguno>
 Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién los crea | permisos por rol | hora/fecha | ninguna>
 ¿Quién más depende de lo que cambia?: <listas blancas, filtros, respaldos, páginas que leen el mismo dato, tests que lo suponen; si no hay, «nadie»>

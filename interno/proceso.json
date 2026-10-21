@@ -484,7 +484,7 @@
    {
     "id": "redactado",
     "fase": "BAI03",
-    "que": "El Chat Desarrollo escribió la instrucción con herramientas/plantillas/instruccion.md y pasó el revisor previo (plantillas/revisor-previo.md, 22 puntos (LM-59, LM-60, LM-62 V4: 21 rige desde L-161), subagente; el 13 comprueba que cada criterio tiene nivel y que el guion N2 está en la sección Pruebas; el 15, que las reglas transversales RT-n citadas existen y ninguna está en conflicto; el 16, que el lote declara qué módulos y relaciones del mapa cambia — LM-36); si es crítico, la cabecera cita la DA-n y el cruce ya hechos en definido y lleva el «ok» de Diseño por el buzón. No vuelve a Carlos salvo que la instrucción amplíe el alcance o suba el riesgo del REQ: entonces Diseño repite el cruce.",
+    "que": "El Chat Desarrollo escribió la instrucción con herramientas/plantillas/instruccion.md y pasó el revisor previo (plantillas/revisor-previo.md, 23 puntos (LM-59, LM-60, LM-62 V4: 21 rige desde L-161), subagente; el 13 comprueba que cada criterio tiene nivel y que el guion N2 está en la sección Pruebas; el 15, que las reglas transversales RT-n citadas existen y ninguna está en conflicto; el 16, que el lote declara qué módulos y relaciones del mapa cambia — LM-36); si es crítico, la cabecera cita la DA-n y el cruce ya hechos en definido y lleva el «ok» de Diseño por el buzón. No vuelve a Carlos salvo que la instrucción amplíe el alcance o suba el riesgo del REQ: entonces Diseño repite el cruce.",
     "dueno": "desarrollo",
     "raci": {
      "R": "desarrollo",
@@ -1154,7 +1154,7 @@
   },
   "criteriosEntrada": [
    "REQ «listo» (Q1–Q8) o INC con caso de uso",
-   "revisión previa 20/20 (21 con tec; 22 desde LM-65: conexiones nuevas/s)",
+   "revisión previa 20/20 (21 con tec; 22 desde LM-65: conexiones nuevas/s; 23 desde LM-67: cambia una decisión)",
    "linea-base.py --lote rc 0 (C2, V3)",
    "crítico ⇒ DA-n y cruce, o emergencia con la línea del Jefe de proyecto",
    "N1 completo con el punto que cubre cada caso; en un fix, el caso que reproduce el INC",
@@ -1306,5 +1306,55 @@
    "esquema, guardias, ficha": "Arquitecto"
   },
   "primeraPruebaReal": "triage con Carlos de los 16 REQ definidos sin lote (Diseño, en M-858) antes de levantar la pausa de producto"
+ },
+ "arquitectura": {
+  "version": "ARQUITECTURA-v1",
+  "lm": "LM-67",
+  "documento": "claude/marco/plan-arquitectura.md (v2)",
+  "frontera": "arquitectura del STR como está; la de la fábrica y la multiproyecto con la capa de proyectos (ADR-008/009); frontera dibujada en el mapa (PRJ, MOD familia fábrica) y en claude/marco/mapa-fabrica.md",
+  "normas": [
+   "COBIT APO03.02, APO03.05, BAI03.01–.02, APO04.06, BAI10",
+   "ISO/IEC/IEEE 42010:2022 (por conocimiento): interesados, vistas, decisiones con razón, correspondencia, evaluación",
+   "ADR (Nygard), C4 (Brown), funciones de aptitud (Ford et al.), proceso de consejo (Harmel-Law)"
+  ],
+  "controles": {
+   "A1": "registro de decisiones: ADR con estado, decisor, capa, revisarCuando; índice interno/arquitectura/decisiones.json; plantilla adr.md; qué merece ADR",
+   "A2": "cada RT con guardia {tipo, ref}; críticas con guardia automática o DA; RT con N2 en orden de Diseño (RT-14, 1, 6, 5, 10, 17); prueba de ráfaga de RT-25 (spec de pw, LM-68)",
+   "A3": "relaciones por precisar: el lote que las cruza las precisa; pasada de 10 por tanda; trinquete C6",
+   "A4": "deuda arquitectónica (dts[].arquitectura) con dueño y plazo; en trabajo[] por severidad; evaluación por evento disparada por el JP (20 lotes, módulo que cambia de estado, INC arquitectura alto/crítico); ficha avisa a los 20",
+   "A5": "una fuente por vista; documentos de agosto marcados históricos; README con las vistas vigentes",
+   "A6": "«Decisión: ADR-n | DA-n | ninguna (motivo)» en la cabecera (campo existente); --lote rc 2 en áreas sensibles; punto 23 del revisor; «Toca decisión:» en el REQ; proceso de consejo",
+   "A7": "frontera fábrica/producto: familia fabrica en el mapa; capa en el índice de decisiones; mapa-fabrica.md vista 0",
+   "A8": "el INC de arquitectura se cierra con referencia a un ADR o a una DT arquitectura"
+  },
+  "criteriosEntrada": [
+   "decisión bien tomada: contexto con dato, ≥2 opciones, decisor y fecha, estado, qué cambia, revisarCuando"
+  ],
+  "criteriosSalida": [
+   "«Decisión:» coherente con lo que toca",
+   "RT citadas existen y ninguna en conflicto",
+   "fila del mapa (M7) con las relaciones por precisar que cruzó, precisadas",
+   "si cambió una decisión, ADR con estado antes del commit"
+  ],
+  "finalizacionTanda": [
+   "RT críticas sin guardia automática",
+   "deuda arquitectónica alta o crítica sin decisión",
+   "relaciones por precisar (trinquete)",
+   "última prueba de capacidad",
+   "lotes desde la última evaluación"
+  ],
+  "herramientas": {
+   "validar.py": "avisos A1/A2/A4/A5/A7/A8; mapa.py admite familia fabrica",
+   "linea-base.py --lote": "Decisión (A6) rc 2 en áreas sensibles",
+   "ficha-semanal.py": "bloque arquitectura y cuatro filas del semáforo",
+   "plantillas": "adr.md, instruccion.md (Decisión), requerimiento.md (Toca decisión), revisor-previo.md punto 23"
+  },
+  "quienEscribe": {
+   "ADR e índice": "Arquitecto",
+   "dts[].arquitectura": "Desarrollo",
+   "evaluacionesArquitectura[] en proyecto.json": "Jefe de proyecto (la media página la escribe el Arquitecto)",
+   "DA de arquitectura": "Diseño con Carlos"
+  },
+  "primeraPruebaReal": "DT-49 (JWT) como DA de Carlos; primer lote con «Decisión:» en área sensible"
  }
 }

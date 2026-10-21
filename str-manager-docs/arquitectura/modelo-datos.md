@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por claude/arquitectura/datos-ciclo-vida.md, interno/linea-base/*.json y RT-4/RT-5/RT-21 en claude/arquitectura/reglas-transversales.md (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Modelo de Datos — STR Manager
 
 Todo dato de negocio va a **MySQL en Hostinger**. Firebase solo maneja autenticación y perfiles de rol.

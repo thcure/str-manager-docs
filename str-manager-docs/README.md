@@ -1,5 +1,7 @@
 # STR Manager — Documentación del Sistema
 
+> **Vistas vigentes de la arquitectura (ARQUITECTURA-v1, 21-oct-2026):** sistema y módulos en `claude/arquitectura/mapa-str.md`; funcionalidades en `interno/linea-base/*.json` (explorador); relaciones en `interno/mapa-modulos.json`; infraestructura en `claude/arquitectura/infraestructura-configuracion.md`; datos en `claude/arquitectura/datos-ciclo-vida.md`; reglas en `claude/arquitectura/reglas-transversales.md`; decisiones en `decisiones/ADR-*.md` con índice `interno/arquitectura/decisiones.json`; fábrica (vista 0) en `claude/marco/mapa-fabrica.md`. Los documentos de agosto de este repositorio (`arquitectura/`, `modulos/`, `producto/`) son **históricos**: cada uno dice en su primera línea qué los sustituye.
+
 > **Este repositorio es la fuente de verdad del sistema.**
 > Todo lo que el sistema es, hace y debe hacer está aquí, en lenguaje humano.
 > A partir de este repositorio se puede reconstruir el sistema completo,

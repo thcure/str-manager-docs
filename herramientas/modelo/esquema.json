@@ -1,5 +1,5 @@
 {
- "version": "0.7",
+ "version": "0.8",
  "fecha": "2026-10-21",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
@@ -595,6 +595,138 @@
     "días en pausa en la ventana",
     "ritmo de salida (ítems aceptados por semana)"
    ]
+  }
+ },
+ "arquitectura": {
+  "lm": "LM-67 (ARQUITECTURA-v1; MJ-17 proceso 6; APO03.02/.05, BAI03, APO04.06; ISO/IEC/IEEE 42010 por conocimiento)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-arquitectura.md (v2, ok de Carlos 21-oct 11:42)",
+  "frontera": "arquitectura del STR como está; la de la fábrica y la multiproyecto con la capa de proyectos (ADR-008/009); PRJ y MOD son familia «fabrica» en el mapa",
+  "modo": "avisos; rc 2 de --lote solo por «Decisión:» en áreas sensibles",
+  "decisiones": {
+   "indice": "interno/arquitectura/decisiones.json",
+   "archivos": "str-manager-docs/decisiones/ADR-nnn-*.md",
+   "plantilla": "herramientas/plantillas/adr.md",
+   "estados": [
+    "propuesta",
+    "aceptada",
+    "aceptada con deuda",
+    "sustituida por ADR-n",
+    "derogada"
+   ],
+   "camposMinimos": [
+    "id",
+    "titulo",
+    "fecha",
+    "estado",
+    "decisor",
+    "capa",
+    "archivo",
+    "revisarCuando"
+   ],
+   "queMereceADR": [
+    "cómo se guarda, conecta, autentica, sincroniza, borra o respalda un dato",
+    "dependencia nueva (servicio, librería, proveedor)",
+    "regla transversal nueva o cambiada",
+    "sobre de capacidad (RT-25)",
+    "estructura de módulos"
+   ]
+  },
+  "decisionEnCabecera": {
+   "campo": "«Decisión:» al final de la línea «Origen: … Requerimiento: … Decisión:» de la instrucción (se reutiliza; la cabecera no crece)",
+   "formato": "Decisión: ADR-n | DA-n | ninguna (motivo)",
+   "areasSensibles": [
+    "api/config/",
+    "database.php",
+    "auth",
+    "jwt",
+    "retencion",
+    "cron",
+    "sync-ical",
+    "drive",
+    "secrets"
+   ],
+   "regla": "Alcance con un área sensible sin «Decisión:» con ese formato = rc 2 en --lote; un DA-n en las 20 primeras líneas va también en la línea «Lote:» del commit (hook v5); un ADR-n no se exige ahí"
+  },
+  "guardiasRT": {
+   "donde": "interno/mapa-modulos.json › reglas[].guardia {tipo, ref, automatica, critica, n2Orden}",
+   "tipos": [
+    "hook",
+    "cola",
+    "pw",
+    "validar",
+    "prueba",
+    "manual",
+    "ninguna"
+   ],
+   "automaticas": [
+    "hook",
+    "cola",
+    "pw",
+    "validar",
+    "prueba"
+   ],
+   "criticas": [
+    "RT-1",
+    "RT-2",
+    "RT-19",
+    "RT-20",
+    "RT-23",
+    "RT-24",
+    "RT-25"
+   ],
+   "regla": "RT sin guardia = aviso; RT crítica sin guardia automática ni «riesgo aceptado» (DA-n en ref) = aviso",
+   "n2Orden": "orden de Diseño (M-1035): RT-14, RT-1, RT-6, RT-5, RT-10, RT-17"
+  },
+  "capacidad": {
+   "rt": "RT-25",
+   "prueba": "spec de pw de solo lectura (LM-68): 12 GET de colecciones en paralelo en zz-verif-pruebas con sesión colab, /api/diagnostico antes y después; lanzado por la cola dentro de la corrida una vez por tanda de 10 lotes aceptados o al tocar database.php/str-api.js; nunca en hora de turnos ni en «negocio»",
+   "rojo": [
+    "1040",
+    "1203",
+    "500 «Base de datos no disponible»"
+   ],
+   "ultimaCorrida": null
+  },
+  "deuda": {
+   "marca": "dts[].arquitectura: true (en INC se deriva de causaRaiz «arquitectura»)",
+   "lista": [
+    "DT-39",
+    "DT-46",
+    "DT-49",
+    "DT-51",
+    "DT-53"
+   ],
+   "evaluacion": {
+    "disparaJP": [
+     "cada 20 lotes aceptados",
+     "módulo que cambia de estado en el mapa",
+     "INC de arquitectura alto o crítico"
+    ],
+    "fichaAvisaA": 20,
+    "registro": "proyecto.json › evaluacionesArquitectura[] {fecha, disparador, lotesDesdeAnterior, nota} (JP) o nota en el ADR"
+   }
+  },
+  "relaciones": {
+   "regla": "A3: lote aceptado cuya ruta cruza una relación «por-precisar» la precisa en su fila del historial (tipo, dato, regla o «sin regla»); pasada del Arquitecto 10 por tanda; trinquete C6"
+  },
+  "fuentes": {
+   "vigentes": {
+    "0 sistema y 1 módulos": "claude/arquitectura/mapa-str.md",
+    "2 funcionalidades": "interno/linea-base/*.json + explorador",
+    "3 relaciones": "interno/mapa-modulos.json",
+    "infraestructura": "claude/arquitectura/infraestructura-configuracion.md",
+    "datos": "claude/arquitectura/datos-ciclo-vida.md",
+    "reglas": "claude/arquitectura/reglas-transversales.md",
+    "decisiones": "str-manager-docs/decisiones/ + interno/arquitectura/decisiones.json",
+    "fábrica (vista 0)": "claude/marco/mapa-fabrica.md"
+   },
+   "historicos": [
+    "str-manager-docs/arquitectura/*.md",
+    "str-manager-docs/modulos/M*.md",
+    "str-manager-docs/producto/*.md"
+   ],
+   "marca": "primera línea «> Histórico (agosto-2026) · sustituido por …»"
   }
  }
 }

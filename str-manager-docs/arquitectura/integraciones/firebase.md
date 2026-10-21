@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por RT-16 y ADR-002; claude/arquitectura/infraestructura-configuracion.md (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Integración Firebase — STR Manager
 
 Firebase se usa en dos servicios con responsabilidades muy acotadas.

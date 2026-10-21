@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por interno/linea-base/CAL.json y RT-22 (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Integración iCal — STR Manager
 
 El protocolo iCal (RFC 5545) es el estándar que usan Airbnb, Booking.com y VRBO para exportar calendarios de disponibilidad. STR Manager lo usa para sincronizar reservas de todos los canales en el Calendario (M5).

@@ -1,3 +1,5 @@
+> **Histórico (agosto-2026)** · sustituido por claude/arquitectura/mapa-str.md vista 1 y el explorador de la línea base (ARQUITECTURA-v1 A5, LM-67, 21-oct-2026). Se conserva como historia; no describe el sistema actual.
+
 # Mapa de Módulos — STR Manager
 
 Todos los módulos del sistema, sus funciones principales, sus dependencias y cómo se relacionan entre sí.

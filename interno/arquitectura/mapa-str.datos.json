@@ -1,5 +1,5 @@
 {
- "generadoEn": "2026-10-20 19:15",
+ "generadoEn": "2026-10-21 11:49",
  "lineaBase": "2026-10-15",
  "codigo": {
   "version": "p5c112",
@@ -1111,7 +1111,7 @@
   {
    "id": "PRJ",
    "nombre": "Grupo Proyecto (interno)",
-   "familia": "interno",
+   "familia": "fabrica",
    "estado": "construido",
    "que": "Seg. Proyecto, Marco, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura: leen los JSON de `str-manager-docs/interno/` por GitHub raw; no escriben en la base del STR. B8 (proxy al servicio del modelo) pendiente.",
    "paginas": [
@@ -1161,12 +1161,13 @@
     "probabilidad": 2,
     "impacto": 1,
     "motivo": "Solo lo ve el admin; no toca datos del negocio; cambia con cada tablero."
-   }
+   },
+   "nota": "ARQUITECTURA-v1 A7 (LM-67): pieza de la fábrica dentro del repo del STR; su arquitectura se diseña con la capa de proyectos (ADR-008/009); en el explorador va en gris y sus relaciones con el producto cuentan como «terceros»."
   },
   {
    "id": "MOD",
    "nombre": "Servicio del modelo (/modelo/api)",
-   "familia": "interno",
+   "familia": "fabrica",
    "estado": "construido",
    "que": "API aparte en `fabrica.` con base propia (esquema 3): salud, eco, migrar, cargar (reemplazo por tabla), credenciales por rol, lectura por tabla y export. Lo usan la cola del Arquitecto y el flujo de GitHub; ningún usuario del STR.",
    "paginas": [
@@ -1211,7 +1212,8 @@
     "probabilidad": 1,
     "impacto": 1,
     "motivo": "Aislado del producto (base y sitio aparte); solo la fábrica lo usa."
-   }
+   },
+   "nota": "ARQUITECTURA-v1 A7 (LM-67): pieza de la fábrica dentro del repo del STR; su arquitectura se diseña con la capa de proyectos (ADR-008/009); en el explorador va en gris y sus relaciones con el producto cuentan como «terceros»."
   },
   {
    "id": "OP",
@@ -3120,7 +3122,14 @@
     "API"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "guardia de escritura de pw + cuenta zz-verif-pruebas (LM-35, DA-47)",
+    "automatica": true,
+    "critica": true,
+    "n2Orden": 2
+   }
   },
   {
    "id": "RT-2",
@@ -3129,7 +3138,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "guardia de red/escritura de pw (LM-35); solo ids zz-verif-",
+    "automatica": true,
+    "critica": true
+   }
   },
   {
    "id": "RT-3",
@@ -3139,7 +3154,13 @@
     "SRV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "pw 0.5.29 corta rutas de copia/terceros con datos zz",
+    "automatica": true,
+    "critica": false
+   }
   },
   {
    "id": "RT-4",
@@ -3148,7 +3169,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisor previo (un dato, una fuente)",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-5",
@@ -3161,7 +3188,14 @@
     "INV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisor previo; N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 4
+   }
   },
   {
    "id": "RT-6",
@@ -3175,7 +3209,14 @@
     "CAL"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisión de Diseño; N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 3
+   }
   },
   {
    "id": "RT-7",
@@ -3187,7 +3228,13 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "revisión de código",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-8",
@@ -3199,7 +3246,13 @@
     "SH"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "ninguna",
+    "ref": "el corte no está activo (T-12 por crear); al activarse: tarea programada + ensayo DT-42",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-9",
@@ -3209,7 +3262,13 @@
     "HK"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "lectura de hPanel/Drive",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-10",
@@ -3220,7 +3279,14 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 5
+   }
   },
   {
    "id": "RT-11",
@@ -3231,7 +3297,13 @@
     "SH"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "—",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-12",
@@ -3240,7 +3312,13 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "procedimiento de respaldo (claude/marco/procedimiento-respaldo-corte-2026-10.md)",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-13",
@@ -3251,7 +3329,13 @@
     "SRV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "prueba",
+    "ref": "tests/ de roles (PT-7)",
+    "automatica": true,
+    "critica": false
+   }
   },
   {
    "id": "RT-14",
@@ -3266,7 +3350,14 @@
     "POR"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "prueba",
+    "ref": "tests/ (403 por rol × acción); N2 pendiente, primera de la lista",
+    "automatica": true,
+    "critica": false,
+    "n2Orden": 1
+   }
   },
   {
    "id": "RT-15",
@@ -3276,7 +3367,13 @@
     "POR"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "—",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-16",
@@ -3288,7 +3385,13 @@
     "SRV"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "sesiones de pw (LM-51) vigilan la renovación en pruebas",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-17",
@@ -3299,7 +3402,14 @@
     "POR"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "N2 pendiente",
+    "automatica": false,
+    "critica": false,
+    "n2Orden": 6
+   }
   },
   {
    "id": "RT-18",
@@ -3310,7 +3420,13 @@
     "MOD"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "plantilla secretos.md; revisión; RT-18 sin guardia automática",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-19",
@@ -3320,7 +3436,13 @@
     "API"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "GET /api/diagnostico a mano; spec de ráfaga desde LM-68",
+    "automatica": false,
+    "critica": true
+   }
   },
   {
    "id": "RT-20",
@@ -3329,7 +3451,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "cola",
+    "ref": "hook stop-check (?v=, CLAUDE.md) + P4 aplicar.js «Versión:» (K1)",
+    "automatica": true,
+    "critica": true
+   }
   },
   {
    "id": "RT-21",
@@ -3339,7 +3467,13 @@
     "API"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "caso"
+   "prueba": "caso",
+   "guardia": {
+    "tipo": "manual",
+    "ref": "—",
+    "automatica": false,
+    "critica": false
+   }
   },
   {
    "id": "RT-22",
@@ -3350,7 +3484,13 @@
     "K3"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "pw",
+    "ref": "guardia de pw corta /api/*/cron y sync-ical",
+    "automatica": true,
+    "critica": false
+   }
   },
   {
    "id": "RT-23",
@@ -3359,7 +3499,13 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "cola",
+    "ref": "probar-lote rechaza crítico sin DA-n/LM-n y cruce",
+    "automatica": true,
+    "critica": true
+   }
   },
   {
    "id": "RT-24",
@@ -3368,7 +3514,32 @@
     "*"
    ],
    "fuente": "claude/arquitectura/reglas-transversales.md",
-   "prueba": "proceso"
+   "prueba": "proceso",
+   "guardia": {
+    "tipo": "cola",
+    "ref": "ruta.js: regresión por la ruta del lote; humo",
+    "automatica": true,
+    "critica": true
+   }
+  },
+  {
+   "id": "RT-25",
+   "titulo": "Sobre de capacidad v1",
+   "modulos": [
+    "SRV",
+    "API",
+    "HK",
+    "INV",
+    "K3"
+   ],
+   "fuente": "claude/arquitectura/reglas-transversales.md",
+   "prueba": "ráfaga",
+   "guardia": {
+    "tipo": "ninguna",
+    "ref": "prueba de ráfaga nunca corrida; spec de pw desde LM-68",
+    "automatica": false,
+    "critica": true
+   }
   }
  ],
  "infraestructura": [
@@ -11357,6 +11528,64 @@
     "estado": "aceptado"
    }
   ],
+  "MOD": [
+   {
+    "lote": "L-78",
+    "fecha": "2026-10-12",
+    "req": "REQ-MOD-6",
+    "resumen": "Servicio del modelo, prueba técnica B7-1: modelo/api con salud (GET) y eco (POST ≤ 4 KB), independiente de api/.",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-84",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-16)",
+    "resumen": "Servicio del modelo con base propia: ModeloDb, secrets fuera del repo, 001_inicial.sql, salud con db y schema_version, GET migrar con X-Modelo-Token (403 {error",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-87",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-20, B7-3)",
+    "resumen": "Servicio del modelo: POST /modelo/api/cargar con el token del Arquitecto (403 sin token, 422 paquete inválido con detalle); carga.php con lista blanca de 14 tab",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-88",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-21, B7-4)",
+    "resumen": "Servicio del modelo: GET estado, export, <tabla> y <tabla>/<id> con el token del Arquitecto (403 antes de conectar; credencial y schema_version → 404); lectura.",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-91",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-27a, B7-5a)",
+    "resumen": "Servicio del modelo: esquema 2 con la tabla complemento (clave archivo+clave, sin id), exportación completa (parcial:false cuando todo archivo tiene complemento",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-92",
+    "fecha": "2026-10-13",
+    "req": "REQ-MOD-6 (LM-27b, B7-5b)",
+    "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida: 403 sin cabecera sin conectar, Arquitecto sin base, hash_equals sobre credenciales vigentes, ",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-93",
+    "fecha": "2026-10-13",
+    "req": "INC-123 (LM-28)",
+    "resumen": "Servicio del modelo: extra se guarda tal cual llega en las 15 tablas (sin json_decode con true, JSON_PRESERVE_ZERO_FRACTION); la exportación del servicio devuel",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-97",
+    "fecha": "2026-10-14",
+    "req": "REQ-MOD-6 (rol carga, LM-34)",
+    "resumen": "Servicio del modelo: rol «carga» (cargar, estado, export; migrar, credenciales y tablas sueltas 403), LIMIT 8; sha opcional; tabla carga (esquema 3) con sha, ho",
+    "estado": "aceptado"
+   }
+  ],
   "SRV": [
    {
     "lote": "L-78",
@@ -11475,64 +11704,6 @@
     "fecha": "2026-10-19",
     "req": "INC-190, INC-191",
     "resumen": "Respaldo diario con temporal + renombrar y perfil_pago/permisos",
-    "estado": "aceptado"
-   }
-  ],
-  "MOD": [
-   {
-    "lote": "L-78",
-    "fecha": "2026-10-12",
-    "req": "REQ-MOD-6",
-    "resumen": "Servicio del modelo, prueba técnica B7-1: modelo/api con salud (GET) y eco (POST ≤ 4 KB), independiente de api/.",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-84",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-16)",
-    "resumen": "Servicio del modelo con base propia: ModeloDb, secrets fuera del repo, 001_inicial.sql, salud con db y schema_version, GET migrar con X-Modelo-Token (403 {error",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-87",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-20, B7-3)",
-    "resumen": "Servicio del modelo: POST /modelo/api/cargar con el token del Arquitecto (403 sin token, 422 paquete inválido con detalle); carga.php con lista blanca de 14 tab",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-88",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-21, B7-4)",
-    "resumen": "Servicio del modelo: GET estado, export, <tabla> y <tabla>/<id> con el token del Arquitecto (403 antes de conectar; credencial y schema_version → 404); lectura.",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-91",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-27a, B7-5a)",
-    "resumen": "Servicio del modelo: esquema 2 con la tabla complemento (clave archivo+clave, sin id), exportación completa (parcial:false cuando todo archivo tiene complemento",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-92",
-    "fecha": "2026-10-13",
-    "req": "REQ-MOD-6 (LM-27b, B7-5b)",
-    "resumen": "Servicio del modelo: acceso por rol (exigir con conexión diferida: 403 sin cabecera sin conectar, Arquitecto sin base, hash_equals sobre credenciales vigentes, ",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-93",
-    "fecha": "2026-10-13",
-    "req": "INC-123 (LM-28)",
-    "resumen": "Servicio del modelo: extra se guarda tal cual llega en las 15 tablas (sin json_decode con true, JSON_PRESERVE_ZERO_FRACTION); la exportación del servicio devuel",
-    "estado": "aceptado"
-   },
-   {
-    "lote": "L-97",
-    "fecha": "2026-10-14",
-    "req": "REQ-MOD-6 (rol carga, LM-34)",
-    "resumen": "Servicio del modelo: rol «carga» (cargar, estado, export; migrar, credenciales y tablas sueltas 403), LIMIT 8; sha opcional; tabla carga (esquema 3) con sha, ho",
     "estado": "aceptado"
    }
   ],
@@ -13997,6 +14168,16 @@
    "fecha": "2026-10-19",
    "lote": "L-159",
    "cambio": "L-159 (p5c112; INC-171): PR, quitar un canal con resumen y confirmación; lee `/api/col/reservas` y escribe `/api/col/reservas` y luego `/api/col/propiedades`. CAL, ⚑, aviso «Canal quitado» y «Dejar como directa»; campo nuevo `canalQuitado` en `reservas`. OP, alerta 7; `/api/tablero` deja pasar `canalQuitado` (REL-44 y REL-33). REL-91 (PR→CAL) queda precisada como datos compartidos (`reservas`). REL-21 (PR→airbnb) sin cambio de forma: los bloqueos de Airbnb se eliminan y lo marcado de otros canales sigue en la exportación. Huecos de cobertura del juez: REL-21 (el guion no lee la exportación; la N1 D1 prueba qué se elimina) y REL-22 (no la toca)."
+  },
+  {
+   "fecha": "2026-10-21",
+   "lote": "L-160, L-161",
+   "cambio": "L-160 (hook v5, LM-64; 9179e2d, commit a mano de Carlos) y L-161 (CLAUDE.md § 5 entorno y tec en tests/e2e-esquema.test.js; 1579a2e): herramientas de la fábrica y documentación; sin cambios en el mapa."
+  },
+  {
+   "fecha": "2026-10-21",
+   "lote": "LM-67",
+   "cambio": "ARQUITECTURA-v1: reglas[] con guardia {tipo, ref, automatica, critica, n2Orden}; RT-25 añadida; PRJ y MOD pasan a familia «fabrica» (frontera ADR-008/009); índice de decisiones en interno/arquitectura/decisiones.json (ADR-001…015)."
   }
  ],
  "avisos": [

@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-21 09:33",
+ "actualizadoEn": "2026-10-21 09:38",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -1786,6 +1786,28 @@
    "debioDetectarse": "verificación",
    "origen": "log/HUMO-PW-guion.json (pw 0.11.0, primera corrida en frío tras LM-62)",
    "nota": "19:33 Primera medición de V9, una sola muestra. /api/health fue la primera petición de la corrida después de horas sin uso (arranque en frío del hosting, a confirmar). En la misma corrida, /str-tablero.html 202 ms, /str-calendario.html 486 ms y /str-inventario.html 378 ms. contra «entorno» es provisional: si en las corridas siguientes /api/health sigue por encima de 3 s en caliente, pasa a «producto». Se cierra si dos humos seguidos salen por debajo del umbral. Los casos s1–s3 y w del mismo humo, en verde: pw 0.11.0 funciona (no hace falta volver a anterior). · 19:37 Humo repetido 19:35 con V9 ajustado (umbral sobre la segunda petición): t en verde, /api/health 120 ms; frío 5741 ms (solo se anota). Primer humo bajo el umbral; falta uno más para cerrar. El frío se repitió casi igual 4 min después de la corrida anterior, con el hosting recién usado: parece un costo de la primera petición de cada contexto del navegador (conexión, TLS o arranque de PHP), no que el hosting se duerma."
+  },
+  {
+   "id": "INC-206",
+   "tipo": "INC",
+   "modulo": "Fábrica (cola y hook de la CLI)",
+   "fecha": "2026-10-21",
+   "titulo": "L-160 falla sin commit: el modo automático bloquea el commit que incluye .claude/hooks/guard-bash.js («Self-Modification»), igual que en L-130; la instrucción pedía a la CLI ese commit",
+   "estado": "abierto",
+   "severidad": "medio",
+   "casoUso": "sin caso de uso",
+   "contra": "herramienta",
+   "originador": "Desarrollo",
+   "contexto": {
+    "lote": "L-160",
+    "guion": null,
+    "caso": null,
+    "tren": null
+   },
+   "causaRaiz": "proceso",
+   "debioDetectarse": "revisión previa",
+   "origen": "log/L-160-instr-hook-v5.txt (09:36)",
+   "nota": "09:38 La CLI no hizo commit ni stash (regla 9): rama claude/l160-hook-v5 con los 4 archivos del Alcance modificados y sin añadir; md5 bien; tests 95/95, hooks 38; main sigue en 255f6ff, nada subido. Ya se sabía desde L-130: la CLI no puede tocar su hook de ninguna forma y el commit lo hace Carlos (seguimiento L-130, 15/16-oct; el punto 9 del revisor previo lo dice: «los copia y commitea Carlos»). Las dos pasadas del revisor previo, la revisión del Jefe de proyecto y Desarrollo lo dieron por bueno, porque la instrucción citaba L-130 solo para la copia. Arreglo: Carlos hace el commit a mano. Destino del escape (V5): que el punto 9 del revisor previo diga explícitamente que un lote que toque .claude/ no lleva commit de la CLI."
   }
  ],
  "dts": [
@@ -15891,7 +15913,7 @@
    "categoria": "crítico",
    "resumen": "Hook de la CLI v5 (K5): el commit lleva la línea de trazabilidad «Lote · id · DA · Casos de uso»",
    "estado": "registrado",
-   "observacion": "Instrucción del Arquitecto (3.ª versión). Cruce de Carlos 20-oct 20:22 (LM-64); ok de Diseño M-977; revisor previo 21/21 (M-975, M-980); revisión previa del Jefe de proyecto M-984. Hook y test copiados a mano por Carlos (M-985). Encolado 09:33 (cmp IGUAL).",
+   "observacion": "Instrucción del Arquitecto (3.ª versión). Cruce de Carlos 20-oct 20:22 (LM-64); ok de Diseño M-977; revisor previo 21/21 (M-975, M-980); revisión previa del Jefe de proyecto M-984. Hook y test copiados a mano por Carlos (M-985). Encolado 09:33 (cmp IGUAL). 09:36 FALLO sin commit («Self-Modification»; INC-206).",
    "version": "p5c112"
   }
  ],
@@ -18272,11 +18294,11 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "Hook de la CLI v5 (K5): el commit lleva la línea de trazabilidad «Lote · id · DA · Casos de uso»",
-   "estado": "encolado",
-   "desde": "2026-10-21 09:33",
-   "esperaA": "CLI",
-   "espera": "construcción de L-160",
-   "nota": "21:02 Cola levantada solo para la fábrica (Carlos 20:50 vía M-975/M-976; Jefe de proyecto M-978): L-160 y luego L-161, uno a la vez; producto sigue en pausa. Instrucción del Arquitecto; cruce de Carlos 20-oct 20:22 (LM-64). Revisor previo 18/21 (4, 5, 6) con D1–D8, devuelto al Arquitecto. Ok de Diseño M-977. Faltan: instrucción corregida, revisión previa del Jefe de proyecto y la copia a mano de Carlos de guard-bash.js y hooks.test.js (hoy LENOVO tiene v4). · 21:16 3.ª versión: revisor previo 21/21; simulación con aplicar.js 2/2, hooks 38 OK, claude-md 86/0. Pedida la revisión del Jefe de proyecto (M-981). · 21:23 Ok del Jefe de proyecto (M-984), tras el cambio de --lote del Arquitecto (M-983). Correcciones de forma hechas; --lote rc 0. Lista para encolar en cuanto Carlos copie los dos archivos. · 2026-10-21 09:33 Carlos copió el hook v5 y su test (09:29, M-985); md5 comprobados en LENOVO (c4599989… y 8bb40025…). pw\\pruebas-v1.test.js sobre las copias de LENOVO: 228/228 (corrido aquí, no en LENOVO). Encolado (cmp IGUAL)."
+   "estado": "fallido",
+   "desde": "2026-10-21 09:38",
+   "esperaA": "Carlos",
+   "espera": "commit a mano de Carlos desde claude/l160-hook-v5 (como L-130)",
+   "nota": "21:02 Cola levantada solo para la fábrica (Carlos 20:50 vía M-975/M-976; Jefe de proyecto M-978): L-160 y luego L-161, uno a la vez; producto sigue en pausa. Instrucción del Arquitecto; cruce de Carlos 20-oct 20:22 (LM-64). Revisor previo 18/21 (4, 5, 6) con D1–D8, devuelto al Arquitecto. Ok de Diseño M-977. Faltan: instrucción corregida, revisión previa del Jefe de proyecto y la copia a mano de Carlos de guard-bash.js y hooks.test.js (hoy LENOVO tiene v4). · 21:16 3.ª versión: revisor previo 21/21; simulación con aplicar.js 2/2, hooks 38 OK, claude-md 86/0. Pedida la revisión del Jefe de proyecto (M-981). · 21:23 Ok del Jefe de proyecto (M-984), tras el cambio de --lote del Arquitecto (M-983). Correcciones de forma hechas; --lote rc 0. Lista para encolar en cuanto Carlos copie los dos archivos. · 2026-10-21 09:33 Carlos copió el hook v5 y su test (09:29, M-985); md5 comprobados en LENOVO (c4599989… y 8bb40025…). pw\\pruebas-v1.test.js sobre las copias de LENOVO: 228/228 (corrido aquí, no en LENOVO). Encolado (cmp IGUAL). · 09:36 FALLO sin commit: el modo automático bloqueó el commit con el hook («Self-Modification», INC-206). Rama claude/l160-hook-v5 con los 4 archivos sin commit; main 255f6ff. Como en L-130, el commit lo hace Carlos. Pasos al Jefe de proyecto y a Carlos."
   },
   {
    "vista": "siguiente",

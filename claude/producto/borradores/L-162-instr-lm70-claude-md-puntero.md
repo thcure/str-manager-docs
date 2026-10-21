@@ -10,7 +10,7 @@ Casos de uso: técnico, sin caso de uso
 Riesgo: bajo (R-1): si `ctx.js` dejara de inyectar las reglas, la CLI quedaría sin ellas; mitigación: `ctx.js` no se toca, `hooks.test.js` (38) las cubre, y el cierre de este lote cita la primera línea inyectada («Reglas fijas recibidas al arrancar: sí»).
 ¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (lote del modelo LM-70, cruce de Carlos citado; solo toca `CLAUDE.md` y `tests/` de este repositorio)
 Reversión: `git revert <hash>` (vuelve § 1 completo y el test v1).
-Origen: `claude/marco/plan-conocimiento.md` Cn2 (Arquitecto; LM-69). Requerimiento: `interno/lotes-modelo/LM-70.md`. Decisión: ninguna (lote del modelo LM-70: solo documentación de la CLI y su test; no cambia ADR ni DA; cruce de Carlos 21-oct 12:46).
+Origen: `claude/marco/plan-conocimiento.md` Cn2 (Arquitecto). Requerimiento: `interno/lotes-modelo/LM-70.md`. Decisión: ninguna (lote del modelo LM-70: solo documentación de la CLI y su test; no cambia ADR ni DA; cruce de Carlos 21-oct 12:46).
 Depende de: nada (L-160 y L-161 ya están en `main`; el hook v5 rige: el commit lleva la línea de trazabilidad, § 4).
 Precondiciones para verificar: ninguna (sin guion N2; la cola corre humo-pw por ser lote de solo documentación y tests).
 ¿Quién más depende de lo que cambia?: toda sesión de la CLI (lee `CLAUDE.md` al arrancar); `tests/run.js` corre `claude-md.test.js`; el lote estándar de docs que viene después (§ 0, § 3, § 5, cabeceras «Al día hasta L-n») parte de este estado; `herramientas/hooks-cli/claude-md.test.js` del repo de documentos queda como fuente (escritor: Arquitecto).

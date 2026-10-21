@@ -16753,10 +16753,50 @@
    "req": "LM-69",
    "categoria": "estándar",
    "resumen": "Partir housekeeping.md, servidor-php.md y tests-y-despliegue.md en tres docs nuevos (secciones enteras, md5 en el N1)",
-   "estado": "instalado",
-   "observacion": "Encolado 14:18 (cmp IGUAL). Revisor 23/23 (subagente). Orden del Jefe de proyecto M-1064/M-1066. Construido be8a550 14:21 (96/96).",
+   "estado": "parcial",
+   "observacion": "Encolado 14:18 (cmp IGUAL). Revisor 23/23 (subagente). Orden del Jefe de proyecto M-1064/M-1066. Construido be8a550 14:21 (96/96). Juez 14:23: PARCIAL (c sin evidencia en pruebas.json).",
    "version": "p5c112",
-   "hash": "be8a550"
+   "hash": "be8a550",
+   "aceptacion": {
+    "lote": "L-164",
+    "hash": "be8a550",
+    "fecha": "2026-10-21",
+    "horaBogota": "14:23",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. node tests/run.js en verde con docs-partidos.test.js y claude-md.test.js OK",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 96/96 archivos OK (n1.ok=true)"
+     },
+     {
+      "c": "b. Cada par se aplicó literal y el N1 es igual al de la instrucción",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "aplicación literal 9/9: D1, D2, D3, P1, P2, P3, P4, P5 y T1 todos ok (aplicacion.resumen=\"aplicación literal 9/9\"); tests/docs-partidos.test.js igual byte a byte (n1Literal.resumen=\"tests/docs-partidos.test.js igual\")"
+     },
+     {
+      "c": "c. El commit lleva «Lote: L-164 · LM-69 · Casos de uso: técnico, sin caso de uso»",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "pruebas.json solo trae el hash del commit (be8a550, campo commit); no trae la salida de git log -1 --format=%B ni verificación del texto de trazabilidad"
+     },
+     {
+      "c": "d. La CLI y la cola siguen andando (humo de la cola, sin guion propio)",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "OK s1 si: /api/me 200 · rol admin | OK w si: alta de zz-verif-humo-pw: 200 | si: baja de zz-verif-humo-pw: 200 | escrituras en serie (máx. 1 en vuelo) | OK s2 si: /api/me 200 · rol operador | OK t si: frío 5502 ms · /api/health 124 ms · /str-tablero.html 281 ms · /str-calendario.html 557 ms · /str-inventario.html 395 ms · todas bajo 3000 ms (el frío solo se anota) | OK s3 si: /api/me 200 · rol colaborador"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "c. El commit lleva «Lote: L-164 · LM-69 · Casos de uso: técnico, sin caso de uso»",
+      "motivo": "la cola no registró en log\\L-164-pruebas.json la salida de git log -1 --format=%B (solo el hash be8a550); el juez no ejecuta comandos para verificarlo por otra vía"
+     }
+    ]
+   }
   }
  ],
  "esquema": {
@@ -19358,9 +19398,9 @@
    "categoria": "estándar",
    "riesgo": "R-1",
    "resumen": "Partir housekeeping.md, servidor-php.md y tests-y-despliegue.md por secciones enteras en docs nuevos con su fila en § 2 y un N1 con la huella de cada sección movida",
-   "estado": "construido",
-   "esperaA": "verificador",
-   "desde": "2026-10-21 14:22",
+   "estado": "parcial",
+   "esperaA": "Arquitecto",
+   "desde": "2026-10-21 14:27",
    "estados": [
     {
      "estado": "previsto",
@@ -19377,9 +19417,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-21 14:21"
+    },
+    {
+     "estado": "parcial",
+     "desde": "2026-10-21 14:23"
     }
    ],
-   "nota": "13:58 Segundo lote de la orden M-1064 (M-1066): se redacta cuando L-163 esté aceptado, con sus Busca sacados de lo que deje L-163. · 14:18 Script determinista (valida las tres partes y después escribe) mueve 5 secciones enteras: housekeeping.md → housekeeping-datos.md (3), servidor-php.md → servidor-php-datos.md (1), tests-y-despliegue.md → modelo.md (1); 5 filas del índice; N1 tests/docs-partidos.test.js con el md5 de cada sección (0/26 en HEAD, 26/26 con el lote). Revisor previo (subagente) 23/23 con 2 recomendaciones aplicadas. Simulación desde el texto de la instrucción: claude-md 100/0, aplicar.js K1 9/9 y K2 igual. Encolado (cmp IGUAL; cola v11 con la línea de revisión). · 14:21 Construido be8a550 (run.js 96/96; docs-partidos 26/0, claude-md 103/0; script con sus tres líneas; reproduce 0 OK en HEAD; ningún «No hecho»). Espera el veredicto."
+   "nota": "13:58 Segundo lote de la orden M-1064 (M-1066): se redacta cuando L-163 esté aceptado, con sus Busca sacados de lo que deje L-163. · 14:18 Script determinista (valida las tres partes y después escribe) mueve 5 secciones enteras: housekeeping.md → housekeeping-datos.md (3), servidor-php.md → servidor-php-datos.md (1), tests-y-despliegue.md → modelo.md (1); 5 filas del índice; N1 tests/docs-partidos.test.js con el md5 de cada sección (0/26 en HEAD, 26/26 con el lote). Revisor previo (subagente) 23/23 con 2 recomendaciones aplicadas. Simulación desde el texto de la instrucción: claude-md 100/0, aplicar.js K1 9/9 y K2 igual. Encolado (cmp IGUAL; cola v11 con la línea de revisión). · 14:21 Construido be8a550 (run.js 96/96; docs-partidos 26/0, claude-md 103/0; script con sus tres líneas; reproduce 0 OK en HEAD; ningún «No hecho»). Espera el veredicto. · 14:23 Parcial (juez: a, b N1 y d humo en verde; c sin evidencia: pruebas.json no copia el mensaje del commit; en L-162 y L-163 el mismo criterio se dio por bueno por el hook v5). Evidencia: .git/COMMIT_EDITMSG de LENOVO (14:21, el commit be8a550) trae «Lote: L-164 · LM-69 · Casos de uso: técnico, sin caso de uso» en su línea propia. Cierre del criterio c pedido al Arquitecto por evidencia cruzada (M-1083)."
   }
  ],
  "riesgos": [
@@ -19599,7 +19643,7 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-21 14:22",
+  "fecha": "2026-10-21 14:27",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
@@ -19617,8 +19661,8 @@
    {
     "ref": "L-164",
     "que": "Partir housekeeping.md, servidor-php.md y tests-y-despliegue.md por secciones enteras (N1 con la huella de cada sección)",
-    "estado": "construido (be8a550), espera veredicto",
-    "siguientePaso": "Cuando la CLI termine: veredicto; aceptado → fila del mapa al Arquitecto, cierre de la tanda T-2 de docs al JP"
+    "estado": "parcial (be8a550): criterio c por evidencia cruzada",
+    "siguientePaso": "Con el cierre del Arquitecto (M-1083): aceptado, fila del mapa y cierre de T-2 al JP"
    }
   ],
   "esperando": [
@@ -19645,6 +19689,12 @@
     "que": "Medición de 7 días de uso real sin «intento 3» en api/logs/error.log (cierre de INC-128) y conteo de tickets en solo lectura (INC-142)",
     "ref": "M-1006 · M-1008",
     "desde": "2026-10-21"
+   },
+   {
+    "de": "Arquitecto",
+    "que": "Cerrar el criterio c de L-164 por evidencia cruzada (COMMIT_EDITMSG) y que la cola copie el mensaje del commit en pruebas.json",
+    "ref": "M-1083",
+    "desde": "2026-10-21 14:27"
    }
   ],
   "dondeEsta": {

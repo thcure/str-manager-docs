@@ -268,6 +268,59 @@ if _ei:
         if cu and cu != 'sin caso de uso' and not re.fullmatch(r'CU-[A-Z0-9]+-\d+\.\d+', cu):
             err('V6 incidente', 'incidente', i.get('id'), f'casoUso={cu!r}: CU-X-n.m o «sin caso de uso»')
 
+# LM-63 (CONSTRUCCIÓN-v1, K4/K6/K8/K9): catálogo de cambio, cierre de INC con evidencia, emergencia y reloj de reversión.
+_cat = E.get('categorias') or {}
+_cie = (E.get('incidente') or {}).get('cierre') or {}
+if _cat:
+    _desdeK = _cat.get('desde', '9999')
+    _senales = [s.lower() for s in (_cat.get('critico') or {}).get('senalesAlcance', [])]
+    _noEst = [s.lower() for s in (_cat.get('estandar') or {}).get('alcanceNoPuede', [])]
+    _desdeLote = int(num_lote(_cat.get('desdeLote') or 'L-0')) if str(num_lote(_cat.get('desdeLote') or 'L-0')).isdigit() else 0
+    _hay = lambda s, texto: re.search(r'(?<![\wáéíóú])' + re.escape(s) + r'(?![\wáéíóú])', texto) is not None
+    for l in lotes:
+        _n = num_lote(l.get('lote')); _n = int(_n) if str(_n).isdigit() else None
+        if _n is not None and _n < _desdeLote: continue   # el catálogo rige desde su instalación; lo anterior no se rehace
+        if _n is None and l.get('estado') not in ('previsto', 'en redacción', 'redactado', 'encolado', 'espera DA'): continue
+        cat = str(l.get('categoria') or l.get('categoriaPrevista') or '').lower()
+        texto = ' '.join(str(l.get(k) or '') for k in ('nota', 'resumen', 'alcance', 'planTrabajo', 'vista')).lower()
+        if not cat or not texto: continue
+        if cat.startswith('est') and any(_hay(s, texto) for s in _noEst):
+            avi('K4 categoría', 'lote', l.get('lote'), 'estándar pero el texto nombra ' + ', '.join(s for s in _noEst if _hay(s, texto)) + ': revisa (catálogo LM-63)')
+        if cat.startswith('normal') and any(_hay(s, texto) for s in _senales):
+            avi('K4 categoría', 'lote', l.get('lote'), 'normal pero el texto nombra ' + ', '.join(s for s in _senales if _hay(s, texto))[:120] + ': ¿crítico? (catálogo LM-63; ante la duda, Diseño)')
+        em = l.get('emergencia')
+        if isinstance(em, dict):
+            if not (em.get('inc') and em.get('mensaje')): err('K8 emergencia', 'lote', l.get('lote'), 'emergencia sin inc o sin mensaje del Jefe de proyecto')
+            c = next((c for c in cambios if num_lote(c.get('lote')) == num_lote(l.get('lote'))), None)
+            if l.get('estado') in ('aceptado', 'cerrado') and not re.search(r'DA-\d+', json.dumps(c or {}, ensure_ascii=False) + json.dumps(l, ensure_ascii=False)):
+                avi('K8 emergencia', 'lote', l.get('lote'), 'emergencia aceptada sin DA-n: la DA y el cruce van en 24 h')
+if _cie:
+    _desdeC = _cie.get('desde', '9999')
+    for i in seg.get('incs', []):
+        if i.get('estado') != 'cerrado': continue
+        ci = i.get('cierre')
+        if isinstance(ci, str):   # forma vieja: texto libre «AAAA-MM-DD: lote n …»; vale si es anterior a LM-63
+            mfe = re.search(r'\d{4}-\d{2}-\d{2}', ci)
+            if not mfe or mfe.group(0) < _desdeC: continue
+            err('K9 cierre', 'incidente', i.get('id'), 'cierre como texto; desde LM-63 es {lote, prueba} | {prueba} | {decision, motivo}'); continue
+        cerradoEn = str(i.get('cerradoEn') or (ci.get('fecha') if isinstance(ci, dict) else '') or '')
+        if not cerradoEn and ci is None: continue   # cerrado antes de LM-63 (sin fecha de cierre ni cierre): no se rehace
+        if cerradoEn and cerradoEn[:10] < _desdeC: continue
+        if not isinstance(ci, dict):
+            err('K9 cierre', 'incidente', i.get('id'), 'cerrado sin cierre {lote, prueba} | {prueba} | {decision, motivo} (LM-63)'); continue
+        contra = i.get('contra')
+        if ci.get('decision'):
+            if not ci.get('motivo'): err('K9 cierre', 'incidente', i.get('id'), 'cierre por decisión sin motivo')
+        elif contra in ('entorno', 'herramienta'):
+            if not ci.get('prueba'): err('K9 cierre', 'incidente', i.get('id'), 'cierre sin prueba (entorno/herramienta exige la prueba)')
+        else:
+            if not (ci.get('lote') and ci.get('prueba')): err('K9 cierre', 'incidente', i.get('id'), 'cierre sin lote o sin prueba (producto/guion/REQ exigen los dos)')
+    # K6: un INC alto o crítico abierto con reloj de reversión vencido (> 1 h desde el aviso, sin decisión)
+    for i in seg.get('incs', []):
+        r = i.get('reversion')
+        if isinstance(r, dict) and r.get('aviso') and not (r.get('decision')):
+            avi('K6 reversión', 'incidente', i.get('id'), 'aviso de reversión a las ' + str(r.get('aviso')) + ' sin decisión (revert o fix) registrada: meta ≤ 30 min, tope 1 h')
+
 # LM-55 (MJ-15 fase B): todo lote de producto aceptado después de la línea base del mapa deja su fila en
 # mapa-modulos.json › historial (una fila de cambio o la fila «sin cambios en el mapa» que lo nombra). Sin eso, error M7.
 try:

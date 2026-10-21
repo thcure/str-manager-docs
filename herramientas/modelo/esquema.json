@@ -1,5 +1,5 @@
 {
- "version": "0.4",
+ "version": "0.5",
  "fecha": "2026-10-11",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
@@ -285,6 +285,81 @@
    "V6: campos mínimos ausentes = error desde «desde»",
    "contra = REQ → el INC pasa a Diseño y cuenta como volatilidad Q7 (M-947)",
    "contra = producto nunca va a cuarentena: INC normal y el lote se rechaza (M-940)"
-  ]
+  ],
+  "cierre": {
+   "desde": "2026-10-21",
+   "lm": "LM-63 (K9; ISO/IEC 12207 7.2.8)",
+   "que": "un INC pasa a «cerrado» solo con cierre: (a) {lote, prueba} si contra es producto, guion o REQ; (b) {prueba} si contra es entorno o herramienta; (c) {decision, motivo} cuando lo cierra producto (DA-n o M-n de Diseño). Si tenía caso en cuarentena, además 20 corridas en verde. Los INC cerrados antes de «desde» no se rehacen.",
+   "prueba": "caso del guion o N1 con la letra, «humo», o «uso real: <quién lo vio>»"
+  }
+ },
+ "categorias": {
+  "desde": "2026-10-21",
+  "lm": "LM-63 (CONSTRUCCIÓN-v1, K4; redacción de crítico: Diseño M-959)",
+  "estandar": {
+   "que": "preautorizado (ITIL cambio estándar): sin ok de Diseño, sin cruce, fase mínima de V7",
+   "cuando": [
+    "solo guiones (tests/e2e, herramientas/pw)",
+    "docs/claude y documentación",
+    "textos y CSS sin lógica",
+    "herramientas de la fábrica que no tocan la cola ni los hooks",
+    "solo ?v="
+   ],
+   "alcanceNoPuede": [
+    "api/",
+    "database.php",
+    "secrets",
+    "modelo/",
+    "migrate",
+    "schema_version",
+    ".claude/",
+    "ejecutar-cola"
+   ]
+  },
+  "normal": {
+   "que": "evaluado cada vez: revisor previo y, si el Jefe de proyecto lo pide, su lectura; sin cruce con Carlos"
+  },
+  "critico": {
+   "que": "DA-n y cruce previo con Carlos; ok de Diseño; fase completa. Ante la duda, se pregunta a Diseño.",
+   "lista": [
+    "datos reales fuera de zz-verif-: escribir, borrar o dejar de guardar, también de forma automática (corte mensual, respaldo, sincronización)",
+    "quién ve y quién cambia: permisos y roles, exposición de datos y no solo escritura (DA-59, INC-158)",
+    "dinero",
+    "lo que sale a canales, huéspedes o terceros: exportación iCal, portal, enlace de registro, mensajes, portería (DA-51)",
+    "obligaciones legales: TRA, SIRE, retención Ley 1581",
+    "migración de base de datos (schema_version)",
+    "scripts que corren solos (cron, tareas programadas, cola)",
+    "secretos"
+   ],
+   "senalesAlcance": [
+    "api/",
+    "database.php",
+    "secrets",
+    "migrate",
+    "schema_version",
+    "sync-ical",
+    "ical",
+    "portal",
+    "registro",
+    "export",
+    "respaldo",
+    "corte",
+    "cron",
+    "tarea programada",
+    "permiso",
+    "rol",
+    "tra",
+    "sire",
+    "pago",
+    "precio",
+    "cobro"
+   ]
+  },
+  "meta": "crítico ≤ 20 % de los lotes: meta a medir un mes, no puerta (M-958)",
+  "emergencia": {
+   "que": "BAI06.02 (M-958): solo un INC alto o crítico en producción; la línea del Jefe de proyecto en el buzón nombra el INC y por qué no espera; Desarrollo corre su revisión previa normal; la revisión del Jefe de proyecto, la DA y el cruce con Carlos van después, en 24 h; plan[].emergencia = {inc, mensaje, desde}",
+   "plazoHoras": 24
+  },
+  "desdeLote": "L-160"
  }
 }

@@ -6,6 +6,7 @@ Reglas de uso: el borrador va **sin número** (el número se asigna al encolar);
 # instr — <REQ-X-n / INC-n / DT-n>: <título en una línea>
 Categoría: **<estándar | normal | crítico>** (<por qué; para crítico: DA-n y «cruce previo con Carlos: fecha hora, dónde»>)
 Alcance: <archivos y rutas exactos> · `?v=<actual>` → `<nuevo>` en <dónde> · `schema_version` <igual | n → m> · <sin cambios de base de datos | migración: …>
+Versión: `?v=` <actual> → <nuevo> en todos los archivos que cargan `str-api.js` y en las dos líneas de `CLAUDE.md` · `schema_version` <igual | n → m> (K1: la cola lo comprueba con grep y en `/api/health`)
 Impacto: <qué cambia para el usuario; qué INC/DT cierra>
 Regresión: <opcional (pw 0.6.0, LM-39b): normalmente NO se escribe: la cola corre los guiones de la **ruta** del lote (§ Ruta de pruebas) más los centinelas si el lote es crítico o toca la capa común. Solo para forzar: ids de módulo o zonas, p. ej. `HK, K3` o `inventario`; `todas`; o `ninguna` con el porqué (un lote de solo guiones no la necesita: la cola corre su guion y el humo)>
 Reglas transversales que toca: <RT-n, RT-m (LM-36: `claude/arquitectura/reglas-transversales.md`); «ninguna» solo si el lote no toca datos, permisos, archivos, retención ni conexiones. Una RT «en conflicto» = el lote no se encola>
@@ -24,7 +25,7 @@ Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién lo
 
 ## 1..n. Cambios — un apartado por archivo o pieza, en imperativo, con lo que **no** debe tocarse.
 
-## Tests en `tests/` — qué funciones puras se extraen y prueban (los criterios N1); réplicas PHP con el patrón del repo; `node tests/run.js` en verde. Si hay guion N2: «copia el bloque de *Guion N2* a `tests/e2e/<REQ-o-INC>.spec.js` sin cambiar nada; no lo corras ni lo arregles: si crees que falla, dilo en el cierre». `tests/e2e/` entra en Alcance.
+## Tests en `tests/` — **el archivo completo** de cada `tests/<x>.test.js` nuevo o cambiado («Contenido completo:», bloque literal; la CLI lo copia byte a byte y la cola lo compara, K2); cada caso nombra el punto que cubre (P1, C3…); en un lote **fix**, el caso que reproduce el INC (falla en `HEAD`, pasa con el lote) y la CLI lo dice en el cierre («Reproduce: …»). Réplicas PHP con el patrón del repo; `node tests/run.js` en verde. Si hay guion N2: «copia el bloque de *Guion N2* a `tests/e2e/<REQ-o-INC>.spec.js` sin cambiar nada; no lo corras ni lo arregles: si crees que falla, dilo en el cierre». `tests/e2e/` entra en Alcance.
 
 ## `CLAUDE.md` — filas que cambian; INC-37 con la versión nueva.
 

@@ -1124,5 +1124,51 @@
    "Alcance = solo lo que cambia: ruta.js corta en «no toques» y descarta los tramos de versión (`?v=`, STR_API_VERSION, schema_version); así un lote de páginas no «toca» los 13 módulos (Desarrollo M-521).",
    "Regresión por ruta (LM-39b, pw 0.6.0): la cola elige los guiones con la misma ruta.js del mapa; pw\\mapa-modulos.json y pw\\ruta.js son copias que el Arquitecto refresca con cada instalación de pw y al aceptarse un lote con «Mapa:»; pw\\centinelas.json (escritor único: Arquitecto): entra un guion cuando atrapa un INC real de la app, sale a los 30 días sin atrapar otro (revisión semanal)."
   ]
+ },
+ "construccion": {
+  "version": "CONSTRUCCIÓN-v1",
+  "lm": "LM-63",
+  "documento": "claude/marco/plan-construccion.md",
+  "normas": [
+   "ISO/IEC 12207:2008 7.1.5, 7.1.6, 6.4.7, 6.4.10, 7.2.3, 7.2.4, 7.2.6, 7.2.8"
+  ],
+  "cobit": [
+   "BAI03.03",
+   "BAI03.05",
+   "BAI03.06",
+   "BAI06.01",
+   "BAI06.02",
+   "BAI06.03",
+   "BAI06.04"
+  ],
+  "controles": {
+   "K1": "aplicación literal en P4 (pw\\aplicar.js): Busca/Pon, Contenido completo, Versión: por grep, schema_version; diferencia → bloqueado salvo «No hecho» en el commit",
+   "K2": "N1 completo en la instrucción, copiado byte a byte y comparado en P4; cada caso nombra su punto; un fix reproduce el INC",
+   "K3": "tamaño del lote en tres columnas (código sin ?v=, pruebas, versión); > 400 líneas o > 8 archivos de código = aviso; umbral con un mes de datos",
+   "K4": "catálogo de cambio: estándar preautorizado, normal, crítico con lista cerrada (esquema.json › categorias); crítico ≤ 20 % como meta a medir",
+   "K5": "línea de trazabilidad en el commit exigida por guard-bash.js (LM aparte por la cola; cruce de Carlos 20-oct)",
+   "K6": "vuelta atrás: aviso del despertador, decisión en ≤ 30 min (tope 1 h) entre revert (lote por la cola) y fix; el veredicto trae el comando y los lotes encima",
+   "K7": "cuatro llaves DORA en ficha-semanal.py como bloque informativo del semáforo",
+   "K8": "entorno declarado en CLAUDE.md (lote de Desarrollo); emergencia: INC alto/crítico en producción, línea del Jefe de proyecto, DA y cruce en 24 h, plan[].emergencia",
+   "K9": "cierre de INC con evidencia: {lote, prueba} | {prueba} (entorno/herramienta) | {decision, motivo} (producto); tendencia en la ficha"
+  },
+  "criteriosEntrada": [
+   "REQ «listo» (Q1–Q8) o INC con caso de uso",
+   "revisión previa 20/20 (21 con tec)",
+   "linea-base.py --lote rc 0 (C2, V3)",
+   "crítico ⇒ DA-n y cruce, o emergencia con la línea del Jefe de proyecto",
+   "N1 completo con el punto que cubre cada caso; en un fix, el caso que reproduce el INC",
+   "tamaño dentro del umbral o motivo escrito; un solo objetivo",
+   "migración ⇒ respaldo del día verificado"
+  ],
+  "criteriosSalida": [
+   "un commit en main con push",
+   "tests en verde y CLAUDE.md/docs al día (hooks)",
+   "?v= nuevo",
+   "mensaje con Hecho / No hecho, declarados vs tocados y línea de trazabilidad",
+   "aplicación literal n/n y N1 igual byte a byte en P4",
+   "líneas y archivos registrados"
+  ],
+  "estado": "LM-63 parcial: K1–K3 instalados (pw 0.12.0); K4, K6, K8 (proceso), K9 instalados en esquema/validar/plantillas; K5 y CLAUDE.md por la cola tras la pausa; K7 en ficha-semanal.py"
  }
 }

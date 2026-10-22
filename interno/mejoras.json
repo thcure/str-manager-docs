@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-20 18:17",
+ "actualizadoEn": "2026-10-21",
  "escritor": "Arquitecto (capa Marco, LM-38)",
  "descripcion": "Registro de mejoras del modelo y del producto (APO01.11, APO11.05): qué se propuso, qué se decidió y qué asumimos mientras no se hace. Un dato, una fuente: los problemas viven en situaciones/ (G-n), las lecciones en BAI08-l; aquí solo la mejora y su decisión.",
  "proceso": {
@@ -813,6 +813,10 @@
     {
      "fecha": "2026-10-21",
      "que": "18:59 numeración por orden de ejecución decidida por Carlos (0 línea base · 1 requerimientos · 2 flujo · 3 construcción · 4 verificación · 5 incidentes · 6 arquitectura · 7 riesgo y medición · 8 conocimiento); aplicada en los dos artefactos y en los títulos de los planes; artefacto nuevo «Diagramas de la fábrica STR» (macro + vista A y B por proceso)."
+    },
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 nombres de la 12207 para los nueve procesos y marco SDLC × 12207 aplicados (Carlos: «lo mejor sería el nombre del marco», «implementa»); seis huecos del marco registrados como propuestas MJ-18…MJ-23; proceso 4 con dueño humano propuesto (Arquitecto) en cruce."
     }
    ],
    "porProbar": [
@@ -852,8 +856,169 @@
      "7": 8,
      "8": 7
     },
-    "donde": "artefactos «Procesos de la fábrica STR» y «Diagramas de la fábrica STR»; títulos de claude/marco/plan-*.md; el índice del manual (proceso-cambios.md) nace ya con esta numeración; estadoPorFase de este punto de pausa sigue por paso de MJ-17"
+    "donde": "artefactos «Procesos de la fábrica STR» y «Diagramas de la fábrica STR»; títulos de claude/marco/plan-*.md; el índice del manual (proceso-cambios.md) nace ya con esta numeración; estadoPorFase de este punto de pausa sigue por paso de MJ-17",
+    "nombres12207": {
+     "0": "Gestión de la configuración (12207 6.3.5) · línea base funcional",
+     "1": "Definición de requisitos (12207 6.4.2, 6.4.3) · REQ con criterios por letra",
+     "2": "Evaluación y control del proyecto (12207 6.3.2) · flujo de la fábrica: lista, límites, tandas",
+     "3": "Implementación e integración (12207 6.4.7, 6.4.8) · construcción y cambio",
+     "4": "Verificación y validación (12207 6.4.9, 6.4.11) · pruebas y aceptación",
+     "5": "Mantenimiento (12207 6.4.13) · incidentes, solicitudes y problemas (ISO/IEC 20000-1 §8.6)",
+     "6": "Definición de arquitectura y gestión de decisiones (12207 6.4.4, 6.3.3) · ADR, RT, mapa",
+     "7": "Gestión de riesgos y medición (12207 6.3.4, 6.3.7) · registro R-n, medidas, metas",
+     "8": "Gestión del conocimiento y de la información (12207 6.2.6, 6.3.6) · lecciones, relevos, buzón"
+    },
+    "decididaNombres": "Carlos 21-oct-2026 («lo mejor sería el nombre del marco»; «de acuerdo, implementa»)"
+   },
+   "marco": {
+    "ancla": "ISO/IEC/IEEE 12207:2017 (procesos del ciclo de vida del software); fases del SDLC como lenguaje común; COBIT 2019 para el gobierno de cada proceso",
+    "figura": "artefacto «Diagramas de la fábrica STR» › Marco (cubierto · parcial · fuera por decisión · falta)",
+    "regla": "el alcance de la fábrica son los nueve procesos; cada «parcial» o «falta» del marco entra como propuesta MJ-n con revisarCuando, no como trabajo; «fuera por decisión» cita la decisión (ADR-008/009, Carlos opera)"
    }
+  },
+  {
+   "id": "MJ-18",
+   "fecha": "2026-10-21",
+   "origen": "Marco SDLC × 12207 (artefacto «Diagramas de la fábrica STR» › Marco; Carlos 21-oct: «nos da esa base de qué nos falta, aunque nuestro alcance actual sean los procesos de hoy»)",
+   "problema": "Validación con usuarios reales como fase (12207 6.4.11)",
+   "propuesta": "Hoy la validación es N4 contigo, caso a caso; no hay una fase en que Andrés o un colaborador usen lo entregado antes de darlo por bueno. Propuesta: al levantar la pausa, cada REQ de producto con un caso de uso del colaborador o del huésped lleva un criterio N4 «lo usa <rol> en producción» con quién y cuándo, registrado en validacion del REQ.",
+   "cobit": "BAI03 · BAI07 · APO01.11",
+   "beneficio": "medio",
+   "costo": "a medir",
+   "decision": "propuesta (no entra al alcance hasta que Carlos la decida)",
+   "asumimos": "El alcance de la fábrica sigue siendo los nueve procesos; esta propuesta se decide cuando se cumpla revisarCuando, con datos.",
+   "revisarCuando": "al levantar la pausa de producto (M-858)",
+   "metrica": "—",
+   "dueno": "Diseño",
+   "estado": "propuesta",
+   "tema": "GOB",
+   "objetivo": "OM-1",
+   "historial": [
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 registrada desde el marco (hueco «parcial» o «falta»)."
+    }
+   ]
+  },
+  {
+   "id": "MJ-19",
+   "fecha": "2026-10-21",
+   "origen": "Marco SDLC × 12207 (artefacto «Diagramas de la fábrica STR» › Marco; Carlos 21-oct: «nos da esa base de qué nos falta, aunque nuestro alcance actual sean los procesos de hoy»)",
+   "problema": "Ventana o escalón de despliegue (12207 6.4.10 transición)",
+   "propuesta": "push a main es producción sin escalón (R-12, decidido). Propuesta a evaluar con datos: ventana de despliegue (hora de poco uso) o un escalón para críticos (rama de pre-producción con el mismo hosting) cuando haya más de un usuario simultáneo.",
+   "cobit": "BAI03 · BAI07 · APO01.11",
+   "beneficio": "medio",
+   "costo": "a medir",
+   "decision": "propuesta (no entra al alcance hasta que Carlos la decida)",
+   "asumimos": "El alcance de la fábrica sigue siendo los nueve procesos; esta propuesta se decide cuando se cumpla revisarCuando, con datos.",
+   "revisarCuando": "primer mes de la operación real con más de un usuario; o un INC P1 causado por un despliegue",
+   "metrica": "—",
+   "dueno": "Arquitecto",
+   "estado": "propuesta",
+   "tema": "GOB",
+   "objetivo": "OM-1",
+   "historial": [
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 registrada desde el marco (hueco «parcial» o «falta»)."
+    }
+   ]
+  },
+  {
+   "id": "MJ-20",
+   "fecha": "2026-10-21",
+   "origen": "Marco SDLC × 12207 (artefacto «Diagramas de la fábrica STR» › Marco; Carlos 21-oct: «nos da esa base de qué nos falta, aunque nuestro alcance actual sean los procesos de hoy»)",
+   "problema": "Revisión del código construido (12207 7.2.4 verificación de código)",
+   "propuesta": "Nadie lee el diff: K1 compara con la instrucción y el juez prueba comportamiento. Propuesta: revisión técnica del diff por el juez solo en lotes críticos, con los criterios de la 12207 (trazable, probable, manejo de errores), medida en costo antes de hacerla regla.",
+   "cobit": "BAI03 · BAI07 · APO01.11",
+   "beneficio": "medio",
+   "costo": "a medir",
+   "decision": "propuesta (no entra al alcance hasta que Carlos la decida)",
+   "asumimos": "El alcance de la fábrica sigue siendo los nueve procesos; esta propuesta se decide cuando se cumpla revisarCuando, con datos.",
+   "revisarCuando": "primer lote crítico de producto tras la pausa; medir el costo en dos lotes",
+   "metrica": "—",
+   "dueno": "Arquitecto",
+   "estado": "propuesta",
+   "tema": "GOB",
+   "objetivo": "OM-1",
+   "historial": [
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 registrada desde el marco (hueco «parcial» o «falta»)."
+    }
+   ]
+  },
+  {
+   "id": "MJ-21",
+   "fecha": "2026-10-21",
+   "origen": "Marco SDLC × 12207 (artefacto «Diagramas de la fábrica STR» › Marco; Carlos 21-oct: «nos da esa base de qué nos falta, aunque nuestro alcance actual sean los procesos de hoy»)",
+   "problema": "Diseño detallado como entregable en críticos (12207 6.4.5)",
+   "propuesta": "El diseño detallado lo hace la instrucción (vale en ligero y estándar). Propuesta: en críticos, una sección «Diseño» en el REQ o en la instrucción antes del Busca/Pon (datos que cambian, rutas, errores y vuelta atrás), revisada por el Arquitecto como parte del consejo (A6).",
+   "cobit": "BAI03 · BAI07 · APO01.11",
+   "beneficio": "medio",
+   "costo": "a medir",
+   "decision": "propuesta (no entra al alcance hasta que Carlos la decida)",
+   "asumimos": "El alcance de la fábrica sigue siendo los nueve procesos; esta propuesta se decide cuando se cumpla revisarCuando, con datos.",
+   "revisarCuando": "primer crítico de producto tras la pausa",
+   "metrica": "—",
+   "dueno": "Diseño y Arquitecto",
+   "estado": "propuesta",
+   "tema": "GOB",
+   "objetivo": "OM-1",
+   "historial": [
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 registrada desde el marco (hueco «parcial» o «falta»)."
+    }
+   ]
+  },
+  {
+   "id": "MJ-22",
+   "fecha": "2026-10-21",
+   "origen": "Marco SDLC × 12207 (artefacto «Diagramas de la fábrica STR» › Marco; Carlos 21-oct: «nos da esa base de qué nos falta, aunque nuestro alcance actual sean los procesos de hoy»)",
+   "problema": "Retención y disposición completas (12207 6.4.14; Ley 1581)",
+   "propuesta": "El corte seguro está en pausa (INC-175/176) y la retención por tipo de dato no está escrita como política. Propuesta: política de retención por colección (qué se guarda, cuánto, quién lo borra) y el corte como su ejecución, con ensayo antes del 30-nov.",
+   "cobit": "BAI03 · BAI07 · APO01.11",
+   "beneficio": "medio",
+   "costo": "a medir",
+   "decision": "propuesta (no entra al alcance hasta que Carlos la decida)",
+   "asumimos": "El alcance de la fábrica sigue siendo los nueve procesos; esta propuesta se decide cuando se cumpla revisarCuando, con datos.",
+   "revisarCuando": "antes del primer corte real (30-nov) o al cerrar INC-175/176",
+   "metrica": "—",
+   "dueno": "Desarrollo y Diseño",
+   "estado": "propuesta",
+   "tema": "GOB",
+   "objetivo": "OM-1",
+   "historial": [
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 registrada desde el marco (hueco «parcial» o «falta»)."
+    }
+   ]
+  },
+  {
+   "id": "MJ-23",
+   "fecha": "2026-10-21",
+   "origen": "Marco SDLC × 12207 (artefacto «Diagramas de la fábrica STR» › Marco; Carlos 21-oct: «nos da esa base de qué nos falta, aunque nuestro alcance actual sean los procesos de hoy»)",
+   "problema": "Política de calidad y modelo del ciclo de vida escritos (12207 6.2.1, 6.2.5)",
+   "propuesta": "PRUEBAS-v2 hace de política de calidad y MJ-17 de modelo del ciclo de vida, pero ninguno está escrito como tal. Propuesta: el índice del manual (proceso-cambios.md) abre con el marco (SDLC × 12207), los nueve procesos con su nombre de norma, los tres perfiles y la política de calidad en una página.",
+   "cobit": "BAI03 · BAI07 · APO01.11",
+   "beneficio": "medio",
+   "costo": "a medir",
+   "decision": "propuesta (no entra al alcance hasta que Carlos la decida)",
+   "asumimos": "El alcance de la fábrica sigue siendo los nueve procesos; esta propuesta se decide cuando se cumpla revisarCuando, con datos.",
+   "revisarCuando": "al cerrar MJ-17 (índice del manual)",
+   "metrica": "—",
+   "dueno": "Arquitecto",
+   "estado": "propuesta",
+   "tema": "GOB",
+   "objetivo": "OM-1",
+   "historial": [
+    {
+     "fecha": "2026-10-21",
+     "que": "19:44 registrada desde el marco (hueco «parcial» o «falta»)."
+    }
+   ]
   }
  ],
  "temas": [

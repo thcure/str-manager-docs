@@ -1,4 +1,4 @@
-# Proceso 4 (numeración por ejecución; paso 2 de MJ-17) · Verificación y aceptación (PRUEBAS-v2) · plan en cruce
+# Proceso 4 · Verificación y validación (ISO/IEC/IEEE 12207 6.4.9, 6.4.11) · pruebas y aceptación · Verificación y aceptación (PRUEBAS-v2) · plan en cruce
 
 **Estado:** **PRUEBAS-v2 vigente** · aprobado por Carlos 20-oct-2026 (19:05; umbral V9 3 s) · LM-62 instalado en el repo y en LENOVO (pw 0.11.0, juez v2); prueba real en el primer tren tras la pausa; `tec` y punto 21 del revisor por lote tras la pausa · cruce: Desarrollo M-940/943/946/949, Diseño M-941/944/947/950, Jefe de proyecto M-942/945/948/951 · **Autor:** Chat Arquitecto · **Marco:** MJ-17 paso 2 · COBIT BAI07.03–.05 y BAI03.07/.08 · ISO/IEC/IEEE 29119-1/-2 (2021), -3, -4 · **Sustituye al aprobarse:** PRUEBAS-v1 (LM-18), que sigue vigente mientras tanto.
 

@@ -1,4 +1,4 @@
-# Proceso 5 (numeración por ejecución; paso 4 de MJ-17) · Incidentes y problemas (INCIDENTES-v1) · plan en cruce
+# Proceso 5 · Mantenimiento (ISO/IEC/IEEE 12207 6.4.13) · incidentes, solicitudes y problemas (ISO/IEC 20000-1 §8.6) · Incidentes y problemas (INCIDENTES-v1) · plan en cruce
 
 **Estado:** v2 · **aprobada por Carlos (21-oct-2026 09:53, chat del Arquitecto)** tras el cruce (Desarrollo M-988, Diseño M-989, Jefe de proyecto M-990) · **LM-65 instalado en el repo (10:02)**: pasos 1, 2, 3 y 6 hechos; paso 4 (pasada de Desarrollo con `prioridad.py`) y 5 (revisión de INC-128) en curso; errores de `validar.py` desde el 22-oct · **Autor:** Chat Arquitecto · **Marco:** MJ-17 paso 4 · COBIT DSS02 (solicitudes e incidentes) y DSS03 (problemas) · ISO/IEC 20000-1:2018 §8.6.1 incidentes, §8.6.2 solicitudes de servicio, §8.6.3 problemas (por conocimiento de la norma; el enlace de Scribd no se deja leer sin navegador, Carlos puede pegar las cláusulas) · Referencias: Google SRE, *Postmortem Culture* (cap. 15); ITIL 4 (prioridad = impacto × urgencia; error conocido; incidente mayor).
 

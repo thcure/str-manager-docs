@@ -1,8 +1,10 @@
-// rafaga.spec.js - prueba de ráfaga de RT-25 (sobre de capacidad) y RT-19 (conexiones del hosting compartido). LM-68, plan de
+// rafaga.spec.js v1.1 - prueba de ráfaga de RT-25 (sobre de capacidad) y RT-19 (conexiones del hosting compartido). LM-68, plan de
 // arquitectura A2; riesgo R-6 (INC-128: «Base de datos no disponible», errores 1040/1203 con varias pantallas a la vez).
 // Lo mantiene el Arquitecto; la cola lo corre con correr\rafaga.txt -> log\RAFAGA-guion.json. SOLO LECTURA: 12 GET de
-// colecciones en paralelo con el perfil colab de zz-verif-pruebas (la guardia de pw corta cualquier escritura), con
-// /api/diagnostico (admin) antes y después. Nunca en hora de turnos: solo corre entre las 22:30 y las 05:30 de Bogotá,
+// colecciones en paralelo por STRApi.get (la sesión del STR va en el encabezado, no en cookie: un fetch a pelo da 401 y no
+// toca la base, primera corrida 21-oct 21:27) con el perfil admin de zz-verif-pruebas (la guardia de pw corta cualquier
+// escritura), con /api/diagnostico antes y después. Los tres casos van con el MISMO perfil porque guion.js agrupa los casos
+// por perfil: con colab en medio, «después» corría antes que la ráfaga (v1). Nunca en hora de turnos: solo corre entre las 22:30 y las 05:30 de Bogotá,
 // o si Carlos deja el archivo RAFAGA-AHORA en la raíz de la cola; fuera de eso los casos quedan «OMITIDO» (verdes, con el
 // motivo) y no se toca el servidor. Rojo: algún GET con 500 «Base de datos no disponible», 1040 o 1203, o sin respuesta;
 // o conexiones del diagnóstico >= UMBRAL después de la ráfaga. El resultado alimenta esquema.json › arquitectura.capacidad.
@@ -75,8 +77,8 @@ module.exports = {
   casos: [
     casoDiag('a', 'antes'),
     {
-      c: 'b', perfil: 'colab', pagina: '/str-app-shell.html',
-      que: RONDAS + ' rondas de ' + PARALELAS + ' GET /api/col/* en paralelo sin 1040/1203 ni «Base de datos no disponible» (RT-25)',
+      c: 'b', perfil: 'admin', pagina: '/str-app-shell.html',
+      que: RONDAS + ' rondas de ' + PARALELAS + ' GET /api/col/* en paralelo (STRApi.get, sesión real) con 200 y sin 1040/1203 ni «Base de datos no disponible» (RT-25)',
       async prueba(h) {
         const puede = puedeCorrer();
         if (!puede.ok) { h.espera(true, 'OMITIDO: ' + puede.motivo); return; }
@@ -86,23 +88,31 @@ module.exports = {
         for (let r = 0; r < RONDAS; r++) {
           const t0 = Date.now();
           const res = await p.evaluate(async (cols) => {
+            // STRApi.get pone la sesión del STR; resuelve con el JSON (200) o rechaza con e.status y e.message (401/403/500…).
             const una = async (c) => {
               const ini = performance.now();
+              if (!window.STRApi || typeof STRApi.get !== 'function') return { col: c, error: 'sin STRApi en la página', ms: 0 };
               try {
-                const rr = await fetch('/api/col/' + c, { credentials: 'include' });
-                let texto = ''; try { texto = (await rr.text()).slice(0, 300); } catch (e) { }
-                return { col: c, status: rr.status, ms: Math.round(performance.now() - ini), texto };
-              } catch (e) { return { col: c, error: String(e && e.message || e), ms: Math.round(performance.now() - ini) }; }
+                const j = await STRApi.get('/col/' + c);
+                const n = Array.isArray(j) ? j.length : (j && Array.isArray(j.items)) ? j.items.length : null;
+                return { col: c, status: 200, ms: Math.round(performance.now() - ini), texto: '', filas: n };
+              } catch (e) {
+                const st = (e && e.status) || 0;
+                const texto = String((e && (e.message || e.error)) || '').slice(0, 300);
+                return st ? { col: c, status: st, ms: Math.round(performance.now() - ini), texto } : { col: c, error: texto || 'sin respuesta', ms: Math.round(performance.now() - ini) };
+              }
             };
             return Promise.all(cols.map(una));
           }, COLECCIONES.slice(0, PARALELAS)).catch(e => COLECCIONES.map(c => ({ col: c, error: String(e && e.message || e) })));
           const rojos = res.filter(esRojo);
-          rondas.push({ ronda: r + 1, totalMs: Date.now() - t0, maxMs: Math.max(...res.map(x => x.ms || 0)), codigos: res.map(x => x.status || 'ERR').join(','), rojos: rojos.map(x => x.col + ':' + (x.status || x.error)).join(' ') });
+          rondas.push({ ronda: r + 1, totalMs: Date.now() - t0, maxMs: Math.max(...res.map(x => x.ms || 0)), codigos: res.map(x => x.status || 'ERR').join(','), filas: res.reduce((n, x) => n + (x.filas || 0), 0), rojos: rojos.map(x => x.col + ':' + (x.status || x.error)).join(' ') });
           if (r < RONDAS - 1) await p.waitForTimeout(PAUSA_MS);
         }
         const rojosTotal = rondas.reduce((n, x) => n + (x.rojos ? x.rojos.split(' ').length : 0), 0);
         ESTADO.rafaga = rondas.map(x => 'R' + x.ronda + ' ' + x.totalMs + ' ms (máx ' + x.maxMs + ')').join(' · ');
-        h.espera(rojosTotal === 0, rondas.map(x => 'ronda ' + x.ronda + ': ' + x.totalMs + ' ms, máx ' + x.maxMs + ' ms, códigos ' + x.codigos + (x.rojos ? ' · ROJOS ' + x.rojos : '')).join(' | ') + ' · modo: ' + puede.motivo);
+        const con200 = rondas.every(x => x.codigos.split(',').filter(c => c === '200').length >= PARALELAS / 2);
+        h.espera(con200, 'la ráfaga tocó la base: ' + rondas.map(x => x.codigos.split(',').filter(c => c === '200').length + '/' + PARALELAS + ' con 200').join(', ') + (con200 ? '' : ' (sin sesión o sin permiso: la prueba no mide nada)'));
+        h.espera(rojosTotal === 0, rondas.map(x => 'ronda ' + x.ronda + ': ' + x.totalMs + ' ms, máx ' + x.maxMs + ' ms, ' + x.filas + ' filas, códigos ' + x.codigos + (x.rojos ? ' · ROJOS ' + x.rojos : '')).join(' | ') + ' · modo: ' + puede.motivo);
       },
     },
     casoDiag('c', 'despues'),

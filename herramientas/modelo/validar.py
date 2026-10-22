@@ -532,7 +532,14 @@ if _ea:
         for mo in _mmj.get('modulos', []):
             if not mo.get('familia'): avi('A7 frontera', 'modulo', mo.get('id'), 'módulo sin familia (operativo · transversal · interno · fabrica)')
         _cap = _ea.get('capacidad') or {}
-        if not _cap.get('ultimaCorrida'): avi('A2 guardia', 'regla', 'RT-25', 'prueba de capacidad nunca corrida (spec de ráfaga, LM-68): línea de partida')
+        _uc = _cap.get('ultimaCorrida')
+        if not _uc: avi('A2 guardia', 'regla', 'RT-25', 'prueba de capacidad nunca corrida (spec de ráfaga, LM-68): línea de partida')
+        elif isinstance(_uc, dict) and _uc.get('valida') is False: avi('A2 guardia', 'regla', 'RT-25', 'última prueba de capacidad (%s) no válida: %s' % (_uc.get('fecha'), str(_uc.get('resultado') or '')[:120]))
+        elif isinstance(_uc, dict) and _uc.get('fecha'):
+            try:
+                _dias = (HOY - datetime.date.fromisoformat(str(_uc['fecha'])[:10])).days
+                if _dias > int(_cap.get('cadaDias') or 90): avi('A2 guardia', 'regla', 'RT-25', 'prueba de capacidad vencida: hace %d días (cada %s)' % (_dias, _cap.get('cadaDias') or 90))
+            except (ValueError, TypeError): pass
     except Exception as ex: avi('A2 guardia', 'archivo', 'interno/mapa-modulos.json', f'no se pudo leer: {ex}')
     # A4: deuda arquitectónica
     _lista = set((_ea.get('deuda') or {}).get('lista') or [])

@@ -5,6 +5,10 @@
 ## Qué es la fábrica
 El conjunto de herramientas y reglas con el que se construye, verifica, acepta y gobierna un producto (hoy, solo el STR = P01). No guarda datos de ningún negocio. Un proyecto no escribe en la fábrica: pide por el buzón.
 
+## Marco (LM-74)
+
+Los nueve procesos de la fábrica se numeran por orden de ejecución y llevan el nombre de la ISO/IEC/IEEE 12207:2017 (`proceso.json › procesosFabrica`): 0 Gestión de la configuración · 1 Definición de requisitos · 2 Evaluación y control del proyecto · 3 Implementación e integración · 4 Verificación y validación · 5 Mantenimiento · 6 Definición de arquitectura y gestión de decisiones · 7 Gestión de riesgos y medición · 8 Gestión del conocimiento y de la información. El mapa SDLC × 12207 con lo cubierto, lo parcial, lo que queda fuera por decisión (capa de proyectos, operación de Carlos) y lo que falta (propuestas MJ-18…MJ-23) está en el artefacto «Diagramas de la fábrica STR» › Marco. COBIT 2019 sigue siendo el marco de gobierno de cada proceso.
+
 ## Piezas (vista 0)
 | Pieza | Qué hace | Dónde vive hoy | Repo destino (ADR-009) | Escritor |
 |---|---|---|---|---|

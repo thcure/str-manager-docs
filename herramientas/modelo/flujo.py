@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""flujo.py — funciones puras de FLUJO-v1 (LM-66; MJ-17 proceso 5: orden del trabajo y prioridades dentro de la fábrica).
+"""flujo.py — funciones puras de FLUJO-v1 (LM-66; MJ-17 paso 5 (proceso 2, Evaluación y control del proyecto): orden del trabajo y prioridades dentro de la fábrica).
 Las usan validar.py (avisos F1–F7) y ficha-semanal.py (F8 y --como-vamos). Solo leen; proyecto.json lo escribe el Jefe de proyecto.
 
 Plan: claude/marco/plan-flujo-trabajo.md v2 (cruce M-1022 JP, M-1023 Diseño, M-1024 Desarrollo; ok de Carlos 21-oct 10:59).

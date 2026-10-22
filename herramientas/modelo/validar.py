@@ -414,7 +414,7 @@ if _I and _pr:
         if ap and not re.search(r'\b(DA|M)-\d+\b', str(ap)): avi('I6 deuda', 'deuda', d.get('id'), 'aceptadaPor sin DA-n ni M-n: ' + str(ap)[:60])
     if _viejasDT: avi('I6 deuda', 'deuda', '%d abiertas' % len(_viejasDT), 'DT anteriores sin severidad, dueño o plazo/aceptadaPor (pasada de Desarrollo, sin tocar texto): ' + ', '.join(_viejasDT))
 
-# LM-66 (FLUJO-v1, F1–F7; MJ-17 proceso 5; BAI11.04/.07): lista única de trabajo con clases, límites de trabajo en curso, tanda con
+# LM-66 (FLUJO-v1, F1–F7; MJ-17 paso 5 (proceso 2, Evaluación y control del proyecto); BAI11.04/.07): lista única de trabajo con clases, límites de trabajo en curso, tanda con
 # entrada, edad por estado, pausas como filas, PT con límites, origen obligatorio. Todo como AVISO el primer mes (esquema.flujo.modo).
 _ef = E.get('flujo') or {}
 try:
@@ -491,7 +491,7 @@ if _F and _ef and os.path.exists(os.path.join(RAIZ, 'interno/proyecto.json')):
                 avi('F6 PT', 'plan', p_.get('id'), 'activo sin ningún ítem en trabajo[] ni sinItemsPorque')
         if p_.get('estado') == 'cerrado' and not (p_.get('cierre') or p_.get('leccion')): avi('F6 PT', 'plan', p_.get('id'), 'cerrado sin cierre ni lección (BAI11.09)')
 
-# LM-67 (ARQUITECTURA-v1, A1/A2/A4/A5/A7/A8; MJ-17 proceso 6): registro de decisiones, RT con guardia, deuda arquitectónica,
+# LM-67 (ARQUITECTURA-v1, A1/A2/A4/A5/A7/A8; MJ-17 paso 6 (proceso 6, Definición de arquitectura y gestión de decisiones)): registro de decisiones, RT con guardia, deuda arquitectónica,
 # una fuente por vista, frontera fábrica/producto, el INC de arquitectura vuelve al registro. Todo AVISO.
 _ea = E.get('arquitectura') or {}
 if _ea:
@@ -550,7 +550,7 @@ if _ea:
             except Exception: continue
             if 'Histórico' not in primera and 'Historico' not in primera: avi('A5 fuente', 'archivo', os.path.relpath(f, RAIZ), 'documento de agosto sin la marca «Histórico · sustituido por …»')
 
-# LM-69 (CONOCIMIENTO-v1, Cn1/Cn3/Cn4/Cn5/Cn6; MJ-17 proceso 7): mapa de piezas, lecciones con destino, traspasos, evaluar y retirar,
+# LM-69 (CONOCIMIENTO-v1, Cn1/Cn3/Cn4/Cn5/Cn6; MJ-17 paso 7 (proceso 8, Gestión del conocimiento y de la información)): mapa de piezas, lecciones con destino, traspasos, evaluar y retirar,
 # archivo. Todo AVISO.
 _ec = E.get('conocimiento') or {}
 if _ec:
@@ -608,7 +608,7 @@ if _ec:
             if tam > tope: avi('Cn6 archivo', 'archivo', rel, '%d KB, tope %d KB: archivar (archivar.py, en punto limpio y a pedido de Carlos)' % (tam // 1024, tope // 1024))
         except Exception: pass
 
-# LM-71 (RIESGO-v1, Rg1–Rg5; MJ-17 proceso 8): registro de riesgos R-n, destino «riesgo» con R-n real, probabilidad por módulo que se
+# LM-71 (RIESGO-v1, Rg1–Rg5; MJ-17 paso 8 (proceso 7, Gestión de riesgos y medición)): registro de riesgos R-n, destino «riesgo» con R-n real, probabilidad por módulo que se
 # mueve con los INC, tabla de medidas con dueño y acción, metas del periodo. Rg1 forma y Rg2 ref = error; el resto avisos (plan § 5).
 _er = E.get('riesgo') or {}
 if _er:

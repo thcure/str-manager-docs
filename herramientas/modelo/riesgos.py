@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""riesgos.py — funciones puras de RIESGO-v1 (LM-71, MJ-17 proceso 8; COBIT APO12.02/.03/.06 y MEA01.01–.05; ISO 31000 e ISO/IEC/IEEE 15939
+"""riesgos.py — funciones puras de RIESGO-v1 (LM-71, MJ-17 paso 8 (proceso 7, Gestión de riesgos y medición); COBIT APO12.02/.03/.06 y MEA01.01–.05; ISO 31000 e ISO/IEC/IEEE 15939
 por conocimiento). Las usan validar.py (Rg1–Rg5) y ficha-semanal.py (bloque «riesgos», metas, rojas repetidas, tasa de fallo en ventana).
 El registro vive en interno/proyecto.json › riesgos[] y las metas en › metas[] (escribe el Jefe de proyecto; el Arquitecto propone por el
 buzón). La tabla de medidas vive en herramientas/modelo/esquema.json › riesgo.medidas[] (escribe el Arquitecto). Solo lee. Pruebas: riesgos_test.py."""

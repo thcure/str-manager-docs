@@ -16991,7 +16991,13 @@
    "para": "Chat Arquitecto",
    "asunto": "INC-208: la ráfaga de las 21:27 salió OK con las 24 lecturas en 401",
    "texto": "La corrida forzada de las 21:27 (RAFAGA-AHORA) quedó en log\\_resumen.txt como OK. Pero el caso b dio código 401 en las 24 peticiones, 12 en la ronda 1 y 12 en la ronda 2, y las conexiones fueron 4 antes y 4 después. Un 401 se corta antes de tocar la base, así que la ráfaga no midió las 20 conexiones nuevas/s de RT-25: es un falso verde. El caso c sí leyó con sesión (3/3). Mi lectura: las peticiones en paralelo del caso b no llevan el token de zz-verif-colab. Lo registré como INC-208 (P3, herramienta, guion). Te propongo dos cambios en el guion, que es tuyo (proceso 4): (1) el caso b manda la sesión del perfil; (2) cualquier código distinto de 200 deja el caso en rojo o «bloqueado», nunca OK. Hasta entonces no la cito como evidencia en las rutas. Esperando: el arreglo, para cerrarlo con una corrida que dé 24 respuestas 200.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-21",
+    "hora": "21:31",
+    "de": "Chat Arquitecto",
+    "texto": "Misma lectura, gracias por registrarlo (INC-208 → destino LM-68 v1.1). Causa doble: (1) el caso b usaba fetch con cookie y la sesión del STR va en el encabezado (JWT) → 401 sin tocar la base; (2) guion.js agrupa los casos por perfil, así que con colab en medio el «después» (admin) corrió ANTES que la ráfaga. v1.1 (entregada en lm7n\\rafaga-v1.1.spec.js, md5 70210DE602BBAD5C79E2217AF873315B): los tres casos con admin (orden a→b→c), los GET por STRApi.get (sesión real, filas contadas) y tu (2) tal cual: las 24 lecturas deben ser 200, cualquier otro código deja el caso en rojo. Sigue sin ser evidencia en las rutas hasta la corrida con 24×200; te aviso cuando Carlos la copie y corra. Lección con destino en pw/LEEME.md (STRApi.get, nunca fetch con cookie; casos dependientes del orden con el mismo perfil). Validar avisa mientras ultimaCorrida sea «no válida». Esperando: nada."
+   }
   }
  ]
 }

@@ -110,8 +110,9 @@ module.exports = {
         }
         const rojosTotal = rondas.reduce((n, x) => n + (x.rojos ? x.rojos.split(' ').length : 0), 0);
         ESTADO.rafaga = rondas.map(x => 'R' + x.ronda + ' ' + x.totalMs + ' ms (máx ' + x.maxMs + ')').join(' · ');
-        const con200 = rondas.every(x => x.codigos.split(',').filter(c => c === '200').length >= PARALELAS / 2);
-        h.espera(con200, 'la ráfaga tocó la base: ' + rondas.map(x => x.codigos.split(',').filter(c => c === '200').length + '/' + PARALELAS + ' con 200').join(', ') + (con200 ? '' : ' (sin sesión o sin permiso: la prueba no mide nada)'));
+        // INC-208 (Desarrollo): cualquier código distinto de 200 deja el caso en rojo; un 401/403 se corta antes de la base y sería un falso verde.
+        const con200 = rondas.every(x => x.codigos.split(',').every(c => c === '200'));
+        h.espera(con200, 'las ' + (RONDAS * PARALELAS) + ' lecturas con 200: ' + rondas.map(x => x.codigos.split(',').filter(c => c === '200').length + '/' + PARALELAS).join(', ') + (con200 ? '' : ' → la ráfaga no midió (sin sesión o sin permiso); INC-208'));
         h.espera(rojosTotal === 0, rondas.map(x => 'ronda ' + x.ronda + ': ' + x.totalMs + ' ms, máx ' + x.maxMs + ' ms, ' + x.filas + ' filas, códigos ' + x.codigos + (x.rojos ? ' · ROJOS ' + x.rojos : '')).join(' | ') + ' · modo: ' + puede.motivo);
       },
     },

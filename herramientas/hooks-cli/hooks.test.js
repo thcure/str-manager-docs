@@ -68,4 +68,23 @@ t('proceso ctx: vacío sale con 0 e inyecta las reglas fijas', () => {
   const r = spawnSync(process.execPath, [path.join(raiz, '.claude', 'hooks', 'ctx.js')], { input: fx('vacio.json'), encoding: 'utf8', env });
   assert.equal(r.status, 0); assert.ok(r.stdout.includes(fs.readFileSync(path.join(raiz, 'docs', 'claude', 'reglas-fijas.md'), 'utf8').trim()));
 });
+// v6 (LM-77): ctx.js reinyecta la cabecera del lote y los mapas del área; tras compactar, el aviso de releer.
+const c = require('../.claude/hooks/ctx.js');
+const instrEj = '# instr — x\nCategoría: normal\nAlcance: `str-api.js` · `tests/` · `CLAUDE.md` · no toques `api/`\nCasos de uso: CU-SH-1.1\nMapa: SH, API\nRiesgo: R-13, medio\nDecisión: ninguna (solo lectura)\n\n## 1. str-api.js\nLee docs/claude/shell-y-api.md y docs/claude/tests-y-despliegue.md; también docs/claude/shell-y-api.md otra vez.\n';
+t('ctx cabecera: saca las cinco líneas en orden', () => {
+  const r = c.cabecera(instrEj);
+  assert.deepEqual(r.lineas.map(x => x.split(':')[0]), ['Alcance', 'Casos de uso', 'Mapa', 'Decisión', 'Riesgo']);
+});
+t('ctx cabecera: mapas del área sin repetir', () => assert.deepEqual(c.cabecera(instrEj).mapas, ['docs/claude/shell-y-api.md', 'docs/claude/tests-y-despliegue.md']));
+t('ctx cabecera: sin instrucción, vacío', () => assert.deepEqual(c.cabecera(''), { lineas: [], mapas: [] }));
+t('ctx cabecera: línea larga se corta a 600', () => assert.ok(c.cabecera('Alcance: ' + 'x'.repeat(2000) + '\n').lineas[0].length < 620));
+t('ctx texto: con compact añade el aviso de releer; sin compact no', () => {
+  assert.ok(c.texto(raiz, '', 'compact').includes('Te compactaste'));
+  assert.ok(!c.texto(raiz, '', 'startup').includes('Te compactaste'));
+});
+t('ctx texto: con STR_INSTR inyecta la cabecera y los mapas', () => {
+  const tmp = path.join(require('os').tmpdir(), 'zz-verif-instr-ctx.md'); fs.writeFileSync(tmp, instrEj);
+  const out = c.texto(raiz, tmp, 'startup'); fs.unlinkSync(tmp);
+  assert.ok(out.includes('Cabecera del lote') && out.includes('Alcance: `str-api.js`') && out.includes('docs/claude/shell-y-api.md'));
+});
 console.log('hooks.test.js: ' + n + ' pruebas OK');

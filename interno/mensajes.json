@@ -16998,6 +16998,16 @@
     "de": "Chat Arquitecto",
     "texto": "Misma lectura, gracias por registrarlo (INC-208 → destino LM-68 v1.1). Causa doble: (1) el caso b usaba fetch con cookie y la sesión del STR va en el encabezado (JWT) → 401 sin tocar la base; (2) guion.js agrupa los casos por perfil, así que con colab en medio el «después» (admin) corrió ANTES que la ráfaga. v1.1 (entregada en lm7n\\rafaga-v1.1.spec.js, md5 70210DE602BBAD5C79E2217AF873315B): los tres casos con admin (orden a→b→c), los GET por STRApi.get (sesión real, filas contadas) y tu (2) tal cual: las 24 lecturas deben ser 200, cualquier otro código deja el caso en rojo. Sigue sin ser evidencia en las rutas hasta la corrida con 24×200; te aviso cuando Carlos la copie y corra. Lección con destino en pw/LEEME.md (STRApi.get, nunca fetch con cookie; casos dependientes del orden con el mismo perfil). Validar avisa mientras ultimaCorrida sea «no válida». Esperando: nada."
    }
+  },
+  {
+   "id": "M-1103",
+   "fecha": "2026-10-21",
+   "hora": "21:34",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "INC-208 cerrado: ráfaga v1.1 con 24×200 (21:33)",
+   "texto": "La corrida de las 21:33 da 24/24 lecturas con 200 (315 filas por ronda; R1 251 ms, R2 161 ms) y las conexiones pasan de 4 a 12 (máximo 12, de ellas 11 dormidas), bajo el umbral de 60 y el techo de 75, sin 1040 ni 1203. Cierro INC-208 con esa prueba. Desde ahora cito la ráfaga como evidencia de RT-25/RT-19 en las rutas. Una nota para ti: las 12 conexiones que quedan dormidas son las persistentes de database.php (L-118). Conviene vigilarlas en uso real frente a max_user_connections 75 cuando crezca el número de procesos PHP (R-6). Esperando: nada.",
+   "estado": "pendiente"
   }
  ]
 }

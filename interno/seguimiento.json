@@ -2327,7 +2327,7 @@
    "modulo": "Fábrica (vigilante del buzón)",
    "fecha": "2026-10-21",
    "titulo": "Falso aviso «la CLI lleva 223951782 min con el lote 164»: el vigilante leyó el candado .corriendo con fecha cero (1601) mientras la cola lo creaba o borraba en una pasada vacía",
-   "estado": "en fix",
+   "estado": "cerrado",
    "severidad": "bajo",
    "casoUso": "sin caso de uso",
    "contra": "herramienta",
@@ -2341,7 +2341,7 @@
    "causaRaiz": "construcción",
    "debioDetectarse": "tests",
    "origen": "aviso del vigilante 20:42; buzon\\cli-avisado.txt (clave cli@16001231190000)",
-   "nota": "20:47 Sin lote en curso (cola vacía; L-164 aceptado 14:21); .corriendo no existe. La sección 7 de vigilar-buzon.ps1 leyó LastWriteTime = 1-ene-1601 de un candado que la cola crea y borra en cada pasada. Arreglo del Arquitecto (LM-75, M-1095): v11.4 relee el candado a los 3 s y lo ignora si desapareció o es anterior a 2000. Cierra cuando Carlos copie v11.4 a buzon\\ (con respaldo v11.3).",
+   "nota": "20:47 Sin lote en curso (cola vacía; L-164 aceptado 14:21); .corriendo no existe. La sección 7 de vigilar-buzon.ps1 leyó LastWriteTime = 1-ene-1601 de un candado que la cola crea y borra en cada pasada. Arreglo del Arquitecto (LM-75, M-1095): v11.4 relee el candado a los 3 s y lo ignora si desapareció o es anterior a 2000. Cierra cuando Carlos copie v11.4 a buzon\\ (con respaldo v11.3). · 21:29 v11.4 instalada por Carlos 21:10 (md5 059C69FE…, M-1101). Desde entonces, 18 min con pasadas de la cola (dos corridas reales del guion de ráfaga, 21:09 y 21:27): ningún «CLI sin avance» en buzon\\buzon.log y sin cli-avisado.txt. Cerrado.",
    "destino": {
     "tipo": "guardia",
     "ref": "LM-75: vigilar-buzon.ps1 v11.4 sección 7",
@@ -2352,6 +2352,38 @@
     "tipo": "fix",
     "ref": "LM-75",
     "motivo": "falso aviso sin impacto en lotes ni datos; arreglo ligero en la herramienta",
+    "fecha": "2026-10-21"
+   },
+   "cierre": {
+    "prueba": "buzon\\buzon.log de LENOVO de 21:10 a 21:28: 0 líneas «CLI sin avance» (la última es la falsa de 20:42); buzon\\cli-avisado.txt no existe; vigilar-buzon.ps1 v11.4 (md5 059C69FE40299BEB06F6C00A1E8D0FC9) en buzon\\ (2026-10-21 21:29)"
+   }
+  },
+  {
+   "id": "INC-208",
+   "tipo": "INC",
+   "modulo": "Fábrica (guion de ráfaga, pw)",
+   "fecha": "2026-10-21",
+   "titulo": "El guion de ráfaga (LM-68) sale OK con las 24 lecturas en paralelo respondidas 401: no llega a abrir conexiones y no prueba RT-25/RT-19",
+   "estado": "abierto",
+   "severidad": "medio",
+   "casoUso": "sin caso de uso",
+   "contra": "herramienta",
+   "originador": "Desarrollo",
+   "contexto": {
+    "lote": null,
+    "guion": "rafaga",
+    "caso": "b",
+    "tren": null
+   },
+   "causaRaiz": "construcción",
+   "debioDetectarse": "guion",
+   "origen": "log\\_resumen.txt 21:27 (RAFAGA-AHORA de Carlos)",
+   "nota": "21:29 Caso b: ronda 1 y ronda 2, 12 GET /api/col/* cada una, los 24 con código 401; conexiones antes 4 y después 4. Un 401 corta antes de tocar la base, así que la ráfaga no mide nada de lo que vigila (20 conexiones nuevas/s). El caso c sí leyó con sesión (3/3 válidas). Lectura: el caso b no usa la sesión de zz-verif-colab (token ausente o vencido en las peticiones en paralelo). El guion debería dar rojo o «bloqueado» si algún código no es 200. Dueño del guion y del proceso 4: Arquitecto (M-1102). Hasta el arreglo, la ráfaga no sirve de evidencia para RT-25 en las rutas de los lotes.",
+   "prioridad": "P3",
+   "decision": {
+    "tipo": "fix",
+    "ref": "LM-68 (Arquitecto)",
+    "motivo": "falso verde de una prueba de capacidad; no hay lote que dependa de ella hoy (producto en pausa)",
     "fecha": "2026-10-21"
    }
   }
@@ -19766,7 +19798,7 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-21 14:32",
+  "fecha": "2026-10-21 21:29",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
@@ -19802,10 +19834,10 @@
     "desde": "2026-10-21"
    },
    {
-    "de": "Carlos",
-    "que": "Copiar vigilar-buzon.ps1 v11.4 (lm7n\\) a buzon\\ para cerrar INC-207 (LM-75)",
-    "ref": "M-1095",
-    "desde": "2026-10-21 20:47"
+    "de": "Arquitecto",
+    "que": "Arreglar el caso b del guion de ráfaga (24 respuestas 401 en verde), INC-208",
+    "ref": "M-1102",
+    "desde": "2026-10-21 21:29"
    }
   ],
   "dondeEsta": {

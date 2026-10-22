@@ -537,7 +537,7 @@ if _ea:
         elif isinstance(_uc, dict) and _uc.get('valida') is False: avi('A2 guardia', 'regla', 'RT-25', 'última prueba de capacidad (%s) no válida: %s' % (_uc.get('fecha'), str(_uc.get('resultado') or '')[:120]))
         elif isinstance(_uc, dict) and _uc.get('fecha'):
             try:
-                _dias = (HOY - datetime.date.fromisoformat(str(_uc['fecha'])[:10])).days
+                _dias = (datetime.date.today() - datetime.date.fromisoformat(str(_uc['fecha'])[:10])).days
                 if _dias > int(_cap.get('cadaDias') or 90): avi('A2 guardia', 'regla', 'RT-25', 'prueba de capacidad vencida: hace %d días (cada %s)' % (_dias, _cap.get('cadaDias') or 90))
             except (ValueError, TypeError): pass
     except Exception as ex: avi('A2 guardia', 'archivo', 'interno/mapa-modulos.json', f'no se pudo leer: {ex}')

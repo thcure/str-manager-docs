@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.3 LM-57: escalamientos y vigia al Chat Jefe de proyecto si existe (si no, al Chat Diseno), por nombre normalizado; planes desde interno/proyecto.json si existe; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.4 M-1095/INC: la seccion 7 ignora el candado .corriendo efimero o con fecha 1601 (falso "CLI sin avance"); v11.3 LM-57: escalamientos y vigia al Chat Jefe de proyecto si existe (si no, al Chat Diseno), por nombre normalizado; planes desde interno/proyecto.json si existe; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
 #     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
@@ -478,7 +478,7 @@ try {
         }
     } catch { Log ('ERROR en verificador: ' + $_.Exception.Message) }
 
-    # --- 7. CLI sin avance (v9, 10-oct-2026) ---
+    # --- 7. CLI sin avance (v9, 10-oct-2026; v11.4, 21-oct-2026) ---
     # Si la cola tiene .corriendo desde hace $CliMin min o mas y el log del lote no cambia desde hace $CliMin min,
     # la CLI quedo esperando algo o murio (ejecutar-cola.ps1 limpia el candado a los 90 min). Primer aviso al Chat
     # de desarrollo; si sigue, cada $CliCada min se repite y Carlos recibe el paso exacto.
@@ -486,6 +486,13 @@ try {
         $lockC = Join-Path $Cola '.corriendo'
         if (Test-Path $lockC) {
             $fl = Get-Item -Force $lockC; $ahoraC = Get-Date
+            # v11.4 (M-1095): un candado leido mientras la cola lo crea trae LastWriteTime 1601 (fecha cero de Windows) y una
+            # "edad" de millones de minutos; tambien puede desaparecer en segundos (pasada sin lotes). Se relee a los 3 s y,
+            # si ya no esta o su fecha es anterior a 2000, no es un lote colgado: se ignora en esta pasada.
+            Start-Sleep -Seconds 3
+            if (-not (Test-Path $lockC)) { throw 'candado-efimero' }
+            $fl = Get-Item -Force $lockC; $ahoraC = Get-Date
+            if ($fl.LastWriteTime.Year -lt 2000) { throw 'candado-sin-fecha' }
             $edadC = ($ahoraC - $fl.LastWriteTime).TotalMinutes
             $ultLog = Get-ChildItem -Path $LogDir -Filter '*-instr-*.txt' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
             $quieto = (-not $ultLog) -or (($ahoraC - $ultLog.LastWriteTime).TotalMinutes -ge $CliMin)
@@ -503,7 +510,7 @@ try {
                 }
             }
         } elseif (Test-Path $EstCli) { Remove-Item -Path $EstCli -Force -ErrorAction SilentlyContinue }
-    } catch { Log ('ERROR en cli: ' + $_.Exception.Message) }
+    } catch { if ($_.Exception.Message -notmatch '^candado-') { Log ('ERROR en cli: ' + $_.Exception.Message) } }
 
     # --- 7b. Pruebas y juez local (v11.2, LM-18/LM-19) ---
     # Avisa al Chat de desarrollo, una vez por archivo: lote bloqueado en la puerta de entrada (L-n-pruebas.json),

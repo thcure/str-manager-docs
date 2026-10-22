@@ -2320,6 +2320,40 @@
     "quien": "Arquitecto"
    },
    "prioridad": "P3"
+  },
+  {
+   "id": "INC-207",
+   "tipo": "INC",
+   "modulo": "Fábrica (vigilante del buzón)",
+   "fecha": "2026-10-21",
+   "titulo": "Falso aviso «la CLI lleva 223951782 min con el lote 164»: el vigilante leyó el candado .corriendo con fecha cero (1601) mientras la cola lo creaba o borraba en una pasada vacía",
+   "estado": "en fix",
+   "severidad": "bajo",
+   "casoUso": "sin caso de uso",
+   "contra": "herramienta",
+   "originador": "Desarrollo",
+   "contexto": {
+    "lote": null,
+    "guion": null,
+    "caso": null,
+    "tren": null
+   },
+   "causaRaiz": "herramienta",
+   "debioDetectarse": "prueba de la herramienta",
+   "origen": "aviso del vigilante 20:42; buzon\\cli-avisado.txt (clave cli@16001231190000)",
+   "nota": "20:47 Sin lote en curso (cola vacía; L-164 aceptado 14:21); .corriendo no existe. La sección 7 de vigilar-buzon.ps1 leyó LastWriteTime = 1-ene-1601 de un candado que la cola crea y borra en cada pasada. Arreglo del Arquitecto (LM-75, M-1095): v11.4 relee el candado a los 3 s y lo ignora si desapareció o es anterior a 2000. Cierra cuando Carlos copie v11.4 a buzon\\ (con respaldo v11.3).",
+   "destino": {
+    "tipo": "guardia",
+    "ref": "LM-75: vigilar-buzon.ps1 v11.4 sección 7",
+    "quien": "Arquitecto"
+   },
+   "prioridad": "P4",
+   "decision": {
+    "tipo": "fix",
+    "ref": "LM-75",
+    "motivo": "falso aviso sin impacto en lotes ni datos; arreglo ligero en la herramienta",
+    "fecha": "2026-10-21"
+   }
   }
  ],
  "dts": [
@@ -19730,6 +19764,12 @@
     "que": "Medición de 7 días de uso real sin «intento 3» en api/logs/error.log (cierre de INC-128) y conteo de tickets en solo lectura (INC-142)",
     "ref": "M-1006 · M-1008",
     "desde": "2026-10-21"
+   },
+   {
+    "de": "Carlos",
+    "que": "Copiar vigilar-buzon.ps1 v11.4 (lm7n\\) a buzon\\ para cerrar INC-207 (LM-75)",
+    "ref": "M-1095",
+    "desde": "2026-10-21 20:47"
    }
   ],
   "dondeEsta": {

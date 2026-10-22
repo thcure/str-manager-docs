@@ -1,4 +1,4 @@
-﻿# ejecutar-cola.ps1 (v11, 21-oct-2026, LM-72: guardia de revision previa «Revision previa: 23/23» en la cabecera (20 lineas) y, en criticos, «ok Diseno|Jefe de proyecto M-n»; rechazos .sin-revision.md / .sin-ok.md) (v10, 17-oct-2026, LM-50: Control-Veredicto compara el veredicto con pruebas.json; un «aceptado» con rojos sin explicar repite el juez una vez con opus y, si sigue, JUEZ-INCONSISTENTE + log\L-n-inconsistente.txt) (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
+﻿# ejecutar-cola.ps1 (v12, 21-oct-2026, LM-78: rafaga de capacidad (pw\rafaga.spec.js, LM-68) sola en la ventana 22:30-05:30 cada 10 lotes aceptados o cuando un lote aceptado toca database.php o str-api.js (contador en log\rafaga-cuenta.json); correr\rafaga.txt fuera de ventana espera en correr\ (salvo RAFAGA-AHORA)) (v11, 21-oct-2026, LM-72: guardia de revision previa «Revision previa: 23/23» en la cabecera (20 lineas) y, en criticos, «ok Diseno|Jefe de proyecto M-n»; rechazos .sin-revision.md / .sin-ok.md) (v10, 17-oct-2026, LM-50: Control-Veredicto compara el veredicto con pruebas.json; un «aceptado» con rojos sin explicar repite el juez una vez con opus y, si sigue, JUEZ-INCONSISTENTE + log\L-n-inconsistente.txt) (v9, 17-oct-2026, LM-49: con la cola sin lotes corre pw\tren.js (fase 2) si hay 3+ lotes en log\tren-pendiente.json o el archivo TREN) (v8, 17-oct-2026, LM-47b: funcion Juzgar, carpeta rejuzgar\ (solo juez), {HORA}/{FECHA} reales en el texto del juez) (v7.9, 13-oct-2026, LM-27b: modelo-cargas\CREDENCIALES y ROLES por pw\modelo-llamar.js; los tokens se quedan en claves\) (v7.8, 13-oct-2026: correr\<nombre>.txt corre pw\<nombre>.spec.js (guiones de solo lectura o de semilla) -> log\<NOMBRE>-guion.json) (v7.7, 13-oct-2026, DT-35: si existe C:\php\php.exe lo agrega al PATH para los tests con PHP real) (v7.6, 13-oct-2026: archivo REPONER-SEMILLA corre pw\guion.js semilla-reponer.spec.js antes de reprobar\) (v7.5, 13-oct-2026: reprobar\L-n.txt acepta el id corto del lote) (v7.4, 13-oct-2026, LM-21: modelo-cargas\EXPORTAR -> log\espejo\) (v7.3, 13-oct-2026: la guardia de criticos acepta LM-n como DA-n) (v7.2, 13-oct-2026: modelo-cargas\ MIGRAR y paquetes por pw\modelo-llamar.js) (v7.1, 13-oct-2026: Probar-Y-Juzgar como funcion; carpeta reprobar\ repite pruebas y juez de un lote de hechas sin reconstruirlo) (v7, 12-oct-2026, LM-19: tras probar-lote verde o rojo, juez local sobre capturas -> log\L-n-veredicto.json; SIN-JUEZ lo apaga) (v6, 12-oct-2026, PRUEBAS-v1/LM-18: tras el commit corre pw\probar-lote.js = P4 puerta de entrada + P5 guion y regresion; escribe log\L-n-pruebas.json) (v5, 12-oct-2026, B3b: ids L-n; orden por numero de lote, acepta NN-instr-* y L-NN-instr-*) (v4: STR_INSTR/STR_LOTE; --settings auto-mode.json) (v3, LM-2) — Ejecuta en orden las instrucciones que Claude (Cowork) deja en la cola
 # Carpeta de la cola: C:\Users\<usuario>\Downloads\str-instr-cola\   (fuera del repositorio)
 #   *.md            → instrucciones pendientes (se ejecutan por numero de lote: 75-instr-*.md o L-75-instr-*.md; v5)
 #   hechas\         → instrucciones ya ejecutadas (con commit)
@@ -36,6 +36,39 @@ if (Test-Path 'C:\php\php.exe') { if (($env:Path -split ';') -notcontains 'C:\ph
 function Resumen($linea) {
   $ts = Get-Date -Format 'yyyy-MM-dd HH:mm'
   Add-Content -Path (Join-Path $Log '_resumen.txt') -Value "$ts | $linea" -Encoding UTF8
+}
+
+# v12 (LM-78): rafaga de capacidad (RT-25/RT-19). Ventana sin turnos 22:30-05:30 de Bogota; RAFAGA-AHORA (lo crea Carlos) la abre.
+$RafagaCuenta = Join-Path $Log 'rafaga-cuenta.json'
+function Hora-Bogota {
+  try { return [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'SA Pacific Standard Time') } catch { return (Get-Date) }
+}
+function En-Ventana-Rafaga {
+  if (Test-Path (Join-Path $Cola 'RAFAGA-AHORA')) { return $true }
+  $h = Hora-Bogota; $m = $h.Hour * 60 + $h.Minute
+  return ($m -ge 1350 -or $m -lt 330)
+}
+function Leer-Cuenta-Rafaga {
+  $c = $null; try { $c = Get-Content -Raw -Encoding UTF8 $RafagaCuenta -ErrorAction Stop | ConvertFrom-Json } catch { }
+  if (-not $c) { $c = [pscustomobject]@{ aceptados = 0; pedida = $false; motivo = ''; lanzada = ''; lotes = @() } }
+  return $c
+}
+function Guardar-Cuenta-Rafaga($c) {
+  [IO.File]::WriteAllText($RafagaCuenta, ($c | ConvertTo-Json -Compress), (New-Object System.Text.UTF8Encoding $false))
+}
+# Un lote aceptado suma 1; si su commit toca database.php o str-api.js, la rafaga queda pedida (plan de arquitectura A2).
+function Contar-Rafaga([string]$loteId, [string]$hash) {
+  $c = Leer-Cuenta-Rafaga
+  $vistos = @(); if ($c.PSObject.Properties.Name -contains 'lotes') { $vistos = @($c.lotes) }
+  if ($loteId -and ($vistos -contains $loteId)) { return }   # reprobar\ o rejuzgar\ del mismo lote no cuentan dos veces
+  $vistos = @(@($vistos) + $loteId | Select-Object -Last 30)
+  if ($c.PSObject.Properties.Name -contains 'lotes') { $c.lotes = $vistos } else { $c | Add-Member -NotePropertyName lotes -NotePropertyValue $vistos }
+  $c.aceptados = [int]$c.aceptados + 1
+  $toca = @()
+  if ($hash) { try { $toca = @(git show --name-only --format= $hash 2>$null | Where-Object { $_ -match '(^|/)database\.php$|(^|/)str-api\.js$' }) } catch { } }
+  if ($toca.Count -gt 0) { $c.pedida = $true; $c.motivo = $loteId + ' toca ' + ($toca -join ', ') }
+  Guardar-Cuenta-Rafaga $c
+  Resumen ("RAFAGA | cuenta " + $c.aceptados + "/10 tras " + $loteId + $(if ($toca.Count -gt 0) { ' | pedida: ' + $c.motivo } else { '' }))
 }
 
 # v7.1: pruebas (P4/P5) y juez (LM-19) de un lote ya en hechas\. Lo usan el final de cada lote y reprobar\.
@@ -111,7 +144,10 @@ function Juzgar([string]$nombre, [string]$hash) {
         Resumen "JUEZ | $($nombre) | $modelo | $arch"
         $ve = $null; try { $ve = Get-Content -Raw -Encoding UTF8 (Join-Path $Log $arch) | ConvertFrom-Json } catch { }
         $fuera = Control-Veredicto $pr $ve
-        if ($fuera.Count -eq 0) { return }
+        if ($fuera.Count -eq 0) {
+          if ($ve -and $ve.resultado -eq 'aceptado') { try { Contar-Rafaga $loteId $hash } catch { Resumen ('RAFAGA | error al contar: ' + $_.Exception.Message) } }   # v12 (LM-78)
+          return
+        }
         $lista = ($fuera -join ', ')
         if ($vuelta -eq 1) {
           Resumen "JUEZ-CONTROL | $($nombre) | $arch dice aceptado con rojos sin explicar: $lista | otra vuelta con opus"
@@ -180,6 +216,8 @@ try {
   # de pw (solo escribe zz-verif-). Resultado en log\<NOMBRE>-guion.json; el .txt pasa a correr\hechos\.
   $Correr = Join-Path $Cola 'correr'
   foreach ($cg in @(Get-ChildItem -Path $Correr -Filter '*.txt' -File -ErrorAction SilentlyContinue)) {
+    # v12 (LM-78): la rafaga solo corre en la ventana (o con RAFAGA-AHORA); fuera de ella el .txt se queda en correr\ esperando
+    if ($cg.BaseName -eq 'rafaga' -and -not (En-Ventana-Rafaga)) { continue }
     $specG = Join-Path $Cola ('pw\' + $cg.BaseName + '.spec.js')
     $nodeG = (Get-Command node -ErrorAction SilentlyContinue | Select-Object -First 1).Source
     if ($nodeG -and (Test-Path $specG)) {
@@ -187,6 +225,7 @@ try {
       $resG = (& $nodeG (Join-Path $Cola 'pw\guion.js') ($cg.BaseName + '.spec.js') '--lote' $cg.BaseName.ToUpper() 2>&1 | ForEach-Object { "$_" })
       Pop-Location
       Resumen ("GUION | " + $cg.BaseName + " | " + (($resG | Select-Object -Last 2) -join ' / ' -replace '[^\x20-\x7E]', ''))
+      if ($cg.BaseName -eq 'rafaga') { $cR = Leer-Cuenta-Rafaga; $cR.aceptados = 0; $cR.pedida = $false; $cR.motivo = ''; $cR.lanzada = (Hora-Bogota).ToString('yyyy-MM-dd HH:mm'); Guardar-Cuenta-Rafaga $cR }   # v12 (LM-78)
     } else { Resumen ("GUION | " + $cg.BaseName + " | no existe pw\" + $cg.BaseName + ".spec.js o falta node") }
     $destG = Join-Path $Correr 'hechos'; if (-not (Test-Path $destG)) { New-Item -ItemType Directory -Path $destG | Out-Null }
     Move-Item -Path $cg.FullName -Destination (Join-Path $destG ($cg.BaseName + '.' + (Get-Date -Format 'yyyyMMdd-HHmm') + '.txt')) -Force
@@ -270,6 +309,16 @@ try {
       Resumen ("TREN | " + $ultT)
     }
     if (Test-Path $pedidoTren) { Remove-Item -Path $pedidoTren -Force -ErrorAction SilentlyContinue }
+    # v12 (LM-78): con la cola sin lotes, en la ventana, la rafaga se pide sola cada 10 aceptados o si un aceptado toco database.php/str-api.js
+    try {
+      $cR = Leer-Cuenta-Rafaga
+      $txtR = Join-Path $Cola 'correr\rafaga.txt'
+      if ((Test-Path (Join-Path $Cola 'pw\rafaga.spec.js')) -and -not (Test-Path $txtR) -and ([int]$cR.aceptados -ge 10 -or $cR.pedida) -and (En-Ventana-Rafaga)) {
+        if (-not (Test-Path (Join-Path $Cola 'correr'))) { New-Item -ItemType Directory -Path (Join-Path $Cola 'correr') | Out-Null }
+        New-Item -ItemType File -Path $txtR -Force | Out-Null
+        Resumen ("RAFAGA | pedida por la cola: " + $(if ($cR.pedida) { $cR.motivo } else { [string]$cR.aceptados + ' lotes aceptados' }) + " | corre en la proxima pasada")
+      }
+    } catch { Resumen ('RAFAGA | error al pedir: ' + $_.Exception.Message) }
     exit 0
   }
 

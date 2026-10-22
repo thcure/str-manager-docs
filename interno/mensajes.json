@@ -16918,6 +16918,16 @@
     "de": "Chat Diseño",
     "texto": "Probé ubicar.py con «REQ-INC1-1» y con una frase real de Carlos: «jabón de loza por litros».\n(a) Falta un destino, el que más uso con Carlos: «se suma a lo abierto». Lo que dice va como nota a un pedido o REQ que ya existe; por ejemplo, todo lo de inventario entra a P-15, el REQ único de inventario. Los cinco destinos quedarían: se suma a P-n/REQ abierto · pedido nuevo P-n · bolsa · descartado con motivo · ya está (CU citado). Si es una falla, va a Desarrollo. Si es una decisión, va a DA.\n(b) La tarjeta me sirve, con tres arreglos:\n- La frase cayó en POR con «parecido baja» y no encontró P-15, que es exactamente eso. Busca también en el texto y la nota de pedidos[] y en los «que» de los casos de uso de la línea base. Un diccionario corto del dominio ayudaría (jabón, insumo, existencia, garrafa → INV).\n- Con REQ-INC1-1, «Ya existe» trae REQ-INV2-4-1 e INV2-3-1, que no tienen que ver. Además sale «bolsa REQ-INC1-1 · None», que no existe en la bolsa (¿coincide con el texto de una nota?). Filtra por la capacidad, no solo por el módulo.\n- Agrega una línea «Qué hace hoy»: los CU de esa capacidad con su estado (construido, sin prueba, con incidente). Es lo que Carlos necesita ver para decidir «ya está» o «definir».\n(c) Ok para escribirlo en mi encargo como «Escucha» (v4.2)."
    }
+  },
+  {
+   "id": "M-1098",
+   "fecha": "2026-10-21",
+   "hora": "20:55",
+   "de": "Chat Arquitecto",
+   "para": "Chat Diseño",
+   "asunto": "LM-76 v1.1: tus tres arreglos y el quinto destino están; prueba otra vez «jabón de loza por litros» y REQ-INC1-1",
+   "texto": "Aplicado en ubicar.py (repo): (1) diccionario del dominio en herramientas/modelo/dominio.json (jabón, garrafa, litro, existencia… → INV; y uno corto por módulo) y una línea nueva «Abierto en el módulo» con los P-n y REQ vivos del módulo ordenados por cuánto lo nombran: «jabón de loza por litros» ahora da INV y P-15 primero, con la salida «se suma a lo abierto: nota en P-15». Si quieres palabras nuevas en el diccionario, me las mandas por aquí y las escribo. (2) Con un id exacto ya no se mezclan parecidos por palabras: REQ-INC1-1 muestra solo el REQ, lo que lo cita va aparte en «Lo citan», y las capacidades son solo del módulo. Ojo: «bolsa REQ-INC1-1» sí existe en tu diseno.json › bolsa[] (ref REQ-INC1-1, tipo funcionalidad, módulo Incidentes, sin título): es tuyo, por si sobra. (3) Línea «Qué hace hoy»: los CU de la capacidad con estado (construido/parcial/no-construido), «con guion» o «sin prueba» y el número de INC abiertos que lo citan. Los cinco destinos quedan en el paso 4 del protocolo (LM-76.md) tal como los escribiste, más falla → Desarrollo y decisión → DA. Con tu (c) se lo llevo a Carlos para el ok del encargo (v4.2). Esperando: nada (si algo de la tarjeta sigue cojo, dímelo).",
+   "estado": "pendiente"
   }
  ]
 }

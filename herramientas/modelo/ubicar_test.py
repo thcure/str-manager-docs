@@ -17,7 +17,7 @@ DATOS = {
     },
     'diseno': {'reqs': [{'id': 'REQ-CAL-3', 'titulo': 'Reservas directas con horario acordado', 'estado': 'aceptado', 'prioridad': 5},
                         {'id': 'REQ-M6-1', 'titulo': 'Plantillas de WhatsApp al huésped', 'estado': 'entregado', 'prioridad': 40}],
-               'pedidos': [{'id': 'P-20', 'texto': 'Que el calendario avise por WhatsApp', 'estado': 'nuevo', 'req': None}],
+               'pedidos': [{'id': 'P-20', 'texto': 'Que el calendario mande un mensaje por WhatsApp al huésped', 'estado': 'nuevo', 'req': None}],
                'bolsa': [{'ref': 'T-40', 'titulo': 'Exportar el calendario a PDF', 'modulo': 'Calendario', 'prioridad': 'baja'}],
                'das': [{'id': 'DA-70', 'pregunta': '¿WhatsApp oficial o enlace wa.me?', 'estado': 'abierta'}]},
     'seg': {'incs': [{'id': 'INC-300', 'titulo': 'La reserva directa no guarda la hora acordada', 'modulo': 'Calendario y reservas', 'estado': 'abierto'},
@@ -90,7 +90,7 @@ class Proceso(unittest.TestCase):
     def test_nada_parecido(self):
         t = U.tarjeta(DATOS, 'xyzzy plugh')
         self.assertIsNone(t['proceso']['n']); self.assertIn('pedido nuevo', t['proceso']['motivo'])
-        self.assertIn('definir', ' '.join(t['salidas']))
+        self.assertIn('pedido nuevo', ' '.join(t['salidas']))
 
 
 class Tarjeta(unittest.TestCase):
@@ -103,6 +103,27 @@ class Tarjeta(unittest.TestCase):
     def test_texto_tiene_las_lineas(self):
         tx = U.texto(U.tarjeta(DATOS, 'reserva directa'))
         for linea in ('Ubicación', 'Módulo:', 'Ya existe:', 'Abierto hoy:', 'Proceso de la fábrica:', 'Salidas de Carlos:'): self.assertIn(linea, tx)
+
+    def test_dominio_y_contexto(self):
+        dom = {'INV': ['jabon', 'insumo', 'litro'], 'CAL': ['reserva']}
+        self.assertEqual(U.modulo_por_dominio('jabón de loza por litros', dom), 'INV')
+        self.assertIsNone(U.modulo_de_texto('jabón de loza por litros', DATOS['mapa']))  # «por» no es un módulo
+        datos = dict(DATOS, dominio={'M6': ['whatsapp', 'mensaje']})
+        t = U.tarjeta(datos, 'un mensaje de whatsapp al llegar')
+        self.assertEqual(t['modulo']['id'], 'M6')
+        self.assertIn('P-20', [p['id'] for p in t['enElModulo']['pedidos']] + [p['id'] for p in t['yaExiste']['pedidos']])
+        self.assertTrue(any(s.startswith('se suma a lo abierto') for s in t['salidas']))
+
+    def test_id_exacto_no_mezcla_parecidos_y_separa_citas(self):
+        t = U.tarjeta(DATOS, 'REQ-CAL-3')
+        self.assertEqual([r['id'] for r in t['yaExiste']['reqs']], ['REQ-CAL-3'])
+        self.assertIn('L-150', [c['id'] for c in t['loCitan']])
+        self.assertTrue(t['queHaceHoy'] == [] or all(c['id'].startswith('CU-CAL') for c in t['queHaceHoy']))
+
+    def test_que_hace_hoy(self):
+        t = U.tarjeta(DATOS, 'CAP-CAL-2')
+        self.assertEqual({c['id'] for c in t['queHaceHoy']}, {'CU-CAL-2.1', 'CU-CAL-2.9'})
+        self.assertEqual({c['prueba'] for c in t['queHaceHoy']}, {'sin prueba'})
 
     def test_json_serializable(self):
         import json; json.dumps(U.tarjeta(DATOS, 'whatsapp'), ensure_ascii=False)

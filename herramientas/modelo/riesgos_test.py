@@ -82,4 +82,18 @@ rr = R.rojas_repetidas(['RT críticas sin guardia automática', 'buzón vivo (KB
 t('repetidas sin acción: solo el buzón (MD-18)', rr == [('buzón vivo (KB)', 'MD-18')], rr)
 t('sin ficha anterior → None', R.rojas_repetidas(['a'], None, [], [], []) is None)
 
+# --- linea-base.py --lote: aviso «Riesgo:» con R-n en módulos ≥ 6 (RIESGO-v1, pendiente de LM-71) ---
+import importlib.util
+_sp = importlib.util.spec_from_file_location('lb', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'linea-base.py')); LB = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(LB)
+mapa_r = {'modulos': [{'id': 'INV', 'riesgo': {'probabilidad': 3, 'impacto': 3}}, {'id': 'PR', 'riesgo': {'probabilidad': 1, 'impacto': 2}}, {'id': 'HK', 'riesgo': {'probabilidad': 3, 'impacto': 3}}]}
+reg_r = [{'id': 'R-5', 'modulos': ['INV'], 'estado': 'vivo'}, {'id': 'R-9', 'modulos': ['INV'], 'estado': 'cerrado'}, {'id': 'R-17', 'modulos': ['HK'], 'estado': 'vivo'}]
+rl = LB.riesgo_del_lote
+t('sin módulo alto → ok', rl('Riesgo: bajo\n', {'CU-PR-3.1': []}, mapa_r, reg_r)['ok'])
+t('módulo alto sin línea Riesgo → aviso', not rl('Alcance: x\n', {'CU-INV-1.1': []}, mapa_r, reg_r)['ok'])
+t('módulo alto con R-n vivo del módulo → ok', rl('Riesgo: medio (R-5)\n', {'CU-INV-1.1': []}, mapa_r, reg_r)['ok'])
+r_ = rl('Riesgo: alto (R-9)\n', {'CU-INV-1.1': []}, mapa_r, reg_r)
+t('R-n cerrado no cuenta y sugiere candidatos', not r_['ok'] and 'R-5' in r_['veredicto'], r_['veredicto'])
+t('módulos también desde «Mapa:»', rl('Mapa: SRV, HK\nRiesgo: medio (R-5)\n', {}, mapa_r, reg_r)['faltan'] == ['HK'])
+t('módulos también desde CU declarados en la cabecera', rl('Casos de uso: CU-HK-1.1\nRiesgo: R-17\n', {}, mapa_r, reg_r)['ok'])
+
 print('\n%d OK, %d FAIL' % (OK_, FAIL)); sys.exit(1 if FAIL else 0)

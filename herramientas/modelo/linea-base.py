@@ -539,6 +539,12 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
     out['decision'] = dc
     rv = revision_del_lote(texto, '--borrador' in argv)
     out['revision'] = rv
+    try:
+        riesgos_reg = cargar(os.path.join(raiz, 'interno', 'proyecto.json')).get('riesgos', [])
+    except Exception:
+        riesgos_reg = []
+    rg = riesgo_del_lote(texto, calc, mapa, riesgos_reg)
+    out['riesgo'] = rg
     if como_json:
         print(json.dumps(out, ensure_ascii=False, indent=1))
     else:
@@ -555,7 +561,46 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
         if dc['areaSensible']:
             print('Decisión (A6): ' + dc['veredicto'] + ('' if dc['ok'] else ' → no encolar'))
         print('Revisión previa (LM-72): ' + rv['veredicto'] + ('' if rv['ok'] or rv['borrador'] else ' → no encolar'))
+        if rg['modulosAltos']:
+            print('Riesgo (RIESGO-v1): ' + rg['veredicto'] + ('' if rg['ok'] else ' → aviso'))
     return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] and dc['ok'] and (rv['ok'] or rv['borrador']) else 2
+
+
+RE_RN = re.compile(r'\bR-\d+\b')
+
+
+def riesgo_del_lote(texto, calc, mapa, riesgos):
+    """Pura (RIESGO-v1, LM-71 paso pendiente): si el lote toca un módulo con riesgo p × i ≥ 6 en el mapa, la línea «Riesgo:» de la
+    cabecera debe citar un R-n vivo del registro (proyecto.json › riesgos[]) que nombre ese módulo. Solo aviso (no corta).
+    calc = {CU-id: …} del cálculo; los módulos salen de los CU calculados y declarados y de la línea «Mapa:». Devuelve {modulosAltos, citados, faltan, ok, veredicto}."""
+    nivel = {}
+    for m in (mapa or {}).get('modulos', []):
+        r = m.get('riesgo') or {}
+        try: nivel[m['id']] = int(r.get('probabilidad')) * int(r.get('impacto'))
+        except (TypeError, ValueError): pass
+    cab = texto[:4000]
+    mods = {m.group(1) for m in (re.match(r'CU-([A-Z0-9]+)-', c) for c in (calc or {})) if m}
+    mods |= {m.group(1) for m in re.finditer(r'\bCU-([A-Z0-9]+)-[\d.]+', cab)}
+    mm = re.search(r'^Mapa:(.*)$', cab, re.M)
+    if mm: mods |= {w for w in re.findall(r'\b[A-Z][A-Z0-9]{0,4}\b', mm.group(1)) if w in nivel}
+    mods = sorted(mods)
+    altos = [m for m in mods if nivel.get(m, 0) >= 6]
+    if not altos:
+        return {'modulosAltos': [], 'citados': [], 'faltan': [], 'ok': True, 'veredicto': 'sin módulo de riesgo ≥ 6'}
+    ml = re.search(r'^Riesgo:(.*)$', cab, re.M)
+    citados = RE_RN.findall(ml.group(1)) if ml else []
+    vivos = {r.get('id'): r for r in riesgos or [] if r.get('estado') != 'cerrado'}
+    cubiertos = set()
+    for rid in citados:
+        for mm in (vivos.get(rid) or {}).get('modulos') or []:
+            cubiertos.add(mm)
+    faltan = [m for m in altos if m not in cubiertos]
+    if not ml:
+        return {'modulosAltos': altos, 'citados': [], 'faltan': altos, 'ok': False, 'veredicto': 'toca %s (riesgo ≥ 6) y la cabecera no trae línea «Riesgo:»' % ', '.join(altos)}
+    if faltan:
+        sug = sorted({r['id'] for r in vivos.values() if set(r.get('modulos') or []) & set(faltan)})
+        return {'modulosAltos': altos, 'citados': citados, 'faltan': faltan, 'ok': False, 'veredicto': 'toca %s (riesgo ≥ 6) y «Riesgo:» no cita un R-n vivo de ese módulo%s' % (', '.join(faltan), ' (candidatos: ' + ', '.join(sug) + ')' if sug else ' (no hay R-n para ese módulo: pídelo al Jefe de proyecto)')}
+    return {'modulosAltos': altos, 'citados': citados, 'faltan': [], 'ok': True, 'veredicto': 'toca %s (riesgo ≥ 6) y cita %s' % (', '.join(altos), ', '.join(citados))}
 
 
 RE_REVISION = re.compile(r'Revisi[oó]n previa:\s*(\d+)\s*/\s*(\d+)', re.I)

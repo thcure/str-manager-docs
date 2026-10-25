@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizadoEn": "2026-10-21",
+ "actualizadoEn": "2026-10-25",
  "titulo": "Base de conocimiento del modelo de operación",
  "descripcion": "Fuente única de las fichas de proceso, el mapa de funcionamiento y las líneas base de configuración del modelo. La escribe el Arquitecto (capa Marco, prefijo 'modelo:'); la página 'Conocimiento' del STR solo la muestra. Los demás documentos apuntan aquí y no repiten el contenido.",
  "cobit": {
@@ -2226,7 +2226,7 @@
   },
   {
    "id": "PZ-17",
-   "nombre": "Línea base funcional",
+   "nombre": "Línea de producto (línea base funcional: lo construido)",
    "ruta": "interno/linea-base/",
    "tipo": "referencia",
    "capa": "producto",
@@ -2255,7 +2255,7 @@
    "cuandoSeLee": "a demanda",
    "tope": null,
    "revisarCuando": "al cerrar cada proceso; estado en la cabecera",
-   "ultimaRevision": "2026-10-21",
+   "ultimaRevision": "2026-10-25",
    "exportable": true,
    "nota": "plan-configuracion-linea-base, proceso-requerimientos-diseno, plan-verificacion-aceptacion, plan-construccion, plan-incidentes-problemas, plan-flujo-trabajo, plan-arquitectura, plan-conocimiento, metodo-formalizacion-fabrica"
   },
@@ -2272,7 +2272,7 @@
    "cuandoSeLee": "a demanda",
    "tope": null,
    "revisarCuando": "con el LM siguiente que lo toque",
-   "ultimaRevision": "2026-10-21",
+   "ultimaRevision": "2026-10-25",
    "exportable": true
   },
   {
@@ -2289,7 +2289,7 @@
    "cuandoSeLee": "a demanda",
    "tope": null,
    "revisarCuando": "con cada LM",
-   "ultimaRevision": "2026-10-21",
+   "ultimaRevision": "2026-10-25",
    "exportable": true,
    "nota": "también interno/cobit.json"
   },
@@ -2585,7 +2585,7 @@
    "cuandoSeLee": "a demanda",
    "tope": null,
    "revisarCuando": "con cada proceso de MJ-17",
-   "ultimaRevision": "2026-10-21",
+   "ultimaRevision": "2026-10-25",
    "exportable": true,
    "ubicacion": "url",
    "que": " · desde LM-74 con numeración por ejecución y nombres de la 12207"
@@ -2621,10 +2621,70 @@
    "cuandoSeLee": "a demanda",
    "tope": null,
    "revisarCuando": "con cada LM que cambie un proceso o su nombre; al cerrar MJ-17 (índice del manual)",
-   "ultimaRevision": "2026-10-21",
+   "ultimaRevision": "2026-10-25",
    "exportable": true,
    "ubicacion": "artefacto (generado por el Arquitecto desde un generador en su scratchpad; fuente: los planes de claude/marco/)",
    "que": "Marco SDLC × ISO/IEC/IEEE 12207 (cubierto, parcial, fuera por decisión, falta) · macroproceso · por proceso: vista A (entradas, guardias, salidas) y vista B (lineal por carriles) · pruebas de principio a fin"
+  },
+  {
+   "tipo": "registro",
+   "capa": "fábrica",
+   "escritor": "Diseño (diferencias D-<MOD>-n); Arquitecto (esquema, objetivo.py, marca «construida»)",
+   "cuandoSeLee": "en la revisión de alcance con Carlos y al redactar un REQ o un lote que construye diferencias",
+   "tope": null,
+   "ultimaRevision": "2026-10-25",
+   "exportable": true,
+   "id": "PZ-40",
+   "nombre": "Línea objetivo (alcance evolutivo) y su brecha",
+   "ruta": "interno/linea-objetivo/",
+   "lectores": [
+    "Diseño",
+    "Arquitecto",
+    "Desarrollo",
+    "Jefe de proyecto",
+    "Carlos"
+   ],
+   "revisarCuando": "con cada módulo confirmado; al subir alcance nuevo a producción",
+   "ubicacion": "repo str-manager-docs; herramienta herramientas/modelo/objetivo.py (--brecha [MOD]); controles O1–O3 en validar.py; línea «Diferencias:» en --lote",
+   "que": "Solo las diferencias con la línea de producto (nuevo · cambia · sale) con su estado borrador → validada → construida; la brecha es lo validado sin construir; los REQ del módulo se congelan mientras su alcance está en revisión (LM-80)"
+  },
+  {
+   "tipo": "herramienta",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "cuandoSeLee": "antes de presentarle a Carlos un tema, una mejora o una decisión",
+   "tope": null,
+   "ultimaRevision": "2026-10-25",
+   "exportable": true,
+   "id": "PZ-41",
+   "nombre": "Ubicar antes de presentar (regla común 17)",
+   "ruta": "herramientas/modelo/ubicar.py",
+   "lectores": [
+    "todos los chats"
+   ],
+   "revisarCuando": "cuando un tema se presente como nuevo y ya existía (lección del 22-oct: decisión de sitios del 17-oct)",
+   "ubicacion": "repo str-manager-docs; pruebas ubicar_test.py",
+   "que": "Tarjeta con módulo, capacidad, qué hace hoy, qué ya existe, qué está abierto, quién lo cita, línea objetivo, proceso, pausa y cinco salidas posibles (LM-76)"
+  },
+  {
+   "tipo": "herramienta",
+   "capa": "fábrica",
+   "escritor": "Arquitecto",
+   "cuandoSeLee": "la lanza la cola v12 cada 10 lotes aceptados o al tocar database.php/str-api.js, en la ventana 22:30–05:30",
+   "tope": null,
+   "ultimaRevision": "2026-10-25",
+   "exportable": true,
+   "id": "PZ-42",
+   "nombre": "Prueba de capacidad (ráfaga) de RT-25",
+   "ruta": "herramientas/pw/rafaga.spec.js",
+   "lectores": [
+    "Arquitecto",
+    "Desarrollo",
+    "Jefe de proyecto"
+   ],
+   "revisarCuando": "si caduca la última corrida (aviso A2 de validar.py) o cambia el hosting",
+   "ubicacion": "repo str-manager-docs y LENOVO (pw\\); última corrida en esquema.json › arquitectura.capacidad.ultimaCorrida; lección en herramientas/pw/LEEME.md (STRApi.get, mismo perfil)",
+   "que": "2 rondas × 12 lecturas con admin en zz-verif-pruebas, /api/diagnostico antes y después; verde solo con 24×200 (LM-68, LM-78)"
   }
  ],
  "mapaConocimiento": {

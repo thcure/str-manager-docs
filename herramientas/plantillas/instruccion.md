@@ -1,6 +1,6 @@
 # Plantilla · Instrucción de lote (la escribe el Chat Desarrollo; la ejecuta la CLI; la lee el verificador)
 
-Reglas de uso: el borrador va **sin número** (el número se asigna al encolar); las primeras 17 líneas son la **cabecera** (la cola lee 20) y las lee la guardia de la cola (un crítico sin `DA-n` ni «cruce … Carlos» no arranca); todo lo que la CLI deba tocar está en **Alcance**; toda prueba derivada dice **perfil, página completa y precondición**. Ejemplo real: `hechas\67-instr-fix-inc108-un-usuario-un-rol.md` (crítico) y `hechas\69-instr-sp3-nomenclatura.md` (estándar).
+Reglas de uso: el borrador va **sin número** (el número se asigna al encolar); las primeras 17 líneas son la **cabecera** (con «Diferencias:» desde LM-80, «Depende de» y «Precondiciones» van en una sola línea) (la cola lee 20) y las lee la guardia de la cola (un crítico sin `DA-n` ni «cruce … Carlos» no arranca); todo lo que la CLI deba tocar está en **Alcance**; toda prueba derivada dice **perfil, página completa y precondición**. Ejemplo real: `hechas\67-instr-fix-inc108-un-usuario-un-rol.md` (crítico) y `hechas\69-instr-sp3-nomenclatura.md` (estándar).
 
 ```
 # instr — <REQ-X-n / INC-n / DT-n>: <título en una línea>
@@ -12,14 +12,14 @@ Regresión: <opcional (pw 0.6.0, LM-39b): normalmente NO se escribe: la cola cor
 Reglas transversales que toca: <RT-n, RT-m (LM-36: `claude/arquitectura/reglas-transversales.md`); «ninguna» solo si el lote no toca datos, permisos, archivos, retención ni conexiones. Una RT «en conflicto» = el lote no se encola>
 Mapa: módulos y relaciones que cambia: <módulo(s) de la vista 1 y relación(es) de la vista 3 de `claude/arquitectura/mapa-str.md` que este lote crea, cambia o quita (colección, evento o ruta nueva); «ninguna» si solo corrige dentro de un módulo>
 Casos de uso: <los que toca, según `python3 -I herramientas/modelo/linea-base.py . --lote <este borrador>` (C2, LM-60): `CU-X-n.m, …`; los que el REQ crea van como «nuevo, definido en REQ-X»; un lote que solo toca guiones, cola, modelo o documentación dice «técnico, sin caso de uso». Si lo calculado no coincide con lo que declaras, corrige uno de los dos y dilo>
+Diferencias: <solo si el REQ cierra diferencias de la línea objetivo (LM-80): `D-<MOD>-n, …` que este lote construye; si son todas las del REQ, las mismas; si no aplica, omite la línea. `linea-base.py --lote` comprueba que existan y estén validadas (rc 2 si no)>
 Riesgo: <bajo | medio | alto> (R-1 del lote; si el lote toca un módulo con riesgo ≥ 6 en el mapa, también el `R-n` del registro `proyecto.json › riesgos[]`, RIESGO-v1). Mitigación: <una frase>.
 ¿Datos personales o dinero?: <no | sí: …> · ¿Normativa?: <no | sí: …> · ¿Toca el modelo (capa Marco)?: <no | sí> (sí = la CLI no lo ejecuta y termina sin commit; un lote del modelo LM-n que solo toque archivos de str-manager lleva «no (lote del modelo LM-n, DA-n y cruce de Carlos)»)
 Reversión: <git revert <hash> + despliegue | script | …>
 Commit: <la CLI | Carlos (obligatorio si el Alcance nombra `.claude/` o `tests/hooks.test.js`: la CLI no puede commitear su hook, INC-206; la instrucción trae entonces los comandos para Carlos —copia con md5, `git add`, `git commit -m` con la línea «Lote:», `git push`— y no la sección «El commit de este lote»; `linea-base.py --lote` lo corta)>
 Revisión previa: <n>/23 · <subagente de Desarrollo | segunda lectura> · <AAAA-MM-DD HH:MM>[ · ok Diseño M-n (crítico de producto) | ok Jefe de proyecto M-n (crítico de fábrica)] (LM-72: sin 23/23 la cola rechaza el lote como .sin-revision.md; un crítico sin el ok, como .sin-ok.md; `--lote --borrador` mientras redactas)
 Origen: <M-n…>. Requerimiento: `<ruta del REQ>` (<criterios n–m>). Decisión: <ADR-n | DA-n | ninguna (motivo)> (ARQUITECTURA-v1 A6: obligatoria con ese formato si el Alcance toca `api/config/`, `database.php`, auth/jwt, retención, cron, `sync-ical`, Drive o secretos; `--lote` lo corta; un DA-n aquí va también en la línea «Lote:» del commit (hook v5), un ADR-n no).
-Depende de: <lotes previos que deben estar aceptados | archivos que deben existir | ninguno>
-Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién los crea | permisos por rol | hora/fecha | ninguna>
+Depende de: <lotes previos que deben estar aceptados | archivos que deben existir | ninguno> · Precondiciones para verificar: <datos de prueba zz-verif- necesarios y quién los crea | permisos por rol | hora/fecha | ninguna>
 ¿Quién más depende de lo que cambia?: <listas blancas, filtros, respaldos, páginas que leen el mismo dato, tests que lo suponen; si no hay, «nadie»>
 ```
 

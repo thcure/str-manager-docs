@@ -220,6 +220,23 @@ try:
     if not _rl: avi('C1 linea-base', 'archivo', 'herramientas/modelo/linea-base.py', 'sin salida JSON: ' + (_lb.stderr or '')[:200])
 except Exception as ex: avi('C1 linea-base', 'archivo', 'herramientas/modelo/linea-base.py', f'no se pudo correr: {ex}')
 
+# LM-80 (línea objetivo, plan de configuración v3): forma de interno/linea-objetivo/<MOD>.json (error, O1); REQ que citan
+# diferencias inexistentes (error, O2); nota de pedido que crece sin especificación (aviso, O3).
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import objetivo as _OB
+    _obj = _OB.leer_objetivo(RAIZ); _prd = _OB.leer_producto(RAIZ)
+    for _m, _o in _obj.items():
+        for _i, _t in _OB.validar_modulo(_m, _o, _prd.get(_m, {})): err('O1 linea-objetivo', 'diferencia', _i, _t)
+    _ids = {x.get('id') for _o in _obj.values() for x in (_o.get('diferencias') or [])}
+    for r in reqs:
+        for _d in r.get('diferencias') or []:
+            if _d not in _ids: err('O2 diferencias', 'requisito', r.get('id'), f'cita {_d}, que no existe en la línea objetivo')
+    for _p in dis.get('pedidos', []):
+        if _p.get('estado') in ('nuevo', 'bloqueado') and len(str(_p.get('nota') or '')) > 3000 and not re.search(r'requerimientos-[a-z0-9-]+\.md|linea-objetivo', str(_p.get('nota') or '')):
+            avi('O3 pedido', 'pedido', _p.get('id'), f'nota de {len(str(_p.get("nota")))} caracteres sin especificación ni línea objetivo: las decisiones de alcance van a la línea objetivo (LM-80)')
+except Exception as ex: avi('O1 linea-objetivo', 'archivo', 'herramientas/modelo/objetivo.py', f'no se pudo correr: {ex}')
+
 # LM-61 (proceso de requerimientos, ISO/IEC/IEEE 29148): guardias sobre los REQ nuevos (con casosUso o desde ≥ 2026-10-21).
 # Los criterios viven en el .md (fuera del repo): los revisa linea-base.py --req; aquí solo los atributos de reqs[].
 try:

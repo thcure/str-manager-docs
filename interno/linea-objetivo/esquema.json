@@ -1,0 +1,33 @@
+{
+ "version": "1.0",
+ "fecha": "2026-10-25",
+ "escritor": "Arquitecto (este esquema); Chat Diseño escribe interno/linea-objetivo/<MOD>.json (LM-80)",
+ "que": "Línea objetivo (alcance evolutivo): solo las DIFERENCIAS del alcance que Carlos cierra con Diseño frente a la línea de producto (interno/linea-base/<MOD>.json, lo construido). La brecha la calcula herramientas/modelo/objetivo.py. Plan: claude/marco/plan-configuracion-linea-base.md v3 y claude/marco/propuesta-linea-objetivo-2026-10.md.",
+ "archivoModulo": {
+  "modulo": "id del mapa (INV, CAL…) (obligatorio)",
+  "version": "entero; 0 = borrador; sube con cada confirmación de Carlos (módulo entero)",
+  "estado": "borrador | en revisión | confirmado",
+  "confirmado": "{fecha, hora, por: Carlos, ref: P-n|DA-n|M-n} cuando estado = confirmado",
+  "capacidades": "[{id: CAP-<MOD>-n (existente) o CAP-<MOD>-n nueva (definida en una diferencia), estado: en revisión | cerrada, confirmada: {fecha, hora, ref} si cerrada}]",
+  "diferencias": "[diferencia]",
+  "historial": "[{fecha, hora, que}]"
+ },
+ "diferencia": {
+  "id": "D-<MOD>-<n> (obligatorio; estable, nunca se reutiliza ni se renumera)",
+  "cu": "CU-<MOD>-n.m (obligatorio): existente si tipo = cambia | sale; nuevo id libre si tipo = nuevo",
+  "capacidad": "CAP-<MOD>-n (obligatorio)",
+  "tipo": "nuevo | cambia | sale (obligatorio)",
+  "que": "verbo + objeto (obligatorio si tipo = nuevo)",
+  "campos": "{campo: valor objetivo} con campos de la ficha del caso de uso (actor, que, entradas, salidas, reglas, limitantes, escenarios, origen); en tipo = cambia, solo los que cambian",
+  "escenarios": "[{id, tipo, dado, cuando, entonces}] nuevos o cambiados",
+  "decision": "{fecha, hora, ref: P-n | DA-n, nota} (obligatorio si estado = validada o construida)",
+  "estado": "borrador | validada (Carlos la vio en la ficha de cambio) | construida (el Arquitecto la pasó a la línea de producto tras el lote) | retirada (Carlos cambió de idea; motivo en nota)",
+  "lote": "L-n que la construyó (cuando estado = construida)",
+  "nota": "texto"
+ },
+ "reglas": [
+  "Un escritor: Diseño escribe <MOD>.json; el Arquitecto solo cambia estado → construida (con lote) al aceptarse el lote que la construye.",
+  "Una diferencia validada sin lote es brecha; los REQ citan las que cierran en reqs[].diferencias; el lote las nombra en la línea «Diferencias:» de su cabecera.",
+  "Mientras un módulo tenga diferencias en borrador o capacidades en revisión, sus REQ quedan congelados (proyecto.json › pausas[].modulos[])."
+ ]
+}

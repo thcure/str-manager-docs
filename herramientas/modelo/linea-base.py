@@ -545,6 +545,13 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
         riesgos_reg = []
     rg = riesgo_del_lote(texto, calc, mapa, riesgos_reg)
     out['riesgo'] = rg
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import objetivo as _OB
+        df = _OB.diferencias_del_lote(texto, _OB.leer_objetivo(raiz))
+    except Exception as ex:
+        df = {'declaradas': [], 'ok': True, 'veredicto': 'no se pudo leer la línea objetivo: %s' % ex}
+    out['diferencias'] = df
     if como_json:
         print(json.dumps(out, ensure_ascii=False, indent=1))
     else:
@@ -563,7 +570,9 @@ def casos_de_lote(argv, raiz, todos_cu, incs, resultados, mapa, gu):
         print('Revisión previa (LM-72): ' + rv['veredicto'] + ('' if rv['ok'] or rv['borrador'] else ' → no encolar'))
         if rg['modulosAltos']:
             print('Riesgo (RIESGO-v1): ' + rg['veredicto'] + ('' if rg['ok'] else ' → aviso'))
-    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] and dc['ok'] and (rv['ok'] or rv['borrador']) else 2
+        if df.get('declaradas') or not df['ok']:
+            print('Diferencias (LM-80): ' + df['veredicto'] + ('' if df['ok'] else ' → no encolar'))
+    return 0 if veredicto.startswith('coincide') and v3_ok and hk['ok'] and dc['ok'] and df['ok'] and (rv['ok'] or rv['borrador']) else 2
 
 
 RE_RN = re.compile(r'\bR-\d+\b')

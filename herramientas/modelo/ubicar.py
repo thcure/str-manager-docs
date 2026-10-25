@@ -82,7 +82,12 @@ def modulo_por_dominio(texto, dominio):
 def leer_todo(raiz_repo):
     i = os.path.join(raiz_repo, 'interno')
     d = {'mapa': cargar(os.path.join(i, 'mapa-modulos.json')), 'diseno': cargar(os.path.join(i, 'diseno.json')),
-         'seg': cargar(os.path.join(i, 'seguimiento.json')), 'pro': cargar(os.path.join(i, 'proyecto.json')), 'lb': {}, 'dominio': leer_dominio()}
+         'seg': cargar(os.path.join(i, 'seguimiento.json')), 'pro': cargar(os.path.join(i, 'proyecto.json')), 'lb': {}, 'dominio': leer_dominio(), 'obj': {}}
+    try:   # LM-80: línea objetivo (diferencias del alcance nuevo)
+        for p in sorted(glob.glob(os.path.join(i, 'linea-objetivo', '*.json'))):
+            n = os.path.basename(p)[:-5]
+            if n != 'esquema': d['obj'][n] = cargar(p)
+    except (OSError, ValueError): pass
     try: d['procesos'] = cargar(os.path.join(i, 'proceso.json')).get('procesosFabrica', {}).get('procesos', [])
     except (OSError, ValueError): d['procesos'] = []
     for p in sorted(glob.glob(os.path.join(i, 'linea-base', '*.json'))):
@@ -259,6 +264,18 @@ def que_hace_hoy(caps, datos, mod):
     return out[:8]
 
 
+def objetivo_de(mod, cus, datos):
+    """LM-80: lo que la línea objetivo dice del módulo y de los casos de uso mostrados (hoy vs objetivo)."""
+    o = (datos.get('obj') or {}).get(mod) if mod else None
+    if not o: return None
+    ids = {c.get('id') for c in cus}
+    difs = [x for x in o.get('diferencias') or [] if x.get('estado') != 'retirada']
+    return {'version': o.get('version'), 'estado': o.get('estado'),
+            'capacidadesEnRevision': [c.get('id') for c in o.get('capacidades') or [] if c.get('estado') == 'en revisión'],
+            'abiertas': len([x for x in difs if x.get('estado') in ('borrador', 'validada')]),
+            'tocan': [{'id': x.get('id'), 'cu': x.get('cu'), 'tipo': x.get('tipo'), 'estado': x.get('estado')} for x in difs if x.get('cu') in ids or x.get('tipo') == 'nuevo'][:6]}
+
+
 def tarjeta(datos, consulta, todo=False):
     cand = buscar(datos, consulta, tope=12 if todo else 5)
     mod = modulo_probable(cand, datos, consulta)
@@ -307,6 +324,7 @@ def tarjeta(datos, consulta, todo=False):
                        'lotes': [{'lote': c.get('lote'), 'req': c.get('req'), 'estado': c.get('estado')} for c in cand['lotes'] if c.get('estado') in LOTE_EN_CURSO]},
         'proceso': {'n': n, 'nombre': nombre_proc, 'motivo': motivo, 'pistas': [{'n': a, 'motivo': b} for a, b in pistas]},
         'pausa': {'alcance': pausa.get('alcance'), 'orden': pausa.get('orden'), 'desde': pausa.get('desde')} if pausa else None,
+        'objetivo': objetivo_de(mod, cus, datos),
         'salidas': salidas(n, cand, pausa, ctx),
     }
 
@@ -357,6 +375,8 @@ def texto(t):
     partes += ['%s %s (%s)' % (l['lote'], l['req'] or '', l['estado']) for l in ab['lotes'][:2]]
     L.append('Abierto hoy: ' + (' · '.join(partes) if partes else 'nada'))
     p = t['proceso']
+    ob = t.get('objetivo')
+    if ob: L.append('Línea objetivo: v%s %s · %d diferencias abiertas%s%s' % (ob['version'], ob['estado'], ob['abiertas'], (' · capacidades en revisión: ' + ', '.join(ob['capacidadesEnRevision'])) if ob['capacidadesEnRevision'] else '', (' · tocan lo mostrado: ' + ', '.join('%s %s %s (%s)' % (x['id'], x['tipo'], x['cu'], x['estado']) for x in ob['tocan'])) if ob['tocan'] else ''))
     L.append('Proceso de la fábrica: ' + ('%s %s — %s' % (p['n'], p['nombre'] or '', p['motivo']) if p['n'] is not None else 'ninguno — ' + p['motivo']))
     if len(p.get('pistas') or []) > 1: L.append('Otras pistas: ' + ' · '.join('%s: %s' % (x['n'], x['motivo']) for x in p['pistas'][1:]))
     if t['pausa']: L.append('Pausa vigente: %s (%s, desde %s)' % (t['pausa']['alcance'], t['pausa']['orden'], t['pausa']['desde']))

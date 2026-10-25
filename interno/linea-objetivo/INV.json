@@ -1,15 +1,397 @@
 {
  "modulo": "INV",
  "version": 0,
- "estado": "borrador",
+ "estado": "en revisión",
  "confirmado": null,
- "capacidades": [],
- "diferencias": [],
+ "capacidades": [
+  {
+   "id": "CAP-INV-1",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-2",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-3",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-4",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-5",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-9",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-10",
+   "estado": "en revisión"
+  },
+  {
+   "id": "CAP-INV-11",
+   "estado": "en revisión"
+  }
+ ],
+ "diferencias": [
+  {
+   "id": "D-INV-1",
+   "cu": "CU-INV-1.5",
+   "capacidad": "CAP-INV-1",
+   "tipo": "cambia",
+   "campos": {
+    "que": "Crear y editar un juego o un kit; el juego se arma desde la receta de su tipo de mueble y tiene propiedad dueña; el kit sigue igual",
+    "entradas": [
+     "INV-1: categorías del sistema y tamaños",
+     "PR: puestos de la propiedad (caso de uso por crear)"
+    ],
+    "salidas": [
+     "CU-HK-7.1 (REL-09), igual",
+     "HK: alistamiento por puestos habilitados",
+     "INV-5: lavado por juego o por prenda"
+    ],
+    "limitantes": [
+     "El nombre debe ser único por clase (juego o kit), incluidos los inactivos.",
+     "Un artículo inactivo solo puede quedar en un juego donde ya estaba.",
+     "Todo juego pertenece a una propiedad (se quita «común»); los kits siguen sin dueña.",
+     "El juego solo lleva artículos del catálogo de las categorías del sistema.",
+     "La ropa de cama debe ser del tamaño del mueble; las fundas se eligen por su medida en cm."
+    ],
+    "origen": [
+     "REQ-INV2-2",
+     "REQ-INV2-9",
+     "DA-29",
+     "P-15"
+    ]
+   },
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "la receta «Cama doble»: sábana doble ×1, sobresábana doble ×1, funda 70×40 ×2",
+     "cuando": "se crea «Juego 1», tipo cama doble, dueña 1708",
+     "entonces": "aparece con la composición de la receta, su tipo y su propiedad dueña"
+    },
+    {
+     "id": "E4",
+     "tipo": "excepcion",
+     "dado": "la receta «Cama doble»",
+     "cuando": "se intenta poner una sobresábana extra doble",
+     "entonces": "el sistema no la ofrece: el tamaño no coincide"
+    },
+    {
+     "id": "E5",
+     "tipo": "alterno",
+     "dado": "«Juego 1 del 1708» sin una funda",
+     "cuando": "se guarda o se alista",
+     "entonces": "avisa que le falta 1 funda 70×40 de la receta"
+    }
+   ],
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "16:50",
+    "ref": "P-15",
+    "nota": "Carlos decide 1A (16:40) y confirma la ficha de cambio (16:50): receta y juego físico conviven; sin «común»; E4 y E5 nuevos"
+   },
+   "estado": "validada"
+  },
+  {
+   "id": "D-INV-2",
+   "cu": "CU-INV-1.1",
+   "capacidad": "CAP-INV-1",
+   "tipo": "cambia",
+   "campos": {
+    "que": "Crear y editar un artículo del catálogo con su ficha en bloques (artículo, inventario con ubicación en árbol, alertas y mínimos)",
+    "limitantes": [
+     "Clase: consumible, activo o circulante (sale «unidad» y «nivel» como clases).",
+     "Todo artículo lleva marca, valor y fecha de compra (de cada compra, desde Compras).",
+     "Cada artículo pertenece a una categoría: del sistema o libre del usuario."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "11:35",
+    "ref": "P-15",
+    "nota": "Bloques jerárquicos (10:04, 10:09); marca, valor y fecha de compra para todas las clases (11:35); clase = comportamiento (18-oct)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-3",
+   "cu": "CU-INV-1.8",
+   "capacidad": "CAP-INV-1",
+   "tipo": "cambia",
+   "campos": {
+    "que": "Registrar la presentación de un artículo, su contenido y unidad, y los recipientes (tarro de paso, dispensador) con su capacidad en ml",
+    "limitantes": [
+     "Contenido y niveles se ingresan en ml o en fracción (¼, ½, ¾) y el sistema muestra la equivalencia."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "10:04",
+    "ref": "P-15",
+    "nota": "Recorrido garrafa › tarro de paso › dispensador con capacidad en ml (24-oct); ml o fracción (25-oct 10:04)"
+   },
+   "estado": "borrador",
+   "nota": "Abierta: ¿un recipiente lleva siempre el mismo producto? (rec A: sí)"
+  },
+  {
+   "id": "D-INV-4",
+   "cu": "CU-INV-1.9",
+   "capacidad": "CAP-INV-1",
+   "tipo": "nuevo",
+   "que": "Usar las categorías del sistema junto a las libres del usuario",
+   "campos": {
+    "actor": [
+     "admin"
+    ],
+    "limitantes": [
+     "Mobiliario para dormir (activo: tamaño y capacidad), Ropa de cama (circulante: tamaño), Ropa de baño (circulante) vienen predefinidas y no se borran."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "13:15",
+    "ref": "P-15",
+    "nota": "Categorías del sistema donde el sistema garantiza un proceso (13:12); todo mobiliario para dormir lleva tamaño y capacidad (13:15)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-5",
+   "cu": "CU-INV-1.10",
+   "capacidad": "CAP-INV-1",
+   "tipo": "nuevo",
+   "que": "Administrar la lista de tamaños de mobiliario y ropa",
+   "campos": {
+    "actor": [
+     "admin"
+    ],
+    "limitantes": [
+     "Lista predefinida: sencilla, semidoble, doble, extra doble, king; las fundas por medida en cm (hoy 70×40).",
+     "Un tamaño en uso no se borra.",
+     "Cada tamaño de ropa es un artículo aparte."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "14:34",
+    "ref": "P-15",
+    "nota": "Carlos decide A (14:34); fundas en cm (16:07)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-6",
+   "cu": "CU-INV-2.1",
+   "capacidad": "CAP-INV-2",
+   "tipo": "cambia",
+   "campos": {
+    "que": "Crear y editar una zona de inventario dentro de una zona de la propiedad, con formulario por tipo",
+    "limitantes": [
+     "Depósito es el término único (se retira «bodega»).",
+     "«Sirve a» incluye «Todas»; el acceso sale de «Sirve a»; «Privada del propietario» deja de ser casilla aparte.",
+     "La ubicación arranca vacía.",
+     "Carreta: zona móvil opcional; zona de lavado de la propiedad por defecto."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-24",
+    "hora": "",
+    "ref": "P-15",
+    "nota": "Revisión del formulario de zona con Carlos (24-oct); lavado en la propiedad por defecto (25-oct 14:44)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-7",
+   "cu": "CU-INV-2.2",
+   "capacidad": "CAP-INV-2",
+   "tipo": "sale",
+   "campos": {},
+   "decision": {
+    "fecha": "2026-10-24",
+    "hora": "",
+    "ref": "P-15",
+    "nota": "Se retira «Del apto»: su papel lo cumple la zona de la propiedad"
+   },
+   "estado": "borrador",
+   "nota": "Por confirmar con Carlos que el caso de uso sale con «Del apto»"
+  },
+  {
+   "id": "D-INV-8",
+   "cu": "CU-INV-3.4",
+   "capacidad": "CAP-INV-3",
+   "tipo": "cambia",
+   "campos": {
+    "limitantes": [
+     "El relleno de un recipiente es un traslado en la unidad del producto (ml): no cambia el total, solo el reparto."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-24",
+    "hora": "",
+    "ref": "P-15",
+    "nota": "Relleno como traslado (opción A)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-9",
+   "cu": "CU-INV-3.8",
+   "capacidad": "CAP-INV-3",
+   "tipo": "nuevo",
+   "que": "Dar de baja, enviar a reparar o reemplazar un artículo",
+   "campos": {
+    "limitantes": [
+     "Baja: salida definitiva con motivo (daño, desgaste, pérdida).",
+     "Reparación: salida temporal que vuelve.",
+     "Reemplazo: baja del viejo más entrada del nuevo.",
+     "Lo que sale del depósito común trazado a un turno suma al costo de esa propiedad."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "11:52",
+    "ref": "P-15",
+    "nota": "Carlos decide (11:52)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-10",
+   "cu": "CU-INV-4.1",
+   "capacidad": "CAP-INV-4",
+   "tipo": "cambia",
+   "campos": {
+    "limitantes": [
+     "Cada ubicación muestra su cantidad (propiedad › zona › lugar).",
+     "«Disponible hoy» cuenta también lo que está en uso; la compra se calcula con lo almacenado."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "11:52",
+    "ref": "P-15",
+    "nota": "Cantidad por ubicación (11:52); disponible hoy opción A (10:09)"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-11",
+   "cu": "CU-INV-4.8",
+   "capacidad": "CAP-INV-4",
+   "tipo": "cambia",
+   "campos": {
+    "limitantes": [
+     "Varios envases abiertos a la vez, cada uno con su nivel; el sistema muestra el total."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-24",
+    "hora": "",
+    "ref": "P-15",
+    "nota": "Cada envase abierto por separado, con total"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-12",
+   "cu": "CU-INV-5.8",
+   "capacidad": "CAP-INV-5",
+   "tipo": "cambia",
+   "campos": {
+    "limitantes": [
+     "Al empezar la limpieza, cada puesto pasa a «por revisar» y el colaborador marca usado o sin usar; sin usar queda puesto y limpio.",
+     "El lavado se hace por defecto en la propiedad al terminar la revisión; turno siguiente y lavandería externa son rutas posibles.",
+     "Lavado y reutilización por juego o por prenda, según la situación.",
+     "Lo que no está seco al cierre queda «secando» y lo recoge el turno siguiente.",
+     "Estados automáticos con las fechas de reserva y turno: en uso, por revisar, pendiente para el turno siguiente, lavandería vencida."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "14:47",
+    "ref": "P-15",
+    "nota": "12:21, 14:44, 14:47 y 16:07"
+   },
+   "estado": "borrador",
+   "nota": "Abiertas: cómo llega la revisión por puesto (rec A: marcada según los huéspedes que salieron); ubicación del depósito de secado (rec A)"
+  },
+  {
+   "id": "D-INV-13",
+   "cu": "CU-INV-9.1",
+   "capacidad": "CAP-INV-9",
+   "tipo": "cambia",
+   "campos": {
+    "salidas": [
+     "HK: alistamiento desde el turno base con la lista de juegos de los puestos habilitados según los huéspedes de la reserva que entra; si falta el dato, se pide al administrador"
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "13:00",
+    "ref": "P-15",
+    "nota": "Alistamiento (12:41); huéspedes faltantes al administrador (13:00)"
+   },
+   "estado": "borrador",
+   "nota": "Abiertas: cuánto propone el alistamiento (rec A: un juego por puesto habilitado); cuadre de carreta que no cuadra (rec A: no deja cerrar)"
+  },
+  {
+   "id": "D-INV-14",
+   "cu": "CU-INV-10.1",
+   "capacidad": "CAP-INV-10",
+   "tipo": "cambia",
+   "campos": {
+    "limitantes": [
+     "Mínimo por artículo (por defecto) y por zona (reemplaza), de cantidad y de nivel; ideal además del mínimo.",
+     "Todo activo tiene mínimo por propiedad; la alerta es opcional por artículo."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "11:52",
+    "ref": "P-15",
+    "nota": "24-oct y 25-oct 11:52"
+   },
+   "estado": "borrador"
+  },
+  {
+   "id": "D-INV-15",
+   "cu": "CU-INV-11.1",
+   "capacidad": "CAP-INV-11",
+   "tipo": "cambia",
+   "campos": {
+    "limitantes": [
+     "El activo está en la propiedad (zona de la propiedad), en su depósito o en el depósito común.",
+     "Condición: nuevo, bueno, desgastado, para reponer.",
+     "El daño se gestiona por Incidentes."
+    ]
+   },
+   "decision": {
+    "fecha": "2026-10-25",
+    "hora": "11:52",
+    "ref": "P-15",
+    "nota": "Carlos decide (11:35, 11:52)"
+   },
+   "estado": "borrador"
+  }
+ ],
  "historial": [
   {
    "fecha": "2026-10-25",
    "hora": "",
    "que": "archivo creado vacío por el Arquitecto (LM-80); desde aquí escribe Diseño"
+  },
+  {
+   "fecha": "2026-10-25",
+   "hora": "17:48",
+   "que": "Diseño vuelca lo decidido en P-15: D-INV-1 validada (CU-INV-1.5, Carlos 16:50); el resto en borrador hasta validarse con su ficha de cambio"
   }
  ]
 }

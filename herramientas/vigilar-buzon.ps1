@@ -1,4 +1,4 @@
-# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.4 M-1095/INC: la seccion 7 ignora el candado .corriendo efimero o con fecha 1601 (falso "CLI sin avance"); v11.3 LM-57: escalamientos y vigia al Chat Jefe de proyecto si existe (si no, al Chat Diseno), por nombre normalizado; planes desde interno/proyecto.json si existe; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
+# vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.5 25-oct: Avisar quita ANTHROPIC_API_KEY/ANTHROPIC_AUTH_TOKEN solo para la llamada a la nube (exige login de claude.ai) y avisa a Carlos una vez por hora si falta el login; v11.4 M-1095/INC: la seccion 7 ignora el candado .corriendo efimero o con fecha 1601 (falso "CLI sin avance"); v11.3 LM-57: escalamientos y vigia al Chat Jefe de proyecto si existe (si no, al Chat Diseno), por nombre normalizado; planes desde interno/proyecto.json si existe; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
 #     (supervisor.plazosHoy y lote.estados[].plazoMin) cuando su estado es 'vigente'; si no se puede leer, valen las
@@ -148,8 +148,25 @@ function Avisar([string]$destNombre, [string]$texto, $dest) {
     if (-not $d -or -not $d.sesion) { Log "Sin sesion registrada para '$destNombre'; no se avisa."; return $false }
     $sesion = [string]$d.sesion
     if ($sesion -notmatch '^(cse|session)_[A-Za-z0-9]+$') { Log "Sesion con formato invalido para '$destNombre'; no se avisa."; return $false }
-    $salida = & $Claude -p $texto --cloud $sesion --output-format json 2>&1 | Out-String
+    # v11.5 (25-oct): las sesiones en la nube solo aceptan el inicio de sesion de claude.ai; si el proceso hereda una clave de API
+    # (ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN, p. ej. la de la cola), la CLI la usa y la nube la rechaza. Se quitan solo para
+    # esta llamada y se restauran despues; la cola no cambia.
+    $kGuard = $env:ANTHROPIC_API_KEY; $tGuard = $env:ANTHROPIC_AUTH_TOKEN
+    Remove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue; Remove-Item Env:ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue
+    try { $salida = & $Claude -p $texto --cloud $sesion --output-format json 2>&1 | Out-String }
+    finally { if ($kGuard) { $env:ANTHROPIC_API_KEY = $kGuard }; if ($tGuard) { $env:ANTHROPIC_AUTH_TOKEN = $tGuard } }
     if ($salida -match '"ok"\s*:\s*true') { return $true }
+    # v11.5: sin inicio de sesion de claude.ai no se repite el error cada minuto: una linea y un aviso a Carlos por hora
+    if ($salida -match 'require authentication with a Claude\.ai account') {
+        $marcaAuth = Join-Path $Base 'auth-avisado.txt'
+        $ultAuth = $null; if (Test-Path $marcaAuth) { try { $ultAuth = [DateTime]::Parse([string](Get-Content -Path $marcaAuth | Select-Object -First 1)) } catch { } }
+        if (-not $ultAuth -or ((Get-Date) - $ultAuth).TotalMinutes -ge 60) {
+            Log "ERROR al avisar a ${destNombre}: la CLI no tiene inicio de sesion de claude.ai (las sesiones en la nube lo exigen). Carlos: abre PowerShell, corre claude y escribe /login con tu cuenta de claude.ai."
+            [void](Notificar-Windows 'STR: el despertador no puede avisar' 'La CLI de LENOVO no tiene inicio de sesion de claude.ai. Abre PowerShell, corre claude y escribe /login.')
+            Set-Content -Path $marcaAuth -Value ((Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))
+        }
+        return $false
+    }
     Log ("ERROR al avisar a ${destNombre}: " + ($salida -replace '\s+', ' ').Trim())
     return $false
 }

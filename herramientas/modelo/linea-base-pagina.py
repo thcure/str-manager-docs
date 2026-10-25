@@ -4,7 +4,8 @@
 Uso: python3 -I herramientas/modelo/linea-base-pagina.py <raíz> [--resultados <log\\L-n-pruebas.json>] [--salida <archivo>]
 Lee interno/linea-base/*.json con linea-base.py (validación, estados y cobertura) y el mapa, y escribe una página
 autónoma (por defecto interno/linea-base/linea-base.html) con: resumen por módulo, mapa de calor de capacidades,
-diagrama de contexto (actores → capacidades → otros módulos), lista filtrable de casos de uso y su ficha.
+diagrama de contexto (actores → capacidades → otros módulos), lista filtrable de casos de uso y su ficha, y la vista
+«Hoy · objetivo · brecha» por módulo con la línea objetivo (LM-80, objetivo.py).
 La página es contenido sin <html>/<head> (formato de artefacto); abre igual en un navegador. Lo mantiene el Arquitecto.
 """
 import json, os, sys, importlib.util, datetime
@@ -14,6 +15,13 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 
 def cargar_lb():
     spec = importlib.util.spec_from_file_location('linea_base', os.path.join(AQUI, 'linea-base.py'))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def cargar_obj():
+    spec = importlib.util.spec_from_file_location('objetivo', os.path.join(AQUI, 'objetivo.py'))
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
     return m
@@ -56,10 +64,16 @@ def main(argv):
     mods = {}
     for mod in informe['modulos']:
         mods[mod] = {'archivo': lb.cargar(os.path.join(d, mod + '.json')), 'informe': informe['modulos'][mod]}
+    ob = cargar_obj()
+    lob = ob.leer_objetivo(raiz)
+    objetivo = {k: {'archivo': v, 'brecha': ob.brecha(v, mods.get(k, {}).get('archivo', {})),
+                    'defectos': ob.validar_modulo(k, v, mods.get(k, {}).get('archivo', {}))}
+                for k, v in lob.items() if '_error' not in v}
     datos = {
         'generado': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
         'resultados': fuente_res,
         'modulos': mods,
+        'objetivo': objetivo,
         'nombresModulo': {m['id']: m['nombre'] for m in mapa['modulos']},
         'actores': {a['id']: a.get('corto') or a['id'] for a in mapa['actores']},
         'actoresInfo': {a['id']: {'tipo': a.get('tipo', ''), 'nombre': a.get('nombre', ''), 'que': a.get('que', '')} for a in mapa['actores']},

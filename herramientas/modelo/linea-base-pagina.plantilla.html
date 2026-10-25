@@ -186,7 +186,8 @@ function vistaSistema(){
      <span class="tenue" id="dgAyuda"></span>
      <div class="diagrama" id="dg"></div>
      <div class="relpanel" id="dgRel" aria-live="polite"></div></section>
-   ${seccionAlcance(mods)}`;
+   ${seccionAlcance(mods)}
+   ${seccionObjetivoSistema()}`;
   $$('.mod[data-m], tr[data-m]').forEach((b) => b.onclick = () => ir(b.dataset.m));
   $$('[data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
   $$('[data-dg]').forEach((b) => b.onclick = () => { VISTA_DG = b.dataset.dg; try { localStorage.setItem('lb-vista-dg', VISTA_DG); } catch (e) {}
@@ -223,6 +224,54 @@ function seccionAlcance(mods){
        <div class="caja"><span class="etq">Pendiente de Carlos</span><ul>${(Al.pendientesCarlos || []).map((x) => `<li>${esc(x)}</li>`).join('') || '<li class="tenue">Nada.</li>'}</ul></div></div>
      <details class="caja"><summary><b>Fuera del alcance (${fuera.length})</b> <span class="tenue">· lo que se decidió no hacer por ahora, con su motivo</span></summary>
        <ul>${fuera.map(({mod, u}) => `<li><button class="enl" data-cu="${esc(u.id)}">${esc(u.id)}</button> ${esc(u.que)} <span class="tenue">— ${esc(corta((u.limitantes || [])[0] || '', 160))}</span></li>`).join('')}</ul></details></section>`;
+}
+/* Línea objetivo (LM-80): hoy (línea de producto) · objetivo (diferencias de Diseño) · brecha (validado sin construir) */
+const TIPO_D = {nuevo: 'Nuevo', cambia: 'Cambia', sale: 'Sale'};
+const EST_D = {borrador: 'Borrador', validada: 'Validada', construida: 'Construida', retirada: 'Retirada'};
+function cuentaD(difs, campo){ const r = {}; difs.forEach((x) => r[x[campo]] = (r[x[campo]] || 0) + 1); return r; }
+function hoyModulo(m){
+  const A = (D.modulos[m] || {}).archivo; if (!A) return null;
+  const prod = A.casosUso.filter((u) => u.ambito !== 'fabrica');
+  return {caps: A.capacidades.length, cus: prod.length,
+    con: prod.filter((u) => u.declarado === 'construido' || u.declarado === 'parcial').length,
+    por: prod.filter((u) => u.declarado === 'no-construido').length};
+}
+function seccionObjetivoSistema(){
+  const O = D.objetivo || {}, ms = Object.keys(O);
+  if (!ms.length) return `<section class="sec"><div class="fila"><h2>Línea objetivo</h2><span class="chip">LM-80</span></div><p class="tenue" style="margin:0">Ningún módulo en revisión de alcance todavía. Cuando Diseño abra uno con Carlos, aquí se ve lo que cambia frente a lo construido.</p></section>`;
+  return `<section class="sec"><div class="fila"><div><h2>Línea objetivo</h2><span class="tenue">El alcance en revisión con Carlos frente a lo construido. Toca un módulo para ver su brecha.</span></div><span class="chip">LM-80</span></div>
+    <div class="tabla" style="max-height:none"><table><thead><tr><th>Módulo</th><th>Estado</th><th>Capacidades en revisión</th><th>Borrador</th><th>Validadas</th><th>Construidas</th><th>Brecha</th><th>REQ</th></tr></thead><tbody>
+    ${ms.map((m) => { const o = O[m], b = o.brecha, e = cuentaD(o.archivo.diferencias || [], 'estado'), nb = b.brecha.nuevo.length + b.brecha.cambia.length + b.brecha.sale.length;
+      return `<tr data-m="${m}"><td><b>${m}</b> · ${esc(nMod(m))}</td><td>${esc(o.archivo.estado)} · v${o.archivo.version}</td><td class="dat">${b.capacidades['en revisión'].length}</td><td class="dat">${e.borrador || 0}</td><td class="dat">${e.validada || 0}</td><td class="dat">${e.construida || 0}</td><td class="dat"><b>${nb}</b></td><td>${b.congelado ? '<span class="chip">congelados</span>' : '<span class="tenue">libres</span>'}</td></tr>`; }).join('')}
+    </tbody></table></div></section>`;
+}
+function itemD(x){
+  const cu = x.cu || '', hay = !!CU[cu], que = x.que || (x.campos || {}).que || x.nota || '';
+  return `<li><b class="dat">${esc(x.id)}</b> <span class="chip">${esc(TIPO_D[x.tipo] || x.tipo)}</span> ${hay ? `<button class="enl" data-cu="${esc(cu)}">${esc(cu)}</button>` : `<span class="dat">${esc(cu)}</span>`} ${esc(corta(que, 140))}</li>`;
+}
+function seccionObjetivoModulo(m){
+  const o = (D.objetivo || {})[m];
+  if (!o) return '';
+  const A = o.archivo, b = o.brecha, difs = A.diferencias || [], h = hoyModulo(m) || {caps: 0, cus: 0, con: 0, por: 0};
+  const e = cuentaD(difs, 'estado'), t = cuentaD(difs.filter((x) => x.estado !== 'retirada'), 'tipo');
+  const abiertas = difs.filter((x) => x.estado === 'validada');
+  const cols = `<div class="alcance">
+    <div class="caja"><span class="etq">Hoy · línea de producto</span><h3 style="margin:4px 0">${h.con} construidos o parciales</h3>
+      <span class="tenue">${h.caps} capacidades · ${h.cus} casos de uso de producto · ${h.por} por construir del alcance anterior</span></div>
+    <div class="caja"><span class="etq">Objetivo · v${A.version} · ${esc(A.estado)}</span><h3 style="margin:4px 0">${difs.length} diferencias</h3>
+      <span class="tenue">${['nuevo','cambia','sale'].map((k) => `${t[k] || 0} ${k}`).join(' · ')} · ${Object.keys(EST_D).filter((k) => e[k]).map((k) => `${e[k]} ${EST_D[k].toLowerCase()}`).join(' · ')}<br>capacidades: ${b.capacidades['en revisión'].length} en revisión · ${b.capacidades.cerrada.length} cerradas</span></div>
+    <div class="caja"><span class="etq">Brecha · validado sin construir</span><h3 style="margin:4px 0">${abiertas.length} por construir</h3>
+      <span class="tenue">${b.congelado ? 'REQ del módulo congelados mientras el alcance está en revisión' : 'REQ libres: el alcance está confirmado o sin borradores'}</span></div></div>`;
+  const lista = abiertas.length ? `<ul>${abiertas.map(itemD).join('')}</ul>` : '<p class="tenue" style="margin:0">Nada validado sin construir.</p>';
+  const filas = difs.map((x) => { const cu = x.cu || '', que = x.que || (x.campos || {}).que || x.nota || '';
+    return `<tr><td class="dat">${esc(x.id)}</td><td>${esc(TIPO_D[x.tipo] || x.tipo)}</td><td>${CU[cu] ? `<button class="enl" data-cu="${esc(cu)}">${esc(cu)}</button>` : `<span class="dat">${esc(cu)}</span>`}</td><td class="dat">${esc((x.capacidad || '').split('-').pop())}</td><td>${esc(corta(que, 120))}</td><td>${esc(EST_D[x.estado] || x.estado)}</td><td class="dat">${esc(x.lote || '–')}</td></tr>`; }).join('');
+  const def = (o.defectos || []).length ? `<ul class="avisos">${o.defectos.map(([i, t]) => `<li><b class="dat">${esc(i)}</b> ${esc(t)}</li>`).join('')}</ul>` : '';
+  return `<section class="sec"><div class="fila"><div><h2>Hoy · objetivo · brecha</h2><span class="tenue">Lo construido, lo que cambia en la revisión de alcance y lo que falta construir de lo validado.</span></div><span class="chip">línea objetivo · LM-80</span></div>
+    ${cols}
+    <div class="caja"><span class="etq">Brecha</span>${lista}</div>
+    <details class="caja"><summary><b>Todas las diferencias (${difs.length})</b> <span class="tenue">· borrador → validada → construida</span></summary>
+      <div class="tabla" style="max-height:none"><table><thead><tr><th>Id</th><th>Tipo</th><th>Caso de uso</th><th>Cap.</th><th>Qué</th><th>Estado</th><th>Lote</th></tr></thead><tbody>${filas}</tbody></table></div></details>
+    ${def}</section>`;
 }
 let FILTRO_REL = (() => { try { return localStorage.getItem('lb-filtro-rel') || ''; } catch (e) { return ''; } })();
 const tipoFlujo = (f) => f.rel ? ((D.relTipo || {})[f.rel] || 'por-precisar') : 'sin-rel';
@@ -437,6 +486,7 @@ function vistaModulo(m){
      <div class="cifras"><div class="cifra"><span class="etq">Cobertura funcional</span><b class="dat">${fmtPct(c.simple)}</b><span class="tenue">${c.alcance - c.faltan} de ${c.alcance} comprobados</span></div>
        <div class="cifra"><span class="etq">Pesada por importancia</span><b class="dat">${fmtPct(c.pesada)}</b><span class="tenue">esencial 3 · necesaria 2 · accesoria 1</span></div></div></header>
    <section class="sec">${barra(I.porEstado, true)}</section>
+   ${seccionObjetivoModulo(m)}
    <section class="sec"><div class="fila"><div><h2>Contexto del módulo</h2><span class="tenue">¿Quién usa este módulo, qué hace y con quién intercambia?</span></div>
        <div class="pestanas" role="tablist">${[['contexto', 'Contexto'], ['capacidades', 'Capacidades']].map(([k, t]) => `<button role="tab" data-mv="${k}" aria-selected="${MF.vista === k}">${t}</button>`).join('')}</div></div>
      <div class="filtros">
@@ -461,6 +511,7 @@ function vistaModulo(m){
   $('#mLimpiar').onclick = () => { MF = filtrosLimpios(m); guardarRel(''); vistaModulo(m); };
   $$('[data-mv]').forEach((bt) => bt.onclick = () => { MF.vista = bt.dataset.mv; $$('[data-mv]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.mv === MF.vista))); refrescarModulo(m); });
   refrescarModulo(m);
+  $$('#vista [data-cu]').forEach((b) => b.onclick = () => ir(b.dataset.cu));
   const sin = (A.sinAtar || []).map((s) => `<li><b class="dat">${esc(s.id || s)}</b> ${esc(s.porque || '')}</li>`);
   const av = D.avisos.filter((a) => (a.startsWith(m + '.json') || a.startsWith('CU-' + m + '-')) && !/sin atar/.test(a)).map((a) => `<li>${esc(a)}</li>`);
   $('#avisos').innerHTML = sin.concat(av).join('') || '<li class="vacio">Nada pendiente de atar.</li>';

@@ -87,7 +87,7 @@ def brecha(obj, prod):
         'modulo': obj.get('modulo'), 'version': obj.get('version'), 'estado': obj.get('estado'),
         'capacidades': {'en revisión': [c['id'] for c in obj.get('capacidades') or [] if c.get('estado') == 'en revisión'],
                         'cerrada': [c['id'] for c in obj.get('capacidades') or [] if c.get('estado') == 'cerrada']},
-        'brecha': {t: [{'id': x['id'], 'cu': x.get('cu'), 'que': x.get('que') or x.get('nota') or ''} for x in abiertas if x.get('tipo') == t] for t in TIPOS},
+        'brecha': {t: [{'id': x['id'], 'cu': x.get('cu'), 'que': x.get('que') or (x.get('campos') or {}).get('que') or x.get('nota') or ''} for x in abiertas if x.get('tipo') == t] for t in TIPOS},
         'borrador': [x['id'] for x in difs if x.get('estado') == 'borrador'],
         'construidas': [x['id'] for x in difs if x.get('estado') == 'construida'],
         'congelado': obj.get('estado') != 'confirmado' and bool([c for c in obj.get('capacidades') or [] if c.get('estado') == 'en revisión'] or [x for x in difs if x.get('estado') == 'borrador']),

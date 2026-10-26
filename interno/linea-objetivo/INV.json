@@ -149,16 +149,17 @@
    "cu": "CU-INV-1.9",
    "capacidad": "CAP-INV-1",
    "tipo": "nuevo",
-   "que": "Crear una categoría: nombre, atributos y los valores de cada atributo",
+   "que": "Crear una categoría: 1 nombre, 2 atributos (cada uno con su tipo)",
    "campos": {
     "actor": [
      "admin",
      "operador"
     ],
     "limitantes": [
-     "La categoría es la plantilla de atributos del artículo (modelo entidad-atributo-valor).",
-     "La composición es un atributo de la categoría: su valor es una lista de artículos con cantidades (juego de cama, kit).",
-     "El usuario crea sus categorías y les da atributos y valores.",
+     "La categoría es la plantilla de atributos del artículo (modelo entidad-atributo-valor) y es opcional para el artículo.",
+     "Cada atributo tiene un tipo: lista de selección (se crea la lista; puede ser cerrada o admitir escribir otro), texto (se digita y se recuerda para reutilizar) o número con unidad de medida (cm, ml, personas).",
+     "La composición (lista de artículos con cantidades) es un atributo de la categoría; la llevan juego de cama y kit.",
+     "El usuario crea sus categorías y sus atributos.",
      "Crea el administrador o el operador con inventario.editar."
     ]
    },
@@ -169,7 +170,16 @@
     "nota": "Categorías del sistema donde el sistema garantiza un proceso (13:12); todo mobiliario para dormir lleva tamaño y capacidad (13:15)"
    },
    "estado": "borrador",
-   "nota": "26-oct 16:30, Carlos: 1A (categorías del usuario exigen atributos) y 3A (configura admin u operador con inventario.editar). · 26-oct 17:31, Carlos: la capacidad crea artículos y categorías con sus atributos; juego de cama y kit son categorías; las predeterminadas no rompen la estructura (son datos más una regla, no un caso de uso aparte). · 26-oct 17:36, Carlos: separar las situaciones particulares; la capacidad no depende de que existan categorías predefinidas. Las predefinidas (mobiliario para dormir, ropa de cama) y el tamaño compartido mueble ↔ ropa pasan a D-INV-13 (alistamiento). · 26-oct 17:52, Carlos: composición es un atributo de la categoría; orden: 1 nombre, 2 atributos, 2.1 valores."
+   "nota": "26-oct 16:30, Carlos: 1A (categorías del usuario exigen atributos) y 3A (configura admin u operador con inventario.editar). · 26-oct 17:31, Carlos: la capacidad crea artículos y categorías con sus atributos; juego de cama y kit son categorías; las predeterminadas no rompen la estructura (son datos más una regla, no un caso de uso aparte). · 26-oct 17:36, Carlos: separar las situaciones particulares; la capacidad no depende de que existan categorías predefinidas. Las predefinidas (mobiliario para dormir, ropa de cama) y el tamaño compartido mueble ↔ ropa pasan a D-INV-13 (alistamiento). · 26-oct 17:52, Carlos: composición es un atributo de la categoría; orden: 1 nombre, 2 atributos, 2.1 valores. · 26-oct 18:03, Carlos: solo dos pasos (1 nombre, 2 atributos); el atributo puede pedir crear una lista de selección, un campo para digitar o un valor numérico con unidad de medida; los «valores» no son un nivel aparte.",
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "el administrador en Catálogo › Categorías",
+     "cuando": "crea «Sábana» con los atributos Tamaño (lista: sencilla, doble, queen, king), Color (lista de 6 colores, admite escribir otro) y Marca (texto que se recuerda)",
+     "entonces": "la categoría queda guardada y al crear un artículo de «Sábana» el sistema pide esos tres atributos con su forma de llenarse"
+    }
+   ]
   },
   {
    "id": "D-INV-5",
@@ -481,6 +491,11 @@
    "fecha": "2026-10-26",
    "hora": "17:56",
    "que": "D-INV-16: mantener con eliminar solo lo nunca usado (Carlos)"
+  },
+  {
+   "fecha": "2026-10-26",
+   "hora": "18:03",
+   "que": "D-INV-4: categoría = nombre + atributos con tipo (lista, texto, número con medida) (Carlos)"
   }
  ]
 }

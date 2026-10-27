@@ -110,8 +110,8 @@
     "limitantes": [
      "Todo artículo es un activo del negocio y lleva una clase según su comportamiento: consumible (se gasta: jabón, papel, esponja), circulante (se usa y vuelve: ropa de cama, toallas, tarro de paso) o fijo (se instala y permanece: cama, televisor, dispensador). Salen «unidad», «nivel» y «activo» como clases.",
      "Todo artículo lleva marca, valor y fecha de compra (de cada compra, desde Compras).",
-     "Relaciones entre artículos (no son clases): «va dentro de» (un consumible en un recipiente) y «viste a» (un juego de circulantes sobre un fijo para dormir, según la receta).",
-     "La categoría es opcional: un artículo sin categoría lleva solo su clase y sus atributos libres; con categoría, llena los atributos que ella exige; si la categoría tiene composición, el artículo se arma con los artículos que ella indica.",
+     "Relaciones entre artículos (no son clases): «va dentro de» (un consumible en un recipiente) y «viste a» (un juego de circulantes sobre un fijo para dormir, según su agrupación).",
+     "La categoría es opcional: un artículo sin categoría lleva solo su clase y sus atributos libres; con categoría, llena los atributos que ella exige; si la categoría tiene marcada «Agrupar artículos», el artículo es una agrupación de los artículos que se le indiquen.",
      "Cada atributo del artículo tiene un tipo: lista de selección (cerrada o que admite escribir otro), texto (se digita y se recuerda para reutilizar) o número con unidad de medida."
     ]
    },
@@ -122,7 +122,7 @@
     "nota": "Bloques jerárquicos (10:04, 10:09); marca, valor y fecha de compra para todas las clases (11:35); clase = comportamiento (18-oct)"
    },
    "estado": "borrador",
-   "nota": "26-oct 16:16, Carlos: todos los artículos son activos; clases consumible, circulante y fijo; la esponja es circulante. · 26-oct 16:17, Carlos: la esponja es consumible (se gasta en la propiedad hasta reemplazarla; no circula por el lavado). · 26-oct 16:28, Carlos confirma el modelo: tres clases por comportamiento y dos relaciones. · 26-oct 17:47, Carlos: no todo artículo debe tener categoría; la que agrupa es la categoría, no el artículo. · 27-oct 08:47: el ejemplo «Sábana» (26-oct 18:01) es de un artículo, no de una categoría (Carlos, 18:05); los tipos de atributo pasan aquí desde D-INV-4.",
+   "nota": "26-oct 16:16, Carlos: todos los artículos son activos; clases consumible, circulante y fijo; la esponja es circulante. · 26-oct 16:17, Carlos: la esponja es consumible (se gasta en la propiedad hasta reemplazarla; no circula por el lavado). · 26-oct 16:28, Carlos confirma el modelo: tres clases por comportamiento y dos relaciones. · 26-oct 17:47, Carlos: no todo artículo debe tener categoría; la que agrupa es la categoría, no el artículo. · 27-oct 08:47: el ejemplo «Sábana» (26-oct 18:01) es de un artículo, no de una categoría (Carlos, 18:05); los tipos de atributo pasan aquí desde D-INV-4. · 27-oct 08:59: «composición» pasa a «agrupación» (Carlos).",
    "escenarios": [
     {
      "id": "E1",
@@ -167,7 +167,7 @@
     ],
     "limitantes": [
      "La categoría es la plantilla de atributos del artículo (modelo entidad-atributo-valor) y es opcional para el artículo.",
-     "La composición (lista de artículos con cantidades) es un atributo de la categoría; la llevan juego de cama y kit.",
+     "Al crear la categoría se marca la opción «Agrupar artículos»: sus artículos son agrupaciones de otros artículos con cantidades (p. ej. el juego de cama es una agrupación de 1 sábana, 1 sobresábana y 2 fundas; el kit de baño, de papel y jabón).",
      "El usuario crea sus categorías y sus atributos.",
      "Crea el administrador o el operador con inventario.editar."
     ]
@@ -179,7 +179,7 @@
     "nota": "Categorías del sistema donde el sistema garantiza un proceso (13:12); todo mobiliario para dormir lleva tamaño y capacidad (13:15)"
    },
    "estado": "borrador",
-   "nota": "26-oct 16:30, Carlos: 1A (categorías del usuario exigen atributos) y 3A (configura admin u operador con inventario.editar). · 26-oct 17:31, Carlos: la capacidad crea artículos y categorías con sus atributos; juego de cama y kit son categorías; las predeterminadas no rompen la estructura (son datos más una regla, no un caso de uso aparte). · 26-oct 17:36, Carlos: separar las situaciones particulares; la capacidad no depende de que existan categorías predefinidas. Las predefinidas (mobiliario para dormir, ropa de cama) y el tamaño compartido mueble ↔ ropa pasan a D-INV-13 (alistamiento). · 26-oct 17:52, Carlos: composición es un atributo de la categoría; orden: 1 nombre, 2 atributos, 2.1 valores. · 26-oct 18:03, Carlos: solo dos pasos (1 nombre, 2 atributos); el atributo puede pedir crear una lista de selección, un campo para digitar o un valor numérico con unidad de medida; los «valores» no son un nivel aparte. · 27-oct 08:47: el escenario «Sábana» se movió a D-INV-2 (era un artículo). Abierto: qué hace la categoría (solo agrupa, o además pasa atributos comunes). Se descarta el ejercicio «desde cero» del 26-oct 18:14 en adelante (Carlos, 27-oct 08:46): no dejó registros en esta línea objetivo."
+   "nota": "26-oct 16:30, Carlos: 1A (categorías del usuario exigen atributos) y 3A (configura admin u operador con inventario.editar). · 26-oct 17:31, Carlos: la capacidad crea artículos y categorías con sus atributos; juego de cama y kit son categorías; las predeterminadas no rompen la estructura (son datos más una regla, no un caso de uso aparte). · 26-oct 17:36, Carlos: separar las situaciones particulares; la capacidad no depende de que existan categorías predefinidas. Las predefinidas (mobiliario para dormir, ropa de cama) y el tamaño compartido mueble ↔ ropa pasan a D-INV-13 (alistamiento). · 26-oct 17:52, Carlos: composición es un atributo de la categoría; orden: 1 nombre, 2 atributos, 2.1 valores. · 26-oct 18:03, Carlos: solo dos pasos (1 nombre, 2 atributos); el atributo puede pedir crear una lista de selección, un campo para digitar o un valor numérico con unidad de medida; los «valores» no son un nivel aparte. · 27-oct 08:47: el escenario «Sábana» se movió a D-INV-2 (era un artículo). Abierto: qué hace la categoría (solo agrupa, o además pasa atributos comunes). Se descarta el ejercicio «desde cero» del 26-oct 18:14 en adelante (Carlos, 27-oct 08:46): no dejó registros en esta línea objetivo. · 27-oct 08:59, Carlos: «composición» confunde; se llama «Agrupar artículos» (opción que se marca al crear la categoría) y su resultado es una agrupación; terminología estándar."
   },
   {
    "id": "D-INV-5",
@@ -501,6 +501,11 @@
    "fecha": "2026-10-27",
    "hora": "08:47",
    "que": "D-INV-2 recibe los tipos de atributo y el ejemplo «Sábana» (era artículo); D-INV-4 queda con el rol de la categoría abierto; ejercicio desde cero descartado (Carlos)"
+  },
+  {
+   "fecha": "2026-10-27",
+   "hora": "08:59",
+   "que": "D-INV-2 y D-INV-4: «composición» pasa a «Agrupar artículos» / agrupación (Carlos)"
   }
  ]
 }

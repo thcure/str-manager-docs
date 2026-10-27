@@ -2394,6 +2394,35 @@
    "cierre": {
     "prueba": "log\\_resumen.txt 2026-10-21 21:33, GUION rafaga v1.1: caso b «las 24 lecturas con 200: 12/12, 12/12»; caso c conexiones máx. 12 (antes 4, después 12), lecturas válidas 3/3"
    }
+  },
+  {
+   "id": "INC-209",
+   "tipo": "INC",
+   "modulo": "SH (guion de regresión REQ-SH-2)",
+   "fecha": "2026-10-26",
+   "titulo": "G2 de la instrucción dejó REQ-SH-2.spec.js con 17 entradas esperadas; con «Línea base» el menú del admin tiene 18",
+   "estado": "abierto",
+   "severidad": "medio",
+   "casoUso": "CU-SH-1.1",
+   "contra": "guion",
+   "originador": "juez",
+   "contexto": {
+    "lote": "L-165",
+    "guion": "REQ-SH-2.spec.js",
+    "caso": "a",
+    "tren": null
+   },
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "origen": "log/L-165-veredicto.json (19:56)",
+   "nota": "19:59 El lote suma una entrada al menú (Proyecto pasa de siete a ocho: 4 + 5 + 1 + 8 = 18) y actualizó los guiones y tests que cuentan páginas (T2, T3), pero el literal G2 de REQ-SH-2.spec.js conservó la comprobación `todos.length === 17` (línea 876 de la instrucción) mientras su descripción dice «Proyecto con ocho entradas». Es el único contador del guion que no se actualizó. Observado: REQ-SH-2.spec.js caso a: «NO: entradas: 18 · maquetas o sin página real: ninguna»; el listado del menú del admin es correcto (Operación del día 4, Configurar el negocio 5, Lo que viene 1, Proyecto 8). Falló en los dos intentos de la cola. El producto está bien (menú con 18 entradas). Lo escapó mi instrucción y el revisor previo: actualicé GRUPOS y PAGINAS del guion pero no el total. Arreglo: «=== 17» → «=== 18» en un lote de solo guion. Destino propuesto: punto del revisor previo «si el lote cambia el menú o una lista, buscar en tests/ y tests/e2e/ los totales literales del conjunto (aquí 17, 18 ítems con data-roles) y actualizarlos».",
+   "prioridad": "P3",
+   "decision": {
+    "tipo": "fix",
+    "ref": "L-166",
+    "motivo": "solo el guion de regresión; el producto es correcto",
+    "fecha": "2026-10-26"
+   }
   }
  ],
  "dts": [
@@ -17034,10 +17063,74 @@
    "req": "LM-82",
    "categoria": "normal",
    "resumen": "Página «Línea base» del grupo Proyecto; versión p5c113",
-   "estado": "instalado",
-   "observacion": "Encolado 19:35 (cmp IGUAL). Revisor 23/23 (subagente). Orden de Carlos M-1118, JP M-1120. Construido ed99503 19:39 (97/97).",
+   "estado": "no aceptado",
+   "observacion": "Encolado 19:35 (cmp IGUAL). Revisor 23/23 (subagente). Orden de Carlos M-1118, JP M-1120. Construido ed99503 19:39 (97/97). Juez 19:56: NO ACEPTADO (REQ-SH-2 a, INC-209).",
    "version": "p5c113",
-   "hash": "ed99503"
+   "hash": "ed99503",
+   "aceptacion": {
+    "lote": "L-165",
+    "hash": "ed99503",
+    "fecha": "2026-10-26",
+    "horaBogota": "19:56",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. La página nueva: guarda de admin, encabezado y ⟳ Actualizar con STRApi.docs, explorador del mismo commit en un iframe sandbox sin mismo origen, versión vigente (linea-base-pagina.test.js)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 97/97 archivos OK"
+     },
+     {
+      "c": "b. El menú cuenta ocho páginas en Proyecto y 19 ítems con data-roles; el operador sigue sin ver Proyecto (menu-sh2.test.js y roles.test.js)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 97/97 archivos OK"
+     },
+     {
+      "c": "c. El admin ve el encabezado del commit y, dentro del iframe, «STR Manager» y la tabla «Línea objetivo»; origen opaco",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: encabezado: «Datos de las 19:39 · 869ffab» · sha 869ffabb56facdb163b192bcd752861c25f21906 | si: estado de la página: ok | si: explorador publicado en 869ffab: HTTP 200 | si: sandbox del iframe: «allow-scripts allow-popups» | si: dentro del iframe: «STR Manager» visible | si: dentro del iframe: tabla «Línea objetivo» visible | si: origen del documento del iframe: null"
+     },
+     {
+      "c": "d. El operador no ve «Línea base» y, si abre la página a mano, vuelve al STR sin el explorador",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entradas «Línea base» visibles para el operador: 0 | si: str-linea-base.html como operador → /str-app-shell.html · iframe del explorador: 0"
+     },
+     {
+      "c": "e. ⟳ Actualizar vuelve a pedir el commit y deja el explorador cargado",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: tras Actualizar: estado ok · sha 869ffab (antes 869ffab) | si: dentro del iframe tras Actualizar: «Línea objetivo» visible"
+     },
+     {
+      "c": "f. El explorador ocupa toda el área bajo el encabezado, en escritorio y a 390 px, sin doble barra de la página",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "f-escritorio (1366 px): bajo el encabezado «Línea base · Datos de las 19:39 · 869ffab · Actualizar» el explorador (STR Manager, cobertura, barra de estados, Mapa del sistema) llena el ancho y el alto restante, sin franja vacía ni barra de desplazamiento propia de la página. f-movil (390 px): igual, el explorador llena el ancho y el alto bajo el encabezado, sin barra doble ni desborde horizontal. El texto del iframe incluye la tabla «Línea objetivo»."
+     },
+     {
+      "c": "g. El colaborador que abre la página a mano vuelve a su inicio sin el explorador",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: str-linea-base.html como colaborador → /portal.html · iframe del explorador: 0"
+     },
+     {
+      "c": "h. Cada punto se aplicó literal y la versión quedó en p5c113 (aplicar.js K1, K2)",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "entrada › aplicación: aplicación literal 16/16 · N1 literal: tests/linea-base-pagina.test.js igual; tests/menu-sh2.test.js igual; tests/roles.test.js igual · tests/ en verde: 97/97 archivos OK"
+     },
+     {
+      "c": "Regresión: REQ-SH-2.spec.js a — el admin ve solo los 4 grupos y sus entradas, en orden; ninguna maqueta",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "Falla en el reintento (intento 2, no es inestable): el menú del admin trae los 4 grupos en orden con «Línea base» como octava de Proyecto, sin maquetas, pero el guion exige «todos.length === 17» y encuentra 18 (NO: entradas: 18 · maquetas o sin página real: ninguna). Captura REQ-SH-2-a-error: menú real del admin, sin pantalla de login."
+     }
+    ]
+   }
   }
  ],
  "esquema": {
@@ -19677,9 +19770,9 @@
    "categoria": "normal",
    "riesgo": "R-12",
    "resumen": "Página «Línea base» del grupo Proyecto (str-linea-base.html): el explorador de la línea base del STR al día, en un iframe aislado; entrada de menú solo admin; versión p5c113",
-   "estado": "construido",
-   "esperaA": "verificador",
-   "desde": "2026-10-26 19:39",
+   "estado": "no aceptado",
+   "esperaA": "CD",
+   "desde": "2026-10-26 19:56",
    "estados": [
     {
      "estado": "redactado",
@@ -19692,20 +19785,24 @@
     {
      "estado": "construido",
      "desde": "2026-10-26 19:39"
+    },
+    {
+     "estado": "no aceptado",
+     "desde": "2026-10-26 19:56"
     }
    ],
-   "nota": "19:35 Orden de Carlos (M-1118), única excepción a la pausa; ok del JP M-1120 (T-3); contrato LM-82 (M-1119). Revisor previo (subagente) 21/23 → 23/23 (C2: CU-SH-5.1 y 5.3 del guion REQ-SH-2; tec en los casos). Simulación sobre main be8a550 desde el texto de la instrucción: run.js 95/97 (2 del entorno simulado), linea-base-pagina 21/0 (2/19 en HEAD), menu-sh2 135/0, roles 54/0, e2e-esquema 23/0, aplicar.js K1 16/16 y K2 igual, hook v5 acepta la línea «Lote:». Prueba en Chromium con STRApi simulado: explorador cargado, origen del iframe null, operador vuelve al shell. Encolado (cmp IGUAL). · 19:39 Construido ed99503 (run.js 97/97; linea-base-pagina 2/19 en HEAD → 21/0; versión p5c113 en 21 archivos, grep de p5c112 vacío; ningún «No hecho»). Espera pruebas de la cola y veredicto."
+   "nota": "19:35 Orden de Carlos (M-1118), única excepción a la pausa; ok del JP M-1120 (T-3); contrato LM-82 (M-1119). Revisor previo (subagente) 21/23 → 23/23 (C2: CU-SH-5.1 y 5.3 del guion REQ-SH-2; tec en los casos). Simulación sobre main be8a550 desde el texto de la instrucción: run.js 95/97 (2 del entorno simulado), linea-base-pagina 21/0 (2/19 en HEAD), menu-sh2 135/0, roles 54/0, e2e-esquema 23/0, aplicar.js K1 16/16 y K2 igual, hook v5 acepta la línea «Lote:». Prueba en Chromium con STRApi simulado: explorador cargado, origen del iframe null, operador vuelve al shell. Encolado (cmp IGUAL). · 19:39 Construido ed99503 (run.js 97/97; linea-base-pagina 2/19 en HEAD → 21/0; versión p5c113 en 21 archivos, grep de p5c112 vacío; ningún «No hecho»). Espera pruebas de la cola y veredicto. · 19:56 No aceptado (juez): a–h en verde (página, menú, admin, operador, colaborador, Actualizar, captura, K1 16/16); la regresión de la ruta da 128/129 y falla REQ-SH-2.spec.js a porque el guion que copié (G2) aún espera 17 entradas y hay 18 → INC-209. Lección: cuando un lote cambia un conjunto (menú, lista de páginas), buscar todos los totales literales de ese conjunto en tests/ y tests/e2e/, no solo las listas."
   },
   {
    "vista": "siguiente",
    "grupo": "fábrica",
    "lote": "L-166",
-   "req": "LM-82",
+   "req": "INC-209",
    "categoria": "estándar",
    "riesgo": "R-1",
-   "resumen": "ID_CUBRE de tests/e2e-esquema.test.js al contrato de «cubre» (REL/RT de 1 a 3 cifras, id de módulo, CU-<MOD>-n.m) y el guion LM-82 con CU-PRJ-2.1/2.2 y REL-102/112 en cubre",
+   "resumen": "Fix INC-209: REQ-SH-2.spec.js caso a, «=== 17» → «=== 18» (menú con «Línea base»)",
    "estado": "previsto",
-   "esperaA": "verificador",
+   "esperaA": "Jefe de proyecto",
    "desde": "2026-10-26 19:38",
    "estados": [
     {
@@ -19713,7 +19810,7 @@
      "desde": "2026-10-26 19:38"
     }
    ],
-   "nota": "19:38 Contrato del Arquitecto (M-1121, hallazgo de L-165). Se redacta con L-165 aceptado y turno del JP (T-3 es solo LM-82). · 19:40 JP (M-1122): ok; entra en T-4 cuando L-165 se acepte (cola de 1); solo tests/ y el guion LM-82, si toca otra cosa vuelve al JP."
+   "nota": "19:38 Contrato del Arquitecto (M-1121, hallazgo de L-165). Se redacta con L-165 aceptado y turno del JP (T-3 es solo LM-82). · 19:40 JP (M-1122): ok; entra en T-4 cuando L-165 se acepte (cola de 1); solo tests/ y el guion LM-82, si toca otra cosa vuelve al JP. · 19:59 Pasa a ser el fix de INC-209 (propuesto al JP); el ajuste de ID_CUBRE (M-1121) queda para L-167."
   }
  ],
  "riesgos": [
@@ -19933,7 +20030,7 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-26 19:39",
+  "fecha": "2026-10-26 19:59",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
@@ -19951,8 +20048,8 @@
    {
     "ref": "L-165",
     "que": "Página «Línea base» (LM-82), única excepción a la pausa",
-    "estado": "construido (ed99503), espera veredicto",
-    "siguientePaso": "Cuando la CLI termine: veredicto; aceptado → avisar al Arquitecto (CU de PRJ y fila del mapa) y al JP (cierra T-3)"
+    "estado": "no aceptado (INC-209)",
+    "siguientePaso": "L-166 fix del guion; con L-166 aceptado, REQ-SH-2 vuelve a verde y se pide cerrar L-165"
    },
    {
     "ref": "L-166",

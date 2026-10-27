@@ -1,0 +1,47 @@
+# LM-82: regenera el explorador de la línea base (interno/linea-base/linea-base.html) con cada push a main que cambie
+# sus fuentes, para que la página del STR (grupo Proyecto) y el artefacto muestren siempre lo último sin que nadie la regenere.
+# Solo push a main y manual. NUNCA pull_request. No usa secretos: solo el GITHUB_TOKEN del flujo, con permiso de escribir el repo.
+# Si linea-base.py da errores, no escribe nada y el flujo queda en rojo (el aviso lo ve el Arquitecto en Actions).
+# Un push hecho con GITHUB_TOKEN no dispara otros flujos (no hay bucle ni recarga de modelo-sync: el .html no va al servicio).
+# Para apagarlo: Actions › linea-base-pagina › Disable.
+name: linea-base-pagina
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'interno/linea-base/*.json'
+      - 'interno/linea-base/resultados/**'
+      - 'interno/linea-objetivo/**'
+      - 'interno/mapa-modulos.json'
+      - 'interno/seguimiento.json'
+      - 'interno/diseno.json'
+      - 'herramientas/modelo/linea-base.py'
+      - 'herramientas/modelo/linea-base-pagina.py'
+      - 'herramientas/modelo/linea-base-pagina.plantilla.html'
+      - 'herramientas/modelo/objetivo.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: linea-base-pagina
+  cancel-in-progress: true
+jobs:
+  regenerar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerar y subir si cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for intento in 1 2 3; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            python3 -I herramientas/modelo/linea-base-pagina.py . --si-cambia
+            if git diff --quiet -- interno/linea-base/linea-base.html; then echo "sin cambios"; exit 0; fi
+            git add interno/linea-base/linea-base.html
+            git commit -q -m "modelo: explorador de la línea base regenerado (automático, LM-82)"
+            if git push -q origin HEAD:main; then echo "subido en el intento $intento"; exit 0; fi
+            sleep $((intento * 10))
+          done
+          echo "no se pudo subir tras 3 intentos"; exit 1

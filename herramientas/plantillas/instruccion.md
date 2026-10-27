@@ -47,7 +47,7 @@ N1 → «cubierto por tests/<archivo>» (la cola corre `node tests/run.js` en la
 
 ### Guion N2 → `tests/e2e/<REQ-o-INC>.spec.js` (la CLI lo copia tal cual, sin cambiar un byte; plantilla: `herramientas/plantillas/guion-e2e.js`)
 ```js
-module.exports = { req: '<REQ-X-n>', zona: ['<id de módulo del mapa, p. ej. HK>'], casos: [ /* un caso por criterio N2 y por hueco de la ruta; cada uno con cubre: ['REL-n', 'RT-n', '<módulo>'] */ ], async limpiar(h) { } };
+module.exports = { req: '<REQ-X-n>', zona: ['<id de módulo del mapa, p. ej. HK>'], casos: [ /* un caso por criterio N2 y por hueco de la ruta; cada uno con cubre: ['REL-n', 'RT-n', '<módulo>', 'CU-<MOD>-n.m'] (REL y RT con 1 a 3 cifras; el CU ancla el caso a la línea base, LM-82) */ ], async limpiar(h) { } };
 ```
 Sin criterios N2: borra esta subsección (la cola lo anota y sigue). La cola comprueba que el archivo del commit es igual a este bloque: si la CLI lo cambia, el lote queda «bloqueado» sin gastar verificación.
 Los criterios de permisos y 403 van «cubierto por tests/<archivo>»: el verificador lee el resultado, no los prueba en el navegador. Lo mismo los criterios de **ancho o móvil** (390 px, media queries): el verificador no puede cambiar el tamaño de la ventana; se prueban con un test que lea el CSS (lote 69, 11-oct). Si un criterio exige llegar «desde el menú», la prueba lo dice y empieza en `str-app-shell.html`.

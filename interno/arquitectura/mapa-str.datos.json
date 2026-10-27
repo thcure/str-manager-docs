@@ -1,5 +1,5 @@
 {
- "generadoEn": "2026-10-21 11:49",
+ "generadoEn": "2026-10-26 20:15",
  "lineaBase": "2026-10-15",
  "codigo": {
   "version": "p5c112",
@@ -1113,7 +1113,7 @@
    "nombre": "Grupo Proyecto (interno)",
    "familia": "fabrica",
    "estado": "construido",
-   "que": "Seg. Proyecto, Marco, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura: leen los JSON de `str-manager-docs/interno/` por GitHub raw; no escriben en la base del STR. B8 (proxy al servicio del modelo) pendiente.",
+   "que": "Seg. Proyecto, Marco, Instrucciones, Cobit, Elementos, Base de conocimiento, Nomenclatura y Línea base (explorador de la línea base, LM-82): leen los JSON de `str-manager-docs/interno/` por GitHub raw; no escriben en la base del STR. B8 (proxy al servicio del modelo) pendiente.",
    "paginas": [
     "str-seg-proyecto.html",
     "str-marco-trabajo.html",
@@ -1121,7 +1121,8 @@
     "str-cobit.html",
     "str-elementos.html",
     "str-base-conocimiento.html",
-    "str-nomenclatura.html"
+    "str-nomenclatura.html",
+    "str-linea-base.html"
    ],
    "rutas": [
     "(ninguna del STR; GitHub raw)"
@@ -3438,10 +3439,11 @@
    "fuente": "claude/arquitectura/reglas-transversales.md",
    "prueba": "caso",
    "guardia": {
-    "tipo": "manual",
-    "ref": "GET /api/diagnostico a mano; spec de ráfaga desde LM-68",
-    "automatica": false,
-    "critica": true
+    "tipo": "pw",
+    "ref": "pw/rafaga.spec.js casos a y c (/api/diagnostico antes y después, umbral 60) + GET /api/diagnostico a mano; LM-68",
+    "automatica": true,
+    "critica": true,
+    "nota": "medida 21-oct 21:33: 4 conexiones en reposo, 12 tras una ráfaga de 12, tope del hosting 75 (umbral 60); automática por tanda con la cola v12 (LM-78, instalada 21-oct)"
    }
   },
   {
@@ -3535,10 +3537,11 @@
    "fuente": "claude/arquitectura/reglas-transversales.md",
    "prueba": "ráfaga",
    "guardia": {
-    "tipo": "ninguna",
-    "ref": "prueba de ráfaga nunca corrida; spec de pw desde LM-68",
-    "automatica": false,
-    "critica": true
+    "tipo": "pw",
+    "ref": "pw/rafaga.spec.js caso b (2 × 12 GET en paralelo, solo lectura, ventana nocturna); LM-68",
+    "automatica": true,
+    "critica": true,
+    "nota": "primera corrida válida 21-oct 21:33 (24×200, 12 conexiones tras la ráfaga, tope 75); automática por tanda con la cola v12 (LM-78, instalada 21-oct)"
    }
   }
  ],
@@ -4359,7 +4362,7 @@
     "DA-35"
    ],
    "prioridad": 14,
-   "nota": "Crítico. Cruce cerrado 10-oct: sin cargo al colaborador (DA-12 pospuesta). Al escribir criterios, confirmar los plazos vigentes de Airbnb en su centro de ayuda. Faltan criterios. [v2: antes de entregar, DA propia + cruce alcance/riesgo/reversión con hora]",
+   "nota": "Crítico. Cruce cerrado 10-oct: sin cargo al colaborador (DA-12 pospuesta). Al escribir criterios, confirmar los plazos vigentes de Airbnb en su centro de ayuda. Faltan criterios. [v2: antes de entregar, DA propia + cruce alcance/riesgo/reversión con hora] · Nota que traía la bolsa (retirada por dupl",
    "modulos": [
     "INC1",
     "INV",
@@ -4491,7 +4494,7 @@
     "DA-30"
    ],
    "prioridad": 25,
-   "nota": "Crítico. DA-30 aprobada 10-oct con ajuste: un solo responsable por turno (titular). Entregado. · Aceptado (L-85 y L-86 (más L-90), según seguimiento.json); estado puesto al día el 14-oct.",
+   "nota": "Crítico. DA-30 aprobada 10-oct con ajuste: un solo responsable por turno (titular). Entregado. · Aceptado (L-85 y L-86 (más L-90), según seguimiento.json); estado puesto al día el 14-oct. · Nota que traía la bolsa (retirada por duplicada, 21-oct): Crítico. Espera DA-30.",
    "modulos": [
     "INV",
     "HK",
@@ -4651,7 +4654,7 @@
    "documento": "claude/producto/requerimientos-inv2-8-plantillas-arranque-2026-10.md › REQ-INV2-8-1",
    "das": [],
    "prioridad": 18,
-   "nota": "Normal. 12 criterios, N1/N2 12/12; se prueba en pruebas. (R11). Contenido v1 con partes «a confirmar» por Carlos (juegos, categorías, dotación). Después de INV2-6-3 e INV2-7-1.",
+   "nota": "Normal. 12 criterios, N1/N2 12/12; se prueba en pruebas. (R11). Contenido v1 con partes «a confirmar» por Carlos (juegos, categorías, dotación). Después de INV2-6-3 e INV2-7-1. · Nota que traía la bolsa (retirada por duplicada, 21-oct): Definido 14-oct; después de INV2-6-3 e INV2-7-1. 8-2 espera sup",
    "modulos": [
     "INV",
     "FL",
@@ -5142,7 +5145,7 @@
     "DA-8"
    ],
    "prioridad": null,
-   "nota": "Sin definir. DA-8 (11-oct): el propietario tercero no tiene cuenta; a lo sumo un informe periódico.",
+   "nota": "Sin definir. DA-8 (11-oct): el propietario tercero no tiene cuenta; a lo sumo un informe periódico. · Nota que traía la bolsa (retirada por duplicada, 21-oct): DA-8 decidida 11-oct: sin cuenta; a lo sumo un informe periódico. Definir después.",
    "modulos": [
     "PR",
     "CAL",
@@ -5176,7 +5179,7 @@
     "DA-17"
    ],
    "prioridad": "baja",
-   "nota": "Por definir cuando haya una casa real.",
+   "nota": "Por definir cuando haya una casa real. · Nota que traía la bolsa (retirada por duplicada, 21-oct): Crítico cuando se defina (disponibilidad hacia Airbnb). Definir cuando haya una casa real (Carlos, 11-oct).",
    "modulos": [
     "PR",
     "CAL"
@@ -5193,7 +5196,7 @@
     "DA-16"
    ],
    "prioridad": 30,
-   "nota": "Normal. Hallazgos de Desarrollo en M-168; coherente con lo dicho por Carlos (horario base + acuerdos por reserva). Después del 75.",
+   "nota": "Normal. Hallazgos de Desarrollo en M-168; coherente con lo dicho por Carlos (horario base + acuerdos por reserva). Después del 75. · Nota que traía la bolsa (retirada por duplicada, 21-oct): Normal. Después del 75.",
    "modulos": [
     "PR",
     "CAL"
@@ -5579,7 +5582,7 @@
    "documento": "claude/producto/requerimientos-tablero-seg-proyecto-2026-10.md › REQ-TB1",
    "das": [],
    "prioridad": 1,
-   "nota": "Aceptado 20/20, lote 63 (318b8e3, p5c63). PT-0 cerrado. · Aceptado (lote 63, según seguimiento.json); estado puesto al día el 14-oct.",
+   "nota": "Aceptado 20/20, lote 63 (318b8e3, p5c63). PT-0 cerrado. · Aceptado (lote 63, según seguimiento.json); estado puesto al día el 14-oct. · Nota que traía la bolsa (retirada por duplicada, 21-oct): Tablero del STR con planes, carriles y dónde está cada REQ.",
    "modulos": [
     "PRJ"
    ],
@@ -7359,6 +7362,103 @@
    },
    "origen": "tests/e2e",
    "anclaje": "req"
+  },
+  {
+   "archivo": "LM-82.spec.js",
+   "req": "LM-82",
+   "zona": [
+    "PRJ"
+   ],
+   "modulos": [
+    "POR",
+    "SH"
+   ],
+   "casos": [
+    {
+     "c": "c",
+     "perfil": "admin",
+     "pagina": "/str-linea-base.html",
+     "nivel": "N2",
+     "que": "El admin ve el encabezado del commit y, dentro del iframe, el explorador de ese commit: «STR Manager» y la tabla «Línea objetivo»",
+     "camara": false,
+     "cubre": [
+      "PRJ",
+      "REL-24"
+     ],
+     "modulos": [],
+     "tec": "escenario"
+    },
+    {
+     "c": "e",
+     "perfil": "admin",
+     "pagina": "/str-linea-base.html",
+     "nivel": "N2",
+     "que": "⟳ Actualizar vuelve a pedir el commit y deja el explorador cargado, con el encabezado del commit",
+     "camara": false,
+     "cubre": [
+      "PRJ",
+      "REL-24"
+     ],
+     "modulos": [],
+     "tec": "escenario"
+    },
+    {
+     "c": "f",
+     "perfil": "admin",
+     "pagina": "/str-linea-base.html",
+     "nivel": "N3",
+     "que": "El explorador ocupa toda el área bajo el encabezado (escritorio y 390 px), sin doble barra de desplazamiento de la página",
+     "camara": false,
+     "cubre": [
+      "PRJ"
+     ],
+     "modulos": []
+    },
+    {
+     "c": "d",
+     "perfil": "oper",
+     "pagina": "/str-app-shell.html",
+     "nivel": "N2",
+     "que": "El operador no ve «Línea base» en el menú y, si abre la página a mano, vuelve al STR sin ver el explorador",
+     "camara": false,
+     "cubre": [
+      "PRJ",
+      "SH"
+     ],
+     "modulos": [],
+     "tec": "decisión"
+    },
+    {
+     "c": "g",
+     "perfil": "colab",
+     "pagina": "/portal.html",
+     "nivel": "N2",
+     "que": "El colaborador que abre la página a mano vuelve a su inicio sin ver el explorador",
+     "camara": false,
+     "cubre": [
+      "PRJ"
+     ],
+     "modulos": [],
+     "tec": "decisión"
+    }
+   ],
+   "nCasos": 5,
+   "paginas": {
+    "/str-linea-base.html": 3,
+    "/str-app-shell.html": 1,
+    "/portal.html": 1
+   },
+   "perfiles": {
+    "admin": 3,
+    "oper": 1,
+    "colab": 1
+   },
+   "niveles": {
+    "N2": 4,
+    "N3": 1
+   },
+   "origen": "tests/e2e",
+   "anclaje": "pagina"
   },
   {
    "archivo": "R-3-db-config.spec.js",
@@ -9753,7 +9853,7 @@
      "perfil": "admin",
      "pagina": "/str-app-shell.html",
      "nivel": "N2",
-     "que": "Criterio 6: Proyecto va al final, cerrado al entrar, solo admin; sus 7 páginas abren igual",
+     "que": "Criterio 6: Proyecto va al final, cerrado al entrar, solo admin; sus 8 páginas abren igual (LM-82: + Línea base)",
      "camara": false,
      "cubre": [
       "REQ-SH-2",
@@ -10864,6 +10964,20 @@
     "req": "LM-57",
     "resumen": "Seg. Proyecto lee planes[] y prioridades[] de interno/proyecto.json (lista por lista, respaldo diseno.json); Nomenclatura con el Jefe de proyecto; ?v= p5c109 → ",
     "estado": "aceptado"
+   },
+   {
+    "lote": "L-165",
+    "fecha": "2026-10-26",
+    "req": "LM-82",
+    "resumen": "Página «Línea base» del grupo Proyecto; versión p5c113",
+    "estado": "no aceptado"
+   },
+   {
+    "lote": "L-166",
+    "fecha": "2026-10-26",
+    "req": "INC-209",
+    "resumen": "REQ-SH-2.spec.js caso a: 18 entradas del menú",
+    "estado": "aceptado"
    }
   ],
   "SH": [
@@ -10949,6 +11063,13 @@
     "fecha": "2026-10-18",
     "req": "INC-155",
     "resumen": "Guion REQ-OP-1 c: orden por atención con la regla de _avOrden (valor conocido, mayor primero, empate por nombre)",
+    "estado": "aceptado"
+   },
+   {
+    "lote": "L-166",
+    "fecha": "2026-10-26",
+    "req": "INC-209",
+    "resumen": "REQ-SH-2.spec.js caso a: 18 entradas del menú",
     "estado": "aceptado"
    }
   ],
@@ -12215,6 +12336,13 @@
     "severidad": "medio",
     "etapa": null,
     "titulo": "El grupo Proyecto (Seg. Proyecto, COBIT, Elementos, Instrucciones, Marco, Base de conocimiento) solo se cierra en pantalla: la página comprueba el rol en el nav"
+   },
+   {
+    "id": "INC-209",
+    "fecha": "2026-10-26",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "G2 de la instrucción dejó REQ-SH-2.spec.js con 17 entradas esperadas; con «Línea base» el menú del admin tiene 18"
    }
   ],
   "SRV": [
@@ -12530,6 +12658,50 @@
     "titulo": "El colaborador recibe todas las ubicaciones comunes del negocio (nombre, dirección, barrio e indicaciones de llegada), también las de propiedades donde no traba"
    }
   ],
+  "U": [
+   {
+    "id": "INC-108",
+    "fecha": "2026-10-10",
+    "severidad": "medio",
+    "etapa": "✔",
+    "titulo": "Un usuario tiene dos roles y un admin nuevo no puede entrar. zz-verif-admin ve 'No tienes una cuenta activa en STR Manager'."
+   },
+   {
+    "id": "INC-110",
+    "fecha": "2026-10-10",
+    "severidad": "bajo",
+    "etapa": "📝",
+    "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
+   },
+   {
+    "id": "INC-160",
+    "fecha": "2026-10-18",
+    "severidad": "medio",
+    "etapa": null,
+    "titulo": "api/capacidades no mira el rol: cualquiera con sesión (también un colaborador) puede crear, renombrar (nombre vacío permitido) o borrar capacidades del negocio "
+   },
+   {
+    "id": "INC-161",
+    "fecha": "2026-10-18",
+    "severidad": "alto",
+    "etapa": null,
+    "titulo": "Un operador con «Invitar» (equipo.invitar) puede reinvitar a un usuario ya activo que no es admin (otro operador con más permisos o un colaborador) y, al acepta"
+   },
+   {
+    "id": "INC-163",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "/api/me devuelve capacidades siempre vacío: el SELECT no trae la columna capacidades"
+   },
+   {
+    "id": "INC-164",
+    "fecha": "2026-10-18",
+    "severidad": "bajo",
+    "etapa": null,
+    "titulo": "Textos y respuestas que no dicen lo que pasa: «¿Eliminar este colaborador permanentemente?» en Equipo solo lo deja inactivo (INC-64); GET /api/usuarios/{id} de "
+   }
+  ],
   "SH": [
    {
     "id": "INC-108",
@@ -12607,50 +12779,13 @@
     "severidad": "bajo",
     "etapa": null,
     "titulo": "Tras pasar de un módulo a otro con un botón propio del módulo (navegación dentro del iframe), tocar en el menú la entrada de origen muestra el destino hasta rec"
-   }
-  ],
-  "U": [
-   {
-    "id": "INC-108",
-    "fecha": "2026-10-10",
-    "severidad": "medio",
-    "etapa": "✔",
-    "titulo": "Un usuario tiene dos roles y un admin nuevo no puede entrar. zz-verif-admin ve 'No tienes una cuenta activa en STR Manager'."
    },
    {
-    "id": "INC-110",
-    "fecha": "2026-10-10",
-    "severidad": "bajo",
-    "etapa": "📝",
-    "titulo": "Equipo muestra '✏️ Editar' al operador sin equipo.editar, también en filas admin."
-   },
-   {
-    "id": "INC-160",
-    "fecha": "2026-10-18",
+    "id": "INC-209",
+    "fecha": "2026-10-26",
     "severidad": "medio",
     "etapa": null,
-    "titulo": "api/capacidades no mira el rol: cualquiera con sesión (también un colaborador) puede crear, renombrar (nombre vacío permitido) o borrar capacidades del negocio "
-   },
-   {
-    "id": "INC-161",
-    "fecha": "2026-10-18",
-    "severidad": "alto",
-    "etapa": null,
-    "titulo": "Un operador con «Invitar» (equipo.invitar) puede reinvitar a un usuario ya activo que no es admin (otro operador con más permisos o un colaborador) y, al acepta"
-   },
-   {
-    "id": "INC-163",
-    "fecha": "2026-10-18",
-    "severidad": "bajo",
-    "etapa": null,
-    "titulo": "/api/me devuelve capacidades siempre vacío: el SELECT no trae la columna capacidades"
-   },
-   {
-    "id": "INC-164",
-    "fecha": "2026-10-18",
-    "severidad": "bajo",
-    "etapa": null,
-    "titulo": "Textos y respuestas que no dicen lo que pasa: «¿Eliminar este colaborador permanentemente?» en Equipo solo lo deja inactivo (INC-64); GET /api/usuarios/{id} de "
+    "titulo": "G2 de la instrucción dejó REQ-SH-2.spec.js con 17 entradas esperadas; con «Línea base» el menú del admin tiene 18"
    }
   ],
   "OP": [
@@ -12707,20 +12842,20 @@
    "reqAceptadosConGuion": 4,
    "reqEntregados": 0,
    "reqHistoricos": 2,
-   "guiones": 9,
-   "casos": 49,
+   "guiones": 10,
+   "casos": 54,
    "perfiles": [
     "admin",
     "colab",
     "oper"
    ],
-   "lotes30d": 12,
-   "lotesTotal": 12,
-   "incidentes": 11,
-   "incidentesAbiertos": 9,
+   "lotes30d": 13,
+   "lotesTotal": 13,
+   "incidentes": 12,
+   "incidentesAbiertos": 10,
    "riesgo": "alto",
    "puntajeRiesgo": 6,
-   "hotspot": 78
+   "hotspot": 84
   },
   "API": {
    "reqVigentes": 0,
@@ -12871,8 +13006,8 @@
    "reqAceptadosConGuion": 3,
    "reqEntregados": 5,
    "reqHistoricos": 5,
-   "guiones": 16,
-   "casos": 78,
+   "guiones": 17,
+   "casos": 83,
    "perfiles": [
     "admin",
     "colab",
@@ -13065,13 +13200,13 @@
     "admin",
     "oper"
    ],
-   "lotes30d": 20,
-   "lotesTotal": 20,
-   "incidentes": 10,
-   "incidentesAbiertos": 7,
+   "lotes30d": 22,
+   "lotesTotal": 22,
+   "incidentes": 11,
+   "incidentesAbiertos": 8,
    "riesgo": "bajo",
    "puntajeRiesgo": 2,
-   "hotspot": 42
+   "hotspot": 46
   },
   "MOD": {
    "reqVigentes": 2,
@@ -13246,6 +13381,24 @@
     "REQ-OP-1b.spec.js b",
     "REQ-OP-1b.spec.js c"
    ],
+   "REL-24": [
+    "LM-82.spec.js c",
+    "LM-82.spec.js e",
+    "REQ-SH-2.spec.js c",
+    "REQ-TB-3.spec.js a",
+    "REQ-TB-3.spec.js b",
+    "REQ-TB-3.spec.js c",
+    "REQ-TB-3.spec.js d",
+    "REQ-TB-3.spec.js f",
+    "REQ-TB-3.spec.js g",
+    "REQ-TB-4.spec.js a",
+    "REQ-TB-4.spec.js b",
+    "REQ-TB-4.spec.js c",
+    "REQ-TB-4.spec.js h",
+    "REQ-TB-5.spec.js c",
+    "REQ-TB-5.spec.js g",
+    "REQ-TB-5.spec.js i"
+   ],
    "REL-12": [
     "REQ-INV2-3-4-hk.spec.js e",
     "REQ-INV2-3-4-hk.spec.js h"
@@ -13276,22 +13429,6 @@
    ],
    "REL-01": [
     "REQ-OP-1b.spec.js a"
-   ],
-   "REL-24": [
-    "REQ-SH-2.spec.js c",
-    "REQ-TB-3.spec.js a",
-    "REQ-TB-3.spec.js b",
-    "REQ-TB-3.spec.js c",
-    "REQ-TB-3.spec.js d",
-    "REQ-TB-3.spec.js f",
-    "REQ-TB-3.spec.js g",
-    "REQ-TB-4.spec.js a",
-    "REQ-TB-4.spec.js b",
-    "REQ-TB-4.spec.js c",
-    "REQ-TB-4.spec.js h",
-    "REQ-TB-5.spec.js c",
-    "REQ-TB-5.spec.js g",
-    "REQ-TB-5.spec.js i"
    ]
   },
   "reglas": {
@@ -13455,6 +13592,7 @@
     "INC-140.spec.js",
     "INC-141.spec.js",
     "L-108.spec.js",
+    "LM-82.spec.js",
     "REQ-INV2-3-4-hk.spec.js",
     "REQ-INV2-3-4.spec.js",
     "REQ-INV2-4-2-dif.spec.js",
@@ -13507,6 +13645,7 @@
    ],
    "SH": [
     "INC-134.spec.js",
+    "LM-82.spec.js",
     "REQ-K3b-aviso.spec.js",
     "REQ-K3b.spec.js",
     "REQ-K3c-vista.spec.js",
@@ -13550,7 +13689,7 @@
    ]
   },
   "casosSinCubre": 0,
-  "casos": 207
+  "casos": 212
  },
  "zonasPw": {
   "que": "Zonas de regresión hoy (pw 0.5.27): el nombre de la zona no coincide con el módulo (HK, POR y K3 van en «inventario»). LM-39b: zona = id de módulo o lista de ids; «sesiones» sigue como zona especial (no es módulo); cambio de las 37 cabeceras y de plantillas/guion-e2e.js en el mismo lote (Desarrollo M-520).",
@@ -14178,9 +14317,48 @@
    "fecha": "2026-10-21",
    "lote": "LM-67",
    "cambio": "ARQUITECTURA-v1: reglas[] con guardia {tipo, ref, automatica, critica, n2Orden}; RT-25 añadida; PRJ y MOD pasan a familia «fabrica» (frontera ADR-008/009); índice de decisiones en interno/arquitectura/decisiones.json (ADR-001…015)."
+  },
+  {
+   "fecha": "2026-10-21",
+   "lote": "L-162",
+   "cambio": "L-162 (LM-70; c3e9011): CLAUDE.md § 1 pasa a puntero a docs/claude/reglas-fijas.md (9 799 caracteres) y tests/claude-md.test.js v2.1; documentación de la CLI y prueba de la fábrica; sin cambios en el mapa."
+  },
+  {
+   "fecha": "2026-10-21",
+   "lote": "L-163",
+   "cambio": "L-163 (lote estándar de docs, Cn2; 4da4ed2): CLAUDE.md a 6 897 caracteres, § 5 movido a docs/claude/entorno.md (nuevo, dueño —), cabeceras «Al día hasta L-n · dueño», DT-33 y DT-48 pagadas; documentación de la CLI; sin cambios en el mapa."
+  },
+  {
+   "fecha": "2026-10-21",
+   "lote": "L-164",
+   "cambio": "L-164 (lote estándar de docs, Cn2; be8a550): tres docs partidos (housekeeping-datos.md, servidor-php-datos.md, modelo.md), CLAUDE.md § 2 índice y tests/docs-partidos.test.js; documentación de la CLI; sin cambios en el mapa."
+  },
+  {
+   "fecha": "2026-10-21",
+   "que": "21:00 LM-68: RT-19 y RT-25 con guardia de guion (pw/rafaga.spec.js); primera corrida pendiente."
+  },
+  {
+   "fecha": "2026-10-26",
+   "lote": "L-165, L-166",
+   "cambio": "L-165 (LM-82; ed99503, p5c113): octava página de PRJ, str-linea-base.html, que muestra el explorador de la línea base del último commit en un iframe aislado; aceptado por evidencia cruzada (M-1127). L-166 (INC-209; 5b18fad): guion REQ-SH-2 con 18 entradas del menú. Sin relaciones nuevas (lee GitHub raw, como el resto de PRJ)."
   }
  ],
  "avisos": [
+  {
+   "regla": "M4 página sin módulo",
+   "id": "LM-82.spec.js",
+   "detalle": "página «/str-linea-base.html» no está en anclajeGuiones.paginaModulo"
+  },
+  {
+   "regla": "M4 página sin módulo",
+   "id": "LM-82.spec.js",
+   "detalle": "página «/str-linea-base.html» no está en anclajeGuiones.paginaModulo"
+  },
+  {
+   "regla": "M4 página sin módulo",
+   "id": "LM-82.spec.js",
+   "detalle": "página «/str-linea-base.html» no está en anclajeGuiones.paginaModulo"
+  },
   {
    "regla": "M5 cobertura",
    "id": "U",

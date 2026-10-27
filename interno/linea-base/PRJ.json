@@ -1,6 +1,6 @@
 {
  "modulo": "PRJ",
- "version": 3,
+ "version": 4,
  "estadoArchivo": "revisado-diseno",
  "levantadoEn": "2026-10-18",
  "fuentes": [
@@ -21,15 +21,21 @@
    "fecha": "2026-10-19",
    "por": "Chat Desarrollo (M-845)",
    "que": "INC-197 y DT-52 atados."
+  },
+  {
+   "fecha": "2026-10-26",
+   "por": "Chat Arquitecto (LM-82)",
+   "que": "CAP-PRJ-10 y CU-PRJ-10.1 por L-165 (aceptado por evidencia cruzada, M-1127) y L-166; octava página en el acceso (CU-PRJ-1.1)."
   }
  ],
  "alcance": {
   "dentro": [
-   "Control de acceso de las siete páginas del grupo Proyecto (solo administrador)",
+   "Control de acceso de las ocho páginas del grupo Proyecto (solo administrador)",
    "Lectura de los documentos del proyecto de la última versión, con encabezado, actualización y respaldo",
    "Seg. Proyecto: indicadores, tablero, plan de trabajo, diseño, ítems y cambios",
    "Marco de trabajo, Instrucciones, Cobit, Elementos, Base de conocimiento (mapa, diagrama, fichas, líneas base) y Nomenclatura",
-   "Lo que está entregado y sin construir: lectura del servicio del modelo (REQ-TB-6) y pestaña Catálogo (REQ-BC-2)"
+   "Lo que está entregado y sin construir: lectura del servicio del modelo (REQ-TB-6) y pestaña Catálogo (REQ-BC-2)",
+   "Línea base del STR: el explorador de la línea de producto y la línea objetivo, al día con el último commit (LM-82)"
   ],
   "fuera": [
    "«Lo que viene» (str-lo-que-viene.html): es CU-SH-6.1, aunque el mapa la lista como página de PRJ",
@@ -103,6 +109,13 @@
    "tipo": "consulta",
    "peso": "accesoria",
    "que": "Leer cómo se llaman las cosas del proyecto: roles, identificadores, entidades, camino de un lote, buzón, archivos y vocabulario."
+  },
+  {
+   "id": "CAP-PRJ-10",
+   "nombre": "Línea base del STR",
+   "tipo": "consulta",
+   "peso": "accesoria",
+   "que": "Ver dentro del STR el explorador de la línea base (sistema, módulos, casos de uso y la vista «Hoy · objetivo · brecha») tal como está en el último commit de los documentos."
   }
  ],
  "casosUso": [
@@ -112,7 +125,7 @@
    "actor": [
     "admin"
    ],
-   "que": "Abrir cualquiera de las siete páginas del grupo Proyecto solo si se es administrador; el operador, el colaborador o quien no ha entrado no las ve",
+   "que": "Abrir cualquiera de las ocho páginas del grupo Proyecto solo si se es administrador; el operador, el colaborador o quien no ha entrado no las ve",
    "declarado": "construido",
    "limitantes": [
     "El control es solo de pantalla: las páginas y los documentos que leen son públicos, así que no protege nada por sí mismo (RT-14 pide que decida el servidor). Hoy no hay datos del negocio en ellos.",
@@ -162,6 +175,10 @@
     },
     {
      "a": "CU-PRJ-9.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "a": "CU-PRJ-10.1",
      "dato": "permiso para ver la página (solo administrador)"
     }
    ],
@@ -229,7 +246,8 @@
      "str-cobit.html",
      "str-elementos.html",
      "str-base-conocimiento.html",
-     "str-nomenclatura.html"
+     "str-nomenclatura.html",
+     "str-linea-base.html"
     ],
     "rutas": [],
     "colecciones": [
@@ -291,6 +309,10 @@
     {
      "a": "CU-PRJ-8.1",
      "dato": "documentos del proyecto de la última versión y su hora"
+    },
+    {
+     "a": "CU-PRJ-10.1",
+     "dato": "commit de los documentos y encabezado de versión"
     }
    ],
    "escenarios": [
@@ -1893,6 +1915,113 @@
    "verificado": {
     "fecha": "2026-10-18",
     "como": "Lectura completa del código de la página y de los datos que lee; no se abrió en un navegador"
+   },
+   "ambito": "fabrica"
+  },
+  {
+   "id": "CU-PRJ-10.1",
+   "capacidad": "CAP-PRJ-10",
+   "actor": [
+    "admin"
+   ],
+   "que": "Ver el explorador de la línea base del último commit de los documentos dentro del STR, con su encabezado de versión y Actualizar, y navegar por sistema, módulos y casos de uso",
+   "declarado": "construido",
+   "limitantes": [
+    "El explorador lo regenera solo GitHub Actions con cada cambio de sus fuentes (LM-82); la página muestra el del commit del encabezado.",
+    "Se muestra aislado (iframe con sandbox, sin mismo origen): no ve la sesión ni el almacenamiento del STR; los filtros recordados del explorador no se guardan.",
+    "Pesa unos 1,6 MB por apertura (datos incrustados).",
+    "La cobertura sale de la última regresión completa guardada en el repo (interno/linea-base/resultados/regresion.json), no de la corrida del momento.",
+    "Como todo el grupo Proyecto, el acceso se cierra solo en pantalla y el repositorio es público (INC-201)."
+   ],
+   "entradas": [
+    {
+     "de": "CU-PRJ-1.1",
+     "dato": "permiso para ver la página (solo administrador)"
+    },
+    {
+     "de": "CU-PRJ-2.1",
+     "dato": "commit de los documentos y encabezado de versión"
+    }
+   ],
+   "salidas": [],
+   "escenarios": [
+    {
+     "id": "E1",
+     "tipo": "principal",
+     "dado": "un administrador",
+     "cuando": "abre Proyecto › Línea base",
+     "entonces": "ve el encabezado del commit y, debajo, el explorador con «STR Manager» y la tabla «Línea objetivo», a pantalla completa"
+    },
+    {
+     "id": "E2",
+     "tipo": "alterno",
+     "dado": "un cambio nuevo en los documentos",
+     "cuando": "pulsa Actualizar",
+     "entonces": "la página vuelve a pedir el commit y deja el explorador cargado"
+    },
+    {
+     "id": "E3",
+     "tipo": "excepcion",
+     "dado": "un operador o un colaborador",
+     "cuando": "abre la página a mano",
+     "entonces": "vuelve a su inicio sin ver el explorador"
+    }
+   ],
+   "origen": [
+    "LM-82"
+   ],
+   "reglas": [
+    "RT-4",
+    "RT-14"
+   ],
+   "pendientes": [
+    "INC-201"
+   ],
+   "pruebas": [
+    {
+     "guion": "LM-82",
+     "casos": [
+      "c",
+      "f"
+     ],
+     "escenarios": [
+      "E1"
+     ]
+    },
+    {
+     "guion": "LM-82",
+     "casos": [
+      "e"
+     ],
+     "escenarios": [
+      "E2"
+     ]
+    },
+    {
+     "guion": "LM-82",
+     "casos": [
+      "d",
+      "g"
+     ],
+     "escenarios": [
+      "E3"
+     ]
+    }
+   ],
+   "tecnica": {
+    "paginas": [
+     "str-linea-base.html"
+    ],
+    "rutas": [
+     "raw.githubusercontent.com/thcure/str-manager-docs/<sha>/interno/linea-base/linea-base.html"
+    ],
+    "colecciones": [],
+    "notas": "L-165 (ed99503, p5c113): STRApi.docs.commit/url/encabezado; iframe sandbox «allow-scripts allow-popups» con srcdoc; guarda de admin de Lo que viene; octava entrada de Proyecto en el menú. Guion tests/e2e/LM-82.spec.js."
+   },
+   "confianza": "alta",
+   "verificado": {
+    "fecha": "2026-10-26",
+    "como": "Veredictos del juez L-165 (criterios a–h) y L-166 (a, b, f); cierre por evidencia cruzada del Arquitecto (M-1127)"
    },
    "ambito": "fabrica"
   }

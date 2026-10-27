@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """linea-base-pagina.py (MJ-16, LM-58) — genera la página de consulta de la línea base funcional.
 
-Uso: python3 -I herramientas/modelo/linea-base-pagina.py <raíz> [--resultados <log\\L-n-pruebas.json>] [--salida <archivo>]
+Uso: python3 -I herramientas/modelo/linea-base-pagina.py <raíz> [--resultados <log\\L-n-pruebas.json>] [--salida <archivo>] [--si-cambia]
+Sin --resultados usa interno/linea-base/resultados/regresion.json (última regresión completa, sin datos reales) si existe.
+--si-cambia: no reescribe la página si solo cambiaría la hora de generación (lo usa el flujo linea-base-pagina de GitHub, LM-82).
 Lee interno/linea-base/*.json con linea-base.py (validación, estados y cobertura) y el mapa, y escribe una página
 autónoma (por defecto interno/linea-base/linea-base.html) con: resumen por módulo, mapa de calor de capacidades,
 diagrama de contexto (actores → capacidades → otros módulos), lista filtrable de casos de uso y su ficha, y la vista
 «Hoy · objetivo · brecha» por módulo con la línea objetivo (LM-80, objetivo.py).
 La página es contenido sin <html>/<head> (formato de artefacto); abre igual en un navegador. Lo mantiene el Arquitecto.
 """
-import json, os, sys, importlib.util, datetime
+import json, os, re, sys, importlib.util, datetime
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,8 +36,9 @@ def main(argv):
     if '--salida' in argv:
         sal = argv[argv.index('--salida') + 1]
     resultados, fuente_res = None, None
-    if '--resultados' in argv:
-        fuente_res = argv[argv.index('--resultados') + 1]
+    por_defecto = os.path.join(raiz, 'interno', 'linea-base', 'resultados', 'regresion.json')
+    if '--resultados' in argv or os.path.exists(por_defecto):
+        fuente_res = argv[argv.index('--resultados') + 1] if '--resultados' in argv else por_defecto
         crudo = lb.cargar(fuente_res)
         resultados = lb.desde_pruebas(crudo)
         fuente_res = (crudo.get('lote') if isinstance(crudo, dict) and crudo.get('lote') else os.path.basename(fuente_res))
@@ -93,6 +96,12 @@ def main(argv):
     with open(os.path.join(AQUI, 'linea-base-pagina.plantilla.html'), encoding='utf-8') as f:
         html = f.read()
     html = html.replace('/*__DATOS__*/null', json.dumps(datos, ensure_ascii=False).replace('</', '<\\/'))
+    if '--si-cambia' in argv and os.path.exists(sal):
+        sin_hora = lambda t: re.sub(r'"generado": "[^"]*"', '', t)
+        with open(sal, encoding='utf-8') as f:
+            if sin_hora(f.read()) == sin_hora(html):
+                print('página sin cambios: %s' % sal)
+                return 0
     with open(sal, 'w', encoding='utf-8') as f:
         f.write(html)
     print('página escrita: %s (%d módulo(s))' % (sal, len(mods)))

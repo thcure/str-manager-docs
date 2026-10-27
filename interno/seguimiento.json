@@ -17217,10 +17217,62 @@
    "req": "LM-82",
    "categoria": "estándar",
    "resumen": "Contrato de «cubre» en e2e-esquema y cubre completo del guion LM-82",
-   "estado": "instalado",
-   "observacion": "Encolado 20:21 (cmp IGUAL). Revisor 23/23. JP M-1129 (T-4). Construido 7f0287e 20:23.",
+   "estado": "aceptado",
+   "observacion": "Encolado 20:21 (cmp IGUAL). Revisor 23/23. JP M-1129 (T-4). Construido 7f0287e 20:23. Juez 20:25: ACEPTADO.",
    "version": "p5c113",
-   "hash": "7f0287e"
+   "hash": "7f0287e",
+   "aceptacion": {
+    "lote": "L-167",
+    "hash": "7f0287e",
+    "fecha": "2026-10-26",
+    "horaBogota": "20:25",
+    "resultado": "aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. La forma de «cubre» acepta REL y RT de 1 a 3 cifras y CU-<MOD>-n.m y rechaza lo mal escrito; todos los guiones la cumplen",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1.ok true: «node tests/run.js: 97/97 archivos OK»"
+     },
+     {
+      "c": "c. El admin ve el explorador de la línea base en la página y su encabezado (CU-PRJ-10.1, CU-PRJ-1.1, CU-PRJ-2.1)",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: encabezado: «Datos de las 20:24 · fcec00b» · sha fcec00b368232dd27300d492284fd01a5bac651b | si: estado de la página: ok | si: explorador publicado en fcec00b: HTTP 200 | si: sandbox del iframe: «allow-scripts allow-popups» | si: dentro del iframe: «STR Manager» visible | si: dentro del iframe: tabla «Línea objetivo» visible | si: origen del documento del iframe: null"
+     },
+     {
+      "c": "d. El operador no ve «Línea base» ni entra (CU-PRJ-1.1, REL-102, REL-112)",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entradas «Línea base» visibles para el operador: 0 | si: str-linea-base.html como operador → /str-app-shell.html · iframe del explorador: 0"
+     },
+     {
+      "c": "e. ⟳ Actualizar deja el explorador cargado (CU-PRJ-2.2)",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: tras Actualizar: estado ok · sha fcec00b (antes fcec00b) | si: dentro del iframe tras Actualizar: «Línea objetivo» visible"
+     },
+     {
+      "c": "f. El explorador sigue ocupando el área bajo el encabezado",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "f-escritorio.png (1366 px): bajo la barra «Línea base» y su subencabezado («Datos de las 20:24 · fcec00b», «Actualizar») el explorador («STR Manager», métricas, barra de estado, «Mapa del sistema») llena todo el ancho y el alto restante; sin doble barra de desplazamiento ni hueco. f-movil.png (390 px): mismo encabezado y el explorador a todo el ancho bajo él, contenido en una columna, sin barra de desplazamiento duplicada. El texto de ambas capturas incluye el frame #lbMarco con «Línea objetivo»."
+     },
+     {
+      "c": "g. El colaborador no entra (CU-PRJ-1.1, REL-112)",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: str-linea-base.html como colaborador → /portal.html · iframe del explorador: 0"
+     },
+     {
+      "c": "h. El guion del commit es igual al de la instrucción y el test es igual byte a byte",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "entrada «guion N2»: tests/e2e/LM-82.spec.js igual a la instruccion · 5 caso(s); n1Literal: tests/e2e-esquema.test.js igual byte a byte; aplicación literal 1/1"
+     }
+    ]
+   }
   }
  ],
  "esquema": {
@@ -19924,9 +19976,8 @@
    "categoria": "estándar",
    "riesgo": "R-1",
    "resumen": "ID_CUBRE de tests/e2e-esquema.test.js al contrato de «cubre» (M-1121) y cubre del guion LM-82 con CU-PRJ-2.1/2.2 y REL-102/112",
-   "estado": "construido",
-   "esperaA": "verificador",
-   "desde": "2026-10-26 20:24",
+   "estado": "aceptado",
+   "desde": "2026-10-26 20:25",
    "estados": [
     {
      "estado": "previsto",
@@ -19943,9 +19994,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-26 20:23"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-26 20:25"
     }
    ],
-   "nota": "20:04 En T-4 cuando L-166 quede aceptado (JP M-1124). · 20:21 Encolado en T-4 (JP M-1129). ID_CUBRE: REL y RT de 1 a 3 cifras y CU-<MOD>-n.m (solo amplía: 746 ids de 53 guiones siguen valiendo); guion LM-82 con CU-PRJ-10.1 (la página, del Arquitecto), 1.1, 2.1, 2.2 y REL-102/112. Revisor previo (subagente) 23/23 con la R1 aplicada (CU-PRJ-10.1). Simulación: e2e-esquema 25/0 (P2 falla en HEAD), drive-copia 78/0, aplicar.js K1 1/1 y K2 igual, hook acepta «Lote:». cmp IGUAL. · 20:23 Construido 7f0287e (run.js 97/97; e2e-esquema 25/0; P2 falla en HEAD con 0 casos). Espera el guion de la cola y el veredicto."
+   "nota": "20:04 En T-4 cuando L-166 quede aceptado (JP M-1124). · 20:21 Encolado en T-4 (JP M-1129). ID_CUBRE: REL y RT de 1 a 3 cifras y CU-<MOD>-n.m (solo amplía: 746 ids de 53 guiones siguen valiendo); guion LM-82 con CU-PRJ-10.1 (la página, del Arquitecto), 1.1, 2.1, 2.2 y REL-102/112. Revisor previo (subagente) 23/23 con la R1 aplicada (CU-PRJ-10.1). Simulación: e2e-esquema 25/0 (P2 falla en HEAD), drive-copia 78/0, aplicar.js K1 1/1 y K2 igual, hook acepta «Lote:». cmp IGUAL. · 20:23 Construido 7f0287e (run.js 97/97; e2e-esquema 25/0; P2 falla en HEAD con 0 casos). Espera el guion de la cola y el veredicto. · 20:25 Aceptado (juez): a, c–h en verde; guion LM-82 5/5 con su cubre completo; e2e-esquema 25/0. Lección: el contrato de una herramienta (cubre) tiene un solo dueño y una sola regla; dos lectores con reglas distintas (C2 y ID_CUBRE) crean deuda falsa."
   }
  ],
  "riesgos": [
@@ -20165,7 +20220,7 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-26 20:24",
+  "fecha": "2026-10-26 20:27",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
@@ -20179,12 +20234,6 @@
     "que": "Fix de INC-135 (Drive invalid_grant pierde código y descripción de Google)",
     "estado": "pospuesto (pausa de producto, M-976)",
     "siguientePaso": "Al levantarse la pausa: rehacer los Busca contra main, revisor previo de 23 puntos, encolar en el orden del Jefe de proyecto"
-   },
-   {
-    "ref": "L-167",
-    "que": "ID_CUBRE al contrato de cubre (M-1121)",
-    "estado": "construido (7f0287e), espera veredicto",
-    "siguientePaso": "Veredicto; aceptado → avisar al Arquitecto (cubre de LM-82 en guiones-e2e.json) y al JP (cierra T-4)"
    }
   ],
   "esperando": [
@@ -20218,7 +20267,7 @@
    "spec de ráfaga": "pw/rafaga.spec.js v1.1 (LM-68, Arquitecto): primera corrida válida 21-oct 21:33 (24×200, conexiones 4→12, máx. 12 de 75); ya sirve de evidencia RT-25/RT-19 en la ruta de lotes que toquen database.php o str-api.js; desde la cola v12 (LM-78) se lanza sola por tanda (10 aceptados o un aceptado que toque database.php/str-api.js) en la ventana 22:30–05:30: líneas «RAFAGA |» y «GUION | rafaga» en _resumen.txt no son lotes"
   },
   "noEscrito": [],
-  "primeraAccion": "Leer buzon.py --para «Chat Desarrollo»; T-2 cerrada (M-1085), sin tanda abierta ni cola; no redactar producto mientras siga la pausa (M-976)",
+  "primeraAccion": "Leer buzon.py --para «Chat Desarrollo»; T-4 cerrada al aceptarse L-167; sin tanda abierta ni cola; no redactar producto mientras siga la pausa (M-976)",
   "decideCarlos": [
    "DA-57 (A o B) para L-156: M-892",
    "levantar la pausa de producto: M-976"

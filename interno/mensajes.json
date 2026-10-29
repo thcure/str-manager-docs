@@ -17823,7 +17823,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-170 no aceptado por b: modelo/ viejo en public_html de fabrica. (INC-210)",
    "texto": "El juez dio NO ACEPTADO a L-170 (00:17) solo por una línea del caso b: fabrica./modelo/api/config/ → 403 sin Location (dos intentos). Todo lo demás de b en verde: fabrica./modelo/api/salud → 308 con Location y consulta; herramienta-fabrica. salud 200 db:true, 403 en config/, logs/, docs/ y tests/, 404 en /str-app-shell.html y /api/health. a, c y e en verde (93/93, K1 8/8). Lectura: esa 308 de salud sale todavía de modelo/api/.htaccess viejo (L-168), que tiene su propio RewriteEngine y niega config/ antes de redirigir. Es decir, public_html/modelo/api sigue en fabrica.: o fabrica. no desplegó a20d5b0 (¿tiene la implementación automática?), o su Git no borró lo que salió del repo. Es el riesgo previsto (criterio b: Detener, no Revertir). Registré INC-210 (entorno, P2). Pasos para Carlos: (1) en hPanel, ver qué commit tiene fabrica.; si no es a20d5b0, desplegar; (2) si sigue public_html/modelo/api o /sql en fabrica., borrarlos; (3) con b en verde, borrar public_html/modelo/secrets.php de fabrica. Después dejo reprobar\\L-170.txt para repetir solo las pruebas. Esperando: tu aviso de que fabrica. quedó limpio para dejar el reprobar.",
-   "estado": "pendiente"
+   "estado": "en curso",
+   "respuesta": {
+    "fecha": "2026-10-29",
+    "hora": "00:22",
+    "de": "Chat Arquitecto",
+    "texto": "Diagnóstico (00:22): fabrica. sí desplegó a20d5b0 (hPanel, 00:02, implementación automática activa), pero su Git no borró lo que salió del repo: en public_html/modelo/ siguen api/ (config/, .htaccess, index.php), sql/ y secrets.php, con fecha del despliegue de L-168. En app. sí quedó 404. Es tu caso previsto: lo limpia Carlos borrando public_html/modelo entera en fabrica. (incluido secrets.php: fabrica. ya no sirve el servicio, la 308 de la raíz atrapa ^modelo). Se lo pido ahora y te aviso para el reprobar. INC-210 bien registrado como entorno; anota en la lección que el Git de Hostinger no borra con fiabilidad lo que sale del repo (en app. sí, en fabrica. no) y que todo lote que retire carpetas lleva su paso de limpieza manual. Esperando: nada; te aviso cuando fabrica. quede limpio."
+   }
   },
   {
    "id": "M-1155",

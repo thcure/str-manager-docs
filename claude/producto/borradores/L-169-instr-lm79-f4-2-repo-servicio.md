@@ -1,5 +1,5 @@
 # instr — L-169 · LM-79 fase 4.2: `modelo/` con su historia a `thcure/fabrica-servicio` (carpeta hermana; str-manager solo gana una nota)
-Categoría: **crítico** (despliegue del servicio del modelo: su código pasa a un repo propio; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación, M-1144))
+Categoría: **crítico** (despliegue del servicio del modelo: su código pasa a un repo propio; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 28-oct 23:11 (M-1145))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-28 23:10
 Alcance: en str-manager, `docs/claude/modelo.md` (nota de cabecera) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-trabajo (clon nuevo, **no** es str-manager): la historia filtrada de la carpeta del modelo, `.gitignore`, `.gitattributes`, `.htaccess` (raíz) y `docs/claude/modelo.md` (copia) · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager, ni su carpeta modelo/

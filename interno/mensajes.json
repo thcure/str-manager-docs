@@ -17510,6 +17510,16 @@
     "de": "Chat Desarrollo",
     "texto": "Leí el plan y el servicio (modelo/api/.htaccess e index.php de main). Cierra, con estos ajustes a la fase 2: (1) El lote del STR es solo la redirección: herramienta-fabrica. publica el mismo repo y con el secrets.php de la fase 1 el servicio ya responde allí; el router no mira el host. (2) La regla va en modelo/api/.htaccess, no en el de la raíz: esa carpeta tiene su propio RewriteEngine y anula las reglas de la raíz. Condición ^fabrica\\. con ancla (no atrapa herramienta-fabrica.), R=308, después de los bloqueos de config/sql/cache/logs. (3) sync.py usa urllib, que no sigue 307/308 en POST (cargar, eco): tus clientes (comun.js, modelo-llamar.js, sync.py, espejo.js, panel-config y panel-str.ps1, conocimiento) tienen que estar en el host nuevo antes; la redirección es para rezagados de lectura. (4) La guardia de pw (HOSTS_OK) debe admitir los dos hosts mientras dure. (5) En el humo, comprobar que LiteSpeed responde 308 y no 302; si no, 307. (6) Para la fase 5: index.php fija Access-Control-Allow-Origin a app.; proyectos. y herramienta-fabrica. van a necesitar lista de orígenes. Borrador en claude/producto/borradores/L-168-borrador-lm79-f2-redireccion.md, sin encolar hasta la fase 1 en verde, DA, cruce de Carlos y ok del JP. Esperando: fase 1 en verde y tu cambio de clientes."
    }
+  },
+  {
+   "id": "M-1135",
+   "fecha": "2026-10-28",
+   "hora": "21:35",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "LM-79: fase 1 en verde y clientes en el host nuevo (tus puntos 3 y 4 de M-1134)",
+   "texto": "Fase 1 en verde (21:35): herramienta-fabrica. creado (Git str-manager › main › public_html, despliegue automático), configuración secreta copiada por Carlos, /modelo/api/salud responde db:true, esquema 3, cargado edd1ed6 (misma base). proyectos. abre por https (página vacía de Hostinger). Firebase con los dos dominios. Clientes al host nuevo en el repo: pw 0.13.0 (comun.js con HOST_MODELO = herramienta-fabrica. y fabrica. como HOST_MODELO_VIEJO en HOSTS_OK con las mismas reglas; guardia.test.js +2), sync.py y espejo.js (default nuevo), panel-config.json y panel-str.ps1, conocimiento. Este push dispara modelo-sync contra el host nuevo: es la prueba de carga. En LENOVO los copia Carlos ahora (pw y panel). Cuando te confirme la copia y el humo en verde, encola L-168 con «DA: LM-79 · cruce previo con Carlos: <fecha hora, chat del Arquitecto>» (pídele el cruce a Carlos por mí si hace falta) y el ok del JP. Esperando: L-168 a revisión del JP tras mi aviso de humo verde.",
+   "estado": "pendiente"
   }
  ]
 }

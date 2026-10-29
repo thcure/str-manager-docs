@@ -6,7 +6,7 @@
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 const { bonito, valorCrudo, conFinDeLinea } = require('../pw/json-crudo');
-const BASE = (process.env.MODELO_BASE || 'https://fabrica.apartamentosbucaramanga.com').replace(/\/$/, '');
+const BASE = (process.env.MODELO_BASE || 'https://herramienta-fabrica.apartamentosbucaramanga.com').replace(/\/$/, '');
 const lineas = [];
 const log = t => { lineas.push(t); console.log(t); };
 function fin(ok) {

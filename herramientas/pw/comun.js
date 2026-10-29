@@ -10,13 +10,17 @@
 // v0.5.3 (M8 de la migración, M-320/M-321): el servicio del modelo vive en fabrica. (BASE_MODELO). Las páginas siguen
 // en app. (sesión y base del STR), y el navegador desvía app./modelo/* a fabrica. (destinoModelo): los guiones no cambian.
 // Las reglas de la guardia se aplican a la URL original (en el modelo solo eco y los sondeos sin token con «{}»).
+// v0.13.0 (LM-79 fase 2, 28-oct): el servicio del modelo se muda a herramienta-fabrica. (HOST_MODELO); fabrica. queda como
+// HOST_MODELO_VIEJO en la lista y con las mismas reglas mientras redirige (308) a la direccion nueva.
 'use strict';
 const path = require('path');
 const { chromium } = require('playwright');
 
 const COLA = path.resolve(__dirname, '..');
 const HOST_STR = 'app.apartamentosbucaramanga.com';
-const HOST_MODELO = 'fabrica.apartamentosbucaramanga.com';
+const HOST_MODELO = 'herramienta-fabrica.apartamentosbucaramanga.com';
+const HOST_MODELO_VIEJO = 'fabrica.apartamentosbucaramanga.com';   // v0.13.0: redirige a HOST_MODELO hasta la fase 6 de LM-79
+const HOSTS_MODELO = [HOST_MODELO, HOST_MODELO_VIEJO];
 const BASE = 'https://' + HOST_STR;
 const BASE_MODELO = 'https://' + HOST_MODELO;
 // Puro: URL a la que va de verdad una petición del navegador (app./modelo/* → fabrica.), o null si no se desvía.
@@ -46,7 +50,7 @@ function conDesvio(page) {
   });
 }
 const PERFILES = { admin: 'zz-verif-admin', oper: 'zz-verif-oper', colab: 'zz-verif-colab', colab2: 'zz-verif-colab2' };
-const HOSTS_OK = [HOST_STR, HOST_MODELO, 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
+const HOSTS_OK = [HOST_STR, ...HOSTS_MODELO, 'securetoken.googleapis.com', 'identitytoolkit.googleapis.com',
   'firestore.googleapis.com', 'www.googleapis.com', 'apis.google.com', 'www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 const LECTURA = ['GET', 'HEAD', 'OPTIONS'];
 // v0.5.32: hosts de la ventana de «Continuar con Google»; la guardia solo los deja pasar mientras recuperarSesion()
@@ -136,7 +140,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
   if (RECUPERANDO.activo && (HOSTS_IDENTIDAD.includes(u.hostname) || /\.firebaseapp\.com$/.test(u.hostname))) return { ok: true, nota: 'ventana de Google durante la recuperación de sesión' };   // v0.5.32
   if (!HOSTS_OK.includes(u.hostname)) return { ok: false, motivo: 'host fuera de la lista: ' + u.hostname };
   if (LECTURA.includes(String(metodo).toUpperCase())) return { ok: true };
-  if (u.hostname !== HOST_STR && u.hostname !== HOST_MODELO) return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
+  if (u.hostname !== HOST_STR && !HOSTS_MODELO.includes(u.hostname)) return { ok: true, nota: 'servicio de Google (identidad o lectura)' };
   // v0.5.12 (M-390): cada escritura que pasa lleva su porqué en nota (queda en la bitácora y en «escrituras» del caso)
   if (ESCRITURA_PERMITIDA.some(r => r.test(u.pathname))) return { ok: true, nota: 'ruta de eco permitida' };
   if (u.hostname === HOST_STR && String(metodo).toUpperCase() === 'POST' && SESION.some(r => r.test(u.pathname))) return { ok: true, nota: 'inicio de sesión (identidad; sin datos de negocio)' };   // v0.5.25
@@ -161,7 +165,7 @@ function decidir(url, metodo, cuerpo, idsZz = ID_ZZ, idsLeidos = ID_ZZ_LEIDOS) {
       : { ok: false, motivo: 'borrado de restauración sobre una cuenta que no es zz-verif-restauracion-: ' + (nombre || '(sin nombre)') };
   }
   if (SONDEO_SIN_TOKEN.some(r => r.test(u.pathname))) return String(cuerpo || '').trim() === '{}' ? { ok: true, nota: 'sondeo sin datos ({})' } : { ok: false, motivo: 'carga del modelo con datos: solo el Arquitecto por la cola' };
-  if (u.hostname === HOST_MODELO) return { ok: false, motivo: 'escritura a la fábrica: solo el Arquitecto por la cola' };
+  if (HOSTS_MODELO.includes(u.hostname)) return { ok: false, motivo: 'escritura a la fábrica: solo el Arquitecto por la cola' };
   // v0.4.1: en /api/col/<coleccion> cada item debe ser zz-verif- y no se borra nada: una subida de la coleccion
   // entera que solo incluya una fila de prueba arrastraria datos reales (y podria pisarlos con una copia vieja).
   if (/^\/api\/col(\/|$)/.test(u.pathname)) {
@@ -295,7 +299,7 @@ async function abrir(usuario, opciones = {}) {
       const u = new URL(resp.url());
       // v0.5.22 (INC-128): estado y duración de cada escritura, para ver cuántas van a la vez y cuál falla.
       // v0.5.26: va ANTES de cualquier await: si el caso cierra mientras se lee el cuerpo, el estado ya quedó anotado.
-      if ([HOST_STR, HOST_MODELO].includes(u.hostname) && !LECTURA.includes(resp.request().method())) {
+      if ([HOST_STR, ...HOSTS_MODELO].includes(u.hostname) && !LECTURA.includes(resp.request().method())) {
         const mE0 = resp.request().method(), uE = resp.url().split('?')[0].slice(0, 200);
         // v0.5.23 (M-427): cada respuesta va a SU petición (WeakMap); antes se le daba a la última sin estado y, con dos en
         // vuelo, la primera respuesta quedaba en la segunda petición («→ 200 en 1ms») y la segunda en la primera.
@@ -314,7 +318,7 @@ async function abrir(usuario, opciones = {}) {
       // v0.5.21 (INC-128): una escritura al STR o al modelo que responde 5xx deja en la bitácora el inicio del cuerpo
       // (el mensaje de error del servidor); el hosting no guarda error_log al alcance. Solo corridas zz-verif-.
       const mE = resp.request().method();
-      if ([HOST_STR, HOST_MODELO].includes(u.hostname) && resp.status() >= 500 && !LECTURA.includes(mE)) {
+      if ([HOST_STR, ...HOSTS_MODELO].includes(u.hostname) && resp.status() >= 500 && !LECTURA.includes(mE)) {
         let t = ''; try { t = (await resp.text()).replace(/\s+/g, ' ').slice(0, 400); } catch (e) { }
         bitacora.push({ metodo: mE, url: resp.url().split('?')[0].slice(0, 200), paso: true, status: resp.status(), resp: true, motivo: 'respuesta ' + resp.status() + ': ' + (t || '(sin cuerpo)') });
       }
@@ -339,7 +343,7 @@ async function abrir(usuario, opciones = {}) {
       if (!d.ok) {
         // v0.4.1: al STR se le responde 409 en vez de cortar la conexion. Asi str-api.js lo trata como rechazo del
         // servidor (no lo guarda en su cola de reintentos) y vacia los reintentos que ya tuviera guardados.
-        if ([HOST_STR, HOST_MODELO].includes(new URL(r.url()).hostname)) return route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: 'guardia del verificador: escritura sin zz-verif- cortada' }) });
+        if ([HOST_STR, ...HOSTS_MODELO].includes(new URL(r.url()).hostname)) return route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: 'guardia del verificador: escritura sin zz-verif- cortada' }) });
         return route.abort('blockedbyclient');
       }
     }

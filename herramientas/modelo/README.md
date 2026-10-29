@@ -6,7 +6,7 @@ Lo mantiene el Chat Arquitecto. Estado al 13-oct-2026. **Sin secretos**: ni toke
 | Pieza | Dónde | Quién la escribe |
 |---|---|---|
 | Código del servicio | repo `str-manager`, carpeta `modelo/` (`api/index.php`, `api/config/*.php`, `sql/NNN_*.sql`) | CLI por lotes del modelo (L-n), redactados por el Arquitecto (LM-n) |
-| Despliegue | Desde la migración (M8, 13-oct) el servicio vive en el sitio de la fábrica: Git de Hostinger publica `str-manager` en su `public_html/` → `https://fabrica.apartamentosbucaramanga.com/modelo/api/`. En `app./modelo` también se publica (mismo repo) pero sin `secrets.php`: responde `db:false` y 503, a propósito, hasta D3 (modelo a su propio repo) | automático al hacer push |
+| Despliegue | Desde la migración (M8, 13-oct) el servicio vive en el sitio de la fábrica: Git de Hostinger publica `str-manager` en su `public_html/` → `https://fabrica.apartamentosbucaramanga.com/modelo/api/`. Desde el 28-oct (LM-79 fase 2) la dirección es `https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/` (sitio propio, mismo repo y misma base); `fabrica.` redirige (308) hasta la fase 6. En `app./modelo` también se publica (mismo repo) pero sin `secrets.php`: responde `db:false` y 503, a propósito, hasta D3 (modelo a su propio repo) | automático al hacer push |
 | Base | MariaDB `u…_modelo` (usuario `u…_modelo`), separada de la del STR | la crea Carlos en hPanel; las tablas, `GET migrar` |
 | Secretos | `public_html/modelo/secrets.php` del sitio `fabrica.` (fuera del repo; Git de Hostinger no borra archivos que no están en el repo): `MODELO_DB_HOST/NAME/USER/PASS`, `MODELO_TOKEN_ARQ` | Carlos, a mano |
 | Token del Arquitecto en LENOVO | `str-instr-cola\claves\modelo-arq.txt` (mismo valor que `MODELO_TOKEN_ARQ`) | Carlos |

@@ -3,7 +3,8 @@
 const assert = require('assert');
 const { decidir, destinoModelo, conDesvio, BASE, BASE_MODELO } = require('./comun');
 const B = 'https://app.apartamentosbucaramanga.com';
-const F = 'https://fabrica.apartamentosbucaramanga.com';   // v0.5.3: servicio del modelo (M8)
+const F = 'https://herramienta-fabrica.apartamentosbucaramanga.com';   // v0.13.0 (LM-79): servicio del modelo en herramienta-fabrica.
+const FV = 'https://fabrica.apartamentosbucaramanga.com';  // fabrica.: redirige mientras dure la mudanza; mismas reglas
 // lecturas simuladas de la semilla fija (lo que haría ctx.on('response') con GET /api/col/...)
 require('./comun').registrarLeidos(JSON.stringify({ items: [{ id: 'art-zz-1', data: { nombre: 'zz-verif-Toalla' } }, { id: 'dep-zz-1', data: { nombre: 'zz-verif-Principal' } }, { id: 'art-real-7', data: { nombre: 'Toalla' } }] }));
 const casos = [
@@ -72,6 +73,9 @@ let n = 0;
 for (const [url, m, body, esperado] of casos) { assert.strictEqual(decidir(url, m, body).ok, esperado, m + ' ' + url); n++; }
 assert.strictEqual(destinoModelo(B + '/modelo/api/salud'), F + '/modelo/api/salud'); assert.strictEqual(destinoModelo(B + '/modelo/api/estado?x=1'), F + '/modelo/api/estado?x=1'); assert.strictEqual(destinoModelo(B + '/api/health'), null); assert.strictEqual(destinoModelo(B + '/modelos.html'), null); assert.strictEqual(destinoModelo(F + '/modelo/api/salud'), null);
 assert.strictEqual(BASE, B); assert.strictEqual(BASE_MODELO, F); n += 7;
+// v0.13.0: el host viejo sigue en la lista con las reglas del modelo (lectura sí, login y escrituras no)
+assert.strictEqual(decidir(FV + '/modelo/api/salud', 'GET', '').ok, true, 'GET al host viejo del modelo sí');
+assert.strictEqual(decidir(FV + '/api/login', 'POST', '{}').ok, false, 'POST /api/login al host viejo del modelo no'); n += 2;
 // conDesvio: page.request.get/post a app./modelo van a la fábrica; lo demás igual y con su this
 {
   const vistos = [];

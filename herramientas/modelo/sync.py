@@ -3,7 +3,7 @@
 
 Uso:  python3 herramientas/modelo/sync.py cargar    (valida, arma el paquete del commit y lo carga)
       python3 herramientas/modelo/sync.py salud     (solo GET salud: prueba a)
-Entorno: MODELO_BASE (por defecto https://fabrica.apartamentosbucaramanga.com), MODELO_TOKEN (secreto, rol «carga»),
+Entorno: MODELO_BASE (por defecto https://herramienta-fabrica.apartamentosbucaramanga.com), MODELO_TOKEN (secreto, rol «carga»),
          GITHUB_SHA (commit), GITHUB_STEP_SUMMARY (resumen de la ejecución; opcional).
 Registro PÚBLICO (repo público): solo sha corto, códigos, conteos y duración. Nunca el token, textos ni títulos.
 Si validar.py da errores: no llama a cargar y lista regla · entidad · id · archivo (para saber a qué escritor le toca).
@@ -13,7 +13,7 @@ Solo biblioteca estándar. Salida: 0 verde, 1 rojo.
 import json, os, re, subprocess, sys, tempfile, time, urllib.request, urllib.error
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-BASE = os.environ.get('MODELO_BASE', 'https://fabrica.apartamentosbucaramanga.com').rstrip('/')
+BASE = os.environ.get('MODELO_BASE', 'https://herramienta-fabrica.apartamentosbucaramanga.com').rstrip('/')
 TIEMPO = float(os.environ.get('MODELO_TIEMPO', '60'))
 # Entidad de validar.py -> archivo (un escritor por archivo)
 ARCHIVO = {'requisito': 'interno/diseno.json (Diseño)', 'decision': 'interno/diseno.json (Diseño)',

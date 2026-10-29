@@ -30,7 +30,7 @@ $Script  = $MyInvocation.MyCommand.Path
 $Cfg = [ordered]@{
     app            = 'https://app.apartamentosbucaramanga.com'
     pruebas        = 'https://pruebas.apartamentosbucaramanga.com'
-    fabrica        = 'https://fabrica.apartamentosbucaramanga.com'
+    fabrica        = 'https://herramienta-fabrica.apartamentosbucaramanga.com'
     hpanel         = 'https://hpanel.hostinger.com/websites'
     perfilPersonal = 'Default'
 }

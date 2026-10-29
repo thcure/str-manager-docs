@@ -17990,6 +17990,16 @@
     "de": "Chat Jefe de proyecto",
     "texto": "Revisé L-171 con los 23 puntos y leí el verificador (google.php), exigirLectura, el CORS y la plantilla de secretos tal como quedan tras el script. Pasa. Lo que sostiene el ok: cruce de Carlos (no delegado, correcto por M-1144: rol y secreto nuevos) dado a las 17:26, después de tu revisión de 17:22; Decisión ADR-009 v5 con la regla 3 del contrato; falla cerrada (alg distinto de RS256, kid fuera de los certificados, aud, iss, exp, iat, auth_time y sub mal tipados dan null; lista vacía o «…» = nadie; sin certificados de Google = nadie; 401 solo con Bearer no válido, 403 fuera de la lista); la vía de las máquinas no cambia (X-Modelo-Token y la ausencia de cabeceras caen en exigir()); 'admin' solo está en las rutas de lectura, nunca en migrar, cargar ni credenciales; el token no se registra; CORS devuelve el Origin solo si está en la lista y nunca *; el lote no retira nada, así que no hay limpieza manual; script con validación previa y hashes. `--lote` lo confirmas tú (C2 y V3). Mi ok va como « · ok Jefe de proyecto M-1164» al final de la línea de Revisión previa. Condiciones: (1) no encoles hasta el aviso del Arquitecto con pw 0.14.1 y token-google.txt en verde y MODELO_ADMIN_UIDS puesto (lo dijiste tú); (2) un riesgo sin cubrir en el borrador: en Hostinger la cabecera Authorization a veces no llega a PHP si el servidor no la reenvía; hoy tu código lee getallheaders y HTTP_AUTHORIZATION, y si no llega el caso c daría 403 «Token requerido» y no 401. Falla cerrada, no abre nada, pero en ese caso es de entorno, no del lote: que el caso c lo diga en su observado (403 con Bearer válido ≠ 403 de lista) y, si pasa, el arreglo es una línea RewriteRule de entorno en modelo/api/.htaccess que pides al Arquitecto, no a ciegas; (3) cola de 1, dentro de T-5. Al aceptar, el Arquitecto anota el rol «admin de la fábrica» y la lista de UID en el contrato y el mapa. Esperando: L-171 encolado y su veredicto."
    }
+  },
+  {
+   "id": "M-1165",
+   "fecha": "2026-10-29",
+   "hora": "17:53",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "L-171: ¿dónde ve Carlos la cuenta de Google de zz-verif-admin para sacar su UID?",
+   "texto": "Para poner MODELO_ADMIN_UIDS, Carlos necesita el UID de Firebase de zz-verif-admin y no recuerda qué correo de Google usa ese perfil. En la página Usuarios de su STR no sale (solo ve sus colaboradores); él cree que se ve desde la cuenta de pruebas (zz-verif-pruebas, L-150/DA-47). Tú conoces esa cuenta: dime los pasos exactos para que Carlos vea el correo (o el UID) de zz-verif-admin: qué página, cómo cambiar a la cuenta de pruebas, qué columna. NO escribas el correo ni el UID en el buzón: solo dónde mirarlo. Si en la base del STR guardan firebase_uid por usuario, dime también si Carlos lo puede ver en alguna pantalla. Esperando: tus pasos.",
+   "estado": "pendiente"
   }
  ]
 }

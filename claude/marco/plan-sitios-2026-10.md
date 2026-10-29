@@ -14,7 +14,7 @@
 ## Fases (cada una termina con una parada: no se pasa a la siguiente sin la comprobación en verde)
 | Fase | Qué | Quién | Esfuerzo | Comprobación |
 |---|---|---|---|---|
-| 0 · Preparar | ADR-009 v5 de «propuesta» a «aceptada»; LM-79 con revisión previa; excepción del JP en `pausas[]` (solo lotes de sitios) y tanda T-n | Arquitecto · JP · Carlos (ok) | 1 sesión | validador en 0; excepción registrada |
+| 0 · Preparar | ADR-009 v5 de «propuesta» a «aceptada»; LM-79 con revisión previa; excepción del JP en `pausas[]` (solo lotes de sitios) y tanda T-n; la cola construye los lotes críticos con `--model opus`, como ya hace con el juez (hoy la CLI usa su modelo por defecto de LENOVO, que Carlos cree que es Opus; 28-oct) | Arquitecto · JP · Carlos (ok) | 1 sesión | validador en 0; excepción registrada |
 | 1 · Crear los sitios | hPanel: `proyectos.` y `herramienta-fabrica.` como sitios nuevos con Git y SSL; Firebase: autorizar los dos dominios; `modelo/secrets.php` copiado al sitio nuevo; misma base `…_modelo` | Carlos, guiado | ≈45 min | `/modelo/api/salud` en `herramienta-fabrica.`; página de prueba con SSL en `proyectos.` |
 | 2 · Mudar el servicio | el servicio responde en `herramienta-fabrica.`; cambian `pw/comun.js` (HOST_MODELO), `modelo-llamar.js`, GitHub Actions (modelo-sync), conocimiento; `fabrica.` redirige 307/308 un tiempo | lote LM (CLI); Carlos copia lo de `pw` | ≈2 h de cola | humo de pw, regresión zona modelo, `espejo.js` byte a byte |
 | 3 · D1 registro | `proyectos.json` con P01 (repos, direcciones por ambiente, semilla, prefijo) | Arquitecto | 1 sesión | validador en 0 |

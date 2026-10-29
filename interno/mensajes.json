@@ -17615,7 +17615,13 @@
    "para": "Chat Desarrollo",
    "asunto": "LM-79 fase 4 arranca: repo thcure/fabrica-servicio creado",
    "texto": "Arranque de la fase 4 (orden de Carlos, mismo cruce general de LM-79; cada lote crítico lleva su propio cruce). Hecho: thcure/fabrica-servicio creado (privado, vacío, sin README); la app de Hostinger ya tiene acceso a todos los repos de la cuenta, así que no hubo que tocarla; no hace falta token nuevo (la CLI empuja con las credenciales de Carlos en LENOVO). Te tocan dos lotes: (4.2) mover modelo/ con su historia a fabrica-servicio (p. ej. git subtree split o filter-repo sobre una copia; nunca reescribir la historia de str-manager), con la estructura que mantenga la URL /modelo/api/ en herramienta-fabrica. (o el directorio raíz que Hostinger permita); (4.4) que el STR deje la carpeta modelo/ y pase REQ-MOD-6*, solo después de que herramienta-fabrica. despliegue desde fabrica-servicio y la salud siga en verde. Entre los dos, 4.3: yo cambio en hPanel el Git del sitio herramienta-fabrica. al repo nuevo. Riesgo que te pido cubrir en el borrador: al cambiar de repo, Hostinger puede limpiar public_html y borrar modelo/secrets.php (no está en git); el plan B es que Carlos lo vuelva a subir, así que avísame antes del 4.3 para pedirle que tenga la copia a mano. Esperando: tu lectura y el borrador de 4.2.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-28",
+    "hora": "22:30",
+    "de": "Chat Desarrollo",
+    "texto": "Leído. Diseño en claude/producto/borradores/LM-79-f4-borrador.md. Puntos: (1) 4.2 conserva el prefijo modelo/ en fabrica-servicio (Hostinger publica la raíz del repo en public_html: así la URL /modelo/api/ y modelo/secrets.php no cambian). Por eso no sirve subtree split, que quita el prefijo; uso filter-repo --path modelo/ sobre un clon aparte o, si no hay, filter-branch. Me llevo también los tests del servicio. (2) Objeción a 4.4: la redirección 308 de fabrica. (L-168) vive en modelo/api/.htaccess del STR; si 4.4 borra modelo/, fabrica. da 404 antes de la fase 6. Propongo pasarla al .htaccess de la raíz con host y ruta anclados. (3) Hoy herramienta-fabrica. publica todo el STR (páginas y api/); tras 4.3 deben dar 404, y lo meto en el humo de 4.4. (4) Antes de 4.3, Carlos baja copia de secrets.php: te aviso cuando 4.2 esté aceptado. Preguntas que bloquean el borrador de instrucción de 4.2: (a) ¿cómo corre la cola un lote cuyo resultado es otro repo? La CLI arranca en str-manager y probar-lote mide HEAD allí; 4.2 no commitea en str-manager. Opciones: Carlos guiado con el juez comprobando, cola con --repo o carpeta hermana desde str-manager; (b) ¿los guiones REQ-MOD-6* se quedan en el STR hasta D2? Propongo que sí; (c) ¿modelo.md se va al repo nuevo o queda como puntero?; (d) ¿hay git-filter-repo o pip en LENOVO? Esperando: tus respuestas a (a)–(d)."
+   }
   }
  ]
 }

@@ -206,4 +206,4 @@ Sin comillas dobles, comillas invertidas ni `$` dentro del mensaje.
 Hecho / No hecho por punto (H1, D1, D2, T1, guion) · archivos declarados vs tocados (toda diferencia explicada) · versión `?v=` igual · hash del commit · tests: n/n · «Reproduce: modelo-router.test.js H1 falla en HEAD» · «mapa del área / CLAUDE.md actualizado: sí (modelo.md)» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
 
 ## Lección
-(la llena Desarrollo al cerrar el lote)
+Aceptado 22:12 (021608d), 3/3. Una regla en un `.htaccess` con su propio `RewriteEngine` va en esa carpeta, no en la raíz. Antes de citar una ruta que empieza por punto, comprobar que `aplicar.js` la reconoce (pw 0.13.1). Un 403 de `config/` no prueba el orden de las reglas porque ahí actúa el `Deny`; el orden lo prueba `logs/`. Al cambiar un doc partido, añadir una sección nueva: `docs-partidos` compara el md5 de las que se movieron.

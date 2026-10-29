@@ -9,6 +9,7 @@
 //   v0.14.0 (LM-79 fase 5, M-1161): h.leerModelo(ruta, { sesion, origen }) hace un GET al servicio del modelo
 //   (herramienta-fabrica./modelo/api/<ruta>) con el token de Google del perfil (sesion: false = sin token) y, si se pide,
 //   con la cabecera Origin. Devuelve { status, cuerpo, cors }. El token nunca sale del ayudante: no va al guion, al log ni a capturas.
+//   v0.14.1 (M-1162): el token se saca en terminos.html (sirve también al colaborador, al que el shell manda a portal.html).
 //   camara: true (video sintetico) o 'fixtures/qr.y4m' (relativo al guion) en el caso -> Chrome con camara simulada (N2).
 //   Caso N3 (LM-19): nivel: 'N3' prepara la pantalla y llama h.captura(); no lo juzga el guion: queda ok=null para el juez local.
 //
@@ -26,21 +27,37 @@ function urlModelo(ruta) {
 }
 // v0.14.0: puro. Origen admitido en h.leerModelo: https y un host del dominio (para probar la lista de CORS), o null.
 function origenValido(o) { return /^https:\/\/[a-z0-9.-]+\.apartamentosbucaramanga\.com$/.test(String(o || '')) || /^https:\/\/[a-z0-9.-]+\.example$/.test(String(o || '')) ? String(o) : null; }
+// v0.14.1 (M-1162): puro. De la página del shell saca la versión del SDK de Firebase y su configuración pública
+// (apiKey, authDomain, projectId...). Devuelve { version, config } o null. Sin eval: el literal se pasa a JSON.
+function configFirebase(html) {
+  const t = String(html || '');
+  const v = (t.match(/firebasejs\/([\d.]+)\/firebase-app\.js/) || [])[1];
+  const m = t.match(/initializeApp\(\s*(\{[\s\S]*?\})\s*\)/) || t.match(/firebaseConfig\s*=\s*(\{[\s\S]*?\})/);
+  if (!v || !m) return null;
+  try {
+    const json = m[1].replace(/([{,]\s*)([A-Za-z_]\w*)\s*:/g, '$1"$2":').replace(/'([^'\\]*)'/g, '"$1"').replace(/,\s*}/g, '}');
+    const c = JSON.parse(json);
+    return (c && c.apiKey && c.projectId) ? { version: v, config: c } : null;
+  } catch (e) { return null; }
+}
 // v0.14.0: token de Google del perfil abierto, sacado de la sesión de Firebase de app. en una pestaña aparte del mismo
-// contexto (misma guardia), con el mismo SDK que carga la página. null si no hay sesión. Nunca se escribe en ningún lado.
+// contexto (misma guardia). Nunca se escribe en ningún lado; null si no hay sesión.
+// v0.14.1 (M-1162): la pestaña abre terminos.html (no redirige a nadie: el shell manda al colaborador a portal.html, que no
+// carga Firebase) e inicia ahí Firebase con la configuración pública del shell; la sesión persistida de app. es la misma.
 async function tokenGoogle(ctx) {
   const p = await ctx.newPage();
   try {
-    await p.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
-    return await p.evaluate(async () => {
-      const v = ([...document.scripts].map(s => s.textContent).join('\n').match(/firebasejs\/([\d.]+)\/firebase-app\.js/) || [])[1];
-      if (!v) return null;
-      const A = await import('https://www.gstatic.com/firebasejs/' + v + '/firebase-app.js');
-      const U = await import('https://www.gstatic.com/firebasejs/' + v + '/firebase-auth.js');
-      if (!A.getApps().length) return null;
-      const au = U.getAuth(A.getApp()); await au.authStateReady();
+    const r = await p.request.get(BASE + '/str-app-shell.html', { timeout: 30000 });
+    const fb = configFirebase(await r.text());
+    if (!fb) return null;
+    await p.goto(BASE + '/terminos.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    return await p.evaluate(async (fb) => {
+      const A = await import('https://www.gstatic.com/firebasejs/' + fb.version + '/firebase-app.js');
+      const U = await import('https://www.gstatic.com/firebasejs/' + fb.version + '/firebase-auth.js');
+      const app = A.getApps().find(a => a.name === '[DEFAULT]') || A.initializeApp(fb.config);
+      const au = U.getAuth(app); await au.authStateReady();
       return au.currentUser ? au.currentUser.getIdToken() : null;
-    });
+    }, fb);
   } catch (e) { return null; } finally { await p.close().catch(() => { }); }
 }
 
@@ -295,7 +312,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { urlModelo, origenValido, esSinSesion, extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
+module.exports = { configFirebase, urlModelo, origenValido, esSinSesion, extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

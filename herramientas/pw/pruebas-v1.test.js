@@ -511,6 +511,11 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   const { urlModelo, origenValido } = require('./guion');
   t('urlModelo: ruta relativa → herramienta-fabrica./modelo/api/<ruta>', urlModelo('salud') === 'https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/salud' && urlModelo('/estado?x=1') === 'https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/estado?x=1');
   t('urlModelo: rechaza esquema, "..", vacío y espacios', urlModelo('https://otro.com/x') === null && urlModelo('../api/config') === null && urlModelo('a/../b') === null && urlModelo('') === null && urlModelo('a b') === null && urlModelo(null) === null);
+  const { configFirebase } = require('./guion');
+  const shell = "<script type=\"module\">\n  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';\n  const app = initializeApp({\n    apiKey: 'AIzaEJEMPLO',\n    authDomain: 'demo.firebaseapp.com',\n    projectId: 'demo',\n    appId: '1:2:web:3',\n  });\n</script>";
+  const fb = configFirebase(shell);
+  t('configFirebase (0.14.1): versión y configuración del literal, sin eval', fb && fb.version === '10.14.1' && fb.config.apiKey === 'AIzaEJEMPLO' && fb.config.projectId === 'demo' && fb.config.appId === '1:2:web:3');
+  t('configFirebase: sin SDK, sin initializeApp o sin apiKey → null', configFirebase('<p>hola</p>') === null && configFirebase("firebasejs/10.1.0/firebase-app.js") === null && configFirebase("firebasejs/10.1.0/firebase-app.js initializeApp({ projectId: 'x' })") === null);
   t('origenValido: hosts https del dominio y *.example; nada más', origenValido('https://proyectos.apartamentosbucaramanga.com') && origenValido('https://ajeno.example') && !origenValido('http://app.apartamentosbucaramanga.com') && !origenValido('https://apartamentosbucaramanga.com.evil.io') && !origenValido('*'));
 }
 

@@ -5,6 +5,7 @@
 //    prosa se lista y no se juzga. Un punto declarado «No hecho» en el mensaje del commit se salta y se anota.
 // K2 N1 literal: cada «archivo nuevo tests/x.test.js … Contenido completo» de la sección «Tests en tests/» es igual byte a byte al
 //    del commit (como el guion N2); cada caso del N1 nombra el punto que cubre (los puntos sin prueba se listan, aviso).
+// v0.13.1 (LM-79, M-1137): las rutas aceptan un archivo que empieza por punto (`modelo/api/.htaccess`); antes K1 lo perdía.
 // K3 tamaño del lote: líneas y archivos del commit en tres columnas (código, pruebas, versión).
 // Puras salvo las que dicen «lee». Lo mantiene el Arquitecto. Pruebas: pruebas-v1.test.js.
 'use strict';
@@ -26,15 +27,15 @@ function puntosDe(texto) {
   const bs = bloques(t);
   const puntos = [];
   const idDe = (antes) => { const ids = [...antes.matchAll(/\*\*([A-Z]{1,3}\d{1,2}[a-z]?)\s*[·:.]/g)]; return ids.length ? ids[ids.length - 1][1] : null; };
-  const RUTA = /`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`/g;
+  const RUTA = /`((?:[\w.-]+\/)*(?:[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml)|\.htaccess))`/g;
   const archivoDe = (antes) => { const a = [...antes.matchAll(RUTA)]; return a.length ? a[a.length - 1][1] : null; };
   // M-972 (A): el archivo de un «Contenido completo» es el que sigue a «archivo nuevo» (o «nuevo») en el texto previo, no la última ruta
   // entre comillas invertidas (la prosa suele nombrar otros archivos: «… real y `str-avance.js` … Contenido completo:»).
   const archivoCompletoDe = (antes) => {
     const parr = antes.slice(-1200);
-    const nuevo = [...parr.matchAll(/(?:archivo\s+nuevo|nuevo)\s*[`*(]*\s*`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`/gi)];
+    const nuevo = [...parr.matchAll(/(?:archivo\s+nuevo|nuevo)\s*[`*(]*\s*`((?:[\w.-]+\/)*(?:[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml)|\.htaccess))`/gi)];
     if (nuevo.length) return nuevo[nuevo.length - 1][1];
-    const enNegrita = [...parr.matchAll(/\*\*[^*\n]*`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`[^*\n]*\*\*/g)];
+    const enNegrita = [...parr.matchAll(/\*\*[^*\n]*`((?:[\w.-]+\/)*(?:[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml)|\.htaccess))`[^*\n]*\*\*/g)];
     if (enNegrita.length) return enNegrita[enNegrita.length - 1][1];
     return archivoDe(antes);
   };
@@ -61,7 +62,7 @@ function puntosDe(texto) {
 function archivosDe(texto) {
   const t = String(texto || '').replace(/\r\n/g, '\n');
   const cab = t.split('\n').slice(0, 15).join('\n');
-  const RE = /`((?:[\w.-]+\/)*[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml))`/g;
+  const RE = /`((?:[\w.-]+\/)*(?:[\w.-]+\.(?:html|js|php|json|md|css|htaccess|txt|sql|yml|yaml)|\.htaccess))`/g;
   const partes = (cab.match(/^Alcance:.*$/m) || [''])[0].split(/\b(?:no toques|no tocar|sin tocar|no cambies)\b/i);
   const fuera = new Set([...(partes.slice(1).join(' ')).matchAll(RE)].map((m) => m[1]));   // lo que la cabecera prohíbe tocar
   const set = new Set();

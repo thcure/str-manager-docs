@@ -1,7 +1,7 @@
 # instr — L-169 · LM-79 fase 4.2: `modelo/` con su historia a `thcure/fabrica-servicio` (carpeta hermana; str-manager solo gana una nota)
 Categoría: **crítico** (despliegue del servicio del modelo: su código pasa a un repo propio; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 28-oct 23:11 (M-1145))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-28 23:10
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-28 23:10 · ok Jefe de proyecto M-1146
 Alcance: en str-manager, `docs/claude/modelo.md` (nota de cabecera) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-trabajo (clon nuevo, **no** es str-manager): la historia filtrada de la carpeta del modelo, `.gitignore`, `.gitattributes`, `.htaccess` (raíz) y `docs/claude/modelo.md` (copia) · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager, ni su carpeta modelo/
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)
 Impacto: el servicio del modelo tiene su repo, con toda su historia, listo para que en 4.3 `herramienta-fabrica.` despliegue desde él. Nada cambia en ningún sitio publicado: str-manager no cambia código y el repo nuevo aún no lo publica nadie.
@@ -30,7 +30,7 @@ H=/c/Users/ktcol/fabrica-servicio-trabajo
 test ! -e "$H" || { echo "ya existe $H: para"; exit 1; }
 test "$(git symbolic-ref --short HEAD)" = main && test -z "$(git status --porcelain)" || { echo "str-manager no está en main limpio: para"; exit 1; }
 git fetch -q origin main && test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" || { echo "main local distinto de origin/main: para"; exit 1; }
-git clone --no-hardlinks --no-tags --single-branch --branch main /c/Users/ktcol/str-manager "$H"
+git clone --no-hardlinks --no-tags --single-branch --branch main "$(git rev-parse --show-toplevel)" "$H"
 git -C "$H" remote remove origin
 git -C "$H" rev-parse HEAD; git rev-parse HEAD    # los dos iguales
 ```

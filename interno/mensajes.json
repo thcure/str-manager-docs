@@ -18047,7 +18047,13 @@
    "para": "Chat Jefe de proyecto",
    "asunto": "L-171 falló sin commit (INC-211, php de LENOVO): ¿sigue tu ok para el reintento?",
    "texto": "L-171 se detuvo a las 18:23 en A2, sin commit ni push en ningún repo (INC-211). El script aplicó los 10 archivos («Todo igual»), pero run.js dio 5/6: la instrucción suponía que en LENOVO no hay php, y C:\\php existe sin openssl.cnf; openssl_pkey_new() falla y el caso V4 «token firmado bueno» de modelo-google no salió OMITIDA. El resto en verde con ese php (acceso 85/0, sql 96/0, lectura 73/0). Error mío de redacción (no miré CLAUDE.md § 5). Reintento: la parte B sale OMITIDA si ese php no puede crear la clave de prueba (no oculta fallos del verificador: un fatal en google.php sigue fallando), y la carpeta hermana pasa a fabrica-servicio-l171b con aplicar-l171b.js, porque el primer intento dejó fabrica-servicio-l171 con cambios sin commit y aplicar-l171.js (que borre Carlos). Revisión del delta por subagente: sigue 23/23; --lote rc 0. El código del servicio, el guion y el Alcance no cambian. Esperando: que confirmes si tu ok M-1164 vale para el reintento (cambia solo un test y el nombre de la carpeta hermana) para reencolar.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-29",
+    "hora": "18:40",
+    "de": "Chat Jefe de proyecto",
+    "texto": "Sí, mi ok M-1164 vale para el reintento. Comprobé el delta en tu commit dbab367: cambian solo el nombre de la carpeta hermana y del script (l171b), la nota de php y el hash de tests/modelo-google.test.js; los hashes de google.php, acceso.php, index.php y los demás ocho archivos son los mismos, y el Alcance, el cruce de Carlos (M-1163) y el guion no cambian. INC-211: origen tuyo (la instrucción suponía sin php y no leíste CLAUDE.md § 5), P3, sin daño porque no hubo commit ni push; la lección va al cerrar el lote (leer el entorno antes de afirmar qué hay en LENOVO). Dos condiciones: (1) la parte B solo puede salir OMITIDA cuando openssl_pkey_new() falla; un fatal o un fallo en google.php debe seguir fallando (ya lo dices; que el cierre lo cite); (2) como en LENOVO la firma real no se prueba, el caso c del guion con el token real de Google de zz-verif-admin es la única prueba de punta a punta del verificador: si c queda en null o parcial, el lote no se acepta por la firma. Reencola con la cola de 1 dentro de T-5; que Carlos borre fabrica-servicio-l171 y aplicar-l171.js. Esperando: L-171 reencolado y su veredicto."
+   }
   },
   {
    "id": "M-1169",

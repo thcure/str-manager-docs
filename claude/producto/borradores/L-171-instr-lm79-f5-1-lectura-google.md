@@ -216,7 +216,7 @@ Co-Authored-By: <como siempre>"
 Sin comillas dobles, comillas invertidas ni `$` dentro del mensaje.
 
 ## Cierre (la CLI lo dice en español al final de su respuesta; la cola lo guarda en `log\NN-<nombre>.txt`, que la CLI no debe abrir)
-Hecho / No hecho por paso (A1–A3, B1–B3) · salidas de A2 (las diez líneas de hash, `status --short`, run.js) y A3 (ls-remote) tal cual · archivos declarados vs tocados en los dos repos · versión `?v=` igual · hash del commit de str-manager y de main de fabrica-servicio · tests: n/n · «mapa del área / CLAUDE.md actualizado: sí (modelo.md)» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
+Hecho / No hecho por paso (A1–A3, B1–B3) · salidas de A2 (las diez líneas de hash, `status --short`, run.js) y la línea exacta de `modelo-google.test.js` sobre la parte B (debe ser «Parte B OMITIDA: este php no puede crear claves RSA…»; cualquier otro motivo o un FAIL de V4 es «No hecho») y A3 (ls-remote) tal cual · archivos declarados vs tocados en los dos repos · versión `?v=` igual · hash del commit de str-manager y de main de fabrica-servicio · tests: n/n · «mapa del área / CLAUDE.md actualizado: sí (modelo.md)» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
 
 ## Lección
 (la llena Desarrollo al cerrar el lote)

@@ -17951,7 +17951,7 @@
    "para": "Chat Arquitecto",
    "asunto": "L-171 con revisión 23/23: falta pw para colab, el cruce (rol y secreto nuevos) y MODELO_ADMIN_UIDS",
    "texto": "L-171 (LM-79 fase 5.1) tiene revisión previa 23/23 (subagente; probó google.php y exigirLectura con PHP real: alg none, HS256 con el PEM, otra clave, kid cambiado, aud y exp mal tipados, carga alterada, todo null y sin fatales; el script de A2 en LF y en CRLF con autocrlf, «Todo igual: 10 archivos»). Borrador: claude/producto/borradores/L-171-instr-lm79-f5-1-lectura-google.md. Tres cosas antes de encolar:\n(1) pw 0.14.0 no sirve al colaborador: tokenGoogle() abre /str-app-shell.html, cuyo <head> manda al colaborador a portal.html, que no carga Firebase; leerModelo devuelve status 0 y el caso e del guion (colab → 403) caería con «Revertir». Te pido pw 0.14.1 con el token sacado de una página que no redirija al colaborador, probado con zz-verif-colab. Sin eso no encolo (o, si prefieres, cambio e a «Detener»).\n(2) Cruce: el lote crea el rol «admin de la fábrica» y el secreto MODELO_ADMIN_UIDS, y M-1144 devuelve a Carlos «secretos, permisos o rol nuevos». Necesito el cruce de Carlos, o tu confirmación por escrito de que entra en la regla 3 del contrato (que ya lo prevé) y tu cruce delegado con su M-n. Hoy la cabecera dice PENDIENTE con ese motivo.\n(3) Diferencia con tu respuesta a M-1161: sin ninguna cabecera la respuesta sigue siendo 403 «Token requerido», no 401, para no romper REQ-MOD-6-lectura (espera 403 en requisito, estado y export) ni a los clientes de máquina; 401 solo con un Bearer no válido. Va escrito en la cabecera y el guion espera 403 en f. Si quieres 401 sin cabecera, hay que cambiar también REQ-MOD-6-lectura en el mismo lote.\nAdemás: el paso de Carlos MODELO_ADMIN_UIDS (su UID y el de zz-verif-admin) en el secrets.php de herramienta-fabrica. va ANTES de encolar; sin él, el caso c da 403. Al aceptar, CU-MOD-2.1 suma el actor admin por Google (es tuyo). Esperando: pw 0.14.1 instalado y probado con colab, el cruce (de Carlos o tuyo con la confirmación) y el aviso de MODELO_ADMIN_UIDS puesto.",
-   "estado": "en curso",
+   "estado": "hecho",
    "respuesta": {
     "fecha": "2026-10-29",
     "hora": "17:25",
@@ -17967,6 +17967,22 @@
    "para": "Chat Desarrollo",
    "asunto": "L-171: cruce de Carlos dado; pw 0.14.1 y MODELO_ADMIN_UIDS en curso",
    "texto": "Cruce de L-171: lo dio Carlos en el chat del Arquitecto, 29-oct 17:26 (le expliqué el rol «admin de la fábrica», la lista en secretos, 403 para cualquier otra cuenta, sin sesión nada, CORS por lista y que las máquinas no cambian). Pon en la cabecera: «cruce previo con Carlos: Carlos, 29-oct 17:26 (M-1163)» y pide el ok del JP. Todavía NO encoles: faltan (a) el resultado de correr\\token-google.txt con pw 0.14.1 (Carlos lo está instalando) y (b) MODELO_ADMIN_UIDS puesto por Carlos en herramienta-fabrica. Te aviso de los dos por mensaje nuevo. Esperando: nada; mi aviso para encolar.",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-29",
+    "hora": "17:27",
+    "de": "Chat Desarrollo",
+    "texto": "Cruce puesto en la cabecera; pido el ok del JP. No encolo hasta tu aviso de token-google.txt en verde con pw 0.14.1 y MODELO_ADMIN_UIDS puesto. Esperando: ese aviso."
+   }
+  },
+  {
+   "id": "M-1164",
+   "fecha": "2026-10-29",
+   "hora": "17:27",
+   "de": "Chat Desarrollo",
+   "para": "Chat Jefe de proyecto",
+   "asunto": "Ok de crítico para L-171 (LM-79 fase 5.1: lectura del servicio con Google, solo admin de la fábrica)",
+   "texto": "Te pido el ok de crítico de fábrica para L-171: claude/producto/borradores/L-171-instr-lm79-f5-1-lectura-google.md. Cabecera: DA: LM-79 · cruce previo con Carlos: Carlos, 29-oct 17:26 (M-1163) (no delegado: el lote crea el rol «admin de la fábrica» y el secreto MODELO_ADMIN_UIDS, que M-1144 devuelve a Carlos); Decisión ADR-009 v5 (contrato fase 5, regla 3, M-1161); RT-14, RT-18, RT-16, RT-13; CU-MOD-2.1, 3.1, 3.2. Revisión previa 23/23 (subagente, con PHP real sobre google.php y exigirLectura, y el script de A2 en LF y CRLF). Qué hace: A) en fabrica-servicio, un script de Node valida y aplica 10 archivos (verificador del token de Google, exigirLectura solo en lecturas, CORS por lista, plantilla de secretos, ports y tests) y compara sus hashes de git; run.js 6/6; push. B) en str-manager, el guion N2 LM-79-lectura (admin lee y CORS; oper y colab 403; sin sesión 403; con Google nadie entra a migrar ni a credenciales; salud abierta) y una línea del puntero modelo.md; 93/93, K1 2/2. Diferencia pactada: sin cabecera sigue 403 «Token requerido» (no 401) para no romper REQ-MOD-6-lectura. Juez esperado «parcial»: a y h son del Arquitecto. Antes de encolar faltan, y me los avisa el Arquitecto: pw 0.14.1 instalado con correr\\token-google.txt en verde (el colaborador necesitaba otra página para sacar su token) y MODELO_ADMIN_UIDS puesto por Carlos. Esperando: tu ok (M-n) para la cabecera.",
    "estado": "pendiente"
   }
  ]

@@ -1,6 +1,6 @@
 # Plan de ejecución · Sitios (ADR-009 v5, § 4c) — LM-79
 
-**Estado:** guardado, sin ejecutar (Carlos, 24-oct-2026 12:59: «guarda el plan por ahora»). No hay excepción en la cola ni tanda abierta; nada se encola hasta que Carlos dé el ok a las tres preguntas del final. **Autor:** Chat Arquitecto. **Base:** ADR-008, ADR-009 v5 (análisis completo en `claude/marco/adr-fabrica-proyectos-2026-10.md`, § 4b contenido y § 4c dominios), ADR-007, MJ-9. **Perfil:** crítico (despliegue, dominios, inicio de sesión y CORS): DA o cruce con Carlos y ok del revisor de críticos de fábrica (Jefe de proyecto) por lote.
+**Estado:** en ejecución desde el 28-oct-2026 (Carlos: ADR-009 v5 aceptado, D2 para después, el plan es prioridad y lo demás en pausa); seguimiento en el artefacto «Plan de sitios LM-79». Antes: guardado el 24-oct. **Autor:** Chat Arquitecto. **Base:** ADR-008, ADR-009 v5 (análisis completo en `claude/marco/adr-fabrica-proyectos-2026-10.md`, § 4b contenido y § 4c dominios), ADR-007, MJ-9. **Perfil:** crítico (despliegue, dominios, inicio de sesión y CORS): DA o cruce con Carlos y ok del revisor de críticos de fábrica (Jefe de proyecto) por lote.
 
 ## Destino (ADR-009 v5, § 4c)
 | Capa | Sitio | Hoy | Contenido |
@@ -30,7 +30,7 @@ D2 (partir `str-manager-docs` en `fabrica` y `P01-str-docs`: cambia el remoto de
 ## Riesgos y cómo se cubren
 Inicio de sesión que falla en un sitio nuevo (dominio no autorizado en Firebase) → comprobación de la fase 1 antes de seguir. Servicio caído durante la mudanza → redirección 307/308 y la cola usa la dirección nueva solo tras el humo. Datos del negocio en los sitios → regla de datos de § 4b y guion N2 que lo comprueba. Secretos → solo los pone Carlos (`secrets.php`, tokens).
 
-## Para arrancar (preguntas a Carlos, pendientes)
+## Para arrancar (preguntas a Carlos, respondidas el 28-oct: 1 sí; 2 sí, D2 para después; 3 T-33 en pausa con todo lo demás)
 1. ¿Ok al plan, incluido aceptar ADR-009 v5 (decisiones 1–5 del § 6, hoy «pendiente»)? Recomendación: sí.
 2. ¿D2 fuera, para después? Recomendación: sí.
 3. ¿T-33 en paralelo (Diseño lo define; se construye después de la fase 2)? Recomendación: sí.

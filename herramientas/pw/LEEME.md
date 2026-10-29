@@ -29,6 +29,9 @@ Carpeta de instalación: `C:\Users\ktcol\Downloads\str-instr-cola\pw\` (fuente: 
 Instalación (una vez, PowerShell): `cd $HOME\Downloads\str-instr-cola\pw ; npm install --no-audit --no-fund ; npx playwright install chromium ; node guardia.test.js`
 
 
+## Registro de usuarios de prueba (29-oct, lo mantiene el Arquitecto)
+`usuarios-prueba.spec.js` (`correr\usuarios-prueba.txt` → `log\USUARIOS-PRUEBA-guion.json`) abre los cuatro perfiles y escribe `pw\usuarios-prueba.json` en LENOVO: usuario, rol en el STR, cuenta (`zz-verif-pruebas`), correo de Google, UID de Firebase, si es administrador de la fábrica (`MODELO_ADMIN_UIDS`) y la hora de la comprobación. El log solo dice qué campos se llenaron: correos y UID no salen de LENOVO. Se corre al cambiar un perfil, una cuenta o la lista de administradores.
+
 ## Servicio del modelo con sesión de Google (LM-79 fase 5, pw 0.14.0)
 `h.leerModelo(ruta, { sesion, origen })` en `guion.js`: GET a `herramienta-fabrica./modelo/api/<ruta>` (ruta relativa, sin `..` ni esquema; `urlModelo`) con `Authorization: Bearer <token de Google>` del perfil abierto y, si se pide, `Origin` de un host del dominio o `*.example` (`origenValido`), sin seguir redirecciones. El token sale de la sesión de Firebase de `app.` en una pestaña aparte del mismo contexto (misma guardia), con el mismo SDK que carga la página; se pide una vez por caso y nunca se escribe en el log, el guion ni las capturas. Devuelve `{ status, cuerpo, cors }`; sin sesión de Google en el perfil, `status: 0` con `error`. **v0.14.1 (M-1162):** el token se saca en `terminos.html`, que no redirige a nadie (el shell manda al colaborador a `portal.html`, sin Firebase), iniciando Firebase con la configuración pública del shell (`configFirebase`, sin eval); comprobación con los tres perfiles: `correr\token-google.txt` → `log\TOKEN-GOOGLE-guion.json`. Pruebas puras en `pruebas-v1.test.js` (234).
 

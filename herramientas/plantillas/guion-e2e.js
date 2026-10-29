@@ -22,6 +22,9 @@
 //   sin galería); camara: 'fixtures/<archivo>.y4m' (relativo al guion) muestra ese video, p. ej. un QR. Los casos se
 //   agrupan por perfil y cámara en el orden en que aparecen.
 // - Cada caso tiene 90 s. Para esperar una respuesta del servidor: await h.respuesta('/api/col/reservas', () => clic).
+// - Servicio del modelo (pw 0.14.0, LM-79 fase 5): const r = await h.leerModelo('estado', { sesion: true, origen: 'https://proyectos.apartamentosbucaramanga.com' })
+//   hace un GET a herramienta-fabrica./modelo/api/<ruta> con el token de Google del perfil ({ sesion: false } = sin token)
+//   y devuelve { status, cuerpo, cors } (cors = Access-Control-Allow-Origin recibido). El guion nunca ve el token. Solo GET.
 // - cubre (LM-41): cada caso declara los nodos del mapa del STR que prueba, por id de interno/mapa-modulos.json: módulo
 //   ('HK'), relación ('REL-16'), regla ('RT-8') o REQ ('REQ-K3-2'). Con eso la cola corre el caso solo cuando un lote pasa por
 //   ese nodo (ruta de pruebas) y el mapa muestra la cobertura. Un caso sin cubre vale por los módulos del guion (grueso).

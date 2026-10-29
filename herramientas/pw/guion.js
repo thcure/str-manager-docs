@@ -6,6 +6,9 @@
 //     pagina: '/str-<pagina>.html', que: '<criterio>', async prueba(h) { ... } } ], async limpiar(h) { ... } }
 //   h = { page, BASE, lote, espera(condicion, observado), dato(nombre), respuesta(fragmentoRuta, accion), captura(nombre, {ancho}) }
 //   limpiar(h) recibe el mismo h (v0.4.9): espera solo avisa y captura no hace nada.
+//   v0.14.0 (LM-79 fase 5, M-1161): h.leerModelo(ruta, { sesion, origen }) hace un GET al servicio del modelo
+//   (herramienta-fabrica./modelo/api/<ruta>) con el token de Google del perfil (sesion: false = sin token) y, si se pide,
+//   con la cabecera Origin. Devuelve { status, cuerpo, cors }. El token nunca sale del ayudante: no va al guion, al log ni a capturas.
 //   camara: true (video sintetico) o 'fixtures/qr.y4m' (relativo al guion) en el caso -> Chrome con camara simulada (N2).
 //   Caso N3 (LM-19): nivel: 'N3' prepara la pantalla y llama h.captura(); no lo juzga el guion: queda ok=null para el juez local.
 //
@@ -13,7 +16,33 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { abrir, BASE, COLA, PERFILES, conDesvio } = require('./comun');
+const { abrir, BASE, BASE_MODELO, COLA, PERFILES, conDesvio } = require('./comun');
+
+// v0.14.0: puro. URL de lectura del servicio del modelo para h.leerModelo, o null si la ruta no es una ruta relativa simple.
+function urlModelo(ruta) {
+  const r = String(ruta == null ? '' : ruta).replace(/^\/+/, '');
+  if (!r || /^[a-z]+:/i.test(r) || /(^|\/)\.\.?(\/|$)/.test(r) || /[\\\s#]/.test(r)) return null;
+  return BASE_MODELO + '/modelo/api/' + r;
+}
+// v0.14.0: puro. Origen admitido en h.leerModelo: https y un host del dominio (para probar la lista de CORS), o null.
+function origenValido(o) { return /^https:\/\/[a-z0-9.-]+\.apartamentosbucaramanga\.com$/.test(String(o || '')) || /^https:\/\/[a-z0-9.-]+\.example$/.test(String(o || '')) ? String(o) : null; }
+// v0.14.0: token de Google del perfil abierto, sacado de la sesión de Firebase de app. en una pestaña aparte del mismo
+// contexto (misma guardia), con el mismo SDK que carga la página. null si no hay sesión. Nunca se escribe en ningún lado.
+async function tokenGoogle(ctx) {
+  const p = await ctx.newPage();
+  try {
+    await p.goto(BASE + '/str-app-shell.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    return await p.evaluate(async () => {
+      const v = ([...document.scripts].map(s => s.textContent).join('\n').match(/firebasejs\/([\d.]+)\/firebase-app\.js/) || [])[1];
+      if (!v) return null;
+      const A = await import('https://www.gstatic.com/firebasejs/' + v + '/firebase-app.js');
+      const U = await import('https://www.gstatic.com/firebasejs/' + v + '/firebase-auth.js');
+      if (!A.getApps().length) return null;
+      const au = U.getAuth(A.getApp()); await au.authStateReady();
+      return au.currentUser ? au.currentUser.getIdToken() : null;
+    });
+  } catch (e) { return null; } finally { await p.close().catch(() => { }); }
+}
 
 const MARCA = /^###\s*Guion N2\s*(?:→|->)\s*`(tests\/e2e\/[A-Za-z0-9._-]+\.spec\.js)`/;
 
@@ -152,7 +181,7 @@ async function correrGuion(spec, opciones = {}) {
       a = await abrir(perfil, { headless: opciones.headless, camara: camara === true || camara === 'si' ? true : (camara ? path.resolve(opciones.dirGuion || process.cwd(), camara) : null) });
       ctx = a.ctx; reg.abierto = horaBogota();
       for (const caso of porPerfil[clave]) {
-        const esperas = []; const capturas = []; let error = null; const marca = a.bitacora.length;
+        const esperas = []; const capturas = []; let error = null; const marca = a.bitacora.length; let tokenCaso;
         const page = await ctx.newPage();
         const dirCapt = path.join(COLA, 'log', 'capturas', lote);
         const h = {
@@ -186,6 +215,21 @@ async function correrGuion(spec, opciones = {}) {
             fs.writeFileSync(path.join(dirCapt, base + '.txt'), texto);
             capturas.push({ nombre, png: path.relative(COLA, png), ancho: page.viewportSize().width });
             return png;
+          },
+          // v0.14.0: lectura del servicio del modelo como el perfil (o sin sesión). Solo GET; sin redirecciones.
+          async leerModelo(ruta, op = {}) {
+            const url = urlModelo(ruta);
+            if (!url) throw new Error('leerModelo: ruta no válida (relativa a /modelo/api/, sin ".." ni esquema)');
+            const headers = {};
+            if (op.origen != null) { const o = origenValido(op.origen); if (!o) throw new Error('leerModelo: origen no válido'); headers.Origin = o; }
+            if (op.sesion !== false) {
+              if (tokenCaso === undefined) tokenCaso = await tokenGoogle(ctx);
+              if (!tokenCaso) return { status: 0, cuerpo: null, cors: null, error: 'el perfil no tiene sesión de Google en app.' };
+              headers.Authorization = 'Bearer ' + tokenCaso;
+            }
+            const r = await page.request.get(url, { headers, maxRedirects: 0, timeout: 30000 });
+            const txt = await r.text(); let cuerpo; try { cuerpo = JSON.parse(txt); } catch (e) { cuerpo = txt.slice(0, 2000); }
+            return { status: r.status(), cuerpo, cors: r.headers()['access-control-allow-origin'] || null };
           },
         };
         try {
@@ -251,7 +295,7 @@ async function correrGuion(spec, opciones = {}) {
 
 function cargar(ruta) { delete require.cache[require.resolve(ruta)]; return require(ruta); }
 
-module.exports = { esSinSesion, extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
+module.exports = { urlModelo, origenValido, esSinSesion, extraerGuion, normalizar, igual, loteDe, cerrarCaso, resumirEscrituras, maxEnVuelo, horaBogota, cerrarSuave, enmascararTexto, correrGuion, cargar, MARCA };
 
 if (require.main === module) {
   (async () => {

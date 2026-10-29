@@ -507,6 +507,13 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('V10 esReanudacion: solo el mismo lote suspendido', V2.esReanudacion({ estado: 'suspendido', lote: 'L-9' }, 'L-9') && !V2.esReanudacion({ estado: 'reanudado', lote: 'L-9' }, 'L-9') && !V2.esReanudacion({ estado: 'suspendido', lote: 'L-8' }, 'L-9') && !V2.esReanudacion(null, 'L-9'));
 }
 
+{ // v0.14.0 (LM-79 fase 5, M-1161): h.leerModelo solo arma URLs relativas al servicio y orígenes del dominio
+  const { urlModelo, origenValido } = require('./guion');
+  t('urlModelo: ruta relativa → herramienta-fabrica./modelo/api/<ruta>', urlModelo('salud') === 'https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/salud' && urlModelo('/estado?x=1') === 'https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/estado?x=1');
+  t('urlModelo: rechaza esquema, "..", vacío y espacios', urlModelo('https://otro.com/x') === null && urlModelo('../api/config') === null && urlModelo('a/../b') === null && urlModelo('') === null && urlModelo('a b') === null && urlModelo(null) === null);
+  t('origenValido: hosts https del dominio y *.example; nada más', origenValido('https://proyectos.apartamentosbucaramanga.com') && origenValido('https://ajeno.example') && !origenValido('http://app.apartamentosbucaramanga.com') && !origenValido('https://apartamentosbucaramanga.com.evil.io') && !origenValido('*'));
+}
+
 { // v0.5.31 (M-499): cierre suave: páginas primero, luego el contexto; devuelve la hora
   const { cerrarSuave } = require('./guion');
   const orden = [];

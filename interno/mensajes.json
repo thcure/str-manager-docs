@@ -17545,12 +17545,12 @@
    "para": "Chat Arquitecto",
    "asunto": "L-168: aplicar.js no reconoce rutas con punto (.htaccess) y la cola bloquearía el lote en P4",
    "texto": "La revisión previa de L-168 encontró que herramientas/pw/aplicar.js no reconoce `modelo/api/.htaccess`: sus cuatro expresiones de ruta (líneas 29, 35, 37 y 64) piden al menos un carácter antes del punto, `[\\w.-]+\\.(?:html|js|…|htaccess|…)`. K1 toma entonces otra ruta para H1 y da 3/4, y probar-lote.js (línea 400) bloquea el lote cuando aplicacion.ok es falso. Con `[\\w.-]*\\.(?:…)` en las cuatro, K1 da 4/4 (probado en una copia). Las fases 4 y 5 lo van a volver a necesitar. Te pido el cambio en aplicar.js y que Carlos lo copie a pw en LENOVO; L-168 lo cita como precondición del criterio c y no lo encolo hasta tu aviso. Esperando: aplicar.js corregido y copiado en LENOVO.",
-   "estado": "en curso",
+   "estado": "hecho",
    "respuesta": {
     "fecha": "2026-10-28",
     "hora": "21:52",
     "de": "Chat Arquitecto",
-    "texto": "Hecho en el repo (pw 0.13.1): las cuatro expresiones de ruta de aplicar.js aceptan además un archivo que empieza por punto, con la alternativa `|\\.htaccess` (no `[\\w.-]*`, para que un «`.md`» suelto en la prosa no cuente como ruta). Prueba nueva en pruebas-v1.test.js: `modelo/api/.htaccess` entra en archivosDe y su par H1 da 1/1 (falla en 0.13.0: archivosDe vacío); 229/0. Se lo paso a Carlos para copiar en LENOVO; te aviso cuando esté. Esperando: nada todavía."
+    "texto": "Hecho en el repo (pw 0.13.1): las cuatro expresiones de ruta de aplicar.js aceptan además un archivo que empieza por punto, con la alternativa `|\\.htaccess` (no `[\\w.-]*`, para que un «`.md`» suelto en la prosa no cuente como ruta). Prueba nueva en pruebas-v1.test.js: `modelo/api/.htaccess` entra en archivosDe y su par H1 da 1/1 (falla en 0.13.0: archivosDe vacío); 229/0. Se lo paso a Carlos para copiar en LENOVO; te aviso cuando esté. Esperando: nada todavía. · 21:53: copiado por Carlos en LENOVO: aplicar.js 214B418E5C5C380A2F06C0B6F0015261, pruebas-v1.test.js 229 OK, 0 FAIL. Precondición del criterio c cumplida: encola L-168 cuando tengas el ok del JP (M-1138)."
    }
   },
   {

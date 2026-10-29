@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-29 16:34",
+ "actualizadoEn": "2026-10-29 16:52",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -2439,7 +2439,7 @@
    "modulo": "MOD (sitio fabrica.; despliegue de Hostinger)",
    "fecha": "2026-10-29",
    "titulo": "fabrica./modelo/api/config/ responde 403 en vez de 308: en public_html de fabrica. sigue el modelo/ viejo y su .htaccess manda antes que la 308 de la raíz",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "casoUso": "CU-MOD-1.1",
    "contra": "entorno",
@@ -2462,12 +2462,16 @@
     "fecha": "2026-10-29"
    },
    "destino": {
-    "tipo": "entorno",
-    "ref": "Carlos: comprobar en hPanel que fabrica. desplegó a20d5b0; borrar public_html/modelo/api y public_html/modelo/sql de fabrica. y, con b en verde, public_html/modelo/secrets.php; después reprobar\\L-170.txt",
-    "quien": "Carlos (guiado por el Arquitecto)"
+    "tipo": "punto",
+    "ref": "lección: todo lote que retire carpetas lleva su paso de limpieza manual en cada sitio (el Git de Hostinger no borra con fiabilidad lo que sale del repo)",
+    "quien": "Arquitecto"
    },
    "solucionTemporal": "ninguna necesaria para operar: nadie del negocio usa fabrica.; la fábrica ya llama a herramienta-fabrica. (pw 0.13.0) y salud en fabrica. sigue redirigiendo. Mientras tanto, el modelo/ viejo de fabrica. niega config/ por su propio .htaccess.",
-   "causa": "el Git de Hostinger no borró en fabrica. los archivos que salieron del repo (en app. sí)"
+   "causa": "el Git de Hostinger no borró en fabrica. los archivos que salieron del repo (en app. sí)",
+   "cierre": {
+    "lote": "L-170",
+    "prueba": "log/L-170-veredicto-2.json 16:51: caso b en verde, fabrica./modelo/api/config/ → 308 a herramienta-fabrica."
+   }
   }
  ],
  "dts": [
@@ -17422,6 +17426,78 @@
     "datosDePrueba": "pruebas.json no trae campo «limpieza»; la instrucción dice «Datos de prueba: ninguno». limpiezaRegresion: cada guion con «limpiar() corrio sin error» o «sin limpiar() en el guion»; restos de turnos zz-verif- de hoy antes de correr: 0 filas.",
     "notas": "Resultado «parcial» tal como lo espera la instrucción (a y b los cierra el Arquitecto en 4.3). pruebas.json › resultado: «verde», causa: null; Grep de \"ok\": false y null sin coincidencias. Fase «completa» (lote crítico), diferidos ninguno; regresión por ruta (25 guiones, centinelas REQ-INV2-4-2 y REQ-INV2-7-1-hk-turno) toda en verde; n2 vacío (la instrucción no trae guion N2) y sin N3 (n3Preparados vacío); la única captura (INC-125-b-medida) es de regresión y muestra a 390 px los lugares zz-verif- con sus botones dentro de la ventana. Cuarentena e inestables: ninguno. Sesiones: sin perdidas ni caídos. Deuda de cobertura de la ruta: REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token) sin caso que la ejerza. Línea de trazabilidad presente: lineaLote «Lote: L-169 · LM-79 · Casos de uso: técnico, sin caso de uso» (no es criterio de la instrucción)."
    }
+  },
+  {
+   "lote": "L-170",
+   "fecha": "2026-10-29",
+   "req": "LM-79",
+   "categoria": "crítico",
+   "resumen": "LM-79 fase 4.4: tests y ports del servicio a fabrica-servicio (8fbf397); el STR deja modelo/ y la 308 de fabrica. pasa al .htaccess de la raíz",
+   "estado": "aceptado",
+   "observacion": "Encolado 23:59 (cmp IGUAL). Revisor 23/23; cruce delegado M-1150; ok JP M-1151. Construido con Opus a20d5b0 00:02 (93/93). Juez 00:17: NO ACEPTADO por b (INC-210: el Git de Hostinger no borró public_html/modelo en fabrica.). Carlos limpió fabrica. (16:31, M-1156). Reprueba 16:51: PARCIAL con a, b, c, e en verde; d y f cerrados por evidencia cruzada del Arquitecto (M-1153). ACEPTADO.",
+   "version": "p5c113",
+   "hash": "a20d5b0",
+   "aceptacion": {
+    "lote": "L-170",
+    "hash": "a20d5b0",
+    "fecha": "2026-10-29",
+    "horaBogota": "16:51",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1.ok true: node tests/run.js: 93/93 archivos OK (ya en verde con este commit a las 00:03:00; no se repite, LM-45); incluye tests/sitios-redireccion.test.js, que la entrada da igual a la instrucción"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: fabrica./modelo/api/salud → 308 | si: Location: https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/salud?l=170 | si: fabrica./modelo/api/config/ (403 = Hostinger dejó el modelo/ viejo en public_html: limpiar, no revertir) → 308 · https://herramienta-fabrica.apartamentosbucaramanga.com/modelo/api/config/secrets.example.php | si: herramienta-fabrica./modelo/api/salud → 200 · servicio modelo · db true · esquema 3 | si: herramienta-fabrica./modelo/api/config/secrets.example.php → 403 | si: herramienta-fabrica./modelo/api/logs/zz-verif-l170 → 403 | si: herramienta-fabrica./docs/claude/modelo.md → 403 | si: herramienta-fabrica./tests/run.js → 403 | si: herramienta-fabrica./str-app-shell.html (el STR ya no se publica ahí) → 404 | si: herramienta-fabrica./api/health (el STR ya no se publica ahí) → 404"
+     },
+     {
+      "c": "c",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1.ok true: node tests/run.js: 93/93 archivos OK (incluye docs-partidos.test.js y claude-md.test.js)"
+     },
+     {
+      "c": "d",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "verificación cruzada del Arquitecto (A2 grep/run.js 5/5 y A3 ls-remote en fabrica-servicio): fuera del juez"
+     },
+     {
+      "c": "e",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "entrada: «aplicación literal 8/8»; «tests/sitios-redireccion.test.js igual; tests/docs-partidos.test.js igual · puntos sin caso N1 que los nombre: C1, T1, T2, T3»; guion N2: «tests/e2e/LM-79.spec.js igual a la instruccion · 1 caso(s)»"
+     },
+     {
+      "c": "f",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "verificación cruzada del Arquitecto (curl a app./modelo/api/salud → 404): el juez no tiene red"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "d",
+      "motivo": "verificación cruzada del Arquitecto fuera del juez: comprobar en GitHub que fabrica-servicio tiene tests y ports (A2 grep 0, run.js 5/5) y ls-remote igual al HEAD de la carpeta hermana; el juez no lee el log de la CLI"
+     },
+     {
+      "c": "f",
+      "motivo": "verificación cruzada del Arquitecto con curl: https://app.apartamentosbucaramanga.com/modelo/api/salud → 404 (page.request lo desvía; el juez no tiene red)"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null; sin casos con ok false (Grep). Fase completa (motivo: lote crítico; riesgo MOD 1×1 bajo), diferidos ninguno; 24 guiones de regresión por ruta, todos en verde. Cuarentena e inestables vacíos. Sesiones: ninguna perdida ni caída. La instrucción no tiene criterios N3; la única captura (INC-125-b-medida) es de regresión y solo muestra datos zz-verif-. Línea de trazabilidad presente: «Lote: L-170 · LM-79 · Casos de uso: CU-MOD-1.1». Deuda de cobertura de la ruta: hueco REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token), ya declarado en la instrucción. Parcial como espera la instrucción: d y f los cierra el Arquitecto por evidencia cruzada. En b, fabrica./modelo/api/config/ dio 308 (no 403): Hostinger no dejó el modelo/ viejo en fabrica.; el borrado de public_html/modelo/secrets.php huérfano en los dos sitios sigue en manos de Carlos (M-1144)."
+   }
   }
  ],
  "esquema": {
@@ -20227,8 +20303,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 4.4: tests y ports del servicio a fabrica-servicio; el STR deja modelo/ y la 308 de fabrica. pasa al .htaccess de la raíz",
-   "estado": "no aceptado",
-   "desde": "2026-10-29 00:17",
+   "estado": "aceptado",
+   "desde": "2026-10-29 16:52",
    "estados": [
     {
      "estado": "previsto",
@@ -20249,9 +20325,13 @@
     {
      "estado": "no aceptado",
      "desde": "2026-10-29 00:17"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-29 16:52"
     }
    ],
-   "nota": "Cruce delegado M-1150; ok JP M-1151. Esperado juez «parcial» (d y f al Arquitecto). Paso de Carlos tras b en verde: borrar public_html/modelo/secrets.php huérfano en fabrica.; si el despliegue no borra modelo/ viejo, limpieza de Carlos. · 00:02 Construido con Opus: str-manager a20d5b0 (93/93; sitios-redireccion 11/0, falla en HEAD 3/8); fabrica-servicio 8fbf397 (run.js 5/5; ls-remote igual). · 00:17 juez NO ACEPTADO por b (INC-210, entorno: modelo/ viejo en public_html de fabrica.); a, c, e en verde; d y f cerrados por el Arquitecto (M-1153, 00:05). Reprueba tras la limpieza de Carlos. · 16:34 reprobar\\L-170.txt tras la limpieza (M-1156)."
+   "nota": "Cruce delegado M-1150; ok JP M-1151. Esperado juez «parcial» (d y f al Arquitecto). Paso de Carlos tras b en verde: borrar public_html/modelo/secrets.php huérfano en fabrica.; si el despliegue no borra modelo/ viejo, limpieza de Carlos. · 00:02 Construido con Opus: str-manager a20d5b0 (93/93; sitios-redireccion 11/0, falla en HEAD 3/8); fabrica-servicio 8fbf397 (run.js 5/5; ls-remote igual). · 00:17 juez NO ACEPTADO por b (INC-210, entorno: modelo/ viejo en public_html de fabrica.); a, c, e en verde; d y f cerrados por el Arquitecto (M-1153, 00:05). Reprueba tras la limpieza de Carlos. · 16:34 reprobar\\L-170.txt tras la limpieza (M-1156). · 16:51 reprueba: juez PARCIAL (a, b, c, e en verde; b con 308 en config/ y salud) → aceptado con d y f cerrados por el Arquitecto (M-1153, 00:05)."
   }
  ],
  "riesgos": [
@@ -20471,14 +20551,14 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-28 23:59",
+  "fecha": "2026-10-29 16:52",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
-    "ref": "L-170",
-    "que": "LM-79 fase 4.4: el STR deja modelo/",
-    "estado": "encolado",
-    "siguientePaso": "Veredicto (esperado parcial); avisar al Arquitecto (d, f) y a Carlos (secrets.php huérfano). Después la fase 5 (sitios proyectos. y Fábrica)."
+    "ref": "LM-79 f5",
+    "que": "Fase 5: llenar proyectos. y la sección Fábrica de herramienta-fabrica., y quitar el grupo Proyecto del STR",
+    "estado": "espera arranque del Arquitecto",
+    "siguientePaso": "Con su aviso: borrador completo, 23 puntos, cruce delegado, ok del JP; cada lote que retire carpetas lleva su paso de limpieza manual por sitio (INC-210)"
    },
    {
     "ref": "L-156",

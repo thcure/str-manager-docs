@@ -327,4 +327,4 @@ Sin comillas dobles, comillas invertidas ni `$` dentro del mensaje.
 Hecho / No hecho por paso (A1–A3, B1–B4) · salidas de A2 (grep, run.js) y A3 (ls-remote) tal cual · archivos declarados vs tocados en los dos repos · versión `?v=` igual · hash del commit de str-manager y de main de fabrica-servicio · tests: n/n · «Reproduce: sitios-redireccion.test.js X1 falla en HEAD» · «mapa del área / CLAUDE.md actualizado: sí» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
 
 ## Lección
-(la llena Desarrollo al cerrar el lote)
+Aceptado 16:51 en la reprueba (a20d5b0; d y f por evidencia cruzada). El Git de Hostinger no borró en `fabrica.` la carpeta que salió del repo, aunque en `app.` sí (INC-210): todo lote que retire carpetas lleva su paso de limpieza manual en cada sitio, y su guion distingue «limpiar» de «revertir». Antes de mover tests a otro repo, buscar también sus fixtures (la revisión encontró `filas-export.json`).

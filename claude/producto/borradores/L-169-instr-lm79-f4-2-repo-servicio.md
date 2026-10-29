@@ -12,7 +12,7 @@ Riesgo: medio (R-1 del lote; MOD tiene riesgo 1, no hace falta R-n). Puede salir
 ¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (lote del modelo LM-79, DA: LM-79 y cruce de Carlos)
 Reversión: str-manager: `git revert <hash>` (solo la nota). Repo nuevo: lo vacía o borra Carlos en GitHub (nada lo publica todavía).
 Origen: M-1141, M-1142 y M-1144 (Arquitecto: arranque de la fase 4, respuestas y cruce delegado). Requerimiento: `interno/lotes-modelo/LM-79.md` y `claude/marco/plan-sitios-2026-10.md` (fase 4, D3). Decisión: ADR-009 (v5, § 4c, aceptada; el servicio sale del STR a su repo; no toca áreas de A6: ni api/config/, ni secretos, ni auth)
-Depende de: L-168 aceptado (021608d) y `thcure/fabrica-servicio` creado y vacío (M-1141) · Precondiciones para verificar: ninguna (no hay guion; la evidencia va en tu respuesta y el juez repite el ls-remote)
+Depende de: L-168 aceptado (021608d) y `thcure/fabrica-servicio` creado y vacío (M-1141) · Precondiciones para verificar: ninguna (no hay guion; la evidencia de a y b va en tu respuesta y la cierra el Arquitecto en 4.3)
 ¿Quién más depende de lo que cambia?: el Arquitecto en 4.3 (Git del sitio `herramienta-fabrica.`, después de que Carlos baje copia de `modelo/secrets.php`; 4.3 comprueba 403 en `herramienta-fabrica./docs/claude/modelo.md`); 4.4 (el STR deja `modelo/`); nadie más hasta entonces.
 
 ## 0. Contexto y reglas de este lote
@@ -115,10 +115,11 @@ Deuda de cobertura de la ruta (no la ejerce este lote): REL-29 (cola-arquitecto�
 
 ## Pruebas derivadas (juez; verificador crítico)
 ```
-- a. El repo nuevo tiene exactamente modelo/ con su historia y ningún secreto · nivel: N1 · perfil: log de la CLI · precondición: ninguna · tec: escenario · espera: § 3 con A = B, ls-tree «modelo», 0 revisiones con secrets.php, los dos conteos (NA = NB o la causa dicha) y la lista de la historia sin secrets.php · **Detener**
-- b. thcure/fabrica-servicio tiene main con el commit de § 4 · nivel: N1 · perfil: log de la CLI · precondición: a en verde · tec: escenario · espera: § 5 con el hash de ls-remote igual al HEAD de la carpeta hermana; ese commit trae .gitignore, .gitattributes, .htaccess y docs/claude/modelo.md; el verificador repite git ls-remote https://github.com/thcure/fabrica-servicio.git refs/heads/main y lo compara con el hash del cierre · **Detener**
+- a. El repo nuevo tiene exactamente modelo/ con su historia y ningún secreto · nivel: N1 · perfil: verificación cruzada del Arquitecto (fuera del juez; la cierra en 4.3) · precondición: ninguna · tec: escenario · espera: § 3 con A = B, ls-tree «modelo», 0 revisiones con secrets.php, los dos conteos (NA = NB o la causa dicha) y la lista de la historia sin secrets.php · **Detener**
+- b. thcure/fabrica-servicio tiene main con el commit de § 4 · nivel: N1 · perfil: verificación cruzada del Arquitecto (fuera del juez; la cierra en 4.3) · precondición: a en verde · tec: escenario · espera: § 5 con el hash de ls-remote igual al HEAD de la carpeta hermana; ese commit trae .gitignore, .gitattributes, .htaccess y docs/claude/modelo.md; en 4.3 hPanel despliega ese mismo hash, /modelo/api/salud da 200 con db:true y docs/claude/modelo.md da 403 en herramienta-fabrica. · **Detener**
 - c. str-manager solo cambia la nota de modelo.md y sigue en verde · nivel: N1 · perfil: tests/ · precondición: b en verde · tec: escenario · espera: `aplicar.js` K1 1/1 (D1); `node tests/run.js` en verde; el commit de str-manager toca solo docs/claude/modelo.md · **Detener**
 - Datos de prueba: ninguno
+- Resultado esperado del juez: «parcial», con a y b en criteriosPendientes (el juez no lee el log de la CLI ni tiene red); los cierra el Arquitecto por evidencia cruzada en 4.3 (M-1147, M-1148).
 ```
 
 ## 7. El commit de este lote (str-manager)

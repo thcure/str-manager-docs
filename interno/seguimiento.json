@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-29 00:03",
+ "actualizadoEn": "2026-10-29 00:20",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -2431,6 +2431,40 @@
    "cierre": {
     "lote": "L-166",
     "prueba": "log/L-166-veredicto.json 20:09: REQ-SH-2.spec.js caso a «entradas: 18», 11/11 casos en verde (5b18fad)"
+   }
+  },
+  {
+   "id": "INC-210",
+   "tipo": "INC",
+   "modulo": "MOD (sitio fabrica.; despliegue de Hostinger)",
+   "fecha": "2026-10-29",
+   "titulo": "fabrica./modelo/api/config/ responde 403 en vez de 308: en public_html de fabrica. sigue el modelo/ viejo y su .htaccess manda antes que la 308 de la raíz",
+   "estado": "abierto",
+   "severidad": "medio",
+   "casoUso": "CU-MOD-1.1",
+   "contra": "entorno",
+   "originador": "juez",
+   "contexto": {
+    "lote": "L-170",
+    "guion": "LM-79.spec.js",
+    "caso": "b",
+    "tren": null
+   },
+   "causaRaiz": "entorno",
+   "debioDetectarse": "verificación",
+   "origen": "log/L-170-veredicto.json (00:17)",
+   "nota": "00:17 Juez NO ACEPTADO por b; el resto de b en verde (salud 308 con Location y consulta; en herramienta-fabrica. salud 200 db:true, 403 en config/, logs/, docs/ y tests/, 404 en /str-app-shell.html y /api/health). Lectura: la 308 de salud aún sale de modelo/api/.htaccess viejo (L-168), que tiene su propio RewriteEngine y bloquea config/ antes de redirigir; o sea, public_html/modelo/api sigue en fabrica.: o el sitio no desplegó a20d5b0, o el Git de Hostinger no borró lo que salió del repo. En app. el Arquitecto vio /modelo/api/salud → 404 (00:05). Riesgo previsto en la instrucción (criterio b: «Detener, no Revertir»); un revert no lo arregla. Además, modelo/ viejo con secrets.php sigue en public_html de fabrica. con credenciales vivas.",
+   "prioridad": "P2",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-170 (reprueba tras la limpieza)",
+    "motivo": "el lote está bien (R1 correcta, 93/93, K1 8/8); falta limpiar el servidor",
+    "fecha": "2026-10-29"
+   },
+   "destino": {
+    "tipo": "entorno",
+    "ref": "Carlos: comprobar en hPanel que fabrica. desplegó a20d5b0; borrar public_html/modelo/api y public_html/modelo/sql de fabrica. y, con b en verde, public_html/modelo/secrets.php; después reprobar\\L-170.txt",
+    "quien": "Carlos (guiado por el Arquitecto)"
    }
   }
  ],
@@ -20191,8 +20225,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 4.4: tests y ports del servicio a fabrica-servicio; el STR deja modelo/ y la 308 de fabrica. pasa al .htaccess de la raíz",
-   "estado": "construido",
-   "desde": "2026-10-29 00:02",
+   "estado": "no aceptado",
+   "desde": "2026-10-29 00:17",
    "estados": [
     {
      "estado": "previsto",
@@ -20209,9 +20243,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-29 00:02"
+    },
+    {
+     "estado": "no aceptado",
+     "desde": "2026-10-29 00:17"
     }
    ],
-   "nota": "Cruce delegado M-1150; ok JP M-1151. Esperado juez «parcial» (d y f al Arquitecto). Paso de Carlos tras b en verde: borrar public_html/modelo/secrets.php huérfano en fabrica.; si el despliegue no borra modelo/ viejo, limpieza de Carlos. · 00:02 Construido con Opus: str-manager a20d5b0 (93/93; sitios-redireccion 11/0, falla en HEAD 3/8); fabrica-servicio 8fbf397 (run.js 5/5; ls-remote igual)."
+   "nota": "Cruce delegado M-1150; ok JP M-1151. Esperado juez «parcial» (d y f al Arquitecto). Paso de Carlos tras b en verde: borrar public_html/modelo/secrets.php huérfano en fabrica.; si el despliegue no borra modelo/ viejo, limpieza de Carlos. · 00:02 Construido con Opus: str-manager a20d5b0 (93/93; sitios-redireccion 11/0, falla en HEAD 3/8); fabrica-servicio 8fbf397 (run.js 5/5; ls-remote igual). · 00:17 juez NO ACEPTADO por b (INC-210, entorno: modelo/ viejo en public_html de fabrica.); a, c, e en verde; d y f cerrados por el Arquitecto (M-1153, 00:05). Reprueba tras la limpieza de Carlos."
   }
  ],
  "riesgos": [

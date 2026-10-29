@@ -1,7 +1,7 @@
 # instr — L-168 · LM-79 fase 2: `fabrica.` redirige 308 el servicio del modelo a `herramienta-fabrica.`
 Categoría: **crítico** (despliegue y dominios del servicio del modelo; DA: LM-79 · cruce previo con Carlos: 28-oct 21:41, chat del Arquitecto (M-1136))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-28 21:50 · ok Jefe de proyecto M-OKJP
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-28 21:50 · ok Jefe de proyecto M-1138
 Alcance: `modelo/api/.htaccess` (regla de redirección) · `tests/modelo-router.test.js` · `tests/e2e/LM-79.spec.js` (nuevo) · `docs/claude/modelo.md` (cabecera y sección nueva al final) · nada más · `?v=` igual · `schema_version` igual · sin cambios de base de datos
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)
 Impacto: lo que aún llame al servicio en `fabrica.` recibe 308 a `herramienta-fabrica.` con la misma ruta y consulta. Los clientes de la fábrica ya usan el host nuevo (pw 0.13.0). Nada cambia para el usuario del STR.
@@ -156,7 +156,7 @@ Deuda de cobertura de la ruta (no la ejerce este lote): REL-29 (cola-arquitecto�
 ```
 - a. La regla existe solo para el host fabrica., con 308, después de los bloqueos y antes del router · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: límite · espera: `modelo-router.test.js` n OK, 0 FAIL · **Detener**
 - b. fabrica. redirige 308 a herramienta-fabrica. con ruta y consulta; config/ y logs/ siguen bloqueados en fabrica.; la salud responde con base en herramienta-fabrica. (CU-MOD-1.1) · nivel: N2 · perfil: zz-verif-admin · página: https://app.apartamentosbucaramanga.com/str-app-shell.html · precondición: el commit desplegado en fabrica. y herramienta-fabrica. · tec: escenario · espera: caso b del guion en verde · **Revertir**
-- c. Cada punto se aplicó literal y el test y el guion son iguales byte a byte · nivel: N1 · perfil: tests/ · precondición: a en verde y `aplicar.js` con la corrección de rutas con punto (`.htaccess`, M-1137 del Arquitecto) en pw de LENOVO · tec: escenario · espera: `aplicar.js` K1 4/4 (H1 `modelo/api/.htaccess`, D1, D2, T1); K2 `tests/modelo-router.test.js` igual; la cola compara el guion · **Detener**
+- c. Cada punto se aplicó literal y el test y el guion son iguales byte a byte · nivel: N1 · perfil: tests/ · precondición: a en verde y `aplicar.js` con la corrección de rutas con punto (`.htaccess`, pw 0.13.1, M-1137 del Arquitecto) en pw de LENOVO · tec: escenario · espera: `aplicar.js` K1 4/4 (H1 `modelo/api/.htaccess`, D1, D2, T1); K2 `tests/modelo-router.test.js` igual; la cola compara el guion · **Detener**
 - Datos de prueba: ninguno (solo lectura, GET sin token)
 ```
 

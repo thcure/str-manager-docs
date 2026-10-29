@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-29 18:55",
+ "actualizadoEn": "2026-10-29 18:57",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -17537,6 +17537,84 @@
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "pruebas.json: resultado «verde», causa null; sin casos con ok false (Grep). Fase completa (motivo: lote crítico; riesgo MOD 1×1 bajo), diferidos ninguno; 24 guiones de regresión por ruta, todos en verde. Cuarentena e inestables vacíos. Sesiones: ninguna perdida ni caída. La instrucción no tiene criterios N3; la única captura (INC-125-b-medida) es de regresión y solo muestra datos zz-verif-. Línea de trazabilidad presente: «Lote: L-170 · LM-79 · Casos de uso: CU-MOD-1.1». Deuda de cobertura de la ruta: hueco REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token), ya declarado en la instrucción. Parcial como espera la instrucción: d y f los cierra el Arquitecto por evidencia cruzada. En b, fabrica./modelo/api/config/ dio 308 (no 403): Hostinger no dejó el modelo/ viejo en fabrica.; el borrado de public_html/modelo/secrets.php huérfano en los dos sitios sigue en manos de Carlos (M-1144)."
    }
+  },
+  {
+   "lote": "L-171",
+   "fecha": "2026-10-29",
+   "req": "LM-79",
+   "categoria": "crítico",
+   "resumen": "LM-79 fase 5.1: el servicio del modelo se lee con la sesión de Google solo para los administradores de la fábrica (google.php, exigirLectura, MODELO_ADMIN_UIDS) y CORS por lista (fabrica-servicio 45d320e); guion LM-79-lectura",
+   "estado": "aceptado",
+   "observacion": "Primer intento 18:23 FALLO sin commit (INC-211: php de LENOVO sin openssl.cnf). Reencolado 18:29 con la parte B OMITIDA si no hay claves. Cruce de Carlos M-1163; ok JP M-1164 (vigente, M-1168). Construido con Opus a3415e1 18:32 (93/93; fabrica-servicio 6/6). Juez 18:53: PARCIAL con c–g en verde (c: firma real de punta a punta). a y h cerrados por el Arquitecto (M-1171, 18:35 y 18:57). ACEPTADO.",
+   "version": "p5c113",
+   "hash": "a3415e1",
+   "aceptacion": {
+    "lote": "L-171",
+    "hash": "a3415e1",
+    "fecha": "2026-10-29",
+    "horaBogota": "18:53",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "verificación cruzada del Arquitecto en GitHub (fuera del juez): A2 «Todo igual: 10 archivos.», run.js 6/6 de fabrica-servicio y ls-remote = HEAD de la hermana no vienen en pruebas.json"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado como admin desde proyectos. → 200 · cors https://proyectos.apartamentosbucaramanga.com · esquema 3 | si: CORS para proyectos. → https://proyectos.apartamentosbucaramanga.com | si: GET requisito como admin desde herramienta-fabrica. → 200 · cors https://herramienta-fabrica.apartamentosbucaramanga.com | si: estado como admin desde app. → 200 · cors https://app.apartamentosbucaramanga.com | si: CORS para un origen fuera de la lista → ninguno (HTTP 200)"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado como operador → 403 «Sin permiso» · cors https://proyectos.apartamentosbucaramanga.com | si: GET requisito como operador → 403 «Sin permiso» · cors https://proyectos.apartamentosbucaramanga.com"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado como colaborador → 403 «Sin permiso» · cors https://proyectos.apartamentosbucaramanga.com"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: estado sin sesión → 403 «Token requerido» · cors https://proyectos.apartamentosbucaramanga.com | si: migrar con la sesión del admin → 403 «Token requerido» · cors https://proyectos.apartamentosbucaramanga.com | si: credenciales por GET con la sesión del admin (solo admite POST con X-Modelo-Token; G4 en N1) → 405 «Método no permitido» · cors https://proyectos.apartamentosbucaramanga.com | si: salud sin sesión → 200 · cors https://proyectos.apartamentosbucaramanga.com · sha b62ab18"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK; entrada: guion N2 «tests/e2e/LM-79-lectura.spec.js igual a la instruccion · 4 caso(s)», aplicación literal 2/2"
+     },
+     {
+      "c": "h",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "verificación cruzada del Arquitecto (próxima carga de modelo-sync y espejo); la parte del juez, REQ-MOD-6* de la regresión, vino toda en verde"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a",
+      "motivo": "verificación cruzada del Arquitecto en GitHub (fuera del juez): A2, run.js 6/6 y ls-remote de fabrica-servicio; lo prevé la instrucción («parcial», con a y h pendientes)"
+     },
+     {
+      "c": "h",
+      "motivo": "verificación cruzada del Arquitecto: la próxima carga de modelo-sync y el espejo en verde contra herramienta-fabrica.; los REQ-MOD-6* de la regresión ya vinieron en verde (lectura d/e, carga b/e, carga-rol f, complemento e, credenciales f, REQ-MOD-6 b/c/g)"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json › resultado «verde», causa null; ningún \"ok\": false en el archivo (Grep). Fase «completa» (lote crítico; riesgo SRV alto 6): regresión por ruta (MOD, SRV), 47 guiones, todos los casos en verde, incluidos LM-79 b y los REQ-MOD-6* (los clientes de máquina siguen con 403 «Token requerido» sin token). Deuda de cobertura (regresionSeleccion.ruta.huecos): REL-29 cola-arquitecto→MOD (POST /modelo/api/cargar con X-Modelo-Token), sin cambio en este lote; tampoco se ejerce el preflight OPTIONS real del navegador con Authorization (lo cubren C1 en N1 y la fase 5.2). Sin cuarentena ni inestables; sesiones sin pérdidas; sin cortes de red. La instrucción no trae criterios N3 ni N4 (n3Preparados vacío); la única captura de la carpeta (INC-125-b-medida, regresión) muestra a 390 px los lugares zz-verif- con ▲/▼, Editar y Desactivar dentro de la ventana, coherente con su caso en verde. Línea de trazabilidad: lineaLote «Lote: L-171 · LM-79 · Casos de uso: CU-MOD-2.1, CU-MOD-3.1, CU-MOD-3.2». Resultado «parcial» por a y h, como prevé la instrucción; los cierra el Arquitecto."
+   }
   }
  ],
  "esquema": {
@@ -20380,8 +20458,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.1: el servicio del modelo se lee con la sesión de Google solo para administradores de la fábrica (google.php, exigirLectura, MODELO_ADMIN_UIDS) y CORS por lista; guion LM-79-lectura en el STR",
-   "estado": "parcial",
-   "desde": "2026-10-29 18:53",
+   "estado": "aceptado",
+   "desde": "2026-10-29 18:57",
    "estados": [
     {
      "estado": "previsto",
@@ -20414,9 +20492,13 @@
     {
      "estado": "parcial",
      "desde": "2026-10-29 18:53"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-29 18:57"
     }
    ],
-   "nota": "Cruce de Carlos 17:26 (M-1163, no delegado: rol y secreto nuevos); ok JP M-1164; pw 0.14.1 y MODELO_ADMIN_UIDS listos (M-1166). Esperado juez «parcial» (a y h al Arquitecto). Si c da 403 «Token requerido» con sesión: entorno (Authorization no llegó), Detener. · 18:23 FALLO sin commit (INC-211: php de LENOVO sin openssl.cnf). Reintento con la parte B que sale OMITIDA y carpeta l171b; revisión del delta: sigue 23/23. · 18:29 reencolado con el ok del JP vigente (M-1168): el cierre cita la línea de la parte B; el caso c es la prueba de punta a punta de la firma. · 18:32 Construido con Opus: str-manager a3415e1 (93/93); fabrica-servicio 45d320e (6/6, hashes de los 10 archivos OK, parte B «OMITIDA: este php no puede crear claves RSA»). · 18:53 juez PARCIAL: c, d, e, f, g en verde (c: el admin lee con su token real desde proyectos., herramienta-fabrica. y app.; CORS a otro origen, ninguno); a y h pendientes del Arquitecto. Regresión 47 guiones en verde."
+   "nota": "Cruce de Carlos 17:26 (M-1163, no delegado: rol y secreto nuevos); ok JP M-1164; pw 0.14.1 y MODELO_ADMIN_UIDS listos (M-1166). Esperado juez «parcial» (a y h al Arquitecto). Si c da 403 «Token requerido» con sesión: entorno (Authorization no llegó), Detener. · 18:23 FALLO sin commit (INC-211: php de LENOVO sin openssl.cnf). Reintento con la parte B que sale OMITIDA y carpeta l171b; revisión del delta: sigue 23/23. · 18:29 reencolado con el ok del JP vigente (M-1168): el cierre cita la línea de la parte B; el caso c es la prueba de punta a punta de la firma. · 18:32 Construido con Opus: str-manager a3415e1 (93/93); fabrica-servicio 45d320e (6/6, hashes de los 10 archivos OK, parte B «OMITIDA: este php no puede crear claves RSA»). · 18:53 juez PARCIAL: c, d, e, f, g en verde (c: el admin lee con su token real desde proyectos., herramienta-fabrica. y app.; CORS a otro origen, ninguno); a y h pendientes del Arquitecto. Regresión 47 guiones en verde. · 18:57 ACEPTADO: a y h cerrados por evidencia cruzada del Arquitecto (M-1171, M-1172)."
   }
  ],
  "riesgos": [
@@ -20636,14 +20718,14 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-29 18:22",
+  "fecha": "2026-10-29 18:57",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
-    "ref": "L-171",
-    "que": "LM-79 fase 5.1: lectura del servicio con Google",
-    "estado": "encolado",
-    "siguientePaso": "Veredicto (esperado parcial); avisar al Arquitecto (a, h) y al JP. Después 5.2 (los dos sitios) y 5.3 (el STR quita el grupo Proyecto)."
+    "ref": "LM-79 f5.2",
+    "que": "Fase 5.2: los dos sitios (herramienta-fabrica. sección Fábrica; proyectos. Inicio y Proyectos) leyendo del servicio",
+    "estado": "en lectura (M-1174)",
+    "siguientePaso": "Leer M-1174 y el contrato; primer lote con la regla 403 de /modelo/secrets.php en el .htaccess de fabrica-servicio (M-1173); cruce de Carlos si crea sitios, secretos o permisos"
    },
    {
     "ref": "L-156",

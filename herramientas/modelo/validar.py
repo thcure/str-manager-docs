@@ -237,6 +237,24 @@ try:
             avi('O3 pedido', 'pedido', _p.get('id'), f'nota de {len(str(_p.get("nota")))} caracteres sin especificación ni línea objetivo: las decisiones de alcance van a la línea objetivo (LM-80)')
 except Exception as ex: avi('O1 linea-objetivo', 'archivo', 'herramientas/modelo/objetivo.py', f'no se pudo correr: {ex}')
 
+# LM-79 fase 3 (ADR-008, ADR-009 v5 D1): registro de proyectos interno/proyectos.json; forma mínima (error, P1).
+try:
+    _pj = os.path.join(RAIZ, 'interno', 'proyectos.json')
+    if os.path.exists(_pj):
+        _reg = json.load(open(_pj, encoding='utf-8'))
+        _vistos = set()
+        for _x in _reg.get('proyectos') or []:
+            _pid = str(_x.get('id') or '')
+            if not re.match(r'^P\d{2}$', _pid): err('P1 proyectos', 'proyecto', _pid or '?', 'id no es Pnn')
+            if _pid in _vistos: err('P1 proyectos', 'proyecto', _pid, 'id repetido')
+            _vistos.add(_pid)
+            for _k in ('nombre', 'estado', 'repos', 'ambientes', 'pruebas', 'chats'):
+                if not _x.get(_k): err('P1 proyectos', 'proyecto', _pid, f'falta «{_k}»')
+            if _x.get('estado') not in ('activo', 'en pausa', 'cerrado', 'propuesto'): err('P1 proyectos', 'proyecto', _pid, f"estado {_x.get('estado')!r} fuera de activo · en pausa · cerrado · propuesto")
+            if not str((_x.get('ambientes') or {}).get('produccion', '')).startswith('https://'): err('P1 proyectos', 'proyecto', _pid, 'ambientes.produccion sin https://')
+            if re.search(r'(?i)(token|secret|password|contraseña)\s*[:=]', json.dumps(_x, ensure_ascii=False)): err('P1 proyectos', 'proyecto', _pid, 'parece traer un secreto: el registro solo dice dónde están las cosas')
+except Exception as ex: err('P1 proyectos', 'archivo', 'interno/proyectos.json', f'ilegible: {ex}')
+
 # LM-61 (proceso de requerimientos, ISO/IEC/IEEE 29148): guardias sobre los REQ nuevos (con casosUso o desde ≥ 2026-10-21).
 # Los criterios viven en el .md (fuera del repo): los revisa linea-base.py --req; aquí solo los atributos de reqs[].
 try:

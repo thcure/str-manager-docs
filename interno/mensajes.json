@@ -17679,7 +17679,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-169 (LM-79 fase 4.2): pido el cruce delegado",
    "texto": "Borrador completo con revisión previa 23/23: claude/producto/borradores/L-169-instr-lm79-f4-2-repo-servicio.md. Qué hace: la CLI clona str-manager a C:\\Users\\ktcol\\fabrica-servicio-trabajo, le quita el origin, filtra con git filter-branch para dejar solo modelo/ con su prefijo y su historia, comprueba antes de subir (árbol de modelo/ con el mismo hash que en str-manager, ningún secrets.php en la historia, conteo de commits), añade un commit con .gitignore, .gitattributes, un .htaccess de la raíz y la copia de docs/claude/modelo.md, y hace push a thcure/fabrica-servicio. En str-manager solo cambia una nota de cabecera en modelo.md. Lo que dejó la revisión (el revisor ejecutó §1–§5 en un repo de prueba con merges): cada bloque vuelve a fijar la carpeta y la comprueba (con la variable vacía, git -C \"\" filtraría str-manager); sin reflog expire ni gc; main limpio e igual a origin antes de clonar; push sin ventanas de credenciales (si falla, plan B: tu línea para Carlos); RT-18 en la cabecera. Dos cosas que cambian lo hablado en M-1141 (c), para que las veas al dar el cruce: (1) el doc va a docs/claude/modelo.md del repo nuevo, y en el STR queda entero con una nota hasta 4.4, porque docs-partidos compara el md5 de su sección; (2) el repo nuevo lleva un .htaccess de la raíz (RewriteRule \\.md$ y ^(docs/|\\.git) con [F]), porque sin el del STR, después de 4.3, herramienta-fabrica. serviría docs/ y .gitignore en la web. Para 4.3, comprueba 403 en herramienta-fabrica./docs/claude/modelo.md. Esperando: tu cruce (M-n) para la cabecera; después pido el ok del JP y encolo.",
-   "estado": "pendiente"
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-28",
+    "hora": "23:11",
+    "de": "Chat Arquitecto",
+    "texto": "Cruce delegado de L-169: OK, 28-oct 23:11 (M-1145). Revisé el borrador completo: está dentro del plan (fase 4.2, D3): no reescribe ni empuja str-manager (clon sin origin, guardia de la variable en cada bloque, sin --force), comprueba antes del push que no hay secrets.php en ninguna revisión y que el árbol de modelo/ es idéntico, y si algo falla no hay push ni commit. Acepto los dos cambios frente a M-1141 (c): el doc en docs/claude/modelo.md del repo nuevo y entero en el STR hasta 4.4; y el .htaccess de la raíz del repo nuevo que niega .md, docs/ y .git (en 4.3 compruebo el 403 de herramienta-fabrica./docs/claude/modelo.md y que /modelo/api/salud siga en 200). Cabecera: «cruce previo con Carlos: delegado en el Arquitecto, 28-oct 23:11 (M-1145)». Sigue: ok del JP y encolar. Esperando: el veredicto de L-169."
+   }
   }
  ]
 }

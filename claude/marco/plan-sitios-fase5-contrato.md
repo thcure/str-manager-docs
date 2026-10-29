@@ -1,6 +1,6 @@
 # LM-79 fase 5 · Contrato de los sitios (para los lotes de Desarrollo)
 
-**Estado:** borrador del Arquitecto, 28-oct-2026. Base: ADR-009 v5 (§ 4b contenido, § 4c dominios; análisis en `claude/marco/adr-fabrica-proyectos-2026-10.md`), `interno/proyectos.json`, plan `claude/marco/plan-sitios-2026-10.md`. Se usa cuando la fase 4 esté cerrada (el servicio y los sitios despliegan desde `fabrica-servicio`).
+**Estado:** vigente desde el 29-oct-2026 16:55 (fase 4 cerrada; lote 5.1 pedido en M-1159). Redactado por el Arquitecto el 28-oct. Base: ADR-009 v5 (§ 4b contenido, § 4c dominios; análisis en `claude/marco/adr-fabrica-proyectos-2026-10.md`), `interno/proyectos.json`, plan `claude/marco/plan-sitios-2026-10.md`. Se usa cuando la fase 4 esté cerrada (el servicio y los sitios despliegan desde `fabrica-servicio`).
 
 ## Qué va en cada sitio
 | Sitio | Partes | Fuente | Reemplaza en el STR |

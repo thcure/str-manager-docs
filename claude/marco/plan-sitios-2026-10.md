@@ -1,6 +1,6 @@
 # Plan de ejecución · Sitios (ADR-009 v5, § 4c) — LM-79
 
-**Estado:** en ejecución desde el 28-oct-2026 (Carlos: ADR-009 v5 aceptado, D2 para después, el plan es prioridad y lo demás en pausa); seguimiento en el artefacto «Plan de sitios LM-79». Antes: guardado el 24-oct. **Autor:** Chat Arquitecto. **Base:** ADR-008, ADR-009 v5 (análisis completo en `claude/marco/adr-fabrica-proyectos-2026-10.md`, § 4b contenido y § 4c dominios), ADR-007, MJ-9. **Perfil:** crítico (despliegue, dominios, inicio de sesión y CORS): DA o cruce con Carlos y ok del revisor de críticos de fábrica (Jefe de proyecto) por lote.
+**Estado:** en ejecución desde el 28-oct-2026 (Carlos: ADR-009 v5 aceptado, D2 para después, el plan es prioridad y lo demás en pausa); seguimiento en el artefacto «Plan de sitios LM-79». Fases 0–4 cerradas (29-oct 16:52); fase 5 en curso. Antes: guardado el 24-oct. **Autor:** Chat Arquitecto. **Base:** ADR-008, ADR-009 v5 (análisis completo en `claude/marco/adr-fabrica-proyectos-2026-10.md`, § 4b contenido y § 4c dominios), ADR-007, MJ-9. **Perfil:** crítico (despliegue, dominios, inicio de sesión y CORS): DA o cruce con Carlos y ok del revisor de críticos de fábrica (Jefe de proyecto) por lote.
 
 ## Destino (ADR-009 v5, § 4c)
 | Capa | Sitio | Hoy | Contenido |

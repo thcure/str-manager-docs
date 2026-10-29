@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-29 18:22",
+ "actualizadoEn": "2026-10-29 18:27",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -2471,6 +2471,41 @@
    "cierre": {
     "lote": "L-170",
     "prueba": "log/L-170-veredicto-2.json 16:51: caso b en verde, fabrica./modelo/api/config/ → 308 a herramienta-fabrica."
+   }
+  },
+  {
+   "id": "INC-211",
+   "tipo": "INC",
+   "modulo": "MOD (tests de fabrica-servicio; entorno de LENOVO)",
+   "fecha": "2026-10-29",
+   "titulo": "L-171 se detuvo en A2: la instrucción suponía que en LENOVO no hay php, pero C:\\php existe sin openssl.cnf y la parte B de modelo-google.test.js falló en vez de salir OMITIDA",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "casoUso": null,
+   "contra": "instrucción",
+   "originador": "construcción (CLI)",
+   "contexto": {
+    "lote": "L-171",
+    "guion": null,
+    "caso": null,
+    "tren": null
+   },
+   "causaRaiz": "definición",
+   "debioDetectarse": "revisión previa",
+   "origen": "log/L-171-instr-lm79-f5-1-lectura-google.txt (18:23)",
+   "nota": "18:23 La CLI paró antes de cualquier commit o push: el script de A2 dio «Todo igual: 10 archivos», pero run.js 5/6: modelo-google V4 «token firmado bueno → UID» → null, porque openssl_pkey_new() de C:\\php devuelve false («configuration file routines::no such file»). El resto en verde (modelo-acceso 85/0, sql 96/0, lectura 73/0). Escribí «en LENOVO no hay php» sin mirar CLAUDE.md § 5 (PHP 8.3.35 en C:\\php, DT-35); el revisor lo tomó de la instrucción. Arreglo: si este php no puede crear la clave de prueba, la parte B sale OMITIDA (probado con OPENSSL_CONF inexistente); reintento en otra carpeta hermana (l171b).",
+   "prioridad": "P3",
+   "solucionTemporal": "ninguna necesaria: no hubo cambios en ningún repo ni sitio",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-171 (reintento)",
+    "motivo": "la causa es de la instrucción; el código del servicio está bien",
+    "fecha": "2026-10-29"
+   },
+   "destino": {
+    "tipo": "punto",
+    "ref": "revisor previo: comprobar en CLAUDE.md § 5 y en entorno.md las herramientas de LENOVO que el lote dé por hechas (php, python, openssl)",
+    "quien": "Arquitecto"
    }
   }
  ],
@@ -20341,8 +20376,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.1: el servicio del modelo se lee con la sesión de Google solo para administradores de la fábrica (google.php, exigirLectura, MODELO_ADMIN_UIDS) y CORS por lista; guion LM-79-lectura en el STR",
-   "estado": "encolado",
-   "desde": "2026-10-29 18:22",
+   "estado": "redactado",
+   "desde": "2026-10-29 18:27",
    "estados": [
     {
      "estado": "previsto",
@@ -20355,9 +20390,17 @@
     {
      "estado": "encolado",
      "desde": "2026-10-29 18:22"
+    },
+    {
+     "estado": "fallido",
+     "desde": "2026-10-29 18:23"
+    },
+    {
+     "estado": "redactado",
+     "desde": "2026-10-29 18:27"
     }
    ],
-   "nota": "Cruce de Carlos 17:26 (M-1163, no delegado: rol y secreto nuevos); ok JP M-1164; pw 0.14.1 y MODELO_ADMIN_UIDS listos (M-1166). Esperado juez «parcial» (a y h al Arquitecto). Si c da 403 «Token requerido» con sesión: entorno (Authorization no llegó), Detener."
+   "nota": "Cruce de Carlos 17:26 (M-1163, no delegado: rol y secreto nuevos); ok JP M-1164; pw 0.14.1 y MODELO_ADMIN_UIDS listos (M-1166). Esperado juez «parcial» (a y h al Arquitecto). Si c da 403 «Token requerido» con sesión: entorno (Authorization no llegó), Detener. · 18:23 FALLO sin commit (INC-211: php de LENOVO sin openssl.cnf). Reintento con la parte B que sale OMITIDA y carpeta l171b; revisión del delta: sigue 23/23."
   }
  ],
  "riesgos": [

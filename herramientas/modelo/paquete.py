@@ -56,12 +56,12 @@ def complemento():
     # Nada del negocio: solo archivos del modelo de trabajo.
     for archivo, ruta in FABRICA_JSON.items():
         if not os.path.exists(os.path.join(RAIZ, ruta)): continue
-        d = json.load(open(os.path.join(RAIZ, ruta), encoding='utf-8'))
+        d = json.loads(tapar(open(os.path.join(RAIZ, ruta), encoding='utf-8').read()))
         for orden, (clave, valor) in enumerate(d.items()):
             filas.append({'archivo': 'fabrica/' + archivo, 'clave': clave, 'orden': orden, 'es_lista': 0, 'valor': valor, 'extra': None})
     for orden, ruta in enumerate(sorted(docs_fabrica())):
         nombre = os.path.splitext(os.path.basename(ruta))[0]
-        texto = open(os.path.join(RAIZ, ruta), encoding='utf-8').read()
+        texto = tapar(open(os.path.join(RAIZ, ruta), encoding='utf-8').read())
         filas.append({'archivo': ('fabrica/doc/' + nombre)[:64], 'clave': 'texto', 'orden': orden, 'es_lista': 0,
                       'valor': {'ruta': ruta, 'titulo': (texto.lstrip().split('\n', 1)[0].lstrip('# ').strip() or nombre), 'texto': texto}, 'extra': None})
     # 5.2c (M-1194): páginas generadas del repo de documentos para proyectos. (el explorador de la línea base, LM-82, y el mapa
@@ -72,6 +72,10 @@ def complemento():
         filas.append({'archivo': 'fabrica/pagina/' + nombre, 'clave': 'html', 'orden': orden, 'es_lista': 0,
                       'valor': {'ruta': ruta, 'html': open(os.path.join(RAIZ, ruta), encoding='utf-8').read()}, 'extra': None})
     return filas
+# 5.2c (M-1203): los datos de la fábrica no llevan correos ni teléfonos a los sitios (regla de datos del contrato, M-1186).
+def tapar(texto):
+    texto = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', 'correo-tapado', texto)
+    return re.sub(r'(?<![\w/.-])(?:\+?57[ -]?)?3\d{2}[ -]?\d{3}[ -]?\d{4}(?![\w/.-])', 'telefono-tapado', texto)
 FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': 'interno/arquitectura/mapa-str.html',
                    'nomenclatura': 'herramientas/paginas/nomenclatura-modelo.html'}   # 5.2c (M-1195)
 # 5.2c (M-1195): marco-trabajo y cobit para la Fábrica; proyecto/P01 (planes, prioridades, trabajo, pausas del JP) para proyectos.

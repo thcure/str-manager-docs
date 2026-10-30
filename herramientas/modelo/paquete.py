@@ -64,7 +64,15 @@ def complemento():
         texto = open(os.path.join(RAIZ, ruta), encoding='utf-8').read()
         filas.append({'archivo': ('fabrica/doc/' + nombre)[:64], 'clave': 'texto', 'orden': orden, 'es_lista': 0,
                       'valor': {'ruta': ruta, 'titulo': (texto.lstrip().split('\n', 1)[0].lstrip('# ').strip() or nombre), 'texto': texto}, 'extra': None})
+    # 5.2c (M-1194): páginas generadas del repo de documentos para proyectos. (el explorador de la línea base, LM-82, y el mapa
+    # del STR, LM-40), como «fabrica/pagina/<nombre>» con clave «html»: proyectos. las muestra en un iframe aislado (srcdoc),
+    # como hoy el STR. Son páginas públicas del repo (sin datos del negocio); el export las deja fuera con el resto de fabrica/*.
+    for orden, (nombre, ruta) in enumerate(FABRICA_PAGINAS.items()):
+        if not os.path.exists(os.path.join(RAIZ, ruta)): continue
+        filas.append({'archivo': 'fabrica/pagina/' + nombre, 'clave': 'html', 'orden': orden, 'es_lista': 0,
+                      'valor': {'ruta': ruta, 'html': open(os.path.join(RAIZ, ruta), encoding='utf-8').read()}, 'extra': None})
     return filas
+FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': 'interno/arquitectura/mapa-str.html'}
 FABRICA_JSON = {'instrucciones': 'interno/instrucciones.json', 'mejoras': 'interno/mejoras.json', 'conocimiento': 'interno/conocimiento.json',
                 'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json'}
 def docs_fabrica():

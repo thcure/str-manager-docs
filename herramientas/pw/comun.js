@@ -10,6 +10,10 @@
 // v0.5.3 (M8 de la migración, M-320/M-321): el servicio del modelo vive en fabrica. (BASE_MODELO). Las páginas siguen
 // en app. (sesión y base del STR), y el navegador desvía app./modelo/* a fabrica. (destinoModelo): los guiones no cambian.
 // Las reglas de la guardia se aplican a la URL original (en el modelo solo eco y los sondeos sin token con «{}»).
+// v0.15.0 (LM-79 fase 5.2, M-1176): proyectos. en la guardia, solo lectura; entrarSitio() abre una página de los sitios
+// (proyectos. o herramienta-fabrica.) y, si piden sesión (dataset.sesion = 'sin-sesion'), pulsa #entrar-google y elige la
+// cuenta del perfil en la ventana de Google (sin contraseñas), igual que recuperarSesion en app. Arreglo de paso: la espera
+// sobre la ventana de Google ya no revienta cuando la ventana se cierra sola al elegir la cuenta (afectaba a recuperarSesion).
 // v0.13.0 (LM-79 fase 2, 28-oct): el servicio del modelo se muda a herramienta-fabrica. (HOST_MODELO); fabrica. queda como
 // HOST_MODELO_VIEJO en la lista y con las mismas reglas mientras redirige (308) a la direccion nueva.
 'use strict';
@@ -59,7 +63,8 @@ const HOSTS_IDENTIDAD = ['accounts.google.com', 'accounts.youtube.com', 'ssl.gst
   'content-autofill.googleapis.com', 'lh3.googleusercontent.com', 'str-hospedaje.firebaseapp.com', 'str-hospedaje.web.app'];
 const RECUPERANDO = { activo: false };
 // v0.4.3 (INC-119): el grupo Proyecto lee str-manager-docs de GitHub (raw y la API de commits). Solo lectura.
-const HOSTS_SOLO_LECTURA = ['raw.githubusercontent.com', 'api.github.com'];
+const HOST_PROYECTOS = 'proyectos.apartamentosbucaramanga.com';   // v0.15.0: sitio de gobierno (LM-79 fase 5), solo lectura
+const HOSTS_SOLO_LECTURA = ['raw.githubusercontent.com', 'api.github.com', HOST_PROYECTOS];
 const ESCRITURA_PERMITIDA = [/^\/modelo\/api\/eco$/];
 // v0.4.5 (LM-20): sondeo sin token a /modelo/api/cargar, solo con cuerpo vacío «{}» (espera 403).
 // v0.5.0 (LM-27b): también /modelo/api/credenciales, con las mismas condiciones.
@@ -363,6 +368,56 @@ async function abrir(usuario, opciones = {}) {
 // «Continuar con Google» en login.html, en la ventana emergente de Google elige la cuenta ya abierta (o «Continuar») y
 // espera el /api/me 200. NUNCA escribe correo ni contraseña: si Google pide alguno, se rinde y lo dice (ahí sí hace falta
 // Carlos con abrir-perfil.js). Devuelve { ok, observado }.
+// v0.15.0: puro sobre la ventana emergente de Google: elige la cuenta del perfil o «Continuar»; nunca teclea nada.
+// Devuelve null si la ventana terminó sola (o no hubo ventana) o { ok: false, observado, paso } si Google pide credenciales.
+async function completarVentanaGoogle(pop, perfil, paso) {
+  if (!pop) return null;
+  paso.push('ventana de Google abierta');
+  // v0.15.0: la ventana se cierra sola al elegir la cuenta; esperar sobre una ventana cerrada ya no corta el flujo
+  const fin = Date.now() + 25000;
+  while (Date.now() < fin && !pop.isClosed()) {
+    const pide = await pop.locator('input[type="password"], input[type="email"], input[name="identifier"]').count().catch(() => 0);
+    if (pide) { await pop.close().catch(() => { }); return { ok: false, observado: (perfil || '') + ': Google pide correo o contraseña (la sesión de Google del perfil también se perdió): Carlos con abrir-perfil.js ' + (perfil || ''), paso }; }
+    const cuenta = pop.locator('[data-identifier], [data-email], li[role="link"], div[role="link"][data-authuser]').first();
+    if (await cuenta.count().catch(() => 0)) { await cuenta.click().catch(() => { }); paso.push('cuenta elegida'); await pop.waitForTimeout(1500).catch(() => { }); continue; }
+    const continuar = pop.locator('button:has-text("Continuar"), button:has-text("Continue"), button:has-text("Permitir"), button:has-text("Allow")').first();
+    if (await continuar.count().catch(() => 0)) { await continuar.click().catch(() => { }); paso.push('Continuar'); await pop.waitForTimeout(1500).catch(() => { }); continue; }
+    await pop.waitForTimeout(500).catch(() => { });
+  }
+  if (!pop.isClosed()) { await pop.close().catch(() => { }); return { ok: false, observado: (perfil || '') + ': la ventana de Google no terminó sola en 25 s', paso }; }
+  return null;
+}
+// v0.15.0: puro. Estado de sesión que publica un sitio en document.documentElement.dataset.sesion (contrato de M-1176).
+const ESTADOS_SITIO = ['sin-sesion', 'lista', 'denegada', 'error'];
+function estadoSitio(v) { return ESTADOS_SITIO.includes(v) ? v : null; }
+function esSitio(url) { try { const h = new URL(url).hostname; return h === HOST_PROYECTOS || h === HOST_MODELO; } catch (e) { return false; } }
+// v0.15.0: abre una página de los sitios con la sesión del perfil. { ok, estado, observado, paso }.
+// ok solo si el sitio queda en 'lista'; 'denegada' (403 del servicio) es un resultado válido que el guion juzga.
+async function entrarSitio(ctx, page, url, perfil) {
+  const paso = [];
+  if (!esSitio(url)) return { ok: false, estado: null, observado: 'entrarSitio: solo proyectos. o herramienta-fabrica.: ' + url, paso };
+  const leer = () => page.evaluate(() => document.documentElement.dataset.sesion || '').catch(() => '');
+  const esperar = async (ms, quiero) => { const fin = Date.now() + ms; let v = ''; while (Date.now() < fin) { v = estadoSitio(await leer()); if (v && (!quiero || quiero.includes(v))) return v; await page.waitForTimeout(300); } return v; };
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    let est = await esperar(20000);
+    if (!est) return { ok: false, estado: null, observado: (perfil || '') + ': el sitio no publicó dataset.sesion en 20 s', paso };
+    if (est === 'sin-sesion') {
+      RECUPERANDO.activo = true;
+      try {
+        const boton = page.locator('#entrar-google').first();
+        if (!(await boton.count())) return { ok: false, estado: est, observado: (perfil || '') + ': el sitio pide sesión pero no tiene #entrar-google', paso };
+        const emergente = ctx.waitForEvent('page', { timeout: 15000 }).catch(() => null);
+        await boton.click(); paso.push('clic en #entrar-google');
+        const falla = await completarVentanaGoogle(await emergente, perfil, paso);
+        if (falla) return Object.assign({ estado: est }, falla);
+      } finally { RECUPERANDO.activo = false; }
+      est = await esperar(30000, ['lista', 'denegada', 'error']);
+    }
+    const motivo = est === 'error' ? await page.evaluate(() => document.documentElement.dataset.motivo || '').catch(() => '') : '';
+    return { ok: est === 'lista', estado: est, observado: (perfil || '') + ': sitio en «' + est + '»' + (motivo ? ' (' + motivo + ')' : ''), paso };
+  } catch (e) { return { ok: false, estado: null, observado: (perfil || '') + ': entrarSitio falló: ' + String(e && e.message || e).split('\n')[0].slice(0, 200), paso }; }
+}
 async function recuperarSesion(ctx, page, perfil) {
   const paso = [];
   RECUPERANDO.activo = true;
@@ -373,20 +428,8 @@ async function recuperarSesion(ctx, page, perfil) {
     const emergente = ctx.waitForEvent('page', { timeout: 15000 }).catch(() => null);
     await boton.click(); paso.push('clic en Continuar con Google');
     const pop = await emergente;
-    if (pop) {
-      paso.push('ventana de Google abierta');
-      const fin = Date.now() + 25000;
-      while (Date.now() < fin && !pop.isClosed()) {
-        const pide = await pop.locator('input[type="password"], input[type="email"], input[name="identifier"]').count().catch(() => 0);
-        if (pide) { await pop.close().catch(() => { }); return { ok: false, observado: (perfil || '') + ': Google pide correo o contraseña (la sesión de Google del perfil también se perdió): Carlos con abrir-perfil.js ' + (perfil || '') , paso }; }
-        const cuenta = pop.locator('[data-identifier], [data-email], li[role="link"], div[role="link"][data-authuser]').first();
-        if (await cuenta.count().catch(() => 0)) { await cuenta.click().catch(() => { }); paso.push('cuenta elegida'); await pop.waitForTimeout(1500); continue; }
-        const continuar = pop.locator('button:has-text("Continuar"), button:has-text("Continue"), button:has-text("Permitir"), button:has-text("Allow")').first();
-        if (await continuar.count().catch(() => 0)) { await continuar.click().catch(() => { }); paso.push('Continuar'); await pop.waitForTimeout(1500); continue; }
-        await pop.waitForTimeout(500);
-      }
-      if (!pop.isClosed()) { await pop.close().catch(() => { }); return { ok: false, observado: (perfil || '') + ': la ventana de Google no terminó sola en 25 s', paso }; }
-    }
+    const falla = await completarVentanaGoogle(pop, perfil, paso);
+    if (falla) return falla;
     // la página de login hace POST /api/login y navega al shell o al portal
     const me = await page.waitForResponse(r => /\/api\/me$/.test(new URL(r.url()).pathname) && r.status() === 200, { timeout: 30000 }).catch(() => null);
     await page.waitForTimeout(1000);
@@ -454,4 +497,4 @@ async function recuperarConChrome(perfil, comprobar, opciones = {}) {
     : { ok: false, observado: perfil + ': tampoco se recuperó con el Chrome normal del perfil (LM-51; ' + intentos.join(' / ') + ')' };
 }
 
-module.exports = { COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError, recuperarSesion, RECUPERANDO, HOSTS_IDENTIDAD, rutaChrome, puedeRecuperar, anotarRecuperacion, recuperarConChrome, TOPE_RECUPERAR_MS };
+module.exports = { HOST_PROYECTOS, ESTADOS_SITIO, estadoSitio, esSitio, entrarSitio, completarVentanaGoogle, COLA, BASE, BASE_MODELO, destinoModelo, conDesvio, PERFILES, HOSTS_OK, HOSTS_SOLO_LECTURA, GUARDIA, decidir, registrarLeidos, registrarDescendientes, ID_ZZ_LEIDOS, abrir, dirPerfil, argsCamara, explicarError, recuperarSesion, RECUPERANDO, HOSTS_IDENTIDAD, rutaChrome, puedeRecuperar, anotarRecuperacion, recuperarConChrome, TOPE_RECUPERAR_MS };

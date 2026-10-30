@@ -9,6 +9,8 @@
 //   v0.14.0 (LM-79 fase 5, M-1161): h.leerModelo(ruta, { sesion, origen }) hace un GET al servicio del modelo
 //   (herramienta-fabrica./modelo/api/<ruta>) con el token de Google del perfil (sesion: false = sin token) y, si se pide,
 //   con la cabecera Origin. Devuelve { status, cuerpo, cors }. El token nunca sale del ayudante: no va al guion, al log ni a capturas.
+//   v0.15.0 (M-1176): h.entrarSitio(url) abre una página de proyectos. o herramienta-fabrica. con la sesión de Google del
+//   perfil (pulsa #entrar-google y elige la cuenta si hace falta) y devuelve { ok, estado: 'lista'|'denegada'|'error'|..., observado }.
 //   v0.14.1 (M-1162): el token se saca en terminos.html (sirve también al colaborador, al que el shell manda a portal.html).
 //   camara: true (video sintetico) o 'fixtures/qr.y4m' (relativo al guion) en el caso -> Chrome con camara simulada (N2).
 //   Caso N3 (LM-19): nivel: 'N3' prepara la pantalla y llama h.captura(); no lo juzga el guion: queda ok=null para el juez local.
@@ -17,7 +19,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { abrir, BASE, BASE_MODELO, COLA, PERFILES, conDesvio } = require('./comun');
+const { abrir, BASE, BASE_MODELO, COLA, PERFILES, conDesvio, entrarSitio } = require('./comun');
 
 // v0.14.0: puro. URL de lectura del servicio del modelo para h.leerModelo, o null si la ruta no es una ruta relativa simple.
 function urlModelo(ruta) {
@@ -233,6 +235,8 @@ async function correrGuion(spec, opciones = {}) {
             capturas.push({ nombre, png: path.relative(COLA, png), ancho: page.viewportSize().width });
             return png;
           },
+          // v0.15.0: abre una página de los sitios con la sesión de Google del perfil (contrato de M-1176).
+          entrarSitio(url) { return entrarSitio(ctx, page, url, perfil); },
           // v0.14.0: lectura del servicio del modelo como el perfil (o sin sesión). Solo GET; sin redirecciones.
           async leerModelo(ruta, op = {}) {
             const url = urlModelo(ruta);

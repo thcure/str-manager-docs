@@ -29,6 +29,9 @@ Carpeta de instalación: `C:\Users\ktcol\Downloads\str-instr-cola\pw\` (fuente: 
 Instalación (una vez, PowerShell): `cd $HOME\Downloads\str-instr-cola\pw ; npm install --no-audit --no-fund ; npx playwright install chromium ; node guardia.test.js`
 
 
+## Sitios de la fábrica en las pruebas (LM-79 fase 5.2, pw 0.15.0)
+`proyectos.` entra en la guardia como solo lectura. `h.entrarSitio(url)` (en `comun.js › entrarSitio`) abre una página de `proyectos.` o `herramienta-fabrica.`; si el sitio publica `dataset.sesion = 'sin-sesion'`, pulsa `#entrar-google` y elige la cuenta del perfil en la ventana de Google (sin teclear nada; `completarVentanaGoogle`, compartida con `recuperarSesion`), y espera `lista`, `denegada` o `error`. Contrato del sitio acordado en M-1176. Arreglo: la espera sobre la ventana de Google ya no revienta cuando la ventana se cierra sola. Pruebas: `guardia.test.js` (sitios, 8).
+
 ## Registro de usuarios de prueba (29-oct, lo mantiene el Arquitecto)
 `usuarios-prueba.spec.js` (`correr\usuarios-prueba.txt` → `log\USUARIOS-PRUEBA-guion.json`) abre los cuatro perfiles y escribe `pw\usuarios-prueba.json` en LENOVO: usuario, rol en el STR, cuenta (`zz-verif-pruebas`), correo de Google, UID de Firebase, si es administrador de la fábrica (`MODELO_ADMIN_UIDS`) y la hora de la comprobación. El log solo dice qué campos se llenaron: correos y UID no salen de LENOVO. Se corre al cambiar un perfil, una cuenta o la lista de administradores.
 

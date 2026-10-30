@@ -25,6 +25,10 @@
 // - Servicio del modelo (pw 0.14.0, LM-79 fase 5): const r = await h.leerModelo('estado', { sesion: true, origen: 'https://proyectos.apartamentosbucaramanga.com' })
 //   hace un GET a herramienta-fabrica./modelo/api/<ruta> con el token de Google del perfil ({ sesion: false } = sin token)
 //   y devuelve { status, cuerpo, cors } (cors = Access-Control-Allow-Origin recibido). El guion nunca ve el token. Solo GET.
+// - Sitios (pw 0.15.0, LM-79 fase 5.2): const r = await h.entrarSitio('https://proyectos.apartamentosbucaramanga.com/') abre la
+//   página con la sesión de Google del perfil (pulsa #entrar-google y elige la cuenta si hace falta) y devuelve
+//   { ok, estado: 'lista'|'denegada'|'error'|'sin-sesion'|null, observado }. Después se juzga la pantalla con h.page como siempre.
+//   Contrato del sitio: botón #entrar-google y document.documentElement.dataset.sesion (sin-sesion, lista, denegada, error).
 // - cubre (LM-41): cada caso declara los nodos del mapa del STR que prueba, por id de interno/mapa-modulos.json: módulo
 //   ('HK'), relación ('REL-16'), regla ('RT-8') o REQ ('REQ-K3-2'). Con eso la cola corre el caso solo cuando un lote pasa por
 //   ese nodo (ruta de pruebas) y el mapa muestra la cobertura. Un caso sin cubre vale por los módulos del guion (grueso).

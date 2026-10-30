@@ -216,3 +216,15 @@ console.log('guardia.test.js: ' + n + ' pruebas OK');
   assert.strictEqual(g('https://accounts.google.com/o/oauth2/auth').ok, false, 'después: accounts.google.com vuelve a no pasar');
   console.log('guardia.test.js: recuperación de sesión: 8 OK');
 }
+
+{ // v0.15.0 (LM-79 fase 5.2, M-1176): proyectos. solo lectura; contrato de dataset.sesion de los sitios
+  const { decidir, estadoSitio, esSitio, HOST_PROYECTOS } = require('./comun');
+  const PR = 'https://' + HOST_PROYECTOS;
+  assert.strictEqual(decidir(PR + '/', 'GET').ok, true, 'proyectos.: GET pasa');
+  assert.strictEqual(decidir(PR + '/sitios/comun/x.js', 'HEAD').ok, true, 'proyectos.: HEAD pasa');
+  assert.strictEqual(decidir(PR + '/algo', 'POST', '{"nombre":"zz-verif-x"}').ok, false, 'proyectos.: POST se corta aunque diga zz-verif-');
+  assert.strictEqual(estadoSitio('lista'), 'lista'); assert.strictEqual(estadoSitio('otra'), null);
+  assert.strictEqual(esSitio(PR + '/'), true); assert.strictEqual(esSitio('https://herramienta-fabrica.apartamentosbucaramanga.com/'), true);
+  assert.strictEqual(esSitio('https://app.apartamentosbucaramanga.com/'), false); assert.strictEqual(esSitio('no es url'), false);
+  console.log('guardia.test.js: sitios (proyectos.): 8 OK');
+}

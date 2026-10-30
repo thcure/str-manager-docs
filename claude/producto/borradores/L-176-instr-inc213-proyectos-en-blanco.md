@@ -1,7 +1,7 @@
 # instr — L-176 · INC-213 (LM-79 fase 5.2c): proyectos. en blanco tras L-175 — el servicio acepta archivo con mayúsculas (fabrica/proyecto/P01), la página se pinta aunque falle una lectura, y JS y CSS de los sitios sin caché de 7 días
-Categoría: **crítico** (toca la validación de lectura del servicio y las cabeceras del servidor de los dos sitios; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación, M-1144))
+Categoría: **crítico** (toca la validación de lectura del servicio y las cabeceras del servidor de los dos sitios; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 29-oct 22:40 (M-1216), confirmado sobre el borrador revisado a las 22:43 (respuesta a M-1214))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 22:40
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 22:40 · ok Jefe de proyecto M-1215
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5) y DA: LM-79; arreglo propuesto por el Arquitecto (M-1209)
 Alcance: en str-manager, `tests/e2e/INC-213.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l176 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: .htaccess (raíz), modelo/api/config/lectura.php, sitios/comun/estilo.css, sitios/proyectos/proyectos.js, sitios/proyectos/vistas.js, tests/modelo-lectura.test.js, tests/sitios-htaccess.test.js, tests/sitios-proyectos.test.js y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)

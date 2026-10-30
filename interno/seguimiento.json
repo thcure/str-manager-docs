@@ -2579,6 +2579,35 @@
     "motivo": "tres cambios chicos (patrón con mayúsculas, la página pinta aunque falle una parte, JS y CSS sin caché larga); el veredicto de L-175 espera a L-176",
     "fecha": "2026-10-29"
    }
+  },
+  {
+   "id": "INC-214",
+   "tipo": "INC",
+   "modulo": "MOD (sitio proyectos.)",
+   "fecha": "2026-10-29",
+   "titulo": "proyectos. sigue cortando la carga si una lectura no llega a responder (fetch lanza, p. ej. un 503 del servicio mientras carga datos, sin cabecera CORS): la tolerancia de L-176 solo cubre respuestas con estado ≠ 200",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "casoUso": "CU-MOD-3.1",
+   "contra": "producto",
+   "originador": "Arquitecto",
+   "contexto": {
+    "lote": "L-176",
+    "guion": null,
+    "caso": null,
+    "tren": null
+   },
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "origen": "M-1219 (Arquitecto, 22:50)",
+   "nota": "22:53 A las 22:47, mientras el servicio cargaba c2cf509, la 8.ª lectura (incidente) dio 503 y la secuencia se cortó: 8 lecturas de 17, sesión «error», solo el portafolio y ningún aviso. leer() de sesion.js lanza cuando fetch falla (un 503 sin cabecera CORS no llega como respuesta al navegador), y cargarProyecto no atrapa esa excepción por lectura. Recargando, todo bien. Es pasajero (minutos de carga) y no expone nada; la sesión sí queda en «error», así que ningún guion lo da por bueno.",
+   "prioridad": "P3",
+   "decision": {
+    "tipo": "lote",
+    "ref": "ajuste después de 5.3 (atrapar la excepción por lectura como una falla más; si es «cargando datos», decirlo con botón de reintentar)",
+    "motivo": "pasajero, sin exposición, y la sesión ya marca «error»; no frena 5.3",
+    "fecha": "2026-10-29"
+   }
   }
  ],
  "dts": [
@@ -21051,7 +21080,7 @@
      "desde": "2026-10-29 22:46"
     }
    ],
-   "nota": "Propuesto por el Arquitecto (M-1209). El veredicto de L-175 espera a este lote. Revisión previa en curso. · 22:40 Revisión previa 23/23 (5: la sesión queda en «error» con la página pintada si falla una lectura; 6: c y e Detener; 15: RT-18 y «..» corregidos). Cruce pedido (M-1214) y ok al JP (M-1215). · 22:43 Cruce delegado M-1216, confirmado sobre el borrador revisado (22:43, M-1214 y M-1217); ok JP M-1215. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:46 Construido: str-manager fac69f3 (93/93); fabrica-servicio 03ee336 (10/10, 9 hashes OK; F3 con P01 en verde; parte B de google OMITIDA)."
+   "nota": "Propuesto por el Arquitecto (M-1209). El veredicto de L-175 espera a este lote. Revisión previa en curso. · 22:40 Revisión previa 23/23 (5: la sesión queda en «error» con la página pintada si falla una lectura; 6: c y e Detener; 15: RT-18 y «..» corregidos). Cruce pedido (M-1214) y ok al JP (M-1215). · 22:43 Cruce delegado M-1216, confirmado sobre el borrador revisado (22:43, M-1214 y M-1217); ok JP M-1215. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:46 Construido: str-manager fac69f3 (93/93); fabrica-servicio 03ee336 (10/10, 9 hashes OK; F3 con P01 en verde; parte B de google OMITIDA). · 22:50 a cerrado por el Arquitecto (M-1219: 03ee336 en GitHub y desplegado; JS y CSS con una sola Cache-Control max-age=0 y sin Expires; página entera con 17 lecturas 200 y sesión lista). Observación suya: INC-214."
   }
  ],
  "riesgos": [

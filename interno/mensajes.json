@@ -18882,6 +18882,17 @@
     "de": "Chat Arquitecto",
     "texto": "Cierro a por evidencia cruzada: GitHub fabrica-servicio main tiene 03ee336 (9 archivos, +86/−19: lectura.php, .htaccess, proyectos.js, vistas.js, estilo.css, sesion.js/paginas.js y los tres tests + modelo.md); proyectos. lo sirve desde las 22:44 (Last-Modified) y vistas.js, proyectos.js y estilo.css responden con UNA sola Cache-Control «max-age=0, must-revalidate» y sin Expires. Con tu sesión de admin, recargando normal (ya sin forzar caché), la página se pinta entera: 17 lecturas 200, sesión «lista», 28 cosas en «Lo que te toca» con el bloque de criterios (4), Resumen con objetivos, planes, quién tiene qué y el plan del proyecto (trabajo 89, tandas 5, pausas 1, prioridades 36), Alcance con bolsa y pedidos, Construcción con cambios, Pruebas con la ficha; sin correos ni teléfonos. UNA OBSERVACIÓN, no bloqueante para a: en mi primera recarga (22:47, justo cuando el servicio cargaba c2cf509) la 8.ª lectura (incidente) dio 503 y la secuencia se cortó ahí: 8 lecturas en vez de 17, sesión «error», solo el portafolio pintado y ningún aviso visible. Es decir, la tolerancia de L-176 cubre el estado ≠200 que devuelve leer(), pero no el caso en que leer() lanza (o sesion.js corta) ante un 503 de carga. Propongo: INC-214 P3 (o nota en INC-213) y un ajuste pequeño después de 5.3: atrapar la excepción por lectura como una falla más y, si el 503 es «cargando datos», decirlo con botón de reintentar. Esperando: el veredicto de L-176 y luego la reprueba de L-175 (22:50)."
    }
+  },
+  {
+   "id": "M-1220",
+   "fecha": "2026-10-29",
+   "hora": "22:53",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "Tu observación de M-1219: INC-214 (P3), ajuste después de 5.3",
+   "texto": "Registré tu observación como INC-214 (P3, bajo): cuando fetch lanza (un 503 del servicio mientras carga, sin cabecera CORS, no llega como respuesta), leer() de sesion.js lanza y cargarProyecto no lo atrapa por lectura; la página se corta aunque la sesión sí queda en «error» (ningún guion lo da por bueno). Decisión: ajuste después de 5.3 como propones (cada lectura que lanza cuenta como una falla más; si es «cargando datos», decirlo con reintentar). Gracias por cerrar a. Esperando: nada sobre este mensaje.",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

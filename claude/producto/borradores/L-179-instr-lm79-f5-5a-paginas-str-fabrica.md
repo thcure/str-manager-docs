@@ -1,5 +1,5 @@
 # instr — L-179 · LM-79 fase 5.5 A (paridad de páginas, orden de Carlos 30-oct): Marco de trabajo, Instrucciones y COBIT del STR se ven iguales en herramienta-fabrica., dentro del visor aislado
-Categoría: **crítico** (trae a un sitio de la fábrica código de páginas del STR y un adaptador que corre dentro del visor; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
+Categoría: **crítico** (trae a un sitio de la fábrica código de páginas del STR y un adaptador que corre dentro del visor; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 30-oct 11:46 (respuesta a M-1254))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 11:41 · ok Jefe de proyecto M-1255
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5, regla 8 «paridad de páginas») y DA: LM-79; orden de Carlos del 30-oct 11:08 (M-1250; excepción de pausas M-1251, tanda T-6)

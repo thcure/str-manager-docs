@@ -17808,10 +17808,67 @@
    "req": "LM-79",
    "categoria": "crítico",
    "resumen": "LM-79 fase 5.2c (1 de 2): línea base, mapa y nomenclatura en un visor aislado con CSP propia; Fábrica con marco de trabajo y COBIT, leída archivo por archivo; guion LM-79-paginas y ajuste de LM-79-proyectos",
-   "estado": "instalado",
-   "observacion": "Encolado 21:30. Revisor 23/23 (21:27; 5 y 13 corregidos); cruce delegado M-1198; ok JP M-1197. Esperado juez «parcial» (a del Arquitecto). Construido 21:33: 64cb845 (93/93); fabrica-servicio 8c7b980 (10/10).",
+   "estado": "aceptado",
+   "observacion": "Encolado 21:30. Revisor 23/23 (21:27; 5 y 13 corregidos); cruce delegado M-1198; ok JP M-1197. Esperado juez «parcial» (a del Arquitecto). Construido 21:33: 64cb845 (93/93); fabrica-servicio 8c7b980 (10/10). a cerrado por el Arquitecto 21:35 (M-1200). Juez 21:51: PARCIAL con c–g en verde. ACEPTADO.",
    "version": "p5c113",
-   "hash": "64cb845"
+   "hash": "64cb845",
+   "aceptacion": {
+    "lote": "L-174",
+    "hash": "64cb845",
+    "fecha": "2026-10-29",
+    "horaBogota": "21:51",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "Verificación cruzada del Arquitecto fuera del juez (A2 «Todo igual: 11 archivos.», run.js 10/10 de fabrica-servicio, ls-remote = HEAD de la hermana): no está en pruebas.json; va a criteriosPendientes."
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como admin → admin: sitio en «lista» | si: visor y página adentro: visor sí, página sí | si: página «Línea base del STR» con 834 elementos | si: aislado: origen null · página de afuera aislado · almacenamiento sin acceso | si: bloqueos de la CSP en la consola: ninguno"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como admin → admin: sitio en «lista» | si: visor y página adentro: visor sí, página sí | si: página «Mapa del STR» con 739 elementos | si: aislado: origen null · página de afuera aislado · almacenamiento sin acceso | si: bloqueos de la CSP en la consola: ninguno"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar a la Fábrica como admin → admin: sitio en «lista» | si: marco de trabajo en Modelo: true · COBIT en Gobierno: true · páginas o plan de P01 como archivo: 0 | si: visor y página adentro: visor sí, página sí | si: página «Nomenclatura del modelo STR» con 588 elementos | si: aislado: origen null · página de afuera aislado · almacenamiento sin acceso | si: bloqueos de la CSP en la consola: ninguno"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: https://proyectos.apartamentosbucaramanga.com/sitios/comun/visor.html → 200 · cabeceras CSP: 1 · default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-s… | si: https://proyectos.apartamentosbucaramanga.com/ CSP general con frame-src self y sin script en línea: sí | si: https://herramienta-fabrica.apartamentosbucaramanga.com/sitios/comun/visor.html → 200 · cabeceras CSP: 1 · default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-s… | si: https://herramienta-fabrica.apartamentosbucaramanga.com/ CSP general con frame-src self y sin script en línea: sí | si: sin sesión, complemento linea-base → 403 | si: sin sesión, complemento mapa → 403 | si: sin sesión, complemento nomenclatura → 403"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK (entrada: guion N2 «tests/e2e/LM-79-paginas.spec.js igual a la instruccion · 4 caso(s)», aplicación literal 5/5)"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a",
+      "motivo": "Criterio N1 de fabrica-servicio con perfil «verificación cruzada del Arquitecto (fuera del juez)»: la evidencia (salida de A2, run.js 10/10, ls-remote) no viene en pruebas.json ni en capturas; la cierra el Arquitecto por evidencia cruzada, como prevé la instrucción."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json › resultado «verde», causa null; ningún \"ok\": false en el archivo (Grep). Fase «completa» (lote crítico; riesgo MOD 1×1 bajo), sin diferidos. Regresión por ruta (modo ruta): 28 guiones corridos, todos en verde, incluidos LM-79-proyectos c y h ya ajustados por B2 (1 pendiente, 2 botones; gobierno solo con documentos fabrica/doc/). Deuda de cobertura de la ruta: REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token) sin caso que la ejerza; la instrucción lo declara como no ejercido por el lote. Cuarentena e inestables vacíos; sesiones sin pérdidas; sin cortes de red. Sin N3 en la instrucción (n3Preparados vacío); la única captura (INC-125-b-medida) es de regresión y solo muestra datos zz-verif-. Línea de trazabilidad: lineaLote «Lote: L-174 · LM-79 · Casos de uso: CU-MOD-3.1». Resultado «parcial» solo por a, el resultado esperado por la propia instrucción."
+   }
   }
  ],
  "esquema": {
@@ -20773,9 +20830,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.2c (1 de 2): línea base, mapa y nomenclatura en los sitios dentro de un visor aislado (iframe sandbox sin allow-same-origin, CSP propia por <Files>); la Fábrica suma marco de trabajo y COBIT y lee archivo por archivo; guion LM-79-paginas",
-   "estado": "construido",
-   "esperaA": "verificador",
-   "desde": "2026-10-29 21:33",
+   "estado": "aceptado",
+   "desde": "2026-10-29 21:51",
    "estados": [
     {
      "estado": "previsto",
@@ -20792,9 +20848,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-29 21:33"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-29 21:51"
     }
    ],
-   "nota": "Arranque M-1194 (5.2c antes de 5.3); brechas y carga del Arquitecto M-1195 con visto al visor y tres condiciones. Partido en dos: L-174 (visor y páginas) y L-175 (lo que falta de Seg. Proyecto, criterios pendientes, portafolio con fase/salud/hito, Pruebas). Revisión previa en curso. · 21:27 Revisión previa 23/23 (5: ajuste del guion de L-173 en regresión; 13: f exige una sola cabecera CSP en visor.html). Cruce pedido al Arquitecto (M-1196) y ok al JP (M-1197). · 21:30 Cruce delegado M-1198 (21:29); ok JP M-1197 (21:45, válido tras el cruce). Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 21:33 Construido: str-manager 64cb845 (93/93; P1–P3 en LM-79-proyectos); fabrica-servicio 8c7b980 (10/10, 11 hashes OK; F3 corrió; parte B de google OMITIDA). · 21:35 a cerrado por el Arquitecto (M-1200: 8c7b980 en GitHub, desplegado en los dos hosts; visor.html con una sola CSP, la suya; la raíz y paginas.js con la general)."
+   "nota": "Arranque M-1194 (5.2c antes de 5.3); brechas y carga del Arquitecto M-1195 con visto al visor y tres condiciones. Partido en dos: L-174 (visor y páginas) y L-175 (lo que falta de Seg. Proyecto, criterios pendientes, portafolio con fase/salud/hito, Pruebas). Revisión previa en curso. · 21:27 Revisión previa 23/23 (5: ajuste del guion de L-173 en regresión; 13: f exige una sola cabecera CSP en visor.html). Cruce pedido al Arquitecto (M-1196) y ok al JP (M-1197). · 21:30 Cruce delegado M-1198 (21:29); ok JP M-1197 (21:45, válido tras el cruce). Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 21:33 Construido: str-manager 64cb845 (93/93; P1–P3 en LM-79-proyectos); fabrica-servicio 8c7b980 (10/10, 11 hashes OK; F3 corrió; parte B de google OMITIDA). · 21:35 a cerrado por el Arquitecto (M-1200: 8c7b980 en GitHub, desplegado en los dos hosts; visor.html con una sola CSP, la suya; la raíz y paginas.js con la general). · 21:51 juez PARCIAL con c–g en verde (línea base, mapa y nomenclatura en el visor: origen null, sin alcance a la página de afuera ni al almacenamiento, sin bloqueos de CSP; visor.html con una sola CSP en los dos hosts; 403 sin sesión; regresión por ruta 28 guiones en verde, con LM-79-proyectos ajustado); a cerrado por el Arquitecto 21:35 (M-1200) → ACEPTADO."
   }
  ],
  "riesgos": [

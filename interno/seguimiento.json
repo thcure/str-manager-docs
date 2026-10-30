@@ -2595,7 +2595,7 @@
    "modulo": "MOD (sitio proyectos.)",
    "fecha": "2026-10-29",
    "titulo": "proyectos. sigue cortando la carga si una lectura no llega a responder (fetch lanza, p. ej. un 503 del servicio mientras carga datos, sin cabecera CORS): la tolerancia de L-176 solo cubre respuestas con estado ≠ 200",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "bajo",
    "casoUso": "CU-MOD-3.1",
    "contra": "producto",
@@ -2609,13 +2609,17 @@
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
    "origen": "M-1219 (Arquitecto, 22:50)",
-   "nota": "22:53 A las 22:47, mientras el servicio cargaba c2cf509, la 8.ª lectura (incidente) dio 503 y la secuencia se cortó: 8 lecturas de 17, sesión «error», solo el portafolio y ningún aviso. leer() de sesion.js lanza cuando fetch falla (un 503 sin cabecera CORS no llega como respuesta al navegador), y cargarProyecto no atrapa esa excepción por lectura. Recargando, todo bien. Es pasajero (minutos de carga) y no expone nada; la sesión sí queda en «error», así que ningún guion lo da por bueno. · 23:35 JP (M-1221): de acuerdo con el orden, con la condición de que esté aceptado antes de 5.4 (que Carlos vea los sitios). · 09:17 Desarrollo: borrador L-178 (ajuste de 5.3) en revisión previa.",
+   "nota": "22:53 A las 22:47, mientras el servicio cargaba c2cf509, la 8.ª lectura (incidente) dio 503 y la secuencia se cortó: 8 lecturas de 17, sesión «error», solo el portafolio y ningún aviso. leer() de sesion.js lanza cuando fetch falla (un 503 sin cabecera CORS no llega como respuesta al navegador), y cargarProyecto no atrapa esa excepción por lectura. Recargando, todo bien. Es pasajero (minutos de carga) y no expone nada; la sesión sí queda en «error», así que ningún guion lo da por bueno. · 23:35 JP (M-1221): de acuerdo con el orden, con la condición de que esté aceptado antes de 5.4 (que Carlos vea los sitios). · 09:17 Desarrollo: borrador L-178 (ajuste de 5.3) en revisión previa. · 09:53 Cerrado con L-178 aceptado.",
    "prioridad": "P3",
    "decision": {
     "tipo": "lote",
     "ref": "ajuste después de 5.3 (en el lote de 5.3 o en uno propio justo después), aceptado antes de 5.4 (JP, M-1221)",
     "motivo": "pasajero, sin exposición, y la sesión ya marca «error»; no frena 5.3",
     "fecha": "2026-10-29"
+   },
+   "cierre": {
+    "lote": "L-178",
+    "prueba": "log/L-178-veredicto.json 09:50: c (incidentes sin respuesta → página entera, un aviso en Construcción, sesión «error» con el motivo) y d (lectura de prueba sin respuesta → «No se pudo leer el servicio (sin respuesta).», «error») en verde; a por evidencia cruzada del Arquitecto (09:32, M-1245); regresión en verde"
    }
   }
  ],
@@ -18137,10 +18141,55 @@
    "req": "INC-214",
    "categoria": "crítico",
    "resumen": "INC-214: leer() de los sitios devuelve «sin respuesta» (status 0) en vez de lanzar; proyectos. se pinta entero con el aviso; textoEstado; tests S4 y P7; guion INC-214; encabezado y número de guiones en tests-y-despliegue.md",
-   "estado": "instalado",
-   "observacion": "Encolado 09:26. Revisor 23/23 (09:20, sin fallas); cruce delegado 09:22 (M-1241); ok JP M-1242. Esperado juez «parcial» (a del Arquitecto por evidencia cruzada). · Construido 09:29: STR 0af2935 (84/84), fabrica-servicio a2226f3 (10/10). · a cerrado por el Arquitecto 09:32 (M-1245).",
+   "estado": "aceptado",
+   "observacion": "Encolado 09:26. Revisor 23/23 (09:20, sin fallas); cruce delegado 09:22 (M-1241); ok JP M-1242. Esperado juez «parcial» (a del Arquitecto por evidencia cruzada). · Construido 09:29: STR 0af2935 (84/84), fabrica-servicio a2226f3 (10/10). · a cerrado por el Arquitecto 09:32 (M-1245). · Juez 09:50: PARCIAL (c, d, g verde; a cerrado por el Arquitecto 09:32). ACEPTADO.",
    "version": "p5c113",
-   "hash": "0af2935"
+   "hash": "0af2935",
+   "aceptacion": {
+    "lote": "L-178",
+    "hash": "0af2935",
+    "fecha": "2026-10-30",
+    "horaBogota": "09:50",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "Sin decidir aquí: la instrucción asigna este criterio a la verificación cruzada del Arquitecto, fuera del juez. El mensaje del commit declara «Todo igual: 9 archivos», 10/10 y main a2226f3 con ls-remote igual al HEAD; es lo declarado por la CLI, no evidencia cruzada."
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como admin sin respuesta en incidentes → admin: sitio en «error» (no se pudo leer: incidentes (sin respuesta)) | si: proyecto activo: «P01 · STR Manager» · contenido a la vista: true | si: avisos de lectura: construccion: No se pudo leer: incidentes (sin respuesta). Lo demás de esta parte sí está. | si: partes vacías: ninguna"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como admin sin respuesta en la lectura de prueba → admin: sitio en «error» (sin respuesta) | si: aviso: «No se pudo leer el servicio (sin respuesta).» · contenido oculto: true · bloques: 0"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "n1: node tests/run.js: 84/84 archivos OK · aplicación literal 4/4 (D1–D4) · tests/e2e/INC-214.spec.js igual a la instruccion · 2 caso(s)"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a",
+      "motivo": "Lo cierra el Arquitecto por evidencia cruzada, según la instrucción (perfil «verificación cruzada del Arquitecto, fuera del juez»; resultado esperado del juez: «parcial»). pruebas.json no trae las salidas de A2 ni de A3."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null; Grep de \"ok\": false sin coincidencias. Sin letras N3 en la instrucción y n3Preparados vacío. Fase completa (lote crítico); cuarentena e inestables vacíos; sesiones sin perdidas ni caídos. Deuda de cobertura de la ruta: REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token), sin cambiar el resultado. Para la verificación cruzada de a: el caso f de LM-79-lectura.spec.js muestra en la salud sha 2946747 y el commit de este lote declara fabrica-servicio main a2226f3; no lo interpreto, el Arquitecto lo contrasta."
+   }
   }
  ],
  "esquema": {
@@ -21243,9 +21292,9 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "INC-214: leer() de los sitios devuelve «sin respuesta» (status 0) en vez de lanzar cuando una lectura no tiene respuesta (503 sin CORS); proyectos. se pinta entero con el aviso; textoEstado en puro.js; tests S4 y P7; guion INC-214; dos correcciones de documentación del STR (encabezado de tests-y-despliegue y número de guiones)",
-   "estado": "construido",
-   "esperaA": "juez",
-   "desde": "2026-10-30 09:29",
+   "estado": "aceptado",
+   "esperaA": null,
+   "desde": "2026-10-30 09:50",
    "estados": [
     {
      "estado": "previsto",
@@ -21262,9 +21311,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-30 09:29"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-30 09:50"
     }
    ],
-   "nota": "09:17 Borrador en claude/producto/borradores/L-178-instr-inc214-lectura-sin-respuesta.md. Simulación: script A2 «Todo igual: 9 archivos.», tests de fabrica-servicio en verde salvo los dos de siempre por los sustitutos locales; S4 y P7 fallan con el código viejo; navegador: con incidente sin respuesta, sesión «error» con «incidentes (sin respuesta)», un aviso y ninguna parte vacía (antes: «Failed to fetch» y partes vacías); STR 84/84, K1 4/4. Revisor previo en curso. · 09:20 Revisión previa 23/23 (subagente, sin fallas; sensibilidad de tests y guion comprobada contra el código viejo). Pedidos el cruce delegado al Arquitecto y el ok al JP. · 09:22 Ok del JP M-1242 (vale tras el cruce si no cambia contenido). Falta el cruce del Arquitecto (M-1241). · 09:26:05 Cruce delegado (respuesta a M-1241, commit 09:22:40) y ok JP M-1242 en la cabecera; sin cambios de contenido después. Encolado (cola de 1); releído en LENOVO igual byte a byte. · 09:29 Construido: STR 0af2935 (09:26:22–09:29:15, código 0), 84/84; fabrica-servicio a2226f3 (A2 «Todo igual: 9 archivos.», run.js 10/10, ls-remote = HEAD); archivos declarados = tocados en los dos repos. · 09:32 a cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1245): a2226f3 en GitHub y desplegado en proyectos. a las 09:27; la página carga entera con sesión de admin."
+   "nota": "09:17 Borrador en claude/producto/borradores/L-178-instr-inc214-lectura-sin-respuesta.md. Simulación: script A2 «Todo igual: 9 archivos.», tests de fabrica-servicio en verde salvo los dos de siempre por los sustitutos locales; S4 y P7 fallan con el código viejo; navegador: con incidente sin respuesta, sesión «error» con «incidentes (sin respuesta)», un aviso y ninguna parte vacía (antes: «Failed to fetch» y partes vacías); STR 84/84, K1 4/4. Revisor previo en curso. · 09:20 Revisión previa 23/23 (subagente, sin fallas; sensibilidad de tests y guion comprobada contra el código viejo). Pedidos el cruce delegado al Arquitecto y el ok al JP. · 09:22 Ok del JP M-1242 (vale tras el cruce si no cambia contenido). Falta el cruce del Arquitecto (M-1241). · 09:26:05 Cruce delegado (respuesta a M-1241, commit 09:22:40) y ok JP M-1242 en la cabecera; sin cambios de contenido después. Encolado (cola de 1); releído en LENOVO igual byte a byte. · 09:29 Construido: STR 0af2935 (09:26:22–09:29:15, código 0), 84/84; fabrica-servicio a2226f3 (A2 «Todo igual: 9 archivos.», run.js 10/10, ls-remote = HEAD); archivos declarados = tocados en los dos repos. · 09:32 a cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1245): a2226f3 en GitHub y desplegado en proyectos. a las 09:27; la página carga entera con sesión de admin. · Juez 09:50: PARCIAL con c, d y g en verde y a pendiente, ya cerrado por el Arquitecto a las 09:32 (M-1245). ACEPTADO. INC-214 cerrado; con esto 5.4 puede arrancar."
   }
  ],
  "riesgos": [

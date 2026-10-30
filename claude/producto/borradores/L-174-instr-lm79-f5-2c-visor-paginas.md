@@ -1,7 +1,7 @@
 # instr — L-174 · LM-79 fase 5.2c (1 de 2): la línea base, el mapa y la nomenclatura en los sitios, dentro de un visor aislado con su propia CSP; la Fábrica suma marco de trabajo y COBIT
-Categoría: **crítico** (cambia la CSP de los dos sitios y abre páginas con script dentro de ellos; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación, M-1144))
+Categoría: **crítico** (cambia la CSP de los dos sitios y abre páginas con script dentro de ellos; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 29-oct 21:29 (M-1198))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 21:27
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 21:27 · ok Jefe de proyecto M-1197
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5) y DA: LM-79; visor con las tres condiciones del Arquitecto (respuesta a M-1195, 21:09)
 Alcance: en str-manager, `tests/e2e/LM-79-paginas.spec.js` (nuevo) · `tests/e2e/LM-79-proyectos.spec.js` (casos c y h, para lo que ahora se ve) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l174 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: .htaccess (raíz), sitios/comun/puro.js, sitios/comun/estilo.css, sitios/comun/paginas.js y sitios/comun/visor.html (nuevos), sitios/fabrica/fabrica.js, sitios/proyectos/proyectos.js, tests/sitios-comun.test.js, tests/sitios-htaccess.test.js, tests/sitios-visor.test.js (nuevo) y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)

@@ -2556,7 +2556,7 @@
    "modulo": "MOD (sitio proyectos.; servicio del modelo, lectura de complemento)",
    "fecha": "2026-10-29",
    "titulo": "Tras L-175, proyectos. queda en blanco para el admin: complemento?archivo=fabrica/proyecto/P01 da 422 (el patrón de archivo del servicio solo admite minúsculas) y la página no tolera una lectura fallida",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "medio",
    "casoUso": "CU-MOD-3.1",
    "contra": "producto",
@@ -2578,6 +2578,15 @@
     "ref": "L-176",
     "motivo": "tres cambios chicos (patrón con mayúsculas, la página pinta aunque falle una parte, JS y CSS sin caché larga); el veredicto de L-175 espera a L-176",
     "fecha": "2026-10-29"
+   },
+   "cierre": {
+    "lote": "L-176",
+    "prueba": "log/L-176-veredicto.json 23:05: c (proyectos. entero, plan del proyecto en Resumen, sin avisos), d (fabrica/proyecto/P01 200 como admin, 403 sin sesión) y e (Cache-Control max-age=0) en verde; regresión por ruta en verde"
+   },
+   "destino": {
+    "tipo": "punto",
+    "ref": "lección: la prueba local de un sitio simula el servicio con sus validaciones reales (patrones de lectura.php), no solo con sus datos; y el contrato de carga cruza los nombres con el patrón del servicio (paquete.py › PATRON_ARCHIVO, Arquitecto)",
+    "quien": "Arquitecto"
    }
   },
   {
@@ -18025,10 +18034,61 @@
    "req": "INC-213",
    "categoria": "crítico",
    "resumen": "INC-213: complemento acepta archivo con mayúsculas; proyectos. pinta aunque falle una lectura (aviso por parte y sesión en «error» con el motivo); JS y CSS sin caché larga; guion INC-213",
-   "estado": "instalado",
-   "observacion": "Encolado 22:43. Revisor 23/23 (22:40; 5, 6 y 15 corregidos); cruce delegado M-1216 confirmado 22:43 (M-1217); ok JP M-1215. Esperado juez «parcial» (a del Arquitecto); después, reprueba de L-175. Construido 22:46: fac69f3 (93/93); fabrica-servicio 03ee336 (10/10).",
+   "estado": "aceptado",
+   "observacion": "Encolado 22:43. Revisor 23/23 (22:40; 5, 6 y 15 corregidos); cruce delegado M-1216 confirmado 22:43 (M-1217); ok JP M-1215. Esperado juez «parcial» (a del Arquitecto); después, reprueba de L-175. Construido 22:46: fac69f3 (93/93); fabrica-servicio 03ee336 (10/10). a cerrado por el Arquitecto 22:50 (M-1219). Juez 23:05: PARCIAL con c–g en verde. ACEPTADO.",
    "version": "p5c113",
-   "hash": "fac69f3"
+   "hash": "fac69f3",
+   "aceptacion": {
+    "lote": "L-176",
+    "hash": "fac69f3",
+    "fecha": "2026-10-29",
+    "horaBogota": "23:05",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "fabrica-servicio (A2 «Todo igual: 9 archivos.», run.js 10/10, ls-remote = HEAD) lo verifica el Arquitecto por evidencia cruzada, fuera del juez; pruebas.json no lo trae"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como admin → admin: sitio en «lista» | si: proyecto activo: «P01 · STR Manager» | si: avisos de lectura fallida: ninguno | si: plan del proyecto en Resumen: trabajo, pausas, prioridades · partes vacías: ninguna"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: como admin → 200 · filas: 16 | si: sin sesión → 403"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: proyectos.apartamentosbucaramanga.com/sitios/proyectos/proyectos.js → 200 · Cache-Control: max-age=0, must-revalidate · Expires: 0 | si: proyectos.apartamentosbucaramanga.com/sitios/comun/estilo.css → 200 · Cache-Control: max-age=0, must-revalidate · Expires: 0 | si: herramienta-fabrica.apartamentosbucaramanga.com/sitios/fabrica/fabrica.js → 200 · Cache-Control: max-age=0, must-revalidate · Expires: 0 | si: herramienta-fabrica.apartamentosbucaramanga.com/sitios/comun/sesion.js → 200 · Cache-Control: max-age=0, must-revalidate · Expires: 0"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK (entrada: guion N2 igual a la instrucción · 3 casos; aplicación literal 2/2)"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a",
+      "motivo": "verificación cruzada del Arquitecto sobre fabrica-servicio (fuera del juez, según la instrucción); la cierra el Arquitecto por evidencia cruzada"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json › resultado «verde», causa null; ningún caso con ok false (Grep). Fase completa (lote crítico; riesgo MOD 1×1 bajo), 30 guiones de regresión por ruta, todos en verde; cuarentena e inestables vacíos; sesiones sin pérdidas. Sin letras N3 (n3Preparados vacío) ni N4. Deuda de cobertura de la ruta: REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token) sin guion que la cubra; no cambia el resultado. lineaLote «Lote: L-176 · INC-213 · Casos de uso: CU-MOD-3.1» (no es criterio de este lote). Resultado «parcial» como lo prevé la instrucción: solo queda a pendiente del Arquitecto; después corre el veredicto de L-175 sobre lo desplegado aquí."
+   }
   }
  ],
  "esquema": {
@@ -21025,7 +21085,7 @@
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.2c (2 de 2): proyectos. suma lo que mostraba Seg. Proyecto (objetivos, planes, quién tiene qué, plan del proyecto, bolsa, pedidos y cambios), criterios por cerrar, fase/salud/hito y Pruebas, con la regla de datos; ajuste de LM-79-proyectos; guion LM-79-seguimiento",
    "estado": "no aceptado",
-   "esperaA": "CD",
+   "esperaA": "verificador",
    "desde": "2026-10-29 22:35",
    "estados": [
     {
@@ -21049,7 +21109,7 @@
      "desde": "2026-10-29 22:35"
     }
    ],
-   "nota": "Tras L-174 (M-1202: adelante). Cuidados del JP M-1201: regla de datos con su caso y el plan de P01 solo para administradores. Revisión previa en curso. · 22:06 Revisión previa 23/23 (1 y 6 corregidos). Cruce pedido al Arquitecto (M-1203) y ok al JP (M-1204). · 22:11 Cruce delegado M-1206 (22:07); ok JP M-1204. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:14 Construido: str-manager 8b894b6 (93/93; P1–P3 en LM-79-proyectos); fabrica-servicio 3b43b33 (10/10, 4 hashes OK; sitios-proyectos 32; F3 corrió; parte B de google OMITIDA). · 22:26 a cerrado por el Arquitecto (M-1208), pero proyectos. queda en blanco: INC-213 (422 en fabrica/proyecto/P01 y página que no tolera una lectura fallida). El veredicto espera a L-176 (M-1209). · 22:35 juez NO ACEPTADO: c y d (y en regresión LM-79-paginas c, d y LM-79-proyectos c, d) en «error» por «plan: HTTP 422», la misma causa de INC-213; e, f y g en verde. Sin revertir (M-1209: lo arregla L-176); se reprueba L-175 cuando L-176 esté desplegado."
+   "nota": "Tras L-174 (M-1202: adelante). Cuidados del JP M-1201: regla de datos con su caso y el plan de P01 solo para administradores. Revisión previa en curso. · 22:06 Revisión previa 23/23 (1 y 6 corregidos). Cruce pedido al Arquitecto (M-1203) y ok al JP (M-1204). · 22:11 Cruce delegado M-1206 (22:07); ok JP M-1204. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:14 Construido: str-manager 8b894b6 (93/93; P1–P3 en LM-79-proyectos); fabrica-servicio 3b43b33 (10/10, 4 hashes OK; sitios-proyectos 32; F3 corrió; parte B de google OMITIDA). · 22:26 a cerrado por el Arquitecto (M-1208), pero proyectos. queda en blanco: INC-213 (422 en fabrica/proyecto/P01 y página que no tolera una lectura fallida). El veredicto espera a L-176 (M-1209). · 22:35 juez NO ACEPTADO: c y d (y en regresión LM-79-paginas c, d y LM-79-proyectos c, d) en «error» por «plan: HTTP 422», la misma causa de INC-213; e, f y g en verde. Sin revertir (M-1209: lo arregla L-176); se reprueba L-175 cuando L-176 esté desplegado. · 23:08 L-176 aceptado: reprueba pedida (reprobar\\L-175.txt)."
   },
   {
    "vista": "siguiente",
@@ -21059,9 +21119,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "INC-213: proyectos. en blanco tras L-175. complemento acepta archivo con mayúsculas (fabrica/proyecto/P01); la página se pinta aunque falle una lectura (aviso por parte); JS y CSS de los sitios con Cache-Control max-age=0; guion INC-213",
-   "estado": "construido",
-   "esperaA": "verificador",
-   "desde": "2026-10-29 22:46",
+   "estado": "aceptado",
+   "desde": "2026-10-29 23:05",
    "estados": [
     {
      "estado": "previsto",
@@ -21078,9 +21137,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-29 22:46"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-29 23:05"
     }
    ],
-   "nota": "Propuesto por el Arquitecto (M-1209). El veredicto de L-175 espera a este lote. Revisión previa en curso. · 22:40 Revisión previa 23/23 (5: la sesión queda en «error» con la página pintada si falla una lectura; 6: c y e Detener; 15: RT-18 y «..» corregidos). Cruce pedido (M-1214) y ok al JP (M-1215). · 22:43 Cruce delegado M-1216, confirmado sobre el borrador revisado (22:43, M-1214 y M-1217); ok JP M-1215. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:46 Construido: str-manager fac69f3 (93/93); fabrica-servicio 03ee336 (10/10, 9 hashes OK; F3 con P01 en verde; parte B de google OMITIDA). · 22:50 a cerrado por el Arquitecto (M-1219: 03ee336 en GitHub y desplegado; JS y CSS con una sola Cache-Control max-age=0 y sin Expires; página entera con 17 lecturas 200 y sesión lista). Observación suya: INC-214."
+   "nota": "Propuesto por el Arquitecto (M-1209). El veredicto de L-175 espera a este lote. Revisión previa en curso. · 22:40 Revisión previa 23/23 (5: la sesión queda en «error» con la página pintada si falla una lectura; 6: c y e Detener; 15: RT-18 y «..» corregidos). Cruce pedido (M-1214) y ok al JP (M-1215). · 22:43 Cruce delegado M-1216, confirmado sobre el borrador revisado (22:43, M-1214 y M-1217); ok JP M-1215. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:46 Construido: str-manager fac69f3 (93/93); fabrica-servicio 03ee336 (10/10, 9 hashes OK; F3 con P01 en verde; parte B de google OMITIDA). · 22:50 a cerrado por el Arquitecto (M-1219: 03ee336 en GitHub y desplegado; JS y CSS con una sola Cache-Control max-age=0 y sin Expires; página entera con 17 lecturas 200 y sesión lista). Observación suya: INC-214. · 23:05 juez PARCIAL con c–g en verde (proyectos. entero con el plan y sin avisos; plan 200 como admin y 403 sin sesión; JS y CSS con una sola Cache-Control max-age=0 y sin Expires en los dos hosts; regresión por ruta 30 guiones en verde); a cerrado por el Arquitecto 22:50 (M-1219) → ACEPTADO. Pedida la reprueba de L-175 (23:08)."
   }
  ],
  "riesgos": [

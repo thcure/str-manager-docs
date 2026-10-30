@@ -1,0 +1,209 @@
+# instr — L-176 · INC-213 (LM-79 fase 5.2c): proyectos. en blanco tras L-175 — el servicio acepta archivo con mayúsculas (fabrica/proyecto/P01), la página se pinta aunque falle una lectura, y JS y CSS de los sitios sin caché de 7 días
+Categoría: **crítico** (toca la validación de lectura del servicio y las cabeceras del servidor de los dos sitios; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
+Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
+Revisión previa: 23/23 · subagente de Desarrollo · AAAA-MM-DD HH:MM
+Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5) y DA: LM-79; arreglo propuesto por el Arquitecto (M-1209)
+Alcance: en str-manager, `tests/e2e/INC-213.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l176 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: .htaccess (raíz), modelo/api/config/lectura.php, sitios/comun/estilo.css, sitios/proyectos/proyectos.js, sitios/proyectos/vistas.js, tests/modelo-lectura.test.js, tests/sitios-htaccess.test.js, tests/sitios-proyectos.test.js y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
+Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)
+Origen: INC-213 (M-1209, Arquitecto 22:26: complemento?archivo=fabrica/proyecto/P01 da 422 y proyectos. queda en blanco para el admin desde las 22:12; arreglo en tres cambios); M-1210 (al JP: el veredicto de L-175 espera a este lote). Requerimiento: INC-213 en `interno/seguimiento.json`
+Impacto: proyectos. vuelve a verse entero para el admin, con el plan del proyecto en Resumen; si un día falla una lectura, esa parte lo dice y el resto se ve. Los JS y CSS de los dos sitios se revalidan en cada visita (cada lote se ve sin recargar a la fuerza). El servicio acepta archivo y prefijo con mayúsculas (sigue sin comillas, espacios ni «..»). Nada cambia para el usuario del STR.
+Reglas transversales que toca: RT-14 (el servicio sigue decidiendo: el plan de P01 se lee con el token de un administrador y sin sesión da 403) · RT-18 (la validación sigue cerrando comillas, espacios y «..»; solo suma mayúsculas) · RT-19 (sin lecturas nuevas: 17 en serie por visita)
+Mapa: módulos y relaciones que cambia: MOD (lectura de complemento con mayúsculas; caché de los sitios); ninguna relación nueva ni del STR
+Casos de uso: CU-MOD-3.1
+Riesgo: bajo en código y medio por estar en el servicio y el servidor (R-1 del lote; MOD tiene riesgo 1, no hace falta R-n). Puede salir mal: que el hosting sume su propia Cache-Control a la nueva (e lo ve con dos cabeceras: Detener y avisar, no Revertir; lo resuelve el Arquitecto en el .htaccess); que aceptar mayúsculas abra algo (la consulta sigue con parámetros y LEFT; F3 lo prueba con php y SQLite). Conexiones a MySQL (RT-19): las mismas 17 en serie. Sin limpieza manual: no retira nada (INC-210).
+¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (arreglo de un lote del modelo LM-79, DA: LM-79 y cruce delegado)
+Reversión: fabrica-servicio: `git revert` del commit de A3 (vuelve L-175: proyectos. en blanco otra vez; no revertir sin otro arreglo). str-manager: `git revert <hash>` (el guion y la nota).
+Depende de: L-175 construido (8b894b6; fabrica-servicio 3b43b33, desplegado; su veredicto espera a este lote, M-1209) · Precondiciones para verificar: perfil zz-verif-admin (en MODELO_ADMIN_UIDS); sin datos que crear
+¿Quién más depende de lo que cambia?: el veredicto de L-175 (LM-79-seguimiento c–f) corre después de este lote, sobre lo desplegado aquí; LM-79-proyectos, LM-79-paginas y LM-79-sitios siguen igual (el aviso no aparece si todo se lee); 5.3 arranca al aceptarse L-175.
+
+## 0. Contexto y reglas de este lote
+- Dos partes, en este orden: **A** (A1–A3) en una carpeta hermana, clon de `thcure/fabrica-servicio`: aplicas con un script de Node el arreglo del servicio, de proyectos. y de la caché, y sus tests, corres sus tests y lo subes. **B** (B1–B2) en str-manager: dos líneas del puntero `modelo.md` y el guion N2 nuevo. **Si A no termina en verde, no hagas B.**
+- **La consola no guarda variables entre llamadas.** Cada bloque de A empieza con `H=/c/Users/ktcol/fabrica-servicio-l176` y su guardia: córrelo entero en una sola llamada. No hagas `cd` a la carpeta hermana. Nunca `push --force` ni reescribir historia.
+- El script de A2 escribe los nueve archivos: **no los edites a mano** ni los reescribas. Si dice FAIL, para.
+- No abras `database.php`, `credenciales.php` ni ningún `secrets.php`.
+- En LENOVO hay `C:\php` (PHP 8.3) sin `openssl.cnf`: la parte B de `modelo-google.test.js` sale «OMITIDA» (INC-211); `modelo-lectura.test.js` F3 corre o sale «F3 OMITIDA» según traiga `pdo_sqlite`. Las dos cosas valen.
+
+## A1. Clonar fabrica-servicio a la carpeta hermana
+```bash
+H=/c/Users/ktcol/fabrica-servicio-l176
+test ! -e "$H" || { echo "ya existe $H: para"; exit 1; }
+test "$(git symbolic-ref --short HEAD)" = main && test -z "$(git status --porcelain)" || { echo "str-manager no está en main limpio: para"; exit 1; }
+git fetch -q origin main && test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" || { echo "main local distinto de origin/main: para"; exit 1; }
+GIT_TERMINAL_PROMPT=0 GCM_INTERACTIVE=never git clone --no-tags --single-branch --branch main https://github.com/thcure/fabrica-servicio.git "$H"
+test "$(git -C "$H" rev-parse HEAD)" = 3b43b33f578c492d45ef8b7176b7d562f25b7ec8 || { echo "fabrica-servicio no está en 3b43b33: para"; exit 1; }
+node "$H/tests/run.js"      # 10/10 antes de tocar nada
+```
+
+## A2. Aplicar los cambios con el script
+Guarda el bloque siguiente como `aplicar-l176.js` en `C:\Users\ktcol\` (fuera de los dos repos; **no se commitea**) y córrelo. Primero valida todo en memoria (cada texto a cambiar aparece una sola vez; los archivos nuevos no existen); si algo no cuadra no escribe nada. Después escribe y compara el hash de git de los nueve archivos con el esperado: debe terminar en «Todo igual: 9 archivos.».
+```js
+// L-176 (INC-213): aplica en la carpeta hermana de fabrica-servicio el arreglo del servicio, de proyectos. y de la caché, y sus tests.
+// Uso: node aplicar-l176.js <carpeta de fabrica-servicio>. Primero lo valida todo en memoria (cada «busca» aparece una
+// sola vez; los archivos nuevos no existen); si algo no cuadra, no escribe nada y sale con 1. Después escribe (LF) y
+// compara el hash de git de cada archivo con el esperado.
+'use strict';
+const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
+const H = process.argv[2];
+if (!H || !fs.existsSync(path.join(H, '.git'))) { console.log('FAIL carpeta sin .git: ' + H); process.exit(1); }
+const OPS = [{"tipo": "par", "ruta": ".htaccess", "busca": "# fabrica-servicio: un repo, dos sitios (LM-79 fase 4.2, 4.4, 5.2a, 5.2b y 5.2c). Los dos sitios publican main › public_html y\n# este archivo decide por el host qué sirve cada uno. modelo/api/ tiene su propio RewriteEngine (sus reglas mandan ahí).", "pon": "# fabrica-servicio: un repo, dos sitios (LM-79 fase 4.2, 4.4, 5.2a, 5.2b y 5.2c; L-176 caché de JS y CSS). Los dos sitios publican main › public_html y\n# este archivo decide por el host qué sirve cada uno. modelo/api/ tiene su propio RewriteEngine (sus reglas mandan ahí)."}, {"tipo": "par", "ruta": ".htaccess", "busca": "Header always set Referrer-Policy \"strict-origin-when-cross-origin\"\n# L-174 (5.2c, M-1195): el visor de páginas generadas lleva su propia CSP (reemplaza la de arriba solo para él). Corre en un", "pon": "Header always set Referrer-Policy \"strict-origin-when-cross-origin\"\n# L-176 (INC-213): los JS y CSS de los sitios cambian con cada lote: el navegador revalida siempre (sin la caché de 7 días\n# del hosting). «set» y no «always set»: reemplaza la cabecera que pone el hosting en las respuestas 200, sin duplicarla.\n<FilesMatch \"\\.(js|css)$\">\nHeader set Cache-Control \"max-age=0, must-revalidate\"\nHeader unset Expires\n</FilesMatch>\n# L-174 (5.2c, M-1195): el visor de páginas generadas lleva su propia CSP (reemplaza la de arriba solo para él). Corre en un"}, {"tipo": "par", "ruta": "sitios/proyectos/vistas.js", "busca": "\n  raiz.ProyectosVistas = { loQueTeToca: loQueTeToca, portafolio: portafolio, resumen: resumen, alcance: alcance, decisiones: decisiones, construccion: construccion, buzon: buzon, pendiente: pendiente, seguimiento: seguimiento, planProyecto: planProyecto, bolsaYPedidos: bolsaYPedidos, cambios: cambios, pruebas: pruebas, criteriosPendientes: criteriosPendientes };\n})(typeof window !== 'undefined' ? window : this);", "pon": "\n  // L-176 (INC-213): aviso de lo que no se pudo leer en una parte; lista de [qué, estado HTTP]\n  function avisoLectura(fallas) {\n    var fs = Array.isArray(fallas) ? fallas : [];\n    if (!fs.length) return '';\n    return '<p class=\"aviso-lectura\" data-fallas=\"' + fs.length + '\">No se pudo leer: ' + fs.map(function (x) { return esc(txt(x[0]) + ' (HTTP ' + txt(x[1]) + ')'); }).join(', ') + '. Lo demás de esta parte sí está.</p>';\n  }\n\n  raiz.ProyectosVistas = { loQueTeToca: loQueTeToca, portafolio: portafolio, resumen: resumen, alcance: alcance, decisiones: decisiones, construccion: construccion, buzon: buzon, pendiente: pendiente, seguimiento: seguimiento, planProyecto: planProyecto, bolsaYPedidos: bolsaYPedidos, cambios: cambios, pruebas: pruebas, criteriosPendientes: criteriosPendientes, avisoLectura: avisoLectura };\n})(typeof window !== 'undefined' ? window : this);"}, {"tipo": "par", "ruta": "sitios/proyectos/proyectos.js", "busca": "// Seg. Proyecto del STR (cambios, pedidos, bolsa, objetivos, planes, quién tiene qué y el plan del proyecto), criterios por cerrar y pruebas.\nimport { iniciarSitio } from '/sitios/comun/sesion.js';", "pon": "// Seg. Proyecto del STR (cambios, pedidos, bolsa, objetivos, planes, quién tiene qué y el plan del proyecto), criterios por cerrar y pruebas.\n// L-176 (INC-213): una lectura que falla no deja la página en blanco: la parte que la usa dice qué no se pudo leer y el resto se pinta.\nimport { iniciarSitio } from '/sitios/comun/sesion.js';"}, {"tipo": "par", "ruta": "sitios/proyectos/proyectos.js", "busca": "  document.querySelector('#' + parte + ' .cuerpo').innerHTML = html;\n}\n\nlet portafolio = [];", "pon": "  document.querySelector('#' + parte + ' .cuerpo').innerHTML = html;\n}\n\n// Nombre de cada lectura para el aviso, y qué partes la usan\nconst NOMBRES = { decisiones: 'decisiones', reqs: 'requisitos', lotes: 'lotes', veredictos: 'veredictos', incs: 'incidentes', pendientes: 'mensajes pendientes', enCurso: 'mensajes en curso', riesgos: 'riesgos', diseno: 'bolsa y objetivos', cambios: 'cambios', pedidos: 'pedidos', planes: 'planes de trabajo', plan: 'plan del proyecto', estado: 'resumen del servicio' };\nconst USA = {\n  inicio: ['pendientes', 'enCurso', 'decisiones', 'diseno', 'lotes', 'riesgos', 'cambios'],\n  resumen: ['estado', 'diseno', 'planes', 'pendientes', 'enCurso', 'lotes', 'plan'],\n  alcance: ['reqs', 'diseno', 'pedidos'],\n  decisiones: ['decisiones'],\n  construccion: ['lotes', 'veredictos', 'incs', 'cambios'],\n  buzon: ['pendientes', 'enCurso']\n};\n\nlet portafolio = [];"}, {"tipo": "par", "ruta": "sitios/proyectos/proyectos.js", "busca": "  // Una lectura tras otra: cada una abre una conexión a MySQL en la cuenta compartida (RT-19); nunca en paralelo\n  const d = {};\n  for (const k of Object.keys(rutas)) d[k] = filasDe(await leer(rutas[k]), k);\n  const est = await leer('estado');", "pon": "  // Una lectura tras otra: cada una abre una conexión a MySQL en la cuenta compartida (RT-19); nunca en paralelo\n  const d = {}, fallas = {};\n  for (const k of Object.keys(rutas)) {\n    const r = await leer(rutas[k]);\n    if (r.status === 200 && r.cuerpo && Array.isArray(r.cuerpo.filas)) d[k] = r.cuerpo.filas;\n    else { d[k] = []; fallas[k] = r.status; }\n  }\n  const est = await leer('estado');"}, {"tipo": "par", "ruta": "sitios/proyectos/proyectos.js", "busca": "  const est = await leer('estado');\n  if (est.status !== 200 || !est.cuerpo) throw new Error('estado: HTTP ' + est.status);\n  const mensajes = d.pendientes.concat(d.enCurso);", "pon": "  const est = await leer('estado');\n  if (!(est.status === 200 && est.cuerpo)) fallas.estado = est.status;\n  const aviso = (parte) => V.avisoLectura(USA[parte].filter((k) => k in fallas).map((k) => [NOMBRES[k], fallas[k]]));\n  const mensajes = d.pendientes.concat(d.enCurso);"}, {"tipo": "par", "ruta": "sitios/proyectos/proyectos.js", "busca": "  document.getElementById('proyecto-activo').textContent = p.id + ' · ' + p.nombre;\n  poner('inicio', V.loQueTeToca({ mensajes, decisiones: d.decisiones, bolsa: Array.isArray(bolsa) ? bolsa : [], lotes: d.lotes, riesgos: d.riesgos, cambios: d.cambios }));\n  poner('resumen', V.resumen(est.cuerpo) + V.seguimiento({ objetivos: Array.isArray(objetivos) ? objetivos : [], planes: d.planes, mensajes, lotes: d.lotes }) +\n    '<h3>Plan del proyecto</h3>' + V.planProyecto(d.plan));", "pon": "  document.getElementById('proyecto-activo').textContent = p.id + ' · ' + p.nombre;\n  poner('inicio', aviso('inicio') + V.loQueTeToca({ mensajes, decisiones: d.decisiones, bolsa: Array.isArray(bolsa) ? bolsa : [], lotes: d.lotes, riesgos: d.riesgos, cambios: d.cambios }));\n  poner('resumen', aviso('resumen') + V.resumen(fallas.estado === undefined ? est.cuerpo : null) + V.seguimiento({ objetivos: Array.isArray(objetivos) ? objetivos : [], planes: d.planes, mensajes, lotes: d.lotes }) +\n    '<h3>Plan del proyecto</h3>' + V.planProyecto(d.plan));"}, {"tipo": "par", "ruta": "sitios/proyectos/proyectos.js", "busca": "    '<h3>Plan del proyecto</h3>' + V.planProyecto(d.plan));\n  poner('alcance', V.alcance(d.reqs) + V.bolsaYPedidos(Array.isArray(bolsa) ? bolsa : [], d.pedidos));\n  poner('decisiones', V.decisiones(d.decisiones));\n  poner('construccion', V.construccion(d.lotes, d.veredictos, d.incs) + V.cambios(d.cambios));\n  poner('buzon', V.buzon(mensajes));\n  ofrecerPagina(document.querySelector('#arquitectura .cuerpo'), leer, 'mapa', 'el mapa del proyecto');", "pon": "    '<h3>Plan del proyecto</h3>' + V.planProyecto(d.plan));\n  poner('alcance', aviso('alcance') + V.alcance(d.reqs) + V.bolsaYPedidos(Array.isArray(bolsa) ? bolsa : [], d.pedidos));\n  poner('decisiones', aviso('decisiones') + V.decisiones(d.decisiones));\n  poner('construccion', aviso('construccion') + V.construccion(d.lotes, d.veredictos, d.incs) + V.cambios(d.cambios));\n  poner('buzon', aviso('buzon') + V.buzon(mensajes));\n  ofrecerPagina(document.querySelector('#arquitectura .cuerpo'), leer, 'mapa', 'el mapa del proyecto');"}, {"tipo": "par", "ruta": "sitios/comun/estilo.css", "busca": ".pagina-generada { margin-top: 12px; }\n", "pon": ".pagina-generada { margin-top: 12px; }\n/* L-176: aviso de una lectura fallida */\n.aviso-lectura { border-left: 3px solid var(--acento); padding: 4px 8px; color: var(--suave); }\n"}, {"tipo": "par", "ruta": "modelo/api/config/lectura.php", "busca": "    }\n    // L-172 (LM-79 fase 5.2a): complemento por archivo exacto o por prefijo (los sitios leen «fabrica/…»)\n    if (isset($q['archivo']) || isset($q['prefijo'])) {", "pon": "    }\n    // L-172 (LM-79 fase 5.2a): complemento por archivo exacto o por prefijo (los sitios leen «fabrica/…») (L-176, INC-213: también mayúsculas, como fabrica/proyecto/P01)\n    if (isset($q['archivo']) || isset($q['prefijo'])) {"}, {"tipo": "par", "ruta": "modelo/api/config/lectura.php", "busca": "            $v = (string) $q[$k];\n            if (!preg_match('#^[a-z0-9][a-z0-9/_.-]{0,63}$#', $v)) return _lecturaFalla(422, $k . ' inválido');\n            if ($k === 'archivo') { $where[] = '\u0060archivo\u0060 = ?'; $args[] = $v; }", "pon": "            $v = (string) $q[$k];\n            if (!preg_match('#^[A-Za-z0-9][A-Za-z0-9/_.-]{0,63}$#', $v)) return _lecturaFalla(422, $k . ' inválido');\n            if ($k === 'archivo') { $where[] = '\u0060archivo\u0060 = ?'; $args[] = $v; }"}, {"tipo": "par", "ruta": "tests/sitios-proyectos.test.js", "busca": "// P5 (L-175): lo que mostraba Seg. Proyecto del STR, con la misma regla de datos.\nconst path = require('path');", "pon": "// P5 (L-175): lo que mostraba Seg. Proyecto del STR, con la misma regla de datos.\n// P6 (L-176, INC-213): una lectura que falla no deja la página en blanco.\nconst path = require('path');"}, {"tipo": "par", "ruta": "tests/sitios-proyectos.test.js", "busca": "\nconsole.log(\u0060\\n${ok} OK, ${fail} FAIL\u0060);", "pon": "\n// ── P6 (L-176) ──\neq('P6: avisoLectura: vacío sin fallas; con fallas, qué y su estado, escapado', [V.avisoLectura([]), V.avisoLectura([['plan del proyecto', 422], ['<b>x</b>', 500]])], ['', '<p class=\"aviso-lectura\" data-fallas=\"2\">No se pudo leer: plan del proyecto (HTTP 422), &lt;b&gt;x&lt;/b&gt; (HTTP 500). Lo demás de esta parte sí está.</p>']);\nconst fnProy = (/async function cargarProyecto\\(leer, p\\) \\{([\\s\\S]*?)\\n\\}/.exec(js) || [])[1] || '';\neq('P6: cargarProyecto no corta en una lectura fallida (sin filasDe ni throw; guarda la falla y sigue)', [/filasDe\\(|throw /.test(fnProy), fnProy.includes('else { d[k] = []; fallas[k] = r.status; }'), fnProy.includes('if (!(est.status === 200 && est.cuerpo)) fallas.estado = est.status;')], [false, true, true]);\neq('P6: cada parte que lee del servicio pone su aviso antes de su contenido', ['inicio', 'resumen', 'alcance', 'decisiones', 'construccion', 'buzon'].every((x) => fnProy.includes(\"poner('\" + x + \"', aviso('\" + x + \"') + \")), true);\nconst usa = (/const USA = \\{([\\s\\S]*?)\\n\\};/.exec(js) || [])[1] || '';\nconst claves = [...(/const rutas = \\{([\\s\\S]*?)\\n  \\};/.exec(js) || [])[1].matchAll(/^\\s+(\\w+):/gm)].map((m) => m[1]).concat(['estado']);\nconst nombres = (/const NOMBRES = \\{([^}]*)\\};/.exec(js) || [])[1] || '';\neq('P6: cada lectura (y estado) tiene nombre y alguna parte que la usa', claves.filter((k) => !new RegExp(\"(^|, )\" + k + \": '\").test(nombres.trim()) || !usa.includes(\"'\" + k + \"'\")), []);\n\nconsole.log(\u0060\\n${ok} OK, ${fail} FAIL\u0060);"}, {"tipo": "par", "ruta": "tests/modelo-lectura.test.js", "busca": "eq('F1: listar filtra complemento por archivo exacto y por prefijo con LEFT y parámetros', fnListar.includes(\"$where[] = '\u0060archivo\u0060 = ?'; $args[] = $v;\") && fnListar.includes(\"$where[] = 'LEFT(\u0060archivo\u0060, ' . strlen($v) . ') = ?'; $args[] = $v;\"), true);\neq('F1: archivo y prefijo solo en complemento (otra tabla → 422) y con forma fija', fnListar.includes(\"if ($tabla !== 'complemento') return _lecturaFalla(422, 'la tabla no tiene archivo');\") && fnListar.includes(\"preg_match('#^[a-z0-9][a-z0-9/_.-]{0,63}$#', $v)\"), true);\nconst conFab = filas.concat([{ tabla: 'complemento', proyecto: 'str', archivo: 'fabrica/mejoras', clave: 'mejoras', orden: 0, es_lista: 0, valor: [{ id: 'MJ-T' }] }, { tabla: 'complemento', proyecto: 'str', archivo: 'fabrica/doc/proceso', clave: 'texto', orden: 0, es_lista: 0, valor: '# x' }]);", "pon": "eq('F1: listar filtra complemento por archivo exacto y por prefijo con LEFT y parámetros', fnListar.includes(\"$where[] = '\u0060archivo\u0060 = ?'; $args[] = $v;\") && fnListar.includes(\"$where[] = 'LEFT(\u0060archivo\u0060, ' . strlen($v) . ') = ?'; $args[] = $v;\"), true);\neq('F1: archivo y prefijo solo en complemento (otra tabla → 422) y con forma fija', fnListar.includes(\"if ($tabla !== 'complemento') return _lecturaFalla(422, 'la tabla no tiene archivo');\") && fnListar.includes(\"preg_match('#^[A-Za-z0-9][A-Za-z0-9/_.-]{0,63}$#', $v)\"), true);\nconst conFab = filas.concat([{ tabla: 'complemento', proyecto: 'str', archivo: 'fabrica/mejoras', clave: 'mejoras', orden: 0, es_lista: 0, valor: [{ id: 'MJ-T' }] }, { tabla: 'complemento', proyecto: 'str', archivo: 'fabrica/doc/proceso', clave: 'texto', orden: 0, es_lista: 0, valor: '# x' }]);"}, {"tipo": "par", "ruta": "tests/modelo-lectura.test.js", "busca": "$db->exec(\"CREATE TABLE requisito (proyecto TEXT, id TEXT, estado TEXT, extra TEXT)\");\nforeach ([['fabrica/mejoras', 'mejoras', 0], ['fabrica/doc/proceso', 'texto', 0], ['fabricante', 'x', 0], ['diseno', 'reqs', 0]] as $f) $db->prepare(\"INSERT INTO complemento VALUES ('str', ?, ?, ?, 0, '1', NULL)\")->execute($f);\n$r = [];", "pon": "$db->exec(\"CREATE TABLE requisito (proyecto TEXT, id TEXT, estado TEXT, extra TEXT)\");\nforeach ([['fabrica/mejoras', 'mejoras', 0], ['fabrica/doc/proceso', 'texto', 0], ['fabricante', 'x', 0], ['diseno', 'reqs', 0], ['fabrica/proyecto/P01', 'trabajo', 0]] as $f) $db->prepare(\"INSERT INTO complemento VALUES ('str', ?, ?, ?, 0, '1', NULL)\")->execute($f);\n$r = [];"}, {"tipo": "par", "ruta": "tests/modelo-lectura.test.js", "busca": "$r['todo'] = $q('complemento', [])['total'];\necho json_encode($r);", "pon": "$r['todo'] = $q('complemento', [])['total'];\n$r['p01'] = array_map(fn($f) => $f['clave'], $q('complemento', ['archivo' => 'fabrica/proyecto/P01'])['filas'] ?? ['422']);\necho json_encode($r);"}, {"tipo": "par", "ruta": "tests/modelo-lectura.test.js", "busca": "  let o3 = null; try { o3 = JSON.parse(r3.stdout); } catch (e) { o3 = { error: (r3.stderr || r3.stdout || '').slice(0, 300) }; }\n  eq('F3 (php): prefijo fabrica/ trae solo los fabrica/* (no «fabricante»)', o3.prefijo, ['fabrica/doc/proceso', 'fabrica/mejoras']);\n  eq('F3 (php): archivo exacto', o3.archivo, ['fabrica/mejoras']);", "pon": "  let o3 = null; try { o3 = JSON.parse(r3.stdout); } catch (e) { o3 = { error: (r3.stderr || r3.stdout || '').slice(0, 300) }; }\n  eq('F3 (php): prefijo fabrica/ trae solo los fabrica/* (no «fabricante»)', o3.prefijo, ['fabrica/doc/proceso', 'fabrica/mejoras', 'fabrica/proyecto/P01']);\n  eq('F3 (php): archivo con mayúsculas (fabrica/proyecto/P01) se lee (L-176, INC-213; antes 422)', o3.p01, ['trabajo']);\n  eq('F3 (php): archivo exacto', o3.archivo, ['fabrica/mejoras']);"}, {"tipo": "par", "ruta": "tests/modelo-lectura.test.js", "busca": "  eq('F3 (php): archivo en otra tabla → 422', o3.otra, { error: 'la tabla no tiene archivo' });\n  eq('F3 (php): sin filtro, todas', o3.todo, 4);\n  fs3.rmSync(tmp, { recursive: true, force: true });", "pon": "  eq('F3 (php): archivo en otra tabla → 422', o3.otra, { error: 'la tabla no tiene archivo' });\n  eq('F3 (php): sin filtro, todas', o3.todo, 5);\n  fs3.rmSync(tmp, { recursive: true, force: true });"}, {"tipo": "par", "ruta": "tests/sitios-htaccess.test.js", "busca": "// L-174 (5.2c): frame-src 'self' para el visor y la CSP propia de visor.html (R6).\nconst path = require('path');", "pon": "// L-174 (5.2c): frame-src 'self' para el visor y la CSP propia de visor.html (R6).\n// L-176 (INC-213): JS y CSS de los sitios sin caché larga (R7).\nconst path = require('path');"}, {"tipo": "par", "ruta": "tests/sitios-htaccess.test.js", "busca": "  'Header always set Referrer-Policy \"strict-origin-when-cross-origin\"',\n  '<Files \"visor.html\">',", "pon": "  'Header always set Referrer-Policy \"strict-origin-when-cross-origin\"',\n  String.raw\u0060<FilesMatch \"\\.(js|css)$\">\u0060,\n  'Header set Cache-Control \"max-age=0, must-revalidate\"',\n  'Header unset Expires',\n  '</FilesMatch>',\n  '<Files \"visor.html\">',"}, {"tipo": "par", "ruta": "tests/sitios-htaccess.test.js", "busca": "eq('R5: frame-src: el visor propio y los marcos de inicio de sesión (Firebase y Google)', dir['frame-src'], [\"'self'\", 'https://str-hospedaje.firebaseapp.com', 'https://accounts.google.com', 'https://apis.google.com']);\neq('R5: las cabeceras van con «always» y dentro de IfModule (sin mod_headers no rompe el sitio)', l.indexOf('<IfModule mod_headers.c>') < l.findIndex((x) => x.startsWith('Header ')) && l.filter((x) => x.startsWith('Header ')).every((x) => x.startsWith('Header always set ')), true);\n", "pon": "eq('R5: frame-src: el visor propio y los marcos de inicio de sesión (Firebase y Google)', dir['frame-src'], [\"'self'\", 'https://str-hospedaje.firebaseapp.com', 'https://accounts.google.com', 'https://apis.google.com']);\neq('R5: las cabeceras de seguridad van con «always» y dentro de IfModule (sin mod_headers no rompe el sitio; la caché, R7)', l.indexOf('<IfModule mod_headers.c>') < l.findIndex((x) => x.startsWith('Header ')) && l.filter((x) => x.startsWith('Header ') && !/Cache-Control|Expires/.test(x)).every((x) => x.startsWith('Header always set ')), true);\n"}, {"tipo": "par", "ruta": "tests/sitios-htaccess.test.js", "busca": "\nconsole.log(\u0060\\n${ok} OK, ${fail} FAIL\u0060);", "pon": "\n// R7 (L-176): la caché de JS y CSS\nconst iFM = l.indexOf(String.raw\u0060<FilesMatch \"\\.(js|css)$\">\u0060);\neq('R7: JS y CSS con Cache-Control max-age=0, must-revalidate (set, no always: reemplaza al del hosting) y sin Expires, dentro de IfModule', [iFM > l.indexOf('<IfModule mod_headers.c>'), l[iFM + 1], l[iFM + 2], l[iFM + 3], iFM < l.indexOf('</IfModule>')], [true, 'Header set Cache-Control \"max-age=0, must-revalidate\"', 'Header unset Expires', '</FilesMatch>', true]);\neq('R7: el patrón solo toca .js y .css (no html ni el servicio)', [/\\.(js|css)$/.test('sitios/comun/sesion.js'), /\\.(js|css)$/.test('sitios/comun/estilo.css'), /\\.(js|css)$/.test('sitios/comun/visor.html'), /\\.(js|css)$/.test('modelo/api/salud')], [true, true, false, false]);\n\nconsole.log(\u0060\\n${ok} OK, ${fail} FAIL\u0060);"}, {"tipo": "par", "ruta": "docs/claude/modelo.md", "busca": "- Lo vigilan \u0060tests/sitios-proyectos.test.js\u0060 (P1–P5) y el guion \u0060tests/e2e/LM-79-seguimiento.spec.js\u0060 del STR.\n", "pon": "- Lo vigilan \u0060tests/sitios-proyectos.test.js\u0060 (P1–P5) y el guion \u0060tests/e2e/LM-79-seguimiento.spec.js\u0060 del STR.\n\n## Arreglo de INC-213 (L-176)\n- **Servicio:** \u0060GET complemento\u0060 acepta \u0060archivo\u0060 y \u0060prefijo\u0060 con mayúsculas (\u0060^[A-Za-z0-9][A-Za-z0-9/_.-]{0,63}$\u0060), como \u0060fabrica/proyecto/P01\u0060; sigue sin comillas, espacios ni \u0060..\u0060 (F3).\n- **proyectos.:** una lectura que falla ya no deja la página en blanco: cada parte avisa «No se pudo leer: <qué> (HTTP n)» y pinta lo demás (\u0060NOMBRES\u0060 y \u0060USA\u0060 en \u0060proyectos.js\u0060, \u0060avisoLectura\u0060 en \u0060vistas.js\u0060; P6). El portafolio sí es necesario: si falla, la sesión queda en «error».\n- **Caché:** \u0060<FilesMatch \"\\.(js|css)$\">\u0060 con \u0060Header set Cache-Control \"max-age=0, must-revalidate\"\u0060 y \u0060Header unset Expires\u0060 (R7): cada lote se ve sin recargar a la fuerza.\n- Lo vigila además el guion \u0060tests/e2e/INC-213.spec.js\u0060 del STR.\n"}];
+const HASHES = {".htaccess": "ab55cba7eee529766757022ef4a2170faa1addd0", "docs/claude/modelo.md": "eff4fa2e972c9ae220cede001183164533603847", "modelo/api/config/lectura.php": "db5dd90242c8b6a4ac62fff99e3b869b969ac49b", "sitios/comun/estilo.css": "48fc2caef9aeb38cc9f97da7e9fd4420b263ed1d", "sitios/proyectos/proyectos.js": "dceb25ec4ea33cc1555cf121df76f402e9b88016", "sitios/proyectos/vistas.js": "1b05210537471cb0acb9db9626a94d8b5beed1d8", "tests/modelo-lectura.test.js": "5a5251a98807568255d114a99f8376b8a7b16cd4", "tests/sitios-htaccess.test.js": "211402ce357650730106c7609e1d51f0bf494363", "tests/sitios-proyectos.test.js": "46371b09e55c09f403cd2d74133669fccf79a68b"};
+const mem = {}; let mal = 0;
+const leer = (r) => { if (!(r in mem)) mem[r] = fs.existsSync(path.join(H, r)) ? fs.readFileSync(path.join(H, r), 'utf8').replace(/\r\n/g, '\n') : null; return mem[r]; };
+OPS.forEach((o, i) => {
+  const t = leer(o.ruta);
+  if (o.tipo === 'nuevo') { if (t !== null) { mal++; console.log('FAIL ' + (i + 1) + ' ' + o.ruta + ': ya existe'); } else mem[o.ruta] = o.texto; return; }
+  if (t === null) { mal++; console.log('FAIL ' + (i + 1) + ' ' + o.ruta + ': no existe'); return; }
+  const n = t.split(o.busca).length - 1;
+  if (n !== 1) { mal++; console.log('FAIL ' + (i + 1) + ' ' + o.ruta + ': «busca» aparece ' + n + ' veces'); return; }
+  mem[o.ruta] = t.replace(o.busca, () => o.pon);
+});
+if (mal) { console.log('No escribí nada: ' + mal + ' fallo(s).'); process.exit(1); }
+for (const r of Object.keys(mem)) { fs.mkdirSync(path.dirname(path.join(H, r)), { recursive: true }); fs.writeFileSync(path.join(H, r), mem[r]); }
+for (const [r, esp] of Object.entries(HASHES)) {
+  const real = execFileSync('git', ['-C', H, 'hash-object', r], { encoding: 'utf8' }).trim();
+  if (real !== esp) mal++;
+  console.log((real === esp ? 'OK   ' : 'FAIL ') + r + ' ' + real + (real === esp ? '' : ' (esperado ' + esp + ')'));
+}
+console.log(mal ? 'Hash distinto en ' + mal + ' archivo(s).' : 'Todo igual: ' + Object.keys(HASHES).length + ' archivos.');
+process.exit(mal ? 1 : 0);
+```
+```bash
+H=/c/Users/ktcol/fabrica-servicio-l176
+test -d "$H/.git" || { echo "no existe $H/.git: para"; exit 1; }
+node /c/Users/ktcol/aplicar-l176.js "$H"
+git -C "$H" status --short
+node "$H/tests/run.js"      # 10/10 archivos OK
+```
+Para (§ 0) si el script no termina en «Todo igual: 9 archivos.» o si `run.js` no da 10/10. `status --short` debe listar solo los nueve archivos, todos modificados (ninguno nuevo).
+
+## A3. Commit y push del repo nuevo
+```bash
+H=/c/Users/ktcol/fabrica-servicio-l176
+test -d "$H/.git" || { echo "no existe $H/.git: para"; exit 1; }
+git -C "$H" add -A
+git -C "$H" commit -m "fabrica-servicio: complemento acepta archivo con mayúsculas, proyectos. se pinta aunque falle una lectura y JS y CSS de los sitios sin caché larga (INC-213)" -m "Lote: L-176 · INC-213 · Casos de uso: CU-MOD-3.1
+Co-Authored-By: <como siempre>"
+GIT_TERMINAL_PROMPT=0 GCM_INTERACTIVE=never git -C "$H" push origin main
+git -C "$H" ls-remote origin refs/heads/main; git -C "$H" rev-parse HEAD     # el mismo hash
+```
+Si el push falla: **para** sin B y di «No hecho: push bloqueado» con la salida. Plan B: Carlos corre `git -C /c/Users/ktcol/fabrica-servicio-l176 push origin main` y el lote se repite solo desde B. Borra `C:\Users\ktcol\aplicar-l176.js` al terminar A3.
+
+## B1. `docs/claude/modelo.md` (puntero)
+**D1 · cabecera** (`docs/claude/modelo.md`). Busca:
+```md
+Al día hasta L-175 · dueño: MOD
+```
+Pon:
+```md
+Al día hasta L-176 · dueño: MOD
+```
+
+**D2 · guiones** (`docs/claude/modelo.md`). Busca:
+```md
+con la regla de datos y solo para administradores.
+```
+Pon:
+```md
+con la regla de datos y solo para administradores. `tests/e2e/INC-213.spec.js` (L-176) comprueba que proyectos. se pinta entero con el plan del proyecto, que el servicio da fabrica/proyecto/P01 al admin y no sin sesión, y que los JS y CSS de los sitios llegan sin caché larga.
+```
+
+## B2. Guion nuevo
+Copia el bloque de *Guion N2* a `tests/e2e/INC-213.spec.js` sin cambiar nada; no lo corras. `node tests/run.js` en verde (93/93: el lote no añade tests en str-manager; `e2e-esquema` carga el guion nuevo).
+
+## Ruta de pruebas (mapa.py --ruta)
+```
+## Ruta de pruebas (mapa.py --ruta) · 1 módulos · 5 relaciones · 6 reglas · corren 24 guiones (58 casos) · no corren 32 · huecos: 1 relaciones, 0 reglas
+- Módulos: **MOD** (archivo modelo/api/config/lectura.php; línea «Mapa:»)
+- Relaciones por las que pasa: REL-01 SH→*, REL-02 *→SH, REL-23 *→google-drive, REL-26 *→SRV, REL-29 cola-arquitecto→MOD
+- Reglas que cruza: — (de proceso, las garantiza la fábrica: RT-2, RT-4, RT-18, RT-20, RT-23, RT-24)
+- Corren (regresión por ruta): DT-42 (1/4), INC-125 (1/3), INC-131 (2/3), INC-132 (3/6), INC-146-purga (3/5), REQ-INV2-3-4-hk (3/13), REQ-INV2-3-4 (2/5), REQ-INV2-4-2-dif (7/9), REQ-INV2-4-2 (9/14), REQ-INV2-7-1-hk-turno (3/5), REQ-INV2-7-1 (3/10), REQ-K3b-aviso (2/7), REQ-K3c-vista (2/6), REQ-K3c (2/3), REQ-MOD-6-carga-rol (1/1), REQ-MOD-6-carga (2/2), REQ-MOD-6-complemento (1/1), REQ-MOD-6-credenciales (1/1), REQ-MOD-6-lectura (2/2), REQ-MOD-6 (3/4), REQ-OP-1 (2/8), REQ-OP-1b (1/7), REQ-SH-2 (1/11), herramientas/pw/humo-pw (1/1)
+- No corren: 32 guiones fuera de la ruta
+- Huecos de la ruta (nadie pasa): el guion cubre con un caso con `cubre` los que SU CAMBIO ejerce; los demás quedan aquí como deuda de cobertura (una línea de por qué no aplica basta al revisor previo). Relaciones REL-29 (cola-arquitecto→MOD); reglas ninguna — un caso negativo por regla (quien no puede, intenta)
+- A declarar (algún guion pasa por sus módulos, ningún caso lo dice en `cubre`): ninguna
+```
+
+Deuda de cobertura de la ruta (no la ejerce este lote): REL-29 (cola-arquitecto→MOD): la vía con `X-Modelo-Token` no cambia. El inicio con Google lo ejerce h.entrarSitio en c.
+
+## Pruebas derivadas (juez; verificador crítico)
+```
+- a. fabrica-servicio trae el arreglo con sus tests en verde · nivel: N1 · perfil: verificación cruzada del Arquitecto (fuera del juez) · precondición: ninguna · tec: escenario · espera: en el cierre, A2 «Todo igual: 9 archivos.» y run.js 10/10 (modelo-lectura F1–F3 con P01, sitios-proyectos P6, sitios-htaccess R7), A3 con ls-remote igual al HEAD de la hermana · **Detener**
+- c. El admin entra a proyectos. y la página se pinta entera: P01 activo, el plan del proyecto en Resumen y ningún aviso de lectura fallida (CU-MOD-3.1, INC-213) · nivel: N2 · perfil: zz-verif-admin · página: https://proyectos.apartamentosbucaramanga.com/ (el arnés arranca en https://app.apartamentosbucaramanga.com/str-app-shell.html) · precondición: commit de A3 desplegado · tec: escenario · espera: caso c del guion en verde; si entrarSitio no llega a un estado, Detener y avisar · **Revertir**
+- d. El servicio da el plan del proyecto (fabrica/proyecto/P01) al admin y lo sigue negando sin sesión (RT-14) · nivel: N2 · perfil: zz-verif-admin · página: https://proyectos.apartamentosbucaramanga.com/ (el arnés arranca en https://app.apartamentosbucaramanga.com/str-app-shell.html) · precondición: commit de A3 desplegado · tec: decisión · espera: caso d del guion en verde · **Revertir**
+- e. Los JS y CSS de los dos sitios llegan con una sola Cache-Control max-age=0, must-revalidate y sin Expires · nivel: N2 · perfil: zz-verif-admin · página: https://proyectos.apartamentosbucaramanga.com/ (el arnés arranca en https://app.apartamentosbucaramanga.com/str-app-shell.html) · precondición: commit de A3 desplegado · tec: decisión · espera: caso e del guion en verde; si solo falla por una cabecera de más del hosting, Detener y avisar, no Revertir · **Revertir**
+- g. str-manager solo suma el guion y la nota, y sigue en verde · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: escenario · espera: `node tests/run.js` 93/93; `aplicar.js` K1 en verde (D1, D2); la cola compara el guion · **Detener**
+- Datos de prueba: ninguno (solo lectura)
+- Sin letras b ni f: las letras siguen las de los casos del guion (c–e); a y g no tienen caso.
+- Resultado esperado del juez: «parcial», con a en criteriosPendientes; la cierra el Arquitecto por evidencia cruzada. Después de este veredicto corre el de L-175 sobre lo desplegado aquí.
+```
+
+### Guion N2 → `tests/e2e/INC-213.spec.js` (la CLI lo copia tal cual, sin cambiar un byte; no lo corras)
+```js
+// INC-213 (L-176): tras L-175, proyectos. quedaba en blanco para el admin: complemento?archivo=fabrica/proyecto/P01 daba 422
+// (el patrón de archivo del servicio solo admitía minúsculas) y la página no toleraba una lectura fallida; además el hosting
+// guardaba el JS de los sitios 7 días. Aquí: el plan del proyecto se lee (200), proyectos. se pinta entero sin avisos de
+// lectura, y los JS y CSS de los sitios llegan con max-age=0. Solo lectura.
+const PRO = 'https://proyectos.apartamentosbucaramanga.com';
+const FAB = 'https://herramienta-fabrica.apartamentosbucaramanga.com';
+
+module.exports = {
+  req: 'INC-213',
+  zona: ['MOD'],
+  casos: [
+    {
+      c: 'c', perfil: 'admin', tec: 'escenario', cubre: ['MOD', 'CU-MOD-3.1'], modulos: ['MOD'], pagina: '/str-app-shell.html',
+      que: 'El admin entra a proyectos. y la página se pinta entera: proyecto activo P01, el plan del proyecto en Resumen y ningún aviso de lectura fallida',
+      async prueba(h) {
+        const r = await h.entrarSitio(PRO + '/');
+        h.espera(r.ok && r.estado === 'lista', 'entrar como admin → ' + r.observado);
+        if (r.estado !== 'lista') return;
+        const v = await h.page.evaluate(() => ({
+          proyecto: (document.getElementById('proyecto-activo') || {}).textContent || '',
+          avisos: [...document.querySelectorAll('.aviso-lectura')].map((x) => x.textContent),
+          plan: ['trabajo', 'pausas', 'prioridades'].filter((b) => document.querySelector('#resumen [data-bloque="' + b + '"]')),
+          vacias: [...document.querySelectorAll('section.parte')].filter((s) => !(s.querySelector('.cuerpo') || {}).textContent).map((s) => s.id),
+        })).catch(() => null);
+        h.espera(!!v && v.proyecto.startsWith('P01 · '), 'proyecto activo: «' + (v && v.proyecto) + '»');
+        h.espera(!!v && v.avisos.length === 0, 'avisos de lectura fallida: ' + (v ? (v.avisos.join(' | ') || 'ninguno') : '?'));
+        h.espera(!!v && v.plan.length === 3 && v.vacias.length === 0, 'plan del proyecto en Resumen: ' + (v && v.plan.join(', ')) + ' · partes vacías: ' + (v && (v.vacias.join(', ') || 'ninguna')));
+      },
+    },
+    {
+      c: 'd', perfil: 'admin', tec: 'decisión', cubre: ['MOD', 'RT-14'], modulos: ['MOD'], pagina: '/str-app-shell.html',
+      que: 'El servicio acepta archivo con mayúsculas: el plan del proyecto (fabrica/proyecto/P01) se lee como admin y sigue negado sin sesión',
+      async prueba(h) {
+        const c = await h.leerModelo('complemento?archivo=fabrica/proyecto/P01');
+        h.espera(!!c && c.status === 200 && c.cuerpo && Array.isArray(c.cuerpo.filas) && c.cuerpo.filas.length > 0, 'como admin → ' + (c ? c.status : 'sin respuesta') + ' · filas: ' + (c && c.cuerpo && Array.isArray(c.cuerpo.filas) ? c.cuerpo.filas.length : '?'));
+        const s = await h.page.request.get(FAB + '/modelo/api/complemento?archivo=fabrica/proyecto/P01', { maxRedirects: 0 }).catch(() => null);
+        h.espera(!!s && s.status() === 403, 'sin sesión → ' + (s ? s.status() : 'sin respuesta'));
+      },
+    },
+    {
+      c: 'e', perfil: 'admin', tec: 'decisión', cubre: ['MOD'], modulos: ['MOD'], pagina: '/str-app-shell.html',
+      que: 'Los JS y CSS de los sitios llegan con una sola cabecera Cache-Control max-age=0, must-revalidate y sin Expires, en los dos hosts',
+      async prueba(h) {
+        for (const [host, ruta] of [[PRO, '/sitios/proyectos/proyectos.js'], [PRO, '/sitios/comun/estilo.css'], [FAB, '/sitios/fabrica/fabrica.js'], [FAB, '/sitios/comun/sesion.js']]) {
+          const r = await h.page.request.get(host + ruta, { maxRedirects: 0 }).catch(() => null);
+          const cc = r ? r.headersArray().filter((x) => x.name.toLowerCase() === 'cache-control').map((x) => x.value) : [];
+          const ex = r ? r.headersArray().filter((x) => x.name.toLowerCase() === 'expires').length : -1;
+          h.espera(!!r && r.status() === 200 && cc.length === 1 && /max-age=0/.test(cc[0]) && /must-revalidate/.test(cc[0]) && ex === 0,
+            host.replace('https://', '') + ruta + ' → ' + (r ? r.status() : 'sin respuesta') + ' · Cache-Control: ' + (cc.join(' | ') || 'falta') + ' · Expires: ' + ex);
+        }
+      },
+    },
+  ],
+};
+```
+
+## B3. El commit de este lote (str-manager)
+Mensaje con lo de siempre (categoría, Hecho / No hecho por paso, declarados vs tocados, el hash de main de fabrica-servicio) y la línea de trazabilidad en un `-m` propio, el último, con el Co-Authored-By en la línea siguiente (hook v5):
+```
+git commit -m "<mensaje de siempre>" -m "Lote: L-176 · INC-213 · Casos de uso: CU-MOD-3.1
+Co-Authored-By: <como siempre>"
+```
+Sin comillas dobles, comillas invertidas ni `$` dentro del mensaje.
+
+## Cierre (la CLI lo dice en español al final de su respuesta; la cola lo guarda en `log\NN-<nombre>.txt`, que la CLI no debe abrir)
+Hecho / No hecho por paso (A1–A3, B1–B3) · salidas de A2 (las nueve líneas de hash, `status --short`, run.js con las líneas de modelo-google parte B y de modelo-lectura F3: cada una «OMITIDA» o en verde) y A3 (ls-remote) tal cual · archivos declarados vs tocados en los dos repos · versión `?v=` igual · hash del commit de str-manager y de main de fabrica-servicio · tests: n/n · «mapa del área / CLAUDE.md actualizado: sí (modelo.md)» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
+
+## Lección
+(la llena Desarrollo al cerrar el lote)

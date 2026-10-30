@@ -18362,10 +18362,55 @@
    "req": "LM-79",
    "categoria": "crítico",
    "resumen": "LM-79 5.6 a: sistema de diseño común de los sitios tomado del STR (sistema.css con 26 bloques literales, ui.js, tema.js, guía), sin cambio visible; Y1–Y5; guion LM-79-sistema",
-   "estado": "instalado",
-   "observacion": "Encolado 13:14. Revisor 23/24 → 24/24 (13:08); cruce delegado 13:10 (M-1272); ok JP M-1273. Esperado juez «parcial» (a del Arquitecto). · Construido 13:18: STR bae2217 (84/84), fabrica-servicio 9c30f15 (12/12). · a cerrado por el Arquitecto 13:24 (M-1276).",
+   "estado": "aceptado",
+   "observacion": "Encolado 13:14. Revisor 23/24 → 24/24 (13:08); cruce delegado 13:10 (M-1272); ok JP M-1273. Esperado juez «parcial» (a del Arquitecto). · Construido 13:18: STR bae2217 (84/84), fabrica-servicio 9c30f15 (12/12). · a cerrado por el Arquitecto 13:24 (M-1276). · Juez 13:42: PARCIAL (c, d, g verde; a del Arquitecto). ACEPTADO.",
    "version": "p5c113",
-   "hash": "bae2217"
+   "hash": "bae2217",
+   "aceptacion": {
+    "lote": "L-181",
+    "hash": "bae2217",
+    "fecha": "2026-10-30",
+    "horaBogota": "13:42",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a. fabrica-servicio trae el sistema con sus tests en verde y los bloques del shell iguales a los del STR",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "Verificación cruzada del Arquitecto, fuera del juez; la instrucción espera este criterio en criteriosPendientes."
+     },
+     {
+      "c": "c. Los dos hosts sirven sistema.css, ui.js y tema.js con su tipo, el contenido del lote y sin caché larga",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: herramienta-fabrica.apartamentosbucaramanga.com/sitios/comun/sistema.css → 200 · text/css · Cache-Control: max-age=0, must-revalidate · contenido del lote: true | si: herramienta-fabrica.apartamentosbucaramanga.com/sitios/comun/ui.js → 200 · application/x-javascript · Cache-Control: max-age=0, must-revalidate · contenido del lote: true | si: herramienta-fabrica.apartamentosbucaramanga.com/sitios/comun/tema.js → 200 · application/x-javascript · Cache-Control: max-age=0, must-revalidate · contenido del lote: true | si: proyectos.apartamentosbucaramanga.com/sitios/comun/sistema.css → 200 · text/css · Cache-Control: max-age=0, must-revalidate · contenido del lote: true | si: proyectos.apartamentosbucaramanga.com/sitios/comun/ui.js → 200 · application/x-javascript · Cache-Control: max-age=0, must-revalidate · contenido del lote: true | si: proyectos.apartamentosbucaramanga.com/sitios/comu"
+     },
+     {
+      "c": "d. Sin cambio visible: los dos sitios entran como admin igual que antes y ninguno pide todavía el sistema",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: herramienta-fabrica.apartamentosbucaramanga.com como admin → admin: sitio en «lista» | si: herramienta-fabrica.apartamentosbucaramanga.com pide del sistema: nada | si: proyectos.apartamentosbucaramanga.com como admin → admin: sitio en «lista» | si: proyectos.apartamentosbucaramanga.com pide del sistema: nada"
+     },
+     {
+      "c": "g. str-manager solo suma el guion y la nota, y sigue en verde",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 84/84 archivos OK"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a. fabrica-servicio trae el sistema con sus tests en verde y los bloques del shell iguales a los del STR",
+      "motivo": "Lo cierra el Arquitecto por evidencia cruzada con el cierre de la CLI (A2, run.js 12/12, A3 con ls-remote); ese cierre no está entre lo que lee el juez."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null. El «parcial» es el esperado por la instrucción: solo queda a. Fase completa (lote crítico), con regresión por ruta sin casos en rojo, sin cuarentena y sin inestables. Sin letras N3 en la instrucción; n3Preparados vacío. Sin letras N4. Deuda de cobertura de la ruta: REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token). acción sin INC: semilla.ok false en pruebas.json, estado «no concluyente» (la página no pidió /api/col/inv-depositos; zonas sin respuesta; los avisos solo bloquean a L-86, L-101 y L-103), no es caso de este lote y la puerta de entrada la dio por buena."
+   }
   }
  ],
  "esquema": {
@@ -21573,9 +21618,9 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.6 a: sistema de diseño común de los sitios tomado del STR (sistema.css con bloques literales del shell y de las páginas, ui.js con los componentes, tema.js), sin cambio visible; tests Y1–Y5; guion LM-79-sistema",
-   "estado": "construido",
-   "esperaA": "juez",
-   "desde": "2026-10-30 13:18",
+   "estado": "aceptado",
+   "esperaA": null,
+   "desde": "2026-10-30 13:42",
    "estados": [
     {
      "estado": "previsto",
@@ -21592,9 +21637,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-30 13:18"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-30 13:42"
     }
    ],
-   "nota": "12:58 Borrador en claude/producto/borradores/L-181-instr-lm79-f5-6a-sistema-diseno.md con «Paridad:» y § P (tabla componente del STR → dónde queda, no aplica, diferencias). Simulación: script «Todo igual: 6 archivos.», los ocho bloques del shell iguales (comparación de A2 probada), Y1–Y5 16/16, STR 84/84, K1 2/2; vista previa de los componentes en los dos temas. No se encola antes del veredicto de L-180. Revisor previo (24 puntos) en curso. · 13:09 Revisión previa: 1.ª pasada 23/24 (punto 24: faltaba la diferencia 6, el tema que sigue al sistema; además, nombrar las entradas HTML de ui.js); corregido → 24/24 a las 13:08. Pedidos cruce y ok; se encola tras el veredicto de L-180. · 13:14:57 L-180 aceptado; cruce delegado 13:10 (respuesta a M-1272) y ok JP M-1273 en la cabecera, sin cambios de contenido después. Encolado (cola de 1); releído en LENOVO igual byte a byte. · 13:18 Construido: STR bae2217 (13:15:24–13:18:11, código 0), 84/84; fabrica-servicio 9c30f15 («Todo igual: 6 archivos.», los ocho bloques del shell iguales a 73d5aa9~1, 12/12, ls-remote = HEAD). · 13:24 a cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1276): 9c30f15 desplegado 13:16, los tres archivos servidos, el index sin cargarlos. Observación suya: la pestaña de la Fábrica se le congeló un rato con el visor de Elementos abierto (sin fallo)."
+   "nota": "12:58 Borrador en claude/producto/borradores/L-181-instr-lm79-f5-6a-sistema-diseno.md con «Paridad:» y § P (tabla componente del STR → dónde queda, no aplica, diferencias). Simulación: script «Todo igual: 6 archivos.», los ocho bloques del shell iguales (comparación de A2 probada), Y1–Y5 16/16, STR 84/84, K1 2/2; vista previa de los componentes en los dos temas. No se encola antes del veredicto de L-180. Revisor previo (24 puntos) en curso. · 13:09 Revisión previa: 1.ª pasada 23/24 (punto 24: faltaba la diferencia 6, el tema que sigue al sistema; además, nombrar las entradas HTML de ui.js); corregido → 24/24 a las 13:08. Pedidos cruce y ok; se encola tras el veredicto de L-180. · 13:14:57 L-180 aceptado; cruce delegado 13:10 (respuesta a M-1272) y ok JP M-1273 en la cabecera, sin cambios de contenido después. Encolado (cola de 1); releído en LENOVO igual byte a byte. · 13:18 Construido: STR bae2217 (13:15:24–13:18:11, código 0), 84/84; fabrica-servicio 9c30f15 («Todo igual: 6 archivos.», los ocho bloques del shell iguales a 73d5aa9~1, 12/12, ls-remote = HEAD). · 13:24 a cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1276): 9c30f15 desplegado 13:16, los tres archivos servidos, el index sin cargarlos. Observación suya: la pestaña de la Fábrica se le congeló un rato con el visor de Elementos abierto (sin fallo). · Juez 13:42: PARCIAL con c, d y g en verde y a ya cerrado por el Arquitecto (13:24). ACEPTADO. INC-215 (bloque 20–103 con «<style>») lo arregla L-182."
   },
   {
    "vista": "siguiente",

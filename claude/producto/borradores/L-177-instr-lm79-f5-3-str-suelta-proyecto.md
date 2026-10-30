@@ -1,9 +1,9 @@
 # instr — L-177 · LM-79 fase 5.3: el STR suelta el grupo Proyecto — sus ocho páginas salen del repo (ya se ven en proyectos. y herramienta-fabrica.) y en el menú queda una sola entrada, «Proyectos (fábrica) ↗», solo para el admin
 Categoría: **crítico** (toca el menú del shell, capa común del STR, y retira páginas en uso; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación, M-1144))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · AAAA-MM-DD HH:MM
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 08:37
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5, regla 7) y DA: LM-79
-Alcance: `str-app-shell.html` (grupo Proyecto con una sola entrada externa; ningún grupo arranca plegado) · borrar con `git rm` (§ 1) las ocho páginas del grupo, nueve tests que prueban su código y cinco guiones que solo las abren · ajustar `tests/menu-sh2.test.js`, `tests/roles.test.js`, `tests/tablero-al-dia.test.js` y `tests/e2e/REQ-SH-2.spec.js` · guion nuevo `tests/e2e/LM-79-str.spec.js` · docs: `CLAUDE.md`, `docs/claude/proyecto.md`, `docs/claude/shell-y-api.md`, `docs/claude/tests-y-despliegue.md`, `tests/README.md` · `?v=` igual · `schema_version` igual · sin cambios de base de datos
+Alcance: `str-app-shell.html` (grupo Proyecto con una sola entrada externa; ningún grupo arranca plegado) · borrar con `git rm` (§ 1) las ocho páginas del grupo (`str-seg-proyecto.html`, `str-marco-trabajo.html`, `str-instrucciones.html`, `str-cobit.html`, `str-elementos.html`, `str-base-conocimiento.html`, `str-nomenclatura.html`, `str-linea-base.html`), nueve tests que prueban su código (`tests/plan-trabajo.test.js`, `tests/tablero.test.js`, `tests/tablero-metrica.test.js`, `tests/tablero-items.test.js`, `tests/diseno.test.js`, `tests/nomenclatura.test.js`, `tests/nomenclatura-ancho.test.js`, `tests/base-conocimiento-diagrama.test.js`, `tests/linea-base-pagina.test.js`) y cinco guiones que solo las abren (`tests/e2e/L-151.spec.js`, `tests/e2e/REQ-TB-3.spec.js`, `tests/e2e/REQ-TB-4.spec.js`, `tests/e2e/REQ-TB-5.spec.js`, `tests/e2e/LM-82.spec.js`) · ajustar `tests/menu-sh2.test.js`, `tests/roles.test.js`, `tests/tablero-al-dia.test.js` y `tests/e2e/REQ-SH-2.spec.js` · guion nuevo `tests/e2e/LM-79-str.spec.js` · docs: `CLAUDE.md`, `docs/claude/proyecto.md`, `docs/claude/shell-y-api.md`, `docs/claude/tests-y-despliegue.md`, `tests/README.md` · `?v=` igual · `schema_version` igual · sin cambios de base de datos
 Versión: `?v=` igual (p5c113) · `schema_version` igual (14)
 Origen: M-1227 (Arquitecto: arranque de 5.3, regla 7 del contrato), M-1229 y M-1228 (Jefe de proyecto: tabla de reemplazos, nadie pierde otra entrada, limpieza manual de Carlos fuera de la cola), M-1230 (diseño de la entrada y los tres sitios que publican el STR); `claude/marco/plan-sitios-fase5-contrato.md` (regla 7). Requerimiento: `interno/lotes-modelo/LM-79.md` (fase 5)
 Impacto: el admin deja de ver en el STR las ocho páginas del grupo Proyecto y ve en su lugar «Proyectos (fábrica) ↗», que abre https://proyectos.apartamentosbucaramanga.com/ en pestaña nueva (tabla de § 0: dónde quedó cada página). El operador y el colaborador no ven nada distinto (nunca vieron el grupo). Un favorito guardado de una página retirada queda atenuado con «✕ quitar» (el shell ya lo hace). Después del lote, Carlos borra a mano las ocho páginas en los tres sitios (paso de Carlos, abajo).
@@ -11,6 +11,7 @@ Reglas transversales que toca: RT-14 (el menú solo oculta; la entrada nueva lle
 Mapa: módulos y relaciones que cambia: retira el módulo «Grupo Proyecto (interno)» (PRJ: sus ocho páginas) y la relación «lectura de str-manager-docs desde el grupo Proyecto» (queda la de Lo que viene); SH cambia (grupo Proyecto con una entrada externa). Salen los 5 guiones y los 9 tests del Alcance; el Arquitecto retira el módulo y ajusta `cubre` al aceptarse (CU-PRJ → CU-MOD-3.1/3.2 en proyectos.; línea base → visor; M-1230)
 Casos de uso: CU-KN-6.1, CU-OP-4.1, CU-PRJ-1.1, CU-PRJ-2.1, CU-PRJ-2.2, CU-PRJ-2.3, CU-PRJ-3.1, CU-PRJ-3.5, CU-PRJ-3.6, CU-PRJ-9.1, CU-PRJ-10.1, CU-SH-1.1, CU-SH-1.2, CU-SH-3.1, CU-SH-3.2, CU-SH-3.3, CU-SH-5.2, CU-SH-6.1, CU-SH-7.1, CU-SH-8.1, CU-U-2.5
 Riesgo: medio (R-1 del lote; R-12: SH, el shell, tiene riesgo 6). Puede salir mal: (1) que algún enlace del STR apunte a una página retirada: ninguna referencia en html, js, php ni .htaccess fuera de las propias páginas (solo comentarios en `str-lo-que-viene.html`, que no cambian); (2) que un contador del menú quede viejo (INC-209): se cambian en el mismo lote `menu-sh2.test.js`, `roles.test.js` (19 → 12 ítems con `data-roles`, 10 que abren algo) y `REQ-SH-2.spec.js` (18 → 11 entradas del admin), y `node tests/run.js` debe dar 84/84; (3) que el hosting siga sirviendo las páginas (Git no borra): paso de Carlos y caso d. Si el modo automático bloquea el `git rm`, no se rodea (§ 0, plan B). Conexiones a MySQL: ninguna nueva.
+Tamaño: 9 archivos de código (el shell y las 8 páginas borradas), ≈ 4 360 líneas, casi todo páginas enteras que se borran; un solo objetivo (el retiro del grupo); cabe en una sesión.
 ¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (lote del modelo LM-79, DA: LM-79 y cruce delegado)
 Reversión: un solo `git revert <hash>` (vuelven las ocho páginas, sus tests y guiones, y el grupo con sus ocho entradas); las páginas reaparecen en los sitios con el despliegue normal.
 Depende de: L-174, L-175 y L-176 aceptados (5.2c cerrada: las ocho páginas tienen reemplazo) · Precondiciones para verificar: perfiles zz-verif-admin, zz-verif-oper y zz-verif-colab; para d, el paso de Carlos hecho en los tres sitios
@@ -31,7 +32,7 @@ Dónde quedó cada página del grupo Proyecto (las ve un administrador de la fá
 | Línea base | proyectos. › Línea base › «Abrir la línea base» |
 
 - Orden: § 1 (borrar), § 2 (pares), § 3 (guion nuevo), `node tests/run.js` y § 4 (commit). Si algo no cuadra, para sin commit.
-- Si el modo automático bloquea el `git rm` de § 1: no lo rodees (ni `rm`, ni mover, ni vaciar), deja str-manager sin cambios (`git restore --staged .` y `git restore .`) y di «No hecho: borrado bloqueado». Plan B: Carlos corre § 1 a mano y el lote se repite desde § 2.
+- Si el modo automático bloquea el `git rm` de § 1: no lo rodees (ni `rm`, ni mover, ni vaciar), deja str-manager sin cambios con `git restore --staged str-seg-proyecto.html str-marco-trabajo.html str-instrucciones.html str-cobit.html str-elementos.html str-base-conocimiento.html str-nomenclatura.html str-linea-base.html tests/plan-trabajo.test.js tests/tablero.test.js tests/tablero-metrica.test.js tests/tablero-items.test.js tests/diseno.test.js tests/nomenclatura.test.js tests/nomenclatura-ancho.test.js tests/base-conocimiento-diagrama.test.js tests/linea-base-pagina.test.js tests/e2e/L-151.spec.js tests/e2e/REQ-TB-3.spec.js tests/e2e/REQ-TB-4.spec.js tests/e2e/REQ-TB-5.spec.js tests/e2e/LM-82.spec.js` y luego `git restore str-seg-proyecto.html str-marco-trabajo.html str-instrucciones.html str-cobit.html str-elementos.html str-base-conocimiento.html str-nomenclatura.html str-linea-base.html tests/plan-trabajo.test.js tests/tablero.test.js tests/tablero-metrica.test.js tests/tablero-items.test.js tests/diseno.test.js tests/nomenclatura.test.js tests/nomenclatura-ancho.test.js tests/base-conocimiento-diagrama.test.js tests/linea-base-pagina.test.js tests/e2e/L-151.spec.js tests/e2e/REQ-TB-3.spec.js tests/e2e/REQ-TB-4.spec.js tests/e2e/REQ-TB-5.spec.js tests/e2e/LM-82.spec.js` (archivos nombrados uno a uno: el hook no deja `git restore .`) y di «No hecho: borrado bloqueado». Plan B: Carlos corre § 1 a mano y el lote se repite desde § 2.
 - No abras `api/config/database.php`, `credenciales.php`, `firebase.php` ni ningún `secrets.php`. No toques la carpeta de los hooks ni el cliente común de la API (su bloque `STRApi.docs` lo sigue usando Lo que viene).
 - La entrada nueva no lleva `data-fav-url` (si lo llevara, el favorito la abriría en un iframe); su favorito reutiliza su propio clic.
 
@@ -44,7 +45,7 @@ git status --short | grep -c '^D '      # 22
 ```
 
 ## 2. Cambios en los archivos que se quedan
-Aplica cada par tal cual (cada «Busca» aparece una sola vez en su archivo). Son 37 pares más **D1**, que reemplaza un archivo entero.
+Aplica cada par tal cual (cada «Busca» aparece una sola vez en su archivo). Son 39 pares más **D1**, que reemplaza un archivo entero.
 
 **D1 · `docs/claude/proyecto.md`** (reemplázalo entero: queda el mapa de Conocimiento y Lo que viene, con la nota del retiro). Contenido completo:
 ```md
@@ -137,23 +138,41 @@ Pon:
 
 **P7 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
 ```md
-`api/col` del PHP real y exige que sean iguales. `diseno.test.js` (instr-57) extrae `[DIS-inicio]…[DIS-fin]` REAL de `str-seg-proyecto.html`
+`api/col` del PHP real y exige que sean iguales. `diseno.test.js` (instr-57) extrae `[DIS-inicio]…[DIS-fin]` REAL de `str-seg-proyecto.html` (`_disClasificar`, con arreglos vacíos y una prioridad fuera de `reqs[]`). `tablero.test.js` (REQ-TB1) extrae `[TB1-inicio]…[TB1-fin]`
 ```
 Pon:
 ```md
-`api/col` del PHP real y exige que sean iguales. (retirado en L-177) `diseno.test.js` (instr-57) extraía `[DIS-inicio]…[DIS-fin]` REAL de `str-seg-proyecto.html`
+`api/col` del PHP real y exige que sean iguales. (retirado en L-177) `diseno.test.js` (instr-57) extraía `[DIS-inicio]…[DIS-fin]` REAL de `str-seg-proyecto.html` (`_disClasificar`, con arreglos vacíos y una prioridad fuera de `reqs[]`). (retirado en L-177) `tablero.test.js` (REQ-TB1) extrae `[TB1-inicio]…[TB1-fin]`
 ```
 
 **P8 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
 ```md
-hora de Bogotá con cambio de día/año) y lee las 6 páginas del grupo Proyecto (sin `raw/main` a mano, llaman a `STRApi.docs.commit`,
+REQ-INV2-4a: en definición, DA-30, lo tiene Carlos). `tablero-items.test.js` (REQ-TB-4, L-82)
 ```
 Pon:
 ```md
-hora de Bogotá con cambio de día/año) y lee `str-lo-que-viene.html` (desde L-177; antes las 6 páginas del grupo Proyecto) (sin `raw/main` a mano, llaman a `STRApi.docs.commit`,
+REQ-INV2-4a: en definición, DA-30, lo tiene Carlos). (retirado en L-177) `tablero-items.test.js` (REQ-TB-4, L-82)
 ```
 
 **P9 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
+```md
+hora de Bogotá con cambio de día/año) y lee las 6 páginas del grupo Proyecto (sin `raw/main` a mano, llaman a `STRApi.docs.commit`, `data-docs-encabezado`/`data-docs-actualizar`, sin token); su guion N2 es `tests/e2e/REQ-TB-3.spec.js` (L-136: el caso g espera `networkidle` antes de contar consultas a la API). `tablero-metrica.test.js` (REQ-TB-5 + INC-118,
+```
+Pon:
+```md
+hora de Bogotá con cambio de día/año) y lee `str-lo-que-viene.html` (desde L-177; antes las 6 páginas del grupo Proyecto) (sin `raw/main` a mano, llaman a `STRApi.docs.commit`, `data-docs-encabezado`/`data-docs-actualizar`, sin token); su guion N2 es `tests/e2e/REQ-TB-3.spec.js` (L-136: el caso g espera `networkidle` antes de contar consultas a la API). (retirado en L-177) `tablero-metrica.test.js` (REQ-TB-5 + INC-118,
+```
+
+**P10 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
+```md
+guion N2 es `tests/e2e/REQ-TB-5.spec.js`. `nomenclatura-ancho.test.js` (REQ-SP-3 criterio 7, L-94) lee el CSS REAL de `str-nomenclatura.html` (mismo método que `inventario-ancho.test.js`): ningún width/min-width fijo > 360 px, toda `<table>` dentro de un contenedor con `overflow-x: auto` y ningún p/li/td/th con `nowrap`. `base-conocimiento-diagrama.test.js` (REQ-BC1) extrae `[BC1-inicio]…[BC1-fin]` REAL de `str-base-conocimiento.html` (franjas 6/4/1/5 del mapa de hoy, +1 nodo/+1 flujo, flujo roto omitido, flujos de chat-desarrollo y que ninguna flecha cruce un recuadro). `nomenclatura.test.js` (REQ-SP-3) exige
+```
+Pon:
+```md
+guion N2 es `tests/e2e/REQ-TB-5.spec.js`. (retirado en L-177) `nomenclatura-ancho.test.js` (REQ-SP-3 criterio 7, L-94) lee el CSS REAL de `str-nomenclatura.html` (mismo método que `inventario-ancho.test.js`): ningún width/min-width fijo > 360 px, toda `<table>` dentro de un contenedor con `overflow-x: auto` y ningún p/li/td/th con `nowrap`. (retirado en L-177) `base-conocimiento-diagrama.test.js` (REQ-BC1) extrae `[BC1-inicio]…[BC1-fin]` REAL de `str-base-conocimiento.html` (franjas 6/4/1/5 del mapa de hoy, +1 nodo/+1 flujo, flujo roto omitido, flujos de chat-desarrollo y que ninguna flecha cruce un recuadro). (retirado en L-177) `nomenclatura.test.js` (REQ-SP-3) exige
+```
+
+**P11 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
 ```md
 sus `data-roles` reales (admin ve Proyecto; operador ni Proyecto ni Dashboard; sin
 ```
@@ -162,7 +181,7 @@ Pon:
 sus `data-roles` reales (admin ve Proyecto, con su entrada externa desde L-177; operador ni Proyecto ni Dashboard; sin
 ```
 
-**P10 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
+**P12 · tests y guiones retirados** (`docs/claude/tests-y-despliegue.md`). Busca:
 ```md
 `thcure/fabrica-servicio` en L-170).
 - **`tests/linea-base-pagina.test.js`** (LM-82, L-165): texto real de `str-linea-base.html` (guarda de admin, encabezado y ⟳ Actualizar con `STRApi.docs`, explorador del mismo commit, iframe con `sandbox="allow-scripts allow-popups"` sin `allow-same-origin`, `srcdoc` por `_lbSrcdoc` en un vm, `str-api.js?v=` vigente, no escribe) y la entrada «Línea base» del grupo Proyecto en `str-app-shell.html` (octava, solo admin). `menu-sh2.test.js`, `roles.test.js` y el guion `REQ-SH-2.spec.js` cuentan ocho páginas en Proyecto (19 ítems con `data-roles`).
@@ -171,11 +190,11 @@ sus `data-roles` reales (admin ve Proyecto, con su entrada externa desde L-177; 
 Pon:
 ```md
 `thcure/fabrica-servicio` en L-170).
-- **LM-79 fase 5.3 (L-177):** salieron con las páginas del grupo Proyecto `linea-base-pagina`, `nomenclatura`, `nomenclatura-ancho`, `base-conocimiento-diagrama`, `diseno`, `tablero`, `tablero-items`, `tablero-metrica` y `plan-trabajo` (84 archivos de tests) y los guiones `L-151`, `REQ-TB-3`, `REQ-TB-4`, `REQ-TB-5` y `LM-82` (55 guiones). `menu-sh2.test.js`, `roles.test.js` y el guion `REQ-SH-2.spec.js` cuentan una sola entrada en Proyecto, la externa a proyectos. (12 ítems con `data-roles`, 11 entradas del admin); `tablero-al-dia.test.js` lee `str-lo-que-viene.html`.
+- **LM-79 fase 5.3 (L-177):** salieron con las páginas del grupo Proyecto `linea-base-pagina`, `nomenclatura`, `nomenclatura-ancho`, `base-conocimiento-diagrama`, `diseno`, `tablero`, `tablero-items`, `tablero-metrica` y `plan-trabajo` (84 archivos de tests) y los guiones `L-151`, `REQ-TB-3`, `REQ-TB-4`, `REQ-TB-5` y `LM-82` (56 guiones con `LM-79-str`). `menu-sh2.test.js`, `roles.test.js` y el guion `REQ-SH-2.spec.js` cuentan una sola entrada en Proyecto, la externa a proyectos. (12 ítems con `data-roles`, 11 entradas del admin); `tablero-al-dia.test.js` lee `str-lo-que-viene.html`.
 - **`tests/col-log-errores.test.js`** (DT-36,
 ```
 
-**P11 · el grupo Proyecto con una sola entrada** (`str-app-shell.html`). Busca:
+**P13 · el grupo Proyecto con una sola entrada** (`str-app-shell.html`). Busca:
 ```html
 </div>
 
@@ -191,7 +210,7 @@ Pon:
     <div class="nav-group" id="nav-group-proyecto"
 ```
 
-**P12 · el grupo Proyecto con una sola entrada** (`str-app-shell.html`). Busca:
+**P14 · el grupo Proyecto con una sola entrada** (`str-app-shell.html`). Busca:
 ```html
       <div class="nav-item type-active" data-fav-url="str-seg-proyecto.html" data-roles="admin" onclick="openModule(this,'seg-proyecto','str-seg-proyecto.html')"><div class="ni-icon">📋</div><div class="ni-label">Seg. Proyecto</div></div>
         <div class="nav-item type-active" data-fav-url="str-marco-trabajo.html" data-roles="admin" onclick="openModule(this,'marco-trabajo','str-marco-trabajo.html')"><div class="ni-icon">🧩</div><div class="ni-label">Marco de Trabajo</div></div>
@@ -213,7 +232,7 @@ Pon:
   </nav>
 ```
 
-**P13 · el grupo Proyecto con una sola entrada** (`str-app-shell.html`). Busca:
+**P15 · el grupo Proyecto con una sola entrada** (`str-app-shell.html`). Busca:
 ```html
 Init: Favoritos y estrellas (_favRepintar); REQ-SH-2: solo Proyecto arranca plegado (los demás grupos, abiertos)
 document.addEventListener('DOMContentLoaded', function() {
@@ -238,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Sesión del
 ```
 
-**P14 · entrada de nomenclatura.test.js** (`tests/README.md`). Busca:
+**P16 · entrada de nomenclatura.test.js** (`tests/README.md`). Busca:
 ```md
 prueba: Node no trae XSalsa20. REQ-K3 · K3a.
 - `nomenclatura.test.js` — `str-nomenclatura.html` (REQ-SP-3): sin el bloque `[STR-inicio]…[STR-fin]` ni el `data-acceso`, el archivo es la fuente de `str-manager-docs` byte a byte (huella SHA-256); 7 `<h2>`, 7 `<section>`, 41 `<tr>`; acceso solo admin sin otra llamada a la API; entrada del menú con `data-roles="admin"` y enlace en Seg. Proyecto. Si la fuente cambia, se vuelve a traer y se actualizan las huellas.
@@ -250,7 +269,7 @@ prueba: Node no trae XSalsa20. REQ-K3 · K3a.
 - `inv-traslado-403.test.js` — REQ-INV2-3a
 ```
 
-**P15 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P17 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 que viene (admin)
 // · Proyecto (admin, plegado al final). Sin Dashboard ni maquetas; desde OP-1b
@@ -261,7 +280,7 @@ que viene (admin)
 // · Proyecto (admin, al final; desde L-177 una sola entrada que abre proyectos. en pestaña nueva). Sin Dashboard ni maquetas; desde OP-1b
 ```
 
-**P16 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P18 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 base» (LM-82, L-165) el menú del admin tiene 18 entradas (4 + 5 + 1 + 8).
 const base = (h) => h.BASE || new URL(h.page.url()).origin;
@@ -274,7 +293,7 @@ const EXTERNA = 'https://proyectos.apartamentosbucaramanga.com/';
 const base = (h) => h.BASE || new URL(h.page.url()).origin;
 ```
 
-**P17 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P19 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 viene', ['Lo que viene']],
   ['Proyecto', ['Seg. Proyecto', 'Marco de Trabajo', 'Instrucciones', 'Cobit', 'Elementos', 'Base de conocimiento', 'Nomenclatura', 'Línea base']],
@@ -289,7 +308,7 @@ viene', ['Lo que viene']],
 const OPER = ['Tablero', 'Calendario',
 ```
 
-**P18 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P20 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 'str-usuarios.html', 'str-lo-que-viene.html', 'str-seg-proyecto.html', 'str-marco-trabajo.html', 'str-instrucciones.html', 'str-cobit.html',
   'str-elementos.html', 'str-base-conocimiento.html', 'str-nomenclatura.html', 'str-linea-base.html'];
@@ -301,7 +320,7 @@ Pon:
 const PANELES = ['workflows', 'config',
 ```
 
-**P19 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P21 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 n.getAttribute('data-inicio'),
             accion: /^(openModule|nav|navSub)\(this/.test(oc) };
@@ -319,7 +338,7 @@ n.getAttribute('data-inicio'),
     });
 ```
 
-**P20 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P22 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 /type-(soon|dash|bottom)/.test(i.clase) || (i.url ? !PAGINAS.includes(i.url) : !PANELES.includes(i.panel)));
         h.espera(todos.length === 18 && !raros.length, 'entradas: ' + todos.length
@@ -330,7 +349,7 @@ Pon:
         h.espera(todos.length === 11 && !raros.length, 'entradas: ' + todos.length
 ```
 
-**P21 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P23 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 '/str-app-shell.html',
       que: 'Criterio 6: Proyecto va al final, cerrado al entrar, solo admin; sus 8 páginas abren igual (LM-82: + Línea base)',
@@ -348,7 +367,7 @@ Pon:
       
 ```
 
-**P22 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P24 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 = gs[gs.length - 1] || {};
         const otrosPleg = gs.filter((g) => g.id !== 'nav-group-proyecto' && g.plegado).map((g) => g.label);
@@ -376,7 +395,7 @@ Pon:
       c: 'g', perfil:
 ```
 
-**P23 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P25 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 operador que abre a mano «Lo que viene» o Seg. Proyecto vuelve al STR sin ver nada',
       async prueba(h) {
@@ -389,7 +408,7 @@ operador que abre a mano «Lo que viene» vuelve al STR sin ver nada (Seg. Proye
         const
 ```
 
-**P24 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
+**P26 · guion del menú** (`tests/e2e/REQ-SH-2.spec.js`). Busca:
 ```js
 for (const pg of ['str-lo-que-viene.html', 'str-seg-proyecto.html']) {
           await p.goto(base(h) + '/'
@@ -400,7 +419,7 @@ for (const pg of ['str-lo-que-viene.html']) {
           await p.goto(base(h) + '/'
 ```
 
-**P25 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P27 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 str-app-shell.html REAL y str-lo-que-viene.html). LM-82 (L-165): Proyecto con ocho páginas (+ Línea base).
 // 1) Grupos y entradas en orden, sin
@@ -412,7 +431,7 @@ str-app-shell.html REAL y str-lo-que-viene.html). LM-79 fase 5.3 (L-177): Proyec
 // 1) Grupos y entradas en orden, sin
 ```
 
-**P26 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P28 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
    una página real que existe en el repo.
 // 2) Quién ve qué (bloque [ROL-inicio]…[ROL-fin]
@@ -423,7 +442,7 @@ Pon:
 // 2) Quién ve qué (bloque [ROL-inicio]…[ROL-fin]
 ```
 
-**P27 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P29 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 viene', ['Lo que viene']],
   ['Proyecto', ['Seg. Proyecto', 'Marco de Trabajo', 'Instrucciones', 'Cobit', 'Elementos', 'Base de conocimiento', 'Nomenclatura', 'Línea base']],
@@ -438,7 +457,7 @@ viene', ['Lo que viene']],
 const real = grupos.map((g) => [g.label,
 ```
 
-**P28 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P30 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 ((i.attrs.match(/openModule\(this,\s*'[^']*',\s*'([^']+)'\)/) || [])[1]) || ('panel:' + ((i.attrs.match(/data-panel="([^"]+)"/)
 ```
@@ -447,7 +466,7 @@ Pon:
 ((i.attrs.match(/openModule\(this,\s*'[^']*',\s*'([^']+)'\)/) || [])[1]) || ((i.attrs.match(/data-externo="([^"]+)"/) || [])[1]) || ('panel:' + ((i.attrs.match(/data-panel="([^"]+)"/)
 ```
 
-**P29 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P31 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 'str-usuarios.html', 'str-lo-que-viene.html', 'str-seg-proyecto.html', 'str-marco-trabajo.html', 'str-instrucciones.html',
   'str-cobit.html', 'str-elementos.html', 'str-base-conocimiento.html', 'str-nomenclatura.html', 'str-linea-base.html'];
@@ -460,7 +479,7 @@ const EXTERNAS = ['https://proyectos.apartamentosbucaramanga.com/']; // L-177: l
 const PANELES_REALES = ['workflows', 'config'];
 ```
 
-**P30 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P32 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 fuera) {
   const d = destino(i);
@@ -478,7 +497,7 @@ fuera) {
   check('entrada «' + i.label + '» abre
 ```
 
-**P31 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P33 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 grupos[grupos.length - 1].label === 'Proyecto');
 check('Lo que viene: grupo solo admin y su
@@ -493,7 +512,7 @@ check('L-177: ninguna de las ocho páginas del grupo Proyecto sigue en el repo n
 check('Lo que viene: grupo solo admin y su
 ```
 
-**P32 · test del menú** (`tests/menu-sh2.test.js`). Busca:
+**P34 · test del menú** (`tests/menu-sh2.test.js`). Busca:
 ```js
 _favRepintar\(\);[\s\S]*?\n\}\);/) || [''])[0];
 check('al cargar: solo Proyecto arranca plegado (cerrado por defecto)', init.includes("document.querySelectorAll('#nav-group-proyecto > .nav-group-hdr')") && !init.includes(".nav-group-hdr:not(.fav-hdr)"), init.slice(0, 200));
@@ -508,7 +527,7 @@ check('al cargar: ningún grupo arranca plegado (L-177: Proyecto es una sola ent
 // ── 2. Quién ve
 ```
 
-**P33 · test de roles** (`tests/roles.test.js`). Busca:
+**P35 · test de roles** (`tests/roles.test.js`). Busca:
 ```js
 i.id === id) || {}).roles;
 check('shell: 19 ítems con data-roles (REQ-SH-2 + Tablero de REQ-OP-1 + Línea base de LM-82)', items.length === 19, items.length);
@@ -521,7 +540,7 @@ check('shell: 12 ítems con data-roles (REQ-SH-2 + Tablero de REQ-OP-1; L-177: e
 check('shell: sin superadmin/limpieza/porteria/mantenimiento
 ```
 
-**P34 · test de roles** (`tests/roles.test.js`). Busca:
+**P36 · test de roles** (`tests/roles.test.js`). Busca:
 ```js
 const proyecto = ['nav-group-proyecto', 'str-seg-proyecto.html', 'str-marco-trabajo.html', 'str-instrucciones.html', 'str-cobit.html', 'str-elementos.html', 'str-base-conocimiento.html', 'str-nomenclatura.html', 'str-linea-base.html'];
 check('admin ve el grupo Proyecto y sus ocho páginas', proyecto.every(id => roles(id) && ve(roles(id),
@@ -532,7 +551,7 @@ const proyecto = ['nav-group-proyecto', 'nav-proyectos-fabrica'];
 check('admin ve el grupo Proyecto y su entrada a proyectos. (L-177)', proyecto.every(id => roles(id) && ve(roles(id),
 ```
 
-**P35 · test de roles** (`tests/roles.test.js`). Busca:
+**P37 · test de roles** (`tests/roles.test.js`). Busca:
 ```js
 data-roles (salvo config)', abren.length > 15 && sinRoles.length === 0, sinRoles);
 check('INC-109: los type-soon no tienen
@@ -544,7 +563,7 @@ check('L-177: la entrada externa de Proyecto también lleva data-roles="admin"',
 check('INC-109: los type-soon no tienen
 ```
 
-**P36 · test de STRApi.docs** (`tests/tablero-al-dia.test.js`). Busca:
+**P38 · test de STRApi.docs** (`tests/tablero-al-dia.test.js`). Busca:
 ```js
 // REQ-TB-3 (L-83) — las páginas del grupo Proyecto leen los JSON del último commit de str-manager-docs.
 // Se extrae el bloque REAL [TB3-inicio]…[TB3-fin] de str-api.js a un vm (sin red) y se leen los 6 HTML.
@@ -557,7 +576,7 @@ Pon:
 const { leerTexto } = require('./lib/leer-texto.js');
 ```
 
-**P37 · test de STRApi.docs** (`tests/tablero-al-dia.test.js`). Busca:
+**P39 · test de STRApi.docs** (`tests/tablero-al-dia.test.js`). Busca:
 ```js
 /token|Authorization/i.test(bloque), false);
 
@@ -591,7 +610,11 @@ Copia el bloque de *Guion N2* a `tests/e2e/LM-79-str.spec.js` sin cambiar nada; 
 - A declarar (algún guion pasa por sus módulos, ningún caso lo dice en `cubre`): REL-19
 ```
 
-Deuda de cobertura de la ruta (no la ejerce este lote): la que nombre la ruta y no pase por el menú; el retiro del módulo del grupo Proyecto y de sus casos de uso lo hace el Arquitecto en el mapa al aceptarse (M-1230).
+Deuda de cobertura de la ruta (no la ejerce este lote; la ruta se calculó sobre el STR de antes, por eso aún lista LM-82 y REQ-TB-3/4/5, que salen con el lote):
+- REL-37 (API→SH), REL-38 (API→PRJ) y REL-99 (SRV→SH): el lote no toca el cliente de la API ni el servidor.
+- RT-10 (evidencia de incidentes), RT-11 (fotos de tarea) y RT-25 (sobre de capacidad): un cambio de menú no las ejerce.
+- REL-19 (K3→INC1, a declarar): el lote no pasa por el aviso de corte ni por incidentes.
+- El retiro del módulo del grupo Proyecto y de sus casos de uso lo hace el Arquitecto en el mapa al aceptarse (M-1230).
 
 ## Pruebas derivadas (juez; verificador crítico)
 ```
@@ -600,7 +623,7 @@ Deuda de cobertura de la ruta (no la ejerce este lote): la que nombre la ruta y 
 - c. El colaborador sigue en su portal y no ve la entrada (RT-14) · nivel: N2 · perfil: zz-verif-colab · página: /portal.html · precondición: commit desplegado · tec: decisión · espera: caso c del guion en verde · **Revertir**
 - d. Tras la limpieza manual de Carlos, las ocho rutas viejas dan 404 en app., pruebas. y fabrica. (o fabrica. ya no resuelve) · nivel: N2 · perfil: zz-verif-admin · página: /str-app-shell.html · precondición: el paso de Carlos hecho en los tres sitios · tec: decisión · espera: caso d del guion en verde; si sigue en 200 en algún sitio, es que falta la limpieza: Detener y avisar, no Revertir (el lote no se acepta hasta que d pase) · **Detener**
 - e. Humo del shell: el admin entra y el STR abre en el Tablero · nivel: N2 · perfil: zz-verif-admin · página: /str-app-shell.html · precondición: commit desplegado · tec: escenario · espera: caso e del guion en verde · **Revertir**
-- f. str-manager queda en verde con los contadores al día · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: escenario · espera: `node tests/run.js` 84/84 (menu-sh2, roles y tablero-al-dia con lo nuevo); `aplicar.js` K1 en verde (D1 y P1–P37); la cola compara el guion; los 22 archivos borrados no están en el commit · **Detener**
+- f. str-manager queda en verde con los contadores al día · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: escenario · espera: `node tests/run.js` 84/84 (menu-sh2, roles y tablero-al-dia con lo nuevo); `aplicar.js` K1 en verde (D1 y P1–P39); la cola compara el guion; los 22 archivos borrados no están en el commit · **Detener**
 - Datos de prueba: ninguno (solo lectura)
 - Regresión: la del menú (REQ-SH-2 ajustado en § 2) y la de la ruta. Si a–c y e fallan todos a la vez justo después del push, puede faltar el despliegue: Detener y avisar, no Revertir.
 ```
@@ -616,7 +639,7 @@ const VIEJAS = ['str-seg-proyecto.html', 'str-marco-trabajo.html', 'str-instrucc
   'str-base-conocimiento.html', 'str-nomenclatura.html', 'str-linea-base.html'];
 // Los tres sitios que publican el STR (M-1230): fabrica. lo sirve entero hasta la fase 6; si Carlos lo retira antes, «no resuelve» vale
 const SITIOS = ['https://app.apartamentosbucaramanga.com', 'https://pruebas.apartamentosbucaramanga.com', 'https://fabrica.apartamentosbucaramanga.com'];
-const PUEDE_NO_RESOLVER = ['https://fabrica.apartamentosbucaramanga.com'];
+const PUEDE_NO_RESOLVER = ['https://fabrica.apartamentosbucaramanga.com']; // si se retira: DNS, certificado o conexión (la fase 6 lo quita de SITIOS)
 // Entradas de cada rol después del lote (antes: admin 18 = estas 10 + las 8 de Proyecto; operador 9, sin cambio)
 const ADMIN = ['Tablero', 'Calendario', 'Limpieza & HK', 'Inventario', 'Propiedades', 'Flujos de trabajo', 'Guías', 'Equipo y permisos', 'Configuración',
   'Lo que viene', 'Proyectos (fábrica) ↗'];
@@ -681,7 +704,7 @@ module.exports = {
       que: 'El colaborador sigue en su portal: si abre el shell vuelve al portal y no ve la entrada',
       async prueba(h) {
         const p = h.page;
-        await p.goto(new URL(p.url()).origin + '/str-app-shell.html', { waitUntil: 'load' }).catch(() => null);
+        await p.goto((h.BASE || new URL(p.url()).origin) + '/str-app-shell.html', { waitUntil: 'load' }).catch(() => null);
         const t0 = Date.now(); while (Date.now() - t0 < 10000 && !/\/portal\.html/.test(p.url())) await p.waitForTimeout(300);
         const vis = await p.locator('#nav-proyectos-fabrica').isVisible().catch(() => false);
         h.espera(/\/portal\.html/.test(p.url()) && !vis, 'colaborador → ' + p.url().replace(/^https:\/\/[^/]+/, '') + ' · entrada visible: ' + vis);
@@ -695,7 +718,7 @@ module.exports = {
           for (const r of VIEJAS) {
             let error = '';
             const x = await h.page.request.get(sitio + '/' + r, { maxRedirects: 0 }).catch((e) => { error = String(e && e.message || e).slice(0, 80); return null; });
-            const retirado = !x && PUEDE_NO_RESOLVER.includes(sitio) && /ENOTFOUND|getaddrinfo|ERR_NAME_NOT_RESOLVED/i.test(error);
+            const retirado = !x && PUEDE_NO_RESOLVER.includes(sitio) && /ENOTFOUND|getaddrinfo|ERR_NAME_NOT_RESOLVED|CERT|certificate|SSL|TLS|ECONNREFUSED|ECONNRESET/i.test(error);
             h.espera((!!x && x.status() === 404) || retirado, sitio.replace('https://', '') + '/' + r + ' → ' + (x ? x.status() : (retirado ? 'host retirado' : 'sin respuesta: ' + error)));
           }
         }
@@ -719,7 +742,7 @@ module.exports = {
 ## Paso de Carlos (fuera de la cola, después del commit desplegado)
 Git de Hostinger no borra en el servidor lo que el commit borra (INC-210). En **cada uno de los tres sitios** que publican el STR — `app.apartamentosbucaramanga.com`, `pruebas.apartamentosbucaramanga.com` y `fabrica.apartamentosbucaramanga.com` — abre hPanel › Administrador de archivos › `public_html` y borra estas ocho páginas (nada más):
 `str-seg-proyecto.html`, `str-marco-trabajo.html`, `str-instrucciones.html`, `str-cobit.html`, `str-elementos.html`, `str-base-conocimiento.html`, `str-nomenclatura.html`, `str-linea-base.html`.
-Comprobación: abre `https://app.apartamentosbucaramanga.com/str-seg-proyecto.html` (y lo mismo en los otros dos sitios): debe decir «404». Los tests y guiones retirados que queden en `public_html/tests/` no hacen daño (no tienen datos); bórralos solo si quieres. Avisa a Desarrollo al terminar: el caso d se corre después.
+Comprobación: abre `https://app.apartamentosbucaramanga.com/str-seg-proyecto.html` (y lo mismo en los otros dos sitios): debe decir «404». Los tests y guiones retirados que queden en `public_html/tests/` no hacen daño (no tienen datos); bórralos solo si quieres. Avisa a Desarrollo al terminar: el caso d sale rojo en la primera corrida (antes de la limpieza, como está previsto, Detener) y Desarrollo pide la reprueba (`reprobar\\L-177.txt`, como en INC-210).
 
 ## 4. El commit de este lote (str-manager)
 Mensaje con lo de siempre (categoría, Hecho / No hecho por paso, declarados vs tocados —los 22 borrados, los 9 cambiados, `docs/claude/proyecto.md` reemplazado y el guion nuevo—) y la línea de trazabilidad en un `-m` propio, el último, con el Co-Authored-By en la línea siguiente (hook v5):

@@ -1,7 +1,7 @@
 # instr — L-180 · LM-79 fase 5.5 B (paridad de páginas, orden de Carlos 30-oct): Elementos y Base de conocimiento del STR se ven iguales en herramienta-fabrica. › Conocimiento, dentro del visor aislado, y ahí también la nomenclatura
 Categoría: **crítico** (trae a un sitio de la fábrica código de páginas del STR que corre dentro del visor; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 12:27
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 12:27 · ok Jefe de proyecto M-1266
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5, regla 8 «paridad de páginas» con su criterio) y DA: LM-79; orden de Carlos del 30-oct 11:08 (M-1250; excepción M-1251, tanda T-6)
 Alcance: en str-manager, `tests/e2e/LM-79-paridad-b.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l180 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: dos páginas nuevas del STR en sitios/fabrica/str/ (elementos y base de conocimiento, texto literal de str-manager 73d5aa9~1, comprobado por hash contra ese commit), sitios/fabrica/fabrica.js, tests/sitios-str.test.js y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)

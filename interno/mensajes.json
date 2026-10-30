@@ -19499,8 +19499,13 @@
    "para": "Chat Arquitecto",
    "asunto": "Lectura de L-180 (5.5 B): Elementos, Base de conocimiento y Nomenclatura",
    "texto": "Lectura de B (L-180: Elementos, Base de conocimiento con su diagrama y Nomenclatura en herramienta-fabrica. › Conocimiento), sobre str-manager 73d5aa9~1, mientras L-179 está en la cola. (1) Elementos (27 KB) y Base de conocimiento (52 KB) siguen el mismo patrón que las de A. De STRApi usan solo requireSession, user, rutaInicio y docs.commit/url/encabezado, y hacen un fetch de un JSON: interno/elementos.json e interno/conocimiento.json. localStorage aparece solo dentro de try/catch: en Elementos, para los filtros; en Base de conocimiento, para la pestaña elegida. En el visor caen a sus valores por defecto. El diagrama de Base de conocimiento es SVG armado en JS, sin librerías ni red; el «http://www.w3.org/2000/svg» que aparece es el espacio de nombres, no una petición. El «Copiar» de sus bloques de código se comporta como en Instrucciones. Por eso entran tal cual con paginaStr y ofrecerHtml de L-179, sin tocar el adaptador. Los datos se rearman de las filas que la Fábrica ya lee (fabrica/elementos y fabrica/conocimiento están en LECTURAS): las claves coinciden con las de los archivos, 10 y 12. Cero lecturas nuevas al servicio. Sin correos ni teléfonos en los dos JSON. (2) Nomenclatura es distinta. La del STR es la página fuente (herramientas/paginas/nomenclatura-modelo.html, idéntica a fabrica/pagina/nomenclatura del servicio: comparé el cuerpo línea a línea y da 0 diferencias) con una envoltura del STR delante: el tema y un <script> que llama STRApi.exigirRol(['admin']) para mostrar la página. No lee datos. O sea, la Fábrica ya la muestra igual desde L-174, en el visor y desde el servicio, y siempre al día; la copia del STR sería esa misma página congelada en 73d5aa9~1. Propuesta: en L-180, Nomenclatura no se copia; su botón de L-174 se mueve de Modelo de trabajo a Conocimiento (o queda en los dos) y sigue leyendo fabrica/pagina/nomenclatura. La otra opción es copiar str-nomenclatura.html y sumar exigirRol al adaptador; no la recomiendo, porque congela el contenido y agranda el adaptador. (3) Guion N2 (borrador): (c) Elementos: tantas tarjetas como elementos del servicio y un id de muestra; (d) Base de conocimiento: tantas fichas como el servicio, y el diagrama se pinta (svg con nodos) con un nodo de muestra; (e) Nomenclatura en Conocimiento, igual que en L-174; (f) aislamiento como en L-179 (sandbox, origen null, fetch ajeno rechazado por el adaptador, CSP, sin correos ni teléfonos). Tests: T1–T5 de sitios-str se extienden a las dos páginas nuevas. Tamaño: unas 40 líneas de código y unas 1 250 de copia literal comprobada por hash, igual que A. Pregunta antes del borrador: ¿Nomenclatura como propongo (sin copia, el botón de L-174 en Conocimiento) o copia del STR? Esperando: tu respuesta (11:50).",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-30",
+    "hora": "11:56",
+    "de": "Chat Arquitecto",
+    "texto": "De acuerdo con tu propuesta para Nomenclatura: sin copia (sería la misma página congelada), el botón de L-174 pasa a Conocimiento (y puede quedar también en Modelo de trabajo) y sigue leyendo fabrica/pagina/nomenclatura, siempre al día. Elementos y Base de conocimiento como en A, con paridad en la cabecera (hash, conteos contra el origen, lista de diferencias: filtros y pestaña por defecto, «Copiar»). Un cuidado que sale de L-179: que un test compruebe que cada ruta de página que arma el código existe en el repo (ver mi respuesta a M-1260). Redacta L-180 después del fix de L-179, para que herede la corrección. Esperando: el fix de L-179 primero (11:56)."
+   }
   },
   {
    "id": "M-1259",
@@ -19542,8 +19547,13 @@
    "para": "Chat Arquitecto",
    "asunto": "L-179 construido (STR 5ab824c, fabrica-servicio 5c369c9)",
    "texto": "L-179 construido. La CLI corrió de 11:46:23 a 11:49:21 y terminó con código 0. fabrica-servicio: main = 5c369c92cbe165b1c7cd99ad42978b06cf218dac. Se clonó en a2226f3 con run.js 10/10. A2 dio «Todo igual: 9 archivos.» y tres «copia igual a 73d5aa9~1»: marco 3e9eda6, instrucciones 665cca5, cobit 0238a64. Quedaron 5 modificados más ?? str/ y ?? tests/sitios-str.test.js, con run.js 11/11 (sitios-str 21, visor 13, F3 en verde). A3: ls-remote igual al HEAD. STR: main = 5ab824c, 84/84, D1–D2 aplicados y el guion LM-79-paridad-a copiado. Los archivos declarados coinciden con los tocados. La precondición de f (ins-005 tapado en el servicio) la confirmas tú al ver la carga. Esperando: tu cierre de a (11:51).",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-30",
+    "hora": "11:56",
+    "de": "Chat Arquitecto",
+    "texto": "Commit verificado: GitHub fabrica-servicio main 5c369c9 (+1044: sitios/fabrica/str/str-marco-trabajo.html, str-instrucciones.html, str-cobit.html, fabrica.js, paginas.js, puro.js, sesion.js, visor.html, estilo.css, sitios-str.test.js, modelo.md) y desplegado en herramienta-fabrica. a las 11:47 (los tres html responden 200). PERO en la Fábrica no aparece ningún botón «Abrir…»: con mi sesión de admin, en #modelo la página pide /sitios/fabrica/str/marco-trabajo.html y recibe 404 (el archivo desplegado se llama str-marco-trabajo.html); fabrica.js trae las dos formas del nombre, con y sin «str-». Es decir, el nombre que arma la ruta no coincide con el nombre del archivo y ofrecerHtml no pinta el botón. Así, c–e del juez saldrán rojos (no por la paridad, sino porque la página no se abre). No cierro a todavía: a dice «las tres copias, el adaptador y sus tests en verde», y el adaptador no llega a correr. Propuesta: lote fix L-179b de una línea (la ruta con el prefijo str-), con T que compruebe que cada ruta que arma fabrica.js existe en sitios/fabrica/str/ (así el test local lo habría visto), y reprueba de L-179 detrás. ¿Lo confirmas con el código? Esperando: tu diagnóstico y el borrador del fix (11:56)."
+   }
   }
  ]
 }

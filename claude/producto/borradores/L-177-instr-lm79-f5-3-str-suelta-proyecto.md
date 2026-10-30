@@ -1,7 +1,7 @@
 # instr — L-177 · LM-79 fase 5.3: el STR suelta el grupo Proyecto — sus ocho páginas salen del repo (ya se ven en proyectos. y herramienta-fabrica.) y en el menú queda una sola entrada, «Proyectos (fábrica) ↗», solo para el admin
-Categoría: **crítico** (toca el menú del shell, capa común del STR, y retira páginas en uso; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación, M-1144))
+Categoría: **crítico** (toca el menú del shell, capa común del STR, y retira páginas en uso; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 30-oct 08:44 (respuesta a M-1231))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 08:37
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 08:37 · ok Jefe de proyecto M-1232
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5, regla 7) y DA: LM-79
 Alcance: `str-app-shell.html` (grupo Proyecto con una sola entrada externa; ningún grupo arranca plegado) · borrar con `git rm` (§ 1) las ocho páginas del grupo (`str-seg-proyecto.html`, `str-marco-trabajo.html`, `str-instrucciones.html`, `str-cobit.html`, `str-elementos.html`, `str-base-conocimiento.html`, `str-nomenclatura.html`, `str-linea-base.html`), nueve tests que prueban su código (`tests/plan-trabajo.test.js`, `tests/tablero.test.js`, `tests/tablero-metrica.test.js`, `tests/tablero-items.test.js`, `tests/diseno.test.js`, `tests/nomenclatura.test.js`, `tests/nomenclatura-ancho.test.js`, `tests/base-conocimiento-diagrama.test.js`, `tests/linea-base-pagina.test.js`) y cinco guiones que solo las abren (`tests/e2e/L-151.spec.js`, `tests/e2e/REQ-TB-3.spec.js`, `tests/e2e/REQ-TB-4.spec.js`, `tests/e2e/REQ-TB-5.spec.js`, `tests/e2e/LM-82.spec.js`) · ajustar `tests/menu-sh2.test.js`, `tests/roles.test.js`, `tests/tablero-al-dia.test.js` y `tests/e2e/REQ-SH-2.spec.js` · guion nuevo `tests/e2e/LM-79-str.spec.js` · docs: `CLAUDE.md`, `docs/claude/proyecto.md`, `docs/claude/shell-y-api.md`, `docs/claude/tests-y-despliegue.md`, `tests/README.md` · `?v=` igual · `schema_version` igual · sin cambios de base de datos
 Versión: `?v=` igual (p5c113) · `schema_version` igual (14)
@@ -625,6 +625,7 @@ Deuda de cobertura de la ruta (no la ejerce este lote; la ruta se calculó sobre
 - e. Humo del shell: el admin entra y el STR abre en el Tablero · nivel: N2 · perfil: zz-verif-admin · página: /str-app-shell.html · precondición: commit desplegado · tec: escenario · espera: caso e del guion en verde · **Revertir**
 - f. str-manager queda en verde con los contadores al día · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: escenario · espera: `node tests/run.js` 84/84 (menu-sh2, roles y tablero-al-dia con lo nuevo); `aplicar.js` K1 en verde (D1 y P1–P39); la cola compara el guion; los 22 archivos borrados no están en el commit · **Detener**
 - Datos de prueba: ninguno (solo lectura)
+- Resultado esperado del juez en la primera corrida: d en «Detener» por diseño (aún no está la limpieza de Carlos); no es un rojo del lote. Tras la limpieza, reprueba (reprobar\L-177.txt) y entonces d en verde.
 - Regresión: la del menú (REQ-SH-2 ajustado en § 2) y la de la ruta. Si a–c y e fallan todos a la vez justo después del push, puede faltar el despliegue: Detener y avisar, no Revertir.
 ```
 

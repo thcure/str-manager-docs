@@ -1,5 +1,5 @@
 # instr — L-182 · LM-79 fase 5.6 a' (diseño de los sitios, orden de Carlos 30-oct): los dos sitios con el marco del STR — barra superior, barra lateral por partes, tema claro/oscuro y versión del lote (?v=) en todo recurso propio
-Categoría: **crítico** (cambia lo que se ve y cómo se carga en los dos sitios de la fábrica; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
+Categoría: **crítico** (cambia lo que se ve y cómo se carga en los dos sitios de la fábrica; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 30-oct 13:49 (respuesta a M-1279))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-30 13:46 · ok Jefe de proyecto M-1280
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5, regla 9 «diseño de los sitios») y DA: LM-79; orden de Carlos del 30-oct 12:00 (M-1263; excepción M-1264, tanda T-6); decisiones del Arquitecto en M-1271 (tema por sitio, versión manual por lote, barra por anclas con todas las partes a la vista); M-1271 b con un almacén en memoria en el adaptador (las páginas leen `str-theme || 'dark'`): amplía la regla 8 y T3, a confirmar en el cruce

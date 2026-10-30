@@ -72,9 +72,12 @@ def complemento():
         filas.append({'archivo': 'fabrica/pagina/' + nombre, 'clave': 'html', 'orden': orden, 'es_lista': 0,
                       'valor': {'ruta': ruta, 'html': open(os.path.join(RAIZ, ruta), encoding='utf-8').read()}, 'extra': None})
     return filas
-FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': 'interno/arquitectura/mapa-str.html'}
+FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': 'interno/arquitectura/mapa-str.html',
+                   'nomenclatura': 'herramientas/paginas/nomenclatura-modelo.html'}   # 5.2c (M-1195)
+# 5.2c (M-1195): marco-trabajo y cobit para la Fábrica; proyecto/P01 (planes, prioridades, trabajo, pausas del JP) para proyectos.
 FABRICA_JSON = {'instrucciones': 'interno/instrucciones.json', 'mejoras': 'interno/mejoras.json', 'conocimiento': 'interno/conocimiento.json',
-                'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json'}
+                'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json', 'marco-trabajo': 'interno/marco-trabajo.json',
+                'cobit': 'interno/cobit.json', 'proyecto/P01': 'interno/proyecto.json'}
 def docs_fabrica():
     import glob
     out = [os.path.relpath(f, RAIZ).replace(os.sep, '/') for f in glob.glob(os.path.join(RAIZ, 'claude/gobierno/*.md'))]

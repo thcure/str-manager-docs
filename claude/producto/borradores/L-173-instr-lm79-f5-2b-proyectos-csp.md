@@ -1,7 +1,7 @@
 # instr — L-173 · LM-79 fase 5.2b: cabeceras de seguridad (CSP, nosniff, Referrer-Policy) en los dos sitios y el sitio proyectos. (Inicio «Lo que te toca» y Proyectos), que lee solo del servicio con la sesión de Google
-Categoría: **crítico** (sitio nuevo con inicio de sesión, permisos decididos por el servicio y cabeceras del servidor; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
+Categoría: **crítico** (sitio nuevo con inicio de sesión, permisos decididos por el servicio y cabeceras del servidor; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 29-oct 20:34 (M-1189))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 20:30
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 20:30 · ok Jefe de proyecto M-1188
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5) y DA: LM-79
 Alcance: en str-manager, `tests/e2e/LM-79-proyectos.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l173 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: .htaccess (raíz), sitios/comun/estilo.css, sitios/fabrica/fabrica.js, sitios/proyectos/index.html, sitios/proyectos/proyectos.js y sitios/proyectos/vistas.js (los tres de proyectos, nuevos), tests/sitios-htaccess.test.js, tests/sitios-proyectos.test.js (nuevo) y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)

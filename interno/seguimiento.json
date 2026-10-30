@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-29 19:39",
+ "actualizadoEn": "2026-10-29 19:57",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -17615,6 +17615,74 @@
     "datosDePrueba": "sin limpiar() en el guion",
     "notas": "pruebas.json › resultado «verde», causa null; ningún \"ok\": false en el archivo (Grep). Fase «completa» (lote crítico; riesgo SRV alto 6): regresión por ruta (MOD, SRV), 47 guiones, todos los casos en verde, incluidos LM-79 b y los REQ-MOD-6* (los clientes de máquina siguen con 403 «Token requerido» sin token). Deuda de cobertura (regresionSeleccion.ruta.huecos): REL-29 cola-arquitecto→MOD (POST /modelo/api/cargar con X-Modelo-Token), sin cambio en este lote; tampoco se ejerce el preflight OPTIONS real del navegador con Authorization (lo cubren C1 en N1 y la fase 5.2). Sin cuarentena ni inestables; sesiones sin pérdidas; sin cortes de red. La instrucción no trae criterios N3 ni N4 (n3Preparados vacío); la única captura de la carpeta (INC-125-b-medida, regresión) muestra a 390 px los lugares zz-verif- con ▲/▼, Editar y Desactivar dentro de la ventana, coherente con su caso en verde. Línea de trazabilidad: lineaLote «Lote: L-171 · LM-79 · Casos de uso: CU-MOD-2.1, CU-MOD-3.1, CU-MOD-3.2». Resultado «parcial» por a y h, como prevé la instrucción; los cierra el Arquitecto."
    }
+  },
+  {
+   "lote": "L-172",
+   "fecha": "2026-10-29",
+   "req": "LM-79",
+   "categoria": "crítico",
+   "resumen": "LM-79 fase 5.2a: un repo dos sitios (.htaccess por host; modelo/ fuera de api y secrets.php en 403), sitios/comun con inicio de Google y sección Fábrica de herramienta-fabrica. (fabrica-servicio 9f5242e); complemento por archivo/prefijo y export sin fabrica/*; guion LM-79-sitios",
+   "estado": "aceptado",
+   "observacion": "Encolado 19:35. Revisor 23/23 (dos pasadas); cruce delegado M-1179; ok JP M-1180; clave de Firebase comprobada M-1181. Construido con Opus 5ad1fec 19:38 (93/93; fabrica-servicio 8/8). a cerrado por el Arquitecto 19:41 (M-1184). Juez 19:55: PARCIAL con c–g en verde. ACEPTADO. Deuda declarada: CSP de sitios/ en 5.2b.",
+   "version": "p5c113",
+   "hash": "5ad1fec",
+   "aceptacion": {
+    "lote": "L-172",
+    "hash": "5ad1fec",
+    "fecha": "2026-10-29",
+    "horaBogota": "19:55",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "verificación cruzada del Arquitecto (fuera del juez): A2 «Todo igual: 13 archivos.», run.js 8/8 de fabrica-servicio y ls-remote igual al HEAD de la hermana. El commitMensaje declara «A2. script aplicado, Todo igual 13 archivos, 8/8 · A3. ... main 9f5242e (ls-remote igual)», pero no es evidencia del juez"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como admin → admin: sitio en «lista» | si: partes visibles: modelo, gobierno, mejora, herramientas, conocimiento | si: encabezado: «Datos de c4b231a · cargados el 2026-10-29 19:39 (Bogotá)» | si: la página no pide a app. ni a GitHub: ninguno · hosts: apis.google.com, herramienta-fabrica.apartamentosbucaramanga.com, identitytoolkit.googleapis.com, str-hospedaje.firebaseapp.com, www.googleapis.com, www.gstatic.com | si: GET complemento?prefijo=fabrica/ como admin → 200"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como operador → oper: sitio en «denegada» | si: contenido visible para el operador: false"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar como colaborador → colab: sitio en «denegada»"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: herramienta-fabrica./modelo/secrets.php → 403 | si: herramienta-fabrica./modelo/sql/001_inicial.sql → 403 | si: herramienta-fabrica./sitios/proyectos/index.html → 403 | si: herramienta-fabrica./docs/claude/modelo.md → 403 | si: herramienta-fabrica./tests/run.js → 403 | si: herramienta-fabrica./ → 200 · Fábrica sí | si: el servicio sigue en /modelo/api/salud → 200 | si: export como admin → 200 · archivos con «fabrica»: 0"
+     },
+     {
+      "c": "g",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 93/93 archivos OK · entrada: aplicación literal 2/2 (D1, D2) · guion N2 tests/e2e/LM-79-sitios.spec.js igual a la instruccion · 4 caso(s)"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a",
+      "motivo": "N1 de verificación cruzada del Arquitecto, fuera del juez (lo dice la instrucción: «Resultado esperado del juez: parcial, con a en criteriosPendientes»); el juez no tiene acceso a la carpeta hermana ni al remoto de fabrica-servicio"
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null; Grep de \"ok\": false sin coincidencias. Regresión por ruta (modo ruta, fase completa, lote crítico): todos los casos de regresion en verde (DT-42, INC-125, INC-131, INC-132, INC-146-purga, INC-150, LM-79-lectura, LM-79, REQ-INV2-*, REQ-K3*, REQ-MOD-6*, REQ-OP-1*, REQ-SH-2); los 32 guiones en noCorren no cuentan. Deuda de cobertura: regresionSeleccion.ruta.huecos trae REL-29 (cola-arquitecto→MOD, POST /modelo/api/cargar con X-Modelo-Token), que el lote no cambia; reglas: ninguna. Trazabilidad K5: lineaLote «Lote: L-172 · LM-79 · Casos de uso: CU-MOD-3.1» (el hook corrió). cuarentena e inestables vacíos; sesiones sin perdidas ni caidos; no hay cortes de red registrados. La instrucción no tiene criterios N3 ni N4 y n3Preparados está vacío; la captura INC-125-b-medida de la carpeta es de regresión y no decide ningún criterio. Sin INC, así que no hace falta reversión. Queda «parcial» solo por a, que la cierra el Arquitecto con evidencia cruzada; con a en verde el lote queda aceptado."
+   }
   }
  ],
  "esquema": {
@@ -20508,8 +20576,8 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.2a: un repo dos sitios (.htaccess por host; todo modelo/ fuera de api y secrets.php en 403), sitios/comun (Google, contrato pw 0.15.0) y sección Fábrica de herramienta-fabrica. leída de complemento?prefijo=fabrica/; servicio con complemento por archivo/prefijo y export sin fabrica/*; guion LM-79-sitios",
-   "estado": "construido",
-   "desde": "2026-10-29 19:38",
+   "estado": "aceptado",
+   "desde": "2026-10-29 19:55",
    "estados": [
     {
      "estado": "previsto",
@@ -20526,9 +20594,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-29 19:38"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-29 19:55"
     }
    ],
-   "nota": "Cruce delegado M-1179; ok JP M-1180; clave de Firebase sin restricción por referente y dominios autorizados (M-1181). Esperado juez «parcial» (a del Arquitecto). Deuda declarada: CSP de sitios/ en 5.2b. · 19:38 Construido con Opus: str-manager 5ad1fec (93/93); fabrica-servicio 9f5242e (8/8, 13 hashes OK; F3 corrió con pdo_sqlite; parte B de google OMITIDA)."
+   "nota": "Cruce delegado M-1179; ok JP M-1180; clave de Firebase sin restricción por referente y dominios autorizados (M-1181). Esperado juez «parcial» (a del Arquitecto). Deuda declarada: CSP de sitios/ en 5.2b. · 19:38 Construido con Opus: str-manager 5ad1fec (93/93); fabrica-servicio 9f5242e (8/8, 13 hashes OK; F3 corrió con pdo_sqlite; parte B de google OMITIDA). · 19:55 juez PARCIAL con c–g en verde (primer inicio con Google real en herramienta-fabrica.: admin lista, oper y colab denegada); a cerrado por el Arquitecto a las 19:41 (M-1184) → ACEPTADO."
   }
  ],
  "riesgos": [
@@ -20748,14 +20820,14 @@
   }
  ],
  "traspaso": {
-  "fecha": "2026-10-29 19:35",
+  "fecha": "2026-10-29 19:57",
   "quienSoy": "Chat Desarrollo, escritor de interno/seguimiento.json (plan[], incs[], dts[], problemas[], cambios[] de producto, traspaso) y de la cola de LENOVO (str-instr-cola\\); encargo rol-desarrollo v2.3 (LM-69)",
   "enCurso": [
    {
-    "ref": "L-172",
-    "que": "LM-79 fase 5.2a: un repo dos sitios y sección Fábrica",
-    "estado": "encolado",
-    "siguientePaso": "Veredicto (esperado parcial); avisar al Arquitecto (a) y al JP; 5.2b empieza por la CSP de sitios/ y luego proyectos."
+    "ref": "LM-79 f5.2b",
+    "que": "Fase 5.2b: primero la CSP y encabezados de seguridad de sitios/; después proyectos. (Inicio «Lo que te toca» y Proyectos)",
+    "estado": "espera la carga de fabrica/* y el arranque del Arquitecto",
+    "siguientePaso": "Borrador de 5.2b empezando por la CSP (deuda de L-172; probar la ventana de Google con pw/prueba.js), proyectos. con portafolio de fabrica/proyectos, cruce y ok del JP"
    },
    {
     "ref": "L-156",

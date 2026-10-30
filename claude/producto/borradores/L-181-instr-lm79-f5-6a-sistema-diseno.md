@@ -1,7 +1,7 @@
 # instr — L-181 · LM-79 fase 5.6 a (diseño de los sitios, orden de Carlos 30-oct): sistema de diseño común tomado del shell y las páginas del STR (sistema.css, ui.js, tema.js), publicado sin cambio visible
 Categoría: **crítico** (suma código común a los dos sitios de la fábrica; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 24/24 · subagente de Desarrollo · AAAA-MM-DD HH:MM
+Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-30 13:08
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5, regla 9 «diseño de los sitios») y DA: LM-79; orden de Carlos del 30-oct 12:00 (M-1263; excepción ampliada M-1264, tanda T-6); decisiones del Arquitecto en M-1271 (tema por sitio, versión manual, anclas, partir en L-181/L-182)
 Alcance: en str-manager, `tests/e2e/LM-79-sistema.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l181 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: sitios/comun/sistema.css, sitios/comun/ui.js y sitios/comun/tema.js (nuevos), tests/sitios-sistema.test.js (nuevo), docs/claude/sistema-diseno.md (nuevo) y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)

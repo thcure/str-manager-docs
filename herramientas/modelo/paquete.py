@@ -71,7 +71,14 @@ def complemento():
         if not os.path.exists(os.path.join(RAIZ, ruta)): continue
         filas.append({'archivo': 'fabrica/pagina/' + nombre, 'clave': 'html', 'orden': orden, 'es_lista': 0,
                       'valor': {'ruta': ruta, 'html': open(os.path.join(RAIZ, ruta), encoding='utf-8').read()}, 'extra': None})
+    # INC-213 (lección): todo nombre de archivo que entre al servicio se prueba contra el patrón de lectura.php ANTES de cargarlo
+    # (fabrica/proyecto/P01 entró con mayúscula cuando el patrón solo admitía minúsculas y el sitio no pudo leerlo).
+    malos = sorted({f['archivo'] for f in filas if not PATRON_ARCHIVO.match(f['archivo'])})
+    if malos:
+        raise SystemExit('paquete: nombres de archivo que el servicio no acepta (patrón ' + PATRON_ARCHIVO.pattern + '): ' + ', '.join(malos))
     return filas
+# Patrón de `archivo` y `prefijo` de modelo/api/config/lectura.php (L-172; con mayúsculas desde L-176). Si el servicio lo cambia, cambia aquí.
+PATRON_ARCHIVO = re.compile(r'^[A-Za-z0-9][A-Za-z0-9/_.-]{0,63}$')
 # 5.2c (M-1203): los datos de la fábrica no llevan correos ni teléfonos a los sitios (regla de datos del contrato, M-1186).
 def tapar(texto):
     texto = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', 'correo-tapado', texto)

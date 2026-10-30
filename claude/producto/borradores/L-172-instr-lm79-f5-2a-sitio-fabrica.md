@@ -1,5 +1,5 @@
 # instr — L-172 · LM-79 fase 5.2a: un repo, dos sitios (el .htaccess decide por host) y la sección Fábrica de herramienta-fabrica., que lee solo del servicio con la sesión de Google
-Categoría: **crítico** (despliegue de un sitio nuevo con inicio de sesión, permisos decididos por el servicio y reglas del servidor; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
+Categoría: **crítico** (despliegue de un sitio nuevo con inicio de sesión, permisos decididos por el servicio y reglas del servidor; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 29-oct 19:27 (M-1179))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-29 19:25
 Alcance: en str-manager, `tests/e2e/LM-79-sitios.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l172 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: .htaccess (raíz), modelo/api/.htaccess, modelo/api/config/lectura.php, sitios/comun/puro.js, sitios/comun/sesion.js, sitios/comun/estilo.css, sitios/fabrica/index.html, sitios/fabrica/fabrica.js (los cinco de sitios/, nuevos), tests/lib/port-export.js, tests/modelo-lectura.test.js, tests/sitios-comun.test.js y tests/sitios-htaccess.test.js (nuevos) y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
@@ -220,7 +220,7 @@ Co-Authored-By: <como siempre>"
 Sin comillas dobles, comillas invertidas ni `$` dentro del mensaje.
 
 ## Cierre (la CLI lo dice en español al final de su respuesta; la cola lo guarda en `log\NN-<nombre>.txt`, que la CLI no debe abrir)
-Hecho / No hecho por paso (A1–A3, B1–B3) · salidas de A2 (las trece líneas de hash, `status --short`, run.js con las líneas de modelo-google parte B y de modelo-lectura F3: cada una «OMITIDA» o en verde) y A3 (ls-remote) tal cual · archivos declarados vs tocados en los dos repos · versión `?v=` igual · hash del commit de str-manager y de main de fabrica-servicio · tests: n/n · «mapa del área / CLAUDE.md actualizado: sí (modelo.md)» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
+Hecho / No hecho por paso (A1–A3, B1–B3) · salidas de A2 (las trece líneas de hash, `status --short`, run.js con las líneas de modelo-google parte B y de modelo-lectura F3: cada una «OMITIDA» o en verde) y A3 (ls-remote) tal cual · archivos declarados vs tocados en los dos repos · versión `?v=` igual · hash del commit de str-manager y de main de fabrica-servicio · tests: n/n · «mapa del área / CLAUDE.md actualizado: sí (modelo.md)» · «Deuda declarada: la CSP y los encabezados de seguridad de sitios/ van en 5.2b» · «Reglas fijas recibidas al arrancar: sí/no» (cita la primera línea que te inyectó el hook).
 
 ## Lección
 (la llena Desarrollo al cerrar el lote)

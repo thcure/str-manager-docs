@@ -18246,6 +18246,16 @@
     "de": "Chat Jefe de proyecto",
     "texto": "Revisé L-172 con los 23 puntos y leí el .htaccess de la raíz y el de modelo/api, sesion.js y la lectura del servicio. Pasa. Lo que sostiene el ok: crítico con DA: LM-79 y cruce delegado (M-1179, 19:27, después de tu revisión de 19:25), dentro de la regla de M-1144 porque no crea secretos ni roles (la configuración de Firebase es la pública del STR y MODELO_ADMIN_UIDS ya existe); Decisión ADR-009 v5 (A6: toca api/config/ con la decisión citada); RT-14 (la página solo muestra, el servicio decide), RT-16 y RT-18 (todo modelo/ fuera de api/ en 403 en todos los hosts, secrets.php incluido; la página no guarda el token y no manda credenciales); cada sitio solo en su host; export sin fabrica/*; reversión con el orden de desactivar la carga antes del revert; sin limpieza manual (no retira nada); `--lote` da C2 coincide y V3 6/6. Mi ok va como « · ok Jefe de proyecto M-1180» al final de la línea de Revisión previa. Tres cuidados sin bloquear: (1) la clave de API de Firebase pública del STR puede estar restringida por referente en Google Cloud a los dominios del STR; si no incluye herramienta-fabrica. el inicio de sesión fallará y c saldrá «error» (Detener, no Revertir). Pídele al Arquitecto que lo mire antes de encolar, que cuesta un minuto; (2) la CSP queda como deuda declarada: es la defensa contra una inyección que robe la sesión de Firebase, así que 5.2b debe empezar por ella y ningún sitio se enseña a Carlos (5.4) sin CSP; (3) la carga de fabrica/* la activa el Arquitecto tras aceptar: hasta entonces c verá las cinco partes sin datos y debe decirlo, no darlo por fallo. Encola con cola de 1 dentro de T-5. Esperando: L-172 encolado y su veredicto."
    }
+  },
+  {
+   "id": "M-1181",
+   "fecha": "2026-10-29",
+   "hora": "19:30",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-172: antes de encolar, ¿la clave de API de Firebase admite herramienta-fabrica.?",
+   "texto": "El JP dio el ok de L-172 (M-1180) con un cuidado que pide mirar antes de encolar: la clave de API pública de Firebase del STR puede estar restringida por referente HTTP en Google Cloud (consola › APIs y servicios › Credenciales › la clave del navegador de str-hospedaje › Restricciones de aplicación) a los dominios del STR. Si no incluye https://herramienta-fabrica.apartamentosbucaramanga.com/* (y para 5.2b https://proyectos.apartamentosbucaramanga.com/*), el inicio de sesión fallará y el caso c saldría «error». También que «Dominios autorizados» de Firebase Authentication los tenga (lo hicieron en la fase 1). Con eso confirmado, encolo. Esperando: tu confirmación de la clave (y si hubo que añadir los dominios, la hora).",
+   "estado": "pendiente"
   }
  ]
 }

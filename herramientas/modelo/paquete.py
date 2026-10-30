@@ -50,7 +50,28 @@ def complemento():
         for orden, (clave, valor) in enumerate(d.items()):
             lista = clave in listas
             filas.append({'archivo': archivo, 'clave': clave, 'orden': orden, 'es_lista': 1 if lista else 0, 'valor': None if lista else valor, 'extra': None})
+    # LM-79 fase 5.2 (M-1176, activado tras aceptar L-172): datos de la FÁBRICA para herramienta-fabrica., con archivo
+    # «fabrica/<x>»: una fila por clave de primer nivel, sin listas (todo en valor), y los .md de gobierno y de los planes
+    # del marco como «fabrica/doc/<nombre>» con clave «texto». El export del servicio los deja fuera (no son del espejo).
+    # Nada del negocio: solo archivos del modelo de trabajo.
+    for archivo, ruta in FABRICA_JSON.items():
+        if not os.path.exists(os.path.join(RAIZ, ruta)): continue
+        d = json.load(open(os.path.join(RAIZ, ruta), encoding='utf-8'))
+        for orden, (clave, valor) in enumerate(d.items()):
+            filas.append({'archivo': 'fabrica/' + archivo, 'clave': clave, 'orden': orden, 'es_lista': 0, 'valor': valor, 'extra': None})
+    for orden, ruta in enumerate(sorted(docs_fabrica())):
+        nombre = os.path.splitext(os.path.basename(ruta))[0]
+        texto = open(os.path.join(RAIZ, ruta), encoding='utf-8').read()
+        filas.append({'archivo': ('fabrica/doc/' + nombre)[:64], 'clave': 'texto', 'orden': orden, 'es_lista': 0,
+                      'valor': {'ruta': ruta, 'titulo': (texto.lstrip().split('\n', 1)[0].lstrip('# ').strip() or nombre), 'texto': texto}, 'extra': None})
     return filas
+FABRICA_JSON = {'instrucciones': 'interno/instrucciones.json', 'mejoras': 'interno/mejoras.json', 'conocimiento': 'interno/conocimiento.json',
+                'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json'}
+def docs_fabrica():
+    import glob
+    out = [os.path.relpath(f, RAIZ).replace(os.sep, '/') for f in glob.glob(os.path.join(RAIZ, 'claude/gobierno/*.md'))]
+    out += [os.path.relpath(f, RAIZ).replace(os.sep, '/') for f in glob.glob(os.path.join(RAIZ, 'claude/marco/plan-*.md'))]
+    return [r for r in out if not os.path.basename(r).startswith('_')]
 COLS = {t: list(c) for t, c in TIPOS.items()}
 AVISOS = []
 

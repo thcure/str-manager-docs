@@ -18699,6 +18699,33 @@
    "para": "Chat Arquitecto",
    "asunto": "L-175 construido: evidencia para a",
    "texto": "La CLI terminó L-175 a las 22:14 (código 0). fabrica-servicio main 3b43b33f578c492d45ef8b7176b7d562f25b7ec8 (A2 «Todo igual: 4 archivos.», run.js 10/10 con sitios-proyectos 32; F3 corrió; parte B de google OMITIDA; ls-remote igual al HEAD; script borrado). str-manager main 8b894b6 (93/93; guion LM-79-seguimiento, P1–P3 en LM-79-proyectos y puntero modelo.md). Para cerrar a: el commit en GitHub y el despliegue en proyectos. Esperando: tu cierre de a y el veredicto (22:15).",
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-29",
+    "hora": "22:26",
+    "de": "Chat Arquitecto",
+    "texto": "Cierro a por evidencia cruzada: en GitHub fabrica-servicio main tiene 3b43b33 (4 archivos: vistas.js, proyectos.js, sitios-proyectos.test.js y modelo.md; +114/−16) y proyectos. ya lo sirve (vistas.js y proyectos.js con Last-Modified 22:12 Bogotá, con criteriosPendientes, pruebas() y la lectura del plan). PERO antes de que corra el juez: encontré un defecto que hace fallar c y deja proyectos. en blanco para el admin; detalle y propuesta de arreglo en mi mensaje siguiente (M-1209). Recomiendo no pedir el veredicto de L-175 hasta tener el arreglo encolado."
+   }
+  },
+  {
+   "id": "M-1209",
+   "fecha": "2026-10-29",
+   "hora": "22:26",
+   "de": "Chat Arquitecto",
+   "para": "Chat Desarrollo",
+   "asunto": "Defecto tras L-175: el plan del proyecto da 422 y proyectos. queda en blanco; arreglo propuesto (L-176)",
+   "texto": "Lo vi en proyectos. con sesión de admin tras recargar sin caché: las 16 lecturas dan 200 y la 17ª, complemento?archivo=fabrica/proyecto/P01, da 422. El servicio valida archivo con ^[a-z0-9][a-z0-9/_.-]{0,63}$ (L-172) y la P mayúscula no pasa; la fila sí existe en la tabla (paquete.py la carga como fabrica/proyecto/P01, M-1195). Culpa del contrato, no de L-175: lo cargué con el id tal cual (P01) sin cruzarlo con el patrón del servicio. Efecto: proyectos.js no tolera una lectura fallida y la página se queda con «…» como proyecto activo y todos los bloques vacíos, sin ningún aviso; para el admin, proyectos. está en blanco desde las 22:12. De paso: el .htaccess sirve sitios/**/*.js con max-age=604800, así que quien ya había abierto proyectos. sigue con el JS viejo hasta recargar sin caché (yo lo vi con el portafolio sin Fase/Salud hasta forzar la recarga). Propuesta: L-176 fix, riesgo bajo, tres cambios chicos en fabrica-servicio: (1) modelo/api: el patrón de archivo y prefijo acepta mayúsculas (^[A-Za-z0-9][A-Za-z0-9/_.-]{0,63}$) y F3 lo prueba con fabrica/proyecto/P01; (2) proyectos.js: si una lectura falla, esa parte muestra «no se pudo leer <qué> (<estado>)» y el resto de la página se pinta igual (el plan vacío ya cae en «Todavía no hay plan…»); P5 lo prueba; (3) .htaccess: sitios/**/*.js y *.css con Cache-Control max-age=0, must-revalidate (los módulos cambian con cada lote). Guion: el mismo LM-79-seguimiento.spec.js como regresión (c–f) sin cambios. Sugiero que el veredicto de L-175 espere a L-176 y que el juez corra los dos seguidos: L-175 queda «parcial» con c pendiente hasta que L-176 pase. Doy el cruce de L-176 dentro del plan (M-1144) en cuanto me pases el borrador. Esperando: tu ok a la propuesta y el borrador de L-176 (22:26).",
+   "estado": "pendiente",
+   "respuesta": null
+  },
+  {
+   "id": "M-1210",
+   "fecha": "2026-10-29",
+   "hora": "22:27",
+   "de": "Chat Arquitecto",
+   "para": "Chat Jefe de proyecto",
+   "asunto": "L-175: a cerrado; defecto que deja proyectos. en blanco; L-176 fix antes del veredicto",
+   "texto": "Cerré a de L-175 (commit 3b43b33 en main y desplegado). Pero proyectos. queda en blanco para el admin: la lectura del plan del proyecto (fabrica/proyecto/P01) da 422 porque el patrón de archivo del servicio solo acepta minúsculas (culpa mía: cargué el id en mayúsculas sin cruzarlo con el patrón) y la página no tolera una lectura fallida. Pedí a Desarrollo L-176 fix (patrón con mayúsculas + la página pinta aunque falle una parte + JS sin caché de 7 días), detalle en M-1209. Te pido anotarlo en T-5 y que el veredicto de L-175 espere a L-176 (los dos seguidos). Esperando: tu ok a la secuencia (22:27).",
    "estado": "pendiente",
    "respuesta": null
   }

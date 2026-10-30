@@ -6,6 +6,8 @@
 // K2 N1 literal: cada «archivo nuevo tests/x.test.js … Contenido completo» de la sección «Tests en tests/» es igual byte a byte al
 //    del commit (como el guion N2); cada caso del N1 nombra el punto que cubre (los puntos sin prueba se listan, aviso).
 // v0.13.1 (LM-79, M-1137): las rutas aceptan un archivo que empieza por punto (`modelo/api/.htaccess`); antes K1 lo perdía.
+// v0.15.1 (LM-79, reprueba de L-175): K1/K2/K3 se leen del commit del LOTE (opciones.ref), no de HEAD: en una reprueba, un lote
+//    posterior pudo tocar los mismos archivos y la aplicación literal del primero ya no está en HEAD aunque sí estuvo en su commit.
 // K3 tamaño del lote: líneas y archivos del commit en tres columnas (código, pruebas, versión).
 // Puras salvo las que dicen «lee». Lo mantiene el Arquitecto. Pruebas: pruebas-v1.test.js.
 'use strict';
@@ -176,34 +178,52 @@ function tamano(numstat, lineasPorArchivo = {}, version = null) {
   return col;
 }
 // Lee del repo (git): archivos del commit, numstat y líneas cambiadas.
-function leerCommit(repo, rutas) {
+// ref (v0.15.1): commit del lote; sin ref o con HEAD, el árbol de trabajo. Con otro ref, cada archivo sale de `git show ref:ruta`.
+function leerCommit(repo, rutas, ref) {
   const archivos = {};
-  for (const r of rutas) { try { archivos[r] = fs.readFileSync(path.join(repo, ...r.split('/')), 'utf8'); } catch (e) { } }
+  const enRef = ref && ref !== 'HEAD';
+  const leer = (r) => enRef ? execSync('git show ' + ref + ':' + JSON.stringify(r), { cwd: repo, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] }) : fs.readFileSync(path.join(repo, ...r.split('/')), 'utf8');
+  for (const r of rutas) { try { archivos[r] = leer(r); } catch (e) { } }
+  const R = enRef ? ref : 'HEAD';
   let numstat = [], lineas = {}, mensaje = '';
-  try { mensaje = execSync('git log -1 --format=%B', { cwd: repo, encoding: 'utf8' }); } catch (e) { }
+  try { mensaje = execSync('git log -1 --format=%B ' + R, { cwd: repo, encoding: 'utf8' }); } catch (e) { }
   try {
-    numstat = execSync('git diff --numstat HEAD~1 HEAD', { cwd: repo, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean).map((l) => { const [a, b, f] = l.split('\t'); return { archivo: f, mas: +a || 0, menos: +b || 0 }; });
-    const diff = execSync('git diff -U0 HEAD~1 HEAD', { cwd: repo, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    numstat = execSync('git diff --numstat ' + R + '~1 ' + R, { cwd: repo, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean).map((l) => { const [a, b, f] = l.split('\t'); return { archivo: f, mas: +a || 0, menos: +b || 0 }; });
+    const diff = execSync('git diff -U0 ' + R + '~1 ' + R, { cwd: repo, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     let actual = null;
     for (const l of diff.split(/\r?\n/)) { const m = l.match(/^\+\+\+ b\/(.*)$/); if (m) { actual = m[1]; lineas[actual] = []; continue; } if (actual && /^[+-]/.test(l) && !/^(\+\+\+|---)/.test(l)) lineas[actual].push(l.slice(1)); }
   } catch (e) { }
-  return { archivos, numstat, lineas, mensaje };
+  return { archivos, numstat, lineas, mensaje, ref: R };
+}
+// Lee: el commit de un lote por su línea de trazabilidad «Lote: L-n · …» (hook v5); null si no hay. Busca entre los últimos 200.
+function commitDeLote(repo, lote) {
+  try {
+    const salida = execSync('git log -200 --format=%H%x09%s%x09%b', { cwd: repo, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    const re = new RegExp('(^|\\n)Lote:\\s*' + lote.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*·');
+    for (const bloque of salida.split(/\n(?=[0-9a-f]{40}\t)/)) { const h = bloque.slice(0, 40); if (/^[0-9a-f]{40}$/.test(h) && re.test(bloque.slice(41).replace(/\t/g, '\n'))) return h; }
+  } catch (e) { }
+  return null;
 }
 // Lee: todo junto para probar-lote (P4.f y K3).
 function revisarCommit(texto, repo, opciones = {}) {
   const rutas = archivosDe(texto);
-  const c = leerCommit(repo, rutas);
-  // la versión toca archivos que no están en el Alcance uno por uno: se leen todos los .html/.js de la raíz
-  try { for (const f of fs.readdirSync(repo)) if (/\.(html|js)$/.test(f) && c.archivos[f] == null) c.archivos[f] = fs.readFileSync(path.join(repo, f), 'utf8'); } catch (e) { }
-  if (c.archivos['CLAUDE.md'] == null) { try { c.archivos['CLAUDE.md'] = fs.readFileSync(path.join(repo, 'CLAUDE.md'), 'utf8'); } catch (e) { } }
+  const c = leerCommit(repo, rutas, opciones.ref);
+  const enRef = c.ref !== 'HEAD';
+  const leerExtra = (f) => enRef ? execSync('git show ' + c.ref + ':' + JSON.stringify(f), { cwd: repo, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] }) : fs.readFileSync(path.join(repo, f), 'utf8');
+  // la versión toca archivos que no están en el Alcance uno por uno: se leen todos los .html/.js de la raíz (del ref, si lo hay)
+  try {
+    const raiz = enRef ? execSync('git ls-tree --name-only ' + c.ref, { cwd: repo, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean) : fs.readdirSync(repo);
+    for (const f of raiz) if (/\.(html|js)$/.test(f) && c.archivos[f] == null) { try { c.archivos[f] = leerExtra(f); } catch (e) { } }
+  } catch (e) { }
+  if (c.archivos['CLAUDE.md'] == null) { try { c.archivos['CLAUDE.md'] = leerExtra('CLAUDE.md'); } catch (e) { } }
   const ap = aplicar(texto, c.archivos, c.mensaje, opciones);
   const n1 = verificarN1(texto, c.archivos);
   const v = puntosDe(texto).find((p) => p.tipo === 'version');
   const tam = tamano(c.numstat, c.lineas, v ? { vieja: v.vieja, nueva: v.nueva } : null);
-  return { aplicacion: ap, n1, tamano: tam, mensajeCommit: c.mensaje.slice(0, 2000) };
+  return { aplicacion: ap, n1, tamano: tam, mensajeCommit: c.mensaje.slice(0, 2000), ref: c.ref };
 }
 
-module.exports = { norm, bloques, puntosDe, archivosDe, noHechos, verificarPunto, aplicar, n1De, verificarN1, tamano, leerCommit, revisarCommit };
+module.exports = { norm, bloques, puntosDe, archivosDe, noHechos, verificarPunto, aplicar, n1De, verificarN1, tamano, leerCommit, commitDeLote, revisarCommit };
 
 // A mano (prueba c de LM-63, M-966: sin desplegar nada): node pw\aplicar.js --instr <instrucción.md> [--repo C:\Users\ktcol\str-manager]
 // Revisa la instrucción contra el HEAD del repo tal como está (un lote ya aceptado) e imprime aplicación, N1 y tamaño; rc 1 si K1 o K2 fallan.

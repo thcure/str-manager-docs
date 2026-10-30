@@ -15,6 +15,9 @@
 // V2 un rojo repite el guion entero una vez (segundo intento manda; los que pasan quedan «inestables»). V10 P4 bloqueado por entorno o
 // dos guiones seguidos fallando por el entorno → log\suspension.json y «bloqueado»; la corrida siguiente del mismo lote es «reanudación»
 // (no cuenta como reprueba). El informe suma fase.riesgo, inestables[], cuarentena[] y cuarentenaEntradas.
+// v0.15.1 (LM-79, reprueba de L-175 bloqueada por K1 contra HEAD): K1/K2/K3 se comprueban sobre el commit del LOTE (el que lleva
+// «Lote: L-n ·» en su mensaje), no sobre HEAD: en una reprueba, un lote posterior pudo tocar los mismos archivos. El informe lo dice
+// en commitLote y k1Sobre; «commit» sigue siendo HEAD (lo desplegado), que es lo que prueban N1/N2.
 // v0.12.1 (LM-73): commitMensaje y lineaLote («Lote: L-n · …», hook v5) en el informe, para el criterio de trazabilidad del juez.
 // v0.12.0 (LM-63, CONSTRUCCIÓN-v1): pw\aplicar.js. P4.f «aplicación»: cada Busca/Pon y cada «Contenido completo» de la instrucción
 // contra el commit (K1; diferencia → bloqueado salvo «No hecho» en el commit; «Versión:» por grep; schema_version en /api/health);
@@ -395,7 +398,13 @@ async function main() {
 
   // P4.f aplicación literal (K1), P4.g N1 literal (K2) y tamaño (K3) — LM-63, sin créditos ni navegador
   try {
-    const rev = APL.revisarCommit(texto, repo, { health: salud });
+    // v0.15.1: el commit del lote, si no es HEAD (reprueba con lotes posteriores encima)
+    const cLote = APL.commitDeLote(repo, lote);
+    const ref = cLote && commitLargo && cLote !== commitLargo ? cLote : undefined;
+    out.commitLote = cLote ? cLote.slice(0, 7) : null;
+    out.k1Sobre = ref ? 'commit del lote ' + ref.slice(0, 7) + ' (HEAD ' + (out.commit || '') + ' es de un lote posterior)' : 'HEAD';
+    if (ref) console.log('K1/K2/K3 sobre el commit del lote ' + ref.slice(0, 7) + ' (HEAD ' + out.commit + ' es posterior)');
+    const rev = APL.revisarCommit(texto, repo, { health: salud, ref });
     out.aplicacion = rev.aplicacion; out.n1Literal = rev.n1; out.tamano = rev.tamano;
     if (!entra('aplicación', rev.aplicacion.ok, rev.aplicacion.resumen)) return fin('bloqueado', 'el commit no aplica la instrucción tal cual (K1): ' + rev.aplicacion.resumen.slice(0, 300));
     if (!entra('N1 literal', rev.n1.ok, rev.n1.resumen || rev.n1.aviso)) return fin('bloqueado', 'el N1 del commit no es igual al de la instrucción (K2, independencia): ' + rev.n1.resumen);

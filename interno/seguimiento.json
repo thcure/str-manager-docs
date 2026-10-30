@@ -2549,6 +2549,36 @@
     "ref": "lección: el contrato de datos entre la carga y una página fija la forma del valor (no solo la clave) y se prueba con el paquete real (paquete.py --complemento) antes de encolar",
     "quien": "Arquitecto"
    }
+  },
+  {
+   "id": "INC-213",
+   "tipo": "INC",
+   "modulo": "MOD (sitio proyectos.; servicio del modelo, lectura de complemento)",
+   "fecha": "2026-10-29",
+   "titulo": "Tras L-175, proyectos. queda en blanco para el admin: complemento?archivo=fabrica/proyecto/P01 da 422 (el patrón de archivo del servicio solo admite minúsculas) y la página no tolera una lectura fallida",
+   "estado": "abierto",
+   "severidad": "medio",
+   "casoUso": "CU-MOD-3.1",
+   "contra": "producto",
+   "originador": "Arquitecto",
+   "contexto": {
+    "lote": "L-175",
+    "guion": "LM-79-seguimiento.spec.js",
+    "caso": "c",
+    "tren": null
+   },
+   "causaRaiz": "integración",
+   "debioDetectarse": "revisión previa",
+   "origen": "M-1209 (Arquitecto, 22:26)",
+   "nota": "22:27 El Arquitecto lo vio en proyectos. con sesión de admin: 16 lecturas 200 y la 17.ª (fabrica/proyecto/P01) 422, porque lectura.php valida archivo con ^[a-z0-9][a-z0-9/_.-]{0,63}$ (L-172) y la carga usa el id P01 (M-1195). proyectos.js corta en la primera lectura fallida: la página queda con «…» y sin bloques, sin aviso. La prueba local de Desarrollo no lo vio porque el servicio simulado no aplicaba el patrón del servicio real. Además, el hosting sirve sitios/**/*.js con max-age de 7 días: quien ya abrió el sitio sigue con el JS viejo hasta recargar sin caché. Nada se expone: solo deja de verse.",
+   "prioridad": "P2",
+   "solucionTemporal": "el grupo Proyecto del STR (app.) sigue en uso hasta 5.3, y la Fábrica no está afectada; L-176 lo arregla antes del veredicto de L-175",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-176",
+    "motivo": "tres cambios chicos (patrón con mayúsculas, la página pinta aunque falle una parte, JS y CSS sin caché larga); el veredicto de L-175 espera a L-176",
+    "fecha": "2026-10-29"
+   }
   }
  ],
  "dts": [
@@ -20896,7 +20926,7 @@
      "desde": "2026-10-29 22:14"
     }
    ],
-   "nota": "Tras L-174 (M-1202: adelante). Cuidados del JP M-1201: regla de datos con su caso y el plan de P01 solo para administradores. Revisión previa en curso. · 22:06 Revisión previa 23/23 (1 y 6 corregidos). Cruce pedido al Arquitecto (M-1203) y ok al JP (M-1204). · 22:11 Cruce delegado M-1206 (22:07); ok JP M-1204. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:14 Construido: str-manager 8b894b6 (93/93; P1–P3 en LM-79-proyectos); fabrica-servicio 3b43b33 (10/10, 4 hashes OK; sitios-proyectos 32; F3 corrió; parte B de google OMITIDA)."
+   "nota": "Tras L-174 (M-1202: adelante). Cuidados del JP M-1201: regla de datos con su caso y el plan de P01 solo para administradores. Revisión previa en curso. · 22:06 Revisión previa 23/23 (1 y 6 corregidos). Cruce pedido al Arquitecto (M-1203) y ok al JP (M-1204). · 22:11 Cruce delegado M-1206 (22:07); ok JP M-1204. Encolado (cola de 1, T-5); releído en LENOVO igual byte a byte. · 22:14 Construido: str-manager 8b894b6 (93/93; P1–P3 en LM-79-proyectos); fabrica-servicio 3b43b33 (10/10, 4 hashes OK; sitios-proyectos 32; F3 corrió; parte B de google OMITIDA). · 22:26 a cerrado por el Arquitecto (M-1208), pero proyectos. queda en blanco: INC-213 (422 en fabrica/proyecto/P01 y página que no tolera una lectura fallida). El veredicto espera a L-176 (M-1209)."
   }
  ],
  "riesgos": [

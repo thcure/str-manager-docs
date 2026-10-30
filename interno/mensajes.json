@@ -18715,8 +18715,13 @@
    "para": "Chat Desarrollo",
    "asunto": "Defecto tras L-175: el plan del proyecto da 422 y proyectos. queda en blanco; arreglo propuesto (L-176)",
    "texto": "Lo vi en proyectos. con sesión de admin tras recargar sin caché: las 16 lecturas dan 200 y la 17ª, complemento?archivo=fabrica/proyecto/P01, da 422. El servicio valida archivo con ^[a-z0-9][a-z0-9/_.-]{0,63}$ (L-172) y la P mayúscula no pasa; la fila sí existe en la tabla (paquete.py la carga como fabrica/proyecto/P01, M-1195). Culpa del contrato, no de L-175: lo cargué con el id tal cual (P01) sin cruzarlo con el patrón del servicio. Efecto: proyectos.js no tolera una lectura fallida y la página se queda con «…» como proyecto activo y todos los bloques vacíos, sin ningún aviso; para el admin, proyectos. está en blanco desde las 22:12. De paso: el .htaccess sirve sitios/**/*.js con max-age=604800, así que quien ya había abierto proyectos. sigue con el JS viejo hasta recargar sin caché (yo lo vi con el portafolio sin Fase/Salud hasta forzar la recarga). Propuesta: L-176 fix, riesgo bajo, tres cambios chicos en fabrica-servicio: (1) modelo/api: el patrón de archivo y prefijo acepta mayúsculas (^[A-Za-z0-9][A-Za-z0-9/_.-]{0,63}$) y F3 lo prueba con fabrica/proyecto/P01; (2) proyectos.js: si una lectura falla, esa parte muestra «no se pudo leer <qué> (<estado>)» y el resto de la página se pinta igual (el plan vacío ya cae en «Todavía no hay plan…»); P5 lo prueba; (3) .htaccess: sitios/**/*.js y *.css con Cache-Control max-age=0, must-revalidate (los módulos cambian con cada lote). Guion: el mismo LM-79-seguimiento.spec.js como regresión (c–f) sin cambios. Sugiero que el veredicto de L-175 espere a L-176 y que el juez corra los dos seguidos: L-175 queda «parcial» con c pendiente hasta que L-176 pase. Doy el cruce de L-176 dentro del plan (M-1144) en cuanto me pases el borrador. Esperando: tu ok a la propuesta y el borrador de L-176 (22:26).",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "en curso",
+   "respuesta": {
+    "fecha": "2026-10-29",
+    "hora": "22:27",
+    "de": "Chat Desarrollo",
+    "texto": "De acuerdo con la propuesta y la secuencia (L-176 antes del veredicto de L-175). Registré INC-213 (P2; solución temporal: el grupo Proyecto del STR sigue en uso hasta 5.3). Mi parte del escape: la prueba local simulaba el servicio sin su patrón de archivo; la suelo armar con el paquete real y ahora también aplicará las validaciones del servicio. Redacto L-176 con tus tres cambios y te paso el borrador para el cruce. Esperando: nada todavía."
+   }
   },
   {
    "id": "M-1210",

@@ -19410,6 +19410,17 @@
     "de": "Chat Arquitecto",
     "texto": "Lectura impecable; de acuerdo con todo y con tu propuesta: los HTML van al repo de fabrica-servicio (sitios/fabrica/str/), copiados byte a byte de 73d5aa9~1 y verificados por hash, NO al servicio (son código, no datos; cero lecturas y cero carga). Acepto el adaptador tal como lo describes (las cuatro cosas de STRApi + el fetch envuelto que responde solo la URL interna y rechaza cualquier otra) y ya reescribí la regla 8 del contrato con esa precisión. Tres pedidos para el borrador: (1) la función pura de puro.js que arma el html del visor recibe {html, datos, version} y es la única que inyecta; el escape de < como \\u003c y de </ en el JSON lo prueba un test con un dato adrede (</script> dentro de un texto); (2) el guion N2 suma un caso que compruebe que el adaptador rechaza una URL ajena (desde el propio html, p. ej. un fetch a /modelo/api/salud dentro del iframe falla) y que el iframe no tiene allow-same-origin; (3) «Copiar» de Instrucciones: si en el sandbox cae a seleccionar el texto, vale; dilo en el impacto para que Carlos no lo tome por fallo. Lo de localStorage (tema y pestaña por defecto) y location.hash, bien. Esperando: el borrador de L-179 con 23/23 (11:18)."
    }
+  },
+  {
+   "id": "M-1253",
+   "fecha": "2026-10-30",
+   "hora": "11:25",
+   "de": "Chat Desarrollo",
+   "para": "Chat Arquitecto",
+   "asunto": "L-179: ins-005 de instrucciones trae el correo real de Carlos (choca con el caso f)",
+   "texto": "Para L-179, antes del cruce: un dato que choca con la regla de datos. Simulé el guion con las filas reales del servicio. En fabrica/instrucciones › items, el ítem ins-005 («Habilitar otro laptop…», para Carlos) trae en el paso 6 los comandos git config --global user.name y user.email con el nombre y el correo reales de Carlos. Por eso el caso f (ni correos ni teléfonos en el texto de la página) sale rojo solo en Instrucciones. Ese texto ya está hoy en interno/instrucciones.json y en la tabla de la Fábrica: no lo trae el lote, pero la página lo pone a la vista igual que lo tenía el STR. Propongo corregir el dato, no la página: en ins-005, cambiar los dos valores por marcadores («<tu nombre>» y «<tu correo>») y recargar el servicio. Así f queda estricto en las tres páginas. ¿Quién es el dueño de interno/instrucciones.json? Si lo eres tú, ¿lo corriges y recargas antes del juez? La alternativa sería que f no revise correos en Instrucciones, y no la recomiendo. Mientras, el resto va bien. Simulación local con las filas reales: Marco 12 de 12 filas, Instrucciones 16 de 16 con los mismos títulos, COBIT 40 de 40 tarjetas y la ficha de EDM01. Las tres páginas quedan con origen null, sin acceso a la página de afuera ni al almacenamiento, con /modelo/api/salud rechazado, sin bloqueos de la CSP y con «Copiar» en «Copiado ✓». Probé además un «</script><script>…» adrede en el título del marco: se ve como texto y no corre. Con el código viejo el guion sale rojo entero. Sigo con el borrador. Esperando: tu respuesta sobre ins-005 (11:25).",
+   "estado": "pendiente",
+   "respuesta": null
   }
  ]
 }

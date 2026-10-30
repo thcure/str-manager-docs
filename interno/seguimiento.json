@@ -2628,7 +2628,7 @@
    "modulo": "MOD (sitios: sitios/comun/sistema.css)",
    "fecha": "2026-10-30",
    "titulo": "sistema.css (L-181) trae en su primer bloque del shell la línea «<style>» (rango 20–103 en vez de 21–103): el navegador descarta la regla de reinicio «* { margin: 0 … }» y el cuerpo queda con 8 px de margen",
-   "estado": "abierto",
+   "estado": "cerrado",
    "severidad": "bajo",
    "casoUso": "CU-MOD-3.1",
    "contra": "producto",
@@ -2642,13 +2642,17 @@
    "causaRaiz": "construcción",
    "debioDetectarse": "revisión previa",
    "origen": "simulación de L-182 (13:31)",
-   "nota": "13:31 Latente: en L-181 ningún sitio carga sistema.css. Se arregla en L-182 (bloque 21–103 y Y1 que no deja etiquetas de html dentro de un bloque). Lección: el rango de líneas del shell se eligió mirando el comentario y no la línea anterior.",
+   "nota": "13:31 Latente: en L-181 ningún sitio carga sistema.css. Se arregla en L-182 (bloque 21–103 y Y1 que no deja etiquetas de html dentro de un bloque). Lección: el rango de líneas del shell se eligió mirando el comentario y no la línea anterior. · 14:23 Cerrado con L-182 aceptado.",
    "prioridad": "P3",
    "decision": {
     "tipo": "lote",
     "ref": "L-182",
     "motivo": "latente hasta que los sitios carguen el sistema, que es justo L-182",
     "fecha": "2026-10-30"
+   },
+   "cierre": {
+    "lote": "L-182",
+    "prueba": "log/L-182-veredicto.json 14:21: h (84/84, aplicación literal 9/9) y g (capturas con el marco del STR, mismos fondos que el shell) en verde; a por evidencia cruzada del Arquitecto (13:58, M-1283): A2 con los ocho bloques del shell iguales usando 21–103"
    }
   }
  ],
@@ -18418,10 +18422,73 @@
    "req": "LM-79",
    "categoria": "crítico",
    "resumen": "LM-79 5.6 a': los dos sitios con el marco del STR (barra superior y lateral, tema, móvil; marco.js), ?v=s182 en todo recurso, visor con el tema del sitio (almacén en memoria), INC-215; guion LM-79-marco; ajustes en LM-79-sistema y LM-79-paridad-a/b",
-   "estado": "instalado",
-   "observacion": "Encolado 13:51. Revisor 20/24 → 24/24 (13:46); cruce delegado 13:49 (M-1279); ok JP M-1280. Esperado juez «parcial» (a del Arquitecto; g N3 según capturas). · Construido 13:54: STR b6e05b0 (84/84), fabrica-servicio 962cbea (13/13).",
+   "estado": "aceptado",
+   "observacion": "Encolado 13:51. Revisor 20/24 → 24/24 (13:46); cruce delegado 13:49 (M-1279); ok JP M-1280. Esperado juez «parcial» (a del Arquitecto; g N3 según capturas). · Construido 13:54: STR b6e05b0 (84/84), fabrica-servicio 962cbea (13/13). · a cerrado por el Arquitecto 13:58 (M-1283). · Juez 14:21: PARCIAL (c, d, e, f, g, h verde; a del Arquitecto). ACEPTADO.",
    "version": "p5c113",
-   "hash": "b6e05b0"
+   "hash": "b6e05b0",
+   "aceptacion": {
+    "lote": "L-182",
+    "hash": "b6e05b0",
+    "fecha": "2026-10-30",
+    "horaBogota": "14:21",
+    "resultado": "parcial",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "Fuera del juez: la instrucción la asigna a la verificación cruzada del Arquitecto. pruebas.json no trae la corrida de fabrica-servicio; el 13/13 solo consta en el mensaje del commit, que no es evidencia."
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: herramienta-fabrica.apartamentosbucaramanga.com como admin → admin: sitio en «lista» | si: herramienta-fabrica.apartamentosbucaramanga.com · barra superior del STR: true · barra lateral y contenido: true · variables del sistema: true | si: herramienta-fabrica.apartamentosbucaramanga.com · entradas: modelo, gobierno, mejora, herramientas, conocimiento · partes: modelo, gobierno, mejora, herramientas, conocimiento | si: herramienta-fabrica.apartamentosbucaramanga.com · recursos propios: 9 · sin ?v=s182: ninguno"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: proyectos.apartamentosbucaramanga.com como admin → admin: sitio en «lista» | si: proyectos.apartamentosbucaramanga.com · barra superior del STR: true · barra lateral y contenido: true · variables del sistema: true | si: proyectos.apartamentosbucaramanga.com · entradas: inicio, proyectos, resumen, alcance, decisiones, construccion, buzon, arquitectura, pruebas, lineabase · partes: inicio, proyectos, resumen, alcance, decisiones, construccion, buzon, arquitectura, pruebas, lineabase | si: proyectos.apartamentosbucaramanga.com · recursos propios: 10 · sin ?v=s182: ninguno | si: proyecto activo en la barra superior: «P01 · STR Manager»"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: herramienta-fabrica.apartamentosbucaramanga.com como admin → admin: sitio en «lista» | si: tema light → dark · icono 🌙 · fondo rgb(240, 244, 248) → rgb(8, 12, 20) | si: el tema vuelve a light · str-theme guardado: null → null"
+     },
+     {
+      "c": "f",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: herramienta-fabrica.apartamentosbucaramanga.com como admin → admin: sitio en «lista» | si: entrada «Conocimiento» → [\"#conocimiento\",[\"conocimiento\"],true] | si: grupo plegado: true · desplegado otra vez: true | si: móvil 390: hamburguesa true · sin desbordar true · abre [true,true] · el velo la cierra true"
+     },
+     {
+      "c": "g",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "Seis capturas, mismo tema oscuro. A 1366, la Fábrica y proyectos. tienen la barra superior del shell (logo a la izquierda, separador, botones cuadrados a la derecha con 🌙) y la barra lateral del shell (encabezado de grupo en mayúsculas con icono y ▾, entradas con icono, la marcada en morado con fondo y filete a la izquierda); mismos fondos y bordes de tarjeta que el shell. A 390, los tres muestran hamburguesa, logo y botones, con la barra lateral cerrada y sin desbordar. Lo que difiere está en § P: logo con el nombre del sitio y el proyecto, versión de los datos, Actualizar y Salir propios, sin avatar, favoritos, campana, ayuda ni aviso de Drive; versión y proyecto escondidos en el móvil."
+     },
+     {
+      "c": "h",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 84/84 archivos OK; aplicación literal 9/9 (D1, D2, E1–E7); tests/e2e/LM-79-marco.spec.js igual a la instruccion · 5 caso(s)"
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a",
+      "motivo": "La cierra el Arquitecto en la verificación cruzada (A2 «Todo igual: 19 archivos.», ocho bloques del shell iguales, run.js 13/13 en fabrica-servicio, ls-remote igual al HEAD). El juez no tiene esa evidencia; la instrucción espera «parcial» por esto."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «verde», causa null; ningún caso con ok false en entrada, n2 ni regresion. Fase completa (lote crítico): corren 36 guiones (101 casos), no corren 27. Cuarentena e inestables vacíos; sesiones sin caídas. Deuda de cobertura (regresionSeleccion.ruta.huecos): REL-29 (cola-arquitecto → MOD, POST /modelo/api/cargar con X-Modelo-Token) sin guion en la ruta. Observación sin efecto en el resultado: en las capturas, Actualizar y Salir se ven más apagados que los botones de la derecha del shell; el criterio se cumple igual y el shell no tiene esos dos botones para comparar."
+   }
   }
  ],
  "esquema": {
@@ -21664,9 +21731,9 @@
    "categoria": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 fase 5.6 b: los dos sitios con el marco del STR (barra superior y lateral por partes, tema, móvil) con marco.js; ?v=s182 en todo recurso propio; páginas del visor con el tema del sitio; INC-215; guion LM-79-marco con capturas junto al STR; ajustes en LM-79-sistema y LM-79-paridad-a/b",
-   "estado": "construido",
-   "esperaA": "juez",
-   "desde": "2026-10-30 13:55",
+   "estado": "aceptado",
+   "esperaA": null,
+   "desde": "2026-10-30 14:23",
    "estados": [
     {
      "estado": "previsto",
@@ -21683,9 +21750,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-30 13:55"
+    },
+    {
+     "estado": "aceptado",
+     "desde": "2026-10-30 14:23"
     }
    ],
-   "nota": "13:31 Borrador en claude/producto/borradores/L-182-instr-lm79-f5-6b-marco-sitios.md. Simulación: script «Todo igual: 19 archivos.», fabrica-servicio 13/13 salvo los dos de siempre, STR 84/84, K1 9/9; navegador: barra superior y lateral, tema que conmuta, anclas y marca, móvil sin desbordar, visor con el tema del sitio; LM-79-paridad-a/b y el guion nuevo verdes; con el código viejo, rojo. No se encola antes del veredicto de L-181. Revisor previo (24) en curso. · 13:47 Revisión previa: 1.ª pasada 20/24 (8 el caso e dejaba str-theme en el perfil; 12 cifras y motivo del tamaño; 23 el almacén en memoria del adaptador no estaba en Decisión; 24 capturas del STR a 390, mismo tema y diferencias 9–12 en la guía); corregido y renombrado a 5.6 a' → 24/24 a las 13:46. Pedidos cruce (con la pregunta del almacén en memoria) y ok. · 13:51:08 Cruce delegado 13:49 (respuesta a M-1279, acepta el almacén en memoria y amplía la regla 8) y ok JP M-1280 en la cabecera; sin cambios de contenido después. Encolado (cola de 1); releído en LENOVO igual byte a byte. · 13:55 Construido: STR b6e05b0 (13:51:24–13:54:54, código 0), 84/84; fabrica-servicio 962cbea («Todo igual: 19 archivos.», los ocho bloques del shell iguales con 21–103, 13/13, ls-remote = HEAD)."
+   "nota": "13:31 Borrador en claude/producto/borradores/L-182-instr-lm79-f5-6b-marco-sitios.md. Simulación: script «Todo igual: 19 archivos.», fabrica-servicio 13/13 salvo los dos de siempre, STR 84/84, K1 9/9; navegador: barra superior y lateral, tema que conmuta, anclas y marca, móvil sin desbordar, visor con el tema del sitio; LM-79-paridad-a/b y el guion nuevo verdes; con el código viejo, rojo. No se encola antes del veredicto de L-181. Revisor previo (24) en curso. · 13:47 Revisión previa: 1.ª pasada 20/24 (8 el caso e dejaba str-theme en el perfil; 12 cifras y motivo del tamaño; 23 el almacén en memoria del adaptador no estaba en Decisión; 24 capturas del STR a 390, mismo tema y diferencias 9–12 en la guía); corregido y renombrado a 5.6 a' → 24/24 a las 13:46. Pedidos cruce (con la pregunta del almacén en memoria) y ok. · 13:51:08 Cruce delegado 13:49 (respuesta a M-1279, acepta el almacén en memoria y amplía la regla 8) y ok JP M-1280 en la cabecera; sin cambios de contenido después. Encolado (cola de 1); releído en LENOVO igual byte a byte. · 13:55 Construido: STR b6e05b0 (13:51:24–13:54:54, código 0), 84/84; fabrica-servicio 962cbea («Todo igual: 19 archivos.», los ocho bloques del shell iguales con 21–103, 13/13, ls-remote = HEAD). · 13:58 a cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1283): 962cbea desplegado, index con sistema.css, tema.js en el head y ?v=s182; los dos sitios con el marco del STR tras recarga forzada; se los abre a Carlos. · Juez 14:21: PARCIAL con c, d, e, f, g (N3, capturas) y h en verde y a ya cerrado por el Arquitecto (13:58). ACEPTADO. INC-215 cerrado. Observación del juez sin efecto: Actualizar y Salir se ven más apagados que los botones del shell; deuda de cobertura REL-29 sin guion en la ruta."
   }
  ],
  "riesgos": [

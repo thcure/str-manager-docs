@@ -1,7 +1,7 @@
 # instr — L-178 · INC-214 (LM-79 fase 5, ajuste): proyectos. ya no corta la carga cuando una lectura del servicio no tiene respuesta — leer() devuelve «sin respuesta» (status 0) en vez de lanzar, y dos correcciones de documentación del STR
 Categoría: **crítico** (toca la lectura del servicio en los dos sitios de la fábrica; DA: LM-79 · cruce previo con Carlos: PENDIENTE (lo da el Arquitecto por delegación: dentro del plan, sin secretos ni roles nuevos, M-1176))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: 23/23 · subagente de Desarrollo · AAAA-MM-DD HH:MM
+Revisión previa: 23/23 · subagente de Desarrollo · 2026-10-30 09:20
 Decisión: ADR-009 (v5, § 4b y 4c, aceptada; contrato de la fase 5) y DA: LM-79; INC-214 con decisión «lote: ajuste después de 5.3, aceptado antes de 5.4» (JP, M-1221)
 Alcance: en str-manager, `tests/e2e/INC-214.spec.js` (nuevo) · `docs/claude/modelo.md` (puntero) · `docs/claude/tests-y-despliegue.md` (encabezado y una frase) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l178 (clon de fabrica-servicio, **no** es str-manager), con el script de A2: sitios/comun/sesion.js, sitios/comun/puro.js, sitios/comun/paginas.js, sitios/proyectos/proyectos.js, sitios/proyectos/vistas.js, sitios/fabrica/fabrica.js, tests/sitios-comun.test.js, tests/sitios-proyectos.test.js y docs/claude/modelo.md · `?v=` igual · `schema_version` igual · sin cambios de base de datos · no toques nada más de str-manager
 Versión: `?v=` igual · `schema_version` igual (el del modelo, 3, también)

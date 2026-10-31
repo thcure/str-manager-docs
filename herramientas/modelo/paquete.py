@@ -64,6 +64,14 @@ def complemento():
         texto = tapar(open(os.path.join(RAIZ, ruta), encoding='utf-8').read())
         filas.append({'archivo': ('fabrica/doc/' + nombre)[:64], 'clave': 'texto', 'orden': orden, 'es_lista': 0,
                       'valor': {'ruta': ruta, 'titulo': (texto.lstrip().split('\n', 1)[0].lstrip('# ').strip() or nombre), 'texto': texto}, 'extra': None})
+    # L-184 (M-1312): las ADR del proyecto P01 (str-manager-docs/decisiones/ADR-nnn-*.md) como «fabrica/proyecto/P01/doc/ADR-nnn»
+    # con clave «texto», para la sección Decisiones de proyectos.; el nombre es solo el id (ADR-nnn) para caber en 64 caracteres.
+    import glob as _glob
+    for orden, ruta in enumerate(sorted(_glob.glob(os.path.join(RAIZ, 'str-manager-docs/decisiones/ADR-*.md')))):
+        rel = os.path.relpath(ruta, RAIZ).replace(os.sep, '/'); nombre = os.path.basename(ruta)[:7]
+        texto = tapar(open(ruta, encoding='utf-8').read())
+        filas.append({'archivo': 'fabrica/proyecto/P01/doc/' + nombre, 'clave': 'texto', 'orden': orden, 'es_lista': 0,
+                      'valor': {'ruta': rel, 'titulo': (texto.lstrip().split('\n', 1)[0].lstrip('# ').strip() or nombre), 'texto': texto}, 'extra': None})
     # 5.2c (M-1194): páginas generadas del repo de documentos para proyectos. (el explorador de la línea base, LM-82, y el mapa
     # del STR, LM-40), como «fabrica/pagina/<nombre>» con clave «html»: proyectos. las muestra en un iframe aislado (srcdoc),
     # como hoy el STR. Son páginas públicas del repo (sin datos del negocio); el export las deja fuera con el resto de fabrica/*.

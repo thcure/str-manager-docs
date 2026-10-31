@@ -39,23 +39,44 @@ buzon = {'pendientes': [{'id': m['id'], 'hora': m['hora'], 'de': m['de'], 'para'
          'enCurso': len(encurso), 'hoy': len(hoyms),
          'ultimos': [{'id': m['id'], 'hora': m['hora'], 'de': m['de'], 'para': m['para'], 'asunto': corto(m['asunto'], 90), 'estado': m['estado']} for m in ms[-8:]],
          'ultimo': {'id': ms[-1]['id'], 'hora': ms[-1]['hora']}}
-# ── agentes: qué hace cada chat según el buzón ──
+# ── agentes: por encargos, no por actividad (Carlos 30-oct: «deben responder el cierre o el fallo de la última tarea asignada») ──
+# Para cada chat: su último encargo recibido por el buzón (mensaje dirigido a él) y cómo lo reportó: cerrado (respuesta «hecho»),
+# en curso (acusó y sigue), bloqueado/fallo (la respuesta lo dice) o sin reporte (pendiente, con la edad). Y qué espera él de otros.
 CHATS = ['Chat Arquitecto', 'Chat Desarrollo', 'Chat Jefe de proyecto', 'Chat Diseño', 'Carlos']
 def minutos(h):
     try: hh, mm = h.split(':'); return int(hh) * 60 + int(mm)
     except Exception: return None
+ahora_min = ahora.hour * 60 + ahora.minute
+def edad(m):
+    if m.get('fecha') != hoy: return 24 * 60
+    x = minutos(m.get('hora') or ''); return (ahora_min - x) if x is not None else 0
 agentes = []
 for ch in CHATS:
-    envia = [m for m in hoyms if m['de'] == ch]; recibe = [m for m in pend if m['para'] == ch]
-    ult = envia[-1] if envia else None
-    ult_resp = max([m for m in hoyms if isinstance(m.get('respuesta'), dict) and m['respuesta'].get('de') == ch], key=lambda m: m['respuesta'].get('hora', ''), default=None)
-    hora = max([x for x in [ult and ult['hora'], ult_resp and ult_resp['respuesta'].get('hora')] if x] or ['—'])
-    esp = re.search(r'Esperando:\s*([^(]{3,90})', (ult['texto'] if ult and ult['estado'] != 'hecho' else '') or '')
-    if recibe: estado, que = 'debe responder', recibe[-1]['id'] + ' · ' + corto(recibe[-1]['asunto'], 70)
-    elif ult and ult['estado'] != 'hecho' and esp: estado, que = 'espera', 'espera: ' + esp.group(1).strip()
-    elif hora != '—' and minutos(hora) is not None and (ahora.hour * 60 + ahora.minute) - minutos(hora) < 45: estado, que = 'trabaja', 'último: ' + (ult or ult_resp)['id'] + ' ' + hora
-    else: estado, que = 'quieto', 'sin movimiento hoy' if hora == '—' else 'último movimiento ' + hora
-    agentes.append({'chat': ch, 'estado': estado, 'que': que, 'hora': hora})
+    recibidos = [m for m in ms if m['para'] == ch]
+    pend_mios = [m for m in recibidos if m['estado'] == 'pendiente']
+    ult = pend_mios[0] if pend_mios else (recibidos[-1] if recibidos else None)   # lo pendiente más viejo manda sobre lo último cerrado
+    enviados_abiertos = [m for m in ms if m['de'] == ch and m['estado'] != 'hecho']
+    if not ult:
+        estado, que, hora = 'sin encargo', 'nadie le ha pedido nada por el buzón', '—'
+    else:
+        r = ult.get('respuesta') or {}; txt = (r.get('texto') or '').strip(); e = edad(ult)
+        if ult['estado'] == 'hecho' and r:
+            bajo = txt.lower()
+            fallo = bool(re.match(r'(no (se )?(pudo|hice|corr[ií]|logr)|bloqueado|fallo|fall[óo])', bajo)) or ' no la corr' in bajo[:80]
+            estado = 'falló' if fallo else 'cerró'; hora = r.get('hora') or ult['hora']
+            que = f"{ult['id']} de {ult['de'].replace('Chat ', '')} ({ult['hora']}): «{corto(txt, 90)}»"
+        elif ult['estado'] == 'en curso':
+            estado, hora = 'en curso', ult['hora']; que = f"{ult['id']} de {ult['de'].replace('Chat ', '')} ({ult['hora']}): {corto(ult['asunto'], 80)}"
+        else:
+            estado = 'sin reporte' if e >= 30 else 'recién asignado'; hora = ult['hora']
+            que = f"{ult['id']} de {ult['de'].replace('Chat ', '')} hace {e // 60} h {e % 60} min: {corto(ult['asunto'], 80)}" if e >= 60 else f"{ult['id']} de {ult['de'].replace('Chat ', '')} hace {e} min: {corto(ult['asunto'], 80)}"
+    espera = []
+    for m in enviados_abiertos[-3:]:
+        es = re.search(r'Esperando:\s*([^(]{3,80})', m.get('texto') or '')
+        espera.append(m['id'] + ' → ' + m['para'].replace('Chat ', '') + (' · ' + es.group(1).strip() if es else ''))
+    viejos = [m for m in enviados_abiertos if m.get('fecha') != hoy]
+    agentes.append({'chat': ch, 'estado': estado, 'que': que, 'hora': hora, 'espera': espera, 'ultimoEncargo': ult and ult['id'], 'pendientesRecibidos': len(pend_mios),
+                    'abiertosSuyos': len(enviados_abiertos), 'abiertosViejos': len(viejos), 'masViejo': viejos[0]['id'] + ' (' + viejos[0]['fecha'] + ')' if viejos else None})
 # ── plan LM-79 (desde la base del artefacto del plan, si se pasó la carpeta) ──
 plan = None
 if PLANDB != '-' and os.path.isdir(os.path.join(PLANDB, 'pasos')):

@@ -85,3 +85,22 @@ Resumen: los nueve procesos de la fábrica **existen**; dos tienen su documento 
 ## 7. Decisión de Carlos sobre el nivel 1 (31-oct 13:1x)
 
 **PMI se mantiene** como marco del nivel 1 (ADR-009): los proyectos se enmarcan en los cinco grupos de procesos del PMI (inicio, planificación, ejecución, monitoreo y control, cierre). Que hoy ni Diseño ni el JP lo apliquen no es una contradicción sino el estado esperado: la capa de proyectos se definió hace poco (el modelo «siguió subiendo de nivel») y **casi todo en ella está por definir**. Consecuencias para el modelo: (a) la sección `marcos` dice nivel 1 = PMI, estado «definido, por formalizar», con sus cinco grupos como estructura y P1–P4 como puertas previstas; (b) ISO 21502 queda como referencia de vocabulario (artefacto «Elección de términos», elige Carlos) y no como marco; (c) ADR-009 se corrige solo en la frase «Fábrica (COBIT)» → «Fábrica (ciclo de vida 12207, gobernada con COBIT)»; (d) ninguna guardia exige todavía fases ni puertas de proyecto: se escribirán cuando el proceso del nivel 1 se formalice (con el método MJ-17, P02 como prueba). Siguen abiertas las decisiones 2 (APO06.05) y 3 (DA-61/62).
+
+## 8. «Desfasada» no es lo mismo que «parcial o personalizada» (Carlos, 31-oct 13:2x)
+
+Tiene razón: el cruce de § 2 juzga por fecha y LM, y una ficha puede estar «atrás» porque la adopción fue parcial o adaptada a propósito. Releídas con las respuestas de los chats, las ocho se separan así:
+
+| Ficha | Afirmaciones **falsas** (contradicen la práctica real) | Solo **incompleta** (falta lo nuevo; puede ser adopción parcial legítima) |
+|---|---|---|
+| BAI02 | `requerimientos-consolidado.md`; «el dueño aprueba al autorizar el lote»; BAI02.02 «off» | trazabilidad REQ ↔ CU, N1–N4, tres modos, 29148 |
+| BAI03 | .07 cita PRUEBAS-v1; .06 «réplicas de Node» | revisor de 24 puntos, `linea-base --lote`, simulación local |
+| BAI06 | .01 «cruce del commit antes de desplegar»; .03 estados del modelo v1 | cruce delegado, excepción M-1264 |
+| BAI11 | 11.02 «ficha en estado-proyecto.md»; 11.09 «posimplementación en proceso-cambios.md» | tandas, pausas con excepciones, ficha de tanda, METRICAS |
+| DSS02 (.04/.07) | `patrones-codigo.md` (no existe); `estado-proyecto.md § 5` | — |
+| BAI10 | — | proceso 0, línea objetivo, C1–C11/O1–O3, explorador |
+| BAI07 | — | los tres caminos de aceptación (LM-88), puerta de independencia |
+| BAI08 | — | LM-69/70 (piezas, tipos Diátaxis, lecciones con destino) |
+| APO08 | — (una referencia dudosa a la ficha BAI11-d) | tres modos de Diseño, regla 17 |
+| MEA01.02 | marcada «ok» con metas no acordadas | — |
+
+Consecuencia para el modelo: cada práctica de `cobit.json` declara su **grado**: `adoptada` (tal cual), `adaptada` (cómo difiere y por qué), `parcial` (qué parte y qué se dejó fuera, con motivo) o `fuera` (por qué a esta escala). Así una adopción personalizada queda escrita y no parece desfase. La guardia R-cobit solo señala lo **falso** —ruta que no existe, estado fuera de la lista cerrada, LM o versión superados, objetivo «ok» con prácticas pendientes— y no lo incompleto. Eso corrige también la lectura de § 2: hoy son **4 fichas con afirmaciones falsas** (más dos rutas en DSS02 y una marca en MEA01) y **4 incompletas** que pueden ser adopción parcial si se declara.

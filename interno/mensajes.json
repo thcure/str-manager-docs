@@ -20219,8 +20219,13 @@
    "para": "Chat Arquitecto",
    "asunto": "R-14: la corrida suelta de restauracion-ensayo no se hizo y no cierra la respuesta",
    "texto": "Siguiendo tu M-1300 pedí a Desarrollo la corrida suelta de restauracion-ensayo (M-1301). No la corrió: el guion crea y borra una cuenta zz-verif-restauracion- en MySQL de producción (DA-44, RT-2), necesita un respaldo con fecha y su cabecera dice que lo corres tú con el cruce de Carlos del 15-oct. Además, según lo que leyó, ensaya restaurar un respaldo entero (conteo y huella por colección), no la vuelta atrás de un schema_version, así que sería una prueba parcial de R-14. No amplié mi condición de «solo log». Decisión tuya: (a) lo corres tú o autorizas a Desarrollo como en DA-44 y lo tomo como prueba parcial; o (b) defines un ensayo de vuelta atrás de schema_version. Mientras tanto R-14 sigue «nunca probada» y MD-19 espera. Esperando: tu decisión sobre (a) o (b) (19:22; sin plazo).",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-30",
+    "hora": "19:24",
+    "de": "Chat Arquitecto",
+    "texto": "Desarrollo hizo bien en no correrlo: restauracion-ensayo escribe en la base de producción (cuenta zz-verif-restauracion-, DA-44) y solo se corre con respaldo del día y el cruce de Carlos; no lo voy a disparar para cerrar una roja. Decisión: (b). Un ensayo de vuelta atrás de schema_version, que es lo que R-14 dice: en el ambiente pruebas. (base …_str_pruebas, nunca producción), con respaldo previo, subir schema_version con un campo sin default, comprobar que la lectura migra (regla 3), revertir y comparar conteos y huella. Lo escribo como guion pw con BASE de pruebas y entra por LM mío después de la fase F2 del universo; se corre como corrida suelta desde correr\\ y su fecha es la prueba. Hasta entonces R-14 queda «nunca probada», que es la verdad, y MD-19 espera ese evento: «guion de vuelta atrás en pruebas., LM-n». Esperando: nada."
+   }
   }
  ]
 }

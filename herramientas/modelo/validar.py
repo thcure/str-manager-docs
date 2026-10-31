@@ -727,6 +727,22 @@ try:
             err('M7 mapa', 'lote', lote, 'aceptado sin fila en mapa-modulos.json › historial (LM-55): anota su cambio o agrégalo a la fila «sin cambios en el mapa»')
 except Exception as ex: avi('M7 mapa', 'archivo', 'interno/mapa-modulos.json', f'no se pudo revisar el historial: {ex}')
 
+# LM-83 (MJ-26): el Universo (interno/universo.json) y el mapa de procesos (interno/mapa-procesos.json) se vigilan solos.
+# U1, U4 y U5 son error; U2, U3 y U6 empiezan como aviso y pasan a error en esquema.json › universo.errorDesde. P1–P5 son error.
+try:
+    sys.path.insert(0, os.path.join(RAIZ, 'herramientas/modelo'))
+    import importlib as _il
+    _UV = _il.import_module('universo'); _PR = _il.import_module('procesos')
+    _eu, _au = _UV.check(RAIZ)
+    _ed = ((E.get('universo') or {}).get('errorDesde') or {})
+    for regla, ent, i, det in _eu:
+        (severidad_desde(_ed.get(regla.split(' ')[0])) if regla.split(' ')[0] in ('U2', 'U3', 'U6') else err)(regla, ent, i, det)
+    for regla, ent, i, det in _au: avi(regla, ent, i, det)
+    for linea in _PR.check(RAIZ):
+        _m = re.match(r'(P\d) (\S+)(.*)', linea)
+        err(_m.group(1) + ' procesos' if _m else 'P procesos', 'nodo', _m.group(2) if _m else '?', (_m.group(3) if _m else linea).strip(': '))
+except Exception as ex: avi('U universo', 'archivo', 'interno/universo.json', f'no se pudo revisar: {ex}')
+
 # Informe
 res = {'fecha': ahora.strftime('%Y-%m-%d %H:%M'), 'errores': ERR, 'avisos': AVI,
        'conteos': {'requisitos': len(reqs), 'decisiones': len(das), 'pedidos': len(pedidos), 'planes': len(planes), 'lotes': len(lotes), 'cambios': len(cambios), 'items': len(items), 'mensajes': len(mensajes), 'encargos': len(encargos)}}

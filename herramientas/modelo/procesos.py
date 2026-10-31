@@ -4,16 +4,17 @@
 #       python3 -I herramientas/modelo/procesos.py <raiz> --pagina <salida>  (herramientas/paginas/mapa-procesos.html)
 # Fuente única: interno/mapa-procesos.json. Las piezas se cruzan con interno/universo.json cuando existe.
 import json, sys, os, html
-RAIZ = sys.argv[1] if len(sys.argv) > 1 else '.'
-M = json.load(open(os.path.join(RAIZ, 'interno/mapa-procesos.json'), encoding='utf-8'))
-N = {n['id']: n for n in M['nodos']}
-PIEZAS = set()
-up = os.path.join(RAIZ, 'interno/universo.json')
-if os.path.exists(up):
-    PIEZAS = {p['id'] for p in json.load(open(up, encoding='utf-8'))['piezas']}
-EV = {e['id']: e for e in M['eventos']}
+M = N = PIEZAS = EV = None
+def cargar(raiz):
+    global M, N, PIEZAS, EV
+    M = json.load(open(os.path.join(raiz, 'interno/mapa-procesos.json'), encoding='utf-8'))
+    N = {n['id']: n for n in M['nodos']}
+    up = os.path.join(raiz, 'interno/universo.json')
+    PIEZAS = {p['id'] for p in json.load(open(up, encoding='utf-8'))['piezas']} if os.path.exists(up) else set()
+    EV = {e['id']: e for e in M['eventos']}
 
-def check():
+def check(raiz='.'):
+    cargar(raiz)
     err = []
     for n in M['nodos']:
         if n['nivel'] != 'N0' and n.get('padre') not in N: err.append(f"P1 {n['id']}: padre «{n.get('padre')}» no existe")
@@ -50,7 +51,8 @@ def check():
         if n['nivel'] in ('N1', 'N2') and not hijos.get(n['id']) and n.get('estado') != 'sin detallar': err.append(f"P5 {n['id']}: sin procedimientos (N3) y no está marcado «sin detallar»")
     return err
 
-def pagina(salida):
+def pagina(raiz, salida):
+    cargar(raiz)
     hijos = {}
     for n in M['nodos']: hijos.setdefault(n.get('padre'), []).append(n['id'])
     def esc(s): return html.escape(str(s or ''))
@@ -117,9 +119,10 @@ window.addEventListener('hashchange',ir);pintar();ir();}})();
     open(salida, 'w', encoding='utf-8').write(doc)
     print('página', salida, len(doc) // 1024, 'KB', len(M['nodos']), 'nodos')
 
-if '--check' in sys.argv:
-    e = check()
-    for x in e: print(x)
-    print('## Errores:', len(e)); sys.exit(1 if e else 0)
-if '--pagina' in sys.argv:
-    pagina(sys.argv[sys.argv.index('--pagina') + 1])
+if __name__ == '__main__':
+    raiz = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else '.'
+    if '--pagina' in sys.argv: pagina(raiz, sys.argv[sys.argv.index('--pagina') + 1])
+    if '--check' in sys.argv or '--pagina' not in sys.argv:
+        e = check(raiz)
+        for x in e: print(x)
+        print('## Errores:', len(e)); sys.exit(1 if e else 0)

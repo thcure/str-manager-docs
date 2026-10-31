@@ -1,0 +1,3759 @@
+{
+ "version": "0.1",
+ "estado": "borrador 0.1: N2 y N3 con las etapas de los cuatro chats (M-1294/1295/1296 y planes); N4 (pasos) pendiente; N1 sin detallar hasta la metodología de proyectos (ADR-009 §5)",
+ "fecha": "2026-10-30",
+ "escritor": "Arquitecto (capa Marco)",
+ "que": "Mapa de procesos del universo por niveles (N0 portafolio · N1 proyecto · N2 proceso de la fábrica · N3 procedimiento · N4 paso). La salida de un nodo es el disparador de otro. Sucede a marco-trabajo.json. Modelo: claude/marco/universo-modelo.md; plan: claude/marco/plan-universo-2026-10.md.",
+ "niveles": {
+  "N0": "portafolio (APO05)",
+  "N1": "proyecto (PMI: inicio, planificación, ejecución, monitoreo y control, cierre)",
+  "N2": "proceso de la fábrica (los nueve, 12207)",
+  "N3": "procedimiento (etapas de un proceso)",
+  "N4": "paso (una fila de trabajo con herramienta)"
+ },
+ "eventos": [
+  {
+   "id": "necesidad de software",
+   "que": "una idea, un cliente o una nueva fase de un producto",
+   "origen": "externo"
+  },
+  {
+   "id": "proyecto admitido",
+   "que": "puerta P1: acta aprobada y proyecto en el portafolio"
+  },
+  {
+   "id": "línea base aprobada",
+   "que": "puerta P2"
+  },
+  {
+   "id": "listo para entregar",
+   "que": "puerta P3"
+  },
+  {
+   "id": "proyecto cerrado",
+   "que": "puerta P4",
+   "terminal": true
+  },
+  {
+   "id": "hito firmado",
+   "que": "Carlos acepta un entregable"
+  },
+  {
+   "id": "pedido de Carlos",
+   "que": "Carlos pide algo en el chat (P-n)",
+   "origen": "externo"
+  },
+  {
+   "id": "REQ listo para construir",
+   "que": "Diseño entrega un REQ validado (M-n)"
+  },
+  {
+   "id": "DA decidida",
+   "que": "Carlos decidió una decisión de alcance"
+  },
+  {
+   "id": "respuesta de Carlos",
+   "que": "Carlos contesta una pregunta (chat, Panel o buzón)",
+   "origen": "externo"
+  },
+  {
+   "id": "pregunta a Carlos",
+   "que": "un chat le pide una sola decisión"
+  },
+  {
+   "id": "ítem en lista",
+   "que": "el JP agregó una fila a trabajo[]"
+  },
+  {
+   "id": "ítem libre",
+   "que": "primer ítem que no espera DA, cruce ni ok"
+  },
+  {
+   "id": "tanda abierta",
+   "que": "T-n abierta con entra[]"
+  },
+  {
+   "id": "tanda cerrada",
+   "que": "T-n con hasta, salio[] y ficha"
+  },
+  {
+   "id": "pausa ordenada",
+   "que": "Carlos ordena pausa o excepción"
+  },
+  {
+   "id": "límite superado",
+   "que": "la ficha muestra un umbral pasado"
+  },
+  {
+   "id": "lote previsto",
+   "que": "fila en plan[] «previsto»"
+  },
+  {
+   "id": "simulación verde",
+   "que": "cambio probado en el contenedor de Desarrollo"
+  },
+  {
+   "id": "instrucción redactada",
+   "que": "borrador L-n con cabecera completa"
+  },
+  {
+   "id": "revisión 24/24",
+   "que": "el revisor previo pasó los 24 puntos"
+  },
+  {
+   "id": "cruce y ok dados",
+   "que": "cruce delegado del Arquitecto y ok del JP (críticos)"
+  },
+  {
+   "id": "instrucción encolada",
+   "que": "L-n en la raíz de la cola"
+  },
+  {
+   "id": "lote construido",
+   "que": "la CLI terminó: commit y push; Hostinger desplegó"
+  },
+  {
+   "id": "construido registrado",
+   "que": "plan[] construido; evidencia al Arquitecto"
+  },
+  {
+   "id": "pruebas corridas",
+   "que": "pruebas.json y capturas en log\\"
+  },
+  {
+   "id": "veredicto emitido",
+   "que": "L-n-veredicto.json escrito por el juez"
+  },
+  {
+   "id": "criterio a cerrado",
+   "que": "el Arquitecto cerró a (lotes del servicio)"
+  },
+  {
+   "id": "lote aceptado",
+   "que": "cambios[] aceptado; el lote entra al producto"
+  },
+  {
+   "id": "lote no aceptado",
+   "que": "rojo o bloqueado"
+  },
+  {
+   "id": "reprueba pedida",
+   "que": ".txt en reprobar\\, rejuzgar\\ o correr\\"
+  },
+  {
+   "id": "INC registrado",
+   "que": "incs[] con prioridad y causa"
+  },
+  {
+   "id": "INC decidido",
+   "que": "el JP decidió tipo de lote, bolsa o pospuesto"
+  },
+  {
+   "id": "INC cerrado",
+   "que": "cierre con lote y prueba",
+   "terminal": true
+  },
+  {
+   "id": "DT registrada",
+   "que": "deuda técnica abierta"
+  },
+  {
+   "id": "PRB abierto",
+   "que": "varios INC con la misma causa"
+  },
+  {
+   "id": "revisión de incidente hecha",
+   "que": "revisión sin culpables en 48 h"
+  },
+  {
+   "id": "escape con destino",
+   "que": "lo que debió detectarse va a un punto del revisor o a una guardia"
+  },
+  {
+   "id": "pieza identificada",
+   "que": "una pieza nueva tiene fila (ficha, índice, universo)"
+  },
+  {
+   "id": "línea base actualizada",
+   "que": "linea-base.py --lote y fotos tras un lote aceptado"
+  },
+  {
+   "id": "estado registrado",
+   "que": "reporte de estado de la configuración (ficha, explorador)"
+  },
+  {
+   "id": "auditoría hecha",
+   "que": "realidad comparada con la línea base",
+   "terminal": true
+  },
+  {
+   "id": "decisión registrada",
+   "que": "ADR con contexto, opciones, decisor y revisarCuando"
+  },
+  {
+   "id": "fila del mapa puesta",
+   "que": "mapa-modulos › historial con el lote (M7)"
+  },
+  {
+   "id": "evaluación hecha",
+   "que": "evaluación de arquitectura por evento",
+   "terminal": true
+  },
+  {
+   "id": "riesgo registrado",
+   "que": "R-n en riesgos[]"
+  },
+  {
+   "id": "ficha generada",
+   "que": "ficha de tanda con semáforo"
+  },
+  {
+   "id": "roja repetida",
+   "que": "una fila roja repite respecto a la ficha anterior"
+  },
+  {
+   "id": "metas fijadas",
+   "que": "metas[] fijadas con Carlos",
+   "terminal": true
+  },
+  {
+   "id": "riesgo materializado",
+   "que": "un INC coincide con un R-n",
+   "terminal": true
+  },
+  {
+   "id": "lección registrada",
+   "que": "lecciones[] con destino"
+  },
+  {
+   "id": "lección madura",
+   "que": "una práctica funcionó en dos proyectos",
+   "terminal": true
+  },
+  {
+   "id": "traspaso escrito",
+   "que": "traspaso renovado",
+   "terminal": true
+  },
+  {
+   "id": "mensaje enviado",
+   "que": "M-n pendiente en mensajes.json"
+  },
+  {
+   "id": "chat despertado",
+   "que": "el despertador dejó «Revisa el buzón…»"
+  },
+  {
+   "id": "relevo de chat",
+   "que": "un chat nuevo reemplaza a otro (lo abre Carlos)",
+   "origen": "externo"
+  },
+  {
+   "id": "mejora adoptada",
+   "que": "Carlos adopta MJ-n",
+   "origen": "externo"
+  },
+  {
+   "id": "LM instalado",
+   "que": "cambio del modelo instalado con validar en 0",
+   "terminal": true
+  },
+  {
+   "id": "cómo vamos pedido",
+   "que": "Carlos pide el estado",
+   "origen": "externo"
+  },
+  {
+   "id": "INC en producción",
+   "que": "Carlos o el Arquitecto avisan algo visto en producción",
+   "origen": "externo"
+  }
+ ],
+ "nodos": [
+  {
+   "id": "PF",
+   "nivel": "N0",
+   "padre": null,
+   "nombre": "Portafolio de proyectos",
+   "rol": "DU (patrocinador) · AP (PMO)",
+   "disparador": {
+    "evento": "necesidad de software",
+    "de": "Carlos o un cliente"
+   },
+   "entradas": [
+    "json-proyectos"
+   ],
+   "hace": "decide qué proyectos existen, con qué prioridad y puertas; registra cada uno en proyectos.json con sus herramientas",
+   "salidas": {
+    "piezas": [
+     "json-proyectos"
+    ],
+    "evento": "proyecto admitido"
+   },
+   "siguiente": [
+    "P01.ini"
+   ],
+   "bifurca": [],
+   "retorno": null,
+   "guardias": [],
+   "herramientas": [
+    "json-proyectos"
+   ],
+   "fuente": "ADR-008, ADR-009 v5 §1",
+   "estado": "APO05 ligero; BAI01 cuando haya cuatro proyectos"
+  },
+  {
+   "id": "P01.ini",
+   "nivel": "N1",
+   "padre": "PF",
+   "nombre": "Inicio del proyecto (acta)",
+   "rol": "DU decide · AN gerente",
+   "disparador": {
+    "evento": "proyecto admitido",
+    "de": "PF"
+   },
+   "entradas": [
+    "json-proyectos"
+   ],
+   "hace": "acta de constitución: propósito, patrocinador, gerente, alcance alto, criterios de éxito, presupuesto; alta en la fábrica (id, repos, ambientes, semilla, chats)",
+   "salidas": {
+    "piezas": [
+     "json-proyectos",
+     "repo-str-manager",
+     "ambientes-str"
+    ],
+    "evento": "proyecto admitido"
+   },
+   "siguiente": [
+    "P01.pla"
+   ],
+   "bifurca": [],
+   "retorno": "PF",
+   "guardias": [],
+   "herramientas": [
+    "plantilla-adr-md"
+   ],
+   "fuente": "ADR-009 §2; P01: D5 pendiente (acta desde lo construido)",
+   "estado": "sin detallar"
+  },
+  {
+   "id": "P01.pla",
+   "nivel": "N1",
+   "padre": "PF",
+   "nombre": "Planificación (línea base del proyecto)",
+   "rol": "AN gerente · DU aprueba",
+   "disparador": {
+    "evento": "proyecto admitido",
+    "de": "P01.ini"
+   },
+   "entradas": [
+    "json-diseno",
+    "json-proyecto"
+   ],
+   "hace": "línea base: alcance (REQ), hitos con entregable, costo, riesgos, plan de comunicación; pide a la fábrica REQ y DA con sus plantillas",
+   "salidas": {
+    "piezas": [
+     "json-diseno",
+     "json-proyecto"
+    ],
+    "evento": "línea base aprobada"
+   },
+   "siguiente": [
+    "P01.eje"
+   ],
+   "bifurca": [
+    {
+     "si": "un REQ nuevo o cambio de alcance",
+     "a": "F1"
+    }
+   ],
+   "retorno": "PF",
+   "guardias": [],
+   "herramientas": [
+    "plantilla-requerimiento-md"
+   ],
+   "fuente": "ADR-009 §2; hoy: planes PT-n del JP y REQ de Diseño",
+   "estado": "sin detallar"
+  },
+  {
+   "id": "P01.eje",
+   "nivel": "N1",
+   "padre": "PF",
+   "nombre": "Ejecución (entregables por hito)",
+   "rol": "AN gerente · fábrica construye",
+   "disparador": {
+    "evento": "línea base aprobada",
+    "de": "P01.pla"
+   },
+   "entradas": [
+    "json-diseno",
+    "json-proyecto"
+   ],
+   "hace": "cada REQ pasa por la fábrica: instrucción → cola → CLI → pruebas → juez → lote aceptado → desplegado; cada hito lo firma Carlos",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "hito firmado"
+   },
+   "siguiente": [
+    "P01.mon"
+   ],
+   "bifurca": [
+    {
+     "si": "REQ listo",
+     "a": "F2"
+    },
+    {
+     "si": "INC en producción",
+     "a": "F5"
+    }
+   ],
+   "retorno": "PF",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "ADR-009 §2",
+   "estado": "sin detallar"
+  },
+  {
+   "id": "P01.mon",
+   "nivel": "N1",
+   "padre": "PF",
+   "nombre": "Monitoreo y control (transversal)",
+   "rol": "JP · AN · DU",
+   "disparador": {
+    "evento": "hito firmado",
+    "de": "P01.eje"
+   },
+   "entradas": [
+    "json-proyecto",
+    "jp-fichas-archivo",
+    "json-metricas"
+   ],
+   "hace": "informe de avance, control de cambios de la línea base (DA), riesgos, gasto; métricas del servicio, INC y situaciones",
+   "salidas": {
+    "piezas": [
+     "jp-fichas-archivo",
+     "json-riesgos"
+    ],
+    "evento": "listo para entregar"
+   },
+   "siguiente": [
+    "P01.cie"
+   ],
+   "bifurca": [
+    {
+     "si": "cambio de alcance, costo o hitos",
+     "a": "F1"
+    },
+    {
+     "si": "tanda cerrada",
+     "a": "F7"
+    }
+   ],
+   "retorno": "PF",
+   "guardias": [
+    "F9",
+    "Rg6"
+   ],
+   "herramientas": [
+    "modelo-ficha-semanal-py"
+   ],
+   "fuente": "ADR-009 §2; hoy: tandas, fichas y «¿cómo vamos?» del JP",
+   "estado": "sin detallar"
+  },
+  {
+   "id": "P01.cie",
+   "nivel": "N1",
+   "padre": "PF",
+   "nombre": "Cierre del proyecto",
+   "rol": "DU cierra · AN",
+   "disparador": {
+    "evento": "listo para entregar",
+    "de": "P01.mon"
+   },
+   "entradas": [
+    "json-seguimiento",
+    "json-conocimiento"
+   ],
+   "hace": "aceptación final, transferencia (repos, credenciales, dominio, documentación), acta de cierre, lecciones a la fábrica; archivo en el servicio",
+   "salidas": {
+    "piezas": [
+     "json-conocimiento"
+    ],
+    "evento": "proyecto cerrado"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "PF",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "ADR-009 §2",
+   "estado": "sin detallar"
+  },
+  {
+   "id": "F1",
+   "nivel": "N2",
+   "padre": "P01.pla",
+   "nombre": "1 · Requerimientos (Definición de requisitos, 12207 6.4.2–6.4.3): escucha, revisión de alcance y REQ",
+   "rol": "AN (Diseño) con DU",
+   "disparador": {
+    "evento": "pedido de Carlos",
+    "de": "Carlos en el chat de Diseño; o P01.pla"
+   },
+   "entradas": [
+    "json-diseno",
+    "linea-base-funcional",
+    "plantilla-requerimiento-md"
+   ],
+   "hace": "tres modos: escucha (E), revisión de alcance con línea objetivo (R) y requerimiento con DA (C), hasta «listo para construir»",
+   "salidas": {
+    "piezas": [
+     "diseno-listas",
+     "docs-requerimientos-tema",
+     "linea-objetivo-inv"
+    ],
+    "evento": "REQ listo para construir"
+   },
+   "siguiente": [
+    "F2"
+   ],
+   "bifurca": [
+    {
+     "si": "toca decisión de datos, dinero o seguridad",
+     "a": "F1.C2"
+    }
+   ],
+   "retorno": "P01.pla",
+   "guardias": [
+    "Q1–Q8"
+   ],
+   "herramientas": [
+    "modelo-ubicar-py",
+    "modelo-objetivo-py"
+   ],
+   "fuente": "plan-proceso-1 (proyecto de Claude); Diseño M-1294"
+  },
+  {
+   "id": "F2",
+   "nivel": "N2",
+   "padre": "P01.eje",
+   "nombre": "2 · Orden del trabajo (Evaluación y control del proyecto, 6.3.2)",
+   "rol": "JP",
+   "disparador": {
+    "evento": "REQ listo para construir",
+    "de": "F1 (M-n), INC decidido, DT con plazo, LM con ok, orden de Carlos"
+   },
+   "entradas": [
+    "json-proyecto",
+    "json-diseno",
+    "json-seguimiento",
+    "json-mensajes"
+   ],
+   "hace": "lista con clase y prioridad, tandas con límites, pausas; dice qué está libre",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "ítem libre"
+   },
+   "siguiente": [
+    "F3"
+   ],
+   "bifurca": [
+    {
+     "si": "pausa de Carlos",
+     "a": "F2.6"
+    },
+    {
+     "si": "límite superado",
+     "a": "F2.5"
+    }
+   ],
+   "retorno": "P01.eje",
+   "guardias": [
+    "F1–F7"
+   ],
+   "herramientas": [
+    "modelo-flujo-py",
+    "modelo-ficha-semanal-py"
+   ],
+   "fuente": "plan-proceso-2; JP M-1295"
+  },
+  {
+   "id": "F3",
+   "nivel": "N2",
+   "padre": "P01.eje",
+   "nombre": "3 · Construcción y cambio (Implementación e integración, 6.4.7–6.4.8)",
+   "rol": "Desarrollo (ASw, GCa) · CLI (DV)",
+   "disparador": {
+    "evento": "ítem libre",
+    "de": "F2 (trabajo[] libre) o brief/LM del Arquitecto"
+   },
+   "entradas": [
+    "json-diseno",
+    "repo-str-manager",
+    "plantilla-instruccion-md",
+    "plantilla-revisor-previo"
+   ],
+   "hace": "del REQ a un lote construido y desplegado: instrucción, revisor previo, cruce y ok, cola, CLI, push",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote",
+     "json-seguimiento",
+     "repo-str-manager"
+    ],
+    "evento": "lote construido"
+   },
+   "siguiente": [
+    "F4"
+   ],
+   "bifurca": [
+    {
+     "si": "crítico",
+     "a": "F3.5"
+    },
+    {
+     "si": "hallazgo al simular",
+     "a": "F5.3"
+    }
+   ],
+   "retorno": "P01.eje",
+   "guardias": [
+    "K1–K9",
+    "guardias de la cola",
+    "hooks"
+   ],
+   "herramientas": [
+    "cola-str-instr",
+    "ejecutar-cola",
+    "herramienta-hooks-cli"
+   ],
+   "fuente": "plan-proceso-3 (proyecto de Claude); Desarrollo M-1296"
+  },
+  {
+   "id": "F4",
+   "nivel": "N2",
+   "padre": "P01.eje",
+   "nombre": "4 · Verificación y aceptación (6.4.9, 6.4.11; PRUEBAS-v2)",
+   "rol": "cola · pw · juez · Desarrollo registra · AP cierra a",
+   "disparador": {
+    "evento": "lote construido",
+    "de": "F3 (push; la cola sigue sola)"
+   },
+   "entradas": [
+    "pw-probar-lote",
+    "guiones-e2e-str",
+    "herramienta-juez"
+   ],
+   "hace": "pruebas sobre el commit del lote, veredicto del juez, cierre; quien construye no acepta",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento",
+     "doc-log-lote"
+    ],
+    "evento": "lote aceptado"
+   },
+   "siguiente": [
+    "F0",
+    "F6",
+    "F8"
+   ],
+   "bifurca": [
+    {
+     "si": "rojo o bloqueado",
+     "a": "F4.5"
+    },
+    {
+     "si": "criterio incumplido",
+     "a": "F5.1"
+    }
+   ],
+   "retorno": "P01.eje",
+   "guardias": [
+    "V1–V11",
+    "K1 sobre el commit",
+    "Control-Veredicto"
+   ],
+   "herramientas": [
+    "herramienta-pw",
+    "herramienta-juez",
+    "control-veredicto"
+   ],
+   "fuente": "plan-proceso-4; Desarrollo M-1296"
+  },
+  {
+   "id": "F5",
+   "nivel": "N2",
+   "padre": "P01.eje",
+   "nombre": "5 · Incidentes y problemas (Mantenimiento 6.4.13; 20000-1 §8.6)",
+   "rol": "Desarrollo · juez propone · JP decide · AN confirma",
+   "disparador": {
+    "evento": "INC registrado",
+    "de": "F4 (veredicto), producción (Carlos/Arquitecto), simulación"
+   },
+   "entradas": [
+    "json-seguimiento",
+    "plantilla-aviso-produccion-md",
+    "plantilla-revision-incidente-md"
+   ],
+   "hace": "registrar con causa y control que debió verlo, decidir, arreglar por lote, revisar y cerrar con evidencia",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "INC cerrado"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "decisión de lote",
+     "a": "F3.1"
+    },
+    {
+     "si": "misma causa repetida",
+     "a": "F5.5"
+    },
+    {
+     "si": "escape",
+     "a": "F5.6"
+    }
+   ],
+   "retorno": "P01.eje",
+   "guardias": [
+    "I1–I7",
+    "K9"
+   ],
+   "herramientas": [
+    "modelo-incidentes-py"
+   ],
+   "fuente": "plan-proceso-5; Desarrollo M-1296"
+  },
+  {
+   "id": "F0",
+   "nivel": "N2",
+   "padre": "P01.mon",
+   "nombre": "0 · Línea base y configuración (6.3.5; ISO 10007)",
+   "rol": "AP (ACf)",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "F4"
+   },
+   "entradas": [
+    "linea-base-funcional",
+    "json-elementos",
+    "mapa-str"
+   ],
+   "hace": "identificar piezas, controlar cambios de la línea base por lote, registrar estado, auditar realidad contra línea base",
+   "salidas": {
+    "piezas": [
+     "linea-base-funcional",
+     "linea-base-archivos",
+     "json-elementos"
+    ],
+    "evento": "línea base actualizada"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "pieza nueva en un lote o decisión",
+     "a": "F0.1"
+    },
+    {
+     "si": "cambio de equipo o revisión periódica",
+     "a": "F0.4"
+    }
+   ],
+   "retorno": "P01.mon",
+   "guardias": [
+    "C1–C10",
+    "U1–U6 (LM-83, por instalar)"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py",
+    "modelo-validar-py"
+   ],
+   "fuente": "plan-proceso-0; Arquitecto"
+  },
+  {
+   "id": "F6",
+   "nivel": "N2",
+   "padre": "P01.mon",
+   "nombre": "6 · Arquitectura y decisiones (6.4.4, 6.3.3)",
+   "rol": "AP (ASw) · DU decide por DA",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "F4; o un lote que toca una decisión"
+   },
+   "entradas": [
+    "mapa-str",
+    "decisiones-adr",
+    "plantilla-adr-md"
+   ],
+   "hace": "decisiones ADR, reglas transversales, mapa del STR al día por lote, evaluación por evento",
+   "salidas": {
+    "piezas": [
+     "mapa-str",
+     "decisiones-adr"
+    ],
+    "evento": "fila del mapa puesta"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "decisión que toca datos reales, dinero o seguridad",
+     "a": "F6.1"
+    },
+    {
+     "si": "20 lotes aceptados o INC de arquitectura alto",
+     "a": "F6.4"
+    }
+   ],
+   "retorno": "P01.mon",
+   "guardias": [
+    "A1–A8",
+    "M1–M7"
+   ],
+   "herramientas": [
+    "modelo-mapa-py"
+   ],
+   "fuente": "plan-proceso-6; Arquitecto"
+  },
+  {
+   "id": "F7",
+   "nivel": "N2",
+   "padre": "P01.mon",
+   "nombre": "7 · Riesgo y medición (6.3.4, 6.3.7)",
+   "rol": "JP escribe · AP propone · DU acepta",
+   "disparador": {
+    "evento": "tanda cerrada",
+    "de": "F2.10"
+   },
+   "entradas": [
+    "json-riesgos",
+    "json-metricas",
+    "jp-fichas-archivo"
+   ],
+   "hace": "registro R-n con escenario y respuesta, medidas con umbral, ficha de tanda, rojas repetidas con acción, metas",
+   "salidas": {
+    "piezas": [
+     "json-riesgos",
+     "jp-fichas-archivo"
+    ],
+    "evento": "ficha generada"
+   },
+   "siguiente": [
+    "P01.mon"
+   ],
+   "bifurca": [
+    {
+     "si": "roja repetida",
+     "a": "F7.6"
+    },
+    {
+     "si": "INC coincide con un R-n",
+     "a": "F7.3"
+    }
+   ],
+   "retorno": "P01.mon",
+   "guardias": [
+    "Rg1–Rg7"
+   ],
+   "herramientas": [
+    "modelo-riesgos-py",
+    "modelo-ficha-semanal-py"
+   ],
+   "fuente": "plan-proceso-7; JP M-1295"
+  },
+  {
+   "id": "F8",
+   "nivel": "N2",
+   "padre": "P01.mon",
+   "nombre": "8 · Conocimiento y relevos (6.2.6, 6.3.6)",
+   "rol": "AP · cada chat",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "F4; cierre de tanda; relevo; mensaje"
+   },
+   "entradas": [
+    "json-conocimiento",
+    "json-mensajes",
+    "plantilla-traspaso-md"
+   ],
+   "hace": "lecciones con destino, catálogo que madura, traspasos, buzón y despertador, arranque de chats",
+   "salidas": {
+    "piezas": [
+     "json-conocimiento",
+     "json-mensajes"
+    ],
+    "evento": "lección registrada"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "relevo de chat",
+     "a": "F8.3"
+    },
+    {
+     "si": "mensaje para otro chat",
+     "a": "F8.4"
+    }
+   ],
+   "retorno": "P01.mon",
+   "guardias": [
+    "Cn1–Cn6",
+    "R1 buzón"
+   ],
+   "herramientas": [
+    "modelo-buzon-py",
+    "modelo-archivar-py",
+    "herramienta-vigilar-buzon"
+   ],
+   "fuente": "plan-proceso-8; Arquitecto"
+  },
+  {
+   "id": "F1.Z1",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Arranque y tras compactar",
+   "rol": "AN",
+   "disparador": {
+    "evento": "chat despertado",
+    "de": "sesión nueva, compactación o «Revisa el buzón…»"
+   },
+   "entradas": [
+    "json-instrucciones",
+    "json-mensajes",
+    "json-diseno",
+    "json-proyecto"
+   ],
+   "hace": "relee encargo y reglas, atiende el buzón y registra lo que Carlos respondió en «esperando»",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "mensaje enviado"
+   },
+   "siguiente": [
+    "F1.E1",
+    "F1.R1",
+    "F1.C1"
+   ],
+   "bifurca": [
+    {
+     "si": "duda de rol",
+     "a": "F2.12"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [
+    "modelo-buzon-py",
+    "modelo-validar-py"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.E1",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Escucha: ubicar la idea (LM-76)",
+   "rol": "AN",
+   "disparador": {
+    "evento": "pedido de Carlos",
+    "de": "Carlos suelta una idea, queja o «¿ya está?» sin pedir REQ"
+   },
+   "entradas": [
+    "linea-base-funcional",
+    "situaciones",
+    "json-diseno",
+    "json-proyecto"
+   ],
+   "hace": "corre ubicar.py y muestra la tarjeta en sus palabras (módulo, qué hace hoy, lo abierto, proceso, pausa)",
+   "salidas": {
+    "piezas": [],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F1.E2"
+   ],
+   "bifurca": [
+    {
+     "si": "parecido bajo",
+     "a": "F1.E2"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "regla común 17"
+   ],
+   "herramientas": [
+    "modelo-ubicar-py"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.E2",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Escucha: una pregunta de destino",
+   "rol": "AN · DU",
+   "disparador": {
+    "evento": "ítem en lista",
+    "de": "tarjeta mostrada"
+   },
+   "entradas": [
+    "json-diseno"
+   ],
+   "hace": "pregunta: ¿se suma a lo abierto, pedido nuevo, bolsa, descartado o ya está?",
+   "salidas": {
+    "piezas": [],
+    "evento": "pregunta a Carlos"
+   },
+   "siguiente": [
+    "F1.E3"
+   ],
+   "bifurca": [
+    {
+     "si": "crítico o riesgo ≥ 6",
+     "a": "F1.C2"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.E3",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Escucha: registrar el mismo día",
+   "rol": "AN",
+   "disparador": {
+    "evento": "respuesta de Carlos",
+    "de": "F1.E2"
+   },
+   "entradas": [
+    "json-diseno"
+   ],
+   "hace": "nota en el P-n o REQ vivo, P-n nuevo, bolsa[] con módulo y prioridad, o descartado con motivo; nada se encola desde aquí",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F1.C1"
+   ],
+   "bifurca": [
+    {
+     "si": "pausa de producto",
+     "a": "F2.6"
+    },
+    {
+     "si": "descartado que estaba en trabajo[]",
+     "a": "F8.4"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "Diseño M-1294",
+   "plazo": "mismo día"
+  },
+  {
+   "id": "F1.R1",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión de alcance: abrir un módulo (LM-80)",
+   "rol": "AN",
+   "disparador": {
+    "evento": "pedido de Carlos",
+    "de": "Carlos: «revisemos Inventario»"
+   },
+   "entradas": [
+    "linea-base-funcional",
+    "linea-objetivo-inv",
+    "json-proyecto"
+   ],
+   "hace": "ficha de ubicación con la ruta Módulo › Capacidad; pide al JP congelar el módulo en pausas[] si no lo está",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F1.R2"
+   ],
+   "bifurca": [],
+   "retorno": "F1",
+   "guardias": [],
+   "herramientas": [
+    "modelo-ubicar-py",
+    "modelo-objetivo-py",
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Diseño M-1294 (duda: no comprueba la pausa en cada sesión)"
+  },
+  {
+   "id": "F1.R2",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: recorrer capacidad y caso de uso",
+   "rol": "AN · DU",
+   "disparador": {
+    "evento": "ítem en lista",
+    "de": "F1.R1 o la capacidad siguiente"
+   },
+   "entradas": [
+    "linea-base-funcional",
+    "docs-requerimientos-tema"
+   ],
+   "hace": "ficha de cambio: la de la línea base con su «después» al lado (igual · cambia · nuevo); una pregunta con opciones y consecuencia por hueco",
+   "salidas": {
+    "piezas": [],
+    "evento": "pregunta a Carlos"
+   },
+   "siguiente": [
+    "F1.R3"
+   ],
+   "bifurca": [
+    {
+     "si": "toca otro módulo",
+     "a": "F1.R2"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.R3",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: decisión de Carlos",
+   "rol": "DU",
+   "disparador": {
+    "evento": "pregunta a Carlos",
+    "de": "F1.R2"
+   },
+   "entradas": [
+    "chat-diseno"
+   ],
+   "hace": "toma la decisión tal como la dijo, sin añadir opciones que no pidió",
+   "salidas": {
+    "piezas": [],
+    "evento": "respuesta de Carlos"
+   },
+   "siguiente": [
+    "F1.R4"
+   ],
+   "bifurca": [
+    {
+     "si": "abre otra pregunta",
+     "a": "F1.R2"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.R4",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: registrar la diferencia D-MOD-n",
+   "rol": "AN",
+   "disparador": {
+    "evento": "respuesta de Carlos",
+    "de": "F1.R3"
+   },
+   "entradas": [
+    "linea-objetivo-inv"
+   ],
+   "hace": "D-MOD-n (nuevo, cambia o sale) con decision {fecha, hora, ref, nota}; borrador → validada; commit el mismo día",
+   "salidas": {
+    "piezas": [
+     "linea-objetivo-inv"
+    ],
+    "evento": "DA decidida"
+   },
+   "siguiente": [
+    "F1.R2",
+    "F1.R5"
+   ],
+   "bifurca": [],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py",
+    "objetivo.py"
+   ],
+   "herramientas": [
+    "modelo-objetivo-py"
+   ],
+   "fuente": "Diseño M-1294 · falla reconocida: decisiones del 27-oct registradas el 30-oct",
+   "plazo": "mismo día"
+  },
+  {
+   "id": "F1.R5",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: cerrar la capacidad",
+   "rol": "AN",
+   "disparador": {
+    "evento": "respuesta de Carlos",
+    "de": "Carlos confirma la capacidad"
+   },
+   "entradas": [
+    "linea-objetivo-inv"
+   ],
+   "hace": "capacidad «en revisión» → «cerrada»",
+   "salidas": {
+    "piezas": [
+     "linea-objetivo-inv"
+    ],
+    "evento": "DA decidida"
+   },
+   "siguiente": [
+    "F1.R2",
+    "F1.R6"
+   ],
+   "bifurca": [],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.R6",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: confirmar el módulo",
+   "rol": "AN",
+   "disparador": {
+    "evento": "DA decidida",
+    "de": "todas las capacidades cerradas"
+   },
+   "entradas": [
+    "linea-objetivo-inv"
+   ],
+   "hace": "módulo «borrador» → «confirmado vN»; aviso al JP para levantar la pausa",
+   "salidas": {
+    "piezas": [
+     "linea-objetivo-inv",
+     "json-mensajes"
+    ],
+    "evento": "mensaje enviado"
+   },
+   "siguiente": [
+    "F1.R7"
+   ],
+   "bifurca": [],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Diseño M-1294 (duda: si el JP levanta la pausa solo)"
+  },
+  {
+   "id": "F1.R7",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: pasada de los REQ vigentes",
+   "rol": "AN",
+   "disparador": {
+    "evento": "mensaje enviado",
+    "de": "módulo confirmado"
+   },
+   "entradas": [
+    "diseno-listas",
+    "linea-objetivo-inv"
+   ],
+   "hace": "cada REQ vigente se ajusta o se desestima con motivo; reqs[].diferencias cita las D-MOD-n que cierra",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F1.C1"
+   ],
+   "bifurca": [
+    {
+     "si": "REQ sin pedido vigente",
+     "a": "F8.4"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.R8",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Revisión: paso a la línea base (Arquitecto)",
+   "rol": "AP",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "lote aceptado con la línea «Diferencias:»"
+   },
+   "entradas": [
+    "linea-objetivo-inv",
+    "linea-base-funcional"
+   ],
+   "hace": "pasa la diferencia a la línea de producto y la marca «construida»",
+   "salidas": {
+    "piezas": [
+     "linea-base-funcional"
+    ],
+    "evento": "línea base actualizada"
+   },
+   "siguiente": [
+    "F0.2"
+   ],
+   "bifurca": [],
+   "retorno": "F0",
+   "guardias": [
+    "ninguna visible para Diseño (duda)"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Diseño M-1294 · Arquitecto"
+  },
+  {
+   "id": "F1.C1",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: entrada del pedido",
+   "rol": "AN",
+   "disparador": {
+    "evento": "ítem en lista",
+    "de": "pedido en pedidos[], orden de Carlos o diferencia por cerrar"
+   },
+   "entradas": [
+    "linea-base-funcional",
+    "diseno-listas",
+    "pagina-linea-base"
+   ],
+   "hace": "lista de entrada: problema y actores, objetivo OB-n, capacidad y casos de uso, frontera, lo decidido, clase, ¿crítico?",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F1.C3"
+   ],
+   "bifurca": [
+    {
+     "si": "crítico, capacidad nueva o decisión solo de Carlos",
+     "a": "F1.C2"
+    },
+    {
+     "si": "sin objetivo",
+     "a": "F1.E3"
+    },
+    {
+     "si": "módulo congelado",
+     "a": "F1.C3"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "regla común 17"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Diseño M-1294",
+   "plazo": "≈3 min"
+  },
+  {
+   "id": "F1.C2",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: decisión de alcance (DA)",
+   "rol": "AN lleva · DU decide",
+   "disparador": {
+    "evento": "pregunta a Carlos",
+    "de": "F1.C1 / F1.E2"
+   },
+   "entradas": [
+    "plantilla-pregunta-a-carlos-md",
+    "diseno-listas"
+   ],
+   "hace": "DA-n con opciones, consecuencias y recomendación; al decidir, decision y fechaDecision",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "DA decidida"
+   },
+   "siguiente": [
+    "F1.C3"
+   ],
+   "bifurca": [],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py (forma)",
+    "la cola no acepta crítico sin DA-n y cruce"
+   ],
+   "herramientas": [
+    "plantilla-pregunta-a-carlos-md"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.C3",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: redactar",
+   "rol": "AN",
+   "disparador": {
+    "evento": "DA decidida",
+    "de": "entrada completa y DA decididas (o F1.C1 sin DA)"
+   },
+   "entradas": [
+    "plantilla-requerimiento-md",
+    "docs-lecturas-codigo",
+    "artefactos-bocetos"
+   ],
+   "hace": "el .md con criterios a., b., c. por nivel N1–N4 y caso de uso, ejemplo real, no funcionales, desventajas y preguntas sin resolver; reqs[] en definición",
+   "salidas": {
+    "piezas": [
+     "docs-requerimientos-tema",
+     "diseno-listas"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F1.C4"
+   ],
+   "bifurca": [
+    {
+     "si": "preguntas sin resolver",
+     "a": "F1.C2"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "ninguna hasta C4"
+   ],
+   "herramientas": [
+    "claude-proyecto"
+   ],
+   "fuente": "Diseño M-1294 · el .md solo en el proyecto de Claude"
+  },
+  {
+   "id": "F1.C4",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: revisión de calidad",
+   "rol": "AN",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "borrador completo"
+   },
+   "entradas": [
+    "docs-requerimientos-tema",
+    "modelo-auxiliares"
+   ],
+   "hace": "revisión Q1–Q8 (linea-base.py --req y validar.py; palabras vagas); en críticos también el revisor previo; veredicto en la nota",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "revisión 24/24"
+   },
+   "siguiente": [
+    "F1.C5"
+   ],
+   "bifurca": [
+    {
+     "si": "falla",
+     "a": "F1.C3"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "Q1–Q8"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py",
+    "modelo-validar-py"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.C5",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: validación con Carlos",
+   "rol": "DU",
+   "disparador": {
+    "evento": "revisión 24/24",
+    "de": "REQ en «listo»"
+   },
+   "entradas": [
+    "artefactos-bocetos",
+    "docs-requerimientos-tema"
+   ],
+   "hace": "Carlos confirma el escenario operativo y el boceto, no el texto de los criterios; reqs[].validacion {fecha, qué, nota}",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "respuesta de Carlos"
+   },
+   "siguiente": [
+    "F1.C6"
+   ],
+   "bifurca": [
+    {
+     "si": "no confirma",
+     "a": "F1.C3"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "Q5: sin validación no pasa a entregado"
+   ],
+   "herramientas": [],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.C6",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: entrega a Desarrollo",
+   "rol": "AN",
+   "disparador": {
+    "evento": "respuesta de Carlos",
+    "de": "validación registrada"
+   },
+   "entradas": [
+    "diseno-listas"
+   ],
+   "hace": "reqs[] a «entregado»; mensaje «REQ-X listo para construir» a Desarrollo y al JP con documento, sección, nivel P0–P3 y si es crítico",
+   "salidas": {
+    "piezas": [
+     "json-mensajes",
+     "diseno-listas"
+    ],
+    "evento": "REQ listo para construir"
+   },
+   "siguiente": [
+    "F2.1",
+    "F3.1"
+   ],
+   "bifurca": [
+    {
+     "si": "crítico",
+     "a": "F1.C2"
+    },
+    {
+     "si": "pausa de producto",
+     "a": "F2.6"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [
+    "json-mensajes"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.C7",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: atender a Desarrollo",
+   "rol": "AN",
+   "disparador": {
+    "evento": "mensaje enviado",
+    "de": "Desarrollo pregunta (regla de producto de un INC, ok a un crítico, falla)"
+   },
+   "entradas": [
+    "diseno-listas",
+    "json-mensajes"
+   ],
+   "hace": "responde «ok» si cumple la DA tal como la cruzó Carlos, o los puntos que no",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "mensaje enviado"
+   },
+   "siguiente": [
+    "F3.3"
+   ],
+   "bifurca": [
+    {
+     "si": "falla del REQ",
+     "a": "F1.C3"
+    }
+   ],
+   "retorno": "F1",
+   "guardias": [],
+   "herramientas": [
+    "json-mensajes"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F1.C8",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "REQ: estado tras construir",
+   "rol": "AN",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "aviso de lote aceptado o INC (F4.4)"
+   },
+   "entradas": [
+    "json-mensajes",
+    "json-seguimiento"
+   ],
+   "hace": "reqs[].estado a construido o aceptado",
+   "salidas": {
+    "piezas": [
+     "diseno-listas"
+    ],
+    "evento": "lección registrada"
+   },
+   "siguiente": [
+    "F8.1"
+   ],
+   "bifurca": [],
+   "retorno": "F1",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Diseño M-1294 (duda: quién pone «aceptado»)"
+  },
+  {
+   "id": "F1.Z2",
+   "nivel": "N3",
+   "padre": "F1",
+   "nombre": "Cierre de sesión de Diseño",
+   "rol": "AN",
+   "disparador": {
+    "evento": "lección registrada",
+    "de": "fin de sesión o de un avance con Carlos"
+   },
+   "entradas": [
+    "plantilla-traspaso-md"
+   ],
+   "hace": "traspaso y lecciones con destino; commit y push; sube a mano al proyecto de Claude los .md que cambió",
+   "salidas": {
+    "piezas": [
+     "traspaso-diseno",
+     "diseno-listas",
+     "claude-proyecto"
+    ],
+    "evento": "traspaso escrito"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F8",
+   "guardias": [
+    "validar.py (no revisa que subió el .md)"
+   ],
+   "herramientas": [
+    "plantilla-traspaso-md"
+   ],
+   "fuente": "Diseño M-1294"
+  },
+  {
+   "id": "F2.1",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Entrada a la lista",
+   "rol": "JP",
+   "disparador": {
+    "evento": "REQ listo para construir",
+    "de": "Diseño (M-n), orden de Carlos, INC decidido, DT con plazo",
+    "otros": [
+     "INC decidido",
+     "DT registrada",
+     "PRB abierto",
+     "roja repetida",
+     "LM instalado"
+    ]
+   },
+   "entradas": [
+    "json-mensajes",
+    "json-diseno",
+    "json-seguimiento"
+   ],
+   "hace": "agrega una fila a trabajo[] con ref, clase, origen, desde y estado; nada entra sin origen",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F2.2"
+   ],
+   "bifurca": [
+    {
+     "si": "sin origen",
+     "a": "F2.12"
+    }
+   ],
+   "retorno": "F2",
+   "guardias": [
+    "F1"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "JP M-1295 (duda: cuándo copiar una INC a trabajo[])",
+   "plazo": "«listo sin lote» 5 d"
+  },
+  {
+   "id": "F2.2",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Clase y prioridad",
+   "rol": "JP",
+   "disparador": {
+    "evento": "ítem en lista",
+    "de": "F2.1"
+   },
+   "entradas": [
+    "encargo-rol-jefe-proyecto",
+    "json-proyecto"
+   ],
+   "hace": "clase a–g por el origen; orden dentro de la clase; en la clase e sigue prioridades[]",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "ítem en lista"
+   },
+   "siguiente": [
+    "F2.3"
+   ],
+   "bifurca": [],
+   "retorno": "F2",
+   "guardias": [
+    "F1",
+    "prioridad.py"
+   ],
+   "herramientas": [
+    "modelo-prioridad-py"
+   ],
+   "fuente": "JP M-1295 (duda: prioridades[] y clase e son dos listas del mismo orden)"
+  },
+  {
+   "id": "F2.3",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Orden y «libre»",
+   "rol": "JP",
+   "disparador": {
+    "evento": "ítem en lista",
+    "de": "cada cambio de la lista (aceptado, orden nueva, pausa)",
+    "otros": [
+     "DA decidida",
+     "lote aceptado",
+     "pausa ordenada"
+    ]
+   },
+   "entradas": [
+    "jp-fichas-archivo",
+    "json-proyecto"
+   ],
+   "hace": "reordena trabajo[]; «libre» es el primero que no espera DA, cruce ni ok",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "ítem libre"
+   },
+   "siguiente": [
+    "F3.1"
+   ],
+   "bifurca": [
+    {
+     "si": "espera DA o a Carlos",
+     "a": "F2.12"
+    }
+   ],
+   "retorno": "F2",
+   "guardias": [
+    "F1–F4"
+   ],
+   "herramientas": [
+    "modelo-ficha-semanal-py",
+    "modelo-validar-py"
+   ],
+   "fuente": "JP M-1295"
+  },
+  {
+   "id": "F2.4",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Abrir tanda",
+   "rol": "JP",
+   "disparador": {
+    "evento": "respuesta de Carlos",
+    "de": "orden de Carlos, pausa levantada o tanda anterior aceptada con cola vacía"
+   },
+   "entradas": [
+    "json-proyecto",
+    "json-mensajes"
+   ],
+   "hace": "abre T-n con desde, abiertaPor y entra[] ≤ 7 en el orden de la lista y dentro de los límites",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "tanda abierta"
+   },
+   "siguiente": [
+    "F2.5"
+   ],
+   "bifurca": [
+    {
+     "si": "a mitad de tanda",
+     "a": "F2.3"
+    }
+   ],
+   "retorno": "F2",
+   "guardias": [
+    "F3 (una sola abierta)"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "JP M-1295"
+  },
+  {
+   "id": "F2.5",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Límites y edad",
+   "rol": "JP",
+   "disparador": {
+    "evento": "chat despertado",
+    "de": "despertador; cada lectura de la ficha",
+    "otros": [
+     "tanda abierta",
+     "ficha generada"
+    ]
+   },
+   "entradas": [
+    "jp-fichas-archivo",
+    "esquema-flujo-limites"
+   ],
+   "hace": "detecta lo que pasó el umbral y pregunta al dueño por el buzón; a Carlos lo reitera una vez; si pasa un tope, excepción por una tanda",
+   "salidas": {
+    "piezas": [
+     "json-mensajes",
+     "json-proyecto"
+    ],
+    "evento": "límite superado"
+   },
+   "siguiente": [
+    "F2.12"
+   ],
+   "bifurca": [
+    {
+     "si": "tope superado",
+     "a": "F2.6"
+    }
+   ],
+   "retorno": "F2",
+   "guardias": [
+    "F2",
+    "F4"
+   ],
+   "herramientas": [
+    "modelo-ficha-semanal-py"
+   ],
+   "fuente": "JP M-1295 (duda: sin hora fija; ítems y DT vencidos en rojo sin acción escrita)",
+   "plazo": "construido 2 h · espera DA 2 d · a Carlos 1 d"
+  },
+  {
+   "id": "F2.6",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Pausa y excepciones",
+   "rol": "JP",
+   "disparador": {
+    "evento": "pausa ordenada",
+    "de": "Carlos (o el Arquitecto transmitiendo su orden)"
+   },
+   "entradas": [
+    "json-mensajes",
+    "json-proyecto"
+   ],
+   "hace": "fila de pausas[] (desde, alcance, motivo, condición, revisarEn); cada orden que abre una excepción, fila en excepciones[]",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "pausa ordenada"
+   },
+   "siguiente": [
+    "F2.3"
+   ],
+   "bifurca": [],
+   "retorno": "F2",
+   "guardias": [
+    "F5 (revisarEn)"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "JP M-1295",
+   "plazo": "condición pendiente > 7 d = una pregunta"
+  },
+  {
+   "id": "F2.7",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Ok a críticos de fábrica",
+   "rol": "JP",
+   "disparador": {
+    "evento": "revisión 24/24",
+    "de": "Desarrollo «pido tu ok» (M-n)"
+   },
+   "entradas": [
+    "doc-instruccion-lote",
+    "plantilla-revisor-previo",
+    "plan-sitios"
+   ],
+   "hace": "lee cabecera y partes críticas; dentro de la excepción y del plan, reversión, paridad, no cambia decisión; añade « · ok Jefe de proyecto M-n» en la línea 4",
+   "salidas": {
+    "piezas": [
+     "jp-ok-revision-previa",
+     "json-mensajes"
+    ],
+    "evento": "cruce y ok dados"
+   },
+   "siguiente": [
+    "F3.6"
+   ],
+   "bifurca": [
+    {
+     "si": "faltan puntos",
+     "a": "F3.3"
+    },
+    {
+     "si": "toca .claude/hooks",
+     "a": "F2.12"
+    },
+    {
+     "si": "producto",
+     "a": "F1.C7"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "linea-base.py --lote («no encolar» sin ok)",
+    "guardia de la cola"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "JP M-1295 (duda: el encargo no lo recoge)",
+   "plazo": "2–5 min"
+  },
+  {
+   "id": "F2.8",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Seguimiento del lote",
+   "rol": "JP",
+   "disparador": {
+    "evento": "mensaje enviado",
+    "de": "«encolado», «construido», «aceptado» de Desarrollo"
+   },
+   "entradas": [
+    "json-mensajes"
+   ],
+   "hace": "anota salio[], trabajo[].estado e INC; responde",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "mensaje enviado"
+   },
+   "siguiente": [
+    "F2.10"
+   ],
+   "bifurca": [],
+   "retorno": "F2",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "JP M-1295"
+  },
+  {
+   "id": "F2.9",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Decisión de INC (I1)",
+   "rol": "JP",
+   "disparador": {
+    "evento": "INC registrado",
+    "de": "Desarrollo (P1–P2 o consulta)"
+   },
+   "entradas": [
+    "json-seguimiento",
+    "json-mensajes"
+   ],
+   "hace": "decide tipo de lote, bolsa, pospuesto o solución temporal; lo anota en trabajo[] con decision y ref",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "INC decidido"
+   },
+   "siguiente": [
+    "F3.1"
+   ],
+   "bifurca": [
+    {
+     "si": "P1",
+     "a": "F3.1"
+    }
+   ],
+   "retorno": "F5",
+   "guardias": [
+    "I1"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "JP M-1295",
+   "plazo": "P1/P2 según la tabla de incidentes"
+  },
+  {
+   "id": "F2.10",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Cerrar tanda",
+   "rol": "JP",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "todo lo de la tanda aceptado y la cola vacía"
+   },
+   "entradas": [
+    "json-proyecto"
+   ],
+   "hace": "pone hasta y salio[]; corre ficha-semanal --anterior y guarda la ficha; lecciones; traspaso",
+   "salidas": {
+    "piezas": [
+     "json-proyecto",
+     "jp-fichas-archivo"
+    ],
+    "evento": "tanda cerrada"
+   },
+   "siguiente": [
+    "F7.5"
+   ],
+   "bifurca": [],
+   "retorno": "F2",
+   "guardias": [
+    "F9"
+   ],
+   "herramientas": [
+    "modelo-ficha-semanal-py"
+   ],
+   "fuente": "JP M-1295 · HALLAZGO: la herramienta sube ficha vacía si la tanda sigue abierta con salio[] en texto",
+   "plazo": "al cerrar"
+  },
+  {
+   "id": "F2.11",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "¿Cómo vamos?",
+   "rol": "JP",
+   "disparador": {
+    "evento": "cómo vamos pedido",
+    "de": "Carlos (o cierre de tanda)"
+   },
+   "entradas": [
+    "jp-fichas-archivo"
+   ],
+   "hace": "pega la tabla de seis filas de ficha-semanal --como-vamos; no la redacta",
+   "salidas": {
+    "piezas": [
+     "jp-fichas-archivo"
+    ],
+    "evento": "respuesta de Carlos"
+   },
+   "siguiente": [
+    "P01.mon"
+   ],
+   "bifurca": [],
+   "retorno": "F2",
+   "guardias": [],
+   "herramientas": [
+    "modelo-ficha-semanal-py",
+    "plantilla-como-vamos-md"
+   ],
+   "fuente": "JP M-1295 (duda: cuándo guardar el JSON)"
+  },
+  {
+   "id": "F2.12",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Pregunta a Carlos",
+   "rol": "JP",
+   "disparador": {
+    "evento": "límite superado",
+    "de": "una decisión que solo él toma"
+   },
+   "entradas": [
+    "plantilla-pregunta-a-carlos-md"
+   ],
+   "hace": "una decisión por mensaje con recomendación; llega al Panel y al aviso de Windows",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "pregunta a Carlos"
+   },
+   "siguiente": [
+    "F2.3"
+   ],
+   "bifurca": [],
+   "retorno": "F2",
+   "guardias": [
+    "plantilla"
+   ],
+   "herramientas": [
+    "herramienta-panel-str"
+   ],
+   "fuente": "JP M-1295 (duda: Carlos le habla por el Arquitecto)"
+  },
+  {
+   "id": "F2.13",
+   "nivel": "N3",
+   "padre": "F2",
+   "nombre": "Traspaso del JP",
+   "rol": "JP",
+   "disparador": {
+    "evento": "tanda cerrada",
+    "de": "cierre de tanda, 7 días o relevo"
+   },
+   "entradas": [
+    "plantilla-traspaso-md"
+   ],
+   "hace": "reescribe traspaso con la plantilla",
+   "salidas": {
+    "piezas": [
+     "traspaso-jp"
+    ],
+    "evento": "traspaso escrito"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F8",
+   "guardias": [
+    "«traspasos vencidos» de la ficha"
+   ],
+   "herramientas": [],
+   "fuente": "JP M-1295",
+   "plazo": "7 días"
+  },
+  {
+   "id": "F3.1",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Recibir trabajo",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "ítem libre",
+    "de": "F2.3; M-n de Diseño; brief o LM del Arquitecto; INC decidido; orden de Carlos"
+   },
+   "entradas": [
+    "json-diseno",
+    "json-proyecto",
+    "json-mensajes"
+   ],
+   "hace": "abre la fila del lote en plan[] en el orden del JP",
+   "salidas": {
+    "piezas": [
+     "json-plan-lotes"
+    ],
+    "evento": "lote previsto"
+   },
+   "siguiente": [
+    "F3.2"
+   ],
+   "bifurca": [
+    {
+     "si": "pausa vigente",
+     "a": "F2.6"
+    },
+    {
+     "si": "falta definición",
+     "a": "F1.C7"
+    },
+    {
+     "si": "toca el modelo",
+     "a": "F6.1"
+    },
+    {
+     "si": "DA abierta",
+     "a": "F1.C2"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [
+    "modelo-buzon-py"
+   ],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F3.2",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Leer código y simular",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "lote previsto",
+    "de": "F3.1 con lo anterior aceptado"
+   },
+   "entradas": [
+    "clon-str-manager-lenovo",
+    "doc-claude-md",
+    "mapa-str"
+   ],
+   "hace": "hace el cambio en una copia y corre tests/run.js, los del servicio y pw/prueba*.js en su contenedor",
+   "salidas": {
+    "piezas": [
+     "carpetas-construccion-desarrollo"
+    ],
+    "evento": "simulación verde"
+   },
+   "siguiente": [
+    "F3.3"
+   ],
+   "bifurca": [
+    {
+     "si": "hallazgo",
+     "a": "F5.3"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "tests locales"
+   ],
+   "herramientas": [
+    "carpetas-construccion-desarrollo"
+   ],
+   "fuente": "Desarrollo M-1296 (el token no lee str-manager: copias de LENOVO)"
+  },
+  {
+   "id": "F3.3",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Redactar la instrucción",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "simulación verde",
+    "de": "F3.2"
+   },
+   "entradas": [
+    "plantilla-instruccion-md",
+    "plantilla-guion-e2e-js",
+    "carpetas-construccion-desarrollo"
+   ],
+   "hace": "pares Busca/Reemplaza, script aplicar-l1NN.js con hashes, guion N2 y cabecera de 17 líneas (Paridad desde 5.5)",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote",
+     "json-plan-lotes"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.4"
+   ],
+   "bifurca": [],
+   "retorno": "F3",
+   "guardias": [
+    "linea-base.py --borrador/--lote",
+    "aplicar.js K1",
+    "guard-bash evaluar()"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py",
+    "pw-aplicar"
+   ],
+   "fuente": "Desarrollo M-1296 (de memoria: Decisión y Riesgo antes del byte 4000)"
+  },
+  {
+   "id": "F3.4",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Revisor previo",
+   "rol": "Desarrollo (subagente)",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "F3.3"
+   },
+   "entradas": [
+    "plantilla-revisor-previo",
+    "situaciones"
+   ],
+   "hace": "un subagente independiente pasa los 24 puntos; corrige y repite hasta 24/24",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "revisión 24/24"
+   },
+   "siguiente": [
+    "F3.6"
+   ],
+   "bifurca": [
+    {
+     "si": "crítico",
+     "a": "F3.5"
+    },
+    {
+     "si": "punto fallado",
+     "a": "F3.3"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "la cola rechaza .sin-revision.md"
+   ],
+   "herramientas": [
+    "plantilla-revisor-previo"
+   ],
+   "fuente": "Desarrollo M-1296",
+   "plazo": "2–10 min"
+  },
+  {
+   "id": "F3.5",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Cruce y ok (críticos)",
+   "rol": "Desarrollo pide · AP cruza · JP da ok",
+   "disparador": {
+    "evento": "revisión 24/24",
+    "de": "F3.4"
+   },
+   "entradas": [
+    "json-mensajes"
+   ],
+   "hace": "pide cruce delegado al Arquitecto y ok al JP por el buzón; línea 2 y línea 4 de la cabecera",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote",
+     "cruce-delegado",
+     "jp-ok-revision-previa"
+    ],
+    "evento": "cruce y ok dados"
+   },
+   "siguiente": [
+    "F3.6"
+   ],
+   "bifurca": [
+    {
+     "si": "pregunta de diseño",
+     "a": "F6.1"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "guardia de la cola (.sin-ok / .sin-cruce)"
+   ],
+   "herramientas": [
+    "json-mensajes"
+   ],
+   "fuente": "Desarrollo M-1296 (duda: quién escribe el sufijo del ok)"
+  },
+  {
+   "id": "F3.6",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Encolar",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "cruce y ok dados",
+    "de": "F3.4 (normal) o F3.5 (crítico); veredicto del lote anterior aceptado (uno a la vez)"
+   },
+   "entradas": [
+    "doc-instruccion-lote"
+   ],
+   "hace": "copia a la raíz de la cola, vuelve a copiar y compara byte a byte; plan[] encolado; cambios[] fila nueva",
+   "salidas": {
+    "piezas": [
+     "cola-str-instr",
+     "json-seguimiento"
+    ],
+    "evento": "instrucción encolada"
+   },
+   "siguiente": [
+    "F3.7"
+   ],
+   "bifurca": [
+    {
+     "si": "cola con otro lote",
+     "a": "F3.6"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "guardias de ejecutar-cola.ps1"
+   ],
+   "herramientas": [
+    "cola-str-instr"
+   ],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F3.7",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Construcción y despliegue (cola + CLI)",
+   "rol": "cola · CLI (DV)",
+   "disparador": {
+    "evento": "instrucción encolada",
+    "de": "tarea «STR cola CLI» cada minuto ve un L-n en la raíz"
+   },
+   "entradas": [
+    "doc-instruccion-lote",
+    "clon-str-manager-lenovo",
+    "clones-fabrica-servicio",
+    "auto-mode"
+   ],
+   "hace": "la cola lanza la CLI (opus en críticos); la CLI aplica, corre tests, actualiza CLAUDE.md y docs, commit con trazabilidad y push a main; Hostinger despliega",
+   "salidas": {
+    "piezas": [
+     "repo-str-manager",
+     "repo-fabrica-servicio",
+     "doc-log-lote",
+     "sitio-app"
+    ],
+    "evento": "lote construido"
+   },
+   "siguiente": [
+    "F3.8"
+   ],
+   "bifurca": [
+    {
+     "si": "guardia rechaza",
+     "a": "F3.3"
+    },
+    {
+     "si": "fallo de la CLI o hash distinto",
+     "a": "F3.8"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "hooks-cli",
+    "auto-mode",
+    "tests/run.js"
+   ],
+   "herramientas": [
+    "ejecutar-cola",
+    "tarea-win-cola",
+    "herramienta-hooks-cli",
+    "lenovo-hooks-instalados"
+   ],
+   "fuente": "Desarrollo M-1296",
+   "plazo": "minutos (críticos 3–5)"
+  },
+  {
+   "id": "F3.8",
+   "nivel": "N3",
+   "padre": "F3",
+   "nombre": "Registrar construido",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "lote construido",
+    "de": "aviso de Carlos «La CLI terminó…» (vía vigía)"
+   },
+   "entradas": [
+    "doc-log-lote"
+   ],
+   "hace": "comprueba hash, declarados = tocados, tests y ls-remote; plan[] construido; cambios[] instalado; evidencia al Arquitecto",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento",
+     "json-mensajes"
+    ],
+    "evento": "construido registrado"
+   },
+   "siguiente": [
+    "F4.1"
+   ],
+   "bifurca": [
+    {
+     "si": "log con «No hecho»",
+     "a": "F5.1"
+    }
+   ],
+   "retorno": "F3",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F4.1",
+   "nivel": "N3",
+   "padre": "F4",
+   "nombre": "Pruebas (pw)",
+   "rol": "cola · pw",
+   "disparador": {
+    "evento": "lote construido",
+    "de": "commit del lote (la cola sigue sola)",
+    "otros": [
+     "reprueba pedida"
+    ]
+   },
+   "entradas": [
+    "pw-probar-lote",
+    "guiones-e2e-str",
+    "mapa-str",
+    "pw-semilla"
+   ],
+   "hace": "K1 aplicación literal, tests (P4), guion del lote y regresión por ruta (P5), capturas; fase completa en críticos; ráfaga y tren según ventana",
+   "salidas": {
+    "piezas": [
+     "doc-log-lote"
+    ],
+    "evento": "pruebas corridas"
+   },
+   "siguiente": [
+    "F4.2"
+   ],
+   "bifurca": [],
+   "retorno": "F4",
+   "guardias": [
+    "V1–V11",
+    "centinelas",
+    "cuarentena"
+   ],
+   "herramientas": [
+    "herramienta-pw",
+    "pw-probar-lote",
+    "pw-guion-tren-rafaga-metricas"
+   ],
+   "fuente": "Desarrollo M-1296 (duda en K2/K3)"
+  },
+  {
+   "id": "F4.2",
+   "nivel": "N3",
+   "padre": "F4",
+   "nombre": "Juez local",
+   "rol": "juez (claude.exe sin red)",
+   "disparador": {
+    "evento": "pruebas corridas",
+    "de": "pruebas.json escrito"
+   },
+   "entradas": [
+    "herramienta-juez",
+    "doc-instruccion-lote",
+    "doc-log-lote"
+   ],
+   "hace": "decide criterio por criterio (N1, N2, N3) sin red ni comandos; Control-Veredicto repite con opus si contradice",
+   "salidas": {
+    "piezas": [
+     "doc-log-lote"
+    ],
+    "evento": "veredicto emitido"
+   },
+   "siguiente": [
+    "F4.4"
+   ],
+   "bifurca": [
+    {
+     "si": "inconsistente",
+     "a": "F4.5"
+    }
+   ],
+   "retorno": "F4",
+   "guardias": [
+    "Control-Veredicto LM-50"
+   ],
+   "herramientas": [
+    "herramienta-juez",
+    "control-veredicto"
+   ],
+   "fuente": "Desarrollo M-1296",
+   "plazo": "minutos"
+  },
+  {
+   "id": "F4.3",
+   "nivel": "N3",
+   "padre": "F4",
+   "nombre": "Criterio a del Arquitecto",
+   "rol": "AP",
+   "disparador": {
+    "evento": "construido registrado",
+    "de": "lotes con fabrica-servicio (el juez no ve ese repo)"
+   },
+   "entradas": [
+    "json-mensajes",
+    "repo-fabrica-servicio",
+    "sitio-herramienta-fabrica"
+   ],
+   "hace": "verifica de forma cruzada: hash, «Todo igual», run.js, ls-remote y el sitio desplegado; responde «cierro a»",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "criterio a cerrado"
+   },
+   "siguiente": [
+    "F4.4"
+   ],
+   "bifurca": [
+    {
+     "si": "no cierra",
+     "a": "F4.5"
+    }
+   ],
+   "retorno": "F4",
+   "guardias": [
+    "ninguna escrita fuera del mensaje"
+   ],
+   "herramientas": [
+    "herramienta-chrome"
+   ],
+   "fuente": "Desarrollo M-1296 · Arquitecto"
+  },
+  {
+   "id": "F4.4",
+   "nivel": "N3",
+   "padre": "F4",
+   "nombre": "Cierre del lote",
+   "rol": "Desarrollo registra (no acepta)",
+   "disparador": {
+    "evento": "veredicto emitido",
+    "de": "F4.2 (+ F4.3 si aplica)",
+    "otros": [
+     "criterio a cerrado"
+    ]
+   },
+   "entradas": [
+    "doc-log-lote",
+    "json-mensajes"
+   ],
+   "hace": "acepta si todo verde o parcial con solo a cerrado; plan[] aceptado; cambios[].aceptacion = veredicto; INC cerrados; M-n al Arquitecto y al JP",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento",
+     "json-mensajes"
+    ],
+    "evento": "lote aceptado",
+    "alternos": [
+     "lote no aceptado"
+    ]
+   },
+   "siguiente": [
+    "F0.2",
+    "F6.3",
+    "F8.1",
+    "F2.8"
+   ],
+   "bifurca": [
+    {
+     "si": "no aceptado",
+     "a": "F5.1"
+    },
+    {
+     "si": "bloqueado",
+     "a": "F4.5"
+    }
+   ],
+   "retorno": "F4",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F4.5",
+   "nivel": "N3",
+   "padre": "F4",
+   "nombre": "Reprobar, rejuzgar, correr",
+   "rol": "Desarrollo pide · cola ejecuta",
+   "disparador": {
+    "evento": "lote no aceptado",
+    "de": "rojo ajeno o intermitente, bloqueado, guion de semilla"
+   },
+   "entradas": [
+    "cola-carpetas"
+   ],
+   "hace": "deja un .txt en reprobar\\ (pruebas + juez), rejuzgar\\ (solo juez) o correr\\<nombre>.txt; los .txt pasan a hechos\\",
+   "salidas": {
+    "piezas": [
+     "doc-log-lote"
+    ],
+    "evento": "reprueba pedida"
+   },
+   "siguiente": [
+    "F4.1"
+   ],
+   "bifurca": [
+    {
+     "si": "falta la semilla",
+     "a": "F4.1"
+    }
+   ],
+   "retorno": "F4",
+   "guardias": [
+    "las de F4.1–F4.2"
+   ],
+   "herramientas": [
+    "cola-carpetas",
+    "pw-semilla"
+   ],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F5.1",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "INC desde el juez",
+   "rol": "Desarrollo (el juez propone)",
+   "disparador": {
+    "evento": "lote no aceptado",
+    "de": "veredicto con incs[] o criterio en rojo"
+   },
+   "entradas": [
+    "doc-log-lote",
+    "repo-str-manager"
+   ],
+   "hace": "registra con severidad, prioridad, causaRaiz y debioDetectarse",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento",
+     "json-mensajes"
+    ],
+    "evento": "INC registrado"
+   },
+   "siguiente": [
+    "F2.9"
+   ],
+   "bifurca": [
+    {
+     "si": "regresión ajena",
+     "a": "F5.1"
+    }
+   ],
+   "retorno": "F5",
+   "guardias": [
+    "validar.py",
+    "incidentes.py"
+   ],
+   "herramientas": [
+    "modelo-incidentes-py"
+   ],
+   "fuente": "Desarrollo M-1296",
+   "plazo": "≤ 1 h"
+  },
+  {
+   "id": "F5.2",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "INC desde producción",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "INC en producción",
+    "de": "Carlos o el Arquitecto (plantilla aviso-produccion o mensaje)"
+   },
+   "entradas": [
+    "plantilla-aviso-produccion-md",
+    "repo-str-manager"
+   ],
+   "hace": "diagnostica desde el código antes de abrir; INC con prioridad o «no es INC» con la causa",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "INC registrado"
+   },
+   "siguiente": [
+    "F2.9"
+   ],
+   "bifurca": [
+    {
+     "si": "P1",
+     "a": "F3.1"
+    }
+   ],
+   "retorno": "F5",
+   "guardias": [
+    "I2 (≤ 1 h)"
+   ],
+   "herramientas": [
+    "modelo-incidentes-py"
+   ],
+   "fuente": "Desarrollo M-1296",
+   "plazo": "≤ 1 h"
+  },
+  {
+   "id": "F5.3",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "INC desde la simulación o revisión",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "simulación verde",
+    "de": "fallo visto mientras construye (F3.2) o revisa"
+   },
+   "entradas": [
+    "carpetas-construccion-desarrollo"
+   ],
+   "hace": "lo registra y lo mete en el lote que corresponde",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "INC registrado"
+   },
+   "siguiente": [
+    "F3.3"
+   ],
+   "bifurca": [],
+   "retorno": "F5",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F5.4",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "Deuda técnica (DT)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "INC registrado",
+    "de": "deuda vista en código o en un veredicto"
+   },
+   "entradas": [
+    "doc-log-lote"
+   ],
+   "hace": "registra sin urgencia: abierta → programada → pagada por un lote",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "DT registrada"
+   },
+   "siguiente": [
+    "F2.1"
+   ],
+   "bifurca": [],
+   "retorno": "F5",
+   "guardias": [
+    "validar.py",
+    "DT vencidas en la ficha"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F5.5",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "Problema (PRB)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "INC registrado",
+    "de": "varios INC con la misma causa"
+   },
+   "entradas": [
+    "json-seguimiento"
+   ],
+   "hace": "abre el problema y agrupa los INC; solución temporal escrita",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "PRB abierto"
+   },
+   "siguiente": [
+    "F2.9"
+   ],
+   "bifurca": [],
+   "retorno": "F5",
+   "guardias": [
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1296 (duda: sin regla de cuándo abrir uno)"
+  },
+  {
+   "id": "F5.6",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "Revisión de incidente",
+   "rol": "Desarrollo o AP según la causa",
+   "disparador": {
+    "evento": "INC registrado",
+    "de": "INC P1 o escape"
+   },
+   "entradas": [
+    "plantilla-revision-incidente-md"
+   ],
+   "hace": "revisión sin culpables en 48 h dentro del INC; el escape va a un punto del revisor o a una guardia",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento",
+     "plantilla-revisor-previo"
+    ],
+    "evento": "revisión de incidente hecha",
+    "alternos": [
+     "escape con destino"
+    ]
+   },
+   "siguiente": [
+    "F8.1"
+   ],
+   "bifurca": [],
+   "retorno": "F5",
+   "guardias": [
+    "I5",
+    "I7"
+   ],
+   "herramientas": [
+    "plantilla-revision-incidente-md"
+   ],
+   "fuente": "Desarrollo M-1296 (duda: en la práctica se hace poco)",
+   "plazo": "48 h"
+  },
+  {
+   "id": "F5.7",
+   "nivel": "N3",
+   "padre": "F5",
+   "nombre": "Cerrar INC",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "el lote que lo arregla fue aceptado"
+   },
+   "entradas": [
+    "doc-log-lote"
+   ],
+   "hace": "cierra con la prueba: incs[] cerrado + cierre{lote, prueba}",
+   "salidas": {
+    "piezas": [
+     "json-seguimiento"
+    ],
+    "evento": "INC cerrado"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "pospuesto por decisión",
+     "a": "F2.9"
+    }
+   ],
+   "retorno": "F5",
+   "guardias": [
+    "K9",
+    "validar.py"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1296"
+  },
+  {
+   "id": "F0.1",
+   "nivel": "N3",
+   "padre": "F0",
+   "nombre": "Identificar la pieza",
+   "rol": "AP",
+   "disparador": {
+    "evento": "pieza identificada",
+    "de": "un lote, una decisión o una mejora crea una pieza (mecanismo, archivo, sitio, cuenta)"
+   },
+   "entradas": [
+    "json-elementos",
+    "json-conocimiento"
+   ],
+   "hace": "fila en el índice (hoy elementos.json, mañana universo.json) y ficha si es mecanismo; dueño, plataforma, control",
+   "salidas": {
+    "piezas": [
+     "json-elementos"
+    ],
+    "evento": "pieza identificada"
+   },
+   "siguiente": [
+    "F0.3"
+   ],
+   "bifurca": [],
+   "retorno": "F0",
+   "guardias": [
+    "regla 1 del conocimiento",
+    "U5 (por instalar)"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto",
+   "plazo": "mismo día"
+  },
+  {
+   "id": "F0.2",
+   "nivel": "N3",
+   "padre": "F0",
+   "nombre": "Control de cambios de la línea base",
+   "rol": "AP (ACf)",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "F4.4 (M-n «aceptado»)"
+   },
+   "entradas": [
+    "json-seguimiento",
+    "linea-base-funcional"
+   ],
+   "hace": "linea-base.py --lote: capacidades y casos de uso que cambian, fotos, trinquetes; una fila por lote",
+   "salidas": {
+    "piezas": [
+     "linea-base-funcional",
+     "linea-base-archivos"
+    ],
+    "evento": "línea base actualizada"
+   },
+   "siguiente": [
+    "F0.3"
+   ],
+   "bifurca": [
+    {
+     "si": "el lote cambió el esquema",
+     "a": "F6.1"
+    }
+   ],
+   "retorno": "F0",
+   "guardias": [
+    "C1–C10",
+    "K/M"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto",
+   "plazo": "al aceptar"
+  },
+  {
+   "id": "F0.3",
+   "nivel": "N3",
+   "padre": "F0",
+   "nombre": "Registrar estado",
+   "rol": "AP",
+   "disparador": {
+    "evento": "línea base actualizada",
+    "de": "F0.2 / F0.1"
+   },
+   "entradas": [
+    "linea-base-archivos"
+   ],
+   "hace": "explorador generado (Action linea-base-pagina), página Elementos, servicio recargado por commit",
+   "salidas": {
+    "piezas": [
+     "pagina-linea-base",
+     "servicio-api"
+    ],
+    "evento": "estado registrado"
+   },
+   "siguiente": [
+    "F0.4"
+   ],
+   "bifurca": [],
+   "retorno": "F0",
+   "guardias": [
+    "validar 0 errores antes del push"
+   ],
+   "herramientas": [
+    "modelo-linea-base-pagina",
+    "github-actions"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto"
+  },
+  {
+   "id": "F0.4",
+   "nivel": "N3",
+   "padre": "F0",
+   "nombre": "Auditoría (realidad contra línea base)",
+   "rol": "AP",
+   "disparador": {
+    "evento": "estado registrado",
+    "de": "cambio de equipo (ins-006) o revisión periódica"
+   },
+   "entradas": [
+    "linea-base-archivos",
+    "json-conocimiento",
+    "lenovo-equipo"
+   ],
+   "hace": "compara lo que hay con lo escrito; toda diferencia se corrige o se anota (regla 3)",
+   "salidas": {
+    "piezas": [
+     "json-conocimiento"
+    ],
+    "evento": "auditoría hecha"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "diferencia",
+     "a": "F0.1"
+    }
+   ],
+   "retorno": "F0",
+   "guardias": [
+    "A7 (§5.6)"
+   ],
+   "herramientas": [],
+   "fuente": "plan del proceso + práctica del Arquitecto · hoy: inventario del universo (30-oct)"
+  },
+  {
+   "id": "F6.1",
+   "nivel": "N3",
+   "padre": "F6",
+   "nombre": "Registrar una decisión (ADR)",
+   "rol": "AP · DU por DA",
+   "disparador": {
+    "evento": "decisión registrada",
+    "de": "un lote que cambia una decisión; una DA; un límite del entorno"
+   },
+   "entradas": [
+    "plantilla-adr-md",
+    "decisiones-adr"
+   ],
+   "hace": "contexto con el dato que la motivó, dos opciones con consecuencia, decisor, estado, qué RT/relación cambia, revisarCuando",
+   "salidas": {
+    "piezas": [
+     "decisiones-adr"
+    ],
+    "evento": "decisión registrada"
+   },
+   "siguiente": [
+    "F6.2"
+   ],
+   "bifurca": [
+    {
+     "si": "toca datos reales, dinero, seguridad o proveedor",
+     "a": "F1.C2"
+    }
+   ],
+   "retorno": "F6",
+   "guardias": [
+    "A1 (forma de la decisión)"
+   ],
+   "herramientas": [
+    "plantilla-adr-md"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto",
+   "plazo": "antes del commit"
+  },
+  {
+   "id": "F6.2",
+   "nivel": "N3",
+   "padre": "F6",
+   "nombre": "El lote respeta la arquitectura",
+   "rol": "Desarrollo escribe · AP revisa",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "F3.3 (línea «Decisión:» y RT)"
+   },
+   "entradas": [
+    "doc-instruccion-lote",
+    "mapa-str"
+   ],
+   "hace": "Decisión coherente, RT citadas existen, relaciones por precisar, consejo por el buzón si toca áreas A6",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "revisión 24/24"
+   },
+   "siguiente": [
+    "F3.4"
+   ],
+   "bifurca": [],
+   "retorno": "F6",
+   "guardias": [
+    "A2–A6",
+    "punto 23 del revisor"
+   ],
+   "herramientas": [
+    "plantilla-revisor-previo"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto"
+  },
+  {
+   "id": "F6.3",
+   "nivel": "N3",
+   "padre": "F6",
+   "nombre": "Fila del mapa (M7)",
+   "rol": "AP",
+   "disparador": {
+    "evento": "lote aceptado",
+    "de": "F4.4"
+   },
+   "entradas": [
+    "json-seguimiento",
+    "mapa-str"
+   ],
+   "hace": "una fila por lote en mapa-modulos › historial con módulos, relaciones y estados; mapa gráfico regenerado",
+   "salidas": {
+    "piezas": [
+     "mapa-str",
+     "arquitectura-mapa-datos"
+    ],
+    "evento": "fila del mapa puesta"
+   },
+   "siguiente": [
+    "F0.2"
+   ],
+   "bifurca": [],
+   "retorno": "F6",
+   "guardias": [
+    "M7: lote aceptado sin fila = error"
+   ],
+   "herramientas": [
+    "modelo-mapa-py",
+    "modelo-validar-py"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto",
+   "plazo": "al aceptar"
+  },
+  {
+   "id": "F6.4",
+   "nivel": "N3",
+   "padre": "F6",
+   "nombre": "Evaluación de arquitectura",
+   "rol": "AP",
+   "disparador": {
+    "evento": "fila del mapa puesta",
+    "de": "20 lotes aceptados, módulo que cambia de estado o INC de arquitectura alto"
+   },
+   "entradas": [
+    "mapa-str",
+    "json-seguimiento"
+   ],
+   "hace": "deuda arquitectónica por severidad con dueño, RT críticas con guardia, relaciones por precisar, última prueba de capacidad",
+   "salidas": {
+    "piezas": [
+     "json-proyecto",
+     "json-seguimiento"
+    ],
+    "evento": "evaluación hecha"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "deuda alta",
+     "a": "F2.1"
+    }
+   ],
+   "retorno": "F6",
+   "guardias": [
+    "A7–A8"
+   ],
+   "herramientas": [],
+   "fuente": "plan del proceso + práctica del Arquitecto"
+  },
+  {
+   "id": "F7.1",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Alta de riesgo",
+   "rol": "JP escribe · AP propone · DU acepta ≥ 6",
+   "disparador": {
+    "evento": "riesgo registrado",
+    "de": "el Arquitecto propone R-n por el buzón"
+   },
+   "entradas": [
+    "json-mensajes",
+    "modelo-esquema-json"
+   ],
+   "hace": "valida forma y escribe la fila (escenario, capa, módulos, p × i, respuesta, señal, dueño, revisarCuando)",
+   "salidas": {
+    "piezas": [
+     "json-riesgos"
+    ],
+    "evento": "riesgo registrado"
+   },
+   "siguiente": [
+    "F7.2"
+   ],
+   "bifurca": [
+    {
+     "si": "aceptado de nivel ≥ 6",
+     "a": "F1.C2"
+    }
+   ],
+   "retorno": "F7",
+   "guardias": [
+    "Rg1",
+    "Rg2"
+   ],
+   "herramientas": [
+    "modelo-riesgos-py"
+   ],
+   "fuente": "JP M-1295"
+  },
+  {
+   "id": "F7.2",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Revisión por tanda",
+   "rol": "JP",
+   "disparador": {
+    "evento": "tanda cerrada",
+    "de": "F2.10"
+   },
+   "entradas": [
+    "jp-fichas-archivo",
+    "json-riesgos"
+   ],
+   "hace": "mira lo que está sin probar o vencido; avisa al dueño",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "ficha generada"
+   },
+   "siguiente": [
+    "F7.5"
+   ],
+   "bifurca": [],
+   "retorno": "F7",
+   "guardias": [
+    "Rg7"
+   ],
+   "herramientas": [
+    "modelo-riesgos-py"
+   ],
+   "fuente": "JP M-1295",
+   "plazo": "respuesta probada cada 90 días"
+  },
+  {
+   "id": "F7.3",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Materialización",
+   "rol": "JP (el juez propone)",
+   "disparador": {
+    "evento": "INC decidido",
+    "de": "F2.9 cuando el INC coincide con un R-n"
+   },
+   "entradas": [
+    "json-seguimiento",
+    "json-riesgos"
+   ],
+   "hace": "marca el R-n «materializado»",
+   "salidas": {
+    "piezas": [
+     "json-riesgos"
+    ],
+    "evento": "riesgo materializado"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F7",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "JP M-1295 (duda: solo R-6)"
+  },
+  {
+   "id": "F7.4",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Metas",
+   "rol": "JP con DU",
+   "disparador": {
+    "evento": "respuesta de Carlos",
+    "de": "DA-62 pendiente"
+   },
+   "entradas": [
+    "json-riesgos"
+   ],
+   "hace": "metas MT-1…MT-4 fijadas con Carlos; la ficha las compara cada tanda",
+   "salidas": {
+    "piezas": [
+     "json-riesgos"
+    ],
+    "evento": "metas fijadas"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F7",
+   "guardias": [],
+   "herramientas": [],
+   "fuente": "JP M-1295"
+  },
+  {
+   "id": "F7.5",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Ficha de tanda",
+   "rol": "JP",
+   "disparador": {
+    "evento": "tanda cerrada",
+    "de": "F2.10"
+   },
+   "entradas": [
+    "json-metricas",
+    "json-seguimiento",
+    "json-proyecto"
+   ],
+   "hace": "genera la ficha con --anterior y lee el semáforo (hoy 7 rojas)",
+   "salidas": {
+    "piezas": [
+     "jp-fichas-archivo"
+    ],
+    "evento": "ficha generada"
+   },
+   "siguiente": [
+    "F7.6"
+   ],
+   "bifurca": [],
+   "retorno": "F7",
+   "guardias": [
+    "MD-n del semáforo"
+   ],
+   "herramientas": [
+    "modelo-ficha-semanal-py"
+   ],
+   "fuente": "JP M-1295 (duda: METRICAS.json del 15-oct)"
+  },
+  {
+   "id": "F7.6",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Rojas repetidas",
+   "rol": "JP · AP · DU",
+   "disparador": {
+    "evento": "ficha generada",
+    "de": "F7.5 con --anterior"
+   },
+   "entradas": [
+    "jp-fichas-archivo"
+   ],
+   "hace": "cada roja repetida produce una fila en trabajo[] que cite su MD-n, un R-n aceptado por Carlos o el retiro de la medida",
+   "salidas": {
+    "piezas": [
+     "json-proyecto"
+    ],
+    "evento": "roja repetida"
+   },
+   "siguiente": [
+    "F2.1"
+   ],
+   "bifurca": [],
+   "retorno": "F7",
+   "guardias": [
+    "Rg6"
+   ],
+   "herramientas": [],
+   "fuente": "JP M-1295 · FALLA HOY: rojas sin acción (DT vencidas, ítems vencidos, piezas de arranque, riesgos sin respuesta probada)"
+  },
+  {
+   "id": "F7.7",
+   "nivel": "N3",
+   "padre": "F7",
+   "nombre": "Traspasos vencidos",
+   "rol": "JP",
+   "disparador": {
+    "evento": "ficha generada",
+    "de": "F7.5"
+   },
+   "entradas": [
+    "traspaso-jp"
+   ],
+   "hace": "reescribe el traspaso si pasó de 7 días",
+   "salidas": {
+    "piezas": [
+     "traspaso-jp"
+    ],
+    "evento": "traspaso escrito"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F7",
+   "guardias": [
+    "ficha"
+   ],
+   "herramientas": [],
+   "fuente": "JP M-1295",
+   "plazo": "7 días"
+  },
+  {
+   "id": "F8.1",
+   "nivel": "N3",
+   "padre": "F8",
+   "nombre": "Lección con destino",
+   "rol": "cada chat",
+   "disparador": {
+    "evento": "lección registrada",
+    "de": "un error visto, un lote aceptado, una revisión de incidente",
+    "otros": [
+     "escape con destino",
+     "revisión de incidente hecha",
+     "lote aceptado"
+    ]
+   },
+   "entradas": [
+    "json-diseno",
+    "json-proyecto",
+    "json-seguimiento"
+   ],
+   "hace": "lección en el archivo de su rol con destino {tipo, ref, fecha}; las de forma de trabajar van al Arquitecto",
+   "salidas": {
+    "piezas": [
+     "json-conocimiento"
+    ],
+    "evento": "lección registrada"
+   },
+   "siguiente": [
+    "F8.2"
+   ],
+   "bifurca": [
+    {
+     "si": "es del método",
+     "a": "F8.5"
+    }
+   ],
+   "retorno": "F8",
+   "guardias": [
+    "Cn3 (destino)",
+    "«lecciones sin destino > 7 d»"
+   ],
+   "herramientas": [],
+   "fuente": "plan del proceso + práctica del Arquitecto",
+   "plazo": "mismo día"
+  },
+  {
+   "id": "F8.2",
+   "nivel": "N3",
+   "padre": "F8",
+   "nombre": "Catálogo que madura",
+   "rol": "AP",
+   "disparador": {
+    "evento": "lección registrada",
+    "de": "F8.1; revisión del catálogo"
+   },
+   "entradas": [
+    "json-conocimiento"
+   ],
+   "hace": "práctica, patrón o herramienta con alcance (proyecto → fábrica cuando funcionó en dos proyectos) y madurez",
+   "salidas": {
+    "piezas": [
+     "json-conocimiento"
+    ],
+    "evento": "lección madura"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F8",
+   "guardias": [
+    "Cn1–Cn2"
+   ],
+   "herramientas": [
+    "modelo-conocimiento-py",
+    "modelo-catalogo-md-py"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto"
+  },
+  {
+   "id": "F8.3",
+   "nivel": "N3",
+   "padre": "F8",
+   "nombre": "Relevo de chat",
+   "rol": "cada chat · AP",
+   "disparador": {
+    "evento": "relevo de chat",
+    "de": "un chat nuevo reemplaza a otro; compactación"
+   },
+   "entradas": [
+    "plantilla-traspaso-md",
+    "json-destinatarios"
+   ],
+   "hace": "traspaso escrito, sesión nueva en destinatarios.json, arranque leyendo encargo + reglas comunes + traspaso + buzón",
+   "salidas": {
+    "piezas": [
+     "json-destinatarios",
+     "traspaso-jp"
+    ],
+    "evento": "traspaso escrito"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "el chat se pierde sin traspaso",
+     "a": "F5.2"
+    }
+   ],
+   "retorno": "F8",
+   "guardias": [
+    "Cn4",
+    "traspasos vencidos"
+   ],
+   "herramientas": [
+    "plantilla-traspaso-md"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto · hallazgo: el mensaje de arranque no existe como archivo"
+  },
+  {
+   "id": "F8.4",
+   "nivel": "N3",
+   "padre": "F8",
+   "nombre": "Buzón y despertador",
+   "rol": "cada chat · despertador",
+   "disparador": {
+    "evento": "mensaje enviado",
+    "de": "un chat deja M-n pendiente; «Esperando: …» al cerrar"
+   },
+   "entradas": [
+    "json-mensajes",
+    "json-destinatarios"
+   ],
+   "hace": "el despertador (cada minuto) deja «Revisa el buzón…» en el chat destinatario; escala a los 30 y 60 min; a Carlos por Windows y el Panel",
+   "salidas": {
+    "piezas": [
+     "json-mensajes"
+    ],
+    "evento": "chat despertado"
+   },
+   "siguiente": [
+    "F2.5"
+   ],
+   "bifurca": [
+    {
+     "si": "el destinatario es Carlos",
+     "a": "F2.12"
+    }
+   ],
+   "retorno": "F8",
+   "guardias": [
+    "R1 ids",
+    "buzon.py"
+   ],
+   "herramientas": [
+    "herramienta-vigilar-buzon",
+    "tarea-win-buzon",
+    "herramienta-panel-str"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto",
+   "plazo": "1 min"
+  },
+  {
+   "id": "F8.5",
+   "nivel": "N3",
+   "padre": "F8",
+   "nombre": "Mejora del método (MJ-n → LM-n)",
+   "rol": "AP · DU adopta",
+   "disparador": {
+    "evento": "mejora adoptada",
+    "de": "una lección del método, un INC de proceso, una brecha del marco"
+   },
+   "entradas": [
+    "registro-mejoras",
+    "planes-procesos"
+   ],
+   "hace": "propuesta con beneficio, costo, asumimos y revisarCuando; LM-n con ok de Carlos; guardias en validar.py; encargos y plantillas al día",
+   "salidas": {
+    "piezas": [
+     "registro-mejoras",
+     "lotes-modelo",
+     "modelo-validar-py",
+     "json-instrucciones"
+    ],
+    "evento": "LM instalado"
+   },
+   "siguiente": [],
+   "bifurca": [
+    {
+     "si": "cambia encargos de otros roles",
+     "a": "F8.4"
+    }
+   ],
+   "retorno": "F8",
+   "guardias": [
+    "validar 0 errores",
+    "cruce por el buzón"
+   ],
+   "herramientas": [
+    "modelo-validar-py"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto · hallazgo: encargos del JP y de Desarrollo desfasados"
+  },
+  {
+   "id": "F8.6",
+   "nivel": "N3",
+   "padre": "F8",
+   "nombre": "Archivo del buzón y del conocimiento",
+   "rol": "AP",
+   "disparador": {
+    "evento": "límite superado",
+    "de": "«buzón vivo (KB)» en rojo en la ficha"
+   },
+   "entradas": [
+    "json-mensajes"
+   ],
+   "hace": "archivar.py poda el buzón; archivo/ guarda lo cerrado",
+   "salidas": {
+    "piezas": [
+     "respaldos-internos",
+     "json-mensajes"
+    ],
+    "evento": "estado registrado"
+   },
+   "siguiente": [],
+   "bifurca": [],
+   "retorno": "F8",
+   "guardias": [
+    "Cn6"
+   ],
+   "herramientas": [
+    "modelo-archivar-py"
+   ],
+   "fuente": "plan del proceso + práctica del Arquitecto · hoy en rojo (2,3 MB)"
+  }
+ ]
+}

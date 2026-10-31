@@ -1,0 +1,1566 @@
+<!DOCTYPE html><html lang="es" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mapa de procesos · 0.1</title>
+<style>
+:root{--bg:#0f1115;--papel:#171a21;--tinta:#e7e9ee;--suave:#9aa3b2;--linea:#2a2f3a;--acento:#8fc4f5;--n0:#f0a06a;--n1:#f0a06a;--n2:#b7a3f2;--n3:#6fd3c6;--n4:#9aa3b2}
+html[data-theme="light"]{--bg:#f2f3ef;--papel:#fff;--tinta:#1b221e;--suave:#5b655f;--linea:#cdd3cc;--acento:#185fa5;--n0:#b4530f;--n1:#b4530f;--n2:#5b3fb3;--n3:#0f766e;--n4:#5b655f}
+body{margin:0;background:var(--bg);color:var(--tinta);font:13px/1.4 system-ui,sans-serif}
+.pag{max-width:1200px;margin:0 auto;padding:18px 16px 48px}
+h1{font-size:22px;margin:0} .sub{color:var(--suave);margin:4px 0 12px;max-width:80ch}
+.barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.barra button{font:inherit;padding:5px 10px;border:1px solid var(--linea);border-radius:7px;background:var(--papel);color:var(--tinta);cursor:pointer}
+.barra button.on{border-color:var(--acento);color:var(--acento)}
+.barra input{flex:1 1 220px;font:inherit;padding:6px 10px;border:1px solid var(--linea);border-radius:7px;background:var(--papel);color:var(--tinta)}
+.nodos{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
+.nodo{background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:10px 12px;min-width:0}
+.nodo.foco{outline:2px solid var(--acento)}
+.nodo header{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;margin-bottom:6px}
+.nodo h3{font-size:14px;margin:0;flex:1 1 auto}
+.niv{font-family:ui-monospace,monospace;font-size:11px;border-radius:5px;padding:1px 6px;color:#fff;background:var(--n2)}
+.nodo[data-nivel="N0"] .niv,.nodo[data-nivel="N1"] .niv{background:var(--n1)} .nodo[data-nivel="N3"] .niv{background:var(--n3)} .nodo[data-nivel="N4"] .niv{background:var(--n4)}
+.rol,.est{font-size:11px;color:var(--suave);border:1px solid var(--linea);border-radius:5px;padding:0 5px}
+dl{display:grid;grid-template-columns:92px 1fr;gap:3px 8px;margin:0;font-size:12.3px} dt{color:var(--suave)} dd{margin:0;min-width:0;overflow-wrap:anywhere} dd.fte{font-size:11px;color:var(--suave)}
+nav{margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;font-size:12px} a{color:var(--acento);text-decoration:none} a:hover{text-decoration:underline}
+.oculto{display:none}
+details.ev{margin-top:16px;color:var(--suave)} details.ev ul{columns:2;font-size:12px}
+</style></head><body><div class="pag">
+<h1>Mapa de procesos del universo</h1>
+<p class="sub">Cada nodo es un proceso en algún nivel (N0 portafolio · N1 proyecto · N2 proceso de la fábrica · N3 procedimiento · N4 paso). La salida de uno es el disparador de otro: «entrar» baja un nivel, «continuar» sigue el circuito, «volver» sube al padre. Versión 0.1 · borrador 0.1: N2 y N3 con las etapas de los cuatro chats (M-1294/1295/1296 y planes); N4 (pasos) pendiente; N1 sin detallar hasta la metodología de proyectos (ADR-009 §5).</p>
+<div class="barra"><button data-n="" class="on">Todos</button><button data-n="N0">N0</button><button data-n="N1">N1</button><button data-n="N2">N2</button><button data-n="N3">N3</button><button data-n="N4">N4</button><input id="q" type="search" placeholder="buscar nodo, evento, pieza, rol…"><span id="cnt"></span></div>
+<div class="nodos" id="nodos"><article class="nodo" id="PF" data-nivel="N0" data-padre="">
+<header><span class="niv">N0</span><h3>PF · Portafolio de proyectos</h3><span class="rol">DU (patrocinador) · AP (PMO)</span><span class="est">APO05 ligero; BAI01 cuando haya cuatro proyectos</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>necesidad de software</b> · de Carlos o un cliente</dd>
+<dt>Entradas</dt><dd>json-proyectos</dd>
+<dt>Hace</dt><dd>decide qué proyectos existen, con qué prioridad y puertas; registra cada uno en proyectos.json con sus herramientas</dd>
+<dt>Salidas</dt><dd>json-proyectos → <b>proyecto admitido</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.ini" data-ir="P01.ini">P01.ini</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd>—</dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>json-proyectos</dd>
+
+<dt>Dentro</dt><dd><a href="#P01.ini" data-ir="P01.ini">P01.ini</a>, <a href="#P01.pla" data-ir="P01.pla">P01.pla</a>, <a href="#P01.eje" data-ir="P01.eje">P01.eje</a>, <a href="#P01.mon" data-ir="P01.mon">P01.mon</a>, <a href="#P01.cie" data-ir="P01.cie">P01.cie</a></dd>
+<dt>Fuente</dt><dd class="fte">ADR-008, ADR-009 v5 §1</dd>
+</dl>
+<nav> <a href="#P01.ini" data-ir="P01.ini">entrar en P01.ini ↓</a> <a href="#P01.ini" data-ir="P01.ini">continuar → P01.ini</a></nav>
+</article><article class="nodo" id="P01.ini" data-nivel="N1" data-padre="PF">
+<header><span class="niv">N1</span><h3>P01.ini · Inicio del proyecto (acta)</h3><span class="rol">DU decide · AN gerente</span><span class="est">sin detallar</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>proyecto admitido</b> · de PF</dd>
+<dt>Entradas</dt><dd>json-proyectos</dd>
+<dt>Hace</dt><dd>acta de constitución: propósito, patrocinador, gerente, alcance alto, criterios de éxito, presupuesto; alta en la fábrica (id, repos, ambientes, semilla, chats)</dd>
+<dt>Salidas</dt><dd>json-proyectos, repo-str-manager, ambientes-str → <b>proyecto admitido</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.pla" data-ir="P01.pla">P01.pla</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#PF" data-ir="PF">PF</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>plantilla-adr-md</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">ADR-009 §2; P01: D5 pendiente (acta desde lo construido)</dd>
+</dl>
+<nav><a href="#PF" data-ir="PF">↑ volver a PF</a> <a href="#P01.pla" data-ir="P01.pla">continuar → P01.pla</a></nav>
+</article><article class="nodo" id="P01.pla" data-nivel="N1" data-padre="PF">
+<header><span class="niv">N1</span><h3>P01.pla · Planificación (línea base del proyecto)</h3><span class="rol">AN gerente · DU aprueba</span><span class="est">sin detallar</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>proyecto admitido</b> · de P01.ini</dd>
+<dt>Entradas</dt><dd>json-diseno, json-proyecto</dd>
+<dt>Hace</dt><dd>línea base: alcance (REQ), hitos con entregable, costo, riesgos, plan de comunicación; pide a la fábrica REQ y DA con sus plantillas</dd>
+<dt>Salidas</dt><dd>json-diseno, json-proyecto → <b>línea base aprobada</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.eje" data-ir="P01.eje">P01.eje</a></dd>
+<dt>Bifurca</dt><dd>un REQ nuevo o cambio de alcance → <a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Retorno</dt><dd><a href="#PF" data-ir="PF">PF</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>plantilla-requerimiento-md</dd>
+
+<dt>Dentro</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Fuente</dt><dd class="fte">ADR-009 §2; hoy: planes PT-n del JP y REQ de Diseño</dd>
+</dl>
+<nav><a href="#PF" data-ir="PF">↑ volver a PF</a> <a href="#F1" data-ir="F1">entrar en F1 ↓</a> <a href="#P01.eje" data-ir="P01.eje">continuar → P01.eje</a></nav>
+</article><article class="nodo" id="P01.eje" data-nivel="N1" data-padre="PF">
+<header><span class="niv">N1</span><h3>P01.eje · Ejecución (entregables por hito)</h3><span class="rol">AN gerente · fábrica construye</span><span class="est">sin detallar</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>línea base aprobada</b> · de P01.pla</dd>
+<dt>Entradas</dt><dd>json-diseno, json-proyecto</dd>
+<dt>Hace</dt><dd>cada REQ pasa por la fábrica: instrucción → cola → CLI → pruebas → juez → lote aceptado → desplegado; cada hito lo firma Carlos</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>hito firmado</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Bifurca</dt><dd>REQ listo → <a href="#F2" data-ir="F2">F2</a>; INC en producción → <a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Retorno</dt><dd><a href="#PF" data-ir="PF">PF</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd><a href="#F2" data-ir="F2">F2</a>, <a href="#F3" data-ir="F3">F3</a>, <a href="#F4" data-ir="F4">F4</a>, <a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Fuente</dt><dd class="fte">ADR-009 §2</dd>
+</dl>
+<nav><a href="#PF" data-ir="PF">↑ volver a PF</a> <a href="#F2" data-ir="F2">entrar en F2 ↓</a> <a href="#P01.mon" data-ir="P01.mon">continuar → P01.mon</a></nav>
+</article><article class="nodo" id="P01.mon" data-nivel="N1" data-padre="PF">
+<header><span class="niv">N1</span><h3>P01.mon · Monitoreo y control (transversal)</h3><span class="rol">JP · AN · DU</span><span class="est">sin detallar</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>hito firmado</b> · de P01.eje</dd>
+<dt>Entradas</dt><dd>json-proyecto, jp-fichas-archivo, json-metricas</dd>
+<dt>Hace</dt><dd>informe de avance, control de cambios de la línea base (DA), riesgos, gasto; métricas del servicio, INC y situaciones</dd>
+<dt>Salidas</dt><dd>jp-fichas-archivo, json-riesgos → <b>listo para entregar</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.cie" data-ir="P01.cie">P01.cie</a></dd>
+<dt>Bifurca</dt><dd>cambio de alcance, costo o hitos → <a href="#F1" data-ir="F1">F1</a>; tanda cerrada → <a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Retorno</dt><dd><a href="#PF" data-ir="PF">PF</a></dd>
+<dt>Guardias</dt><dd>F9, Rg6</dd>
+<dt>Herramientas</dt><dd>modelo-ficha-semanal-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F0" data-ir="F0">F0</a>, <a href="#F6" data-ir="F6">F6</a>, <a href="#F7" data-ir="F7">F7</a>, <a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Fuente</dt><dd class="fte">ADR-009 §2; hoy: tandas, fichas y «¿cómo vamos?» del JP</dd>
+</dl>
+<nav><a href="#PF" data-ir="PF">↑ volver a PF</a> <a href="#F0" data-ir="F0">entrar en F0 ↓</a> <a href="#P01.cie" data-ir="P01.cie">continuar → P01.cie</a></nav>
+</article><article class="nodo" id="P01.cie" data-nivel="N1" data-padre="PF">
+<header><span class="niv">N1</span><h3>P01.cie · Cierre del proyecto</h3><span class="rol">DU cierra · AN</span><span class="est">sin detallar</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>listo para entregar</b> · de P01.mon</dd>
+<dt>Entradas</dt><dd>json-seguimiento, json-conocimiento</dd>
+<dt>Hace</dt><dd>aceptación final, transferencia (repos, credenciales, dominio, documentación), acta de cierre, lecciones a la fábrica; archivo en el servicio</dd>
+<dt>Salidas</dt><dd>json-conocimiento → <b>proyecto cerrado</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#PF" data-ir="PF">PF</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">ADR-009 §2</dd>
+</dl>
+<nav><a href="#PF" data-ir="PF">↑ volver a PF</a></nav>
+</article><article class="nodo" id="F1" data-nivel="N2" data-padre="P01.pla">
+<header><span class="niv">N2</span><h3>F1 · 1 · Requerimientos (Definición de requisitos, 12207 6.4.2–6.4.3): escucha, revisión de alcance y REQ</h3><span class="rol">AN (Diseño) con DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pedido de Carlos</b> · de Carlos en el chat de Diseño; o P01.pla</dd>
+<dt>Entradas</dt><dd>json-diseno, linea-base-funcional, plantilla-requerimiento-md</dd>
+<dt>Hace</dt><dd>tres modos: escucha (E), revisión de alcance con línea objetivo (R) y requerimiento con DA (C), hasta «listo para construir»</dd>
+<dt>Salidas</dt><dd>diseno-listas, docs-requerimientos-tema, linea-objetivo-inv → <b>REQ listo para construir</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Bifurca</dt><dd>toca decisión de datos, dinero o seguridad → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.pla" data-ir="P01.pla">P01.pla</a></dd>
+<dt>Guardias</dt><dd>Q1–Q8</dd>
+<dt>Herramientas</dt><dd>modelo-ubicar-py, modelo-objetivo-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F1.Z1" data-ir="F1.Z1">F1.Z1</a>, <a href="#F1.E1" data-ir="F1.E1">F1.E1</a>, <a href="#F1.E2" data-ir="F1.E2">F1.E2</a>, <a href="#F1.E3" data-ir="F1.E3">F1.E3</a>, <a href="#F1.R1" data-ir="F1.R1">F1.R1</a>, <a href="#F1.R2" data-ir="F1.R2">F1.R2</a>, <a href="#F1.R3" data-ir="F1.R3">F1.R3</a>, <a href="#F1.R4" data-ir="F1.R4">F1.R4</a>, <a href="#F1.R5" data-ir="F1.R5">F1.R5</a>, <a href="#F1.R6" data-ir="F1.R6">F1.R6</a>, <a href="#F1.R7" data-ir="F1.R7">F1.R7</a>, <a href="#F1.R8" data-ir="F1.R8">F1.R8</a>, <a href="#F1.C1" data-ir="F1.C1">F1.C1</a>, <a href="#F1.C2" data-ir="F1.C2">F1.C2</a>, <a href="#F1.C3" data-ir="F1.C3">F1.C3</a>, <a href="#F1.C4" data-ir="F1.C4">F1.C4</a>, <a href="#F1.C5" data-ir="F1.C5">F1.C5</a>, <a href="#F1.C6" data-ir="F1.C6">F1.C6</a>, <a href="#F1.C7" data-ir="F1.C7">F1.C7</a>, <a href="#F1.C8" data-ir="F1.C8">F1.C8</a>, <a href="#F1.Z2" data-ir="F1.Z2">F1.Z2</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-1 (proyecto de Claude); Diseño M-1294</dd>
+</dl>
+<nav><a href="#P01.pla" data-ir="P01.pla">↑ volver a P01.pla</a> <a href="#F1.Z1" data-ir="F1.Z1">entrar en F1.Z1 ↓</a> <a href="#F2" data-ir="F2">continuar → F2</a></nav>
+</article><article class="nodo" id="F2" data-nivel="N2" data-padre="P01.eje">
+<header><span class="niv">N2</span><h3>F2 · 2 · Orden del trabajo (Evaluación y control del proyecto, 6.3.2)</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>REQ listo para construir</b> · de F1 (M-n), INC decidido, DT con plazo, LM con ok, orden de Carlos</dd>
+<dt>Entradas</dt><dd>json-proyecto, json-diseno, json-seguimiento, json-mensajes</dd>
+<dt>Hace</dt><dd>lista con clase y prioridad, tandas con límites, pausas; dice qué está libre</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>ítem libre</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Bifurca</dt><dd>pausa de Carlos → <a href="#F2.6" data-ir="F2.6">F2.6</a>; límite superado → <a href="#F2.5" data-ir="F2.5">F2.5</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.eje" data-ir="P01.eje">P01.eje</a></dd>
+<dt>Guardias</dt><dd>F1–F7</dd>
+<dt>Herramientas</dt><dd>modelo-flujo-py, modelo-ficha-semanal-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F2.1" data-ir="F2.1">F2.1</a>, <a href="#F2.2" data-ir="F2.2">F2.2</a>, <a href="#F2.3" data-ir="F2.3">F2.3</a>, <a href="#F2.4" data-ir="F2.4">F2.4</a>, <a href="#F2.5" data-ir="F2.5">F2.5</a>, <a href="#F2.6" data-ir="F2.6">F2.6</a>, <a href="#F2.7" data-ir="F2.7">F2.7</a>, <a href="#F2.8" data-ir="F2.8">F2.8</a>, <a href="#F2.9" data-ir="F2.9">F2.9</a>, <a href="#F2.10" data-ir="F2.10">F2.10</a>, <a href="#F2.11" data-ir="F2.11">F2.11</a>, <a href="#F2.12" data-ir="F2.12">F2.12</a>, <a href="#F2.13" data-ir="F2.13">F2.13</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-2; JP M-1295</dd>
+</dl>
+<nav><a href="#P01.eje" data-ir="P01.eje">↑ volver a P01.eje</a> <a href="#F2.1" data-ir="F2.1">entrar en F2.1 ↓</a> <a href="#F3" data-ir="F3">continuar → F3</a></nav>
+</article><article class="nodo" id="F3" data-nivel="N2" data-padre="P01.eje">
+<header><span class="niv">N2</span><h3>F3 · 3 · Construcción y cambio (Implementación e integración, 6.4.7–6.4.8)</h3><span class="rol">Desarrollo (ASw, GCa) · CLI (DV)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem libre</b> · de F2 (trabajo[] libre) o brief/LM del Arquitecto</dd>
+<dt>Entradas</dt><dd>json-diseno, repo-str-manager, plantilla-instruccion-md, plantilla-revisor-previo</dd>
+<dt>Hace</dt><dd>del REQ a un lote construido y desplegado: instrucción, revisor previo, cruce y ok, cola, CLI, push</dd>
+<dt>Salidas</dt><dd>doc-instruccion-lote, json-seguimiento, repo-str-manager → <b>lote construido</b></dd>
+<dt>Siguiente</dt><dd><a href="#F4" data-ir="F4">F4</a></dd>
+<dt>Bifurca</dt><dd>crítico → <a href="#F3.5" data-ir="F3.5">F3.5</a>; hallazgo al simular → <a href="#F5.3" data-ir="F5.3">F5.3</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.eje" data-ir="P01.eje">P01.eje</a></dd>
+<dt>Guardias</dt><dd>K1–K9, guardias de la cola, hooks</dd>
+<dt>Herramientas</dt><dd>cola-str-instr, ejecutar-cola, herramienta-hooks-cli</dd>
+
+<dt>Dentro</dt><dd><a href="#F3.1" data-ir="F3.1">F3.1</a>, <a href="#F3.2" data-ir="F3.2">F3.2</a>, <a href="#F3.3" data-ir="F3.3">F3.3</a>, <a href="#F3.4" data-ir="F3.4">F3.4</a>, <a href="#F3.5" data-ir="F3.5">F3.5</a>, <a href="#F3.6" data-ir="F3.6">F3.6</a>, <a href="#F3.7" data-ir="F3.7">F3.7</a>, <a href="#F3.8" data-ir="F3.8">F3.8</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-3 (proyecto de Claude); Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#P01.eje" data-ir="P01.eje">↑ volver a P01.eje</a> <a href="#F3.1" data-ir="F3.1">entrar en F3.1 ↓</a> <a href="#F4" data-ir="F4">continuar → F4</a></nav>
+</article><article class="nodo" id="F4" data-nivel="N2" data-padre="P01.eje">
+<header><span class="niv">N2</span><h3>F4 · 4 · Verificación y aceptación (6.4.9, 6.4.11; PRUEBAS-v2)</h3><span class="rol">cola · pw · juez · Desarrollo registra · AP cierra a</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote construido</b> · de F3 (push; la cola sigue sola)</dd>
+<dt>Entradas</dt><dd>pw-probar-lote, guiones-e2e-str, herramienta-juez</dd>
+<dt>Hace</dt><dd>pruebas sobre el commit del lote, veredicto del juez, cierre; quien construye no acepta</dd>
+<dt>Salidas</dt><dd>json-seguimiento, doc-log-lote → <b>lote aceptado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F0" data-ir="F0">F0</a>, <a href="#F6" data-ir="F6">F6</a>, <a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Bifurca</dt><dd>rojo o bloqueado → <a href="#F4.5" data-ir="F4.5">F4.5</a>; criterio incumplido → <a href="#F5.1" data-ir="F5.1">F5.1</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.eje" data-ir="P01.eje">P01.eje</a></dd>
+<dt>Guardias</dt><dd>V1–V11, K1 sobre el commit, Control-Veredicto</dd>
+<dt>Herramientas</dt><dd>herramienta-pw, herramienta-juez, control-veredicto</dd>
+
+<dt>Dentro</dt><dd><a href="#F4.1" data-ir="F4.1">F4.1</a>, <a href="#F4.2" data-ir="F4.2">F4.2</a>, <a href="#F4.3" data-ir="F4.3">F4.3</a>, <a href="#F4.4" data-ir="F4.4">F4.4</a>, <a href="#F4.5" data-ir="F4.5">F4.5</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-4; Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#P01.eje" data-ir="P01.eje">↑ volver a P01.eje</a> <a href="#F4.1" data-ir="F4.1">entrar en F4.1 ↓</a> <a href="#F0" data-ir="F0">continuar → F0</a></nav>
+</article><article class="nodo" id="F5" data-nivel="N2" data-padre="P01.eje">
+<header><span class="niv">N2</span><h3>F5 · 5 · Incidentes y problemas (Mantenimiento 6.4.13; 20000-1 §8.6)</h3><span class="rol">Desarrollo · juez propone · JP decide · AN confirma</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC registrado</b> · de F4 (veredicto), producción (Carlos/Arquitecto), simulación</dd>
+<dt>Entradas</dt><dd>json-seguimiento, plantilla-aviso-produccion-md, plantilla-revision-incidente-md</dd>
+<dt>Hace</dt><dd>registrar con causa y control que debió verlo, decidir, arreglar por lote, revisar y cerrar con evidencia</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>INC cerrado</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>decisión de lote → <a href="#F3.1" data-ir="F3.1">F3.1</a>; misma causa repetida → <a href="#F5.5" data-ir="F5.5">F5.5</a>; escape → <a href="#F5.6" data-ir="F5.6">F5.6</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.eje" data-ir="P01.eje">P01.eje</a></dd>
+<dt>Guardias</dt><dd>I1–I7, K9</dd>
+<dt>Herramientas</dt><dd>modelo-incidentes-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F5.1" data-ir="F5.1">F5.1</a>, <a href="#F5.2" data-ir="F5.2">F5.2</a>, <a href="#F5.3" data-ir="F5.3">F5.3</a>, <a href="#F5.4" data-ir="F5.4">F5.4</a>, <a href="#F5.5" data-ir="F5.5">F5.5</a>, <a href="#F5.6" data-ir="F5.6">F5.6</a>, <a href="#F5.7" data-ir="F5.7">F5.7</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-5; Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#P01.eje" data-ir="P01.eje">↑ volver a P01.eje</a> <a href="#F5.1" data-ir="F5.1">entrar en F5.1 ↓</a></nav>
+</article><article class="nodo" id="F0" data-nivel="N2" data-padre="P01.mon">
+<header><span class="niv">N2</span><h3>F0 · 0 · Línea base y configuración (6.3.5; ISO 10007)</h3><span class="rol">AP (ACf)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de F4</dd>
+<dt>Entradas</dt><dd>linea-base-funcional, json-elementos, mapa-str</dd>
+<dt>Hace</dt><dd>identificar piezas, controlar cambios de la línea base por lote, registrar estado, auditar realidad contra línea base</dd>
+<dt>Salidas</dt><dd>linea-base-funcional, linea-base-archivos, json-elementos → <b>línea base actualizada</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>pieza nueva en un lote o decisión → <a href="#F0.1" data-ir="F0.1">F0.1</a>; cambio de equipo o revisión periódica → <a href="#F0.4" data-ir="F0.4">F0.4</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Guardias</dt><dd>C1–C10, U1–U6 (LM-83, por instalar)</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py, modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F0.1" data-ir="F0.1">F0.1</a>, <a href="#F0.2" data-ir="F0.2">F0.2</a>, <a href="#F0.3" data-ir="F0.3">F0.3</a>, <a href="#F0.4" data-ir="F0.4">F0.4</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-0; Arquitecto</dd>
+</dl>
+<nav><a href="#P01.mon" data-ir="P01.mon">↑ volver a P01.mon</a> <a href="#F0.1" data-ir="F0.1">entrar en F0.1 ↓</a></nav>
+</article><article class="nodo" id="F6" data-nivel="N2" data-padre="P01.mon">
+<header><span class="niv">N2</span><h3>F6 · 6 · Arquitectura y decisiones (6.4.4, 6.3.3)</h3><span class="rol">AP (ASw) · DU decide por DA</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de F4; o un lote que toca una decisión</dd>
+<dt>Entradas</dt><dd>mapa-str, decisiones-adr, plantilla-adr-md</dd>
+<dt>Hace</dt><dd>decisiones ADR, reglas transversales, mapa del STR al día por lote, evaluación por evento</dd>
+<dt>Salidas</dt><dd>mapa-str, decisiones-adr → <b>fila del mapa puesta</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>decisión que toca datos reales, dinero o seguridad → <a href="#F6.1" data-ir="F6.1">F6.1</a>; 20 lotes aceptados o INC de arquitectura alto → <a href="#F6.4" data-ir="F6.4">F6.4</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Guardias</dt><dd>A1–A8, M1–M7</dd>
+<dt>Herramientas</dt><dd>modelo-mapa-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F6.1" data-ir="F6.1">F6.1</a>, <a href="#F6.2" data-ir="F6.2">F6.2</a>, <a href="#F6.3" data-ir="F6.3">F6.3</a>, <a href="#F6.4" data-ir="F6.4">F6.4</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-6; Arquitecto</dd>
+</dl>
+<nav><a href="#P01.mon" data-ir="P01.mon">↑ volver a P01.mon</a> <a href="#F6.1" data-ir="F6.1">entrar en F6.1 ↓</a></nav>
+</article><article class="nodo" id="F7" data-nivel="N2" data-padre="P01.mon">
+<header><span class="niv">N2</span><h3>F7 · 7 · Riesgo y medición (6.3.4, 6.3.7)</h3><span class="rol">JP escribe · AP propone · DU acepta</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>tanda cerrada</b> · de F2.10</dd>
+<dt>Entradas</dt><dd>json-riesgos, json-metricas, jp-fichas-archivo</dd>
+<dt>Hace</dt><dd>registro R-n con escenario y respuesta, medidas con umbral, ficha de tanda, rojas repetidas con acción, metas</dd>
+<dt>Salidas</dt><dd>json-riesgos, jp-fichas-archivo → <b>ficha generada</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Bifurca</dt><dd>roja repetida → <a href="#F7.6" data-ir="F7.6">F7.6</a>; INC coincide con un R-n → <a href="#F7.3" data-ir="F7.3">F7.3</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Guardias</dt><dd>Rg1–Rg7</dd>
+<dt>Herramientas</dt><dd>modelo-riesgos-py, modelo-ficha-semanal-py</dd>
+
+<dt>Dentro</dt><dd><a href="#F7.1" data-ir="F7.1">F7.1</a>, <a href="#F7.2" data-ir="F7.2">F7.2</a>, <a href="#F7.3" data-ir="F7.3">F7.3</a>, <a href="#F7.4" data-ir="F7.4">F7.4</a>, <a href="#F7.5" data-ir="F7.5">F7.5</a>, <a href="#F7.6" data-ir="F7.6">F7.6</a>, <a href="#F7.7" data-ir="F7.7">F7.7</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-7; JP M-1295</dd>
+</dl>
+<nav><a href="#P01.mon" data-ir="P01.mon">↑ volver a P01.mon</a> <a href="#F7.1" data-ir="F7.1">entrar en F7.1 ↓</a> <a href="#P01.mon" data-ir="P01.mon">continuar → P01.mon</a></nav>
+</article><article class="nodo" id="F8" data-nivel="N2" data-padre="P01.mon">
+<header><span class="niv">N2</span><h3>F8 · 8 · Conocimiento y relevos (6.2.6, 6.3.6)</h3><span class="rol">AP · cada chat</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de F4; cierre de tanda; relevo; mensaje</dd>
+<dt>Entradas</dt><dd>json-conocimiento, json-mensajes, plantilla-traspaso-md</dd>
+<dt>Hace</dt><dd>lecciones con destino, catálogo que madura, traspasos, buzón y despertador, arranque de chats</dd>
+<dt>Salidas</dt><dd>json-conocimiento, json-mensajes → <b>lección registrada</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>relevo de chat → <a href="#F8.3" data-ir="F8.3">F8.3</a>; mensaje para otro chat → <a href="#F8.4" data-ir="F8.4">F8.4</a></dd>
+<dt>Retorno</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Guardias</dt><dd>Cn1–Cn6, R1 buzón</dd>
+<dt>Herramientas</dt><dd>modelo-buzon-py, modelo-archivar-py, herramienta-vigilar-buzon</dd>
+
+<dt>Dentro</dt><dd><a href="#F8.1" data-ir="F8.1">F8.1</a>, <a href="#F8.2" data-ir="F8.2">F8.2</a>, <a href="#F8.3" data-ir="F8.3">F8.3</a>, <a href="#F8.4" data-ir="F8.4">F8.4</a>, <a href="#F8.5" data-ir="F8.5">F8.5</a>, <a href="#F8.6" data-ir="F8.6">F8.6</a></dd>
+<dt>Fuente</dt><dd class="fte">plan-proceso-8; Arquitecto</dd>
+</dl>
+<nav><a href="#P01.mon" data-ir="P01.mon">↑ volver a P01.mon</a> <a href="#F8.1" data-ir="F8.1">entrar en F8.1 ↓</a></nav>
+</article><article class="nodo" id="F1.Z1" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.Z1 · Arranque y tras compactar</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>chat despertado</b> · de sesión nueva, compactación o «Revisa el buzón…»</dd>
+<dt>Entradas</dt><dd>json-instrucciones, json-mensajes, json-diseno, json-proyecto</dd>
+<dt>Hace</dt><dd>relee encargo y reglas, atiende el buzón y registra lo que Carlos respondió en «esperando»</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>mensaje enviado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.E1" data-ir="F1.E1">F1.E1</a>, <a href="#F1.R1" data-ir="F1.R1">F1.R1</a>, <a href="#F1.C1" data-ir="F1.C1">F1.C1</a></dd>
+<dt>Bifurca</dt><dd>duda de rol → <a href="#F2.12" data-ir="F2.12">F2.12</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>modelo-buzon-py, modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.E1" data-ir="F1.E1">continuar → F1.E1</a></nav>
+</article><article class="nodo" id="F1.E1" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.E1 · Escucha: ubicar la idea (LM-76)</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pedido de Carlos</b> · de Carlos suelta una idea, queja o «¿ya está?» sin pedir REQ</dd>
+<dt>Entradas</dt><dd>linea-base-funcional, situaciones, json-diseno, json-proyecto</dd>
+<dt>Hace</dt><dd>corre ubicar.py y muestra la tarjeta en sus palabras (módulo, qué hace hoy, lo abierto, proceso, pausa)</dd>
+<dt>Salidas</dt><dd>— → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.E2" data-ir="F1.E2">F1.E2</a></dd>
+<dt>Bifurca</dt><dd>parecido bajo → <a href="#F1.E2" data-ir="F1.E2">F1.E2</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>regla común 17</dd>
+<dt>Herramientas</dt><dd>modelo-ubicar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.E2" data-ir="F1.E2">continuar → F1.E2</a></nav>
+</article><article class="nodo" id="F1.E2" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.E2 · Escucha: una pregunta de destino</h3><span class="rol">AN · DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem en lista</b> · de tarjeta mostrada</dd>
+<dt>Entradas</dt><dd>json-diseno</dd>
+<dt>Hace</dt><dd>pregunta: ¿se suma a lo abierto, pedido nuevo, bolsa, descartado o ya está?</dd>
+<dt>Salidas</dt><dd>— → <b>pregunta a Carlos</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.E3" data-ir="F1.E3">F1.E3</a></dd>
+<dt>Bifurca</dt><dd>crítico o riesgo ≥ 6 → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.E3" data-ir="F1.E3">continuar → F1.E3</a></nav>
+</article><article class="nodo" id="F1.E3" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.E3 · Escucha: registrar el mismo día</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>respuesta de Carlos</b> · de F1.E2</dd>
+<dt>Entradas</dt><dd>json-diseno</dd>
+<dt>Hace</dt><dd>nota en el P-n o REQ vivo, P-n nuevo, bolsa[] con módulo y prioridad, o descartado con motivo; nada se encola desde aquí</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C1" data-ir="F1.C1">F1.C1</a></dd>
+<dt>Bifurca</dt><dd>pausa de producto → <a href="#F2.6" data-ir="F2.6">F2.6</a>; descartado que estaba en trabajo[] → <a href="#F8.4" data-ir="F8.4">F8.4</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+<dt>Plazo</dt><dd>mismo día</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C1" data-ir="F1.C1">continuar → F1.C1</a></nav>
+</article><article class="nodo" id="F1.R1" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R1 · Revisión de alcance: abrir un módulo (LM-80)</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pedido de Carlos</b> · de Carlos: «revisemos Inventario»</dd>
+<dt>Entradas</dt><dd>linea-base-funcional, linea-objetivo-inv, json-proyecto</dd>
+<dt>Hace</dt><dd>ficha de ubicación con la ruta Módulo › Capacidad; pide al JP congelar el módulo en pausas[] si no lo está</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.R2" data-ir="F1.R2">F1.R2</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>modelo-ubicar-py, modelo-objetivo-py, modelo-linea-base-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294 (duda: no comprueba la pausa en cada sesión)</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.R2" data-ir="F1.R2">continuar → F1.R2</a></nav>
+</article><article class="nodo" id="F1.R2" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R2 · Revisión: recorrer capacidad y caso de uso</h3><span class="rol">AN · DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem en lista</b> · de F1.R1 o la capacidad siguiente</dd>
+<dt>Entradas</dt><dd>linea-base-funcional, docs-requerimientos-tema</dd>
+<dt>Hace</dt><dd>ficha de cambio: la de la línea base con su «después» al lado (igual · cambia · nuevo); una pregunta con opciones y consecuencia por hueco</dd>
+<dt>Salidas</dt><dd>— → <b>pregunta a Carlos</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.R3" data-ir="F1.R3">F1.R3</a></dd>
+<dt>Bifurca</dt><dd>toca otro módulo → <a href="#F1.R2" data-ir="F1.R2">F1.R2</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.R3" data-ir="F1.R3">continuar → F1.R3</a></nav>
+</article><article class="nodo" id="F1.R3" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R3 · Revisión: decisión de Carlos</h3><span class="rol">DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pregunta a Carlos</b> · de F1.R2</dd>
+<dt>Entradas</dt><dd>chat-diseno</dd>
+<dt>Hace</dt><dd>toma la decisión tal como la dijo, sin añadir opciones que no pidió</dd>
+<dt>Salidas</dt><dd>— → <b>respuesta de Carlos</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.R4" data-ir="F1.R4">F1.R4</a></dd>
+<dt>Bifurca</dt><dd>abre otra pregunta → <a href="#F1.R2" data-ir="F1.R2">F1.R2</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.R4" data-ir="F1.R4">continuar → F1.R4</a></nav>
+</article><article class="nodo" id="F1.R4" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R4 · Revisión: registrar la diferencia D-MOD-n</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>respuesta de Carlos</b> · de F1.R3</dd>
+<dt>Entradas</dt><dd>linea-objetivo-inv</dd>
+<dt>Hace</dt><dd>D-MOD-n (nuevo, cambia o sale) con decision {fecha, hora, ref, nota}; borrador → validada; commit el mismo día</dd>
+<dt>Salidas</dt><dd>linea-objetivo-inv → <b>DA decidida</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.R2" data-ir="F1.R2">F1.R2</a>, <a href="#F1.R5" data-ir="F1.R5">F1.R5</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py, objetivo.py</dd>
+<dt>Herramientas</dt><dd>modelo-objetivo-py</dd>
+<dt>Plazo</dt><dd>mismo día</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294 · falla reconocida: decisiones del 27-oct registradas el 30-oct</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.R2" data-ir="F1.R2">continuar → F1.R2</a></nav>
+</article><article class="nodo" id="F1.R5" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R5 · Revisión: cerrar la capacidad</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>respuesta de Carlos</b> · de Carlos confirma la capacidad</dd>
+<dt>Entradas</dt><dd>linea-objetivo-inv</dd>
+<dt>Hace</dt><dd>capacidad «en revisión» → «cerrada»</dd>
+<dt>Salidas</dt><dd>linea-objetivo-inv → <b>DA decidida</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.R2" data-ir="F1.R2">F1.R2</a>, <a href="#F1.R6" data-ir="F1.R6">F1.R6</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.R2" data-ir="F1.R2">continuar → F1.R2</a></nav>
+</article><article class="nodo" id="F1.R6" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R6 · Revisión: confirmar el módulo</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>DA decidida</b> · de todas las capacidades cerradas</dd>
+<dt>Entradas</dt><dd>linea-objetivo-inv</dd>
+<dt>Hace</dt><dd>módulo «borrador» → «confirmado vN»; aviso al JP para levantar la pausa</dd>
+<dt>Salidas</dt><dd>linea-objetivo-inv, json-mensajes → <b>mensaje enviado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.R7" data-ir="F1.R7">F1.R7</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294 (duda: si el JP levanta la pausa solo)</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.R7" data-ir="F1.R7">continuar → F1.R7</a></nav>
+</article><article class="nodo" id="F1.R7" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R7 · Revisión: pasada de los REQ vigentes</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>mensaje enviado</b> · de módulo confirmado</dd>
+<dt>Entradas</dt><dd>diseno-listas, linea-objetivo-inv</dd>
+<dt>Hace</dt><dd>cada REQ vigente se ajusta o se desestima con motivo; reqs[].diferencias cita las D-MOD-n que cierra</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C1" data-ir="F1.C1">F1.C1</a></dd>
+<dt>Bifurca</dt><dd>REQ sin pedido vigente → <a href="#F8.4" data-ir="F8.4">F8.4</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C1" data-ir="F1.C1">continuar → F1.C1</a></nav>
+</article><article class="nodo" id="F1.R8" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.R8 · Revisión: paso a la línea base (Arquitecto)</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de lote aceptado con la línea «Diferencias:»</dd>
+<dt>Entradas</dt><dd>linea-objetivo-inv, linea-base-funcional</dd>
+<dt>Hace</dt><dd>pasa la diferencia a la línea de producto y la marca «construida»</dd>
+<dt>Salidas</dt><dd>linea-base-funcional → <b>línea base actualizada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F0.2" data-ir="F0.2">F0.2</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F0" data-ir="F0">F0</a></dd>
+<dt>Guardias</dt><dd>ninguna visible para Diseño (duda)</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294 · Arquitecto</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F0.2" data-ir="F0.2">continuar → F0.2</a></nav>
+</article><article class="nodo" id="F1.C1" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C1 · REQ: entrada del pedido</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem en lista</b> · de pedido en pedidos[], orden de Carlos o diferencia por cerrar</dd>
+<dt>Entradas</dt><dd>linea-base-funcional, diseno-listas, pagina-linea-base</dd>
+<dt>Hace</dt><dd>lista de entrada: problema y actores, objetivo OB-n, capacidad y casos de uso, frontera, lo decidido, clase, ¿crítico?</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C3" data-ir="F1.C3">F1.C3</a></dd>
+<dt>Bifurca</dt><dd>crítico, capacidad nueva o decisión solo de Carlos → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a>; sin objetivo → <a href="#F1.E3" data-ir="F1.E3">F1.E3</a>; módulo congelado → <a href="#F1.C3" data-ir="F1.C3">F1.C3</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>regla común 17</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py</dd>
+<dt>Plazo</dt><dd>≈3 min</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C3" data-ir="F1.C3">continuar → F1.C3</a></nav>
+</article><article class="nodo" id="F1.C2" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C2 · REQ: decisión de alcance (DA)</h3><span class="rol">AN lleva · DU decide</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pregunta a Carlos</b> · de F1.C1 / F1.E2</dd>
+<dt>Entradas</dt><dd>plantilla-pregunta-a-carlos-md, diseno-listas</dd>
+<dt>Hace</dt><dd>DA-n con opciones, consecuencias y recomendación; al decidir, decision y fechaDecision</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>DA decidida</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C3" data-ir="F1.C3">F1.C3</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py (forma), la cola no acepta crítico sin DA-n y cruce</dd>
+<dt>Herramientas</dt><dd>plantilla-pregunta-a-carlos-md</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C3" data-ir="F1.C3">continuar → F1.C3</a></nav>
+</article><article class="nodo" id="F1.C3" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C3 · REQ: redactar</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>DA decidida</b> · de entrada completa y DA decididas (o F1.C1 sin DA)</dd>
+<dt>Entradas</dt><dd>plantilla-requerimiento-md, docs-lecturas-codigo, artefactos-bocetos</dd>
+<dt>Hace</dt><dd>el .md con criterios a., b., c. por nivel N1–N4 y caso de uso, ejemplo real, no funcionales, desventajas y preguntas sin resolver; reqs[] en definición</dd>
+<dt>Salidas</dt><dd>docs-requerimientos-tema, diseno-listas → <b>instrucción redactada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C4" data-ir="F1.C4">F1.C4</a></dd>
+<dt>Bifurca</dt><dd>preguntas sin resolver → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>ninguna hasta C4</dd>
+<dt>Herramientas</dt><dd>claude-proyecto</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294 · el .md solo en el proyecto de Claude</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C4" data-ir="F1.C4">continuar → F1.C4</a></nav>
+</article><article class="nodo" id="F1.C4" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C4 · REQ: revisión de calidad</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>instrucción redactada</b> · de borrador completo</dd>
+<dt>Entradas</dt><dd>docs-requerimientos-tema, modelo-auxiliares</dd>
+<dt>Hace</dt><dd>revisión Q1–Q8 (linea-base.py --req y validar.py; palabras vagas); en críticos también el revisor previo; veredicto en la nota</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>revisión 24/24</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C5" data-ir="F1.C5">F1.C5</a></dd>
+<dt>Bifurca</dt><dd>falla → <a href="#F1.C3" data-ir="F1.C3">F1.C3</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>Q1–Q8</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py, modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C5" data-ir="F1.C5">continuar → F1.C5</a></nav>
+</article><article class="nodo" id="F1.C5" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C5 · REQ: validación con Carlos</h3><span class="rol">DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>revisión 24/24</b> · de REQ en «listo»</dd>
+<dt>Entradas</dt><dd>artefactos-bocetos, docs-requerimientos-tema</dd>
+<dt>Hace</dt><dd>Carlos confirma el escenario operativo y el boceto, no el texto de los criterios; reqs[].validacion {fecha, qué, nota}</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>respuesta de Carlos</b></dd>
+<dt>Siguiente</dt><dd><a href="#F1.C6" data-ir="F1.C6">F1.C6</a></dd>
+<dt>Bifurca</dt><dd>no confirma → <a href="#F1.C3" data-ir="F1.C3">F1.C3</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>Q5: sin validación no pasa a entregado</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F1.C6" data-ir="F1.C6">continuar → F1.C6</a></nav>
+</article><article class="nodo" id="F1.C6" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C6 · REQ: entrega a Desarrollo</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>respuesta de Carlos</b> · de validación registrada</dd>
+<dt>Entradas</dt><dd>diseno-listas</dd>
+<dt>Hace</dt><dd>reqs[] a «entregado»; mensaje «REQ-X listo para construir» a Desarrollo y al JP con documento, sección, nivel P0–P3 y si es crítico</dd>
+<dt>Salidas</dt><dd>json-mensajes, diseno-listas → <b>REQ listo para construir</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.1" data-ir="F2.1">F2.1</a>, <a href="#F3.1" data-ir="F3.1">F3.1</a></dd>
+<dt>Bifurca</dt><dd>crítico → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a>; pausa de producto → <a href="#F2.6" data-ir="F2.6">F2.6</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>json-mensajes</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F2.1" data-ir="F2.1">continuar → F2.1</a></nav>
+</article><article class="nodo" id="F1.C7" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C7 · REQ: atender a Desarrollo</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>mensaje enviado</b> · de Desarrollo pregunta (regla de producto de un INC, ok a un crítico, falla)</dd>
+<dt>Entradas</dt><dd>diseno-listas, json-mensajes</dd>
+<dt>Hace</dt><dd>responde «ok» si cumple la DA tal como la cruzó Carlos, o los puntos que no</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>mensaje enviado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.3" data-ir="F3.3">F3.3</a></dd>
+<dt>Bifurca</dt><dd>falla del REQ → <a href="#F1.C3" data-ir="F1.C3">F1.C3</a></dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>json-mensajes</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F3.3" data-ir="F3.3">continuar → F3.3</a></nav>
+</article><article class="nodo" id="F1.C8" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.C8 · REQ: estado tras construir</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de aviso de lote aceptado o INC (F4.4)</dd>
+<dt>Entradas</dt><dd>json-mensajes, json-seguimiento</dd>
+<dt>Hace</dt><dd>reqs[].estado a construido o aceptado</dd>
+<dt>Salidas</dt><dd>diseno-listas → <b>lección registrada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F8.1" data-ir="F8.1">F8.1</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F1" data-ir="F1">F1</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294 (duda: quién pone «aceptado»)</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a> <a href="#F8.1" data-ir="F8.1">continuar → F8.1</a></nav>
+</article><article class="nodo" id="F1.Z2" data-nivel="N3" data-padre="F1">
+<header><span class="niv">N3</span><h3>F1.Z2 · Cierre de sesión de Diseño</h3><span class="rol">AN</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lección registrada</b> · de fin de sesión o de un avance con Carlos</dd>
+<dt>Entradas</dt><dd>plantilla-traspaso-md</dd>
+<dt>Hace</dt><dd>traspaso y lecciones con destino; commit y push; sube a mano al proyecto de Claude los .md que cambió</dd>
+<dt>Salidas</dt><dd>traspaso-diseno, diseno-listas, claude-proyecto → <b>traspaso escrito</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>validar.py (no revisa que subió el .md)</dd>
+<dt>Herramientas</dt><dd>plantilla-traspaso-md</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Diseño M-1294</dd>
+</dl>
+<nav><a href="#F1" data-ir="F1">↑ volver a F1</a></nav>
+</article><article class="nodo" id="F2.1" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.1 · Entrada a la lista</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>REQ listo para construir</b> · también: INC decidido, DT registrada, PRB abierto, roja repetida, LM instalado · de Diseño (M-n), orden de Carlos, INC decidido, DT con plazo</dd>
+<dt>Entradas</dt><dd>json-mensajes, json-diseno, json-seguimiento</dd>
+<dt>Hace</dt><dd>agrega una fila a trabajo[] con ref, clase, origen, desde y estado; nada entra sin origen</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.2" data-ir="F2.2">F2.2</a></dd>
+<dt>Bifurca</dt><dd>sin origen → <a href="#F2.12" data-ir="F2.12">F2.12</a></dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F1</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+<dt>Plazo</dt><dd>«listo sin lote» 5 d</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: cuándo copiar una INC a trabajo[])</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.2" data-ir="F2.2">continuar → F2.2</a></nav>
+</article><article class="nodo" id="F2.2" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.2 · Clase y prioridad</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem en lista</b> · de F2.1</dd>
+<dt>Entradas</dt><dd>encargo-rol-jefe-proyecto, json-proyecto</dd>
+<dt>Hace</dt><dd>clase a–g por el origen; orden dentro de la clase; en la clase e sigue prioridades[]</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>ítem en lista</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.3" data-ir="F2.3">F2.3</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F1, prioridad.py</dd>
+<dt>Herramientas</dt><dd>modelo-prioridad-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: prioridades[] y clase e son dos listas del mismo orden)</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.3" data-ir="F2.3">continuar → F2.3</a></nav>
+</article><article class="nodo" id="F2.3" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.3 · Orden y «libre»</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem en lista</b> · también: DA decidida, lote aceptado, pausa ordenada · de cada cambio de la lista (aceptado, orden nueva, pausa)</dd>
+<dt>Entradas</dt><dd>jp-fichas-archivo, json-proyecto</dd>
+<dt>Hace</dt><dd>reordena trabajo[]; «libre» es el primero que no espera DA, cruce ni ok</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>ítem libre</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.1" data-ir="F3.1">F3.1</a></dd>
+<dt>Bifurca</dt><dd>espera DA o a Carlos → <a href="#F2.12" data-ir="F2.12">F2.12</a></dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F1–F4</dd>
+<dt>Herramientas</dt><dd>modelo-ficha-semanal-py, modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F3.1" data-ir="F3.1">continuar → F3.1</a></nav>
+</article><article class="nodo" id="F2.4" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.4 · Abrir tanda</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>respuesta de Carlos</b> · de orden de Carlos, pausa levantada o tanda anterior aceptada con cola vacía</dd>
+<dt>Entradas</dt><dd>json-proyecto, json-mensajes</dd>
+<dt>Hace</dt><dd>abre T-n con desde, abiertaPor y entra[] ≤ 7 en el orden de la lista y dentro de los límites</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>tanda abierta</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.5" data-ir="F2.5">F2.5</a></dd>
+<dt>Bifurca</dt><dd>a mitad de tanda → <a href="#F2.3" data-ir="F2.3">F2.3</a></dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F3 (una sola abierta)</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.5" data-ir="F2.5">continuar → F2.5</a></nav>
+</article><article class="nodo" id="F2.5" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.5 · Límites y edad</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>chat despertado</b> · también: tanda abierta, ficha generada · de despertador; cada lectura de la ficha</dd>
+<dt>Entradas</dt><dd>jp-fichas-archivo, esquema-flujo-limites</dd>
+<dt>Hace</dt><dd>detecta lo que pasó el umbral y pregunta al dueño por el buzón; a Carlos lo reitera una vez; si pasa un tope, excepción por una tanda</dd>
+<dt>Salidas</dt><dd>json-mensajes, json-proyecto → <b>límite superado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.12" data-ir="F2.12">F2.12</a></dd>
+<dt>Bifurca</dt><dd>tope superado → <a href="#F2.6" data-ir="F2.6">F2.6</a></dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F2, F4</dd>
+<dt>Herramientas</dt><dd>modelo-ficha-semanal-py</dd>
+<dt>Plazo</dt><dd>construido 2 h · espera DA 2 d · a Carlos 1 d</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: sin hora fija; ítems y DT vencidos en rojo sin acción escrita)</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.12" data-ir="F2.12">continuar → F2.12</a></nav>
+</article><article class="nodo" id="F2.6" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.6 · Pausa y excepciones</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pausa ordenada</b> · de Carlos (o el Arquitecto transmitiendo su orden)</dd>
+<dt>Entradas</dt><dd>json-mensajes, json-proyecto</dd>
+<dt>Hace</dt><dd>fila de pausas[] (desde, alcance, motivo, condición, revisarEn); cada orden que abre una excepción, fila en excepciones[]</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>pausa ordenada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.3" data-ir="F2.3">F2.3</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F5 (revisarEn)</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+<dt>Plazo</dt><dd>condición pendiente &gt; 7 d = una pregunta</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.3" data-ir="F2.3">continuar → F2.3</a></nav>
+</article><article class="nodo" id="F2.7" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.7 · Ok a críticos de fábrica</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>revisión 24/24</b> · de Desarrollo «pido tu ok» (M-n)</dd>
+<dt>Entradas</dt><dd>doc-instruccion-lote, plantilla-revisor-previo, plan-sitios</dd>
+<dt>Hace</dt><dd>lee cabecera y partes críticas; dentro de la excepción y del plan, reversión, paridad, no cambia decisión; añade « · ok Jefe de proyecto M-n» en la línea 4</dd>
+<dt>Salidas</dt><dd>jp-ok-revision-previa, json-mensajes → <b>cruce y ok dados</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.6" data-ir="F3.6">F3.6</a></dd>
+<dt>Bifurca</dt><dd>faltan puntos → <a href="#F3.3" data-ir="F3.3">F3.3</a>; toca .claude/hooks → <a href="#F2.12" data-ir="F2.12">F2.12</a>; producto → <a href="#F1.C7" data-ir="F1.C7">F1.C7</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>linea-base.py --lote («no encolar» sin ok), guardia de la cola</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py</dd>
+<dt>Plazo</dt><dd>2–5 min</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: el encargo no lo recoge)</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F3.6" data-ir="F3.6">continuar → F3.6</a></nav>
+</article><article class="nodo" id="F2.8" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.8 · Seguimiento del lote</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>mensaje enviado</b> · de «encolado», «construido», «aceptado» de Desarrollo</dd>
+<dt>Entradas</dt><dd>json-mensajes</dd>
+<dt>Hace</dt><dd>anota salio[], trabajo[].estado e INC; responde</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>mensaje enviado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.10" data-ir="F2.10">F2.10</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.10" data-ir="F2.10">continuar → F2.10</a></nav>
+</article><article class="nodo" id="F2.9" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.9 · Decisión de INC (I1)</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC registrado</b> · de Desarrollo (P1–P2 o consulta)</dd>
+<dt>Entradas</dt><dd>json-seguimiento, json-mensajes</dd>
+<dt>Hace</dt><dd>decide tipo de lote, bolsa, pospuesto o solución temporal; lo anota en trabajo[] con decision y ref</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>INC decidido</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.1" data-ir="F3.1">F3.1</a></dd>
+<dt>Bifurca</dt><dd>P1 → <a href="#F3.1" data-ir="F3.1">F3.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>I1</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+<dt>Plazo</dt><dd>P1/P2 según la tabla de incidentes</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F3.1" data-ir="F3.1">continuar → F3.1</a></nav>
+</article><article class="nodo" id="F2.10" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.10 · Cerrar tanda</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de todo lo de la tanda aceptado y la cola vacía</dd>
+<dt>Entradas</dt><dd>json-proyecto</dd>
+<dt>Hace</dt><dd>pone hasta y salio[]; corre ficha-semanal --anterior y guarda la ficha; lecciones; traspaso</dd>
+<dt>Salidas</dt><dd>json-proyecto, jp-fichas-archivo → <b>tanda cerrada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F7.5" data-ir="F7.5">F7.5</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>F9</dd>
+<dt>Herramientas</dt><dd>modelo-ficha-semanal-py</dd>
+<dt>Plazo</dt><dd>al cerrar</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 · HALLAZGO: la herramienta sube ficha vacía si la tanda sigue abierta con salio[] en texto</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F7.5" data-ir="F7.5">continuar → F7.5</a></nav>
+</article><article class="nodo" id="F2.11" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.11 · ¿Cómo vamos?</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>cómo vamos pedido</b> · de Carlos (o cierre de tanda)</dd>
+<dt>Entradas</dt><dd>jp-fichas-archivo</dd>
+<dt>Hace</dt><dd>pega la tabla de seis filas de ficha-semanal --como-vamos; no la redacta</dd>
+<dt>Salidas</dt><dd>jp-fichas-archivo → <b>respuesta de Carlos</b></dd>
+<dt>Siguiente</dt><dd><a href="#P01.mon" data-ir="P01.mon">P01.mon</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>modelo-ficha-semanal-py, plantilla-como-vamos-md</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: cuándo guardar el JSON)</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#P01.mon" data-ir="P01.mon">continuar → P01.mon</a></nav>
+</article><article class="nodo" id="F2.12" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.12 · Pregunta a Carlos</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>límite superado</b> · de una decisión que solo él toma</dd>
+<dt>Entradas</dt><dd>plantilla-pregunta-a-carlos-md</dd>
+<dt>Hace</dt><dd>una decisión por mensaje con recomendación; llega al Panel y al aviso de Windows</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>pregunta a Carlos</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.3" data-ir="F2.3">F2.3</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F2" data-ir="F2">F2</a></dd>
+<dt>Guardias</dt><dd>plantilla</dd>
+<dt>Herramientas</dt><dd>herramienta-panel-str</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: Carlos le habla por el Arquitecto)</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a> <a href="#F2.3" data-ir="F2.3">continuar → F2.3</a></nav>
+</article><article class="nodo" id="F2.13" data-nivel="N3" data-padre="F2">
+<header><span class="niv">N3</span><h3>F2.13 · Traspaso del JP</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>tanda cerrada</b> · de cierre de tanda, 7 días o relevo</dd>
+<dt>Entradas</dt><dd>plantilla-traspaso-md</dd>
+<dt>Hace</dt><dd>reescribe traspaso con la plantilla</dd>
+<dt>Salidas</dt><dd>traspaso-jp → <b>traspaso escrito</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>«traspasos vencidos» de la ficha</dd>
+<dt>Herramientas</dt><dd>—</dd>
+<dt>Plazo</dt><dd>7 días</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F2" data-ir="F2">↑ volver a F2</a></nav>
+</article><article class="nodo" id="F3.1" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.1 · Recibir trabajo</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ítem libre</b> · de F2.3; M-n de Diseño; brief o LM del Arquitecto; INC decidido; orden de Carlos</dd>
+<dt>Entradas</dt><dd>json-diseno, json-proyecto, json-mensajes</dd>
+<dt>Hace</dt><dd>abre la fila del lote en plan[] en el orden del JP</dd>
+<dt>Salidas</dt><dd>json-plan-lotes → <b>lote previsto</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.2" data-ir="F3.2">F3.2</a></dd>
+<dt>Bifurca</dt><dd>pausa vigente → <a href="#F2.6" data-ir="F2.6">F2.6</a>; falta definición → <a href="#F1.C7" data-ir="F1.C7">F1.C7</a>; toca el modelo → <a href="#F6.1" data-ir="F6.1">F6.1</a>; DA abierta → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>modelo-buzon-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.2" data-ir="F3.2">continuar → F3.2</a></nav>
+</article><article class="nodo" id="F3.2" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.2 · Leer código y simular</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote previsto</b> · de F3.1 con lo anterior aceptado</dd>
+<dt>Entradas</dt><dd>clon-str-manager-lenovo, doc-claude-md, mapa-str</dd>
+<dt>Hace</dt><dd>hace el cambio en una copia y corre tests/run.js, los del servicio y pw/prueba*.js en su contenedor</dd>
+<dt>Salidas</dt><dd>carpetas-construccion-desarrollo → <b>simulación verde</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.3" data-ir="F3.3">F3.3</a></dd>
+<dt>Bifurca</dt><dd>hallazgo → <a href="#F5.3" data-ir="F5.3">F5.3</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>tests locales</dd>
+<dt>Herramientas</dt><dd>carpetas-construccion-desarrollo</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 (el token no lee str-manager: copias de LENOVO)</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.3" data-ir="F3.3">continuar → F3.3</a></nav>
+</article><article class="nodo" id="F3.3" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.3 · Redactar la instrucción</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>simulación verde</b> · de F3.2</dd>
+<dt>Entradas</dt><dd>plantilla-instruccion-md, plantilla-guion-e2e-js, carpetas-construccion-desarrollo</dd>
+<dt>Hace</dt><dd>pares Busca/Reemplaza, script aplicar-l1NN.js con hashes, guion N2 y cabecera de 17 líneas (Paridad desde 5.5)</dd>
+<dt>Salidas</dt><dd>doc-instruccion-lote, json-plan-lotes → <b>instrucción redactada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.4" data-ir="F3.4">F3.4</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>linea-base.py --borrador/--lote, aplicar.js K1, guard-bash evaluar()</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py, pw-aplicar</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 (de memoria: Decisión y Riesgo antes del byte 4000)</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.4" data-ir="F3.4">continuar → F3.4</a></nav>
+</article><article class="nodo" id="F3.4" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.4 · Revisor previo</h3><span class="rol">Desarrollo (subagente)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>instrucción redactada</b> · de F3.3</dd>
+<dt>Entradas</dt><dd>plantilla-revisor-previo, situaciones</dd>
+<dt>Hace</dt><dd>un subagente independiente pasa los 24 puntos; corrige y repite hasta 24/24</dd>
+<dt>Salidas</dt><dd>doc-instruccion-lote → <b>revisión 24/24</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.6" data-ir="F3.6">F3.6</a></dd>
+<dt>Bifurca</dt><dd>crítico → <a href="#F3.5" data-ir="F3.5">F3.5</a>; punto fallado → <a href="#F3.3" data-ir="F3.3">F3.3</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>la cola rechaza .sin-revision.md</dd>
+<dt>Herramientas</dt><dd>plantilla-revisor-previo</dd>
+<dt>Plazo</dt><dd>2–10 min</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.6" data-ir="F3.6">continuar → F3.6</a></nav>
+</article><article class="nodo" id="F3.5" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.5 · Cruce y ok (críticos)</h3><span class="rol">Desarrollo pide · AP cruza · JP da ok</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>revisión 24/24</b> · de F3.4</dd>
+<dt>Entradas</dt><dd>json-mensajes</dd>
+<dt>Hace</dt><dd>pide cruce delegado al Arquitecto y ok al JP por el buzón; línea 2 y línea 4 de la cabecera</dd>
+<dt>Salidas</dt><dd>doc-instruccion-lote, cruce-delegado, jp-ok-revision-previa → <b>cruce y ok dados</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.6" data-ir="F3.6">F3.6</a></dd>
+<dt>Bifurca</dt><dd>pregunta de diseño → <a href="#F6.1" data-ir="F6.1">F6.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>guardia de la cola (.sin-ok / .sin-cruce)</dd>
+<dt>Herramientas</dt><dd>json-mensajes</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 (duda: quién escribe el sufijo del ok)</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.6" data-ir="F3.6">continuar → F3.6</a></nav>
+</article><article class="nodo" id="F3.6" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.6 · Encolar</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>cruce y ok dados</b> · de F3.4 (normal) o F3.5 (crítico); veredicto del lote anterior aceptado (uno a la vez)</dd>
+<dt>Entradas</dt><dd>doc-instruccion-lote</dd>
+<dt>Hace</dt><dd>copia a la raíz de la cola, vuelve a copiar y compara byte a byte; plan[] encolado; cambios[] fila nueva</dd>
+<dt>Salidas</dt><dd>cola-str-instr, json-seguimiento → <b>instrucción encolada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.7" data-ir="F3.7">F3.7</a></dd>
+<dt>Bifurca</dt><dd>cola con otro lote → <a href="#F3.6" data-ir="F3.6">F3.6</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>guardias de ejecutar-cola.ps1</dd>
+<dt>Herramientas</dt><dd>cola-str-instr</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.7" data-ir="F3.7">continuar → F3.7</a></nav>
+</article><article class="nodo" id="F3.7" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.7 · Construcción y despliegue (cola + CLI)</h3><span class="rol">cola · CLI (DV)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>instrucción encolada</b> · de tarea «STR cola CLI» cada minuto ve un L-n en la raíz</dd>
+<dt>Entradas</dt><dd>doc-instruccion-lote, clon-str-manager-lenovo, clones-fabrica-servicio, auto-mode</dd>
+<dt>Hace</dt><dd>la cola lanza la CLI (opus en críticos); la CLI aplica, corre tests, actualiza CLAUDE.md y docs, commit con trazabilidad y push a main; Hostinger despliega</dd>
+<dt>Salidas</dt><dd>repo-str-manager, repo-fabrica-servicio, doc-log-lote, sitio-app → <b>lote construido</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.8" data-ir="F3.8">F3.8</a></dd>
+<dt>Bifurca</dt><dd>guardia rechaza → <a href="#F3.3" data-ir="F3.3">F3.3</a>; fallo de la CLI o hash distinto → <a href="#F3.8" data-ir="F3.8">F3.8</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>hooks-cli, auto-mode, tests/run.js</dd>
+<dt>Herramientas</dt><dd>ejecutar-cola, tarea-win-cola, herramienta-hooks-cli, lenovo-hooks-instalados</dd>
+<dt>Plazo</dt><dd>minutos (críticos 3–5)</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F3.8" data-ir="F3.8">continuar → F3.8</a></nav>
+</article><article class="nodo" id="F3.8" data-nivel="N3" data-padre="F3">
+<header><span class="niv">N3</span><h3>F3.8 · Registrar construido</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote construido</b> · de aviso de Carlos «La CLI terminó…» (vía vigía)</dd>
+<dt>Entradas</dt><dd>doc-log-lote</dd>
+<dt>Hace</dt><dd>comprueba hash, declarados = tocados, tests y ls-remote; plan[] construido; cambios[] instalado; evidencia al Arquitecto</dd>
+<dt>Salidas</dt><dd>json-seguimiento, json-mensajes → <b>construido registrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F4.1" data-ir="F4.1">F4.1</a></dd>
+<dt>Bifurca</dt><dd>log con «No hecho» → <a href="#F5.1" data-ir="F5.1">F5.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F3" data-ir="F3">F3</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F3" data-ir="F3">↑ volver a F3</a> <a href="#F4.1" data-ir="F4.1">continuar → F4.1</a></nav>
+</article><article class="nodo" id="F4.1" data-nivel="N3" data-padre="F4">
+<header><span class="niv">N3</span><h3>F4.1 · Pruebas (pw)</h3><span class="rol">cola · pw</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote construido</b> · también: reprueba pedida · de commit del lote (la cola sigue sola)</dd>
+<dt>Entradas</dt><dd>pw-probar-lote, guiones-e2e-str, mapa-str, pw-semilla</dd>
+<dt>Hace</dt><dd>K1 aplicación literal, tests (P4), guion del lote y regresión por ruta (P5), capturas; fase completa en críticos; ráfaga y tren según ventana</dd>
+<dt>Salidas</dt><dd>doc-log-lote → <b>pruebas corridas</b></dd>
+<dt>Siguiente</dt><dd><a href="#F4.2" data-ir="F4.2">F4.2</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F4" data-ir="F4">F4</a></dd>
+<dt>Guardias</dt><dd>V1–V11, centinelas, cuarentena</dd>
+<dt>Herramientas</dt><dd>herramienta-pw, pw-probar-lote, pw-guion-tren-rafaga-metricas</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 (duda en K2/K3)</dd>
+</dl>
+<nav><a href="#F4" data-ir="F4">↑ volver a F4</a> <a href="#F4.2" data-ir="F4.2">continuar → F4.2</a></nav>
+</article><article class="nodo" id="F4.2" data-nivel="N3" data-padre="F4">
+<header><span class="niv">N3</span><h3>F4.2 · Juez local</h3><span class="rol">juez (claude.exe sin red)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pruebas corridas</b> · de pruebas.json escrito</dd>
+<dt>Entradas</dt><dd>herramienta-juez, doc-instruccion-lote, doc-log-lote</dd>
+<dt>Hace</dt><dd>decide criterio por criterio (N1, N2, N3) sin red ni comandos; Control-Veredicto repite con opus si contradice</dd>
+<dt>Salidas</dt><dd>doc-log-lote → <b>veredicto emitido</b></dd>
+<dt>Siguiente</dt><dd><a href="#F4.4" data-ir="F4.4">F4.4</a></dd>
+<dt>Bifurca</dt><dd>inconsistente → <a href="#F4.5" data-ir="F4.5">F4.5</a></dd>
+<dt>Retorno</dt><dd><a href="#F4" data-ir="F4">F4</a></dd>
+<dt>Guardias</dt><dd>Control-Veredicto LM-50</dd>
+<dt>Herramientas</dt><dd>herramienta-juez, control-veredicto</dd>
+<dt>Plazo</dt><dd>minutos</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F4" data-ir="F4">↑ volver a F4</a> <a href="#F4.4" data-ir="F4.4">continuar → F4.4</a></nav>
+</article><article class="nodo" id="F4.3" data-nivel="N3" data-padre="F4">
+<header><span class="niv">N3</span><h3>F4.3 · Criterio a del Arquitecto</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>construido registrado</b> · de lotes con fabrica-servicio (el juez no ve ese repo)</dd>
+<dt>Entradas</dt><dd>json-mensajes, repo-fabrica-servicio, sitio-herramienta-fabrica</dd>
+<dt>Hace</dt><dd>verifica de forma cruzada: hash, «Todo igual», run.js, ls-remote y el sitio desplegado; responde «cierro a»</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>criterio a cerrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F4.4" data-ir="F4.4">F4.4</a></dd>
+<dt>Bifurca</dt><dd>no cierra → <a href="#F4.5" data-ir="F4.5">F4.5</a></dd>
+<dt>Retorno</dt><dd><a href="#F4" data-ir="F4">F4</a></dd>
+<dt>Guardias</dt><dd>ninguna escrita fuera del mensaje</dd>
+<dt>Herramientas</dt><dd>herramienta-chrome</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 · Arquitecto</dd>
+</dl>
+<nav><a href="#F4" data-ir="F4">↑ volver a F4</a> <a href="#F4.4" data-ir="F4.4">continuar → F4.4</a></nav>
+</article><article class="nodo" id="F4.4" data-nivel="N3" data-padre="F4">
+<header><span class="niv">N3</span><h3>F4.4 · Cierre del lote</h3><span class="rol">Desarrollo registra (no acepta)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>veredicto emitido</b> · también: criterio a cerrado · de F4.2 (+ F4.3 si aplica)</dd>
+<dt>Entradas</dt><dd>doc-log-lote, json-mensajes</dd>
+<dt>Hace</dt><dd>acepta si todo verde o parcial con solo a cerrado; plan[] aceptado; cambios[].aceptacion = veredicto; INC cerrados; M-n al Arquitecto y al JP</dd>
+<dt>Salidas</dt><dd>json-seguimiento, json-mensajes → <b>lote aceptado</b> · o: lote no aceptado</dd>
+<dt>Siguiente</dt><dd><a href="#F0.2" data-ir="F0.2">F0.2</a>, <a href="#F6.3" data-ir="F6.3">F6.3</a>, <a href="#F8.1" data-ir="F8.1">F8.1</a>, <a href="#F2.8" data-ir="F2.8">F2.8</a></dd>
+<dt>Bifurca</dt><dd>no aceptado → <a href="#F5.1" data-ir="F5.1">F5.1</a>; bloqueado → <a href="#F4.5" data-ir="F4.5">F4.5</a></dd>
+<dt>Retorno</dt><dd><a href="#F4" data-ir="F4">F4</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F4" data-ir="F4">↑ volver a F4</a> <a href="#F0.2" data-ir="F0.2">continuar → F0.2</a></nav>
+</article><article class="nodo" id="F4.5" data-nivel="N3" data-padre="F4">
+<header><span class="niv">N3</span><h3>F4.5 · Reprobar, rejuzgar, correr</h3><span class="rol">Desarrollo pide · cola ejecuta</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote no aceptado</b> · de rojo ajeno o intermitente, bloqueado, guion de semilla</dd>
+<dt>Entradas</dt><dd>cola-carpetas</dd>
+<dt>Hace</dt><dd>deja un .txt en reprobar\ (pruebas + juez), rejuzgar\ (solo juez) o correr\&lt;nombre&gt;.txt; los .txt pasan a hechos\</dd>
+<dt>Salidas</dt><dd>doc-log-lote → <b>reprueba pedida</b></dd>
+<dt>Siguiente</dt><dd><a href="#F4.1" data-ir="F4.1">F4.1</a></dd>
+<dt>Bifurca</dt><dd>falta la semilla → <a href="#F4.1" data-ir="F4.1">F4.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F4" data-ir="F4">F4</a></dd>
+<dt>Guardias</dt><dd>las de F4.1–F4.2</dd>
+<dt>Herramientas</dt><dd>cola-carpetas, pw-semilla</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F4" data-ir="F4">↑ volver a F4</a> <a href="#F4.1" data-ir="F4.1">continuar → F4.1</a></nav>
+</article><article class="nodo" id="F5.1" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.1 · INC desde el juez</h3><span class="rol">Desarrollo (el juez propone)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote no aceptado</b> · de veredicto con incs[] o criterio en rojo</dd>
+<dt>Entradas</dt><dd>doc-log-lote, repo-str-manager</dd>
+<dt>Hace</dt><dd>registra con severidad, prioridad, causaRaiz y debioDetectarse</dd>
+<dt>Salidas</dt><dd>json-seguimiento, json-mensajes → <b>INC registrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.9" data-ir="F2.9">F2.9</a></dd>
+<dt>Bifurca</dt><dd>regresión ajena → <a href="#F5.1" data-ir="F5.1">F5.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>validar.py, incidentes.py</dd>
+<dt>Herramientas</dt><dd>modelo-incidentes-py</dd>
+<dt>Plazo</dt><dd>≤ 1 h</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a> <a href="#F2.9" data-ir="F2.9">continuar → F2.9</a></nav>
+</article><article class="nodo" id="F5.2" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.2 · INC desde producción</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC en producción</b> · de Carlos o el Arquitecto (plantilla aviso-produccion o mensaje)</dd>
+<dt>Entradas</dt><dd>plantilla-aviso-produccion-md, repo-str-manager</dd>
+<dt>Hace</dt><dd>diagnostica desde el código antes de abrir; INC con prioridad o «no es INC» con la causa</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>INC registrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.9" data-ir="F2.9">F2.9</a></dd>
+<dt>Bifurca</dt><dd>P1 → <a href="#F3.1" data-ir="F3.1">F3.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>I2 (≤ 1 h)</dd>
+<dt>Herramientas</dt><dd>modelo-incidentes-py</dd>
+<dt>Plazo</dt><dd>≤ 1 h</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a> <a href="#F2.9" data-ir="F2.9">continuar → F2.9</a></nav>
+</article><article class="nodo" id="F5.3" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.3 · INC desde la simulación o revisión</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>simulación verde</b> · de fallo visto mientras construye (F3.2) o revisa</dd>
+<dt>Entradas</dt><dd>carpetas-construccion-desarrollo</dd>
+<dt>Hace</dt><dd>lo registra y lo mete en el lote que corresponde</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>INC registrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.3" data-ir="F3.3">F3.3</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a> <a href="#F3.3" data-ir="F3.3">continuar → F3.3</a></nav>
+</article><article class="nodo" id="F5.4" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.4 · Deuda técnica (DT)</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC registrado</b> · de deuda vista en código o en un veredicto</dd>
+<dt>Entradas</dt><dd>doc-log-lote</dd>
+<dt>Hace</dt><dd>registra sin urgencia: abierta → programada → pagada por un lote</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>DT registrada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.1" data-ir="F2.1">F2.1</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>validar.py, DT vencidas en la ficha</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a> <a href="#F2.1" data-ir="F2.1">continuar → F2.1</a></nav>
+</article><article class="nodo" id="F5.5" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.5 · Problema (PRB)</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC registrado</b> · de varios INC con la misma causa</dd>
+<dt>Entradas</dt><dd>json-seguimiento</dd>
+<dt>Hace</dt><dd>abre el problema y agrupa los INC; solución temporal escrita</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>PRB abierto</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.9" data-ir="F2.9">F2.9</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 (duda: sin regla de cuándo abrir uno)</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a> <a href="#F2.9" data-ir="F2.9">continuar → F2.9</a></nav>
+</article><article class="nodo" id="F5.6" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.6 · Revisión de incidente</h3><span class="rol">Desarrollo o AP según la causa</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC registrado</b> · de INC P1 o escape</dd>
+<dt>Entradas</dt><dd>plantilla-revision-incidente-md</dd>
+<dt>Hace</dt><dd>revisión sin culpables en 48 h dentro del INC; el escape va a un punto del revisor o a una guardia</dd>
+<dt>Salidas</dt><dd>json-seguimiento, plantilla-revisor-previo → <b>revisión de incidente hecha</b> · o: escape con destino</dd>
+<dt>Siguiente</dt><dd><a href="#F8.1" data-ir="F8.1">F8.1</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>I5, I7</dd>
+<dt>Herramientas</dt><dd>plantilla-revision-incidente-md</dd>
+<dt>Plazo</dt><dd>48 h</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296 (duda: en la práctica se hace poco)</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a> <a href="#F8.1" data-ir="F8.1">continuar → F8.1</a></nav>
+</article><article class="nodo" id="F5.7" data-nivel="N3" data-padre="F5">
+<header><span class="niv">N3</span><h3>F5.7 · Cerrar INC</h3><span class="rol">Desarrollo</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de el lote que lo arregla fue aceptado</dd>
+<dt>Entradas</dt><dd>doc-log-lote</dd>
+<dt>Hace</dt><dd>cierra con la prueba: incs[] cerrado + cierre{lote, prueba}</dd>
+<dt>Salidas</dt><dd>json-seguimiento → <b>INC cerrado</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>pospuesto por decisión → <a href="#F2.9" data-ir="F2.9">F2.9</a></dd>
+<dt>Retorno</dt><dd><a href="#F5" data-ir="F5">F5</a></dd>
+<dt>Guardias</dt><dd>K9, validar.py</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">Desarrollo M-1296</dd>
+</dl>
+<nav><a href="#F5" data-ir="F5">↑ volver a F5</a></nav>
+</article><article class="nodo" id="F0.1" data-nivel="N3" data-padre="F0">
+<header><span class="niv">N3</span><h3>F0.1 · Identificar la pieza</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>pieza identificada</b> · de un lote, una decisión o una mejora crea una pieza (mecanismo, archivo, sitio, cuenta)</dd>
+<dt>Entradas</dt><dd>json-elementos, json-conocimiento</dd>
+<dt>Hace</dt><dd>fila en el índice (hoy elementos.json, mañana universo.json) y ficha si es mecanismo; dueño, plataforma, control</dd>
+<dt>Salidas</dt><dd>json-elementos → <b>pieza identificada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F0.3" data-ir="F0.3">F0.3</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F0" data-ir="F0">F0</a></dd>
+<dt>Guardias</dt><dd>regla 1 del conocimiento, U5 (por instalar)</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+<dt>Plazo</dt><dd>mismo día</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F0" data-ir="F0">↑ volver a F0</a> <a href="#F0.3" data-ir="F0.3">continuar → F0.3</a></nav>
+</article><article class="nodo" id="F0.2" data-nivel="N3" data-padre="F0">
+<header><span class="niv">N3</span><h3>F0.2 · Control de cambios de la línea base</h3><span class="rol">AP (ACf)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de F4.4 (M-n «aceptado»)</dd>
+<dt>Entradas</dt><dd>json-seguimiento, linea-base-funcional</dd>
+<dt>Hace</dt><dd>linea-base.py --lote: capacidades y casos de uso que cambian, fotos, trinquetes; una fila por lote</dd>
+<dt>Salidas</dt><dd>linea-base-funcional, linea-base-archivos → <b>línea base actualizada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F0.3" data-ir="F0.3">F0.3</a></dd>
+<dt>Bifurca</dt><dd>el lote cambió el esquema → <a href="#F6.1" data-ir="F6.1">F6.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F0" data-ir="F0">F0</a></dd>
+<dt>Guardias</dt><dd>C1–C10, K/M</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-py</dd>
+<dt>Plazo</dt><dd>al aceptar</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F0" data-ir="F0">↑ volver a F0</a> <a href="#F0.3" data-ir="F0.3">continuar → F0.3</a></nav>
+</article><article class="nodo" id="F0.3" data-nivel="N3" data-padre="F0">
+<header><span class="niv">N3</span><h3>F0.3 · Registrar estado</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>línea base actualizada</b> · de F0.2 / F0.1</dd>
+<dt>Entradas</dt><dd>linea-base-archivos</dd>
+<dt>Hace</dt><dd>explorador generado (Action linea-base-pagina), página Elementos, servicio recargado por commit</dd>
+<dt>Salidas</dt><dd>pagina-linea-base, servicio-api → <b>estado registrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F0.4" data-ir="F0.4">F0.4</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F0" data-ir="F0">F0</a></dd>
+<dt>Guardias</dt><dd>validar 0 errores antes del push</dd>
+<dt>Herramientas</dt><dd>modelo-linea-base-pagina, github-actions</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F0" data-ir="F0">↑ volver a F0</a> <a href="#F0.4" data-ir="F0.4">continuar → F0.4</a></nav>
+</article><article class="nodo" id="F0.4" data-nivel="N3" data-padre="F0">
+<header><span class="niv">N3</span><h3>F0.4 · Auditoría (realidad contra línea base)</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>estado registrado</b> · de cambio de equipo (ins-006) o revisión periódica</dd>
+<dt>Entradas</dt><dd>linea-base-archivos, json-conocimiento, lenovo-equipo</dd>
+<dt>Hace</dt><dd>compara lo que hay con lo escrito; toda diferencia se corrige o se anota (regla 3)</dd>
+<dt>Salidas</dt><dd>json-conocimiento → <b>auditoría hecha</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>diferencia → <a href="#F0.1" data-ir="F0.1">F0.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F0" data-ir="F0">F0</a></dd>
+<dt>Guardias</dt><dd>A7 (§5.6)</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto · hoy: inventario del universo (30-oct)</dd>
+</dl>
+<nav><a href="#F0" data-ir="F0">↑ volver a F0</a></nav>
+</article><article class="nodo" id="F6.1" data-nivel="N3" data-padre="F6">
+<header><span class="niv">N3</span><h3>F6.1 · Registrar una decisión (ADR)</h3><span class="rol">AP · DU por DA</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>decisión registrada</b> · de un lote que cambia una decisión; una DA; un límite del entorno</dd>
+<dt>Entradas</dt><dd>plantilla-adr-md, decisiones-adr</dd>
+<dt>Hace</dt><dd>contexto con el dato que la motivó, dos opciones con consecuencia, decisor, estado, qué RT/relación cambia, revisarCuando</dd>
+<dt>Salidas</dt><dd>decisiones-adr → <b>decisión registrada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F6.2" data-ir="F6.2">F6.2</a></dd>
+<dt>Bifurca</dt><dd>toca datos reales, dinero, seguridad o proveedor → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a></dd>
+<dt>Retorno</dt><dd><a href="#F6" data-ir="F6">F6</a></dd>
+<dt>Guardias</dt><dd>A1 (forma de la decisión)</dd>
+<dt>Herramientas</dt><dd>plantilla-adr-md</dd>
+<dt>Plazo</dt><dd>antes del commit</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F6" data-ir="F6">↑ volver a F6</a> <a href="#F6.2" data-ir="F6.2">continuar → F6.2</a></nav>
+</article><article class="nodo" id="F6.2" data-nivel="N3" data-padre="F6">
+<header><span class="niv">N3</span><h3>F6.2 · El lote respeta la arquitectura</h3><span class="rol">Desarrollo escribe · AP revisa</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>instrucción redactada</b> · de F3.3 (línea «Decisión:» y RT)</dd>
+<dt>Entradas</dt><dd>doc-instruccion-lote, mapa-str</dd>
+<dt>Hace</dt><dd>Decisión coherente, RT citadas existen, relaciones por precisar, consejo por el buzón si toca áreas A6</dd>
+<dt>Salidas</dt><dd>doc-instruccion-lote → <b>revisión 24/24</b></dd>
+<dt>Siguiente</dt><dd><a href="#F3.4" data-ir="F3.4">F3.4</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F6" data-ir="F6">F6</a></dd>
+<dt>Guardias</dt><dd>A2–A6, punto 23 del revisor</dd>
+<dt>Herramientas</dt><dd>plantilla-revisor-previo</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F6" data-ir="F6">↑ volver a F6</a> <a href="#F3.4" data-ir="F3.4">continuar → F3.4</a></nav>
+</article><article class="nodo" id="F6.3" data-nivel="N3" data-padre="F6">
+<header><span class="niv">N3</span><h3>F6.3 · Fila del mapa (M7)</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lote aceptado</b> · de F4.4</dd>
+<dt>Entradas</dt><dd>json-seguimiento, mapa-str</dd>
+<dt>Hace</dt><dd>una fila por lote en mapa-modulos › historial con módulos, relaciones y estados; mapa gráfico regenerado</dd>
+<dt>Salidas</dt><dd>mapa-str, arquitectura-mapa-datos → <b>fila del mapa puesta</b></dd>
+<dt>Siguiente</dt><dd><a href="#F0.2" data-ir="F0.2">F0.2</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F6" data-ir="F6">F6</a></dd>
+<dt>Guardias</dt><dd>M7: lote aceptado sin fila = error</dd>
+<dt>Herramientas</dt><dd>modelo-mapa-py, modelo-validar-py</dd>
+<dt>Plazo</dt><dd>al aceptar</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F6" data-ir="F6">↑ volver a F6</a> <a href="#F0.2" data-ir="F0.2">continuar → F0.2</a></nav>
+</article><article class="nodo" id="F6.4" data-nivel="N3" data-padre="F6">
+<header><span class="niv">N3</span><h3>F6.4 · Evaluación de arquitectura</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>fila del mapa puesta</b> · de 20 lotes aceptados, módulo que cambia de estado o INC de arquitectura alto</dd>
+<dt>Entradas</dt><dd>mapa-str, json-seguimiento</dd>
+<dt>Hace</dt><dd>deuda arquitectónica por severidad con dueño, RT críticas con guardia, relaciones por precisar, última prueba de capacidad</dd>
+<dt>Salidas</dt><dd>json-proyecto, json-seguimiento → <b>evaluación hecha</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>deuda alta → <a href="#F2.1" data-ir="F2.1">F2.1</a></dd>
+<dt>Retorno</dt><dd><a href="#F6" data-ir="F6">F6</a></dd>
+<dt>Guardias</dt><dd>A7–A8</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F6" data-ir="F6">↑ volver a F6</a></nav>
+</article><article class="nodo" id="F7.1" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.1 · Alta de riesgo</h3><span class="rol">JP escribe · AP propone · DU acepta ≥ 6</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>riesgo registrado</b> · de el Arquitecto propone R-n por el buzón</dd>
+<dt>Entradas</dt><dd>json-mensajes, modelo-esquema-json</dd>
+<dt>Hace</dt><dd>valida forma y escribe la fila (escenario, capa, módulos, p × i, respuesta, señal, dueño, revisarCuando)</dd>
+<dt>Salidas</dt><dd>json-riesgos → <b>riesgo registrado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F7.2" data-ir="F7.2">F7.2</a></dd>
+<dt>Bifurca</dt><dd>aceptado de nivel ≥ 6 → <a href="#F1.C2" data-ir="F1.C2">F1.C2</a></dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd>Rg1, Rg2</dd>
+<dt>Herramientas</dt><dd>modelo-riesgos-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a> <a href="#F7.2" data-ir="F7.2">continuar → F7.2</a></nav>
+</article><article class="nodo" id="F7.2" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.2 · Revisión por tanda</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>tanda cerrada</b> · de F2.10</dd>
+<dt>Entradas</dt><dd>jp-fichas-archivo, json-riesgos</dd>
+<dt>Hace</dt><dd>mira lo que está sin probar o vencido; avisa al dueño</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>ficha generada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F7.5" data-ir="F7.5">F7.5</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd>Rg7</dd>
+<dt>Herramientas</dt><dd>modelo-riesgos-py</dd>
+<dt>Plazo</dt><dd>respuesta probada cada 90 días</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a> <a href="#F7.5" data-ir="F7.5">continuar → F7.5</a></nav>
+</article><article class="nodo" id="F7.3" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.3 · Materialización</h3><span class="rol">JP (el juez propone)</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>INC decidido</b> · de F2.9 cuando el INC coincide con un R-n</dd>
+<dt>Entradas</dt><dd>json-seguimiento, json-riesgos</dd>
+<dt>Hace</dt><dd>marca el R-n «materializado»</dd>
+<dt>Salidas</dt><dd>json-riesgos → <b>riesgo materializado</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: solo R-6)</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a></nav>
+</article><article class="nodo" id="F7.4" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.4 · Metas</h3><span class="rol">JP con DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>respuesta de Carlos</b> · de DA-62 pendiente</dd>
+<dt>Entradas</dt><dd>json-riesgos</dd>
+<dt>Hace</dt><dd>metas MT-1…MT-4 fijadas con Carlos; la ficha las compara cada tanda</dd>
+<dt>Salidas</dt><dd>json-riesgos → <b>metas fijadas</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd><i>ninguna</i></dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a></nav>
+</article><article class="nodo" id="F7.5" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.5 · Ficha de tanda</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>tanda cerrada</b> · de F2.10</dd>
+<dt>Entradas</dt><dd>json-metricas, json-seguimiento, json-proyecto</dd>
+<dt>Hace</dt><dd>genera la ficha con --anterior y lee el semáforo (hoy 7 rojas)</dd>
+<dt>Salidas</dt><dd>jp-fichas-archivo → <b>ficha generada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F7.6" data-ir="F7.6">F7.6</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd>MD-n del semáforo</dd>
+<dt>Herramientas</dt><dd>modelo-ficha-semanal-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 (duda: METRICAS.json del 15-oct)</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a> <a href="#F7.6" data-ir="F7.6">continuar → F7.6</a></nav>
+</article><article class="nodo" id="F7.6" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.6 · Rojas repetidas</h3><span class="rol">JP · AP · DU</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ficha generada</b> · de F7.5 con --anterior</dd>
+<dt>Entradas</dt><dd>jp-fichas-archivo</dd>
+<dt>Hace</dt><dd>cada roja repetida produce una fila en trabajo[] que cite su MD-n, un R-n aceptado por Carlos o el retiro de la medida</dd>
+<dt>Salidas</dt><dd>json-proyecto → <b>roja repetida</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.1" data-ir="F2.1">F2.1</a></dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd>Rg6</dd>
+<dt>Herramientas</dt><dd>—</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295 · FALLA HOY: rojas sin acción (DT vencidas, ítems vencidos, piezas de arranque, riesgos sin respuesta probada)</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a> <a href="#F2.1" data-ir="F2.1">continuar → F2.1</a></nav>
+</article><article class="nodo" id="F7.7" data-nivel="N3" data-padre="F7">
+<header><span class="niv">N3</span><h3>F7.7 · Traspasos vencidos</h3><span class="rol">JP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>ficha generada</b> · de F7.5</dd>
+<dt>Entradas</dt><dd>traspaso-jp</dd>
+<dt>Hace</dt><dd>reescribe el traspaso si pasó de 7 días</dd>
+<dt>Salidas</dt><dd>traspaso-jp → <b>traspaso escrito</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F7" data-ir="F7">F7</a></dd>
+<dt>Guardias</dt><dd>ficha</dd>
+<dt>Herramientas</dt><dd>—</dd>
+<dt>Plazo</dt><dd>7 días</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">JP M-1295</dd>
+</dl>
+<nav><a href="#F7" data-ir="F7">↑ volver a F7</a></nav>
+</article><article class="nodo" id="F8.1" data-nivel="N3" data-padre="F8">
+<header><span class="niv">N3</span><h3>F8.1 · Lección con destino</h3><span class="rol">cada chat</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lección registrada</b> · también: escape con destino, revisión de incidente hecha, lote aceptado · de un error visto, un lote aceptado, una revisión de incidente</dd>
+<dt>Entradas</dt><dd>json-diseno, json-proyecto, json-seguimiento</dd>
+<dt>Hace</dt><dd>lección en el archivo de su rol con destino {tipo, ref, fecha}; las de forma de trabajar van al Arquitecto</dd>
+<dt>Salidas</dt><dd>json-conocimiento → <b>lección registrada</b></dd>
+<dt>Siguiente</dt><dd><a href="#F8.2" data-ir="F8.2">F8.2</a></dd>
+<dt>Bifurca</dt><dd>es del método → <a href="#F8.5" data-ir="F8.5">F8.5</a></dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>Cn3 (destino), «lecciones sin destino &gt; 7 d»</dd>
+<dt>Herramientas</dt><dd>—</dd>
+<dt>Plazo</dt><dd>mismo día</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F8" data-ir="F8">↑ volver a F8</a> <a href="#F8.2" data-ir="F8.2">continuar → F8.2</a></nav>
+</article><article class="nodo" id="F8.2" data-nivel="N3" data-padre="F8">
+<header><span class="niv">N3</span><h3>F8.2 · Catálogo que madura</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>lección registrada</b> · de F8.1; revisión del catálogo</dd>
+<dt>Entradas</dt><dd>json-conocimiento</dd>
+<dt>Hace</dt><dd>práctica, patrón o herramienta con alcance (proyecto → fábrica cuando funcionó en dos proyectos) y madurez</dd>
+<dt>Salidas</dt><dd>json-conocimiento → <b>lección madura</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>Cn1–Cn2</dd>
+<dt>Herramientas</dt><dd>modelo-conocimiento-py, modelo-catalogo-md-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F8" data-ir="F8">↑ volver a F8</a></nav>
+</article><article class="nodo" id="F8.3" data-nivel="N3" data-padre="F8">
+<header><span class="niv">N3</span><h3>F8.3 · Relevo de chat</h3><span class="rol">cada chat · AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>relevo de chat</b> · de un chat nuevo reemplaza a otro; compactación</dd>
+<dt>Entradas</dt><dd>plantilla-traspaso-md, json-destinatarios</dd>
+<dt>Hace</dt><dd>traspaso escrito, sesión nueva en destinatarios.json, arranque leyendo encargo + reglas comunes + traspaso + buzón</dd>
+<dt>Salidas</dt><dd>json-destinatarios, traspaso-jp → <b>traspaso escrito</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>el chat se pierde sin traspaso → <a href="#F5.2" data-ir="F5.2">F5.2</a></dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>Cn4, traspasos vencidos</dd>
+<dt>Herramientas</dt><dd>plantilla-traspaso-md</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto · hallazgo: el mensaje de arranque no existe como archivo</dd>
+</dl>
+<nav><a href="#F8" data-ir="F8">↑ volver a F8</a></nav>
+</article><article class="nodo" id="F8.4" data-nivel="N3" data-padre="F8">
+<header><span class="niv">N3</span><h3>F8.4 · Buzón y despertador</h3><span class="rol">cada chat · despertador</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>mensaje enviado</b> · de un chat deja M-n pendiente; «Esperando: …» al cerrar</dd>
+<dt>Entradas</dt><dd>json-mensajes, json-destinatarios</dd>
+<dt>Hace</dt><dd>el despertador (cada minuto) deja «Revisa el buzón…» en el chat destinatario; escala a los 30 y 60 min; a Carlos por Windows y el Panel</dd>
+<dt>Salidas</dt><dd>json-mensajes → <b>chat despertado</b></dd>
+<dt>Siguiente</dt><dd><a href="#F2.5" data-ir="F2.5">F2.5</a></dd>
+<dt>Bifurca</dt><dd>el destinatario es Carlos → <a href="#F2.12" data-ir="F2.12">F2.12</a></dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>R1 ids, buzon.py</dd>
+<dt>Herramientas</dt><dd>herramienta-vigilar-buzon, tarea-win-buzon, herramienta-panel-str</dd>
+<dt>Plazo</dt><dd>1 min</dd>
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto</dd>
+</dl>
+<nav><a href="#F8" data-ir="F8">↑ volver a F8</a> <a href="#F2.5" data-ir="F2.5">continuar → F2.5</a></nav>
+</article><article class="nodo" id="F8.5" data-nivel="N3" data-padre="F8">
+<header><span class="niv">N3</span><h3>F8.5 · Mejora del método (MJ-n → LM-n)</h3><span class="rol">AP · DU adopta</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>mejora adoptada</b> · de una lección del método, un INC de proceso, una brecha del marco</dd>
+<dt>Entradas</dt><dd>registro-mejoras, planes-procesos</dd>
+<dt>Hace</dt><dd>propuesta con beneficio, costo, asumimos y revisarCuando; LM-n con ok de Carlos; guardias en validar.py; encargos y plantillas al día</dd>
+<dt>Salidas</dt><dd>registro-mejoras, lotes-modelo, modelo-validar-py, json-instrucciones → <b>LM instalado</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>cambia encargos de otros roles → <a href="#F8.4" data-ir="F8.4">F8.4</a></dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>validar 0 errores, cruce por el buzón</dd>
+<dt>Herramientas</dt><dd>modelo-validar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto · hallazgo: encargos del JP y de Desarrollo desfasados</dd>
+</dl>
+<nav><a href="#F8" data-ir="F8">↑ volver a F8</a></nav>
+</article><article class="nodo" id="F8.6" data-nivel="N3" data-padre="F8">
+<header><span class="niv">N3</span><h3>F8.6 · Archivo del buzón y del conocimiento</h3><span class="rol">AP</span></header>
+<dl>
+<dt>Disparador</dt><dd><b>límite superado</b> · de «buzón vivo (KB)» en rojo en la ficha</dd>
+<dt>Entradas</dt><dd>json-mensajes</dd>
+<dt>Hace</dt><dd>archivar.py poda el buzón; archivo/ guarda lo cerrado</dd>
+<dt>Salidas</dt><dd>respaldos-internos, json-mensajes → <b>estado registrado</b></dd>
+<dt>Siguiente</dt><dd>—</dd>
+<dt>Bifurca</dt><dd>—</dd>
+<dt>Retorno</dt><dd><a href="#F8" data-ir="F8">F8</a></dd>
+<dt>Guardias</dt><dd>Cn6</dd>
+<dt>Herramientas</dt><dd>modelo-archivar-py</dd>
+
+<dt>Dentro</dt><dd>—</dd>
+<dt>Fuente</dt><dd class="fte">plan del proceso + práctica del Arquitecto · hoy en rojo (2,3 MB)</dd>
+</dl>
+<nav><a href="#F8" data-ir="F8">↑ volver a F8</a></nav>
+</article></div>
+<details class="ev"><summary>Eventos (60)</summary><ul><li><b>necesidad de software</b> · una idea, un cliente o una nueva fase de un producto · externo</li><li><b>proyecto admitido</b> · puerta P1: acta aprobada y proyecto en el portafolio</li><li><b>línea base aprobada</b> · puerta P2</li><li><b>listo para entregar</b> · puerta P3</li><li><b>proyecto cerrado</b> · puerta P4 · terminal</li><li><b>hito firmado</b> · Carlos acepta un entregable</li><li><b>pedido de Carlos</b> · Carlos pide algo en el chat (P-n) · externo</li><li><b>REQ listo para construir</b> · Diseño entrega un REQ validado (M-n)</li><li><b>DA decidida</b> · Carlos decidió una decisión de alcance</li><li><b>respuesta de Carlos</b> · Carlos contesta una pregunta (chat, Panel o buzón) · externo</li><li><b>pregunta a Carlos</b> · un chat le pide una sola decisión</li><li><b>ítem en lista</b> · el JP agregó una fila a trabajo[]</li><li><b>ítem libre</b> · primer ítem que no espera DA, cruce ni ok</li><li><b>tanda abierta</b> · T-n abierta con entra[]</li><li><b>tanda cerrada</b> · T-n con hasta, salio[] y ficha</li><li><b>pausa ordenada</b> · Carlos ordena pausa o excepción</li><li><b>límite superado</b> · la ficha muestra un umbral pasado</li><li><b>lote previsto</b> · fila en plan[] «previsto»</li><li><b>simulación verde</b> · cambio probado en el contenedor de Desarrollo</li><li><b>instrucción redactada</b> · borrador L-n con cabecera completa</li><li><b>revisión 24/24</b> · el revisor previo pasó los 24 puntos</li><li><b>cruce y ok dados</b> · cruce delegado del Arquitecto y ok del JP (críticos)</li><li><b>instrucción encolada</b> · L-n en la raíz de la cola</li><li><b>lote construido</b> · la CLI terminó: commit y push; Hostinger desplegó</li><li><b>construido registrado</b> · plan[] construido; evidencia al Arquitecto</li><li><b>pruebas corridas</b> · pruebas.json y capturas en log\</li><li><b>veredicto emitido</b> · L-n-veredicto.json escrito por el juez</li><li><b>criterio a cerrado</b> · el Arquitecto cerró a (lotes del servicio)</li><li><b>lote aceptado</b> · cambios[] aceptado; el lote entra al producto</li><li><b>lote no aceptado</b> · rojo o bloqueado</li><li><b>reprueba pedida</b> · .txt en reprobar\, rejuzgar\ o correr\</li><li><b>INC registrado</b> · incs[] con prioridad y causa</li><li><b>INC decidido</b> · el JP decidió tipo de lote, bolsa o pospuesto</li><li><b>INC cerrado</b> · cierre con lote y prueba · terminal</li><li><b>DT registrada</b> · deuda técnica abierta</li><li><b>PRB abierto</b> · varios INC con la misma causa</li><li><b>revisión de incidente hecha</b> · revisión sin culpables en 48 h</li><li><b>escape con destino</b> · lo que debió detectarse va a un punto del revisor o a una guardia</li><li><b>pieza identificada</b> · una pieza nueva tiene fila (ficha, índice, universo)</li><li><b>línea base actualizada</b> · linea-base.py --lote y fotos tras un lote aceptado</li><li><b>estado registrado</b> · reporte de estado de la configuración (ficha, explorador)</li><li><b>auditoría hecha</b> · realidad comparada con la línea base · terminal</li><li><b>decisión registrada</b> · ADR con contexto, opciones, decisor y revisarCuando</li><li><b>fila del mapa puesta</b> · mapa-modulos › historial con el lote (M7)</li><li><b>evaluación hecha</b> · evaluación de arquitectura por evento · terminal</li><li><b>riesgo registrado</b> · R-n en riesgos[]</li><li><b>ficha generada</b> · ficha de tanda con semáforo</li><li><b>roja repetida</b> · una fila roja repite respecto a la ficha anterior</li><li><b>metas fijadas</b> · metas[] fijadas con Carlos · terminal</li><li><b>riesgo materializado</b> · un INC coincide con un R-n · terminal</li><li><b>lección registrada</b> · lecciones[] con destino</li><li><b>lección madura</b> · una práctica funcionó en dos proyectos · terminal</li><li><b>traspaso escrito</b> · traspaso renovado · terminal</li><li><b>mensaje enviado</b> · M-n pendiente en mensajes.json</li><li><b>chat despertado</b> · el despertador dejó «Revisa el buzón…»</li><li><b>relevo de chat</b> · un chat nuevo reemplaza a otro (lo abre Carlos) · externo</li><li><b>mejora adoptada</b> · Carlos adopta MJ-n · externo</li><li><b>LM instalado</b> · cambio del modelo instalado con validar en 0 · terminal</li><li><b>cómo vamos pedido</b> · Carlos pide el estado · externo</li><li><b>INC en producción</b> · Carlos o el Arquitecto avisan algo visto en producción · externo</li></ul></details>
+</div><script>
+(function(){var nivel='',q='';var ns=[...document.querySelectorAll('.nodo')];function pintar(){var n=0;ns.forEach(function(e){var ok=(!nivel||e.dataset.nivel===nivel)&&(!q||e.textContent.toLowerCase().indexOf(q)>-1);e.classList.toggle('oculto',!ok);if(ok)n++;});document.getElementById('cnt').textContent=n+' de '+ns.length;}
+document.querySelectorAll('.barra button').forEach(function(b){b.onclick=function(){nivel=b.dataset.n;document.querySelectorAll('.barra button').forEach(function(x){x.classList.toggle('on',x===b)});pintar();}});
+document.getElementById('q').addEventListener('input',function(e){q=e.target.value.trim().toLowerCase();pintar();});
+function ir(){var id=location.hash.slice(1);ns.forEach(function(e){e.classList.toggle('foco',e.id===id)});var el=id&&document.getElementById(id);if(el){nivel='';q='';document.getElementById('q').value='';document.querySelectorAll('.barra button').forEach(function(x){x.classList.toggle('on',!x.dataset.n)});pintar();el.scrollIntoView({block:'start'});}}
+window.addEventListener('hashchange',ir);pintar();ir();})();
+</script></body></html>

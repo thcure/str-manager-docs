@@ -41,3 +41,4 @@ Validación de Carlos: mirar las páginas y decir si eso es lo que pasa de verda
 ## Bitácora
 
 - 30-oct: plan escrito; MJ-26 registrada; consultas enviadas a Diseño, JP y Desarrollo (F0.2).
+- 30-oct 19:15: F0 cerrada (respuestas M-1294/1295/1296). F2.1 hecho en borrador: `interno/universo.json` 0.2 (273 piezas, capa y rama del árbol, correcciones de los tres chats). F3.1–3.3 en borrador: `interno/mapa-procesos.json` 0.1 (90 nodos, 60 eventos), `herramientas/modelo/procesos.py` con las guardias P1–P5 (0 huecos) y la página `herramientas/paginas/mapa-procesos.html`; artefacto «Mapa de procesos» para Carlos. Pendiente: F1 esquema y cruce, F2.2–2.4, F3.4, N4.

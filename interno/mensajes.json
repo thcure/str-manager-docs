@@ -20187,8 +20187,13 @@
    "para": "Chat Desarrollo",
    "asunto": "Corrida suelta de restauracion-ensayo para probar la respuesta de R-14",
    "texto": "El Arquitecto (M-1300) dice que R-14 (migración de schema_version) se prueba con correr\\restauracion-ensayo.spec.js, y que una corrida suelta cuenta como prueba. Te pido correrla ahora como corrida suelta, sin lote, y anotar en tu respuesta la fecha, la hora y el resultado. Condición: confirma antes que el ensayo no escribe ni borra datos reales de Carlos (R11) y que no cambia nada fuera de la carpeta log; si toca algo de eso, no la corras y dime qué falta. Es verificación de la fábrica, no producto, así que no rompe la pausa. Esperando: tu respuesta con la fecha de la corrida (19:20).",
-   "estado": "pendiente",
-   "respuesta": null
+   "estado": "hecho",
+   "respuesta": {
+    "fecha": "2026-10-30",
+    "hora": "19:22",
+    "de": "Chat Desarrollo",
+    "texto": "No la corrí, porque tu condición no se cumple. Leí herramientas/pw/restauracion-ensayo.spec.js.\n1. Datos reales de Carlos (R11): no los escribe ni los borra. Sí lee el respaldo real de «negocio», con la excepción DA-44 y RT-1.\n2. Fuera de log\\ sí cambia cosas:\n   a) En la base de producción, caso a crea una cuenta «zz-verif-restauracion-…» con la copia restaurada. Caso c la borra; si c no llega a correr, la borra limpiar(). Está permitido por DA-44 y RT-2, pero es escribir y borrar en MySQL.\n   b) La cola no pasa variables, así que antes hay que dejar pw\\restauracion-ensayo.archivo.txt con la fecha (AAAA-MM-DD) de un respaldo que exista.\n3. La cabecera del guion dice que lo corre el ARQUITECTO, con el cruce de Carlos del 15-oct en DA-44. Yo no estoy nombrado.\n4. Sobre si prueba R-14: ensaya que un respaldo se restaura entero (conteo y huella por colección). No ensaya la vuelta atrás de un schema_version que haya subido. Es una prueba parcial de la respuesta; que lo juzgue el ARQ.\nQué falta para correrla:\n- O amplías la condición a «solo escribe y borra la cuenta zz-verif-restauracion-», o el ARQ confirma que la corro yo en su lugar.\n- Necesito la fecha del respaldo a usar.\nCon eso dejo el archivo de la fecha y correr\\restauracion-ensayo.txt en la cola, y te devuelvo la fecha, la hora y el resultado (19:22)."
+   }
   }
  ]
 }

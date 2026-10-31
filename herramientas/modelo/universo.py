@@ -102,10 +102,49 @@ document.querySelectorAll('.barra select').forEach(function(s){{s.onchange=funct
     open(salida, 'w', encoding='utf-8').write(doc)
     print('página', salida, len(doc) // 1024, 'KB', len(P), 'piezas')
 
+
+def arbol(raiz, salida):
+    """Página del árbol: capas › ramas › piezas, generada desde universo.json (F4.1)."""
+    U, E = cargar(raiz); P = [p for p in U['piezas'] if p['estado'] not in ('superado', 'fuera')]
+    esc = lambda s: html.escape(str(s or ''))
+    NOM = {'proyectos': ('Capa 1 · PROYECTOS — gobierna', 'PMI · unidad: el proyecto Pnn · gerente: Diseño · PMO: Arquitecto · sitio proyectos.'),
+           'herramientas': ('Capa 2 · HERRAMIENTAS — sirven', 'la Fábrica es la primera (COBIT + modelo; unidad: el lote) · sitio herramienta-fabrica.'),
+           'transversal': ('Transversal', 'identidades y accesos · plataformas donde vive cada pieza')}
+    RAMA = {'portafolio': 'Portafolio', 'P01': 'P01 · STR Manager', 'producto': 'Producto', 'alcance': 'Alcance (REQ, DA, pedidos)', 'decisiones': 'Decisiones', 'construccion': 'Construcción', 'arquitectura': 'Arquitectura y línea base', 'orden': 'Orden y medición', 'pruebas': 'Pruebas', 'vistas': 'Vistas',
+            'fabrica': 'Fábrica', 'metodo': 'Método', 'gobierno': 'Gobierno', 'procesos': 'Procesos y planes', 'roles': 'Roles, encargos y agentes', 'plantillas': 'Plantillas', 'conocimiento': 'Conocimiento', 'herramientas': 'Herramientas de la fábrica', 'modelo': 'Modelo y guardias', 'cola': 'Cola y construcción', 'verificacion': 'Verificación', 'comunicacion': 'Comunicación y visibilidad', 'servicio': 'Servicio del modelo', 'identidades': 'Identidades y accesos', 'plataformas': 'Plataformas'}
+    nodo = {}
+    for p in P:
+        d = nodo
+        for x in p['rama'].split('/'): d = d.setdefault(x, {})
+        d.setdefault('_p', []).append(p)
+    def piezas_de(d):
+        for k, v in d.items():
+            if k == '_p': yield from v
+            else: yield from piezas_de(v)
+    def pinta(d, nivel):
+        out = ''
+        for k in sorted(k for k in d if k != '_p'):
+            hijos = d[k]; n = sum(1 for _ in piezas_de(hijos))
+            titulo = NOM[k][0] if nivel == 0 and k in NOM else RAMA.get(k, k)
+            sub = NOM[k][1] if nivel == 0 and k in NOM else ''
+            cls = 'n%d %s' % (nivel, esc(k) if nivel == 0 else '')
+            out += '<details class="%s" open><summary><span class="t">%s</span>%s<span class="c">%d</span></summary>' % (cls, esc(titulo), ('<span class="s">' + esc(sub) + '</span>') if sub else '', n)
+            out += pinta(hijos, nivel + 1)
+            if hijos.get('_p'):
+                out += '<ul class="hojas">' + ''.join('<li><b>%s</b> <i>%s · %s%s</i></li>' % (esc(p['nombre'].split(' (')[0].split(' — ')[0][:90]), esc(p['naturaleza']), esc(p['plataforma'].split(' ')[0]), (' · ' + esc(p['estado'])) if p['estado'] != 'vigente' else '') for p in sorted(hijos['_p'], key=lambda p: p['id'])) + '</ul>'
+            out += '</details>'
+        return out
+    cuerpo = pinta(nodo, 0)
+    estilo = ':root{--bg:#0f1115;--papel:#171a21;--tinta:#e7e9ee;--suave:#9aa3b2;--linea:#2a2f3a;--pro:#f0a06a;--her:#6fd3c6;--id:#8fc4f5}html[data-theme="light"]{--bg:#f2f3ef;--papel:#fff;--tinta:#1b221e;--suave:#5b655f;--linea:#cdd3cc;--pro:#b4530f;--her:#0f766e;--id:#185fa5}body{margin:0;background:var(--bg);color:var(--tinta);font:13.5px/1.4 system-ui,sans-serif}.pag{max-width:1100px;margin:0 auto;padding:18px 16px 48px}h1{font-size:22px;margin:0}.sub{color:var(--suave);margin:4px 0 14px;max-width:80ch}details{border:1px solid var(--linea);border-radius:9px;background:var(--papel);margin:6px 0;padding:0 10px}details.n0{border-width:1.5px;margin:12px 0}details.proyectos{border-color:var(--pro)}details.herramientas{border-color:var(--her)}details.transversal{border-color:var(--id);border-style:dashed}summary{cursor:pointer;padding:8px 0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}summary .t{font-weight:600}.n0>summary .t{font-size:16px}.n1>summary .t{font-size:14.5px}summary .s{color:var(--suave);font-size:12px}summary .c{margin-left:auto;font-family:ui-monospace,monospace;font-size:11px;color:var(--suave)}ul.hojas{columns:2;margin:0 0 8px;padding-left:18px;font-size:12.5px}ul.hojas li{break-inside:avoid;margin:2px 0}ul.hojas i{font-style:normal;color:var(--suave);font-size:11px}@media (max-width:700px){ul.hojas{columns:1}}'
+    doc = ('<!DOCTYPE html><html lang="es" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Árbol del universo · %s</title><style>%s</style></head><body><div class="pag">'
+           '<h1>Árbol del universo</h1><p class="sub">Dos capas (ADR-009 v5): Proyectos gobierna, Herramientas sirven y la Fábrica es la primera; y las transversales. Cada pieza vigente aparece una sola vez, en su rama. Generado desde interno/universo.json %s; %d piezas vigentes de %d.</p>%s</div></body></html>') % (esc(U.get('version')), estilo, esc(U.get('version')), len(P), len(U['piezas']), cuerpo)
+    open(salida, 'w', encoding='utf-8').write(doc); print('árbol', salida, len(doc) // 1024, 'KB', len(P), 'piezas')
+
 if __name__ == '__main__':
     raiz = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else '.'
     if '--pagina' in sys.argv: pagina(raiz, sys.argv[sys.argv.index('--pagina') + 1])
-    if '--check' in sys.argv or '--pagina' not in sys.argv:
+    if '--arbol' in sys.argv: arbol(raiz, sys.argv[sys.argv.index('--arbol') + 1])
+    if '--check' in sys.argv or ('--pagina' not in sys.argv and '--arbol' not in sys.argv):
         e, a = check(raiz)
         for x in e: print('ERROR', *x)
         for x in a: print('aviso', *x)

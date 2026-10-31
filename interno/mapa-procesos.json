@@ -1,6 +1,6 @@
 {
  "version": "0.1",
- "estado": "borrador 0.1: N2 y N3 con las etapas de los cuatro chats (M-1294/1295/1296 y planes); N4 (pasos) pendiente; N1 sin detallar hasta la metodología de proyectos (ADR-009 §5)",
+ "estado": "borrador 0.1: N2 y N3 con las etapas de los cuatro chats (M-1294/1295/1296 y planes); N4 de F3.3 (22 pasos, Desarrollo M-1305); N4 del resto por hacer; N1 sin detallar hasta la metodología de proyectos (ADR-009 §5)",
  "fecha": "2026-10-30",
  "escritor": "Arquitecto (capa Marco)",
  "que": "Mapa de procesos del universo por niveles (N0 portafolio · N1 proyecto · N2 proceso de la fábrica · N3 procedimiento · N4 paso). La salida de un nodo es el disparador de otro. Sucede a marco-trabajo.json. Modelo: claude/marco/universo-modelo.md; plan: claude/marco/plan-universo-2026-10.md.",
@@ -3754,6 +3754,727 @@
     "modelo-archivar-py"
    ],
    "fuente": "plan del proceso + práctica del Arquitecto · hoy en rojo (2,3 MB)"
+  },
+  {
+   "id": "F3.3.0",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Preparar el material del lote",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "simulación verde",
+    "de": "F3.2"
+   },
+   "entradas": [
+    "carpetas-construccion-desarrollo",
+    "modelo-mapa-py"
+   ],
+   "hace": "carpeta del lote (base/ de LENOVO, mod/ con el cambio); mapa.py --ruta → ruta.txt y huecos.txt",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.1"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [],
+   "herramientas": [
+    "modelo-mapa-py"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.1",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 1 · título «# instr — L-n · ref: qué hace»",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "json-seguimiento"
+   ],
+   "hace": "REQ, LM o INC del lote; L-n = siguiente libre de cambios[]",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.2"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "la cola ordena por el número L-n"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.2",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 2 · Categoría (estándar/normal/crítico), DA o LM y cruce delegado",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "doc-proceso-cambios",
+    "diseno-listas",
+    "cruce-delegado"
+   ],
+   "hace": "proceso-cambios; DA-n o LM-n; respuesta del Arquitecto al cruce (M-n)",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.3"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "ejecutar-cola (.sin-cruce); linea-base.py --lote"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.3",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 3 · Commit (quién hace commit; si el Alcance roza los hooks)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "herramienta-hooks-cli"
+   ],
+   "hace": "la CLI; hooks",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.4"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "hooks guard-bash y stop-check"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.4",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 4 · Revisión previa 24/24 · subagente · fecha · ok Jefe de proyecto M-n",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "revisión 24/24",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "plantilla-revisor-previo",
+    "jp-ok-revision-previa"
+   ],
+   "hace": "resultado del subagente; mensaje del JP (el ok lo escribe el JP o se copia citando su M-n)",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.5"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "ejecutar-cola (.sin-revision.md, .sin-ok.md); linea-base.py --lote rc 2"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.5",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 5 · Decisión (ADR-n, DA-n, LM-n u orden M-n; «ninguna (motivo)» si toca un área A6)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "decisiones-adr",
+    "diseno-listas"
+   ],
+   "hace": "decisiones-adr, das[], LM, órdenes de Carlos",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.6"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "linea-base.py (A6); de memoria: antes del byte 4000"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.6",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 6 · Alcance: archivos exactos por repo y «no toques …»",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "carpetas-construccion-desarrollo"
+   ],
+   "hace": "diff base→mod",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.7"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "guard-bash corta el Alcance en «no toques»; la CLI compara declarados contra tocados; el juez lo lee"
+   ],
+   "herramientas": [
+    "herramienta-hooks-cli",
+    "herramienta-juez"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.7",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 7 · Versión (?v= del front o sNNN de los sitios; schema_version)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "repo-str-manager",
+    "sitios-comun"
+   ],
+   "hace": "?v= actual del shell y de los sitios; schema_version del STR y del modelo",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.8"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "juez (recursos con ?v=); sube schema_version → respaldo del día y señal K4 (R-14)"
+   ],
+   "herramientas": [
+    "herramienta-juez"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.8",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 8 · Origen (REQ/INC/M-n de la orden)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "diseno-listas",
+    "json-mensajes"
+   ],
+   "hace": "ids del REQ, INC o mensaje",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.9"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "linea-base.py --lote (los ids existen)"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.9",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 9 · Impacto en lenguaje de Carlos",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "carpetas-construccion-desarrollo"
+   ],
+   "hace": "lo que ve el usuario en la simulación",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.10"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "la lee el juez"
+   ],
+   "herramientas": [
+    "herramienta-juez"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.10",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 10 · Reglas transversales RT-n que toca y cómo las cumple",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "arquitectura-mapa-datos"
+   ],
+   "hace": "registro RT de interno/arquitectura",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.11"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "duda: linea-base.py"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.11",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 11 · Mapa: módulos y relaciones que cambian",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "mapa-str"
+   ],
+   "hace": "mapa-modulos.json",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.12"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "linea-base.py; validar M7 después (relación nueva → fila del Arquitecto al aceptar)"
+   ],
+   "herramientas": [
+    "modelo-mapa-py"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.12",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 12 · Casos de uso CU que toca",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "linea-base-funcional"
+   ],
+   "hace": "diseno.json o mapa (CU-*)",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.13"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "duda: linea-base.py"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.13",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 13 · Riesgo: nivel, líneas +/−, archivos y por qué ese tamaño; R-n",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "json-riesgos"
+   ],
+   "hace": "git diff --stat de la simulación; R-n",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.14"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "revisor (punto de tamaño); de memoria: antes del byte 4000"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.14",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 14 · ¿Datos personales o dinero? ¿Normativa? ¿Toca el modelo?",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "doc-proceso-cambios"
+   ],
+   "hace": "lo que toca el lote",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.15"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "revisor; ejecutar-cola; toca el modelo → al Arquitecto, no a la cola"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.15",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 15 · Reversión: git revert por repo y qué vuelve",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "repo-str-manager",
+    "repo-fabrica-servicio"
+   ],
+   "hace": "commits que hará la CLI por repo",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.16"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "revisor"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.16",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 16 · Paridad (desde 5.5): hash contra 73d5aa9~1, origen leído del servicio, diferencias",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "linea-paridad"
+   ],
+   "hace": "sha256sum, diff; los tres puntos de M-1259",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.17"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "revisor, punto 24"
+   ],
+   "herramientas": [],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.17",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 17 · Depende de: L-(n-1) aceptado; precondiciones del juez",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "json-plan-lotes"
+   ],
+   "hace": "plan[]; precondiciones (perfil, datos)",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.18"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "no se encola antes del veredicto anterior; el juez lee las precondiciones"
+   ],
+   "herramientas": [
+    "herramienta-juez"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.18",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Línea 18 · ¿Quién más depende?: guiones e INC que siguen verdes o cambian",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "guiones-e2e-str"
+   ],
+   "hace": "huecos.txt y la ruta; guiones que recorren lo tocado",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.19"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "revisor; regresión por ruta en pw"
+   ],
+   "herramientas": [
+    "herramienta-pw"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.19",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Cuerpo · pasos: pares Busca/Reemplaza (STR, B1–B3) y aplicar-l1NN.js con OPS y HASHES (servicio, A1–A3)",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "script-aplicar-lote",
+    "carpetas-construccion-desarrollo"
+   ],
+   "hace": "genpares.py sobre base→mod; instr.py",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.20"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "pw/aplicar.js (K1 aplicación literal); guard-bash evaluar() en cada bloque; un hash distinto aborta"
+   ],
+   "herramientas": [
+    "pw-aplicar",
+    "herramienta-hooks-cli"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.20",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Cuerpo · pruebas derivadas y guion N2 completo dentro de la instrucción",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "plantilla-guion-e2e-js",
+    "diseno-listas"
+   ],
+   "hace": "criterios del REQ o LM; plantilla guion-e2e.js; guion-local2.js para correrlo",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.3.21"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "juez (h: guion igual a la instrucción); tests/e2e-esquema.test.js"
+   ],
+   "herramientas": [
+    "herramienta-juez"
+   ],
+   "fuente": "Desarrollo M-1305"
+  },
+  {
+   "id": "F3.3.21",
+   "nivel": "N4",
+   "padre": "F3.3",
+   "nombre": "Comprobar y subir: linea-base.py --lote, aplicar.js contra la copia, guard-bash evaluar(), tests con el guion; push del borrador",
+   "rol": "Desarrollo",
+   "disparador": {
+    "evento": "instrucción redactada",
+    "de": "el paso anterior"
+   },
+   "entradas": [
+    "doc-instruccion-lote"
+   ],
+   "hace": "el archivo armado",
+   "salidas": {
+    "piezas": [
+     "doc-instruccion-lote"
+    ],
+    "evento": "instrucción redactada"
+   },
+   "siguiente": [
+    "F3.4"
+   ],
+   "bifurca": [],
+   "retorno": "F3.3",
+   "guardias": [
+    "las de arriba; rc ≠ 0 → corregir y repetir"
+   ],
+   "herramientas": [
+    "modelo-linea-base-py",
+    "pw-aplicar"
+   ],
+   "fuente": "Desarrollo M-1305"
   }
  ]
 }

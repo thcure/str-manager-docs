@@ -85,7 +85,7 @@ def tapar(texto):
     return re.sub(r'(?<![\w/.-])(?:\+?57[ -]?)?3\d{2}[ -]?\d{3}[ -]?\d{4}(?![\w/.-])', 'telefono-tapado', texto)
 FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': 'interno/arquitectura/mapa-str.html',
                    'nomenclatura': 'herramientas/paginas/nomenclatura-modelo.html',   # 5.2c (M-1195)
-                   'universo': 'herramientas/paginas/universo.html', 'mapa-procesos': 'herramientas/paginas/mapa-procesos.html'}   # MJ-26 / LM-83
+                   'universo': 'herramientas/paginas/universo.html', 'mapa-procesos': 'herramientas/paginas/mapa-procesos.html', 'arbol': 'herramientas/paginas/arbol-universo.html'}   # MJ-26 / LM-83
 # 5.2c (M-1195): marco-trabajo y cobit para la Fábrica; proyecto/P01 (planes, prioridades, trabajo, pausas del JP) para proyectos.
 FABRICA_JSON = {'instrucciones': 'interno/instrucciones.json', 'mejoras': 'interno/mejoras.json', 'conocimiento': 'interno/conocimiento.json',
                 'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json', 'marco-trabajo': 'interno/marco-trabajo.json',

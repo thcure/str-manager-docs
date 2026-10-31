@@ -69,10 +69,24 @@ def check(raiz):
         if p.get('estado') != 'vigente' or not r or '…' in r: continue
         if not r.startswith(('interno/', 'herramientas/', 'claude/', 'str-manager-docs/')): continue
         ruta = os.path.join(raiz, r)
-        if r.startswith('claude/') and not os.path.exists(ruta):
+        if r.startswith('claude/') and not os.path.exists(ruta) and not glob.glob(ruta + '*'):
             if 'proyecto de Claude' not in p.get('plataforma', ''): avi.append(('U6 vigencia', 'pieza', p['id'], 'ruta %s no está en el repo (¿solo en el proyecto de Claude?)' % r))
             continue
         if not os.path.exists(ruta) and not glob.glob(ruta + '*'): err.append(('U6 vigencia', 'pieza', p['id'], 'vigente pero su ruta %s no existe: pásala a «superado» o corrige la ruta' % r))
+    # U7 vencimientos (interno/vencimientos.json: fechas, nunca valores)
+    try:
+        import datetime
+        V = json.load(open(os.path.join(raiz, 'interno/vencimientos.json'), encoding='utf-8'))
+        hoy = datetime.date.today(); ids = {p['id'] for p in P}
+        for it in V.get('items', []):
+            if it.get('estado') != 'vigente': continue
+            if it.get('pieza') and it['pieza'] not in ids: err.append(('U7 vencimientos', 'ítem', it['id'], 'pieza «%s» no existe en universo.json' % it['pieza']))
+            if not it.get('vence'): avi.append(('U7 vencimientos', 'ítem', it['id'], 'sin fecha: «%s» (anotarla al verla en la plataforma)' % it.get('que', ''))); continue
+            dias = (datetime.date.fromisoformat(it['vence']) - hoy).days
+            if dias < 0: err.append(('U7 vencimientos', 'ítem', it['id'], 'vencido hace %d días: «%s» (renueva: %s)' % (-dias, it.get('que', ''), it.get('renueva', ''))))
+            elif dias <= 10: avi.append(('U7 vencimientos', 'ítem', it['id'], 'vence en %d días (%s): «%s»' % (dias, it['vence'], it.get('que', ''))))
+    except FileNotFoundError: pass
+    except Exception as ex: avi.append(('U7 vencimientos', 'archivo', 'interno/vencimientos.json', 'no se pudo revisar: %s' % ex))
     return err, avi
 
 def pagina(raiz, salida):
@@ -93,7 +107,7 @@ body{{margin:0;background:var(--bg);color:var(--tinta);font:13px/1.4 system-ui,s
 .barra{{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}}.barra select,.barra input{{font:inherit;padding:5px 8px;border:1px solid var(--linea);border-radius:7px;background:var(--papel);color:var(--tinta)}}.barra input{{flex:1 1 220px}}.barra span{{font-family:ui-monospace,monospace;font-size:12px;color:var(--suave);align-self:center}}
 .tabla{{overflow:auto;max-height:75vh;border:1px solid var(--linea);border-radius:10px;background:var(--papel)}}table{{border-collapse:separate;border-spacing:0;min-width:1800px;width:100%}}th{{position:sticky;top:0;background:var(--bg);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--suave);text-align:left;padding:8px 9px;border-bottom:1px solid var(--linea)}}td{{padding:6px 9px;border-top:1px solid var(--linea);vertical-align:top;font-size:12.3px}}td.n{{font-family:ui-monospace,monospace;font-size:11px;color:var(--suave)}}td small{{display:block;color:var(--suave);font-family:ui-monospace,monospace;font-size:10.5px}}td.h{{color:var(--rojo);max-width:360px}}tr.hit td.h{{background:var(--rojobg)}}.oculto{{display:none}}
 details{{margin-top:14px;color:var(--suave)}}details ul{{font-size:12px}}li.a{{opacity:.8}}</style></head><body><div class="pag">
-<h1>Universo · todas las piezas</h1><p class="sub">{esc(U.get('que'))} Versión {esc(U.get('version'))} · {esc(U.get('estado'))}. Guardias U1–U6: {len(e)} errores, {len(a)} avisos.</p>
+<h1>Universo · todas las piezas</h1><p class="sub">{esc(U.get('que'))} Versión {esc(U.get('version'))} · {esc(U.get('estado'))}. Guardias U1–U7: {len(e)} errores, {len(a)} avisos.</p>
 <div class="barra"><select data-k="capa"><option value="">capa: todas</option>{opts('capa')}</select><select data-k="nat"><option value="">naturaleza: todas</option>{opts('naturaleza')}</select><select data-k="plat"><option value="">plataforma: todas</option>{opts('plataforma')}</select><select data-k="est"><option value="">estado: todos</option>{opts('estado')}</select><input id="q" type="search" placeholder="buscar…"><span id="cnt"></span></div>
 <div class="tabla"><table><thead><tr><th>#</th><th>Pieza</th><th>Naturaleza</th><th>Forma</th><th>Plataforma</th><th>Proceso</th><th>Responsable</th><th>Cómo cambia</th><th>Control</th><th>Respaldo</th><th>Estado</th><th>Hallazgo</th></tr></thead><tbody id="tb">{filas}</tbody></table></div>
 <details><summary>Lo que dicen las guardias ahora ({len(e) + len(a)})</summary><ul>{guard}</ul></details>

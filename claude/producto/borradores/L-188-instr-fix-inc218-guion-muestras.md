@@ -1,7 +1,7 @@
 # instr — L-188 · INC-218: el caso b de LM-79-proyectos-b busca en el Tablero y en el Plan datos que no dependen del estado del lote que se verifica
 Categoría: **estándar** (solo un guion del STR y su puntero; no cambia código de ningún sitio ni del servicio)
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: pendiente
+Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-31 02:27
 Decisión: ninguna (arreglo de guion por INC-218; decisión del Arquitecto en M-1349 y del Jefe de proyecto en M-1350: lote estándar de un guion dentro de la excepción M-1264)
 Alcance: en str-manager, `tests/e2e/LM-79-proyectos-b.spec.js` (caso b, 5 pares) y `docs/claude/modelo.md` (puntero, dos pares) · `?v=` del STR igual · `schema_version` igual · no toques nada más de str-manager
 Versión: `?v=` del STR igual · `schema_version` igual · los sitios siguen en `?v=s186`
@@ -10,12 +10,12 @@ Impacto: ninguno en lo que se ve: el caso b de LM-79-proyectos-b toma en el Tabl
 Reglas transversales que toca: ninguna
 Mapa: módulos y relaciones que cambia: MOD (solo su guion); ninguna relación nueva
 Casos de uso: CU-MOD-3.1
-Riesgo: bajo: unas 20 líneas de un guion, sin código; solo cambia qué dato busca el caso b en dos pestañas y acorta su observado. Conexiones a MySQL (RT-19): una lectura más del servicio en el caso b (el complemento de diseno), en serie.
+Riesgo: bajo: unas 25 líneas de un guion, sin código; solo cambia qué dato busca el caso b en dos pestañas y acorta su observado. Conexiones a MySQL (RT-19): una lectura más del servicio en el caso b (el complemento de diseno), en serie.
 ¿Datos personales o dinero?: no · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no
 Reversión: `git revert <hash>` (el caso b vuelve a sus muestras de L-186).
 Paridad (punto 24): (1) código: sin cambios (sitios y servicio como en L-186, fabrica-servicio 623eb97); (2) no aplica: no traslada nada; b compara contra el origen leído del servicio; (3) nada se ve distinto
 Depende de: L-186 construido (str-manager 7b3f18d; fabrica-servicio 623eb97) · Precondiciones para verificar: perfil zz-verif-admin; un objetivo en diseno › objetivos; sin datos que crear
-¿Quién más depende de lo que cambia?: nadie: solo el caso b de LM-79-proyectos-b. Las muestras se leen del servicio en la misma corrida y no dependen del estado de ningún lote: el nombre de un objetivo y el título de un lote de un bloque que la página abre siempre (en curso, siguiente, esperando a Carlos). Simulado con los datos de ahora: el guion viejo da 2 rojos en b (Tablero a 1366 y 390) y el nuevo, verde, con un observado de 438 caracteres. Al aceptarse, L-186 se acepta por composición (la reprueba la bloquearía la puerta de independencia, M-1332).
+¿Quién más depende de lo que cambia?: nadie: solo el caso b de LM-79-proyectos-b. Las muestras se leen del servicio en la misma corrida y no dependen del estado de ningún lote: el nombre de un objetivo y el título de un lote de un bloque que la página abre siempre (en curso, siguiente, esperando a Carlos). Simulado con los datos de ahora: el guion viejo da 2 rojos en b (Tablero a 1366 y 390) y el nuevo, verde, con un observado de 438 caracteres. Al aceptarse, L-186 se acepta por composición (la reprueba la bloquearía la puerta de independencia, M-1332). La marca sinSesion del veredicto de L-186 es un falso positivo del arnés (guion.js › esSinSesion busca «Acceso interno» y «Continuar con Google» en el texto de todos los marcos, y la pestaña Ítems muestra INC que citan esas frases): queda fuera de este lote, avisado al Arquitecto.
 
 ## 0. Contexto
 - Dos archivos: 5 pares en `tests/e2e/LM-79-proyectos-b.spec.js` y dos en `docs/claude/modelo.md`. Cada «Busca» aparece una sola vez.

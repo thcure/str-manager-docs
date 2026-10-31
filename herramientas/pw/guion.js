@@ -9,6 +9,7 @@
 //   v0.14.0 (LM-79 fase 5, M-1161): h.leerModelo(ruta, { sesion, origen }) hace un GET al servicio del modelo
 //   (herramienta-fabrica./modelo/api/<ruta>) con el token de Google del perfil (sesion: false = sin token) y, si se pide,
 //   con la cabecera Origin. Devuelve { status, cuerpo, cors }. El token nunca sale del ayudante: no va al guion, al log ni a capturas.
+//   v0.15.2 (LM-89, M-1351): sinSesion solo con el texto de la página principal (los marcos, por URL).
 //   v0.15.0 (M-1176): h.entrarSitio(url) abre una página de proyectos. o herramienta-fabrica. con la sesión de Google del
 //   perfil (pulsa #entrar-google y elige la cuenta si hace falta) y devuelve { ok, estado: 'lista'|'denegada'|'error'|..., observado }.
 //   v0.14.1 (M-1162): el token se saca en terminos.html (sirve también al colaborador, al que el shell manda a portal.html).
@@ -272,7 +273,9 @@ async function correrGuion(spec, opciones = {}) {
           try {
             let tx = ''; try { tx = await page.innerText('body', { timeout: 2000 }); } catch (e3) { }
             const marcos = page.frames().filter((f) => f !== page.mainFrame()).map((f) => f.url());
-            for (const f of page.frames()) { if (f === page.mainFrame()) continue; try { tx += '\n' + await f.innerText('body', { timeout: 1500 }); } catch (e4) { } }
+            // v0.15.2 (LM-89, M-1351): los textos de sesión se buscan SOLO en la página principal; los marcos cuentan por su URL
+            // (login.html). Antes se sumaba el texto de todos los marcos y los títulos de INC que muestra el visor de Seg. Proyecto
+            // («Acceso interno», «Continuar con Google») marcaban falsos «sin sesión» y repetían el caso.
             if (esSinSesion(page.url(), marcos, tx)) rc.sinSesion = true;
           } catch (e5) { }
         }

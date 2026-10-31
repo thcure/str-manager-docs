@@ -305,6 +305,7 @@ t('camara con video', argsCamara('x/qr.y4m').some(a => a.startsWith('--use-file-
   t('LM-51: login.html en un iframe → sin sesión', esSinSesion('https://app.x/portal.html', ['https://app.x/login.html?v=p5c104'], ''));
   t('LM-51: «Tu sesión no está activa» en el portal → sin sesión', esSinSesion('https://app.x/portal.html', [], 'Tu sesión no está activa · Iniciar sesión'));
   t('LM-51: HK normal → no', !esSinSesion('https://app.x/portal.html', ['https://app.x/str-m1-housekeeping.html'], 'Turnos de hoy'));
+  t('LM-89: títulos de INC con «Acceso interno» en un marco del visor no cuentan (solo el texto principal)', !esSinSesion('https://proyectos.x/', ['https://proyectos.x/sitios/comun/visor.html'], 'Lo que te toca · Oficina'));
   const est0 = { caidos: new Set(['colab']), recuperadas: [], perdidas: [] };
   const sp0 = { casos: [{ c: 'a', perfil: 'admin' }, { c: 'b', perfil: 'colab' }, { c: 'c' }] };
   const sal = saltarCaidos(sp0, est0);

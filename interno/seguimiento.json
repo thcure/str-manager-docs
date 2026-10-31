@@ -1,5 +1,5 @@
 {
- "actualizadoEn": "2026-10-31 01:47",
+ "actualizadoEn": "2026-10-31 02:20",
  "cobertura": "REQ activos y recientes, incidentes recientes y decisiones abiertas; desde el 2026-09-28 también el registro de cambios (cambios[], lotes 17 en adelante). El historial anterior (INC-1…76, lotes 1–16) vive en estado-proyecto.md y requerimientos-consolidado.md del proyecto.",
  "modulos": [
   "Calendario",
@@ -2711,6 +2711,35 @@
     "ref": "L-187 (guion, estándar)",
     "motivo": "decisión del Arquitecto M-1327",
     "fecha": "2026-10-30"
+   }
+  },
+  {
+   "id": "INC-218",
+   "tipo": "INC",
+   "modulo": "MOD (guion LM-79-proyectos-b del STR, caso b)",
+   "fecha": "2026-10-31",
+   "titulo": "LM-79-proyectos-b b busca en el Tablero el último lote sin aceptar, que el Tablero solo muestra según su estado: con L-186 construido no aparece y el caso sale rojo aunque la página está bien",
+   "estado": "abierto",
+   "severidad": "bajo",
+   "prioridad": "P3",
+   "casoUso": "CU-MOD-3.1",
+   "contra": "producto",
+   "originador": "juez",
+   "contexto": {
+    "lote": "L-186",
+    "guion": "tests/e2e/LM-79-proyectos-b.spec.js",
+    "caso": "b",
+    "tren": null
+   },
+   "causaRaiz": "construcción",
+   "debioDetectarse": "revisión previa",
+   "origen": "veredicto log\\L-186-veredicto.json (02:15)",
+   "nota": "02:20 Confirmado por Desarrollo: el Tablero lista ciclo, agentes, objetivos, planes y bolsa; un lote solo sale ahí por su estado (al redactar L-186 estaba previsto y salía; al juzgar, construido). El juez además duda de la muestra del Plan («L-186» podía venir de la nota de L-185). Muestras nuevas: Tablero → nombre del primer objetivo (diseno › objetivos); Plan → título del último lote de un bloque abierto. Simulado con los datos de ahora: guion viejo 2 rojos, nuevo verde. El juez propuso causa «definición»; queda «construcción» (el guion eligió una muestra que depende del estado del propio lote). Lección: en un guion, las muestras no pueden depender del estado del lote que se verifica.",
+   "decision": {
+    "tipo": "lote",
+    "ref": "L-188 (propuesto, estándar)",
+    "motivo": "solo el guion; medio/bajo sin revert",
+    "fecha": "2026-10-31"
    }
   }
  ],
@@ -18906,11 +18935,91 @@
    "req": "LM-79",
    "categoria": "crítico",
    "resumen": "LM-79 5.6 c, segunda parte: P01 por secciones (13 entradas, data-rama), las cinco pestañas de Seg. Proyecto como entradas de página (str-seg-proyecto de 73d5aa9~1, datos rearmados como export y tapados, pestaña por siembra), Decisiones con las ADR, ?v=s186; guion LM-79-proyectos-b",
-   "estado": "registrado",
-   "observacion": "Revisor 24/24 (01:38); cruce delegado 01:42 (M-1344); ok JP M-1345. Encolado 01:42. Pieza nueva: tests/e2e/LM-79-proyectos-b.spec.js, tests/sitios-seg.test.js, sitios/proyectos/str/str-seg-proyecto.html. · Construido 01:45: STR 7b3f18d (84/84), fabrica-servicio 623eb97 (16/16, copia = 73d5aa9~1).",
+   "estado": "no aceptado",
+   "observacion": "Revisor 24/24 (01:38); cruce delegado 01:42 (M-1344); ok JP M-1345. Encolado 01:42. Pieza nueva: tests/e2e/LM-79-proyectos-b.spec.js, tests/sitios-seg.test.js, sitios/proyectos/str/str-seg-proyecto.html. · Construido 01:45: STR 7b3f18d (84/84), fabrica-servicio 623eb97 (16/16, copia = 73d5aa9~1). · Juez 02:15: NO ACEPTADO solo por b (INC-218, muestra del Tablero en el guion).",
    "version": "p5c113",
    "hash": "7b3f18d",
-   "aceptacion": null
+   "aceptacion": {
+    "lote": "L-186",
+    "hash": "7b3f18d",
+    "fecha": "2026-10-31",
+    "horaBogota": "02:15",
+    "resultado": "no aceptado",
+    "modoVerificacion": "juez local LM-19: N1 y N2 de la cola, N3 sobre capturas",
+    "criterios": [
+     {
+      "c": "a0",
+      "nivel": "N1",
+      "ok": null,
+      "observado": "Verificación cruzada del Arquitecto, fuera del juez; sin evidencia en este lote."
+     },
+     {
+      "c": "h",
+      "nivel": "N1",
+      "ok": true,
+      "observado": "node tests/run.js: 84/84 archivos OK"
+     },
+     {
+      "c": "a",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar a proyectos. como admin → admin: sitio en «lista» | si: P01: resumen proyectos/P01 · seg-tablero proyectos/P01 · alcance proyectos/P01/alcance · seg-diseno proyectos/P01/alcance · decisiones proyectos/P01/decisiones · construccion proyectos/P01/construccion · seg-plan proyectos/P01/construccion · seg-cambios proyectos/P01/construccion · seg-items proyectos/P01/construccion · arquitectura proyectos/P01/arquitectura · lineabase proyectos/P01/arquitectura · pruebas proyectos/P01/pruebas · buzon proyectos/P01 | si: entradas de página: seg-tablero, seg-diseno, seg-plan, seg-cambios, seg-items"
+     },
+     {
+      "c": "b",
+      "nivel": "N2",
+      "ok": false,
+      "observado": "si: muestras del servicio: seg-plan L-186 · seg-diseno REQ-INV2-7-1 · seg-cambios L-186 · seg-items INC-217 · seg-tablero L-186 | si: entrar a proyectos. como admin → admin: sitio en «lista» | NO: 1366 · seg-tablero: visores 1 · alto 848 de 848 · pestaña tablero · «L-186» NO está | si: 1366 · seg-diseno: visores 1 · alto 848 de 848 · pestaña diseno · «REQ-INV2-7-1» está | si: 1366 · seg-plan: visores 1 · alto 848 de 848 · pestaña plan · «L-186» está | si: 1366 · seg-cambios: visores 1 · alto 848 de 848 · pestaña cambios · «L-186» está | si: 1366 · seg-items: visores 1 · alto 848 de 848 · pestaña items · «INC-217» está | NO: 390 · seg-tablero: visores 1 · alto 796 de 796 · pestaña tablero · «L-186» NO está | si: 390 · seg-diseno: visores 1 · alto 796 de 796 · pestaña diseno · «REQ-INV2-7-1» está | si: 390 · seg-plan: visores 1 · alto 796 de 796 · pestaña plan · «L-186» está | si: 390 · se"
+     },
+     {
+      "c": "c",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: en el servicio: 15 ADR · 49 DA | si: entrar a proyectos. como admin → admin: sitio en «lista» | si: ADR en Decisiones: 15 de 15 · sin título: ninguna · la primera «ADR-001 — MySQL como fuente de verdad de datos de negocio» | si: DA en Decisiones: 50"
+     },
+     {
+      "c": "d",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar a proyectos. como admin → admin: sitio en «lista» | si: seg-tablero · sandbox «allow-scripts allow-popups» · origen null · afuera aislado | si: seg-diseno · sandbox «allow-scripts allow-popups» · origen null · afuera aislado | si: seg-plan · sandbox «allow-scripts allow-popups» · origen null · afuera aislado | si: seg-cambios · sandbox «allow-scripts allow-popups» · origen null · afuera aislado | si: seg-items · sandbox «allow-scripts allow-popups» · origen null · afuera aislado"
+     },
+     {
+      "c": "e",
+      "nivel": "N2",
+      "ok": true,
+      "observado": "si: entrar a proyectos. como admin → admin: sitio en «lista» | si: recursos propios: 10 · sin ?v=s186: ninguno"
+     },
+     {
+      "c": "f",
+      "nivel": "N3",
+      "ok": true,
+      "observado": "12 capturas: el STR con «Lo que viene» y las cinco entradas de Seg. Proyecto, a 1366 y 390. Tema: el guion anota «tema del STR dark · proyectos. entra en dark» y todas las capturas salen oscuras. La página ocupa todo el contenido como el módulo del STR, a la derecha de la barra en 1366 y a todo el ancho en 390. Cada entrada abre con su pestaña marcada y su entrada resaltada en la barra. Las diferencias a la vista son las de § P."
+     }
+    ],
+    "criteriosPendientes": [
+     {
+      "c": "a0",
+      "motivo": "La cierra el Arquitecto por verificación cruzada (fuera del juez), como dice la instrucción."
+     }
+    ],
+    "dispositivo": [],
+    "incs": [
+     {
+      "titulo": "LM-79-proyectos-b caso b: la entrada Tablero no contiene la muestra «L-186» en 1366 ni en 390",
+      "nivel": "medio",
+      "prioridad": "P3",
+      "porquePrioridad": "Según la evidencia solo falla la comprobación del guion: el Tablero abre con su pestaña, altura y datos, sin efecto visible para huéspedes, colaboradores ni operadores.",
+      "causa": "Causa probable, no demostrada: el guion exige en el Tablero el lote más reciente sin aceptar, leído del plan, pero el Tablero capturado no lista lotes del plan (muestra ciclo, agentes, objetivos, planes y bolsa). Falta confirmar si la página debe mostrar ese lote; este juez no pudo leer su código ni los datos del servicio.",
+      "observado": "«L-186» NO está en el panel del Tablero en 1366 ni en 390, con visores 1, alto igual al contenido y pestaña tablero. El texto visible de f-proyectos-seg-tablero no nombra L-186. El observado del caso viene cortado en «390 · se», así que no se ven los resultados de seg-cambios y seg-items a 390.",
+      "causaRaiz": "definición",
+      "debioDetectarse": "revisión previa",
+      "porque": "Duda entre «definición» (la instrucción no cubrió qué muestra el Tablero con el dato real) y «proceso» (guion mal escrito); se elige la más temprana del ciclo, según la regla. Es propuesta: si Desarrollo halla que la página debía mostrar el lote, pasa a otra causa."
+     }
+    ],
+    "regresionAjena": [],
+    "datosDePrueba": "sin limpiar() en el guion",
+    "notas": "pruebas.json: resultado «rojo», causa «fallan: b». Fase completa (lote crítico); ningún caso de regresión en rojo. La regla de regresión ajena no aplica: b es criterio propio del lote. Sin reversion: el INC propuesto es medio. Sin campo herramienta: el rojo sale de una comprobación del guion del lote, no del arnés. Caso b trae sinSesion: true y repetidoPorSesion: true, pero no hay evidencia de falta de sesión: el caso entra en «lista» y b-error.png y su .txt muestran proyectos. con Ítems abierto, sin pantalla de login; conviene que Desarrollo revise esa marca. Sesión de admin recuperada a las 01:48:20; ningún perfil caído. Sin cuarentena ni inestables. Deuda de cobertura: regresionSeleccion.ruta.huecos trae REL-29 (cola-arquitecto → MOD, POST /modelo/api/cargar con X-Modelo-Token). Acción sin INC: pruebas.json › semilla trae ok false con estado «no concluyente» (zonas no concluyente y varios grupos en aviso); la puerta de entrada la dio por buena y ningún caso del lote falla por ella, así que queda solo anotada. Observación sobre b, sin cambiar su resultado: en el texto de la captura del Plan, L-186 aparece una sola vez y parece venir de una nota de L-185 («L-184b → L-186»), no de una fila propia; el «está» de seg-plan podría ser una coincidencia. Observación sobre f, sin cambiar su resultado: a 390 los selectores «REQ: todos» (Cambios) y «Módulo: todos» (Ítems) llegan hasta el borde derecho o lo rebasan; no se puede comparar con el STR porque su captura es de otro módulo. Resultado esperado por la instrucción: «parcial» por a0; sale «no aceptado» por b."
+   }
   }
  ],
  "esquema": {
@@ -22332,9 +22441,9 @@
    "categoriaPrevista": "crítico",
    "riesgo": "R-1",
    "resumen": "LM-79 5.6 c, segunda parte (ex L-184b): P01 con sus siete secciones (data-rama), las cinco pestañas de Seg. Proyecto como entradas en el visor (str-seg-proyecto de 73d5aa9~1, datos rearmados de las tablas, tapar), Decisiones con DA y ADR, ?v=s186",
-   "estado": "construido",
-   "esperaA": "juez",
-   "desde": "2026-10-31 01:47",
+   "estado": "no aceptado",
+   "esperaA": "Arquitecto",
+   "desde": "2026-10-31 02:20",
    "estados": [
     {
      "estado": "previsto",
@@ -22351,9 +22460,13 @@
     {
      "estado": "construido",
      "desde": "2026-10-31 01:45"
+    },
+    {
+     "estado": "no aceptado",
+     "desde": "2026-10-31 02:15"
     }
    ],
-   "nota": "M-1312: parte de L-184 (B, tablas, ADR). M-1341: sigue sin brief nuevo. 01:05 Lectura corta al Arquitecto (M-1343); rearmar() probado 4/4 sobre el paquete de hoy. · 01:37 M-1343 respondido: ok a siembra, Ítems en Construcción, barra de 13, mensajes completo (cinco copias, dicho en el Riesgo). Borrador en claude/producto/borradores/L-186-instr-lm79-f5-6c2-p01-seg-proyecto.md: script «Todo igual: 13 archivos.», K1 15/15, run.js 14/16 aquí (los dos de PHP de siempre), STR 84/84, linea-base C2 coincide y V3 8; rearmar() igual a los cinco archivos; LM-79-proyectos-b verde con el código nuevo y rojo con el viejo; los demás guiones de proyectos. con los mismos rojos de simulación que antes. · 01:39 Revisión previa 24/24 (01:38; mejora aplicada: A2 comprueba que 73d5aa9~1 trae la misma página antes de escribir nada). Pedidos cruce (M-1344) y ok del JP (M-1345). · 01:40 ok JP M-1345 (línea 4). 01:42 cruce delegado (respuesta a M-1344) en la línea 2; además el Arquitecto anota como deuda suya paginaModulo y guiones-e2e con PRJ retirado. 01:42 Encolado (cola vacía); releído en LENOVO igual byte a byte. · 01:45 Construido: STR 7b3f18d (01:42:22–01:45, código 0, 84/84); fabrica-servicio 623eb97 («Todo igual: 13 archivos.», copia igual a 73d5aa9~1 c2f54d5, 16/16, ls-remote = HEAD). La CLI señaló que status --short lista 11 M y no 10: error de conteo mío en la instrucción (los once están en el Alcance). Pruebas y juez en curso; a0 lo cierra el Arquitecto. · 01:50 a0 cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1348): fabrica-servicio main = 623eb97, proyectos. con ?v=s186, P01 con las trece entradas, Tablero abre Seg. Proyecto a toda la altura con datos reales."
+   "nota": "M-1312: parte de L-184 (B, tablas, ADR). M-1341: sigue sin brief nuevo. 01:05 Lectura corta al Arquitecto (M-1343); rearmar() probado 4/4 sobre el paquete de hoy. · 01:37 M-1343 respondido: ok a siembra, Ítems en Construcción, barra de 13, mensajes completo (cinco copias, dicho en el Riesgo). Borrador en claude/producto/borradores/L-186-instr-lm79-f5-6c2-p01-seg-proyecto.md: script «Todo igual: 13 archivos.», K1 15/15, run.js 14/16 aquí (los dos de PHP de siempre), STR 84/84, linea-base C2 coincide y V3 8; rearmar() igual a los cinco archivos; LM-79-proyectos-b verde con el código nuevo y rojo con el viejo; los demás guiones de proyectos. con los mismos rojos de simulación que antes. · 01:39 Revisión previa 24/24 (01:38; mejora aplicada: A2 comprueba que 73d5aa9~1 trae la misma página antes de escribir nada). Pedidos cruce (M-1344) y ok del JP (M-1345). · 01:40 ok JP M-1345 (línea 4). 01:42 cruce delegado (respuesta a M-1344) en la línea 2; además el Arquitecto anota como deuda suya paginaModulo y guiones-e2e con PRJ retirado. 01:42 Encolado (cola vacía); releído en LENOVO igual byte a byte. · 01:45 Construido: STR 7b3f18d (01:42:22–01:45, código 0, 84/84); fabrica-servicio 623eb97 («Todo igual: 13 archivos.», copia igual a 73d5aa9~1 c2f54d5, 16/16, ls-remote = HEAD). La CLI señaló que status --short lista 11 M y no 10: error de conteo mío en la instrucción (los once están en el Alcance). Pruebas y juez en curso; a0 lo cierra el Arquitecto. · 01:50 a0 cerrado por el Arquitecto por evidencia cruzada (respuesta a M-1348): fabrica-servicio main = 623eb97, proyectos. con ?v=s186, P01 con las trece entradas, Tablero abre Seg. Proyecto a toda la altura con datos reales. · 02:15 Juez: NO ACEPTADO solo por b (INC-218): la entrada Tablero no contenía la muestra «L-186» (el guion tomaba el último lote sin aceptar, que el Tablero solo lista según su estado: al redactar estaba previsto y salía; a la hora del juez estaba construido). a, c, d, e, f y h verdes; regresión completa verde; f con el tema fijado antes, todo oscuro. La página funciona (el Arquitecto lo vio en vivo). Reproducido en la simulación con los datos de ahora: el guion viejo falla igual, el nuevo pasa. Propuesta L-188 (guion) en M-1349."
   }
  ],
  "riesgos": [

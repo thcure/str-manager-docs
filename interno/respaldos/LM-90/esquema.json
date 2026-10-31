@@ -1,0 +1,1594 @@
+{
+ "version": "0.12",
+ "fecha": "2026-10-30",
+ "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
+ "patrones": {
+  "REQ": "^REQ-[A-Z0-9]{1,4}-\\d+(-\\d+)?$",
+  "REQ_legado": "^REQ-[A-Z0-9][A-Za-z0-9]{0,6}([.-][A-Za-z0-9]{1,4})*$",
+  "INC": "^INC-\\d+$",
+  "DA": "^DA-\\d+$",
+  "DT": "^DT-\\d+$",
+  "P": "^P-\\d+$",
+  "PT": "^PT-(M?\\d+)$",
+  "OB": "^OB-\\d+$",
+  "L": "^L-\\d+$",
+  "LM": "^LM-\\d+[a-d]?$",
+  "C": "^C-\\d+$",
+  "M": "^M-\\d+$",
+  "R": "^R-\\d+$",
+  "LEC": "^LEC-\\d+$",
+  "V": "^V-\\d+-\\d+$",
+  "S": "^S-(arq|cd|dis|cda)-\\d+$",
+  "G": "^G-\\d+$",
+  "ENC": "^ENC-[a-z-]+-v\\d+$",
+  "PROC": "^PROC-[a-z-]+-v\\d+$"
+ },
+ "estados": {
+  "proyecto": [
+   "activo",
+   "pausado",
+   "cerrado"
+  ],
+  "rol": [
+   "activo",
+   "relevo",
+   "retirado"
+  ],
+  "encargo": [
+   "vigente",
+   "superado"
+  ],
+  "objetivo": [
+   "propuesto",
+   "aprobado",
+   "logrado",
+   "descartado"
+  ],
+  "planTrabajo": [
+   "en definición",
+   "activo",
+   "pausado",
+   "cerrado"
+  ],
+  "requisito": [
+   "borrador",
+   "definido",
+   "aprobado",
+   "entregado",
+   "construido",
+   "aceptado",
+   "cerrado",
+   "pospuesto",
+   "descartado"
+  ],
+  "decision": [
+   "abierta",
+   "decidida",
+   "pospuesta"
+  ],
+  "pedido": [
+   "nuevo",
+   "convertido",
+   "descartado",
+   "bloqueado"
+  ],
+  "lote": [
+   "redactado",
+   "encolado",
+   "construyendo",
+   "construido",
+   "fallido",
+   "verificando",
+   "desplegado",
+   "parcial",
+   "aceptado",
+   "no aceptado",
+   "revertido",
+   "superado",
+   "previsto",
+   "espera DA",
+   "pospuesto"
+  ],
+  "veredicto": [
+   "aceptado",
+   "parcial",
+   "no aceptado",
+   "bloqueado"
+  ],
+  "cambio": [
+   "registrado",
+   "instalado",
+   "probado",
+   "publicado",
+   "cruzado",
+   "aceptado",
+   "cerrado",
+   "no aceptado",
+   "superado",
+   "vigente",
+   "parcial"
+  ],
+  "incidente": [
+   "abierto",
+   "en fix",
+   "cerrado",
+   "pospuesto"
+  ],
+  "deuda": [
+   "abierta",
+   "programada",
+   "pagada",
+   "descartada"
+  ],
+  "riesgo": [
+   "propuesto",
+   "abierto",
+   "mitigado",
+   "aceptado",
+   "cerrado"
+  ],
+  "mensaje": [
+   "pendiente",
+   "en curso",
+   "hecho",
+   "vencido",
+   "superado"
+  ],
+  "leccion": [
+   "abierta",
+   "aplicada",
+   "descartada"
+  ]
+ },
+ "roles": [
+  "Chat Diseño",
+  "Chat Jefe de proyecto",
+  "Chat Desarrollo",
+  "Chat Arquitecto",
+  "Carlos",
+  "Agente verificador",
+  "Agente CLI"
+ ],
+ "rolesAlias": {
+  "chat de diseño": "Chat Diseño",
+  "diseño": "Chat Diseño",
+  "chat de desarrollo": "Chat Desarrollo",
+  "desarrollo": "Chat Desarrollo",
+  "arquitecto": "Chat Arquitecto",
+  "verificador": "Agente verificador",
+  "cli": "Agente CLI",
+  "chat de desarrollo anterior": "Chat Desarrollo",
+  "chat de desarrollo nuevo": "Chat Desarrollo",
+  "desarrollo anterior": "Chat Desarrollo",
+  "desarrollo nuevo": "Chat Desarrollo",
+  "jefe de proyecto": "Chat Jefe de proyecto",
+  "chat jefe de proyecto": "Chat Jefe de proyecto",
+  "jefe proyecto": "Chat Jefe de proyecto"
+ },
+ "limites": {
+  "encargoCaracteres": 3000,
+  "mensajePendienteMin": 60,
+  "lotesEnCurso": 1
+ },
+ "mapaMigracion": {
+  "interno/diseno.json": {
+   "reqs[]": "requisito",
+   "das[]": "decision",
+   "pedidos[]": "pedido",
+   "planes[]": "planTrabajo",
+   "objetivos[]": "objetivo"
+  },
+  "interno/seguimiento.json": {
+   "plan[]": "lote",
+   "cambios[]": "cambio",
+   "items[] tipo INC": "incidente",
+   "items[] tipo DT": "deuda",
+   "items[] tipo REQ": "requisito (duplicado; se archiva tras B3)",
+   "items[] tipo DA": "decision (duplicado; se archiva)",
+   "riesgos[]": "riesgo"
+  },
+  "interno/mensajes.json": {
+   "mensajes[]": "mensaje"
+  },
+  "interno/instrucciones.json": {
+   "items[] rol-*": "encargo",
+   "items[] reglas-comunes": "encargo comun"
+  },
+  "interno/situaciones/*.json": {
+   "situaciones[]": "situacion"
+  },
+  "interno/proyecto.json": {
+   "planes[]": "planTrabajo"
+  }
+ },
+ "decisiones": {
+  "fecha": "2026-10-11",
+  "porCarlos": {
+   "1-idLote": "B: L-n uniforme, también en la cola (B3)",
+   "2-reqLegado": "A: renombrar en una pasada (B3)",
+   "3-estadoReq": "A: derivado del lote por el sistema",
+   "4-cambio": "A: solo modelo + aprobación/costo",
+   "5-rolDueno": "A: Carlos es rol-dueno y se mide"
+  }
+ },
+ "incidenteOrigen": {
+  "desde": "2026-10-18",
+  "causaRaiz": [
+   "definición",
+   "construcción",
+   "integración",
+   "arquitectura",
+   "entorno",
+   "proceso"
+  ],
+  "debioDetectarse": [
+   "REQ",
+   "revisión previa",
+   "tests",
+   "verificación",
+   "solo en uso",
+   "guion"
+  ],
+  "nota": "LM-56 (MJ-15 fase C): el juez los propone en cada INC del veredicto; Desarrollo los confirma al registrarlo en seguimiento.json › incs[]; el campo «origen» de siempre sigue siendo de dónde salió el hallazgo."
+ },
+ "incidente": {
+  "desde": "2026-10-21",
+  "lm": "LM-62 (PRUEBAS-v2, V5 y V6)",
+  "severidad": [
+   "bajo",
+   "medio",
+   "alto",
+   "crítico"
+  ],
+  "severidadEquivalencias": {
+   "baja": "bajo",
+   "menor": "bajo",
+   "media": "medio",
+   "alta": "alto",
+   "critico": "crítico",
+   "crítica": "crítico"
+  },
+  "contra": [
+   "producto",
+   "guion",
+   "REQ",
+   "entorno",
+   "herramienta"
+  ],
+  "originador": [
+   "juez",
+   "tren",
+   "Diseño",
+   "Desarrollo",
+   "Arquitecto",
+   "Carlos",
+   "uso real"
+  ],
+  "camposMinimos": [
+   "id",
+   "titulo",
+   "modulo",
+   "fecha",
+   "estado",
+   "severidad",
+   "casoUso",
+   "contra",
+   "originador",
+   "causaRaiz",
+   "debioDetectarse"
+  ],
+  "contexto": "{lote, guion, caso, tren} cuando lo halló una prueba; evidencia: ruta en log\\ (captura, veredicto o L-n-pruebas.json)",
+  "casoUso": "CU-X-n.m de la línea base, o «sin caso de uso» (entra a diseno.json › bolsa[] como alcance incompleto, C3); lo pone Desarrollo con linea-base.py --cu, Diseño lo revisa al clasificar",
+  "reglas": [
+   "V5: INC desde «desde» sin causaRaiz o debioDetectarse = error (antes aviso R9)",
+   "V6: severidad fuera de la lista = error desde «desde», aviso antes (Desarrollo normaliza los anteriores con severidadEquivalencias, sin plazo)",
+   "V6: campos mínimos ausentes = error desde «desde»",
+   "contra = REQ → el INC pasa a Diseño y cuenta como volatilidad Q7 (M-947)",
+   "contra = producto nunca va a cuarentena: INC normal y el lote se rechaza (M-940)"
+  ],
+  "cierre": {
+   "desde": "2026-10-21",
+   "lm": "LM-63 (K9; ISO/IEC 12207 7.2.8)",
+   "que": "un INC pasa a «cerrado» solo con cierre: (a) {lote, prueba} si contra es producto, guion o REQ; (b) {prueba} si contra es entorno o herramienta; (c) {decision, motivo} cuando lo cierra producto (DA-n o M-n de Diseño). Si tenía caso en cuarentena, además 20 corridas en verde. Los INC cerrados antes de «desde» no se rehacen.",
+   "prueba": "caso del guion o N1 con la letra, «humo», o «uso real: <quién lo vio>»"
+  },
+  "prioridad": {
+   "desde": "2026-10-22",
+   "lm": "LM-65 (INCIDENTES-v1, I1; ISO/IEC 20000-1 §8.6.1, DSS02.02)",
+   "valores": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+   ],
+   "que": "prioridad = severidad × quién lo sufre (huésped o tercero > colaborador en turno > operador o admin > fábrica). Piso P2 si el INC toca un área crítica de K4 (categorias.critico.lista) aunque no lo sufra nadie todavía; sobreventa o pérdida de datos en curso = P1. La propone el juez, la registra Desarrollo, la confirma Diseño cuando hay huésped, tercero o colaborador.",
+   "plazoDecision": {
+    "P1": "30 min desde el aviso (reloj de K6)",
+    "P2": "1 día",
+    "P3": "una tanda (7 días)",
+    "P4": "un mes (30 días)"
+   },
+   "plazoDecisionMin": {
+    "P1": 30,
+    "P2": 1440,
+    "P3": 10080,
+    "P4": 43200
+   },
+   "decision": {
+    "que": "el plazo es de decisión, no de construcción: decision {tipo, ref, motivo, fecha}",
+    "tipos": [
+     "lote",
+     "bolsa",
+     "pospuesto",
+     "solución temporal",
+     "espera la pausa de producto"
+    ],
+    "regla": "«espera la pausa de producto» vale como decisión solo citando la orden de Carlos en ref (M-n o DA-n); «pospuesto» exige motivo o fecha; el Jefe de proyecto ordena dentro de la prioridad, no la define"
+   },
+   "equivalencias": "herramientas/modelo/incidentes.py › equivalencia (tabla del plan §8 paso 6; prioridad.py la imprime): P0 · P1 · «P1 por destrabe» → P1 si crítico o alto, si no P2 · P2 → P2 · P3 → P3 · «con fecha …» → P3 con decision pospuesto · sin valor → crítico P1, alto o área crítica P2, medio P3, bajo P4; pisos: área crítica ≥ P2, crítico ≥ P2 (P1 si nombra a quien lo sufre), sobreventa o pérdida de datos P1; lo que nombra huésped, portal, canal o colaborador lo confirma Diseño",
+   "reglas": [
+    "I1: INC desde «desde» sin prioridad de la lista = error; antes, aviso agregado (pasada de Desarrollo con la tabla)",
+    "I1: INC abierto con prioridad y sin decision válida pasado su plazo = aviso (por prioridad); P1–P2 además los recuerda el despertador del Jefe de proyecto",
+    "I2: originador «uso real» o «Carlos» sin contexto {pantalla, hora, quienLoVio} = error desde «desde» (plantilla herramientas/plantillas/aviso-produccion.md)",
+    "I4: INC abierto P1 o P2 sin solucionTemporal («cómo opera mientras tanto» o «ninguna») = error desde «desde», aviso antes"
+   ]
+  },
+  "revision": {
+   "lm": "LM-65 (I5; Google SRE, Postmortem Culture)",
+   "desde": "2026-10-22",
+   "plazoHoras": 48,
+   "disparadores": [
+    "P1",
+    "pérdida o alteración de datos reales",
+    "revert o restauración",
+    "decisión fuera de plazo",
+    "lo vio Carlos (uso real) y debió detectarlo una prueba"
+   ],
+   "campos": {
+    "queVimos": "síntoma tal como se vio, sin culpables",
+    "impacto": "quién lo sufrió, cuánto tiempo, qué datos",
+    "lineaDeTiempo": "[{hora, que}] desde la primera señal hasta la decisión",
+    "causas": "causa raíz del proceso y técnica (no «error humano»)",
+    "queCambia": "[{tipo: punto | guardia | REQ | LM | riesgo, ref, quien}]",
+    "revisadaPor": "los otros dos chats (M-n)"
+   },
+   "autorPorCausa": {
+    "construcción · tests · guion": "Desarrollo",
+    "entorno · herramienta": "Arquitecto",
+    "REQ · producto": "Diseño",
+    "mezclada": "los tres: Diseño impacto y REQ/bolsa, Desarrollo lo técnico, Arquitecto la causa de proceso"
+   },
+   "plantilla": "herramientas/plantillas/revision-incidente.md",
+   "regla": "INC con disparador sin revision completa y revisada a las 48 h = aviso; sin revisar por los otros dos no cuenta"
+  },
+  "destino": {
+   "lm": "LM-65 (I7; V5 gana guardia)",
+   "desde": "2026-10-22",
+   "tipos": [
+    "punto",
+    "guardia",
+    "riesgo"
+   ],
+   "que": "todo INC con debioDetectarse «revisión previa» o «tests» lleva al cerrarse destino {tipo, ref, quien}: punto del revisor previo, guardia (hook, --lote, validar, pw) o riesgo con ref R-n del registro (LM-71 Rg2; antes: «riesgo aceptado con quién lo aceptó»); sin eso no se cierra (error desde «desde»)"
+  },
+  "solucionTemporal": "texto: «cómo opera mientras tanto» o «ninguna»; obligatorio en P1–P2 abiertos (I4); si hay PRB, apunta a él (prb: PRB-n)"
+ },
+ "categorias": {
+  "desde": "2026-10-21",
+  "lm": "LM-63 (CONSTRUCCIÓN-v1, K4; redacción de crítico: Diseño M-959)",
+  "estandar": {
+   "que": "preautorizado (ITIL cambio estándar): sin ok de Diseño, sin cruce, fase mínima de V7",
+   "cuando": [
+    "solo guiones (tests/e2e, herramientas/pw)",
+    "docs/claude y documentación",
+    "textos y CSS sin lógica",
+    "herramientas de la fábrica que no tocan la cola ni los hooks",
+    "solo ?v="
+   ],
+   "alcanceNoPuede": [
+    "api/",
+    "database.php",
+    "secrets",
+    "modelo/",
+    "migrate",
+    "schema_version",
+    ".claude/",
+    "ejecutar-cola"
+   ]
+  },
+  "normal": {
+   "que": "evaluado cada vez: revisor previo y, si el Jefe de proyecto lo pide, su lectura; sin cruce con Carlos"
+  },
+  "critico": {
+   "que": "DA-n y cruce previo con Carlos; ok de Diseño; fase completa. Ante la duda, se pregunta a Diseño.",
+   "lista": [
+    "datos reales fuera de zz-verif-: escribir, borrar o dejar de guardar, también de forma automática (corte mensual, respaldo, sincronización)",
+    "quién ve y quién cambia: permisos y roles, exposición de datos y no solo escritura (DA-59, INC-158)",
+    "dinero",
+    "lo que sale a canales, huéspedes o terceros: exportación iCal, portal, enlace de registro, mensajes, portería (DA-51)",
+    "obligaciones legales: TRA, SIRE, retención Ley 1581",
+    "migración de base de datos (schema_version)",
+    "scripts que corren solos (cron, tareas programadas, cola)",
+    "secretos"
+   ],
+   "senalesAlcance": [
+    "api/",
+    "database.php",
+    "secrets",
+    "migrate",
+    "schema_version",
+    "sync-ical",
+    "ical",
+    "portal",
+    "registro",
+    "export",
+    "respaldo",
+    "corte",
+    "cron",
+    "tarea programada",
+    "permiso",
+    "rol",
+    "tra",
+    "sire",
+    "pago",
+    "precio",
+    "cobro"
+   ]
+  },
+  "meta": "crítico ≤ 20 % de los lotes: meta a medir un mes, no puerta (M-958)",
+  "emergencia": {
+   "que": "BAI06.02 (M-958): solo un INC alto o crítico en producción; la línea del Jefe de proyecto en el buzón nombra el INC y por qué no espera; Desarrollo corre su revisión previa normal; la revisión del Jefe de proyecto, la DA y el cruce con Carlos van después, en 24 h; plan[].emergencia = {inc, mensaje, desde}",
+   "plazoHoras": 24
+  },
+  "desdeLote": "L-160"
+ },
+ "problema": {
+  "lm": "LM-65 (I3; ISO/IEC 20000-1 §8.6.3, DSS03)",
+  "desde": "2026-10-22",
+  "archivo": "interno/seguimiento.json › problemas[] (escritor: Desarrollo)",
+  "prefijo": "PRB",
+  "campos": [
+   "id",
+   "titulo",
+   "modulo",
+   "causa",
+   "incs",
+   "estado"
+  ],
+  "forma": "{id: PRB-n, titulo, modulo, causa (causaRaiz compartida), incs: [INC-n…], errorConocido {sintoma, solucionTemporal}, accion {tipo: REQ | DT | LM | guardia, id, aceptada: fecha}, estado, fecha, nota}",
+  "estados": [
+   "abierto",
+   "con solución temporal",
+   "resuelto",
+   "cerrado"
+  ],
+  "candidato": {
+   "minInc": 3,
+   "dias": 30,
+   "que": "≥3 INC con el mismo módulo y causaRaiz en 30 días sin PRB que los junte, o la misma causa vista en 2 por el juez o Desarrollo (aviso de validar.py y prioridad.py)"
+  },
+  "cierre": {
+   "diasLimpios": 30,
+   "que": "solo con accion.aceptada y 30 días sin INC nuevo de esa causa y módulo (§8.6.3 d); error si no"
+  }
+ },
+ "deuda": {
+  "lm": "LM-65 (I6)",
+  "desde": "2026-10-22",
+  "campos": [
+   "severidad",
+   "dueno",
+   "plazo | aceptadaPor"
+  ],
+  "aceptadaPor": "DA-n (con cruce de Carlos) si la DT toca un área crítica de K4 o cambia algo que Carlos decidió; M-n de Diseño con motivo si es menor (texto, estilo, orden en pantalla)",
+  "regla": "DT nueva incompleta = error; las anteriores, aviso agregado (pasada de Desarrollo sin tocar texto); DT con plazo vencido y abierta = aviso; revisión mensual en la ficha"
+ },
+ "flujo": {
+  "lm": "LM-66 (FLUJO-v1; MJ-17 paso 5 (proceso 2, Evaluación y control del proyecto); COBIT BAI11.04/.07/.09; Kanban, ley de Little)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-flujo-trabajo.md (v2, ok de Carlos 21-oct 10:59)",
+  "archivo": "interno/proyecto.json (escritor: Jefe de proyecto)",
+  "modo": "avisos el primer mes (sin errores): se calibra con datos",
+  "trabajo": {
+   "que": "proyecto.json › trabajo[]: lista única y ordenada de lo que falta construir; contiene a prioridades[] como clase (e)",
+   "fila": "{ref: REQ-X · INC-n · DT-n · LM-n, clase: a..g, origen, desde, estado, espera?, motivoSalto?}",
+   "clases": {
+    "a": "orden de Carlos (M-n/DA-n)",
+    "b": "expedito: INC P1 o emergencia K8",
+    "c": "destrabe: libera un lote construido o una regresión (regla 4)",
+    "d": "con fecha: plazo externo",
+    "e": "producto: REQ listos por nivel de Diseño (LM-48) y dependencias; el JP ordena dentro",
+    "f": "estándar: INC P2–P3 y DT con plazo",
+    "g": "intangible: P4, fábrica, documentación, en los huecos"
+   },
+   "aMitadDeTanda": [
+    "a",
+    "b",
+    "c"
+   ],
+   "libre": "primera fila que no espera DA, cruce ni ok de Diseño",
+   "motivosSalto": [
+    "toca el mismo archivo que el lote en cola o recién construido",
+    "el anterior está bloqueado por una dependencia de código"
+   ],
+   "lmEntran": "solo los LM que necesitan la cola",
+   "origen": "obligatorio (F7): «Carlos (M-n)», «Diseño (prioridades[])», «I1 P1–P2», «DT plazo», mañana «capa de proyectos (ref)»"
+  },
+  "limites": {
+   "cola": 1,
+   "redaccion": 2,
+   "listosSinLote": 5,
+   "enLoteSinAceptar": 3,
+   "ptProducto": 1,
+   "ptFabrica": 1,
+   "ptDefinicion": 2,
+   "notas": [
+    "redacción cuenta solo lo que Desarrollo puede mover: espera DA/cruce/ok aparte con edad y dueño; la revisión previa de instrucciones ajenas no cuenta",
+    "ptFabrica 2 mientras corran PT-9 y PT-10 (excepción en proyecto.json › limites.excepciones con motivo); vuelve a 1 al cerrar uno",
+    "«entregado» (Diseño) = «en un lote»; definido sin lote = «listo»",
+    "pasar un límite: motivo escrito en proyecto.json › limites.excepciones, por una tanda"
+   ]
+  },
+  "tandas": {
+   "que": "por evento: se abre cuando Carlos levanta una pausa o da una orden, o cuando la anterior quedó aceptada y la cola vacía",
+   "fila": "{id: T-n, desde, hasta, abiertaPor: M-n, entra[], limites?, salio[]: [{ref, resultado: aceptado · no aceptado · devuelto}], nota}",
+   "reglas": [
+    "una sola tanda abierta",
+    "a mitad solo clases a, b, c",
+    "al cerrar: salio[], lecciones y la lista reordenada",
+    "la ficha semanal del Arquitecto (V8) sigue semanal y cruza las tandas de la semana"
+   ],
+   "ficha": "LM-72 (F9): toda tanda cerrada (hasta) lleva ficha {fecha, rojas, archivo} con lo que imprimió ficha-semanal.py al cerrarla («ficha para tandas[]: …»); sin eso validar.py avisa (error desde 2026-12-01)"
+  },
+  "edad": {
+   "que": "plan[].estados: [{estado, desde}] lista que solo crece (Desarrollo la llena en el mismo cambio); el desde actual es el último",
+   "umbrales": {
+    "listoSinLoteDias": 5,
+    "redactadoSinEncolarDias": 1,
+    "construidoSinVeredictoHoras": 2,
+    "esperaDADias": 2,
+    "aCarlosBloqueaDias": 1,
+    "aCarlosNoBloqueaDias": 3,
+    "enLoteSinAceptarDias": 7,
+    "ptDefinicionDias": 14,
+    "pausaSinRevisarDias": 7
+   },
+   "regla": "al vencer, el ítem sale en la ficha con su dueño y el JP pregunta al dueño por el buzón; a Carlos se reitera una vez con la plantilla; las esperas a una persona (DA, Carlos) son edades, no pausas"
+  },
+  "pausas": {
+   "que": "proyecto.json › pausas[]: toda pausa es una fila; detenidos, ordenActivo y ordenAlLevantarPausa se migran y desaparecen",
+   "fila": "{desde, orden: M-n/DA-n, alcance: producto · cola · todo, archivoPAUSA: true/false, motivo, condicionReanudacion, revisarEn, hasta?, reanudacion?: M-n}",
+   "reglas": [
+    "las decisiones «espera la pausa de producto» (I1) citan la fila",
+    "pausa con condición pendiente de Carlos > 7 días: una pregunta con la plantilla",
+    "hasta sin orden de reanudación = aviso"
+   ]
+  },
+  "planes": {
+   "fabrica": "planes[].fabrica: true para PT de fábrica (PT-9, PT-10)",
+   "reglas": [
+    "1 PT de producto activo y 1 de fábrica (2 con excepción)",
+    "PT en definición > 14 días: entra, se pausa con motivo o se cierra",
+    "todo PT activo tiene al menos un ítem en trabajo[] o dice por qué no",
+    "cierre con lo logrado, lección y lo que vuelve a Diseño (BAI11.09)"
+   ]
+  },
+  "comoVamos": {
+   "que": "ficha-semanal.py --como-vamos: tabla de seis filas desde proyecto.json, seguimiento.json y la ficha; el JP la pega, no la redacta",
+   "filas": [
+    "1. lo que espera a Carlos (edad y la única pregunta que sigue)",
+    "2. tanda abierta y qué entró",
+    "3. en cola y construido",
+    "4. aceptado en la tanda",
+    "5. pausas activas y su condición",
+    "6. semáforo: cuántas filas en rojo y solo las que cambiaron desde la última vez"
+   ]
+  },
+  "metricas": {
+   "que": "F8 informativo un mes; luego umbrales del semáforo (LM aparte)",
+   "lista": [
+    "tiempo de entrega REQ listo → aceptado (mediana)",
+    "tiempo en cola construido → aceptado",
+    "edad media de lo en curso",
+    "etapas fuera de límite",
+    "ítems vencidos",
+    "mensajes a Carlos pendientes",
+    "días en pausa en la ventana",
+    "ritmo de salida (ítems aceptados por semana)"
+   ]
+  },
+  "errorDesde": {
+   "F2": "2026-12-01",
+   "nota": "LM-72: F2 (etapas fuera de límite) pasa de aviso a error en esa fecha, con los datos del periodo de metas (22-oct → 30-nov)"
+  }
+ },
+ "arquitectura": {
+  "lm": "LM-67 (ARQUITECTURA-v1; MJ-17 paso 6 (proceso 6, Definición de arquitectura y gestión de decisiones); APO03.02/.05, BAI03, APO04.06; ISO/IEC/IEEE 42010 por conocimiento)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-arquitectura.md (v2, ok de Carlos 21-oct 11:42)",
+  "frontera": "arquitectura del STR como está; la de la fábrica y la multiproyecto con la capa de proyectos (ADR-008/009); PRJ y MOD son familia «fabrica» en el mapa",
+  "modo": "avisos; rc 2 de --lote solo por «Decisión:» en áreas sensibles",
+  "decisiones": {
+   "indice": "interno/arquitectura/decisiones.json",
+   "archivos": "str-manager-docs/decisiones/ADR-nnn-*.md",
+   "plantilla": "herramientas/plantillas/adr.md",
+   "estados": [
+    "propuesta",
+    "aceptada",
+    "aceptada con deuda",
+    "sustituida por ADR-n",
+    "derogada"
+   ],
+   "camposMinimos": [
+    "id",
+    "titulo",
+    "fecha",
+    "estado",
+    "decisor",
+    "capa",
+    "archivo",
+    "revisarCuando"
+   ],
+   "queMereceADR": [
+    "cómo se guarda, conecta, autentica, sincroniza, borra o respalda un dato",
+    "dependencia nueva (servicio, librería, proveedor)",
+    "regla transversal nueva o cambiada",
+    "sobre de capacidad (RT-25)",
+    "estructura de módulos"
+   ]
+  },
+  "decisionEnCabecera": {
+   "campo": "«Decisión:» al final de la línea «Origen: … Requerimiento: … Decisión:» de la instrucción (se reutiliza; la cabecera no crece)",
+   "formato": "Decisión: ADR-n | DA-n | ninguna (motivo)",
+   "areasSensibles": [
+    "api/config/",
+    "database.php",
+    "auth",
+    "jwt",
+    "retencion",
+    "cron",
+    "sync-ical",
+    "drive",
+    "secrets"
+   ],
+   "regla": "Alcance con un área sensible sin «Decisión:» con ese formato = rc 2 en --lote; un DA-n en las 20 primeras líneas va también en la línea «Lote:» del commit (hook v5); un ADR-n no se exige ahí"
+  },
+  "guardiasRT": {
+   "donde": "interno/mapa-modulos.json › reglas[].guardia {tipo, ref, automatica, critica, n2Orden}",
+   "tipos": [
+    "hook",
+    "cola",
+    "pw",
+    "validar",
+    "prueba",
+    "manual",
+    "ninguna"
+   ],
+   "automaticas": [
+    "hook",
+    "cola",
+    "pw",
+    "validar",
+    "prueba"
+   ],
+   "criticas": [
+    "RT-1",
+    "RT-2",
+    "RT-19",
+    "RT-20",
+    "RT-23",
+    "RT-24",
+    "RT-25"
+   ],
+   "regla": "RT sin guardia = aviso; RT crítica sin guardia automática ni «riesgo aceptado» (DA-n en ref) = aviso",
+   "n2Orden": "orden de Diseño (M-1035): RT-14, RT-1, RT-6, RT-5, RT-10, RT-17"
+  },
+  "capacidad": {
+   "rt": "RT-25",
+   "prueba": "spec de pw de solo lectura (LM-68): 12 GET de colecciones en paralelo en zz-verif-pruebas con sesión colab, /api/diagnostico antes y después; lanzado por la cola dentro de la corrida una vez por tanda de 10 lotes aceptados o al tocar database.php/str-api.js; nunca en hora de turnos ni en «negocio»",
+   "rojo": [
+    "1040",
+    "1203",
+    "500 «Base de datos no disponible»"
+   ],
+   "ultimaCorrida": {
+    "fecha": "2026-10-21",
+    "hora": "21:33",
+    "resultado": "válida (v1.1b, RAFAGA-AHORA): 2 rondas × 12 GET /api/col/* con sesión admin, 24/24 con 200, 315 filas por ronda; ronda 1 251 ms (máx 243), ronda 2 161 ms (máx 153); sin 1040/1203 ni 500. Diagnóstico: conexiones 4 antes → 12 justo después (11 dormidas, que bajan a 0 en las muestras siguientes); maxUsuario 75. Lectura: una ráfaga de 12 lecturas paralelas deja 12 conexiones persistentes; el tope del hosting (75) da ~6 ráfagas simultáneas antes del 1040/1203; INC-128 debió juntar más pantallas o pantallas con varias peticiones por minuto.",
+    "conexionesAntes": 4,
+    "conexionesDespues": 12,
+    "maxUsuario": 75,
+    "maxMs": 243,
+    "filasPorRonda": 315,
+    "valida": true,
+    "especVersion": "v1.1b (md5 70210DE6)",
+    "proxima": "2027-01-19 (cada 90 días) o al tocar database.php / str-api.js"
+   },
+   "spec": "herramientas/pw/rafaga.spec.js (LM-68): casos a (diagnóstico antes, admin), b (2 rondas × 12 GET /api/col/* en paralelo, colab), c (diagnóstico después); solo entre 22:30 y 05:30 de Bogotá o con el archivo RAFAGA-AHORA en la raíz de la cola (si no, OMITIDO); se lanza con correr\\rafaga.txt → log\\RAFAGA-guion.json",
+   "ventana": "22:30–05:30 America/Bogota; forzar: RAFAGA-AHORA (lo crea Carlos)",
+   "umbralConexiones": 60,
+   "cadaDias": 90,
+   "registro": "al correr, el Arquitecto escribe ultimaCorrida {fecha, resultado, conexionesAntes, conexionesDespues, maxMs} desde log\\RAFAGA-guion.json; la ficha y validar (A2) leen ultimaCorrida"
+  },
+  "deuda": {
+   "marca": "dts[].arquitectura: true (en INC se deriva de causaRaiz «arquitectura»)",
+   "lista": [
+    "DT-39",
+    "DT-46",
+    "DT-49",
+    "DT-51",
+    "DT-53"
+   ],
+   "evaluacion": {
+    "disparaJP": [
+     "cada 20 lotes aceptados",
+     "módulo que cambia de estado en el mapa",
+     "INC de arquitectura alto o crítico"
+    ],
+    "fichaAvisaA": 20,
+    "registro": "proyecto.json › evaluacionesArquitectura[] {fecha, disparador, lotesDesdeAnterior, nota} (JP) o nota en el ADR"
+   }
+  },
+  "relaciones": {
+   "regla": "A3: lote aceptado cuya ruta cruza una relación «por-precisar» la precisa en su fila del historial (tipo, dato, regla o «sin regla»); pasada del Arquitecto 10 por tanda; trinquete C6"
+  },
+  "fuentes": {
+   "vigentes": {
+    "0 sistema y 1 módulos": "claude/arquitectura/mapa-str.md",
+    "2 funcionalidades": "interno/linea-base/*.json + explorador",
+    "3 relaciones": "interno/mapa-modulos.json",
+    "infraestructura": "claude/arquitectura/infraestructura-configuracion.md",
+    "datos": "claude/arquitectura/datos-ciclo-vida.md",
+    "reglas": "claude/arquitectura/reglas-transversales.md",
+    "decisiones": "str-manager-docs/decisiones/ + interno/arquitectura/decisiones.json",
+    "fábrica (vista 0)": "claude/marco/mapa-fabrica.md"
+   },
+   "historicos": [
+    "str-manager-docs/arquitectura/*.md",
+    "str-manager-docs/modulos/M*.md",
+    "str-manager-docs/producto/*.md"
+   ],
+   "marca": "primera línea «> Histórico (agosto-2026) · sustituido por …»"
+  }
+ },
+ "conocimiento": {
+  "lm": "LM-69 (CONOCIMIENTO-v1; MJ-17 paso 7 (proceso 8, Gestión del conocimiento y de la información); BAI08.01–.04, APO14; ISO 30401 por conocimiento; ADR-010; Diátaxis)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-conocimiento.md (v2, ok de Carlos 21-oct 12:46)",
+  "modo": "avisos",
+  "piezas": {
+   "donde": "interno/conocimiento.json › piezas[]",
+   "tipos": [
+    "reglamento",
+    "referencia",
+    "guía",
+    "explicación",
+    "lección",
+    "canal"
+   ],
+   "cuandoSeLee": [
+    "arranque",
+    "arranque (filtrado)",
+    "arranque (lo vivo)",
+    "por lote",
+    "a demanda",
+    "nunca"
+   ],
+   "regla": "pieza de arranque sin tope = aviso; pieza sobre su tope = aviso; ruta local que no existe = aviso; medición con conocimiento.py"
+  },
+  "arranque": {
+   "cli": {
+    "CLAUDE.md": {
+     "tope": 12000,
+     "meta": 9000,
+     "nota": "§ 1 pasa a puntero (LM-70); § 2 índice, líneas de versión y plantilla § 4 no se tocan"
+    },
+    "reglas-fijas.md": {
+     "tope": 3000
+    },
+    "docs/claude por archivo": {
+     "tope": 40000
+    }
+   },
+   "chats": {
+    "encargo": {
+     "tope": 6000
+    },
+    "buzon": "filtrado con herramientas/modelo/buzon.py --para <rol> [--horas 48]: pendientes para el rol, respuestas de 48 h, lo que espera, lo que espera Carlos",
+    "seguimiento": "lo vivo; por id a demanda"
+   },
+   "regla": "nada entra a una pieza de arranque sin sacar algo del mismo tamaño (K1 Busca/Pon)"
+  },
+  "lecciones": {
+   "destino": {
+    "tipos": [
+     "guardia",
+     "punto",
+     "plantilla",
+     "ficha",
+     "ADR",
+     "catalogo",
+     "riesgo",
+     "regla",
+     "retirada"
+    ],
+    "forma": "{tipo, ref, fecha} o pendiente {dueno, desde}"
+   },
+   "fuentes": {
+    "Jefe de proyecto": "proyecto.json › lecciones[]",
+    "Desarrollo": "incs[] con destino y sección «Lección» del cierre de cada lote (patrones-codigo.md no existe)",
+    "Diseño": "diseno.json › lecciones[]",
+    "Arquitecto": "mejoras.json (MJ-n) y fichas"
+   },
+   "regla": "lección sin destino ni pendiente con dueño > 7 días = aviso",
+   "situaciones": "interno/situaciones/*.json cerrado como histórico el 21-oct (M-1045, M-1046)"
+  },
+  "traspaso": {
+   "plantilla": "herramientas/plantillas/traspaso.md",
+   "campos": [
+    "fecha",
+    "quienSoy",
+    "enCurso",
+    "esperando",
+    "dondeEsta",
+    "noEscrito",
+    "primeraAccion"
+   ],
+   "donde": {
+    "Jefe de proyecto": "proyecto.json › traspaso",
+    "Diseño": "diseno.json › traspaso",
+    "Desarrollo": "seguimiento.json › traspaso (sustituye a estado-proyecto.md y transiciones-chat.md, que no existen)",
+    "Arquitecto": "mejoras.json › puntoDePausa (+ claude/marco/cierre-arquitecto-*.md al cerrar un chat)"
+   },
+   "renovar": "al cerrar cada tanda (Diseño: cada sesión) o cada 7 días",
+   "trasCompactar": [
+    "releer encargo y reglas-comunes",
+    "python3 -I herramientas/modelo/validar.py .",
+    "python3 -I herramientas/modelo/ficha-semanal.py . --como-vamos",
+    "python3 -I herramientas/modelo/buzon.py . --para <rol>",
+    "leer el traspaso propio",
+    "cero preguntas a Carlos salvo lo que el traspaso diga «decide Carlos»"
+   ],
+   "regla": "traspaso con fecha > 7 días o sin primeraAccion = aviso"
+  },
+  "evaluarRetirar": {
+   "regla": "fichas[] e ítems del catálogo con revisarCuando y estado (vigente · retirada · sustituida); al cerrar cada proceso de MJ-17 se revisan las fichas que toca; texto-juez.md, revisor-previo.md (tope 24 puntos) y LEEME no crecen sin fundir",
+   "avisos": "ficha o ítem sin revisarCuando; pieza sin revisión > 30 días (informativo)"
+  },
+  "archivo": {
+   "herramienta": "herramientas/modelo/archivar.py <raiz> [--dias 14] [--aplicar]",
+   "mensajes": "hecho/superado > 14 días no citados por filas vivas → interno/archivo/mensajes-AAAA-MM.json; tope del vivo 1 MB",
+   "seguimiento": "INC cerrados y lotes aceptados > 60 días → interno/archivo/seguimiento-AAAA-MM.json (pendiente de herramienta; tope 2 MB)",
+   "quien": "Arquitecto, en punto limpio, a pedido de Carlos (autorizado 21-oct 12:46)"
+  },
+  "docsCodigo": {
+   "cabecera": "Al día hasta L-n · dueño: <módulo del mapa>",
+   "regla": "el lote que toca el área actualiza el doc y sube el L-n (par Busca/Pon); --lote avisa (no corta) si el Alcance toca un área cuyo doc no está en el Alcance",
+   "areas": {
+    "docs/claude/housekeeping.md": [
+     "HK"
+    ],
+    "docs/claude/housekeeping-2.md": [
+     "HK"
+    ],
+    "docs/claude/inventario.md": [
+     "INV"
+    ],
+    "docs/claude/calendario.md": [
+     "CAL"
+    ],
+    "docs/claude/flujos.md": [
+     "FL"
+    ],
+    "docs/claude/propiedades.md": [
+     "PR"
+    ],
+    "docs/claude/operacion.md": [
+     "OP"
+    ],
+    "docs/claude/usuarios-y-roles.md": [
+     "U"
+    ],
+    "docs/claude/servidor-php.md": [
+     "SRV"
+    ],
+    "docs/claude/shell-y-api.md": [
+     "SH",
+     "API"
+    ],
+    "docs/claude/proyecto.md": [
+     "PRJ"
+    ],
+    "docs/claude/tests-y-despliegue.md": [
+     "tests/"
+    ],
+    "docs/claude/historial.md": [],
+    "docs/claude/reglas-fijas.md": [],
+    "docs/claude/entorno.md": [],
+    "docs/claude/housekeeping-datos.md": [
+     "HK"
+    ],
+    "docs/claude/servidor-php-datos.md": [
+     "SRV"
+    ],
+    "docs/claude/modelo.md": [
+     "MOD"
+    ]
+   }
+  },
+  "errorDesde": {
+   "Cn2": "2026-12-01",
+   "nota": "LM-72: pieza de arranque sobre su tope pasa de aviso a error"
+  }
+ },
+ "riesgo": {
+  "lm": "LM-71 (RIESGO-v1; MJ-17 paso 8 (proceso 7, Gestión de riesgos y medición), el último; APO12.02/.03/.04 parcial/.06, MEA01.01–.05; ISO 31000 e ISO/IEC/IEEE 15939 por conocimiento; DORA)",
+  "desde": "2026-10-21",
+  "documento": "claude/marco/plan-riesgo-medicion.md (v2, ok de Carlos 21-oct 13:23)",
+  "modo": "Rg1 forma y Rg2 ref = error desde que riesgos[] exista; Rg3–Rg7 avisos el primer mes (hasta el 30-nov)",
+  "registro": {
+   "donde": "interno/proyecto.json › riesgos[] (escribe el Jefe de proyecto; el Arquitecto propone filas por el buzón, como con trabajo[])",
+   "campos": [
+    "id R-n",
+    "escenario «si … entonces …»",
+    "capa",
+    "modulos[]",
+    "probabilidad 1–3",
+    "impacto 1–3",
+    "nivel = p × i",
+    "respuesta {tipo, ref, probada: fecha | nunca}",
+    "senal",
+    "dueno",
+    "aceptadoPor {quien: Carlos, fecha} si nivel ≥ 6 y aceptar",
+    "revisarCuando",
+    "estado",
+    "origen"
+   ],
+   "capas": [
+    "producto",
+    "fabrica",
+    "operacion"
+   ],
+   "respuestas": [
+    "evitar",
+    "reducir",
+    "compartir",
+    "aceptar"
+   ],
+   "estados": [
+    "vivo",
+    "materializado",
+    "cerrado"
+   ],
+   "nivelAlto": 6,
+   "probadaCadaDias": 90,
+   "materializado": "un INC P1–P2 cuyo escenario coincide con un R-n lo marca materializado (lo escribe el JP al decidir el INC; el juez propone «materializa: R-n» junto a la prioridad)"
+  },
+  "destino": {
+   "regla": "destino {tipo: riesgo} en escapes (I7), revisiones de incidente (I5) y lecciones (Cn3) exige ref con un R-n existente (Rg2, error)"
+  },
+  "modulo": {
+   "impacto": "desde la línea base: ≥ 5 capacidades esenciales → 3; ≥ 2 → 2; si no → 1 (riesgos.impacto_desde_linea_base); se confirma con Carlos una sola vez",
+   "probabilidad": "sube 1 con un INC P1 o dos P2 en 30 días en el módulo; baja 1 tras 60 días sin P1–P2 y con guardia automática en todas sus RT; lo propone el Arquitecto (evaluación por evento A6), lo confirma Diseño; Carlos solo si el módulo cruza 6",
+   "ventanaSubeDias": 30,
+   "ventanaBajaDias": 60
+  },
+  "medidas": [
+   {
+    "id": "MD-1",
+    "fila": "repruebas %",
+    "pregunta": "¿los guiones fallan por la cola y no por el producto?",
+    "fuente": "METRICAS.json › semanas[].repruebas/corridas (ficha: semaforo)",
+    "umbral": "≤ 15 %",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto (dueño del proceso 4) · acción: Desarrollo",
+    "accion": "guion que reprueba 2 veces → cuarentena (V6) y lote de guiones",
+    "semaforo": true,
+    "desde": "2026-10-19",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-2",
+    "fila": "rojos ajenos %",
+    "pregunta": "¿la regresión por ruta rompe cosas que el lote no tocó?",
+    "fuente": "METRICAS.json › pctRojosAjenos",
+    "umbral": "≤ 20 %",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto (dueño del proceso 4) · acción: Desarrollo",
+    "accion": "revisar la ruta de pruebas y las relaciones del mapa (A3) del módulo que más rojos ajenos da",
+    "semaforo": true,
+    "desde": "2026-10-19",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-3",
+    "fila": "criterios con caso %",
+    "pregunta": "¿los REQ llegan con criterios que se pueden probar?",
+    "fuente": "METRICAS.json › pctCriteriosConCaso",
+    "umbral": "≥ 70 %",
+    "direccion": "≥",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Diseño",
+    "accion": "REQ sin caso vuelve a definición (Q-n, --req)",
+    "semaforo": true,
+    "desde": "2026-10-19",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-4",
+    "fila": "casos en cuarentena",
+    "pregunta": "¿cuántos casos están fuera del veredicto por inestables?",
+    "fuente": "METRICAS.json › cuarentena",
+    "umbral": "≤ 5",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto (dueño del proceso 4) · acción: Desarrollo, avisado antes de cada cuarentena",
+    "accion": "lote de guiones que los arregla o los retira (V6)",
+    "semaforo": true,
+    "desde": "2026-10-19",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-5",
+    "fila": "INC fuera de plazo P1–P2",
+    "pregunta": "¿se decide a tiempo lo que duele?",
+    "fuente": "seguimiento.json › incs[] (incidentes.fuera_de_plazo)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "decisión en la tanda; si no se puede, decision {tipo: espera…, ref}",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-6",
+    "fila": "P1–P2 sin solución temporal escrita",
+    "pregunta": "¿la operación sabe cómo seguir mientras tanto?",
+    "fuente": "incs[].solucionTemporal",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Desarrollo",
+    "accion": "escribir solucionTemporal o «ninguna posible» con motivo",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-7",
+    "fila": "escapes cerrados sin destino",
+    "pregunta": "¿cada defecto que se escapó cambió algo?",
+    "fuente": "incs[].destino (I7)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Desarrollo",
+    "accion": "destino {punto | guardia | riesgo R-n} antes de cerrar",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-8",
+    "fila": "DT vencidas",
+    "pregunta": "¿la deuda se paga cuando se dijo?",
+    "fuente": "seguimiento.json › dts[] plazo",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "replanificar con aceptadaPor o pagar en la tanda",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-9",
+    "fila": "etapas fuera de límite",
+    "pregunta": "¿hay más trabajo abierto del que cabe?",
+    "fuente": "flujo.fuera_de_limite (F2)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "no entra nada nuevo a esa etapa hasta bajar; motivoSalto si Carlos lo ordena",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-10",
+    "fila": "ítems vencidos",
+    "pregunta": "¿algo lleva más de lo que debe en un estado?",
+    "fuente": "flujo.vencidos (F5)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "reasignar, destrabar (clase c) o escalar a Carlos (1 d si bloquea, 3 d si no)",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-11",
+    "fila": "pausas sin revisarEn",
+    "pregunta": "¿toda pausa tiene fecha de volver a mirarla?",
+    "fuente": "proyecto.json › pausas[] (F6)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "poner revisarEn y condicionReanudacion",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-12",
+    "fila": "RT críticas sin guardia automática",
+    "pregunta": "¿lo crítico lo vigila una máquina?",
+    "fuente": "mapa-modulos.json › reglas[].guardia (A2)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto",
+    "accion": "LM con la guardia (hoy LM-68: ráfaga para RT-19 y RT-25)",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-13",
+    "fila": "deuda arquitectónica alta o crítica",
+    "pregunta": "¿hay deuda que puede materializarse en un INC P1?",
+    "fuente": "dts[].arquitectura + severidad (A4)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto propone · Carlos decide (DA)",
+    "accion": "DA con opción recomendada (hoy DA-61) o R-n aceptado por Carlos",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-14",
+    "fila": "última prueba de capacidad",
+    "pregunta": "¿sabemos cuánto aguanta el hosting?",
+    "fuente": "esquema.json › arquitectura.capacidad.ultimaCorrida (A2)",
+    "umbral": "≤ 90 días",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto",
+    "accion": "LM-68 (spec de ráfaga, solo lectura) y repetir cada 90 días",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-15",
+    "fila": "piezas de arranque sobre su tope",
+    "pregunta": "¿lo que se carga siempre cabe?",
+    "fuente": "conocimiento.py (Cn2)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "escritor de la pieza (CLAUDE.md: Desarrollo vía lote; docs del modelo: Arquitecto)",
+    "accion": "poda o partir con índice (LM-70, lote estándar de docs)",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-16",
+    "fila": "lecciones sin destino > 7 días",
+    "pregunta": "¿lo aprendido se vuelve regla?",
+    "fuente": "proyecto.json y diseno.json › lecciones[] (Cn3)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "cada rol con sus lecciones",
+    "accion": "destino {tipo, ref} o pendiente con dueño",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-17",
+    "fila": "traspasos vencidos",
+    "pregunta": "¿el que llega puede seguir sin preguntar?",
+    "fuente": "traspaso de cada rol (Cn4)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "cada rol",
+    "accion": "renovar el traspaso con la plantilla (≤ 7 días)",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-18",
+    "fila": "buzón vivo (KB)",
+    "pregunta": "¿el buzón se puede leer entero sin ahogar un chat?",
+    "fuente": "tamaño de interno/mensajes.json (Cn6)",
+    "umbral": "≤ 1 024 KB",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto",
+    "accion": "archivar.py --aplicar en punto limpio y a pedido de Carlos",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-19",
+    "fila": "riesgos altos sin respuesta probada o con revisión vencida",
+    "pregunta": "¿lo que más duele tiene una respuesta que funciona y se volvió a mirar?",
+    "fuente": "proyecto.json › riesgos[] (riesgos.respuesta_vencida, revision_vencida; Rg7)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "probar la respuesta y anotar probada; o cambiar la respuesta; revisar y poner revisarCuando nuevo",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-20",
+    "fila": "rojas repetidas sin acción",
+    "pregunta": "¿lo rojo produce algo?",
+    "fuente": "ficha --anterior × trabajo[] × riesgos[] (riesgos.rojas_repetidas; Rg6)",
+    "umbral": "0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "fila en trabajo[] con dueño (clase c o f), R-n aceptado por Carlos, o retiro de la medida con motivo",
+    "semaforo": true,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)"
+   },
+   {
+    "id": "MD-21",
+    "fila": "lotes desde la última evaluación de arquitectura",
+    "pregunta": "¿toca volver a mirar la arquitectura?",
+    "fuente": "cambios[] desde evaluacionesArquitectura[] (A6)",
+    "umbral": "< 20",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "disparar la evaluación por evento (A6)",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "arquitectura"
+   },
+   {
+    "id": "MD-22",
+    "fila": "tasa de fallo del cambio %",
+    "pregunta": "¿cuántos lotes salen mal?",
+    "fuente": "cambios[] últimos 20 lotes (riesgos.tasa_fallo_ventana; K7)",
+    "umbral": "meta (a) ≤ 15 %",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Desarrollo",
+    "accion": "meta del periodo; si pasa dos tandas fuera de rumbo, revisión previa más estricta o lotes más chicos (K3)",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "DORA / metas"
+   },
+   {
+    "id": "MD-23",
+    "fila": "escapes en revisión previa por semana",
+    "pregunta": "¿la revisión previa atrapa lo suyo?",
+    "fuente": "incs[].debioDetectarse = revisión previa (V5)",
+    "umbral": "meta (b) ≤ 2",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Desarrollo",
+    "accion": "punto nuevo del revisor por cada escape (destino punto)",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "escapes / metas"
+   },
+   {
+    "id": "MD-24",
+    "fila": "casos esenciales sin guion",
+    "pregunta": "¿lo esencial tiene prueba?",
+    "fuente": "trinquetes.json › casosEsencialesSinGuion (C4)",
+    "umbral": "meta (c) ≤ 170 al 30-nov",
+    "direccion": "trinquete",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Desarrollo (lotes de guiones, cuentan como fábrica)",
+    "accion": "10 por tanda (como las relaciones A3)",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "riesgos residuales / metas"
+   },
+   {
+    "id": "MD-25",
+    "fila": "relaciones por precisar",
+    "pregunta": "¿sabemos qué toca qué?",
+    "fuente": "trinquetes.json › relacionesPorPrecisar (C6, A3)",
+    "umbral": "trinquete",
+    "direccion": "trinquete",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Arquitecto",
+    "accion": "10 por tanda",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "riesgos residuales"
+   },
+   {
+    "id": "MD-26",
+    "fila": "INC P1–P2 abiertos sin decisión",
+    "pregunta": "¿hay dolor sin dueño?",
+    "fuente": "incs[] prioridad P1–P2 sin decision (I1)",
+    "umbral": "meta (d) 0",
+    "direccion": "≤",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "decisión en la tanda",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "INC / metas"
+   },
+   {
+    "id": "MD-27",
+    "fila": "frecuencia, entrega y recuperación (DORA)",
+    "pregunta": "¿cómo fluye la entrega?",
+    "fuente": "ficha.dora (K7)",
+    "umbral": "línea de partida hasta el 30-nov",
+    "direccion": "informativo",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "ninguna hasta tener un mes de datos; después, meta",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "DORA"
+   },
+   {
+    "id": "MD-28",
+    "fila": "flujo (F8)",
+    "pregunta": "¿cuánto tarda lo que entra?",
+    "fuente": "flujo.metricas_flujo",
+    "umbral": "informativo",
+    "direccion": "informativo",
+    "periodo": "semanal (ficha de la tanda)",
+    "capa": "fabrica",
+    "dueno": "Chat Jefe de proyecto",
+    "accion": "«¿cómo vamos?» con Carlos por tanda",
+    "semaforo": false,
+    "desde": "2026-10-21",
+    "revisarCuando": "dos tandas seguidas sin que nadie actúe sobre ella (15939: se retira)",
+    "bloque": "flujo"
+   }
+  ],
+  "semaforo": {
+   "tope": 20,
+   "regla": "una medida sin dueño de acción no entra al semáforo (va a informativo); una fila roja dos fichas seguidas produce fila en trabajo[] con dueño, R-n aceptado por Carlos o retiro de la medida con motivo (Rg6)"
+  },
+  "metas": {
+   "donde": "interno/proyecto.json › metas[] (escribe el Jefe de proyecto; las fija con Carlos)",
+   "campos": [
+    "id MT-n",
+    "medida MD-n",
+    "meta",
+    "direccion",
+    "hoy",
+    "desde",
+    "hasta",
+    "dueno",
+    "estado"
+   ],
+   "periodo": {
+    "desde": "2026-10-22",
+    "hasta": "2026-11-30",
+    "nota": "si la pausa de producto sigue el 2-nov, la meta (c) se reevalúa y no cuenta como incumplida (M-1056)"
+   },
+   "propuestas": [
+    {
+     "id": "MT-1",
+     "medida": "MD-22",
+     "meta": 15,
+     "direccion": "≤",
+     "hoy": "20 % (semana del 19-oct, 9 lotes; sobre 20 lotes lo da la ficha)"
+    },
+    {
+     "id": "MT-2",
+     "medida": "MD-23",
+     "meta": 2,
+     "direccion": "≤",
+     "hoy": "6 (semana del 19-oct)"
+    },
+    {
+     "id": "MT-3",
+     "medida": "MD-24",
+     "meta": 170,
+     "direccion": "≤",
+     "hoy": "200 (trinquete 20-oct)"
+    },
+    {
+     "id": "MT-4",
+     "medida": "MD-26",
+     "meta": 0,
+     "direccion": "≤",
+     "hoy": "0"
+    }
+   ]
+  },
+  "metricas": {
+   "donde": "interno/METRICAS.json (copia de LENOVO log\\METRICAS.json; la trae el Arquitecto por staging al cerrar la ficha hasta que el hook v6 la copie en cada tren, Rg8)"
+  },
+  "errorDesde": {
+   "Rg7": "2026-12-01",
+   "nota": "LM-72: riesgo de nivel ≥ 6 sin respuesta probada en 90 días pasa de aviso a error"
+  }
+ },
+ "lote": {
+  "revisionPrevia": {
+   "lm": "LM-72",
+   "linea": "Revisión previa: n/23 · <quién: subagente de Desarrollo | segunda lectura> · <AAAA-MM-DD HH:MM>[ · ok Diseño M-n | ok Jefe de proyecto M-n]",
+   "regla": "en las primeras 20 líneas de la instrucción; n = total para encolar; los críticos citan el ok de su revisor de críticos (Diseño para producto, Jefe de proyecto para fábrica) con el M-n del buzón; linea-base.py --lote rc 2 sin ella (con --borrador solo avisa); ejecutar-cola.ps1 v11 rechaza (.sin-revision.md / .sin-ok.md)"
+  }
+ },
+ "universo": {
+  "que": "MJ-26 (F1): listas cerradas del Universo (interno/universo.json) y sus guardias U1–U7 (herramientas/modelo/universo.py). Modelo: claude/marco/universo-modelo.md.",
+  "naturaleza": [
+   "proceso",
+   "agente",
+   "herramienta",
+   "dato",
+   "documento",
+   "vista",
+   "decisión",
+   "infraestructura",
+   "instrucción",
+   "credencial",
+   "identidad"
+  ],
+  "forma": [
+   ".json",
+   ".md",
+   ".html",
+   "código",
+   "chat",
+   "tarea programada",
+   "tarea de Windows",
+   "artefacto",
+   "sitio",
+   "repo",
+   "base de datos",
+   "texto",
+   "carpetas",
+   "archivos",
+   "cuenta",
+   "skill",
+   "mensaje",
+   "hosting",
+   "dominio",
+   "servicio",
+   "equipo",
+   "software",
+   "perfil",
+   "workflow",
+   "cron",
+   "proyecto de Claude",
+   ".txt"
+  ],
+  "plataforma": [
+   "GitHub",
+   "proyecto de Claude",
+   "Claude",
+   "chat de Claude",
+   "LENOVO",
+   "ASUS",
+   "Hostinger",
+   "Firebase",
+   "Google Cloud",
+   "MySQL",
+   "varias"
+  ],
+  "capa": [
+   "proyectos",
+   "herramientas",
+   "transversal"
+  ],
+  "estado": [
+   "vigente",
+   "parcial",
+   "desfasado",
+   "propuesto",
+   "diferido",
+   "superado",
+   "duda",
+   "fuera"
+  ],
+  "gobierno": [
+   "responsable",
+   "mantenimiento",
+   "control",
+   "relaciones",
+   "respaldo",
+   "estado",
+   "acceso",
+   "historial"
+  ],
+  "errorDesde": {
+   "U2": "2026-11-10",
+   "U3": "2026-11-10",
+   "U6": "2026-11-10",
+   "nota": "U2, U3 y U6 empiezan como aviso y pasan a error en esa fecha; U1, U4 y U5 son error desde la instalación (LM-83). U7 (vencimientos.json): aviso a 10 días, error al vencer."
+  },
+  "nota": "30-oct F1.3: Diseño pidió «desfasado» (vigente pero atrasado) e historial visible por pieza; Desarrollo preguntó por «evento»: los eventos no son piezas, son el enlace entre nodos del mapa."
+ },
+ "mapaProcesos": {
+  "que": "MJ-26 (F3): niveles y campos del mapa de procesos (interno/mapa-procesos.json) y sus guardias P1–P5 (herramientas/modelo/procesos.py).",
+  "niveles": [
+   "N0",
+   "N1",
+   "N2",
+   "N3",
+   "N4"
+  ],
+  "campos": [
+   "id",
+   "nivel",
+   "padre",
+   "nombre",
+   "rol",
+   "disparador{evento,de,otros}",
+   "entradas[piezas]",
+   "hace",
+   "salidas{piezas,evento,alternos}",
+   "siguiente[]",
+   "bifurca[{si,a}]",
+   "retorno",
+   "guardias[]",
+   "herramientas[piezas]",
+   "plazo",
+   "fuente",
+   "estado"
+  ],
+  "regla": "la salida de un nodo es el disparador de otro; todo evento no externo lo emite alguien y, si no es terminal, lo dispara alguien; toda entrada, salida y herramienta es una pieza del Universo; ningún nodo sin dueño ni retorno (N2–N4)."
+ }
+}

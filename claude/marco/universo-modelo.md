@@ -1,6 +1,6 @@
 # Universo · modelo de clasificación y gobierno de todas las piezas
 
-**Estado:** en definición (30-oct-2026, diálogo Carlos–Arquitecto). Nada se ha aplicado todavía: primero cada chat revisa sus procesos y retroalimenta (consultas M-1286 a M-1288); después el Arquitecto hace el inventario real y lo propone a Carlos. **COBIT:** BAI10 (configuración), APO01 (modelo de operación), APO03.02. **Mejora:** se registrará como MJ-n al cerrar el diálogo.
+**Estado:** adoptado como MJ-26 el 30-oct-2026 («encárgate de eso»); plan en `plan-universo-2026-10.md`. Este documento es la definición del modelo (dimensiones, gobierno, niveles del circuito); se completa en la fase F1. **COBIT:** BAI10, APO01, APO03.02.
 
 ## Idea
 

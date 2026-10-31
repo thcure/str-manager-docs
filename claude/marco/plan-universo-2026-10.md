@@ -1,0 +1,43 @@
+# Plan de trabajo · Universo: piezas, árbol y circuito tangibles
+
+**Líder:** Chat Arquitecto (PMO) · **Origen:** Carlos, 30-oct-2026 («el universo y sus procesos deben ser tangibles al igual que su circuito… consolidación de toda la experiencia… encárgate; habla con los demás agentes primero; genera el plan; no soy técnico; que no sea un cuello de botella») · **Participantes:** Chat Diseño (proceso 1 y capa Proyectos), Chat Jefe de proyecto (procesos 2 y 7, planes), Chat Desarrollo (procesos 3, 4 y 5, cola), Agente CLI (lotes de los sitios), Carlos (lo que solo él puede: cuentas, borrados, decisiones de la lista final) · **Mejora:** MJ-26 · **COBIT:** BAI10 (configuración), APO01 (modelo de operación), APO03.02 (arquitectura de referencia), BAI11 · **Base:** ADR-008, ADR-009 v5, MJ-15/16/17/25, `universo-modelo.md`, inventario 0.1 (artefacto «Inventario del universo»), «Árbol del universo», «Circuito del universo».
+
+## Qué se entrega (en lenguaje llano)
+
+Tres cosas que hoy existen como dibujos y conversaciones pasan a ser **datos del modelo**, con guardias que impiden que se desactualicen, y **páginas** que Carlos puede abrir y entender sin leer archivos:
+
+1. **El Universo (las piezas).** Un solo registro de todo lo que existe, con sus dimensiones (qué es, en qué forma, dónde está, en qué capa y rama del árbol, en qué proceso) y su gobierno (quién responde, cómo cambia, qué lo vigila, de qué depende, dónde está su copia, si vive, quién puede tocarlo). Sucede a `elementos.json`.
+2. **El Árbol (la estructura).** Dos capas del ADR-009 v5 (Proyectos gobierna, Herramientas sirven, la Fábrica la primera) y las transversales (identidades, plataformas). No es otro archivo: es la ruta de cada pieza en el Universo, y la página se genera de ahí.
+3. **El Circuito (los procesos).** Un mapa de procesos por niveles (portafolio › proyecto › proceso de la fábrica › procedimiento › paso), donde cada nodo tiene disparador, entradas, salidas, siguiente, bifurcaciones, retorno, guardias, roles y herramientas; la salida de uno es el disparador del otro. Sucede a `marco-trabajo.json` (12 pasos de septiembre) y junta lo que hoy está repartido en `proceso.json`, los nueve planes, la nomenclatura y las situaciones. La página es navegable: entrar a un nivel, continuar, volver.
+
+Validación de Carlos: mirar las páginas y decir si eso es lo que pasa de verdad. Nada técnico.
+
+## Reglas del plan
+
+- Nada supuesto: cada pieza y cada nodo del circuito cita su fuente (archivo, mensaje, pantalla vista). Lo dudoso se marca «duda» y se pregunta al agente que lo vive, por el buzón, antes que a Carlos.
+- Un dato, una fuente: lo que el Universo o el mapa absorben deja de mantenerse en el archivo viejo; ese archivo pasa a «superado» o a vista generada.
+- Carlos no es cuello de botella: sus decisiones se juntan en una sola lista al final de cada fase (sección «Decisiones de Carlos»), con la recomendación del Arquitecto y lo que pasa si no decide.
+- Sin fechas: cada paso se dispara al cerrar el anterior; el avance se ve en la bitácora de MJ-26 y en el buzón.
+- Los cambios al modelo entran como LM-n (ok de Carlos dado el 30-oct para este plan; se cruza lo que toque encargos de otros roles por el buzón).
+
+## Fases y pasos
+
+| Fase | Pasos (responsable · orden · depende de) | Criterio de salida | Estado |
+|---|---|---|---|
+| **F0 · Plan y consultas** | 0.1 este plan y MJ-26 (Arquitecto) · 0.2 consulta a Diseño, JP y Desarrollo: etapas de sus procesos con disparador, entradas, salidas, siguiente y retorno, más dudas del inventario 0.1 (Arquitecto → buzón) · 0.3 respuestas (los tres chats; por partes si prefieren) | las tres respuestas en el buzón; el plan publicado | en curso |
+| **F1 · Modelo** | 1.1 esquema de pieza y de nodo de proceso en `herramientas/modelo/esquema.json` (dimensiones, gobierno, niveles N0–N4, ids, listas cerradas) · 1.2 `universo-modelo.md` al día como definición · 1.3 cruce por el buzón con los tres chats (lo que cambie su forma de registrar) | esquema validado; sin objeción abierta | por hacer |
+| **F2 · Universo (piezas)** | 2.1 `interno/universo.json` con las piezas del inventario 0.1 corregidas por las respuestas de F0 y con `capa`, `rama` y `proceso` según el árbol (Arquitecto) · 2.2 `elementos.json` pasa a vista generada por `herramientas/modelo/universo.py` (compatibilidad con la página Elementos hasta L-183) · 2.3 guardias U1–U6 en `validar.py` (forma, datos vivos, herramientas, sitios y repos de `proyectos.json`, nacimiento por lote, vigencia) — LM-83 · 2.4 página generada `herramientas/paginas/universo.html` (tabla filtrable + hallazgos) servida por el servicio | validar en 0 con las guardias nuevas; página abierta en la Fábrica; Carlos la revisa | por hacer |
+| **F3 · Circuito (mapa de procesos)** | 3.1 `interno/mapa-procesos.json`: N0 portafolio, N1 proyecto (fases PMI y puertas), N2 los nueve procesos, N3 procedimientos de cada uno a partir de los planes y de lo que respondan los chats, N4 pasos del lote (reemplaza `marco-trabajo.json`) · 3.2 guardias P1–P5: todo disparador con origen, toda salida con destino, toda entrada y salida es pieza del Universo, ningún nodo sin dueño ni retorno, ningún nodo hoja sin herramienta · 3.3 página navegable `herramientas/paginas/mapa-procesos.html` generada por `herramientas/modelo/procesos.py` (entrar, continuar, volver; cada nodo con sus piezas) · 3.4 la nomenclatura toma de aquí el «camino del lote»; los encargos citan de aquí sus criterios de entrada y salida | el recorrido completo pedido → producción → retorno cerrado sin huecos; validar en 0; Carlos lo recorre en la página | por hacer |
+| **F4 · Árbol** | 4.1 página generada `herramientas/paginas/arbol-universo.html` desde `universo.json` (capas, ramas, transversales) · 4.2 los artefactos «Universo STR», «Árbol» y «Circuito» pasan a «superado» (la fuente son las páginas) | la página muestra lo mismo que el artefacto aprobado por Carlos | por hacer |
+| **F5 · Sitios** | 5.1 brief de L-183: Fábrica con menú por árbol (Método, Herramientas, Conocimiento…), cada página del STR como entrada a pantalla completa, más Universo, Árbol y Mapa de procesos · 5.2 brief de L-184: proyectos. con P01 por secciones (Resumen, Alcance, Decisiones, Construcción, Arquitectura, Pruebas, Buzón), Seg. Proyecto y los lados ★ con P01 · 5.3 Desarrollo construye y el juez acepta (paridad por capturas) | los dos sitios muestran el universo y el circuito; ok de Carlos viendo las páginas | por hacer |
+| **F6 · Cerrar las uniones flojas** | una tarea por hallazgo de la cuarta columna del Circuito, cada una con su dueño: encargos del JP y de Desarrollo reescritos (LM) · reglas-comunes con hora, formato JSON, subida y «mensaje de arranque = lee tu encargo» (LM) · duplicados (prioridades, límites, cruce delegado) a una sola fuente (LM + JP) · METRICAS y posimplementación con dueño o superados · D2 partir el repo en `fabrica` y `P01-str-docs` (Carlos + LM) · rama `pruebas` del ADR-007 o cambiar la ADR (Carlos) · vigilancia de vencimientos de tokens y credenciales (LM: `claves/vencimientos.json` sin valores) · restos de LENOVO y plan Premium (Carlos) | cada unión con disparador, fuente, guardia y respaldo, o una decisión escrita de dejarla así | por hacer |
+
+## Decisiones de Carlos (se piden juntas al cerrar cada fase; recomendación del Arquitecto entre paréntesis)
+
+- Tras F1: ¿`capa` del índice viejo se retira? (sí: la reemplazan capa + rama del árbol). ¿El mensaje de arranque de cada chat queda en «lee tu encargo rol-x»? (sí).
+- Tras F3: ¿D2 ahora o después de L-184? (después: los sitios no dependen de él). ¿Rama `pruebas` o ADR-007 corregida? (corregir la ADR a lo que existe y dejar la rama para cuando haya un P02).
+- Con fecha: plan Premium y bucaramangastays.com (3-nov), tokens (9-nov): exportar u…046_hospedaje, desconectar GitHub del sitio viejo, renovar o soltar el dominio, regenerar los tokens con vencimiento largo y anotarlo en `claves/vencimientos.json`.
+
+## Bitácora
+
+- 30-oct: plan escrito; MJ-26 registrada; consultas enviadas a Diseño, JP y Desarrollo (F0.2).

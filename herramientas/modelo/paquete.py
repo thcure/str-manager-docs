@@ -89,7 +89,9 @@ FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': '
 # 5.2c (M-1195): marco-trabajo y cobit para la Fábrica; proyecto/P01 (planes, prioridades, trabajo, pausas del JP) para proyectos.
 FABRICA_JSON = {'instrucciones': 'interno/instrucciones.json', 'mejoras': 'interno/mejoras.json', 'conocimiento': 'interno/conocimiento.json',
                 'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json', 'marco-trabajo': 'interno/marco-trabajo.json',
-                'cobit': 'interno/cobit.json', 'proyecto/P01': 'interno/proyecto.json'}
+                'cobit': 'interno/cobit.json', 'proyecto/P01': 'interno/proyecto.json',
+                # L-183 (M-1311): el universo, el mapa de procesos y los vencimientos (fechas, sin valores) para que la Fábrica muestre cada rama con sus piezas
+                'universo': 'interno/universo.json', 'mapa-procesos': 'interno/mapa-procesos.json', 'vencimientos': 'interno/vencimientos.json'}
 def docs_fabrica():
     import glob
     out = [os.path.relpath(f, RAIZ).replace(os.sep, '/') for f in glob.glob(os.path.join(RAIZ, 'claude/gobierno/*.md'))]

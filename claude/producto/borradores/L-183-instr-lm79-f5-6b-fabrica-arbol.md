@@ -1,5 +1,5 @@
 # instr — L-183 · LM-79 fase 5.6 b (diseño de los sitios, orden de Carlos 30-oct): la Fábrica por el árbol del universo — tres grupos con data-rama, cada página del STR a pantalla completa, Universo, Árbol y Mapa de procesos
-Categoría: **crítico** (cambia la organización y lo que se ve en herramienta-fabrica.; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, pendiente)
+Categoría: **crítico** (cambia la organización y lo que se ve en herramienta-fabrica.; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 30-oct 21:33 (respuesta a M-1315))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-30 21:28 · ok Jefe de proyecto M-1316
 Decisión: ADR-009 (v5, § 4b y 4c) y DA: LM-79; contrato de la fase 5, reglas 8 (paridad de páginas) y 9 (diseño); brief del Arquitecto M-1308 y sus respuestas M-1311 (Mapa de procesos solo en Universo; data-rama «universo»; inicio en Marco de trabajo; ramas sin página con sus piezas de fabrica/universo, que ya carga paquete.py; Línea base y Mapa del STR se quedan en proyectos.)

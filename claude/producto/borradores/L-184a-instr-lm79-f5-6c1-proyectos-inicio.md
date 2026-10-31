@@ -1,21 +1,21 @@
 # instr — L-184a · LM-79 fase 5.6 c, primera parte (diseño de los sitios, orden de Carlos 30-oct): proyectos. por la capa Proyectos del árbol — Inicio con «Lo que te toca» y la Oficina, P01 y Portafolio, en modo «vistas»
 Categoría: **crítico** (cambia la organización de proyectos. y suma la Oficina; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, pendiente)
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
-Revisión previa: pendiente
+Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-30 22:01
 Decisión: ADR-009 (v5, § 4b) y DA: LM-79; contrato de la fase 5, regla 9 (diseño); brief del Arquitecto M-1309 y sus respuestas M-1312 (L-184 se parte: 184a = Inicio, Oficina y Portafolio con el modo «vistas»; 184b = P01 y Seg. Proyecto; tablas, no export; la tabla mensaje entera solo al abrir la Oficina, una vez por sesión); observación del cruce de L-183 (M-1315: piezas superadas al final)
-Alcance: en str-manager, `tests/e2e/LM-79-proyectos-a.spec.js` (nuevo), `tests/e2e/LM-79-proyectos.spec.js`, `LM-79-marco.spec.js`, `LM-79-sistema.spec.js` y `LM-79-fabrica.spec.js` (siguen lo que cambia) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l182 (clon de fabrica-servicio que ya existe, **no** es str-manager), con el script de A2: sitios/proyectos/index.html, proyectos.js y vistas.js, sitios/fabrica/index.html y fabrica.js, tests/sitios-oficina.test.js y tests/fixtures/oficina-buzon.json (nuevos), tests/sitios-marco.test.js, sitios-proyectos.test.js y sitios-fabrica-arbol.test.js, docs/claude/sistema-diseno.md y modelo.md · `?v=` del STR igual · `schema_version` igual · no toques nada más de str-manager
+Alcance: en str-manager, `tests/e2e/LM-79-proyectos-a.spec.js` (nuevo), `tests/e2e/LM-79-proyectos.spec.js`, `LM-79-marco.spec.js`, `LM-79-sistema.spec.js`, `LM-79-fabrica.spec.js` y `LM-79-paginas.spec.js` (siguen lo que cambia; INC-216) · `docs/claude/modelo.md` (puntero) · en la carpeta hermana C:\Users\ktcol\fabrica-servicio-l182 (clon de fabrica-servicio que ya existe, **no** es str-manager), con el script de A2: sitios/proyectos/index.html, proyectos.js y vistas.js, sitios/fabrica/index.html y fabrica.js, tests/sitios-oficina.test.js y tests/fixtures/oficina-buzon.json (nuevos), tests/sitios-marco.test.js, sitios-proyectos.test.js y sitios-fabrica-arbol.test.js, docs/claude/sistema-diseno.md y modelo.md · `?v=` del STR igual · `schema_version` igual · no toques nada más de str-manager
 Versión: `?v=` del STR igual; en los sitios, `?v=s184` · `schema_version` igual (el del modelo, 3, también)
-Origen: brief M-1309 y respuestas M-1312 (Arquitecto, con Carlos); regla de la oficina de Carlos (30-oct: «deben responder el cierre o el fallo de la última tarea asignada», herramientas/oficina/LEEME.md). Requerimiento: LM-79 fase 5.6 en `interno/lotes-modelo/LM-79.md`; estructura del universo MJ-26
+Origen: brief M-1309 y respuestas M-1312; INC-216 (LM-79-proyectos h miraba #gobierno, que L-183 quitó; lo vio el revisor previo de este lote) (Arquitecto, con Carlos); regla de la oficina de Carlos (30-oct: «deben responder el cierre o el fallo de la última tarea asignada», herramientas/oficina/LEEME.md). Requerimiento: LM-79 fase 5.6 en `interno/lotes-modelo/LM-79.md`; estructura del universo MJ-26
 Impacto: proyectos. se organiza como la capa Proyectos del árbol: Inicio («Lo que te toca» y la Oficina nueva: quién trabaja, por su último encargo), P01 con sus partes de siempre y Portafolio; cada entrada se ve sola y al entrar se ve «Lo que te toca». En la Fábrica, las piezas de cada rama salen con las vigentes primero. Diferencias en § P. Nada cambia en el STR ni en el servicio.
 Reglas transversales que toca: RT-18 (el navegador sigue guardando solo el tema) · RT-14 (el permiso sigue en el servicio) · RT-19 (la tabla mensaje entera se lee al abrir la Oficina, en serie y una vez)
 Mapa: módulos y relaciones que cambia: MOD (sitio proyectos. y la vista de piezas de la Fábrica); ninguna relación nueva ni del STR
 Casos de uso: CU-MOD-3.1
-Riesgo: medio: ≈ 260 líneas de código en 5 archivos de fabrica-servicio más sus tests y una muestra fija del buzón, y cinco guiones del STR; partido en 184a y 184b (M-1312). Puede salir mal: la Oficina con otra regla que la del script (O1 la compara con su salida sobre un buzón fijo y el guion c la recalcula aparte en vivo) o un guion que miraba las diez partes viejas (se ajustan los cuatro; simulación en verde). R-1 del lote; MOD riesgo 1. Conexiones a MySQL (RT-19): la carga de proyectos. no cambia (15 lecturas en serie); abrir la Oficina suma una lectura en serie por cada 2000 mensajes (hoy 1), una sola vez por sesión; lejos de 20 nuevas/s.
+Riesgo: medio: ≈ 190 líneas de código (+150 −37) en 5 archivos de fabrica-servicio más sus tests y una muestra fija del buzón, y seis guiones del STR; partido en 184a y 184b (M-1312). Puede salir mal: la Oficina con otra regla que la del script (O1 la compara con su salida sobre un buzón fijo y el guion c la recalcula aparte en vivo) o un guion que miraba las diez partes viejas (se ajustan los cinco; simulación en verde). R-1 del lote; MOD riesgo 1. Conexiones a MySQL (RT-19): la carga de proyectos. no cambia (15 lecturas en serie); abrir la Oficina suma una lectura en serie por cada 2000 mensajes (hoy 1), una sola vez por sesión; lejos de 20 nuevas/s.
 ¿Datos personales o dinero?: no (la Oficina y «Lo que te toca» tapan correos y teléfonos) · ¿Normativa?: no · ¿Toca el modelo (capa Marco)?: no (lote del modelo LM-79, DA: LM-79 y cruce delegado)
 Reversión: fabrica-servicio: `git revert` del commit de A3 (vuelve proyectos. de L-183). str-manager: `git revert <hash>` (los guiones y la nota).
 Paridad (punto 24): (1) código: proyectos. usa el marco y los componentes del sistema (sistema.css y ui.js, sin cambios en este lote); la Oficina es una tabla del sistema (`table.marco`, chips de Elementos) y su regla es la del script de la oficina, comparada en O1 contra su salida; (2) el guion compara contra el origen leído del servicio: b con el mensaje pendiente para Carlos, c con la regla recalculada aparte sobre el buzón entero; (3) diferencia 16 en sistema-diseno.md y § P
 Depende de: L-183 aceptado (fabrica-servicio c0ce17a; str-manager 3909419) · Precondiciones para verificar: perfil zz-verif-admin (en MODELO_ADMIN_UIDS); al menos un mensaje pendiente para Carlos en el buzón del servicio (hoy M-858); sin datos que crear
-¿Quién más depende de lo que cambia?: LM-79-proyectos (partes), LM-79-marco (grupos de proyectos. y versión), LM-79-sistema y LM-79-fabrica (versión) van ajustados aquí (D1–D2, PR1, M1–M3, SS1–SS2, F1–F2). LM-79-seguimiento, INC-213 e INC-214 siguen en verde (miran por id; la Oficina trae su texto antes de leerse, así ninguna parte queda vacía). L-184b parte de aquí. Pieza nueva: tests/e2e/LM-79-proyectos-a.spec.js, tests/sitios-oficina.test.js y tests/fixtures/oficina-buzon.json (regla 19).
+¿Quién más depende de lo que cambia?: LM-79-proyectos (partes; h, INC-216: los documentos de gobierno están desde L-183 en la entrada Proceso de cambios), LM-79-marco (grupos de proyectos. y versión), LM-79-sistema y LM-79-fabrica (versión) y LM-79-paginas (c y d abrían Línea base y Arquitectura con un clic; en modo «vistas» primero se elige la entrada) van ajustados aquí (D1–D2, PR1–PR3, M1–M3, SS1–SS2, F1–F2, PG1–PG2). LM-79-seguimiento, INC-213 e INC-214 siguen en verde (miran por id; la Oficina trae su texto antes de leerse, así ninguna parte queda vacía). L-184b parte de aquí. Pieza nueva: tests/e2e/LM-79-proyectos-a.spec.js, tests/sitios-oficina.test.js y tests/fixtures/oficina-buzon.json (regla 19).
 
 ## § P. Paridad visual: del STR → en proyectos.
 | Del STR (str-manager 73d5aa9~1) | En proyectos. |
@@ -27,7 +27,7 @@ Depende de: L-183 aceptado (fabrica-servicio c0ce17a; str-manager 3909419) · Pr
 Diferencias (y por qué): en `docs/claude/sistema-diseno.md` › Diferencias: 16 (la Oficina es vista propia de proyectos.; las partes de P01 siguen como en L-182 hasta L-184b, ahora una a la vez). Las demás (13–15, modo «vistas») son las de L-183.
 
 ## 0. Contexto y reglas de este lote
-- Dos partes, en este orden: **A** (A1–A3) en la carpeta hermana que ya existe, clon de `thcure/fabrica-servicio` (se reutiliza, como en L-183): la pones al día, aplicas con un script de Node los cambios y sus tests, corres sus tests y lo subes. **B** (B1–B2) en str-manager: pares en el puntero y en cuatro guiones que ya existen, y el guion nuevo. **Si A no termina en verde, no hagas B.**
+- Dos partes, en este orden: **A** (A1–A3) en la carpeta hermana que ya existe, clon de `thcure/fabrica-servicio` (se reutiliza, como en L-183): la pones al día, aplicas con un script de Node los cambios y sus tests, corres sus tests y lo subes. **B** (B1–B2) en str-manager: pares en el puntero y en cinco guiones que ya existen, y el guion nuevo. **Si A no termina en verde, no hagas B.**
 - **La consola no guarda variables entre llamadas.** Cada bloque de A empieza con `H=/c/Users/ktcol/fabrica-servicio-l182` y su guardia: córrelo entero en una sola llamada. No hagas `cd` a la carpeta hermana. Nunca `push --force`, `reset` ni reescribir historia.
 - El script de A2 escribe los doce archivos: **no los edites a mano** ni los reescribas. Si dice FAIL, para.
 - No abras `database.php`, `credenciales.php` ni ningún `secrets.php`.
@@ -100,7 +100,7 @@ git -C "$H" ls-remote origin refs/heads/main; git -C "$H" rev-parse HEAD     # e
 ```
 Si el push falla: **para** sin B y di «No hecho: push bloqueado» con la salida. Plan B: Carlos corre `git -C /c/Users/ktcol/fabrica-servicio-l182 push origin main` y el lote se repite solo desde B. Borra `C:\Users\ktcol\aplicar-l184a.js` al terminar A3.
 
-## B1. Puntero y guiones que ya existen (10 pares; cada «Busca» aparece una sola vez en su archivo; aplícalos en este orden)
+## B1. Puntero y guiones que ya existen (14 pares; cada «Busca» aparece una sola vez en su archivo; aplícalos en este orden)
 **D1 · puntero** (`docs/claude/modelo.md`). Busca:
 ```md
 Al día hasta L-183 · dueño: MOD
@@ -127,6 +127,28 @@ Pon:
 ```js
 // L-184a: Oficina después de «Lo que te toca» y el portafolio al final (grupos Inicio, P01, Portafolio; lo mira LM-79-proyectos-a)
 const PARTES = 'inicio,oficina,resumen,alcance,decisiones,construccion,buzon,arquitectura,pruebas,lineabase,proyectos';
+```
+
+**PR2 · partes de proyectos.** (`tests/e2e/LM-79-proyectos.spec.js`). Busca:
+```js
+      que: 'Con la CSP puesta el admin sigue entrando a la Fábrica, y los documentos de gobierno se ven con su título (INC-212)',
+```
+Pon:
+```js
+      que: 'Con la CSP puesta el admin sigue entrando a la Fábrica, y los documentos de gobierno se ven con su título (INC-212; desde L-183 en la entrada Proceso de cambios, INC-216)',
+```
+
+**PR3 · partes de proyectos.** (`tests/e2e/LM-79-proyectos.spec.js`). Busca:
+```js
+          docs: [...document.querySelectorAll('#gobierno .archivo[data-archivo^="fabrica/doc/"]')].length,
+          conMd: [...document.querySelectorAll('#gobierno .archivo[data-archivo^="fabrica/doc/"] .md')].length,
+          titulos: [...document.querySelectorAll('#gobierno .archivo > summary')].slice(0, 3).map((s) => s.textContent),
+```
+Pon:
+```js
+          docs: [...document.querySelectorAll('#cambios .archivo[data-archivo^="fabrica/doc/"]')].length,
+          conMd: [...document.querySelectorAll('#cambios .archivo[data-archivo^="fabrica/doc/"] .md')].length,
+          titulos: [...document.querySelectorAll('#cambios .archivo > summary')].slice(0, 3).map((s) => s.textContent),
 ```
 
 **M1 · marco (L-184a)** (`tests/e2e/LM-79-marco.spec.js`). Busca:
@@ -206,8 +228,36 @@ Pon:
       que: 'Ningún recurso propio de la Fábrica (js y css de /sitios/) sin la versión del lote (?v=s184 desde L-184a)',
 ```
 
+**PG1 · páginas por entrada en proyectos.** (`tests/e2e/LM-79-paginas.spec.js`). Busca:
+```js
+        if (r.estado !== 'lista') return;
+        revisar(h, await abrir(h, '#lineabase .abrir-pagina'), /L[ií]nea base/i, csp);
+```
+Pon:
+```js
+        if (r.estado !== 'lista') return;
+        // L-184a: proyectos. en modo «vistas»: primero se elige la entrada
+        await h.page.evaluate(() => { location.hash = 'lineabase'; }).catch(() => {});
+        await h.page.waitForTimeout(400);
+        revisar(h, await abrir(h, '#lineabase .abrir-pagina'), /L[ií]nea base/i, csp);
+```
+
+**PG2 · páginas por entrada en proyectos.** (`tests/e2e/LM-79-paginas.spec.js`). Busca:
+```js
+        if (r.estado !== 'lista') return;
+        revisar(h, await abrir(h, '#arquitectura .abrir-pagina'), /Mapa/i, csp);
+```
+Pon:
+```js
+        if (r.estado !== 'lista') return;
+        // L-184a: proyectos. en modo «vistas»: primero se elige la entrada
+        await h.page.evaluate(() => { location.hash = 'arquitectura'; }).catch(() => {});
+        await h.page.waitForTimeout(400);
+        revisar(h, await abrir(h, '#arquitectura .abrir-pagina'), /Mapa/i, csp);
+```
+
 ## B2. Guion nuevo
-Copia el bloque de *Guion N2* a `tests/e2e/LM-79-proyectos-a.spec.js` sin cambiar nada; no lo corras. `node tests/run.js` en verde (84/84: el lote no añade tests en str-manager; `e2e-esquema` carga el guion nuevo y los cuatro ajustados).
+Copia el bloque de *Guion N2* a `tests/e2e/LM-79-proyectos-a.spec.js` sin cambiar nada; no lo corras. `node tests/run.js` en verde (84/84: el lote no añade tests en str-manager; `e2e-esquema` carga el guion nuevo y los cinco ajustados).
 
 ## Ruta de pruebas (mapa.py --ruta)
 ```
@@ -233,7 +283,7 @@ Deuda de cobertura de la ruta (no la ejerce este lote): REL-29 (cola-arquitecto�
 - d. Ni «Lo que te toca» ni la Oficina dejan ver correos ni teléfonos · nivel: N2 · perfil: zz-verif-admin · página: la misma · precondición: la misma · tec: decisión · espera: caso d en verde · **Revertir**
 - e. Ningún recurso propio sin ?v=s184 · nivel: N2 · perfil: zz-verif-admin · página: la misma · precondición: la misma · tec: escenario · espera: caso e en verde · **Detener**
 - f. La tabla mensaje entera se lee una sola vez por sesión · nivel: N2 · perfil: zz-verif-admin · página: la misma · precondición: la misma · tec: límite · espera: caso f en verde · **Detener**
-- h. str-manager suma el guion, ajusta los cuatro que siguen lo que cambia y sigue en verde · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: escenario · espera: `node tests/run.js` 84/84; `aplicar.js` K1 en verde (D1–D2, PR1, M1–M3, SS1–SS2, F1–F2); la cola compara el guion · **Detener**
+- h. str-manager suma el guion, ajusta los cinco que siguen lo que cambia y sigue en verde · nivel: N1 · perfil: tests/ · precondición: ninguna · tec: escenario · espera: `node tests/run.js` 84/84; `aplicar.js` K1 en verde (D1–D2, PR1–PR3, M1–M3, SS1–SS2, F1–F2, PG1–PG2); la cola compara el guion · **Detener**
 - Datos de prueba: ninguno (solo lectura)
 - a0 y h no tienen caso; las demás letras son las del guion.
 - Resultado esperado del juez: «parcial», con a0 en criteriosPendientes (la cierra el Arquitecto).

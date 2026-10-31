@@ -118,7 +118,7 @@ $VigiaHasta = 22    # hora de fin (excluida)
 # Jornada en pausa (panel STR): con el archivo PAUSA en la cola no se avisa a nadie.
 if (Test-Path (Join-Path $Cola 'PAUSA')) { exit 0 }
 New-Item -ItemType Directory -Force $Base | Out-Null
-function Log([string]$t) { Add-Content -Path $LogFile -Value ((Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + ' ' + $t) }
+function Log([string]$t) { Add-Content -Path $LogFile -Encoding UTF8 -Value ((Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + ' ' + $t) }
 
 if ((Test-Path $Lock) -and (((Get-Date) - (Get-Item $Lock).LastWriteTime).TotalMinutes -lt 10)) { exit 0 }
 Set-Content -Path $Lock -Value (Get-Date)

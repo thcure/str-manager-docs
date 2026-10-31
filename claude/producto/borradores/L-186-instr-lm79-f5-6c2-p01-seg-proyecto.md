@@ -1,5 +1,5 @@
 # instr — L-186 · LM-79 fase 5.6 c, segunda parte (diseño de los sitios, orden de Carlos 30-oct): P01 en proyectos. por sus secciones, con las cinco pestañas de Seg. Proyecto del STR como entradas de página y las ADR en Decisiones
-Categoría: **crítico** (trae a proyectos. la página Seg. Proyecto del STR con sus datos rearmados; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, pendiente)
+Categoría: **crítico** (trae a proyectos. la página Seg. Proyecto del STR con sus datos rearmados; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 31-oct 01:42 (respuesta a M-1344))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-31 01:38 · ok Jefe de proyecto M-1345
 Decisión: ADR-009 (v5, § 4b) y DA: LM-79; contrato de la fase 5, reglas 8 y 9; brief del Arquitecto M-1309 y sus respuestas M-1312 (B: las cinco pestañas por sección; tablas, no export; ADR como fabrica/proyecto/P01/doc/ADR-nnn), M-1341 (sigue sin brief nuevo) y M-1343 (pestaña por siembra y no por clic; Ítems en Construcción; barra de trece entradas; mensajes completo)

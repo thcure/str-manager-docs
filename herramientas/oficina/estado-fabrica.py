@@ -1,4 +1,4 @@
-# Estado vivo de la fábrica para el tablero 3D: lee el repo de documentos y escribe un JSON compacto (sin correos ni
+# Estado vivo de la fábrica para el tablero 3D (LM-90: estados de gestión y quietud desde el dato): lee el repo de documentos y escribe un JSON compacto (sin correos ni
 # teléfonos, sin datos del negocio) que se carga en la base del artefacto «La Fábrica STR» (doc estado/actual).
 # Uso: python3 -I estado-fabrica.py <raiz-repo> <carpeta-plan-db o -> <salida.json>
 import json, os, re, sys, subprocess, datetime, zoneinfo
@@ -33,9 +33,9 @@ inc = {'abiertos': len(abiertos), 'porPrioridad': dict(sorted(Counter(i.get('pri
        'ultimos': [{'id': i['id'], 'prioridad': i.get('prioridad'), 'que': corto(i.get('titulo'), 120), 'fecha': i.get('fecha')} for i in abiertos[-3:]],
        'cerradosHoy': len([i for i in incs if i.get('estado') == 'cerrado' and (i.get('fecha') == hoy or hoy in json.dumps(i.get('decision') or {}))])}
 # ── buzón ──
-pend = [m for m in ms if m['estado'] == 'pendiente']; encurso = [m for m in ms if m['estado'] == 'en curso']
+pend = [m for m in ms if m['estado'] in ('pendiente', 'recibido', 'en curso', 'bloqueado')]; encurso = [m for m in ms if m['estado'] in ('recibido', 'en curso', 'bloqueado')]
 hoyms = [m for m in ms if m['fecha'] == hoy]
-buzon = {'pendientes': [{'id': m['id'], 'hora': m['hora'], 'de': m['de'], 'para': m['para'], 'asunto': corto(m['asunto'], 90)} for m in pend],
+buzon = {'pendientes': [{'id': m['id'], 'hora': m['hora'], 'de': m['de'], 'para': m['para'], 'asunto': corto(m['asunto'], 90), 'estado': m['estado'], 'avance': ((m.get('avances') or [{}])[-1].get('hora') or '') if m.get('avances') else ''} for m in pend],
          'enCurso': len(encurso), 'hoy': len(hoyms),
          'ultimos': [{'id': m['id'], 'hora': m['hora'], 'de': m['de'], 'para': m['para'], 'asunto': corto(m['asunto'], 90), 'estado': m['estado']} for m in ms[-8:]],
          'ultimo': {'id': ms[-1]['id'], 'hora': ms[-1]['hora']}}
@@ -50,33 +50,61 @@ ahora_min = ahora.hour * 60 + ahora.minute
 def edad(m):
     if m.get('fecha') != hoy: return 24 * 60
     x = minutos(m.get('hora') or ''); return (ahora_min - x) if x is not None else 0
+ABIERTOS = ('pendiente', 'recibido', 'en curso', 'bloqueado')
+def ult_avance(m):
+    avs = m.get('avances') or []
+    return avs[-1] if avs else (m.get('respuesta') or None)
+def fecha_hora(x):
+    try: return datetime.datetime.strptime(f"{x.get('fecha')} {x.get('hora')}", '%Y-%m-%d %H:%M')
+    except Exception: return None
+ahora_naive = ahora.replace(tzinfo=None)
+# LM-90 (buzón vivo): el estado sale del DATO (mensaje.estado y su último avance), no de heurísticas sobre el texto.
+# quieto declarado = su último mensaje es «Quietud …» al Arquitecto; quieto sin declarar = sin encargo abierto y sin movimiento ≥ 30 min.
 agentes = []
 for ch in CHATS:
     recibidos = [m for m in ms if m['para'] == ch]
-    pend_mios = [m for m in recibidos if m['estado'] == 'pendiente']
-    ult = pend_mios[0] if pend_mios else (recibidos[-1] if recibidos else None)   # lo pendiente más viejo manda sobre lo último cerrado
-    enviados_abiertos = [m for m in ms if m['de'] == ch and m['estado'] != 'hecho']
+    abiertos_mios = [m for m in recibidos if m['estado'] in ABIERTOS]
+    ult = abiertos_mios[0] if abiertos_mios else (recibidos[-1] if recibidos else None)   # lo abierto más viejo manda sobre lo último cerrado
+    enviados_abiertos = [m for m in ms if m['de'] == ch and m['estado'] in ABIERTOS]
+    # último movimiento propio (mensaje o avance escrito por el chat) y última declaración de quietud
+    mov = None; quietud = None
+    for m in ms:
+        if m['de'] == ch:
+            f = fecha_hora(m); mov = max(mov, f) if mov and f else (f or mov)
+            if str(m.get('asunto', '')).startswith('Quietud') and f: quietud = max(quietud, f) if quietud else f
+        for a in (m.get('avances') or []) + ([m['respuesta']] if m.get('respuesta') else []):
+            if isinstance(a, dict) and a.get('de') == ch:
+                f = fecha_hora(a); mov = max(mov, f) if mov and f else (f or mov)
+    min_quieto = int((ahora_naive - mov).total_seconds() // 60) if mov else None
     if not ult:
         estado, que, hora = 'sin encargo', 'nadie le ha pedido nada por el buzón', '—'
     else:
-        r = ult.get('respuesta') or {}; txt = (r.get('texto') or '').strip(); e = edad(ult)
-        if ult['estado'] == 'hecho' and r:
-            bajo = txt.lower()
-            fallo = bool(re.match(r'(no (se )?(pudo|hice|corr[ií]|logr)|bloqueado|fallo|fall[óo])', bajo)) or ' no la corr' in bajo[:80]
-            estado = 'falló' if fallo else 'cerró'; hora = r.get('hora') or ult['hora']
-            que = f"{ult['id']} de {ult['de'].replace('Chat ', '')} ({ult['hora']}): «{corto(txt, 90)}»"
-        elif ult['estado'] == 'en curso':
-            estado, hora = 'en curso', ult['hora']; que = f"{ult['id']} de {ult['de'].replace('Chat ', '')} ({ult['hora']}): {corto(ult['asunto'], 80)}"
+        a = ult_avance(ult) or {}; txt = (a.get('texto') or '').strip(); e = edad(ult); de = ult['de'].replace('Chat ', '')
+        est_dato = a.get('estado') or ult['estado']
+        if ult['estado'] in ('hecho', 'fallo', 'superado') or (ult['estado'] == 'hecho' and a):
+            if ult['estado'] == 'fallo': estado = 'falló'
+            else:
+                bajo = txt.lower()   # mensajes anteriores a LM-90: el fallo solo se lee en el texto
+                estado = 'falló' if (bajo.startswith(('fallo', 'bloqueado', 'no pude')) or re.match(r'(no (se )?(pudo|hice|corr[ií]|logr))', bajo)) else 'cerró'
+            hora = a.get('hora') or ult['hora']; que = f"{ult['id']} de {de} ({ult['hora']}): «{corto(txt, 90)}»"
+        elif ult['estado'] in ('recibido', 'en curso', 'bloqueado'):
+            estado = ult['estado']; hora = a.get('hora') or ult['hora']
+            fa = fecha_hora(a) if a else fecha_hora(ult); sin_av = int((ahora_naive - fa).total_seconds() // 60) if fa else 0
+            que = f"{ult['id']} de {de} ({ult['hora']}): {corto(ult['asunto'], 70)} · último avance {hora}" + (f" · {sin_av // 60} h sin avance" if sin_av >= 240 else '')
         else:
             estado = 'sin reporte' if e >= 30 else 'recién asignado'; hora = ult['hora']
-            que = f"{ult['id']} de {ult['de'].replace('Chat ', '')} hace {e // 60} h {e % 60} min: {corto(ult['asunto'], 80)}" if e >= 60 else f"{ult['id']} de {ult['de'].replace('Chat ', '')} hace {e} min: {corto(ult['asunto'], 80)}"
+            que = f"{ult['id']} de {de} hace {e // 60} h {e % 60} min: {corto(ult['asunto'], 80)}" if e >= 60 else f"{ult['id']} de {de} hace {e} min: {corto(ult['asunto'], 80)}"
+        if not abiertos_mios and ch != 'Carlos' and min_quieto is not None and min_quieto >= 30:
+            estado = 'quieto declarado' if (quietud and mov and quietud >= mov) else 'quieto sin declarar'
+            que = f"sin encargo abierto; último movimiento {mov:%H:%M} ({min_quieto // 60} h {min_quieto % 60} min) · " + que
     espera = []
     for m in enviados_abiertos[-3:]:
         es = re.search(r'Esperando:\s*([^(]{3,80})', m.get('texto') or '')
         espera.append(m['id'] + ' → ' + m['para'].replace('Chat ', '') + (' · ' + es.group(1).strip() if es else ''))
     viejos = [m for m in enviados_abiertos if m.get('fecha') != hoy]
-    agentes.append({'chat': ch, 'estado': estado, 'que': que, 'hora': hora, 'espera': espera, 'ultimoEncargo': ult and ult['id'], 'pendientesRecibidos': len(pend_mios),
-                    'abiertosSuyos': len(enviados_abiertos), 'abiertosViejos': len(viejos), 'masViejo': viejos[0]['id'] + ' (' + viejos[0]['fecha'] + ')' if viejos else None})
+    agentes.append({'chat': ch, 'estado': estado, 'que': que, 'hora': hora, 'espera': espera, 'ultimoEncargo': ult and ult['id'], 'pendientesRecibidos': len(abiertos_mios),
+                    'abiertosSuyos': len(enviados_abiertos), 'abiertosViejos': len(viejos), 'masViejo': viejos[0]['id'] + ' (' + viejos[0]['fecha'] + ')' if viejos else None,
+                    'ultimoMovimiento': mov.strftime('%Y-%m-%d %H:%M') if mov else None, 'minutosQuieto': min_quieto})
 # ── plan LM-79 (desde la base del artefacto del plan, si se pasó la carpeta) ──
 plan = None
 if PLANDB != '-' and os.path.isdir(os.path.join(PLANDB, 'pasos')):

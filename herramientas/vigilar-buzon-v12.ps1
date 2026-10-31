@@ -1,3 +1,13 @@
+# vigilar-buzon-v12.ps1 - Despertador de los chats, version 12 (LM-90, 31-oct-2026; copia de trabajo del v11.5: el v11.5 sigue intacto y es la vuelta atras).
+# v12 (LM-90, buzon vivo): (a) estado propio en buzon\v12\ (no toca los .txt del v11.5; los dos pueden correr a la vez);
+#     (b) modo SOLO REGISTRAR por defecto: escribe en buzon\v12\buzon.log lo que entregaria y no llama a ningun chat; pasa a
+#     entregar cuando buzon\v12\modo.txt dice 'avisar' (lo escribe Carlos cuando el Arquitecto lo pida);
+#     (c) seccion 1 entrega el MENSAJE COMPLETO con su hora (no 'revisa el buzon'): "HH:MM (entregado HH:MM) . M-n de X -> Y . estado . asunto" + texto;
+#     (d) seccion 1c entrega al remitente CADA AVANCE nuevo (avances[] o respuesta) con su hora; lo que pasa a 'bloqueado' o 'fallo'
+#         llega ademas al Chat Arquitecto; (e) seccion 1d QUIETUD: un chat sin encargo abierto y sin movimiento propio en $QuietudMin min
+#         que no declaro 'Quietud' -> aviso al Arquitecto (si el quieto es el Arquitecto, a Carlos); (f) seccion 1b recuerda tambien
+#         los encargos recibidos/en curso sin avance en $AvanceMin min. Todo lo demas igual que v11.5.
+# --- v11.5 ---
 # vigilar-buzon.ps1 - Despertador de los chats (Arquitecto, 2026-10-12; v11.5 25-oct: Avisar quita ANTHROPIC_API_KEY/ANTHROPIC_AUTH_TOKEN solo para la llamada a la nube (exige login de claude.ai) y avisa a Carlos una vez por hora si falta el login; v11.4 M-1095/INC: la seccion 7 ignora el candado .corriendo efimero o con fecha 1601 (falso "CLI sin avance"); v11.3 LM-57: escalamientos y vigia al Chat Jefe de proyecto si existe (si no, al Chat Diseno), por nombre normalizado; planes desde interno/proyecto.json si existe; v11.2 LM-19: avisos de pruebas bloqueadas, guion en rojo y juez sin veredicto; v11.1 B3b: nombres L-NN-* ademas de NN-*; v11 LM-12: plazos desde proceso.json y metricas en estado-vivo)
 #
 # v11 (LM-12, B9a): los plazos (verificador, CLI, fallidas, recordatorio, escalamiento) se leen de interno/proceso.json
@@ -56,7 +66,7 @@
 
 $ErrorActionPreference = 'Continue'
 $Cola     = Join-Path $HOME 'Downloads\str-instr-cola'
-$Base     = Join-Path $Cola 'buzon'
+$Base     = Join-Path $Cola 'buzon\v12'   # v12: estado propio; el v11.5 usa buzon\
 $EstMsg   = Join-Path $Base 'notificados.txt'
 $EstVer   = Join-Path $Base 'veredictos-avisados.txt'
 $EstCola  = Join-Path $Base 'cola-lineas.txt'
@@ -70,6 +80,13 @@ $RepoGit  = 'https://github.com/thcure/str-manager-docs.git'
 $EstSha   = Join-Path $Base 'sha.txt'
 $EstSinS  = Join-Path $Base 'sinsesion.txt'
 $CacheDir = Join-Path $Base 'cache'
+$EstAv    = Join-Path $Base 'avances.txt'      # v12: id|firma del ultimo avance ya entregado al remitente
+$EstQui   = Join-Path $Base 'quietud.txt'      # v12: chat|ultimo movimiento ya avisado como quietud sin declarar
+$QuietudMin = 30   # v12: minutos sin movimiento propio y sin encargo abierto antes de avisar al Arquitecto
+$AvanceMin  = 240  # v12: minutos de un encargo recibido/en curso sin avance antes del recordatorio
+$ModoFile = Join-Path $Base 'modo.txt'
+$SoloRegistrar = $true
+if (Test-Path $ModoFile) { try { if (([string](Get-Content -Path $ModoFile | Select-Object -First 1)).Trim().ToLower() -eq 'avisar') { $SoloRegistrar = $false } } catch { } }
 $EstHora  = Join-Path $Base 'avisados-hora.txt'
 $EstRec   = Join-Path $Base 'recordados.txt'
 $EstEsc   = Join-Path $Base 'escalados.txt'
@@ -144,6 +161,7 @@ function JefeProyecto($dest) { $j = BuscarDest $dest 'Jefe de proyecto'; if ($j)
 
 function Avisar([string]$destNombre, [string]$texto, $dest) {
     $d = BuscarDest $dest $destNombre
+    if ($SoloRegistrar) { Log ("[REGISTRAR] -> " + $destNombre + ": " + (($texto -replace '\s+', ' ').Trim())); return $true }
     if ($d -and ([string]$d.canal) -eq 'windows') { return (Notificar-Windows 'STR: te esperan' $texto) }
     if (-not $d -or -not $d.sesion) { Log "Sin sesion registrada para '$destNombre'; no se avisa."; return $false }
     $sesion = [string]$d.sesion
@@ -236,44 +254,101 @@ try {
             $avisados = @(Get-Content -Path $EstMsg)
             foreach ($m in $msgs) {
                 $id = [string]$m.id
-                if ($id -notmatch '^M-\d+$' -or $m.estado -ne 'pendiente' -or $avisados -contains $id) { continue }
+                if ($id -notmatch '^M-\d+$' -or (@('pendiente','recibido','en curso','bloqueado') -notcontains [string]$m.estado) -or $avisados -contains $id) { continue }
                 $para = [string]$m.para
                 if (-not (BuscarDest $dest $para)) {
                     $yaS = if (Test-Path $EstSinS) { @(Get-Content -Path $EstSinS) } else { @() }
                     if ($yaS -notcontains $id) { Add-Content -Path $EstSinS -Value $id; Log "Sin sesion registrada para el destinatario de $id; espera a que se registre." }
                     continue
                 }
-                $texto = "Revisa el buzon (interno/mensajes.json): tienes el mensaje pendiente $id."
+                # v12: el mensaje completo, con la hora en que se escribio y la de entrega
+                $entregado = (Get-Date).ToString('HH:mm')
+                $texto = "$($m.hora) (entregado $entregado) . $id de $($m.de) -> $($m.para) . $($m.estado) . $($m.asunto)`n`n$($m.texto)`n`n[Buzon LM-90] Responde dentro de $id en interno/mensajes.json: cada cambio es un avance con fecha y hora reales (recibido / en curso / bloqueado / hecho / fallo) y el estado del mensaje es el del ultimo avance."
                 $dPara = BuscarDest $dest $para
-                if (([string]$dPara.canal) -eq 'windows') { $texto = "$id de $($m.de): $($m.asunto). Detalle en el Panel STR o en interno/mensajes.json." }
+                if (([string]$dPara.canal) -eq 'windows') { $texto = "$($m.hora) . $id de $($m.de): $($m.asunto). Detalle en proyectos. > Oficina > Buzon o en interno/mensajes.json." }
                 if (Avisar ([string]$m.para) $texto $dest) { Add-Content -Path $EstMsg -Value $id; Add-Content -Path $EstHora -Value ($id + '|' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')); Log "$id avisado a $($m.para)." }
             }
         }
     } catch { Log ('ERROR en buzon: ' + $_.Exception.Message) }
 
 
-    # --- 1c. Respuestas al remitente (v10, LM-2) ---
-    # Un mensaje enviado por un chat que pasa a 'hecho' con respuesta avisa a quien lo envio (una vez).
+    # --- 1c. Avances al remitente (v12, LM-90; antes v10 'respuestas') ---
+    # Cada avance nuevo de un mensaje (entrada en avances[] o respuesta) se entrega a quien lo envio, con su hora; lo que pasa a
+    # 'bloqueado' o 'fallo' llega ademas al Chat Arquitecto. Firma = cuenta de avances | hay respuesta | estado.
+    function FechaDe($x) { try { return [DateTime]::ParseExact(([string]$x.fecha + ' ' + [string]$x.hora), 'yyyy-MM-dd HH:mm', $null) } catch { return $null } }
+    function UltimoAvance($m) {
+        $u = $null
+        if ($m.avances -and @($m.avances).Count -gt 0) { $u = @($m.avances)[-1] }
+        elseif ($m.respuesta) { $u = $m.respuesta }
+        return $u
+    }
     try {
-        $yaResp = if (Test-Path $EstResp) { @(Get-Content -Path $EstResp) } else { @() }
-        if (-not (Test-Path $EstResp)) {
-            # primera corrida: marcar lo ya respondido sin avisar
-            $msgs | Where-Object { $_.estado -eq 'hecho' -and $_.respuesta } | ForEach-Object { Add-Content -Path $EstResp -Value ([string]$_.id) }
-            Log 'Inicio respuestas: marcadas sin avisar.'
-        } else {
-            foreach ($m in $msgs) {
-                $id = [string]$m.id
-                if ($id -notmatch '^M-\d+$' -or $m.estado -ne 'hecho' -or -not $m.respuesta -or $yaResp -contains $id) { continue }
-                $de = [string]$m.de
-                $dDe = BuscarDest $dest $de
-                if (-not $dDe -or ([string]$dDe.canal) -eq 'windows') { Add-Content -Path $EstResp -Value $id; continue }   # Carlos o remitente desconocido: no se avisa
-                $deResp = ''; try { $deResp = [string]$m.respuesta.de } catch { }
-                if ($deResp -and ((Nom $deResp) -eq (Nom $de))) { Add-Content -Path $EstResp -Value $id; continue }   # v10.2: el remitente cerro su propio mensaje (p. ej. uno para Carlos): no se avisa a si mismo
-                $texto = "Respondieron $id en el buzon (interno/mensajes.json): lee la respuesta y sigue con lo que esperaba."
-                if (Avisar ([string]$dDe.nombre) $texto $dest) { Add-Content -Path $EstResp -Value $id; Log "$id respondido: avisado a $($dDe.nombre)." }
+        $firmas = @{}
+        if (Test-Path $EstAv) { foreach ($l in @(Get-Content -Path $EstAv)) { $q = ([string]$l) -split '\|', 2; if ($q.Count -gt 1) { $firmas[$q[0]] = $q[1] } } }
+        $primera = -not (Test-Path $EstAv)
+        foreach ($m in $msgs) {
+            $id = [string]$m.id
+            if ($id -notmatch '^M-\d+$') { continue }
+            $nAv = 0; if ($m.avances) { $nAv = @($m.avances).Count }
+            $firma = "$nAv|$(if ($m.respuesta) { 1 } else { 0 })|$($m.estado)"
+            if ($primera) { $firmas[$id] = $firma; continue }
+            if ($firmas.ContainsKey($id) -and $firmas[$id] -eq $firma) { continue }
+            if (-not $firmas.ContainsKey($id)) { $firmas[$id] = $firma; continue }   # mensaje nuevo: lo entrega la seccion 1
+            $u = UltimoAvance $m
+            if (-not $u) { $firmas[$id] = $firma; continue }
+            $deAv = ''; try { $deAv = [string]$u.de } catch { }
+            $estAv = ''; try { $estAv = [string]$u.estado } catch { }; if (-not $estAv) { $estAv = [string]$m.estado }
+            $horaAv = ''; try { $horaAv = [string]$u.hora } catch { }
+            $textoAv = ''; try { $textoAv = [string]$u.texto } catch { }
+            $entregado = (Get-Date).ToString('HH:mm')
+            $linea = "$horaAv (entregado $entregado) . $id ($($m.asunto)) . $estAv . avance de ${deAv}: $textoAv"
+            $de = [string]$m.de; $dDe = BuscarDest $dest $de
+            $ok = $true
+            if ($dDe -and -not ($deAv -and ((Nom $deAv) -eq (Nom $de)))) {
+                if (([string]$dDe.canal) -eq 'windows') { $ok = Avisar 'Carlos' ("$horaAv . $id . $estAv . $($m.asunto): $textoAv") $dest }
+                else { $ok = Avisar ([string]$dDe.nombre) $linea $dest }
             }
+            if ($ok -and (@('bloqueado','fallo') -contains $estAv)) {
+                $arq = BuscarDest $dest 'Arquitecto'
+                if ($arq -and (Nom $arq.nombre) -ne (Nom $de) -and (Nom $arq.nombre) -ne (Nom ([string]$m.para))) { [void](Avisar ([string]$arq.nombre) ("Atencion ($estAv): " + $linea) $dest) }
+            }
+            if ($ok) { $firmas[$id] = $firma; Log "$id avance ($estAv) entregado a $de." }
         }
-    } catch { Log ('ERROR en respuestas: ' + $_.Exception.Message) }
+        Set-Content -Path $EstAv -Value @($firmas.Keys | ForEach-Object { $_ + '|' + $firmas[$_] })
+        if ($primera) { Log 'Inicio avances: firmas marcadas sin avisar.' }
+    } catch { Log ('ERROR en avances: ' + $_.Exception.Message) }
+
+    # --- 1d. Quietud sin declarar (v12, LM-90) ---
+    # Un chat sin encargo abierto (ningun mensaje para el en pendiente/recibido/en curso/bloqueado) cuyo ultimo movimiento propio
+    # (mensaje o avance escrito por el) tiene mas de $QuietudMin min y que no escribio despues un mensaje 'Quietud ...' al Arquitecto
+    # -> un aviso al Arquitecto por episodio (si el quieto es el Arquitecto, a Carlos). Solo en horario de vigia.
+    try {
+        $ahoraQ = Get-Date
+        if ($ahoraQ.Hour -ge $VigiaDesde -and $ahoraQ.Hour -lt $VigiaHasta) {
+            $yaQ = @{}; if (Test-Path $EstQui) { foreach ($l in @(Get-Content -Path $EstQui)) { $q = ([string]$l) -split '\|', 2; if ($q.Count -gt 1) { $yaQ[$q[0]] = $q[1] } } }
+            foreach ($d in $dest) {
+                if (([string]$d.canal) -eq 'windows' -or -not $d.sesion) { continue }
+                $k = Nom ([string]$d.nombre)
+                $abierto = $false; $ultMov = $null; $ultQuietud = $null
+                foreach ($m in $msgs) {
+                    if ((Nom ([string]$m.para)) -eq $k -and (@('pendiente','recibido','en curso','bloqueado') -contains [string]$m.estado)) { $abierto = $true }
+                    if ((Nom ([string]$m.de)) -eq $k) { $f = FechaDe $m; if ($f -and (-not $ultMov -or $f -gt $ultMov)) { $ultMov = $f }; if (([string]$m.asunto) -match '^Quietud' -and $f -and (-not $ultQuietud -or $f -gt $ultQuietud)) { $ultQuietud = $f } }
+                    foreach ($a in @($m.avances) + @($m.respuesta)) { if ($a -and (Nom ([string]$a.de)) -eq $k) { $f = FechaDe $a; if ($f -and (-not $ultMov -or $f -gt $ultMov)) { $ultMov = $f } } }
+                }
+                if ($abierto -or -not $ultMov) { continue }
+                $min = ($ahoraQ - $ultMov).TotalMinutes
+                if ($min -lt $QuietudMin) { continue }
+                if ($ultQuietud -and $ultQuietud -ge $ultMov) { continue }   # la declaro
+                $marca = $ultMov.ToString('yyyy-MM-dd HH:mm')
+                if ($yaQ.ContainsKey($k) -and $yaQ[$k] -eq $marca) { continue }   # episodio ya avisado
+                $quien = [string]$d.nombre
+                $t = "$($ahoraQ.ToString('HH:mm')) . $quien lleva $([int]$min) min sin encargo abierto y sin movimiento (ultimo $($ultMov.ToString('HH:mm'))) y no declaro quietud. Valida: corre python3 -I herramientas/oficina/lo-que-me-toca.py . `"$quien`" y, si tiene pasos, encargaselos por el buzon; si no, pidele que declare la quietud."
+                $destinoQ = $(if ($k -eq (Nom 'Chat Arquitecto')) { 'Carlos' } else { 'Chat Arquitecto' })
+                if (Avisar $destinoQ $t $dest) { $yaQ[$k] = $marca; Log "Quietud sin declarar: $quien ($([int]$min) min) avisado a $destinoQ." }
+            }
+            Set-Content -Path $EstQui -Value @($yaQ.Keys | ForEach-Object { $_ + '|' + $yaQ[$_] })
+        }
+    } catch { Log ('ERROR en quietud: ' + $_.Exception.Message) }
 
     # --- 1b. Escalamiento agrupado por destinatario (v7, 10-oct-2026) ---
     # Por chat destinatario: si tiene mensajes avisados que siguen 'pendiente' mas de $RecMin min, UN recordatorio
@@ -291,9 +366,17 @@ try {
             $porDest = @{}
             foreach ($m in $msgs) {
                 $id = [string]$m.id
-                if ($m.estado -ne 'pendiente' -or -not $horas.ContainsKey($id)) { continue }
-                $min = ($ahoraE - $horas[$id]).TotalMinutes
-                if ($min -lt $RecMin) { continue }
+                if ($m.estado -eq 'pendiente') {
+                    if (-not $horas.ContainsKey($id)) { continue }
+                    $min = ($ahoraE - $horas[$id]).TotalMinutes
+                    if ($min -lt $RecMin) { continue }
+                } elseif (@('recibido','en curso','bloqueado') -contains [string]$m.estado) {
+                    # v12: encargo tomado y sin avance en $AvanceMin min -> recordatorio (no escalamiento)
+                    $u = UltimoAvance $m; $fu = $(if ($u) { FechaDe $u } else { FechaDe $m }); if (-not $fu) { continue }
+                    $min = ($ahoraE - $fu).TotalMinutes
+                    if ($min -lt $AvanceMin) { continue }
+                    $min = 0   # no escala: solo recuerda
+                } else { continue }
                 $dPx = BuscarDest $dest ([string]$m.para); $para = $(if ($dPx) { [string]$dPx.nombre } else { [string]$m.para })
                 if (-not $porDest.ContainsKey($para)) { $porDest[$para] = @{ rec = @(); esc = @() } }
                 $porDest[$para].rec += $id
@@ -302,7 +385,7 @@ try {
             foreach ($para in $porDest.Keys) {
                 $g = $porDest[$para]
                 if ($g.rec.Count -gt 0 -and (-not $recD.ContainsKey($para) -or ($ahoraE - $recD[$para]).TotalMinutes -ge $RecCada)) {
-                    $t1 = "Recordatorio: tienes " + $g.rec.Count + " mensaje(s) pendiente(s) en el buzon (" + ($g.rec -join ', ') + "). Atiendelos o responde por que esperan."
+                    $t1 = (Get-Date).ToString('HH:mm') + " . Recordatorio: tienes " + $g.rec.Count + " encargo(s) sin atender o sin avance en el buzon (" + ($g.rec -join ', ') + "). Atiendelos o escribe un avance con hora (recibido / en curso / bloqueado) diciendo por que esperan."
                     if (Avisar $para $t1 $dest) { $recD[$para] = $ahoraE; Log ("Recordatorio a $para de " + ($g.rec -join ',') + ".") }
                 }
                 if ($g.esc.Count -gt 0 -and $dis -and $para -notmatch '^Chat de dise.o$' -and $para -ne 'Carlos' -and (-not $escD.ContainsKey($para) -or ($ahoraE - $escD[$para]).TotalMinutes -ge $EscCada)) {

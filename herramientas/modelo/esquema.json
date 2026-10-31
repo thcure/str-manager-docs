@@ -1,6 +1,6 @@
 {
  "version": "0.12",
- "fecha": "2026-10-30",
+ "fecha": "2026-10-31",
  "fuente": "claude/marco/modelo-de-datos-2026-10.md (B1). Decisiones de Carlos del 11-oct-2026 (17:40–17:50): (1) B: id uniforme L-n también en la cola (L-73-instr-…), se aplica en B3 con cola v5, despertador y Panel; (2) A: los REQ sin -n o con punto se renombran en una sola pasada (B3); hasta entonces REQ_legado es aviso; (3) A: el estado del REQ desde 'construido' lo deriva el sistema del lote; (4) A: 'cambio' solo para lotes del modelo y para aprobación/costo; lo demás se deriva de lote, veredicto y evento; (5) A: Carlos es rol-dueno (tipo persona, canal Panel/Windows) y lo que espera de él se mide. | v0.3 (12-oct, B3a): alias de roles históricos del buzón; R4 solo aplica a lotes desde 'redactado'. | v0.3: patrón REQ admite un subnivel -n-m (partes de un mismo REQ); renombres en herramientas/modelo/renombres-req.json.",
  "patrones": {
   "REQ": "^REQ-[A-Z0-9]{1,4}-\\d+(-\\d+)?$",
@@ -129,8 +129,11 @@
   ],
   "mensaje": [
    "pendiente",
+   "recibido",
    "en curso",
+   "bloqueado",
    "hecho",
+   "fallo",
    "vencido",
    "superado"
   ],
@@ -1590,5 +1593,37 @@
    "estado"
   ],
   "regla": "la salida de un nodo es el disparador de otro; todo evento no externo lo emite alguien y, si no es terminal, lo dispara alguien; toda entrada, salida y herramienta es una pieza del Universo; ningún nodo sin dueño ni retorno (N2–N4)."
+ },
+ "mensaje": {
+  "lm": "LM-90 (buzón vivo; BAI11.04/.07, MEA01; Carlos 31-oct)",
+  "desde": "2026-10-31",
+  "modo": "avisos",
+  "modoNota": "'avisos': R-avance y R-hora solo avisan; pasa a 'vigente' (errores) con el aviso único del Arquitecto por el buzón que activa el modelo nuevo.",
+  "flujo": "pendiente → recibido → en curso → (bloqueado) → hecho | fallo | superado. 'vencido' lo pone el despertador cuando pasa el plazo sin nadie.",
+  "respuesta": "forma de siempre {fecha, hora, de, texto}: sigue valiendo; equivale al último avance.",
+  "avances": {
+   "donde": "mensaje.avances[]",
+   "campos": [
+    "fecha",
+    "hora",
+    "de",
+    "estado",
+    "texto"
+   ],
+   "regla": "cada cambio de estado o de avance es una entrada nueva con fecha y hora reales (America/Bogota); el último avance es el estado actual y mensaje.estado debe coincidir con él; nunca se borra ni se edita un avance anterior."
+  },
+  "quietud": "antes de quedarse sin trabajo el chat escribe al Arquitecto «Quietud HH:MM: último encargo X; lo-que-me-toca vacío; espero Y»; el Arquitecto responde en el mismo mensaje (correcto / te toca Z).",
+  "guardias": {
+   "R-avance": "mensaje en recibido/en curso/bloqueado sin avance en 4 h = aviso; en 48 h = error (vigente). Para Carlos no aplica.",
+   "R-hora": "fecha+hora del mensaje y de cada avance: ni futura (tolerancia 10 min) ni anterior a la del avance previo; mensaje.estado distinto del estado del último avance = error (vigente).",
+   "R-carlos": "'Esperando: Carlos' pendiente más de 5 días = aviso al Arquitecto (lo presenta o lo supera con motivo)."
+  },
+  "plazos": {
+   "avanceHoras": 4,
+   "avanceErrorHoras": 48,
+   "toleranciaFuturoMin": 10,
+   "carlosDias": 5,
+   "quietudMin": 30
+  }
  }
 }

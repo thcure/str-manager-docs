@@ -187,6 +187,51 @@ for m in mensajes:
             mins = (ahora - t).total_seconds() / 60
             if mins > E['limites']['mensajePendienteMin'] and norm_rol(m.get('para')) != 'carlos': avi('R-mensaje', 'mensaje', m.get('id'), f'pendiente desde hace {int(mins)} min (para {m.get("para")})')
         except Exception: pass
+# LM-90 (buzón vivo): R-hora (hora real, no futura, avances en orden, estado = último avance), R-avance (encargo en
+# recibido/en curso/bloqueado sin avance), R-carlos («Esperando: Carlos» viejo). Avisos mientras esquema.mensaje.modo = 'avisos'.
+MSJ = E.get('mensaje') or {}
+if MSJ:
+    try:
+        from zoneinfo import ZoneInfo
+        ahora_bog = datetime.datetime.now(ZoneInfo('America/Bogota')).replace(tzinfo=None)
+    except Exception: ahora_bog = datetime.datetime.now()
+    PL = MSJ.get('plazos', {}); vig = MSJ.get('modo') == 'vigente'
+    err_o_avi = err if vig else avi
+    def t_de(x):
+        try: return datetime.datetime.strptime(str(x.get('fecha')) + ' ' + str(x.get('hora')), '%Y-%m-%d %H:%M')
+        except Exception: return None
+    desde_lm = datetime.datetime.strptime(MSJ.get('desde', '2026-10-31'), '%Y-%m-%d')
+    for m in mensajes:
+        t0 = t_de(m)
+        if t0 is None or t0 < desde_lm: continue   # lo anterior a LM-90 no se juzga
+        tol = datetime.timedelta(minutes=PL.get('toleranciaFuturoMin', 10))
+        if t0 > ahora_bog + tol: err_o_avi('R-hora', 'mensaje', m.get('id'), f'hora futura: {m.get("fecha")} {m.get("hora")}')
+        prev = t0; ult_estado = None
+        avs = m.get('avances') or []
+        for i, a in enumerate(avs):
+            ta = t_de(a)
+            if ta is None: err_o_avi('R-hora', 'mensaje', m.get('id'), f'avance {i+1} sin fecha/hora válidas'); continue
+            if ta > ahora_bog + tol: err_o_avi('R-hora', 'mensaje', m.get('id'), f'avance {i+1} con hora futura {a.get("hora")}')
+            if ta < prev: err_o_avi('R-hora', 'mensaje', m.get('id'), f'avance {i+1} ({a.get("hora")}) anterior al previo ({prev:%H:%M})')
+            if a.get('estado') and a['estado'] not in E['estados']['mensaje']: err('R3 estado', 'mensaje', m.get('id'), f'avance {i+1} estado={a.get("estado")!r}')
+            prev = max(prev, ta); ult_estado = a.get('estado') or ult_estado
+        if avs and ult_estado and m.get('estado') != ult_estado:
+            err_o_avi('R-hora', 'mensaje', m.get('id'), f'estado={m.get("estado")!r} pero el último avance dice {ult_estado!r}')
+        r = m.get('respuesta')
+        if isinstance(r, dict):
+            tr = t_de(r)
+            if tr and tr > ahora_bog + tol: err_o_avi('R-hora', 'mensaje', m.get('id'), f'respuesta con hora futura {r.get("hora")}')
+        # R-avance: encargo tomado y sin reporte
+        if m.get('estado') in ('recibido', 'en curso', 'bloqueado') and norm_rol(m.get('para')) != 'carlos':
+            horas = (ahora_bog - prev).total_seconds() / 3600
+            if horas >= PL.get('avanceErrorHoras', 48): err_o_avi('R-avance', 'mensaje', m.get('id'), f'{m.get("estado")} sin avance desde hace {int(horas)} h (para {m.get("para")})')
+            elif horas >= PL.get('avanceHoras', 4): avi('R-avance', 'mensaje', m.get('id'), f'{m.get("estado")} sin avance desde hace {int(horas)} h (para {m.get("para")})')
+    # R-carlos: lo que espera de Carlos no se queda solo
+    for m in mensajes:
+        if m.get('estado') == 'pendiente' and norm_rol(m.get('para')) == 'carlos':
+            t0 = t_de(m)
+            if t0 and (ahora_bog - t0).days >= PL.get('carlosDias', 5): avi('R-carlos', 'mensaje', m.get('id'), f'«Esperando: Carlos» desde hace {(ahora_bog - t0).days} días: el Arquitecto lo presenta o lo supera con motivo')
+
 # Un lote en curso
 en_curso = [l for l in lotes if l.get('estado') in ('encolado', 'construyendo', 'construido', 'verificando', 'desplegado')]
 if len(en_curso) > E['limites']['lotesEnCurso']: avi('R-curso', 'lote', ','.join(str(l.get('lote')) for l in en_curso), f'{len(en_curso)} lotes en curso a la vez')

@@ -1,5 +1,5 @@
 # instr — L-184a · LM-79 fase 5.6 c, primera parte (diseño de los sitios, orden de Carlos 30-oct): proyectos. por la capa Proyectos del árbol — Inicio con «Lo que te toca» y la Oficina, P01 y Portafolio, en modo «vistas»
-Categoría: **crítico** (cambia la organización de proyectos. y suma la Oficina; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, pendiente)
+Categoría: **crítico** (cambia la organización de proyectos. y suma la Oficina; DA: LM-79 · cruce previo con Carlos: delegado en el Arquitecto, 30-oct 22:03 (respuesta a M-1321))
 Commit: la CLI (el Alcance no nombra la carpeta de los hooks ni `tests/hooks.test.js`)
 Revisión previa: 24/24 · subagente de Desarrollo · 2026-10-30 22:01 · ok Jefe de proyecto M-1322
 Decisión: ADR-009 (v5, § 4b) y DA: LM-79; contrato de la fase 5, regla 9 (diseño); brief del Arquitecto M-1309 y sus respuestas M-1312 (L-184 se parte: 184a = Inicio, Oficina y Portafolio con el modo «vistas»; 184b = P01 y Seg. Proyecto; tablas, no export; la tabla mensaje entera solo al abrir la Oficina, una vez por sesión); observación del cruce de L-183 (M-1315: piezas superadas al final)

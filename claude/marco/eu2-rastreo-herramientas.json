@@ -1,0 +1,820 @@
+[
+ {
+  "id": "herramienta-vigilar-buzon-v12",
+  "origen": "LM-90 (31-oct-2026, orden de Carlos en el chat del Arquitecto)",
+  "necesidad": "El buzón era privado: Carlos hacía de correo, no había avances ni aviso cuando un chat quedaba quieto sin decirlo.",
+  "practicaCobit": "BAI11.07",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: entrega el mensaje completo con hora al destinatario y cada avance al remitente. Control: vigila y avisa al Arquitecto de bloqueos, fallos y quietud sin declarar.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-90.md:3",
+   "interno/lotes-modelo/LM-90.md:4",
+   "interno/lotes-modelo/LM-90.md:15",
+   "interno/lotes-modelo/LM-90.md:23",
+   "interno/seguimiento.json:19102"
+  ]
+ },
+ {
+  "id": "herramientas-arquitecto",
+  "origen": "Relevo del Arquitecto 31-oct-2026 (traspaso-arquitecto-2026-10-31.md); subir.sh aplica la regla 18 de LM-85 (30-oct): subida con rebase y fusión del buzón",
+  "necesidad": "Varios chats suben a la vez y chocan en el buzón; las herramientas del Arquitecto vivían solo en su contenedor y se perdían al relevarlo.",
+  "practicaCobit": "BAI10.05 (subir.sh) · BAI10.01 (build.py y estructura-universo.py)",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: subir.sh no sube si validar.py no da 0. Herramienta: commit, rebase, fusión del buzón (buzon-merge.py), push; build.py genera universo.json; estructura-universo.py arma la página «El Universo armado».",
+  "confianza": "media",
+  "evidencia": [
+   "claude/marco/traspaso-arquitecto-2026-10-31.md:22",
+   "herramientas/arquitecto/LEEME.md:5",
+   "herramientas/arquitecto/LEEME.md:7",
+   "herramientas/arquitecto/subir.sh:3",
+   "interno/seguimiento.json:18629"
+  ]
+ },
+ {
+  "id": "oficina-lo-que-me-toca",
+  "origen": "LM-90 ⑦ (31-oct-2026)",
+  "necesidad": "Cuatro planes en cuatro archivos y cada chat leía solo el suyo: el trabajo le llegaba solo cuando alguien le escribía.",
+  "practicaCobit": "BAI11.04",
+  "funcion": "herramienta",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-90.md:15",
+   "interno/lotes-modelo/LM-90.md:22",
+   "interno/seguimiento.json:19102"
+  ]
+ },
+ {
+  "id": "carpetas-construccion-desarrollo",
+  "origen": "no encontrado (sin LM ni INC de creación; solo inventariada por Desarrollo en M-1288, 30-oct, y descrita como etapas 3.2–3.3 en M-1296)",
+  "necesidad": "Desarrollo necesita simular el cambio sobre copias del código y sacar pares Busca/Reemplaza literales antes de redactar la instrucción.",
+  "practicaCobit": "BAI03.03",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: genpares.py, construir.py e instr.py arman los pares y la instrucción; aplicar-l1NN.js aplica en fabrica-servicio. Control informal: la simulación local (tests/run.js, pw/prueba*.js) antes de encolar; no queda respaldo.",
+  "confianza": "baja",
+  "evidencia": [
+   "interno/mensajes.json:19984",
+   "interno/mensajes.json:20112",
+   "interno/universo.json (pieza carpetas-construccion-desarrollo, fuente «Desarrollo M-1288»)"
+  ]
+ },
+ {
+  "id": "cola-str-instr",
+  "origen": "Anterior a los LM: elemento vigente desde 11-sep-2026; ficha APO01.10-a vigente desde 24-sep-2026 (sin LM/INC de creación en la copia)",
+  "necesidad": "Construir y desplegar cada lote sin intervención de Carlos, uno a la vez, por un único canal hacia el código.",
+  "practicaCobit": "BAI06.03",
+  "funcion": "infraestructura",
+  "detalleFuncion": "Carpetas de la cola (raíz = pendientes, hechas\\, fallidas\\, log\\, correr\\…): canal y registro de estado; las guardias viven en ejecutar-cola.ps1 (pieza aparte).",
+  "confianza": "media",
+  "evidencia": [
+   "interno/elementos.json:905",
+   "interno/conocimiento.json:289",
+   "interno/marco-trabajo.json:65",
+   "interno/marco-trabajo.json:72",
+   "interno/mensajes.json:19984"
+  ]
+ },
+ {
+  "id": "ejecutar-cola",
+  "origen": "Anterior a los LM (ficha APO01.10-a, 24-sep-2026); guardias desde LM-2 (cola v3, 11-oct-2026); Control-Veredicto en LM-50 (17-oct)",
+  "necesidad": "Que la CLI construya, pruebe y despliegue cada lote sola y que ningún lote crítico entre sin cruce de Carlos.",
+  "practicaCobit": "BAI03.05 · BAI06.01 (guardias)",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: lanza la CLI, pw/probar-lote y el juez, mueve la instrucción a hechas\\ o fallidas\\ y escribe _resumen.txt. Control: rechaza crítico sin cruce/DA, sin revisión previa u ok (.sin-*.md) y repite el juez si contradice pruebas.json.",
+  "confianza": "media",
+  "evidencia": [
+   "interno/conocimiento.json:289",
+   "interno/lotes-modelo/LM-2.md:3",
+   "interno/lotes-modelo/LM-2.md:6",
+   "interno/seguimiento.json:7955",
+   "interno/seguimiento.json:14835",
+   "interno/mensajes.json:19984"
+  ]
+ },
+ {
+  "id": "herramienta-hooks-cli",
+  "origen": "LM-7 / A7b (REQ-MOD-3, DA-31; 11-oct-2026; situaciones G-8, G-9, G-16, G-17, G-25, G-29, G-35)",
+  "necesidad": "Las reglas escritas para la CLI (Alcance, tests verdes, mapa, nada sin commit) se incumplían; había que hacerlas automáticas y no perderlas al compactar.",
+  "practicaCobit": "BAI03.06",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: guard-bash.js (PreToolUse) frena comandos destructivos y commits fuera del Alcance, sin mapa, con tests rojos o sin línea «Lote:»; stop-check.js impide terminar con cambios sin commit. Herramienta: ctx.js reinyecta reglas fijas y cabecera del lote tras compactar.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/A7b-instr-hooks-cli.md:4",
+   "interno/lotes-modelo/A7b-instr-hooks-cli.md:7",
+   "interno/lotes-modelo/LM-7.md:3",
+   "interno/seguimiento.json:8025",
+   "interno/elementos.json:2819"
+  ]
+ },
+ {
+  "id": "lenovo-hooks-instalados",
+  "origen": "LM-7b (11-oct-2026: Carlos copió .claude/ a mano porque el modo automático bloquea escribir ahí); versiones posteriores LM-42, LM-64, LM-77",
+  "necesidad": "Los hooks deben estar instalados en el str-manager de LENOVO, donde corre la CLI, y ningún agente puede escribirlos ahí.",
+  "practicaCobit": "BAI03.06",
+  "funcion": "mixta",
+  "detalleFuncion": "Es la copia instalada de herramienta-hooks-cli: guard-bash.js y stop-check.js frenan (control); ctx.js reinyecta contexto (herramienta). Versión instalada sin confirmar.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-7.md:17",
+   "interno/lotes-modelo/A7b-instr-hooks-cli.md:2",
+   "interno/seguimiento.json:8025"
+  ]
+ },
+ {
+  "id": "herramienta-panel-str",
+  "origen": "Cambio del 10-oct-2026 (Panel de jornada; ficha APO01.10-j); v2 por M-105, v3 LM-3 (11-oct), v4 LM-31 (14-oct)",
+  "necesidad": "Que Carlos abra y cierre la jornada con un clic, sin consumo en pausa, viendo la salud y lo que espera de él.",
+  "practicaCobit": "APO06.05",
+  "funcion": "herramienta",
+  "detalleFuncion": "Interruptor de jornada (archivo PAUSA que respetan cola y despertador) y tablero de estado; no juzga nada.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/seguimiento.json:7565",
+   "interno/conocimiento.json:703",
+   "interno/elementos.json:2252",
+   "interno/lotes-modelo/LM-3.md:1",
+   "interno/marco-trabajo.json:163"
+  ]
+ },
+ {
+  "id": "herramienta-vigilar-buzon",
+  "origen": "Cambio del 8-oct-2026 (despertador v1 sobre el buzón creado el 6-oct); vigía «nadie espera en silencio» en v9 (M-105, 10-oct); v10 LM-2, v11 LM-12",
+  "necesidad": "Que los chats se pasen trabajo sin que Carlos haga de mensajero y se enteren de mensajes y veredictos sin gastar créditos esperando.",
+  "practicaCobit": "BAI08.03 (entrega) · BAI11.07 (vigía)",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: deja la frase fija «Revisa el buzón… M-n» o «Hay veredicto nuevo» en el chat destinatario. Control: vigía de cola detenida, verificador sin entregar, CLI sin avance y recordatorios/escalamiento a Carlos.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/seguimiento.json:4308",
+   "interno/seguimiento.json:5556",
+   "interno/seguimiento.json:7739",
+   "interno/conocimiento.json:239",
+   "interno/marco-trabajo.json:163",
+   "interno/elementos.json:1777"
+  ]
+ },
+ {
+  "id": "herramienta-validador",
+  "origen": "LM-9 (B1, REQ-MOD-1; 11-oct-2026)",
+  "necesidad": "Que chats, cola, despertador y tablero usen los mismos ids, estados y plazos, y que una herramienta, no una persona, detecte las desviaciones.",
+  "practicaCobit": "BAI10.05",
+  "funcion": "control",
+  "detalleFuncion": "Agrupa esquema.json + validar.py (control: 0 errores o nada se instala) con linea-base.py, mapa.py y ubicar.py, que tienen pieza propia y hacen también trabajo de herramienta.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-9.md:3",
+   "interno/lotes-modelo/LM-9.md:6",
+   "interno/seguimiento.json:8053",
+   "interno/conocimiento.json:787",
+   "interno/elementos.json:2749"
+  ]
+ },
+ {
+  "id": "modelo-archivar-py",
+  "origen": "LM-69 Cn6 (CONOCIMIENTO-v1, 21-oct-2026)",
+  "necesidad": "El buzón pasó su tope (1,8 MB > 1 MB); hacía falta archivar lo cerrado sin borrar ni perder ids citados.",
+  "practicaCobit": "BAI08.04",
+  "funcion": "herramienta",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-69.md:9",
+   "interno/lotes-modelo/LM-69.md:14",
+   "herramientas/modelo/archivar.py:2",
+   "interno/seguimiento.json:17040"
+  ]
+ },
+ {
+  "id": "modelo-auxiliares",
+  "origen": "B3a/B4 del plan PT-M1 tras LM-9 (12-oct-2026): normalizar.py (B3) y partir-items.py (LM-15); palabras-vagas.json en LM-61 (20-oct); dominio.json en LM-76 (21-oct)",
+  "necesidad": "Llevar los datos viejos a las listas cerradas del esquema y a una sola fuente, y dar diccionarios a las guardias y a ubicar.",
+  "practicaCobit": "BAI10.01 (normalizar) · APO01.07 (partir-items: un dato, una fuente)",
+  "funcion": "herramienta",
+  "detalleFuncion": "Scripts de migración de una vez y datos auxiliares; palabras-vagas.json alimenta la revisión de REQ de linea-base.py --req (dato de un control), dominio.json alimenta ubicar.py.",
+  "confianza": "media",
+  "evidencia": [
+   "herramientas/modelo/normalizar.py:2",
+   "herramientas/modelo/partir-items.py:2",
+   "interno/seguimiento.json:8434",
+   "interno/lotes-modelo/LM-9.md:11",
+   "interno/lotes-modelo/LM-61.md:11",
+   "interno/lotes-modelo/LM-76.md:21",
+   "interno/conocimiento.json:796"
+  ]
+ },
+ {
+  "id": "modelo-buzon-py",
+  "origen": "LM-69 Cn2 (21-oct-2026)",
+  "necesidad": "Cada rol cargaba el buzón entero al arrancar; necesitaba ver solo sus pendientes, respuestas recientes y lo que espera.",
+  "practicaCobit": "BAI08.03",
+  "funcion": "herramienta",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-69.md:10",
+   "herramientas/modelo/buzon.py:2",
+   "claude/marco/plan-conocimiento.md:52",
+   "interno/seguimiento.json:17040"
+  ]
+ },
+ {
+  "id": "modelo-catalogo-md-py",
+  "origen": "LM-32 (14-oct-2026), según la cabecera del archivo; el LM no lo nombra",
+  "necesidad": "Tener una vista legible del catálogo de prácticas, patrones y herramientas reutilizables entre proyectos.",
+  "practicaCobit": "BAI08.03",
+  "funcion": "herramienta",
+  "detalleFuncion": "",
+  "confianza": "media",
+  "evidencia": [
+   "herramientas/modelo/catalogo_md.py:2",
+   "interno/seguimiento.json:10063"
+  ]
+ },
+ {
+  "id": "modelo-conocimiento-py",
+  "origen": "LM-69 Cn1/Cn2/Cn5 (21-oct-2026)",
+  "necesidad": "Los documentos que leen los chats crecían sin medida; había que saber cuáles pasan su tope o llevan demasiado sin revisión.",
+  "practicaCobit": "BAI08.04",
+  "funcion": "control",
+  "detalleFuncion": "Mide tamaño y edad de las piezas del conocimiento y marca lo que pasa el tope; validar.py lo importa para los avisos Cn. Verifica, no frena.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-69.md:9",
+   "interno/lotes-modelo/LM-69.md:27",
+   "herramientas/modelo/conocimiento.py:2",
+   "herramientas/modelo/validar.py:645"
+  ]
+ },
+ {
+  "id": "modelo-espejo-js",
+  "origen": "LM-34 (B7-6 paso 1, 14-oct-2026)",
+  "necesidad": "El servicio pasó a ser la copia de la que se lee; había que comprobar cada día que es idéntico a Git.",
+  "practicaCobit": "BAI10.05",
+  "funcion": "control",
+  "detalleFuncion": "Compara byte a byte la exportación del servicio con el commit cargado; sale distinto de 0 si hay diferencias. No carga nada.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-34.md:4",
+   "interno/lotes-modelo/LM-34.md:14",
+   "interno/lotes-modelo/LM-34.md:21",
+   "herramientas/modelo/espejo.js:1",
+   "interno/seguimiento.json:10439"
+  ]
+ },
+ {
+  "id": "modelo-ficha-semanal-py",
+  "origen": "LM-62 V8 (PRUEBAS-v2, 20-oct-2026); ampliada en LM-63 (DORA), LM-65, LM-66 (--como-vamos) y LM-71 (rojas repetidas)",
+  "necesidad": "Informar al cierre de cada tanda cómo van pruebas, incidentes, flujo y riesgos, con el dueño de cada medida en rojo.",
+  "practicaCobit": "MEA01.03 · MEA01.04",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: junta repo y METRICAS.json y arma la ficha y «¿cómo vamos?». Control: semáforo con umbrales que marca rojas y «rojas repetidas sin acción» (Rg6); informa, no decide.",
+  "confianza": "alta",
+  "evidencia": [
+   "herramientas/modelo/ficha-semanal.py:2",
+   "claude/marco/plan-verificacion-aceptacion.md:82",
+   "interno/seguimiento.json:16888",
+   "interno/lotes-modelo/LM-71.md:14",
+   "interno/cobit.json:3676"
+  ]
+ },
+ {
+  "id": "modelo-flujo-py",
+  "origen": "LM-66 (FLUJO-v1, MJ-17 proceso 5; 21-oct-2026)",
+  "necesidad": "El trabajo no tenía orden único, límites ni edad por estado; nadie veía qué estaba fuera de plazo.",
+  "practicaCobit": "BAI11.04 · BAI11.07",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: funciones que validar.py usa para las guardias F1–F7 (hoy avisos). Herramienta: alimenta las métricas F8 y la tabla «¿cómo vamos?» de ficha-semanal.py.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-66.md:9",
+   "interno/lotes-modelo/LM-66.md:10",
+   "herramientas/modelo/flujo.py:2",
+   "interno/seguimiento.json:17012",
+   "herramientas/modelo/validar.py:501"
+  ]
+ },
+ {
+  "id": "modelo-guiones-e2e-js",
+  "origen": "LM-40 (MJ-14, 15-oct-2026); V11 de palabras clave en LM-62",
+  "necesidad": "El mapa necesitaba saber qué guiones de tests/e2e existen y qué módulos y casos cubren.",
+  "practicaCobit": "APO03.02",
+  "funcion": "herramienta",
+  "detalleFuncion": "Toma la foto de las cabeceras y casos de los guiones; en v2 también lista palabras clave desconocidas (aviso menor). No frena ni juzga.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-40.md:20",
+   "herramientas/modelo/guiones-e2e.js:1",
+   "interno/seguimiento.json:13943",
+   "interno/mejoras.json:458"
+  ]
+ },
+ {
+  "id": "modelo-incidentes-py",
+  "origen": "LM-65 (INCIDENTES-v1, MJ-17 proceso 4; 21-oct-2026)",
+  "necesidad": "Los INC no tenían prioridad, plazo de decisión, revisión ni problemas comunes detectados; había que exigirlo por guardia.",
+  "practicaCobit": "DSS02.02",
+  "funcion": "control",
+  "detalleFuncion": "Guardias I1–I7 que validar.py aplica (error desde el 22-oct para lo nuevo).",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-65.md:9",
+   "interno/lotes-modelo/LM-65.md:21",
+   "interno/seguimiento.json:16941",
+   "herramientas/modelo/validar.py:421"
+  ]
+ },
+ {
+  "id": "modelo-linea-base-pagina",
+  "origen": "LM-58 (MJ-16, 18-oct-2026); automatizada por LM-82 (GitHub Action, 26-oct)",
+  "necesidad": "Ver la línea base funcional al día sin regenerarla a mano y sin perder la cobertura de la última regresión.",
+  "practicaCobit": "BAI10.04",
+  "funcion": "herramienta",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "herramientas/modelo/linea-base-pagina.py:2",
+   "interno/lotes-modelo/LM-82.md:8",
+   "interno/seguimiento.json:16554",
+   "interno/seguimiento.json:17385"
+  ]
+ },
+ {
+  "id": "modelo-linea-base-py",
+  "origen": "LM-58 (MJ-16, 18-oct-2026); --lote y --cu/--cap en LM-60 (20-oct)",
+  "necesidad": "Saber qué sabe hacer hoy el STR, con qué limitantes y cobertura, y que ningún lote se encole con criterios sin caso.",
+  "practicaCobit": "BAI10.02 · BAI07.03 (--lote)",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: valida cada módulo contra esquema y mapa; --lote y --req dan rc 2 «no encolar». Herramienta: --cu/--cap/--req sacan fichas y calcula la cobertura.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-58.md:4",
+   "interno/lotes-modelo/LM-58.md:11",
+   "interno/seguimiento.json:16554",
+   "interno/seguimiento.json:16860",
+   "interno/mejoras.json:568"
+  ]
+ },
+ {
+  "id": "modelo-mapa-py",
+  "origen": "LM-40 (MJ-14, 15-oct-2026); --ruta en LM-41",
+  "necesidad": "Que las pruebas tengan una ruta clara: ver módulos, relaciones y reglas del STR y qué queda sin probar.",
+  "practicaCobit": "APO03.02",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: valida mapa-modulos.json (M1–M7). Herramienta: cruza fuentes, calcula cobertura y genera mapa-str.html y la ruta de un lote.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-40.md:7",
+   "interno/lotes-modelo/LM-40.md:18",
+   "interno/mejoras.json:458",
+   "interno/seguimiento.json:13943",
+   "interno/conocimiento.json:977"
+  ]
+ },
+ {
+  "id": "modelo-objetivo-py",
+  "origen": "LM-80 (25-oct-2026, aprobado por Carlos)",
+  "necesidad": "Diseño escribe lo que el STR debe llegar a hacer; había que ver la brecha contra lo que hace hoy.",
+  "practicaCobit": "BAI02.01",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: --brecha calcula objetivo frente a producto. Control: validar.py usa sus funciones para O1–O3 (forma de la línea objetivo y REQ que citan diferencias inexistentes).",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-80.md:3",
+   "interno/lotes-modelo/LM-80.md:8",
+   "herramientas/modelo/objetivo.py:2",
+   "herramientas/modelo/validar.py:268",
+   "interno/seguimiento.json:17357"
+  ]
+ },
+ {
+  "id": "modelo-paquete-py",
+  "origen": "LM-20 (B7-3, 13-oct-2026)",
+  "necesidad": "Cargar el modelo en el servicio sin conexión directa a la base: llevarlo como datos validados por la API.",
+  "practicaCobit": "BAI10.02",
+  "funcion": "herramienta",
+  "detalleFuncion": "Arma el paquete por tablas; condición interna: no escribe si validar.py no está en 0, y tapa correos y teléfonos.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-20.md:6",
+   "interno/lotes-modelo/LM-20.md:8",
+   "herramientas/modelo/paquete.py:2",
+   "interno/seguimiento.json:9045"
+  ]
+ },
+ {
+  "id": "modelo-prioridad-py",
+  "origen": "LM-65 paso 4 (21-oct-2026)",
+  "necesidad": "Normalizar de una vez la prioridad de los INC existentes con su motivo y la lista que decide Diseño.",
+  "practicaCobit": "DSS02.01",
+  "funcion": "herramienta",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-65.md:12",
+   "herramientas/modelo/prioridad.py:2",
+   "interno/seguimiento.json:16941"
+  ]
+ },
+ {
+  "id": "modelo-riesgos-py",
+  "origen": "LM-71 (RIESGO-v1, MJ-17 proceso 8; 21-oct-2026)",
+  "necesidad": "Los riesgos no tenían registro con respuesta probada ni las medidas en rojo tenían dueño.",
+  "practicaCobit": "APO12.02 · APO12.06",
+  "funcion": "control",
+  "detalleFuncion": "Guardias Rg1–Rg7 en validar.py y cálculo de nivel; también apoya la ficha (rojas repetidas).",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-71.md:9",
+   "interno/seguimiento.json:17119",
+   "herramientas/modelo/validar.py:703",
+   "interno/cobit.json:1358"
+  ]
+ },
+ {
+  "id": "modelo-ruta-js",
+  "origen": "LM-41 (MJ-14, MJ-2, MJ-13; 15-oct-2026); la cola lo usa desde LM-39b",
+  "necesidad": "La regresión corría la zona entera en cada lote; el plan de pruebas debía salir del mapa y no correr fuera de la ruta.",
+  "practicaCobit": "BAI07.03",
+  "funcion": "herramienta",
+  "detalleFuncion": "Calcula qué guiones corren y qué huecos quedan; quien frena es probar-lote/juez, no ruta.js.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-41.md:7",
+   "herramientas/modelo/ruta.js:1",
+   "interno/mejoras.json:73",
+   "interno/seguimiento.json:13961"
+  ]
+ },
+ {
+  "id": "modelo-sync-py",
+  "origen": "LM-34 (B7-6 paso 1, 14-oct-2026)",
+  "necesidad": "Las cargas al servicio se hacían a mano por la cola; debía estar al día y validado aunque LENOVO esté apagado.",
+  "practicaCobit": "BAI10.02",
+  "funcion": "herramienta",
+  "detalleFuncion": "Valida, arma el paquete del commit y lo carga desde GitHub Actions; no carga si la validación falla (condición, no juicio).",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-34.md:14",
+   "interno/lotes-modelo/LM-34.md:22",
+   "herramientas/modelo/sync.py:2",
+   "interno/seguimiento.json:10439"
+  ]
+ },
+ {
+  "id": "modelo-ubicar-py",
+  "origen": "LM-76 (21-oct-2026); obligatorio por la regla común 17 en LM-80",
+  "necesidad": "Ubicar en el mapa cada idea suelta de Carlos sin abrir un REQ ni buscar a mano en cinco JSON.",
+  "practicaCobit": "BAI02.01",
+  "funcion": "herramienta",
+  "detalleFuncion": "Solo lee y muestra la tarjeta de ubicación; la regla 17 obliga a usarla, pero el archivo no frena nada.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-76.md:9",
+   "interno/lotes-modelo/LM-76.md:13",
+   "herramientas/modelo/ubicar.py:2",
+   "interno/seguimiento.json:17287"
+  ]
+ },
+ {
+  "id": "modelo-universo-py",
+  "origen": "LM-83 (MJ-26, 30-oct-2026); U7 en LM-84",
+  "necesidad": "El inventario de piezas vivía en dibujos y archivos parciales y se quedaba atrás; elementos.json iba 15 piezas atrás.",
+  "practicaCobit": "BAI10.03",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: guardias U1–U7 dentro de validar.py. Herramienta: genera la página universo.html.",
+  "confianza": "alta",
+  "evidencia": [
+   "herramientas/modelo/universo.py:2",
+   "interno/mejoras.json:1111",
+   "interno/seguimiento.json:18601",
+   "interno/seguimiento.json:18615"
+  ]
+ },
+ {
+  "id": "modelo-validar-py",
+  "origen": "LM-9 (B1, REQ-MOD-1; 11-oct-2026); cada LM posterior le suma guardias",
+  "necesidad": "Que una herramienta, y no una persona, detecte ids, estados, referencias y reglas rotas antes de instalar cualquier cambio.",
+  "practicaCobit": "BAI10.05",
+  "funcion": "control",
+  "detalleFuncion": "Guardia central: 0 errores o nada se instala; importa las guardias de incidentes, flujo, riesgos, conocimiento, objetivo y universo.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-9.md:7",
+   "interno/seguimiento.json:8053",
+   "interno/conocimiento.json:787",
+   "interno/cobit.json:3222"
+  ]
+ },
+ {
+  "id": "oficina-estado",
+  "origen": "MJ-25 (29-oct-2026, «Oficina» y Fábrica 3D); estados por encargo el 30-oct; quietud desde el dato en LM-90 ⑥ (31-oct)",
+  "necesidad": "Carlos no veía qué hacían los agentes, si estaban ocupados ni en qué parte del plan iban.",
+  "practicaCobit": "BAI11.07",
+  "funcion": "herramienta",
+  "detalleFuncion": "Calcula el estado de cada chat y de la línea para el tablero; marca «sin reporte» pero no frena nada.",
+  "confianza": "media",
+  "evidencia": [
+   "herramientas/oficina/LEEME.md:1",
+   "herramientas/oficina/LEEME.md:7",
+   "interno/mejoras.json:1095",
+   "interno/lotes-modelo/LM-90.md:24"
+  ]
+ },
+ {
+  "id": "control-veredicto",
+  "origen": "LM-50 (17-oct-2026; veredicto de L-142)",
+  "necesidad": "El juez escribió «aceptado» con casos en rojo en pruebas.json; por primera vez un rojo pasó como verde.",
+  "practicaCobit": "BAI07.05",
+  "funcion": "control",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-50.md:4",
+   "interno/lotes-modelo/LM-50.md:19",
+   "interno/seguimiento.json:14835"
+  ]
+ },
+ {
+  "id": "guiones-sitios",
+  "origen": "LM-79 fase 5 (L-181 a L-188, 30–31-oct-2026; contrato de la fase 5, reglas 8 y 9)",
+  "necesidad": "Probar que las páginas trasladadas del STR a los sitios llegan idénticas y con el mismo sistema de diseño.",
+  "practicaCobit": "BAI07.05",
+  "funcion": "control",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "claude/marco/plan-sitios-fase5-contrato.md:22",
+   "claude/marco/plan-sitios-fase5-contrato.md:24",
+   "interno/lotes-modelo/LM-79.md:58",
+   "interno/lotes-modelo/LM-79.md:59"
+  ]
+ },
+ {
+  "id": "herramienta-juez",
+  "origen": "LM-19 (B10-3, 12-oct-2026); antes, tarea «Agente verificador» de Cowork (28-sep / 6-oct)",
+  "necesidad": "Que quien construye no acepte su lote, sin depender del verificador de Cowork manejando el navegador.",
+  "practicaCobit": "BAI07.05",
+  "funcion": "control",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-19.md:3",
+   "interno/lotes-modelo/LM-19.md:6",
+   "interno/seguimiento.json:8711",
+   "interno/conocimiento.json:315",
+   "interno/elementos.json:2786"
+  ]
+ },
+ {
+  "id": "herramienta-pw",
+  "origen": "LM-17 (B10-1, decisión de Carlos 12-oct-2026 19:35)",
+  "necesidad": "Verificar en producción desde LENOVO sin la tarea de Cowork ni la extensión de Chrome (arranque tardío, carpetas que se desconectan).",
+  "practicaCobit": "BAI07.04 · BAI03.08",
+  "funcion": "control",
+  "detalleFuncion": "Ejecuta las pruebas y la guardia de red corta escrituras sin zz-verif-; abrir-perfil es auxiliar. Sus partes tienen pieza propia.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-17.md:3",
+   "interno/lotes-modelo/LM-17.md:9",
+   "interno/seguimiento.json:8633",
+   "interno/conocimiento.json:867",
+   "interno/elementos.json:2326"
+  ]
+ },
+ {
+  "id": "pw-aplicar",
+  "origen": "LM-63 K1 (CONSTRUCCIÓN-v1, 20-oct-2026)",
+  "necesidad": "No había prueba de que el commit aplicara la instrucción tal cual (Busca/Pon, versión, archivos del Alcance).",
+  "practicaCobit": "BAI03.06",
+  "funcion": "control",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-63.md:9",
+   "herramientas/pw/aplicar.js:1",
+   "interno/seguimiento.json:16902"
+  ]
+ },
+ {
+  "id": "pw-base",
+  "origen": "LM-17 (12-oct-2026) para comun.js, humo.js y abrir-perfil.js; modelo-llamar.js en LM-16/LM-20 (13-oct); json-crudo.js por M-312 (pw 0.5.2); v2.js en LM-62",
+  "necesidad": "Base común para probar en producción con perfiles de prueba sin tocar datos reales y para hablar con el servicio del modelo.",
+  "practicaCobit": "BAI07.04",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: guardia de red de comun.js (frena escrituras sin zz-verif-), humo.js (comprueba), v2.js (cuarentena, reintento, suspensión). Herramienta: abrir-perfil.js (inicio de sesión), modelo-llamar.js (llamadas al servicio), json-crudo.js (formato exacto del espejo).",
+  "confianza": "media",
+  "evidencia": [
+   "herramientas/pw/comun.js:1",
+   "herramientas/pw/humo.js:1",
+   "herramientas/pw/modelo-llamar.js:1",
+   "herramientas/pw/json-crudo.js:1",
+   "herramientas/pw/v2.js:1",
+   "interno/lotes-modelo/LM-17.md:6"
+  ]
+ },
+ {
+  "id": "pw-guion-tren-rafaga-metricas",
+  "origen": "guion.js: LM-18 PRUEBAS-v1 (12-oct-2026); metricas.js: LM-39c/MJ-8 (15-oct); tren.js: LM-49 (17-oct); rafaga.spec.js: LM-68 (21-oct)",
+  "necesidad": "Correr los guiones de cada lote, juntar la regresión en tren, probar la capacidad del hosting y medir el retrabajo de las pruebas.",
+  "practicaCobit": "BAI03.08 · MEA01.03 (metricas)",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: guion.js, tren.js y rafaga.spec.js ejecutan pruebas y dejan verde/rojo. Herramienta: metricas.js solo lee logs y mide; no cambia qué se acepta.",
+  "confianza": "alta",
+  "evidencia": [
+   "herramientas/pw/guion.js:1",
+   "herramientas/pw/tren.js:1",
+   "herramientas/pw/rafaga.spec.js:1",
+   "herramientas/pw/metricas.js:1",
+   "interno/lotes-modelo/LM-49.md:4",
+   "interno/lotes-modelo/LM-68.md:4",
+   "interno/mejoras.json:275"
+  ]
+ },
+ {
+  "id": "pw-guiones-spec",
+  "origen": "Varios orígenes, sin LM propio para la mayoría: sesiones.spec (migración M8, 13-oct), conteo-zonas (M-264), mod6-regresion (M-311), humo-pw (M-435), limpiar-zz (M-437), inventario-zz (DA-47); con LM: restauracion-ensayo LM-43, purga-movimientos LM-53, cuenta-pruebas LM-54",
+  "necesidad": "Diagnósticos de solo lectura, humo y mantenimiento de los datos de prueba que pide cada incidente o decisión.",
+  "practicaCobit": "BAI07.04 · DSS02.04 (diagnósticos)",
+  "funcion": "mixta",
+  "detalleFuncion": "Control: humo-pw, sesiones, mod6-regresion, restauracion-ensayo verifican. Herramienta: diagnósticos de solo lectura (flujo-zz, hk-admin, usuarios-zz, conteos) y mantenimiento de datos zz-verif- (limpiar-zz, semilla-reponer, purga-movimientos, cuenta-pruebas).",
+  "confianza": "media",
+  "evidencia": [
+   "herramientas/pw/sesiones.spec.js:1",
+   "herramientas/pw/humo-pw.spec.js:1",
+   "herramientas/pw/limpiar-zz.spec.js:1",
+   "herramientas/pw/inventario-zz.spec.js:1",
+   "interno/lotes-modelo/LM-43.md:28",
+   "interno/lotes-modelo/LM-53.md:10"
+  ]
+ },
+ {
+  "id": "pw-paquete",
+  "origen": "LM-17 (12-oct-2026): package.json y guardia.test.js; pruebas-v1.test.js con PRUEBAS-v1 (LM-18/LM-19)",
+  "necesidad": "Fijar la versión de pw y probar su guardia y sus funciones puras antes de que juzgue lotes.",
+  "practicaCobit": "BAI03.06",
+  "funcion": "control",
+  "detalleFuncion": "guardia.test.js y pruebas-v1.test.js verifican el propio pw; package.json (versión/dependencia) y LEEME.md son configuración y guía, no controles.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-17.md:6",
+   "herramientas/pw/guardia.test.js:1",
+   "herramientas/pw/pruebas-v1.test.js:1"
+  ]
+ },
+ {
+  "id": "pw-probar-lote",
+  "origen": "LM-18 paso 4 (cola v6, 12-oct-2026); K1–K3 en LM-63 (20-oct)",
+  "necesidad": "Puerta de entrada y pruebas N1/N2/regresión automáticas tras cada despliegue, sin gastar créditos de Claude.",
+  "practicaCobit": "BAI03.08",
+  "funcion": "control",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:31",
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:65",
+   "herramientas/pw/probar-lote.js:1",
+   "interno/lotes-modelo/LM-63.md:9",
+   "interno/cobit.json:1934"
+  ]
+ },
+ {
+  "id": "pw-semilla",
+  "origen": "semilla.js: LM-18 paso 3 (12-oct-2026); cuarentena.json LM-39a/MJ-1 y centinelas.json LM-39b/MJ-2 (15-oct); limpiar-zz.json M-437",
+  "necesidad": "Probar en producción con una semilla zz-verif- fija y comprobada, sin que rojos conocidos o efectos laterales se escapen.",
+  "practicaCobit": "BAI07.04",
+  "funcion": "control",
+  "detalleFuncion": "semilla.js comprueba la semilla en la puerta P4; cuarentena.json, centinelas.json y limpiar-zz.json son datos de configuración de esos controles.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:44",
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:64",
+   "interno/lotes-modelo/LM-39a.md:4",
+   "interno/lotes-modelo/LM-39b.md:4",
+   "interno/mejoras.json:35",
+   "interno/cobit.json:2400"
+  ]
+ },
+ {
+  "id": "github-actions",
+  "origen": "modelo-sync y modelo-espejo: LM-34 (14-oct-2026); linea-base-pagina: LM-82 (26-oct); Deploy to Hostinger de str-manager: no encontrado (anterior a la historia de esta copia)",
+  "necesidad": "Correr sin LENOVO la carga y la comparación del servicio, regenerar el explorador de la línea base y desplegar con cada push.",
+  "practicaCobit": "BAI10.02 (sync) · BAI10.05 (espejo) · BAI07.06 (despliegue)",
+  "funcion": "infraestructura",
+  "detalleFuncion": "Plataforma que corre otras piezas: sync y linea-base-pagina hacen trabajo (herramienta), espejo verifica (control) y Deploy despliega el push a main.",
+  "confianza": "media",
+  "evidencia": [
+   "interno/lotes-modelo/LM-34.md:4",
+   "interno/lotes-modelo/LM-34.md:14",
+   "interno/lotes-modelo/LM-82.md:13",
+   "interno/proceso.json:612"
+  ]
+ },
+ {
+  "id": "servicio-api",
+  "origen": "LM-11 ADR-006 (12-oct-2026) y lotes B7: LM-13 salud/eco, LM-16 base, LM-20 cargar, LM-21 lectura/export, LM-27 credenciales y complemento (12–13-oct)",
+  "necesidad": "Leer y cargar el modelo de la fábrica por HTTP, por rol, con base propia y exportación idéntica a Git.",
+  "practicaCobit": "BAI10.02",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: salud, carga, lectura, complemento y exportación. Control: acceso por rol con claves que vencen y patrón de ids (CAP-MOD-2, tipo control).",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-13.md:6",
+   "interno/lotes-modelo/LM-20.md:10",
+   "interno/seguimiento.json:9063",
+   "interno/seguimiento.json:9271",
+   "interno/linea-base/MOD.json:52"
+  ]
+ },
+ {
+  "id": "servicio-modelo",
+  "origen": "LM-11 (B5, ADR-006, REQ-MOD-6; aceptado por Carlos 12-oct-2026 12:45); repo propio fabrica-servicio en LM-79 (28–29-oct)",
+  "necesidad": "Dar al modelo de la fábrica una fuente consultable fuera de los JSON de Git, aparte del STR y sin datos del negocio.",
+  "practicaCobit": "BAI10.02",
+  "funcion": "herramienta",
+  "detalleFuncion": "Servicio (API + base propia) que guarda y sirve la copia validada del modelo.",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-11.md:3",
+   "interno/lotes-modelo/LM-11.md:6",
+   "interno/seguimiento.json:8342",
+   "interno/seguimiento.json:7753",
+   "interno/elementos.json:2289"
+  ]
+ },
+ {
+  "id": "sitios-comun",
+  "origen": "LM-79 fase 5.6 (30-oct-2026; contrato, regla 9); base de sesión y cliente en 5.2 (M-1176, 29-oct)",
+  "necesidad": "Que los sitios nuevos de fábrica y proyectos tengan el mismo sistema visual y organizativo del STR, con contenido real.",
+  "practicaCobit": "BAI03.05",
+  "funcion": "herramienta",
+  "detalleFuncion": "Componentes y estilos comunes; las copias por hash se comprueban con los guiones de paridad (pieza guiones-sitios).",
+  "confianza": "media",
+  "evidencia": [
+   "claude/marco/plan-sitios-fase5-contrato.md:24",
+   "interno/lotes-modelo/LM-79.md:58",
+   "interno/mensajes.json:18190"
+  ]
+ },
+ {
+  "id": "script-aplicar-lote",
+  "origen": "LM-79 fases 4–5 (desde L-171, 29-oct-2026): el servicio pasó al repo fabrica-servicio y la cola construye solo en str-manager",
+  "necesidad": "Aplicar los cambios del servicio en fabrica-servicio desde la instrucción, abortando si el archivo base no es el esperado.",
+  "practicaCobit": "BAI03.03 · BAI10.04 (guardia de hash)",
+  "funcion": "mixta",
+  "detalleFuncion": "Herramienta: aplica las operaciones en el clon de fabrica-servicio. Control: A1 aborta si un hash no coincide; A2 comprueba «Todo igual».",
+  "confianza": "media",
+  "evidencia": [
+   "interno/lotes-modelo/LM-79.md:27",
+   "interno/mensajes.json:18062",
+   "interno/mensajes.json:20256"
+  ]
+ },
+ {
+  "id": "ambientes-str",
+  "origen": "LM-24 ADR-007 (aprobado por Carlos 13-oct-2026; montado en la migración R-3)",
+  "necesidad": "Había un solo entorno y se probaba en producción; hacía falta un sitio de pruebas con base y secretos propios.",
+  "practicaCobit": "BAI07.04",
+  "funcion": "infraestructura",
+  "detalleFuncion": "Sitios app. y pruebas.; no verifican nada por sí mismos. Desarrollo duda de que pruebas. se use hoy (M-1288).",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/seguimiento.json:9217",
+   "interno/cobit.json:2400",
+   "interno/elementos.json:3070",
+   "interno/mensajes.json:19984"
+  ]
+ },
+ {
+  "id": "guiones-e2e-str",
+  "origen": "tests/e2e: LM-18 PRUEBAS-v1 (N2, 12-oct-2026); tests/run.js: anterior a los LM (BAI03.06 act. 3, sin fecha en la copia)",
+  "necesidad": "Pruebas conservadas por requisito, escritas por Desarrollo y copiadas sin cambios, para que quien construye no se juzgue a sí mismo.",
+  "practicaCobit": "BAI03.07 · BAI07.05",
+  "funcion": "control",
+  "detalleFuncion": "",
+  "confianza": "alta",
+  "evidencia": [
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:30",
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:36",
+   "interno/lotes-modelo/LM-18-proceso-pruebas.md:38",
+   "interno/cobit.json:1922"
+  ]
+ },
+ {
+  "id": "infra-hosting",
+  "origen": "Migración R-3 Premium → Unlimited (13-oct-2026; LM-23 paso previo; ficha BAI10.02-h); sitios proyectos. y herramienta-fabrica. en LM-79 fase 1 (28-oct). Contratación original: no encontrada",
+  "necesidad": "Alojar STR, ambiente de pruebas y sitios de la fábrica en un plan con varios sitios y bases propias.",
+  "practicaCobit": "BAI10.01 (encaje parcial; sin práctica de activos BAI09 en cobit.json)",
+  "funcion": "infraestructura",
+  "detalleFuncion": "No controla nada («control: ninguno escrito»).",
+  "confianza": "media",
+  "evidencia": [
+   "interno/conocimiento.json:908",
+   "interno/lotes-modelo/LM-23.md:3",
+   "interno/lotes-modelo/LM-23.md:6",
+   "interno/lotes-modelo/LM-79.md:14",
+   "interno/elementos.json:2360"
+  ]
+ }
+]

@@ -65,11 +65,14 @@ import glob
 for ruta in sorted(glob.glob(os.path.join(RAIZ, 'interno/planes/*.json'))):
     plan = json.load(open(ruta, encoding='utf-8'))
     for paso in plan.get('pasos', []):
-        if paso.get('estado') in ('hecho', 'superado', 'trasladado'): continue
+        if paso.get('estado') in ('hecho', 'superado', 'trasladado', 'revertido'): continue   # LM-91: revertido
         for q in (paso.get('quien') or paso.get('responsable') or ['Arquitecto']):
             c = chat_de(q)
-            lista = 'ahora' if paso.get('estado') == 'en curso' or not paso.get('dependeDe') else 'despues'
-            fila(c, lista, plan.get('id', os.path.basename(ruta)), paso.get('id'), paso.get('que'), paso.get('dependeDe') or '', '', 10 + (paso.get('orden') or 0))
+            dep = paso.get('dependeDe') or ''
+            if isinstance(dep, list): dep = ', '.join(map(str, dep))   # LM-91: la plantilla dice «ids» (lista)
+            if paso.get('estado') == 'bloqueado': dep = dep or (paso.get('evidencia') or 'bloqueado')
+            lista = 'ahora' if paso.get('estado') == 'en curso' or not dep else 'despues'
+            fila(c, lista, plan.get('id', os.path.basename(ruta)), paso.get('id'), paso.get('que'), dep, '', 10 + (paso.get('orden') or 0))
 
 # 3. Lista única de trabajo del Jefe de proyecto (proyecto.json › trabajo[]): quien decide y quien construye
 RESPONSABLE_POR_DEFECTO = 'Jefe de proyecto'

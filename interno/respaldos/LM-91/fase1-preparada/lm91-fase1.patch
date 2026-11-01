@@ -1,0 +1,277 @@
+diff --git a/claude/marco/universo-modelo.md b/claude/marco/universo-modelo.md
+index 14ee958..2cb32c4 100644
+--- a/claude/marco/universo-modelo.md
++++ b/claude/marco/universo-modelo.md
+@@ -1,6 +1,6 @@
+ # Universo · modelo de clasificación y gobierno de todas las piezas
+ 
+-**Estado:** instalado (LM-83, 30-oct-2026) dentro de MJ-26 («encárgate de eso»); plan en `plan-universo-2026-10.md`. Este documento es la **definición** del modelo; los datos viven en `interno/universo.json` (piezas) e `interno/mapa-procesos.json` (circuito); las listas cerradas en `herramientas/modelo/esquema.json › universo` y `› mapaProcesos`; las guardias en `herramientas/modelo/universo.py` (U1–U6) y `herramientas/modelo/procesos.py` (P1–P5), que corre `validar.py`; las páginas generadas en `herramientas/paginas/universo.html`, `arbol-universo.html` y `mapa-procesos.html`, servidas por el servicio del modelo. Cruzado con Diseño, Jefe de proyecto y Desarrollo el 30-oct (M-1304/1305/1306, sin objeción; dos observaciones de Diseño aplicadas). **COBIT:** BAI10 (configuración), APO01 (modelo de operación), APO03.02 (arquitectura de referencia).
++**Estado:** instalado (LM-83, 30-oct-2026) dentro de MJ-26 («encárgate de eso»); plan en `plan-universo-2026-10.md`. Este documento es la **definición** del modelo; los datos viven en `interno/universo.json` (piezas); la lista cerrada en `herramientas/modelo/esquema.json › universo`; las guardias en `herramientas/modelo/universo.py` (U1–U7), que corre `validar.py`; las páginas generadas en `herramientas/paginas/universo.html` y `arbol-universo.html`, servidas por el servicio del modelo. Cruzado con Diseño, Jefe de proyecto y Desarrollo el 30-oct (M-1304/1305/1306, sin objeción; dos observaciones de Diseño aplicadas). **COBIT:** BAI10 (configuración), APO01 (modelo de operación), APO03.02 (arquitectura de referencia).
+ 
+ ## Idea
+ 
+@@ -56,9 +56,13 @@ La «capa» del índice viejo (gobierno · marco · producto · operación · ar
+ | U4 proyectos | todo sitio y repo de `interno/proyectos.json` tiene pieza | error |
+ | U5 nacimiento | un lote que dice «pieza nueva» queda citado en la fuente de alguna pieza | error |
+ | U6 vigencia | la ruta de toda pieza vigente existe en el repo (o la pieza vive en el proyecto de Claude) | aviso → error el 10-nov |
+-| P1–P5 | circuito cerrado: disparador con origen, salida con destino, siguiente y bifurcaciones existentes, nodos N2–N4 con dueño y retorno, hojas con herramienta o piezas | error |
++| ~~P1–P5~~ | retiradas con el mapa de procesos (LM-91, 31-oct) | — |
+ 
+-## El circuito: mapa de procesos (`interno/mapa-procesos.json`)
++## El circuito
++
++**Vigente (LM-91, 31-oct-2026):** el circuito es `interno/proceso.json` (PROC-lote-v2 y `procesosFabrica` F0–F8) + la nomenclatura (`herramientas/paginas/nomenclatura-modelo.html`) + el artefacto «Diagramas de la fábrica STR». LM-92 lo reconstruye como «Diagramas» **generado desde el modelo**, heredando de esas fuentes y de `cobit.json`.
++
++**Borrador superado (MJ-26, 30-oct):** el mapa de procesos `mapa-procesos.json` se devolvió porque no heredó del marco; está en `interno/respaldos/MJ-26-mapa-borrador/` como insumo de LM-92. Su descripción, para referencia:
+ 
+ Niveles: **N0** portafolio (PF) · **N1** el proyecto por fases PMI (`P01.ini/pla/eje/mon/cie`, puertas P1–P4) · **N2** los procesos de la fábrica F0–F8 · **N3** etapas de cada proceso tal como las describieron los chats que las viven (Diseño F1.Z1, E1–E3, R1–R8, C1–C8, Z2; JP F2.1–13 y F7.1–7; Desarrollo F3.1–8, F4.1–5, F5.1–7; Arquitecto F0.x, F6.x, F8.x) · **N4** pasos de un procedimiento (hoy F3.3.0–F3.3.21: la instrucción L-n, 22 pasos de Desarrollo). Cada nodo tiene `rol`, `disparador{evento, de, otros}`, `entradas[piezas]`, `hace`, `salidas{piezas, evento, alternos}`, `siguiente[]`, `bifurca[{si, a}]`, `retorno`, `guardias[]`, `herramientas[piezas]`, `plazo`, `fuente`, `estado`. La regla del circuito: la salida de un nodo es el disparador de otro; todo evento no externo lo emite alguien y, si no es terminal, lo dispara alguien; toda entrada, salida y herramienta es una pieza del Universo. Los eventos de origen `externo` (pedido de Carlos, relevo de chat, mejora adoptada, incidente visto…) y los `terminal` cierran los extremos.
+ 
+@@ -67,9 +71,9 @@ Niveles: **N0** portafolio (PF) · **N1** el proyecto por fases PMI (`P01.ini/pl
+ | Archivo o artefacto viejo | Lo absorbe | Estado |
+ |---|---|---|
+ | `interno/elementos.json` (78 elementos, `puesto`) | `universo.json` (277 piezas) | vista heredada hasta L-183; luego superado (F7) |
+-| `interno/marco-trabajo.json` (12 pasos de septiembre) | nodos N2–N4 del mapa | desfasado; superado cuando N4 cubra las etapas hoja (F3.5) |
+-| artefactos «Universo STR», «Árbol del universo», «Circuito del universo», «Inventario del universo» | páginas generadas universo / arbol-universo / mapa-procesos | pasan a superados en F4.2 |
+-| «situaciones» y nomenclatura del camino del lote | el mapa es la fuente; la nomenclatura y los encargos citan de ahí (F3.4) | en curso |
++| `interno/marco-trabajo.json` (12 pasos de septiembre) | el «Diagramas» generado de LM-92 (pasos bajo la vista B) | desfasado; sigue vigente hasta LM-92 (f3-5 revertido por LM-91) |
++| artefactos «Universo STR», «Árbol del universo», «Circuito del universo», «Inventario del universo» | páginas generadas universo / arbol-universo | superados en F4.2 (la página mapa-procesos queda con el rótulo «borrador superado», LM-91) |
++| «situaciones» y nomenclatura del camino del lote | la nomenclatura y `proceso.json` siguen siendo la fuente; el «Diagramas» generado hereda de ellas (LM-92) | revertido por LM-91 (f3-4) |
+ 
+ ## Revisión periódica de lo que vive fuera del repo
+ 
+diff --git a/herramientas/modelo/esquema.json b/herramientas/modelo/esquema.json
+index 0e7b761..80f5fb0 100644
+--- a/herramientas/modelo/esquema.json
++++ b/herramientas/modelo/esquema.json
+@@ -1564,36 +1564,6 @@
+   },
+   "nota": "30-oct F1.3: Diseño pidió «desfasado» (vigente pero atrasado) e historial visible por pieza; Desarrollo preguntó por «evento»: los eventos no son piezas, son el enlace entre nodos del mapa."
+  },
+- "mapaProcesos": {
+-  "que": "MJ-26 (F3): niveles y campos del mapa de procesos (interno/mapa-procesos.json) y sus guardias P1–P5 (herramientas/modelo/procesos.py).",
+-  "niveles": [
+-   "N0",
+-   "N1",
+-   "N2",
+-   "N3",
+-   "N4"
+-  ],
+-  "campos": [
+-   "id",
+-   "nivel",
+-   "padre",
+-   "nombre",
+-   "rol",
+-   "disparador{evento,de,otros}",
+-   "entradas[piezas]",
+-   "hace",
+-   "salidas{piezas,evento,alternos}",
+-   "siguiente[]",
+-   "bifurca[{si,a}]",
+-   "retorno",
+-   "guardias[]",
+-   "herramientas[piezas]",
+-   "plazo",
+-   "fuente",
+-   "estado"
+-  ],
+-  "regla": "la salida de un nodo es el disparador de otro; todo evento no externo lo emite alguien y, si no es terminal, lo dispara alguien; toda entrada, salida y herramienta es una pieza del Universo; ningún nodo sin dueño ni retorno (N2–N4)."
+- },
+  "mensaje": {
+   "lm": "LM-90 (buzón vivo; BAI11.04/.07, MEA01; Carlos 31-oct)",
+   "desde": "2026-10-31",
+diff --git a/herramientas/modelo/paquete.py b/herramientas/modelo/paquete.py
+index 4143c94..451337f 100644
+--- a/herramientas/modelo/paquete.py
++++ b/herramientas/modelo/paquete.py
+@@ -98,8 +98,9 @@ FABRICA_PAGINAS = {'linea-base': 'interno/linea-base/linea-base.html', 'mapa': '
+ FABRICA_JSON = {'instrucciones': 'interno/instrucciones.json', 'mejoras': 'interno/mejoras.json', 'conocimiento': 'interno/conocimiento.json',
+                 'elementos': 'interno/elementos.json', 'proyectos': 'interno/proyectos.json', 'marco-trabajo': 'interno/marco-trabajo.json',
+                 'cobit': 'interno/cobit.json', 'proyecto/P01': 'interno/proyecto.json',
+-                # L-183 (M-1311): el universo, el mapa de procesos y los vencimientos (fechas, sin valores) para que la Fábrica muestre cada rama con sus piezas
+-                'universo': 'interno/universo.json', 'mapa-procesos': 'interno/mapa-procesos.json', 'vencimientos': 'interno/vencimientos.json'}
++                # L-183 (M-1311): el universo y los vencimientos (LM-91: el mapa de procesos se sirve desde su respaldo, marcado «borrador superado», hasta que Desarrollo confirme qué lee la entrada de la Fábrica; retirarlo es el último paso)
++                # antes: el universo, el mapa de procesos y los vencimientos (fechas, sin valores) para que la Fábrica muestre cada rama con sus piezas
++                'universo': 'interno/universo.json', 'mapa-procesos': 'interno/respaldos/MJ-26-mapa-borrador/mapa-procesos.json', 'vencimientos': 'interno/vencimientos.json'}
+ def docs_fabrica():
+     import glob
+     out = [os.path.relpath(f, RAIZ).replace(os.sep, '/') for f in glob.glob(os.path.join(RAIZ, 'claude/gobierno/*.md'))]
+diff --git a/herramientas/modelo/validar.py b/herramientas/modelo/validar.py
+index ab1a3c3..63bc77c 100644
+--- a/herramientas/modelo/validar.py
++++ b/herramientas/modelo/validar.py
+@@ -772,20 +772,18 @@ try:
+             err('M7 mapa', 'lote', lote, 'aceptado sin fila en mapa-modulos.json › historial (LM-55): anota su cambio o agrégalo a la fila «sin cambios en el mapa»')
+ except Exception as ex: avi('M7 mapa', 'archivo', 'interno/mapa-modulos.json', f'no se pudo revisar el historial: {ex}')
+ 
+-# LM-83 (MJ-26): el Universo (interno/universo.json) y el mapa de procesos (interno/mapa-procesos.json) se vigilan solos.
+-# U1, U4 y U5 son error; U2, U3 y U6 empiezan como aviso y pasan a error en esquema.json › universo.errorDesde. P1–P5 son error.
++# LM-83 (MJ-26): el Universo (interno/universo.json) se vigila solo.
++# U1, U4 y U5 son error; U2, U3 y U6 empiezan como aviso y pasan a error en esquema.json › universo.errorDesde.
++# LM-91 (31-oct): P1–P5 del mapa de procesos retiradas con el mapa (borrador superado en interno/respaldos/MJ-26-mapa-borrador/).
+ try:
+     sys.path.insert(0, os.path.join(RAIZ, 'herramientas/modelo'))
+     import importlib as _il
+-    _UV = _il.import_module('universo'); _PR = _il.import_module('procesos')
++    _UV = _il.import_module('universo')
+     _eu, _au = _UV.check(RAIZ)
+     _ed = ((E.get('universo') or {}).get('errorDesde') or {})
+     for regla, ent, i, det in _eu:
+         (severidad_desde(_ed.get(regla.split(' ')[0])) if regla.split(' ')[0] in ('U2', 'U3', 'U6') else err)(regla, ent, i, det)
+     for regla, ent, i, det in _au: avi(regla, ent, i, det)
+-    for linea in _PR.check(RAIZ):
+-        _m = re.match(r'(P\d) (\S+)(.*)', linea)
+-        err(_m.group(1) + ' procesos' if _m else 'P procesos', 'nodo', _m.group(2) if _m else '?', (_m.group(3) if _m else linea).strip(': '))
+ except Exception as ex: avi('U universo', 'archivo', 'interno/universo.json', f'no se pudo revisar: {ex}')
+ 
+ # Informe
+diff --git a/interno/instrucciones.json b/interno/instrucciones.json
+index 32d9b89..b4e6702 100644
+--- a/interno/instrucciones.json
++++ b/interno/instrucciones.json
+@@ -5,9 +5,9 @@
+   {
+    "id": "reglas-comunes",
+    "fecha": "2026-10-11",
+-   "titulo": "Reglas comunes de los cuatro chats (LM-5; 18–19 LM-85; 20 LM-90, aún sin vigor)",
++   "titulo": "Reglas comunes de los cuatro chats (LM-5; 18–19 LM-85 y LM-91; 20 LM-90, aún sin vigor)",
+    "para": "rol-diseno, rol-jefe-proyecto, rol-desarrollo, rol-arquitecto",
+-   "texto": "Reglas comunes de los chats del STR Manager (Diseño, Jefe de proyecto, Desarrollo, Arquitecto). Carlos es el dueño. Español, breve, tuteo; tenant «negocio».\n\n1. Un escritor por archivo, según tu encargo; antes de escribir, git pull --rebase. Dialogar no implica guardar. Un dato, una fuente.\n2. Capas: Marco (modelo, encargos, fichas, herramientas) → Arquitecto, con aprobación de Carlos y commits «modelo:»; producto (diseno.json, requerimientos-*.md) → Chat Diseño; orden y avance (proyecto.json) → Chat Jefe de proyecto; gobierno y operación (seguimiento.json, cola, estado-proyecto, transiciones) → Chat Desarrollo. Lo que toque otra capa va a su dueño por el buzón.\n3. Buzón (interno/mensajes.json, ficha APO01.03-b): los chats se hablan solo por ahí, nunca a través de Carlos; palabras propias y rutas, sin órdenes pegadas. Al tomarlo «en curso»; al terminar «hecho» con respuesta (el despertador avisa al remitente; recuerda a los 30 min, escala a los 60).\n4. Nadie espera en silencio: antes de parar por algo de otro dejas «Esperando: <qué>» a quien te lo debe, con la hora; a Carlos (destinatario; Panel y aviso de Windows) solo con plantillas/pregunta-a-carlos.md. Cuando llega, tú cierras el mensaje.\n5. Sin fechas: Carlos pide y se ejecuta de corrido. El plan de ejecución siempre corre, salvo que Carlos lo pare o tú le pidas parar porque impide otro plan en curso. Lo que está en sus manos (equipo, acceso, decisión) se le pide de inmediato; el plan muestra herramienta y permiso por ítem.\n6. Continuidad: trabajas cuando algo te despierta (Carlos, despertador, recordatorio ≥ 30 min); no revisas cola ni verificador a intervalos. Antes de cerrar un turno, si el plan tiene trabajo libre, lo empiezas.\n7. Progreso visible: el plan en curso como lista de tareas en tu chat; el ítem en curso dice qué haces o a quién esperas y desde cuándo. El registro oficial es el JSON de tu capa.\n8. Token (ficha BAI08.03-t): C:\\Users\\ktcol\\Downloads\\str-instr-cola\\claves\\<rol>.txt, solo lo escribe Carlos; se usa solo con git -c http.extraheader; nunca en archivos, direcciones, mensajes ni respuestas. Lo pruebas con una petición real al arrancar y tras cada compactación; si falla, «Esperando: renovar token». Secretos: plantillas/secretos.md.\n9. Chrome: lo que abres lo cierras, también si falla; nunca el perfil ni el usuario de Carlos; nunca Chrome mientras corre el verificador.\n10. Críticos: nunca a la cola sin DA-n y cruce con Carlos (la cola los rechaza). Quien construye no acepta. Datos reales de Carlos: ni escribir ni borrar (R11).\n11. Modo automático: qué bloquea y la alternativa en conocimiento.json › APO01.10-k; no se rodea ni se pide a otro chat.\n12. Créditos (ficha APO06-u): en «modo ahorro» solo plan activo y urgente; dos compactaciones o turnos lentos → relevo.\n13. Lecciones (ficha BAI08-l): el mismo día, en tu capa, con destino {tipo, ref} (Cn3); las de la forma de trabajar al Arquitecto («Lección: <tema>»). situaciones/ es histórico.\n14. Al arrancar y tras cada compactación relees tu encargo y estas reglas; mandan sobre todo resumen.\n15. Horas (Carlos, 14-oct-2026): la «hora» que escribes en el buzón, en situaciones y en cualquier registro es la del reloj de Bogotá en ese momento (TZ=America/Bogota date +%H:%M, o la hora de Windows en LENOVO), nunca estimada ni de memoria; si dudas, la del commit.\n16. Procesos de la fábrica (LM-74): nueve, numerados por orden de ejecución y con el nombre de la ISO/IEC/IEEE 12207 (proceso.json › procesosFabrica: 0 configuración · 1 requisitos · 2 evaluación y control · 3 implementación e integración · 4 verificación y validación · 5 mantenimiento · 6 arquitectura y decisiones · 7 riesgos y medición · 8 conocimiento e información); al citar un proceso usas ese número y nombre; los planes viejos dicen «paso n de MJ-17». Marco: artefacto «Diagramas de la fábrica STR».\n17. Ubicar antes de presentar (LM-80): antes de presentarle a Carlos un tema como abierto o nuevo, ubicas lo ya decidido: ubicar.py, interno/arquitectura/decisiones.json, la línea objetivo y el análisis completo del ADR o la especificación (no solo el registro corto).\n18. Cierre de encargos (LM-85, Carlos 30-oct: «deben responder el cierre o el fallo de la última tarea asignada»): todo mensaje que recibes se cierra con una de tres palabras al inicio de la respuesta: «Hecho:» (con la evidencia: commit, archivo, M-n), «Fallo:» (qué no pudiste y por qué) o «Bloqueado:» (a quién esperas y desde cuándo). Un mensaje no se queda «en curso» más de 48 horas: antes lo cierras con una de las tres. La oficina (herramientas/oficina/estado-fabrica.py y la página Oficina de proyectos.) te considera trabajando solo si cerraste así tu último encargo; lo pendiente más viejo manda. Formato: en el mensaje ajeno «estado: hecho» y «respuesta {fecha, hora, de, texto}»; tus mensajes nuevos nacen «pendiente» con «respuesta: null» y terminan con «Esperando: …». Una respuesta escrita en un mensaje ya «hecho» no despierta a nadie: lo nuevo va en mensaje nuevo. Antes de cada subida, git pull --rebase (y si el buzón choca, se funden los dos, nunca se pisa).\n19. Universo (LM-83/84): interno/universo.json es la lista de todas las piezas y el árbol es su rama; el circuito es interno/mapa-procesos.json. Cuando un lote, una decisión o un hábito tuyo cree una pieza (archivo, artefacto, tarea, guion, clave), lo dices con «pieza nueva: …» en el resumen del cambio o en el buzón al Arquitecto (la guardia U5 lo exige); cuando dejes de usar una, avisas para pasarla a «superado»; cuando una etapa de tu proceso cambie de disparador, entradas o salidas, avisas para corregir el mapa. Las fechas de tokens, planes y dominios viven en interno/vencimientos.json (sin valores); quien renueva, la cambia el mismo día.\n20. Buzón vivo (LM-90, Carlos 31-oct; ENTRA EN VIGOR cuando el Arquitecto lo avise por el buzón con «desde M-n rige la regla 20»; hasta entonces sigue la 18 tal cual). (a) Estados de gestión: pendiente → recibido → en curso → (bloqueado) → hecho | fallo | superado. Cada cambio es una entrada nueva en «avances[]» del mensaje {fecha, hora, de, estado, texto} con la hora real de Bogotá; el «estado» del mensaje es el del último avance; «respuesta» deja de usarse en lo nuevo. Nunca se edita ni se borra un avance anterior. El despertador entrega cada avance al remitente y los «bloqueado»/«fallo» también al Arquitecto; las guardias R-hora y R-avance (validar.py) no dejan subir horas futuras, avances fuera de orden ni encargos en curso sin avance en 48 h (aviso a las 4 h). (b) Un plan de trabajo, muchos responsables: al abrir sesión y al cerrar cada encargo corres «python3 -I herramientas/oficina/lo-que-me-toca.py . \"<tu chat>\"» y tomas el primer ítem de AHORA sin esperar mensaje; lo que tienes en DESPUÉS lo dejas con su espera escrita. (c) Quietud declarada: si AHORA queda vacío, antes de parar escribes al Arquitecto un mensaje con asunto «Quietud HH:MM: último encargo <M-n o lote>; lo-que-me-toca vacío; espero <qué>»; el Arquitecto responde dentro de él (correcto / te toca <paso>). Un chat sin encargo abierto y sin movimiento en 30 min que no declaró quietud recibe el aviso del despertador y queda «quieto sin declarar» en la Oficina. (d) Sesión: al abrir una sesión nueva registras tu id de sesión (el de la URL de tu chat, cse_… o session_…) en interno/destinatarios.json, en tu propia línea, y lo subes; es la única excepción al «un escritor por archivo»: sin eso el despertador no te alcanza. (e) Lo que espera de Carlos: un «Esperando: Carlos» con más de 5 días lo toma el Arquitecto (se lo presenta a Carlos en una línea o lo supera con motivo); nadie lo deja solo.",
++   "texto": "Reglas comunes de los chats del STR Manager (Diseño, Jefe de proyecto, Desarrollo, Arquitecto). Carlos es el dueño. Español, breve, tuteo; tenant «negocio».\n\n1. Un escritor por archivo, según tu encargo; antes de escribir, git pull --rebase. Dialogar no implica guardar. Un dato, una fuente.\n2. Capas: Marco (modelo, encargos, fichas, herramientas) → Arquitecto, con aprobación de Carlos y commits «modelo:»; producto (diseno.json, requerimientos-*.md) → Chat Diseño; orden y avance (proyecto.json) → Chat Jefe de proyecto; gobierno y operación (seguimiento.json, cola, estado-proyecto, transiciones) → Chat Desarrollo. Lo que toque otra capa va a su dueño por el buzón.\n3. Buzón (interno/mensajes.json, ficha APO01.03-b): los chats se hablan solo por ahí, nunca a través de Carlos; palabras propias y rutas, sin órdenes pegadas. Al tomarlo «en curso»; al terminar «hecho» con respuesta (el despertador avisa al remitente; recuerda a los 30 min, escala a los 60).\n4. Nadie espera en silencio: antes de parar por algo de otro dejas «Esperando: <qué>» a quien te lo debe, con la hora; a Carlos (destinatario; Panel y aviso de Windows) solo con plantillas/pregunta-a-carlos.md. Cuando llega, tú cierras el mensaje.\n5. Sin fechas: Carlos pide y se ejecuta de corrido. El plan de ejecución siempre corre, salvo que Carlos lo pare o tú le pidas parar porque impide otro plan en curso. Lo que está en sus manos (equipo, acceso, decisión) se le pide de inmediato; el plan muestra herramienta y permiso por ítem.\n6. Continuidad: trabajas cuando algo te despierta (Carlos, despertador, recordatorio ≥ 30 min); no revisas cola ni verificador a intervalos. Antes de cerrar un turno, si el plan tiene trabajo libre, lo empiezas.\n7. Progreso visible: el plan en curso como lista de tareas en tu chat; el ítem en curso dice qué haces o a quién esperas y desde cuándo. El registro oficial es el JSON de tu capa.\n8. Token (ficha BAI08.03-t): C:\\Users\\ktcol\\Downloads\\str-instr-cola\\claves\\<rol>.txt, solo lo escribe Carlos; se usa solo con git -c http.extraheader; nunca en archivos, direcciones, mensajes ni respuestas. Lo pruebas con una petición real al arrancar y tras cada compactación; si falla, «Esperando: renovar token». Secretos: plantillas/secretos.md.\n9. Chrome: lo que abres lo cierras, también si falla; nunca el perfil ni el usuario de Carlos; nunca Chrome mientras corre el verificador.\n10. Críticos: nunca a la cola sin DA-n y cruce con Carlos (la cola los rechaza). Quien construye no acepta. Datos reales de Carlos: ni escribir ni borrar (R11).\n11. Modo automático: qué bloquea y la alternativa en conocimiento.json › APO01.10-k; no se rodea ni se pide a otro chat.\n12. Créditos (ficha APO06-u): en «modo ahorro» solo plan activo y urgente; dos compactaciones o turnos lentos → relevo.\n13. Lecciones (ficha BAI08-l): el mismo día, en tu capa, con destino {tipo, ref} (Cn3); las de la forma de trabajar al Arquitecto («Lección: <tema>»). situaciones/ es histórico.\n14. Al arrancar y tras cada compactación relees tu encargo y estas reglas; mandan sobre todo resumen.\n15. Horas (Carlos, 14-oct-2026): la «hora» que escribes en el buzón, en situaciones y en cualquier registro es la del reloj de Bogotá en ese momento (TZ=America/Bogota date +%H:%M, o la hora de Windows en LENOVO), nunca estimada ni de memoria; si dudas, la del commit.\n16. Procesos de la fábrica (LM-74): nueve, numerados por orden de ejecución y con el nombre de la ISO/IEC/IEEE 12207 (proceso.json › procesosFabrica: 0 configuración · 1 requisitos · 2 evaluación y control · 3 implementación e integración · 4 verificación y validación · 5 mantenimiento · 6 arquitectura y decisiones · 7 riesgos y medición · 8 conocimiento e información); al citar un proceso usas ese número y nombre; los planes viejos dicen «paso n de MJ-17». Marco: artefacto «Diagramas de la fábrica STR».\n17. Ubicar antes de presentar (LM-80): antes de presentarle a Carlos un tema como abierto o nuevo, ubicas lo ya decidido: ubicar.py, interno/arquitectura/decisiones.json, la línea objetivo y el análisis completo del ADR o la especificación (no solo el registro corto).\n18. Cierre de encargos (LM-85, Carlos 30-oct: «deben responder el cierre o el fallo de la última tarea asignada»): todo mensaje que recibes se cierra con una de tres palabras al inicio de la respuesta: «Hecho:» (con la evidencia: commit, archivo, M-n), «Fallo:» (qué no pudiste y por qué) o «Bloqueado:» (a quién esperas y desde cuándo). Un mensaje no se queda «en curso» más de 48 horas: antes lo cierras con una de las tres. La oficina (herramientas/oficina/estado-fabrica.py y la página Oficina de proyectos.) te considera trabajando solo si cerraste así tu último encargo; lo pendiente más viejo manda. Formato: en el mensaje ajeno «estado: hecho» y «respuesta {fecha, hora, de, texto}»; tus mensajes nuevos nacen «pendiente» con «respuesta: null» y terminan con «Esperando: …». Una respuesta escrita en un mensaje ya «hecho» no despierta a nadie: lo nuevo va en mensaje nuevo. Antes de cada subida, git pull --rebase (y si el buzón choca, se funden los dos, nunca se pisa).\n19. Universo (LM-83/84): interno/universo.json es la lista de todas las piezas y el árbol es su rama; el circuito vigente es interno/proceso.json (PROC-lote-v2, procesos F0–F8) + la nomenclatura + «Diagramas de la fábrica STR» (LM-91: el mapa de procesos de MJ-26 volvió a borrador superado; LM-92 genera el Diagramas desde el modelo). Cuando un lote, una decisión o un hábito tuyo cree una pieza (archivo, artefacto, tarea, guion, clave), lo dices con «pieza nueva: …» en el resumen del cambio o en el buzón al Arquitecto (la guardia U5 lo exige); cuando dejes de usar una, avisas para pasarla a «superado»; cuando una etapa de tu proceso cambie de disparador, entradas o salidas, avisas al Arquitecto para corregir proceso.json (y el Diagramas). Las fechas de tokens, planes y dominios viven en interno/vencimientos.json (sin valores); quien renueva, la cambia el mismo día.\n20. Buzón vivo (LM-90, Carlos 31-oct; ENTRA EN VIGOR cuando el Arquitecto lo avise por el buzón con «desde M-n rige la regla 20»; hasta entonces sigue la 18 tal cual). (a) Estados de gestión: pendiente → recibido → en curso → (bloqueado) → hecho | fallo | superado. Cada cambio es una entrada nueva en «avances[]» del mensaje {fecha, hora, de, estado, texto} con la hora real de Bogotá; el «estado» del mensaje es el del último avance; «respuesta» deja de usarse en lo nuevo. Nunca se edita ni se borra un avance anterior. El despertador entrega cada avance al remitente y los «bloqueado»/«fallo» también al Arquitecto; las guardias R-hora y R-avance (validar.py) no dejan subir horas futuras, avances fuera de orden ni encargos en curso sin avance en 48 h (aviso a las 4 h). (b) Un plan de trabajo, muchos responsables: al abrir sesión y al cerrar cada encargo corres «python3 -I herramientas/oficina/lo-que-me-toca.py . \"<tu chat>\"» y tomas el primer ítem de AHORA sin esperar mensaje; lo que tienes en DESPUÉS lo dejas con su espera escrita. (c) Quietud declarada: si AHORA queda vacío, antes de parar escribes al Arquitecto un mensaje con asunto «Quietud HH:MM: último encargo <M-n o lote>; lo-que-me-toca vacío; espero <qué>»; el Arquitecto responde dentro de él (correcto / te toca <paso>). Un chat sin encargo abierto y sin movimiento en 30 min que no declaró quietud recibe el aviso del despertador y queda «quieto sin declarar» en la Oficina. (d) Sesión: al abrir una sesión nueva registras tu id de sesión (el de la URL de tu chat, cse_… o session_…) en interno/destinatarios.json, en tu propia línea, y lo subes; es la única excepción al «un escritor por archivo»: sin eso el despertador no te alcanza. (e) Lo que espera de Carlos: un «Esperando: Carlos» con más de 5 días lo toma el Arquitecto (se lo presenta a Carlos en una línea o lo supera con motivo); nadie lo deja solo.",
+    "aprobacion": "Carlos, 11-oct-2026 («aprobado»)",
+    "version": null
+   },
+diff --git a/interno/planes/plan-universo.json b/interno/planes/plan-universo.json
+index 324fa68..685a9b0 100644
+--- a/interno/planes/plan-universo.json
++++ b/interno/planes/plan-universo.json
+@@ -16,7 +16,8 @@
+   "pendiente",
+   "en curso",
+   "hecho",
+-  "bloqueado"
++  "bloqueado",
++  "revertido"
+  ],
+  "fases": [
+   {
+@@ -198,8 +199,8 @@
+     "Desarrollo"
+    ],
+    "comprobacion": "90 nodos y 60 eventos con fuente",
+-   "estado": "hecho",
+-   "evidencia": "0.1 borrador, 30-oct"
++   "estado": "revertido",
++   "evidencia": "revertido por LM-91 (31-oct 14:52): el mapa no heredó del marco; borrador en interno/respaldos/MJ-26-mapa-borrador/. Antes: 0.1 borrador, 30-oct"
+   },
+   {
+    "id": "f3-2",
+@@ -210,8 +211,8 @@
+     "Arquitecto"
+    ],
+    "comprobacion": "13 huecos encontrados y cerrados; validar atrapa un nodo roto",
+-   "estado": "hecho",
+-   "evidencia": "LM-83"
++   "estado": "revertido",
++   "evidencia": "revertido por LM-91 (31-oct 14:52): el mapa no heredó del marco; borrador en interno/respaldos/MJ-26-mapa-borrador/. Antes: LM-83"
+   },
+   {
+    "id": "f3-3",
+@@ -222,8 +223,8 @@
+     "Arquitecto"
+    ],
+    "comprobacion": "servida por el servicio; artefacto para Carlos",
+-   "estado": "hecho",
+-   "evidencia": "«Mapa de procesos»"
++   "estado": "revertido",
++   "evidencia": "revertido por LM-91 (31-oct 14:52): el mapa no heredó del marco; borrador en interno/respaldos/MJ-26-mapa-borrador/. Antes: «Mapa de procesos»"
+   },
+   {
+    "id": "f3-4",
+@@ -234,8 +235,8 @@
+     "Arquitecto"
+    ],
+    "comprobacion": "la nomenclatura cita los nodos; cada encargo cita sus etapas",
+-   "estado": "pendiente",
+-   "evidencia": "CONGELADO 31-oct (Carlos): el mapa no cita COBIT ni la nomenclatura existente (1 de 112 nodos); nadie construye sobre él hasta la corrección «el mapa hereda de la nomenclatura y de cobit.json», que arranca con punto de retorno declarado, después de LM-90."
++   "estado": "revertido",
++   "evidencia": "revertido por LM-91 (31-oct 14:52): el mapa no heredó del marco; borrador en interno/respaldos/MJ-26-mapa-borrador/. Antes: CONGELADO 31-oct (Carlos): el mapa no cita COBIT ni la nomenclatura existente (1 de 112 nodos); nadie construye sobre él hasta la corrección «el mapa hereda de la nomenclatura y de cobit.json», que arranca con punto de retorno declarado, después de LM-90."
+   },
+   {
+    "id": "f3-5",
+@@ -247,8 +248,27 @@
+     "Desarrollo"
+    ],
+    "comprobacion": "marco-trabajo.json superado; la página Marco de trabajo lee del mapa",
++   "estado": "revertido",
++   "evidencia": "revertido por LM-91 (31-oct 14:52): el mapa no heredó del marco; borrador en interno/respaldos/MJ-26-mapa-borrador/. Antes: N4 de la etapa 3.3 (instrucción L-n): F3.3.0–F3.3.21, 22 pasos de M-1305. Falta N4 del resto de etapas hoja. 112 nodos, 60 eventos, P1–P5 en 0 · CONGELADO 31-oct (Carlos): el mapa no cita COBIT ni la nomenclatura existente (1 de 112 nodos); nadie construye sobre él hasta la corrección «el mapa hereda de la nomenclatura y de cobit.json», que arranca con punto de retorno declarado, después de LM-90."
++  },
++  {
++   "id": "f3-bis",
++   "fase": 3,
++   "orden": 6,
++   "que": "Mapa v2: hereda, no inventa («Diagramas de la fábrica STR» generado desde el modelo)",
++   "quien": [
++    "Arquitecto",
++    "Diseño",
++    "JP",
++    "Desarrollo"
++   ],
++   "comprobacion": "criterios de LM-92",
+    "estado": "pendiente",
+-   "evidencia": "N4 de la etapa 3.3 (instrucción L-n): F3.3.0–F3.3.21, 22 pasos de M-1305. Falta N4 del resto de etapas hoja. 112 nodos, 60 eventos, P1–P5 en 0 · CONGELADO 31-oct (Carlos): el mapa no cita COBIT ni la nomenclatura existente (1 de 112 nodos); nadie construye sobre él hasta la corrección «el mapa hereda de la nomenclatura y de cobit.json», que arranca con punto de retorno declarado, después de LM-90."
++   "evidencia": "LM-92 (arranca con LM-91 aceptado)",
++   "plan": "interno/lotes-modelo/LM-92.md",
++   "dependeDe": [
++    "LM-91"
++   ]
+   },
+   {
+    "id": "f4-1",
+@@ -450,7 +470,7 @@
+  ],
+  "meta": {
+   "faseActual": 6,
+-  "nota": "Fases 0–5 cerradas. F6: solo falta el guion de R-14 (LM-86). Fase 7 = Carlos revisa el universo (piezas, árbol, mapa y los sitios que los muestran). Lo que no es del universo (Premium, tokens, D2, accesos, M-858) salió del plan el 31-oct y vive en su casa (ver trasladados[]). · 31-oct: mapa de procesos congelado (f3-4, f3-5) hasta la corrección COBIT/nomenclatura; LM-90 (buzón vivo) va primero por decisión de Carlos.",
++  "nota": "31-oct 14:52 (LM-91): f3-1…f3-5 revertidos; f3-bis = LM-92. Fases 0–5 cerradas. F6: solo falta el guion de R-14 (LM-86). Fase 7 = Carlos revisa el universo (piezas, árbol, mapa y los sitios que los muestran). Lo que no es del universo (Premium, tokens, D2, accesos, M-858) salió del plan el 31-oct y vive en su casa (ver trasladados[]). · 31-oct: mapa de procesos congelado (f3-4, f3-5) hasta la corrección COBIT/nomenclatura; LM-90 (buzón vivo) va primero por decisión de Carlos.",
+   "actualizado": "31-oct 10:44"
+  },
+  "artefacto": "https://claude.ai/artifact/BNW4gjg54naQfx5bkSQ3cD",
+diff --git a/interno/respaldos/MJ-26-mapa-borrador/LEEME.md b/interno/respaldos/MJ-26-mapa-borrador/LEEME.md
+new file mode 100644
+index 0000000..4b81777
+--- /dev/null
++++ b/interno/respaldos/MJ-26-mapa-borrador/LEEME.md
+@@ -0,0 +1,9 @@
++# Borrador superado · mapa de procesos de MJ-26 (LM-83, 30-oct-2026)
++
++Devuelto por LM-91 (31-oct-2026): el mapa no heredó del marco existente (1 de 112 nodos citaba COBIT). Se conserva como **insumo** de LM-92 (rutas v2 heredando): los nodos, los 60 eventos y las etapas que aportaron los chats en la consulta F0 (M-1294 Diseño, M-1295 JP, M-1296 Desarrollo; pasos F3.3.0–F3.3.21 de la instrucción).
++
++- `mapa-procesos.json` — el mapa 0.1 (N0–N4).
++- `procesos.py` — guardias P1–P5 (retiradas de `validar.py`).
++- `build-mapa.py` — el generador.
++
++Nadie lo lee ni lo valida. No construir sobre él.
+diff --git a/herramientas/arquitecto/universo-fuente/build-mapa.py b/interno/respaldos/MJ-26-mapa-borrador/build-mapa.py
+similarity index 100%
+rename from herramientas/arquitecto/universo-fuente/build-mapa.py
+rename to interno/respaldos/MJ-26-mapa-borrador/build-mapa.py
+diff --git a/interno/mapa-procesos.json b/interno/respaldos/MJ-26-mapa-borrador/mapa-procesos.json
+similarity index 99%
+rename from interno/mapa-procesos.json
+rename to interno/respaldos/MJ-26-mapa-borrador/mapa-procesos.json
+index 071ec5d..592e23c 100644
+--- a/interno/mapa-procesos.json
++++ b/interno/respaldos/MJ-26-mapa-borrador/mapa-procesos.json
+@@ -1,6 +1,6 @@
+ {
+  "version": "0.1",
+- "estado": "borrador 0.1: N2 y N3 con las etapas de los cuatro chats (M-1294/1295/1296 y planes); N4 de F3.3 (22 pasos, Desarrollo M-1305); N4 del resto por hacer; N1 sin detallar hasta la metodología de proyectos (ADR-009 §5)",
++ "estado": "BORRADOR SUPERADO (LM-91, 31-oct-2026): no heredó del marco; nadie construye sobre él; insumo de LM-92. Antes: borrador 0.1: N2 y N3 con las etapas de los cuatro chats (M-1294/1295/1296 y planes); N4 de F3.3 (22 pasos, Desarrollo M-1305); N4 del resto por hacer; N1 sin detallar hasta la metodología de proyectos (ADR-009 §5)",
+  "fecha": "2026-10-30",
+  "escritor": "Arquitecto (capa Marco)",
+  "que": "Mapa de procesos del universo por niveles (N0 portafolio · N1 proyecto · N2 proceso de la fábrica · N3 procedimiento · N4 paso). La salida de un nodo es el disparador de otro. Sucede a marco-trabajo.json. Modelo: claude/marco/universo-modelo.md; plan: claude/marco/plan-universo-2026-10.md.",
+diff --git a/herramientas/modelo/procesos.py b/interno/respaldos/MJ-26-mapa-borrador/procesos.py
+similarity index 100%
+rename from herramientas/modelo/procesos.py
+rename to interno/respaldos/MJ-26-mapa-borrador/procesos.py

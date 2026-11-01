@@ -1,0 +1,76 @@
+# Traspaso del Arquitecto - 01 · 1-nov-2026 (estado al cierre de la tarde)
+
+**Sesión:** `session_01So4JYdwNaGBiXJtPfsUwnF` (enlazada a LENOVO, registrada en `interno/destinatarios.json`). **Por qué existe:** Carlos (18:56): «ya que no tenemos metodología implementada aún, ¿cómo vas a mantener el contexto de este chat? Es mejor que lo vayas guardando ahora mismo». Este archivo es la memoria del rol: quien siga lo lee y no necesita el chat.
+
+## 0. Orden de lectura para retomar
+1. `interno/instrucciones.json` › `rol-arquitecto` y `reglas-comunes`.
+2. **Este traspaso.**
+3. `claude/marco/estructura-universo-v2.md` §§ 1–7: todas las decisiones de Carlos del 31-oct y del 1-nov.
+4. `claude/marco/modelo-objetivo-roles-procesos.md`: el diseño objetivo, en borrador.
+5. `interno/planes/plan-estructura-universo.json` (EU-2) y `python3 -I herramientas/oficina/lo-que-me-toca.py . "Chat Arquitecto"`.
+6. Consultoría COBIT (privada, **no está en el repo**): `C:\Users\ktcol\Downloads\normas-fabrica\consultoria\` en LENOVO. Ahí están la guía del consultor, las respuestas 1–3, las fichas de los 4 grupos (corregidas), las verificaciones 1, 2A y 2B, la consolidación, la plantilla y el contexto. Normas en PDF: `Descargas\normas-fabrica\` (LEEME.md).
+
+## 1. Prioridad y forma de trabajar (Carlos)
+- **Único objetivo activo: organizar el universo y hacerlo funcional (EU-2).** Todo lo demás está en pausa (11:21), LM-91 y LM-93 incluidos.
+- Prioridad dentro de eso: **la fábrica**. Gestión de proyectos básica, sin entrar en metodología.
+- No eliminar ni modificar piezas sin contexto. Antes de clasificar, reconstruir con evidencia. Consultar a otros agentes, pero verificar lo que dicen («te podrían estar diciendo cosas que no son»).
+- Nada queda como deuda: un «revisó 90 de 231» se cierra al 100 % (18:17).
+- **No pensar en los chats actuales** (colapsados por contexto); diseñar lo que debería ser (18:48).
+- Responder breve, en tablas, una pregunta a la vez y con opción recomendada.
+
+## 2. Lo decidido hoy (detalle en estructura-universo-v2 §§ 6–7)
+| Hora | Decisión |
+|---|---|
+| 10:52–10:55 | Elementos de paso o no definidos: se conservan; sin proceso si no tienen función clara; estado «cumplido» para lo que terminó su función |
+| 11:21 | Solo EU-2; lo demás en pausa |
+| 16:59–17:10 | Alcance: gestionar proyectos (cualquier naturaleza, sobre todo software); la fábrica recibe **peticiones**; el proyecto gestiona sus requerimientos de proyecto y la fábrica es la experta en requisitos de diseño de software; GP = rol del proyecto (hoy Carlos) |
+| 17:19 | «Jefe de proyecto» pasa a llamarse **Gestor del plan de trabajo** (rol de la fábrica). El renombre en encargos y buzón va en un lote aparte, no hecho |
+| 17:34 | Carlos delegó en el Arquitecto los factores de diseño (tabla en consultoría, respuesta-2) |
+| 17:46 | Plan de consultores: 4 por dominio, verificador, consolidador |
+| 18:41 | **Catálogo de procesos v1 aprobado** (punto 6) |
+| 18:45 | Puntos 1–5 quedan pendientes |
+
+## 3. Estado de EU-2
+- **Hecho:** e0-1, e0-2, e1-1, e1-2, e2-1 (reclasificación v6: 348 piezas, 282 vivas asignadas, 16 de paso, 0 sin objetivo, 0 compartidas entre procesos), e2-2, e3-2 (11 roles como piezas), e3-5.
+- **En curso:** e3-3 y e3-1 (los cubre LM-94); e3-6 (medida de costo por lote acordada con el Gestor del plan, M-1377; se instala tras EU-2).
+- **Pendiente:** e3-4 ambientes (estándar APO11 + instancia P01); fase 4 (ficha única con estado de formalización y de operación, «cumplido», «de paso», catálogo; diseño objetivo en borrador); fase 5 (inventarios separados: avisar al Gestor del plan antes de partir `proyecto.json`); fase 6 (revisión de Carlos); e9-1 continuidad (lo cubre el diseño objetivo).
+- **LM-94 preparado, no instalado:** catálogo v1 en `cobit.json` (`interno/respaldos/LM-94/`). Probado en copia: validar 0, paquete sin error. Espera el sí de Carlos. Fase B (después): reescribir las prácticas adoptadas con las fichas (niveles invertidos en APO01, APO03 y APO06; errata APO07.01; métricas pegadas).
+
+## 4. Pendientes de Carlos (no insistir; prioridad EU-2)
+1. Vencen el **3-nov** el plan Premium de Hostinger (no renovar; antes exportar la base `_hospedaje` y desconectar GitHub del sitio viejo) y el dominio bucaramangastays.com (recomendado: soltarlo). El **9-nov** vencen tres tokens.
+2. Pruebas contra producción (`herramientas/pw/comun.js` apunta a `app.`): ejecutar la ADR-007 o aceptar el riesgo por escrito.
+3. Repo de documentos público: pasarlo a privado (condición del diseño objetivo).
+4. DA-62 (metas y apetito de riesgo): sin ella, MEA01 no llega a nivel 2.
+5. Ensayo de restauración con «negocio» antes del corte del 30-nov. Hasta hoy solo se probó con la cuenta de pruebas (19-oct, en verde); faltan «negocio», los usuarios y `api/uploads/`.
+6. Sí a LM-94. Punto de entrada al sistema (A, un interlocutor único, recomendado). Revisión del diseño objetivo.
+
+## 5. Buzón (último M-1382)
+- M-1376 y M-1377 (Gestor del plan): hechos.
+- M-1378 (Arquitecto saliente): hecho.
+- M-1379 (Desarrollo, aviso falso de la CLI con guiones): LM-93 preparado y en pausa; M-1380 avisó la pausa.
+- M-1381 y M-1382 (dueños de piezas compartidas): hechos, incorporados en la reclasificación v5.
+- Abierto de antes: M-858 (Diseño → Carlos, alcance del sistema).
+
+## 6. Hallazgos que quedaron registrados (consolidación § 5)
+- Pruebas contra producción.
+- Repo público.
+- LENOVO es un punto único de falla.
+- La restauración no está probada con «negocio».
+- Los incidentes de la fábrica se mezclan con los de P01 (130 de 144 sin «contra»).
+- Riesgos sin fecha de evaluación y un registro viejo duplicado en `seguimiento.json`.
+- El despertador muestra «verificando L-79» colgado.
+- `vencimientos.json` V-7 y V-8 sin fecha.
+
+## 7. Cómo trabaja el rol (herramientas)
+- **Repo:** clon en `/home/claude/work/str-manager-docs` (el contenedor es efímero; si no existe, clonar `thcure/str-manager-docs`).
+- **Subida:** copia local de `herramientas/arquitecto/subir.sh` en `/home/claude/work/scripts/` con `R=/home/claude/work/str-manager-docs`, `buzon-merge.py` copiado al lado y el trailer de la sesión actual. Antes de cada subida, `device_stage_files` de `C:\Users\ktcol\Downloads\str-instr-cola\claves\arquitecto.txt`: el script lo lee y lo borra; nunca se imprime.
+- **Destinatario nuevo** «Arquitecto saliente» (`session_011PAjxLN9fTuZ3PSA1XAPxf`) y su rol en `esquema.json`, para consultarle (5023dc9).
+- **Agentes de apoyo:** los subagentes no tienen la herramienta del proyecto de Claude. Lo privado se guarda en LENOVO con `device_commit_files`.
+- **Reclasificación:** `python3 -I herramientas/arquitecto/eu2-reclasificar.py .` regenera `claude/marco/eu2-reclasificacion.json` (versiones v1–v6 documentadas en el script).
+
+## 8. Errores que evitar (aprendidos hoy)
+- Clasificar por nombre o por defecto (las 10 vistas «generar o superar», el BAI11 por defecto de P01) sin revisar cada pieza.
+- Presentar como cierta la versión de un agente sin contrastarla. El Arquitecto saliente y el repo diferían en 5 de 10 vistas.
+- Dejar una verificación parcial como si fuera completa.
+- «Aprobado» no significa que el proceso opere: hay que mostrar las dos cosas por separado.
+- Citar los 100 dólares al mes como presupuesto general: son solo del agente de comunicaciones.

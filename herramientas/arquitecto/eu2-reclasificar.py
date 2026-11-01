@@ -140,6 +140,45 @@ for o in out:
         est, n = CON_FUNCION[o['id']]
         if est: o['estado'] = est
         o['nota'] = 'vista a mano con función demostrada: ' + n
+# v5 (Arquitecto - 01, 1-nov 11:2x): dueño de las piezas compartidas = proceso de quien escribe; lectores en la nota. Respuestas M-1381 (Desarrollo)
+# y M-1382 (Diseño), cruzadas con el repo (seguimiento.json: 140 de 317 cambios son tipo modelo; riesgos R-1…R-8 frente a R-1…R-19 de proyecto.json).
+D1, D2 = 'Desarrollo M-1381', 'Diseño M-1382'
+partir('json-seguimiento', [
+    ('cambios-producto', 'seguimiento.json › cambios[] de producto (escribe Desarrollo)', 'P01', 'BAI06', 'Dato', D1),
+    ('cambios-modelo', 'seguimiento.json › cambios[] tipo modelo (140 filas; escribe el Arquitecto con LM-n)', 'fábrica', 'BAI06', 'Dato', D1 + ': dos escritores en una lista; partirla al instalar'),
+    ('plan', 'seguimiento.json › plan[] (lotes de producto)', 'P01', 'BAI03', 'Dato', D1),
+    ('dts', 'seguimiento.json › dts[] (deuda técnica)', 'P01', 'BAI03', 'Dato', D1 + ': mezcla DT de fábrica (p. ej. DT-54); falta campo que las separe'),
+    ('incs', 'seguimiento.json › incs[]', 'P01', 'DSS02', 'Dato', D1 + ': mezcla INC de fábrica (INC-216/217/218); el campo «contra» no los separa'),
+    ('problemas', 'seguimiento.json › problemas[]', 'P01', 'DSS03', 'Dato', D1 + ': registro de DSS03 (Carlos 31-oct)'),
+    ('posimplementacion', 'seguimiento.json › posimplementacion[] (vacío)', 'P01', 'BAI07', 'Dato', D1),
+    ('traspaso', 'seguimiento.json › traspaso (de Desarrollo)', 'fábrica', 'BAI08', 'Dato', D1 + ': continuidad del rol (e9-1)')])
+for suf, nombre, est, n in [('modulos-cobertura', 'seguimiento.json › modulos[] y cobertura (texto viejo)', 'desfasado', D1 + ': candidatos a retirar; decide Carlos'),
+                            ('pedidos', 'seguimiento.json › pedidos[] P-1…P-3 (sep, sobre el verificador)', 'duda', D1 + ': no son de Desarrollo; ¿archivar o pasar a diseno.json › pedidos[]?')]:
+    out.append({'id': 'json-seguimiento#' + suf, 'nombre': nombre, 'estado': est, 'inventario': 'P01', 'dominio': '', 'objetivo': '', 'tipo': 'Dato', 'grupo': 'de paso', 'nota': 'de paso: ' + n, 'antes': None})
+out.append({'id': 'json-seguimiento#riesgos', 'nombre': 'seguimiento.json › riesgos[] R-1…R-8 (formato viejo)', 'estado': 'superado', 'inventario': 'fábrica', 'dominio': 'APO', 'objetivo': 'APO12', 'tipo': 'Dato',
+            'nota': D1 + ': duplica proyecto.json › riesgos[] (R-1…R-19, del JP) con ids que chocan; se archiva, no se borra', 'antes': None})
+mover('cola-carpetas', None, 'BAI03', None, D1 + ': escribe la cola (hechas, fallidas, .sin-*, _resumen.txt); BAI07 lector')
+mover('doc-log-lote', None, 'BAI03', None, D1 + ': la escribe la CLI; BAI07 lector')
+for i, nombre, ob, n in [('log-veredictos', 'log\\L-n-veredicto*.json: evidencia de aceptación (la copia Desarrollo a cambios[].aceptacion)', 'BAI07', D1 + ': BAI07.05; lo escribe el juez'),
+                         ('log-juez-texto', 'log\\L-n-juez.md (entrada) y L-n-juez.txt (salida) del juez', 'BAI07', D1),
+                         ('log-inconsistente', 'log\\L-n-inconsistente.txt (LM-50, lo escribe la cola)', 'BAI07', D1),
+                         ('log-pw-salidas', 'log\\L-n-pruebas.json, capturas\\L-n\\, tren y semilla (los escribe pw)', 'BAI03', D1 + ': BAI03.08')]:
+    out.append({'id': i, 'nombre': nombre, 'estado': 'vigente', 'inventario': 'fábrica', 'dominio': ob[:3], 'objetivo': ob, 'tipo': 'Dato', 'nota': 'pieza que faltaba · ' + n, 'antes': None})
+mover('linea-paridad', None, 'BAI03', None, D1 + ': viva (L-183…L-188); escrita en revisor-previo.md punto 24 y rol-desarrollo; falta en la plantilla instruccion.md (brecha)')
+mover('sitio-app', None, 'APO11', None, D1 + ': ambiente de producción del P01, instancia del estándar de ambientes (e3-4)')
+mover('sitio-pruebas', None, 'APO11', None, D1 + ': existe pero sin uso; despliega de main, no de una rama pruebas (el flujo de ADR-007 no está montado); las pruebas corren en producción con zz-verif-')
+for o in out:
+    if o['id'] == 'sitio-pruebas': o['estado'] = 'parcial'
+mover('entrega-a-desarrollo', None, 'BAI02', None, D2 + ': son dos cosas: el mensaje del buzón (evento) y el estado del REQ en diseno.json (reqs[].entregadoEn); lectores Desarrollo y JP')
+mover('linea-objetivo-inv', None, 'BAI02', None, D2 + ': dos escritores (Diseño y el Arquitecto marca «construida»); decide Carlos: (a) el Arquitecto marca en linea-base/<MOD>.json y objetivo.py cruza, (b) excepción anotada. Diseño prefiere (a). objetivo.py sí lee «construida» y «lote»')
+partir('paginas-generadas', [('nomenclatura', 'herramientas/paginas/nomenclatura-modelo.html (generada)', 'fábrica', 'APO01', 'Vista', 'Arquitecto 1-nov'),
+                             ('mapa-str', 'mapa-str.html (generada; arquitectura del STR)', 'P01', 'APO03', 'Vista', 'Arquitecto 1-nov')])
+mover('docs-marco-solo-claude', None, 'APO03', None, 'análisis de las ADR solo en el proyecto de Claude: riesgo de continuidad (e9-1)')
+mover('situaciones', None, 'BAI08', None, 'regla común 13: histórico')
+for o in out:
+    if o['id'] == 'situaciones': o['estado'] = 'cumplido'
+    if o['id'] == 'artefacto-oficina-fabrica':
+        o.update(objetivo='', dominio='', grupo='de paso', estado='duda'); o['nota'] = 'de paso (sin función definida; no se elimina): MJ-25, mismo tablero que art-fabrica-3d / art-oficina-3d'
 json.dump(out, open(f'{R}/claude/marco/eu2-reclasificacion.json', 'w'), ensure_ascii=False, indent=1)
 V = [o for o in out if o['estado'] not in ('superado', 'fuera', 'cumplido')]
 PASO = [o for o in out if o.get('grupo') == 'de paso']

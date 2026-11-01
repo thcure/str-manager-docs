@@ -13,6 +13,8 @@ VISTA_A_MANO = {'art-arquitectura-viva-modelo': 'APO03', 'art-bloques-oficina': 
 TIPO = {'proceso': 'Procedimiento', 'agente': 'Agente', 'dato': 'Dato', 'documento': 'Documento', 'decisión': 'Decisión', 'vista': 'Vista', 'infraestructura': 'Infraestructura', 'credencial': 'Credencial'}
 cods = lambda s: re.findall(r'\b(?:APO|BAI|DSS|MEA|EDM)\d\d', s or '')
 out = []
+# v3 (Arquitecto - 01, 31-oct 19:4x): mixtas cuyo primer código COBIT es el del control, no el de la herramienta
+INVERTIR = {'pw-guion-tren-rafaga-metricas', 'pw-guiones-spec'}
 def pieza(p, tipo, obj, inv, nota='', parte=''):
     out.append({'id': p['id'] + (f'#{parte}' if parte else ''), 'nombre': p['nombre'], 'estado': p['estado'], 'inventario': inv,
                 'dominio': obj[:3] if obj[:3] in ('APO', 'BAI', 'DSS', 'MEA', 'EDM') else '', 'objetivo': obj, 'tipo': tipo, 'nota': nota,
@@ -27,8 +29,10 @@ for p in U:
         x = RA[p['id']]; c = cods(x['practicaCobit']) or [obj]; f = x['funcion']
         n2 = f"origen {x['origen']} · confianza {x['confianza']}"
         if f == 'mixta':
+            c2 = c[1] if len(c) > 1 else c[0]
+            if p['id'] in INVERTIR: c = [c2, c[0]]; c2 = c[1]   # el primer código es el del control (rastreo: «Control: … Herramienta: …»)
             pieza(p, 'Herramienta', c[0], inv, n2, 'herramienta')
-            pieza(p, 'Control', c[1] if len(c) > 1 else c[0], inv, n2, 'control')
+            pieza(p, 'Control', c2, inv, n2, 'control')
         elif f == 'infraestructura':
             pieza(p, 'Infraestructura', 'BAI09' if inv == 'fábrica' and p['capa'] == 'transversal' else c[0], inv, n2)
         else:
@@ -76,6 +80,40 @@ for rid, nombre, obj, n in [('rol-interlocutor-funcional', 'Interlocutor funcion
                             ('rol-revisor-previo', 'Revisor previo de críticos de fábrica (puerta antes de encolar)', 'APO11', 'JP M-1373: rol de hecho, no está en su encargo'),
                             ('rol-duenio-riesgos-metas', 'Dueño del registro de riesgos y de las metas', 'APO12', 'JP M-1373')]:
     out.append({'id': 'pieza-' + rid, 'nombre': nombre, 'estado': 'propuesto', 'inventario': 'fábrica', 'dominio': obj[:3], 'objetivo': obj, 'tipo': 'Rol', 'nota': 'rol de hecho · ' + n, 'antes': None})
+# v3 (Arquitecto - 01, 31-oct 19:4x): revisión del JP (M-1376)
+def resuelta(o):   # el JP eligió dueño: deja de contar como «compartida entre procesos»
+    if o['nota'].startswith('compartida:'): o['nota'] = 'dueño elegido (antes ' + o['nota'] + ')'
+def mover(i, inv=None, ob=None, tipo=None, n=''):
+    for o in out:
+        if o['id'] == i:
+            if inv: o['inventario'] = inv
+            if ob: o['objetivo'] = ob; o['dominio'] = ob[:3]
+            if tipo: o['tipo'] = tipo
+            if inv or ob: resuelta(o)
+            o['nota'] = (o['nota'] + ' · ' if o['nota'] else '') + n
+            return o
+    raise SystemExit('no existe ' + i)
+def partir(i, partes):
+    o = next(x for x in out if x['id'] == i); out.remove(o); resuelta(o)
+    for suf, nombre, inv, ob, tipo, n in partes:
+        out.append(dict(o, id=f'{i}#{suf}', nombre=nombre, inventario=inv, objetivo=ob, dominio=ob[:3], tipo=tipo, nota=((o['nota'] + ' · ') if o['nota'] else '') + n))
+J = 'JP M-1376'
+mover('jp-ok-revision-previa', 'fábrica', 'APO11', 'Control', J + ': puerta antes de encolar un crítico de fábrica; fuente: línea 4 del borrador y linea-base.py --lote')
+partir('json-proyecto', [('fabrica', 'proyecto.json · parte fábrica: trabajo[] clases a–d y f, tandas[], pausas[], limites', 'fábrica', 'BAI11', 'Dato', J + ': las tandas T-1…T-7 son lotes de fábrica; estados de trabajo[] y de tanda sin lista cerrada (M-1358)'),
+                         ('p01', 'proyecto.json · parte P01: prioridades[] de REQ y trabajo[] clase e', 'P01', 'BAI11', 'Dato', J)])
+mover('jp-fichas-archivo', 'fábrica', 'MEA01', 'Dato', J + ': las fichas de tanda miden la fábrica')
+mover('json-riesgos', 'fábrica', 'APO12', None, J + ': los 19 R-n son sobre todo de la fábrica; el que sea del producto se marca en su fila')
+mover('traspaso-jp', 'fábrica', 'BAI08', None, J + ': parte de lo que garantiza que el rol no dependa del chat (e9-1)')
+partir('modelo-riesgos-py', [('herramienta', 'riesgos.py · calcula medidas y metas', 'fábrica', 'MEA01', 'Herramienta', J),
+                             ('control', 'riesgos.py · vigila Rg1–Rg7', 'fábrica', 'APO12', 'Control', J)])
+mover('json-metricas', None, 'MEA01', None, J + ': medida de la cola')
+partir('esquema-flujo-limites', [('limites', 'esquema.json › flujo.limites (duplicado con proyecto.json › limites; dejar una fuente en LM-92)', 'fábrica', 'BAI11', 'Dato', J),
+                                 ('medidas', 'esquema.json › riesgo.medidas[] y semáforo', 'fábrica', 'MEA01', 'Dato', J)])
+mover('pieza-rol-jefe-proyecto', n=J + ': incluye anotar aceptaciones por composición (LM-88), compartido con el Arquitecto')
+for i, nombre, tipo, ob, n in [('json-metas', 'Metas MT-n (proyecto.json › metas[])', 'Dato', 'MEA01', J + ': MT-1…4 sin acordar con Carlos (DA-62)'),
+                               ('regla-jp-seis-pasos', 'Seis pasos del JP no escritos (hora real; JSON sangría 1 y salto final; pull --rebase y reintento; linea-base.py --lote antes del ok; hasta antes de la ficha; «Esperando»)', 'Regla', 'BAI11', J + ': dueño Jefe de proyecto; va con continuidad (e9-1)'),
+                               ('json-pausas-excepciones', 'Excepciones de pausa (proyecto.json › pausas[].excepciones[]) y su regla de ampliación', 'Dato', 'BAI11', J)]:
+    out.append({'id': i, 'nombre': nombre, 'estado': 'propuesto', 'inventario': 'fábrica', 'dominio': ob[:3], 'objetivo': ob, 'tipo': tipo, 'nota': n, 'antes': None})
 json.dump(out, open(f'{R}/claude/marco/eu2-reclasificacion.json', 'w'), ensure_ascii=False, indent=1)
 V = [o for o in out if o['estado'] not in ('superado', 'fuera')]
 print(len(out), 'piezas;', len(V), 'vivas;', C.Counter(o['inventario'] for o in V))

@@ -179,6 +179,28 @@ for o in out:
     if o['id'] == 'situaciones': o['estado'] = 'cumplido'
     if o['id'] == 'artefacto-oficina-fabrica':
         o.update(objetivo='', dominio='', grupo='de paso', estado='duda'); o['nota'] = 'de paso (sin función definida; no se elimina): MJ-25, mismo tablero que art-fabrica-3d / art-oficina-3d'
+# v6 (Arquitecto - 01, 1-nov 18:5x): roles del catálogo de procesos v1 (consolidación § 4, aprobado por Carlos 18:41). Un rol no es un chat:
+# «ejecutaHoy» dice quién lo cumple hoy y puede cambiar sin tocar el rol. Los roles de hecho que el catálogo absorbe quedan superados con su destino.
+CAT = 'catálogo de procesos v1 § 4 (Carlos 1-nov 18:41)'
+ROLES = [('dueno', 'Dueño (patrocinador): gobierno, aprobaciones, A de casi todo', 'EDM01', 'compartida', 'Carlos'),
+         ('gerente-proyecto', 'Gerente de proyecto (GP): rol del proyecto; BAI11, requisitos y KPI del proyecto, contraparte en APO08, aceptación por iteración', 'BAI11', 'compartida', 'Carlos'),
+         ('arquitecto', 'Arquitecto del modelo (PMO): APO01, APO02 (R), APO03, APO04, APO09, APO11, BAI08, BAI10; dueño del proceso 4; rector de APO07.02/.03', 'APO01', 'fábrica', 'Chat Arquitecto'),
+         ('diseno', 'Ingeniero de requisitos e interlocutor de la fábrica: BAI02, APO08.01–.04, línea objetivo (BAI10.02), registro de peticiones', 'BAI02', 'fábrica', 'Chat Diseño'),
+         ('jefe-proyecto', 'Gestor del plan de trabajo (antes «Jefe de proyecto»): BAI06.01 act. 3 y 5, BAI11.07/.09 por iteración, APO05.02/.03 (R), orden de DSS02, «¿cómo vamos?»', 'BAI06', 'fábrica', 'chat hoy llamado «Jefe de proyecto»'),
+         ('desarrollo', 'Desarrollador: BAI03 (R), BAI06.01/.04, BAI07.01/.02, DSS02 y DSS03', 'BAI03', 'fábrica', 'Chat Desarrollo'),
+         ('agente-cli', 'Constructor: aplica la instrucción tal cual (BAI03.05), BAI07.06', 'BAI03', 'fábrica', 'Agente CLI en LENOVO'),
+         ('verificador', 'Verificador independiente (juez, revisor previo): BAI03.08, BAI07.05, revisión técnica (APO11), revisiones (MEA04.01)', 'BAI07', 'fábrica', 'juez local y tareas de verificación'),
+         ('duenio-riesgos-metas', 'Gestor de riesgos y medición: APO12 (R), MEA01 (R); proceso 7', 'APO12', 'fábrica', 'de hecho, el chat hoy llamado «Jefe de proyecto»'),
+         ('operador-infraestructura', 'Operador de infraestructura: BAI09, APO10 (un dueño por proveedor), APO11.01 (R), DSS04.07, APO06.01, DSS05 (R)', 'BAI09', 'compartida', 'Carlos, con la CLI'),
+         ('seguridad-privacidad', 'Responsable de seguridad y privacidad: DSS05 (A), APO13.01, firma de privacidad en BAI02.04, MEA03.01 (R)', 'DSS05', 'compartida', 'Carlos')]
+ids = {o['id']: o for o in out}
+for rid, nombre, ob, inv, quien in ROLES:
+    i = 'pieza-rol-' + rid
+    o = ids.get(i) or {'id': i, 'antes': None}
+    o.update(nombre=nombre, estado='propuesto', inventario=inv, dominio=ob[:3], objetivo=ob, tipo='Rol', ejecutaHoy=quien, nota=CAT)
+    if i not in ids: out.append(o)
+for rid, destino in [('interlocutor-funcional', 'diseno'), ('duenio-linea-objetivo', 'diseno'), ('revisor-previo', 'verificador')]:
+    o = ids['pieza-rol-' + rid]; o['estado'] = 'superado'; o['nota'] = f'fusionado en pieza-rol-{destino} ({CAT})'
 json.dump(out, open(f'{R}/claude/marco/eu2-reclasificacion.json', 'w'), ensure_ascii=False, indent=1)
 V = [o for o in out if o['estado'] not in ('superado', 'fuera', 'cumplido')]
 PASO = [o for o in out if o.get('grupo') == 'de paso']

@@ -42,3 +42,12 @@ Fábrica por objetivo: APO01 26 · APO03 23 · APO12 4 · BAI02 5 · BAI03 12 ·
 - Aplicado en la reclasificación v4 (10:56): 13 vistas de paso; 4 vistas a mano con función demostrada (Diagramas, Procesos, Elección de términos, Plan de sitios). Ninguna página se tocó. Contraste: Arquitecto saliente (M-1378) y revisión del repo; la lista de 10 «generar o superar» del 31-oct era un primer corte sin revisar cada vista.
 - Pendiente: 9 vistas a mano más que no estaban en la lista; páginas con base propia (Elección de términos, Plan de sitios, Plan del Universo): exportar su base antes de cualquier cambio.
 
+## 7. Alcance según COBIT y catálogo de procesos v1 (Carlos, 1-nov 16:59–18:41)
+
+- **Alcance de la organización:** gestionar proyectos (de cualquier naturaleza, sobre todo software y web) con tres herramientas: la **fábrica de software**, que recibe **peticiones** de los proyectos y es la experta en requisitos de diseño de software; los **marcos de referencia**; y la **infraestructura compartida**. Prioridad: la fábrica; la gestión de proyectos, básica.
+- **Términos:** el gerente de proyecto (GP) es un rol del proyecto (hoy Carlos). «Diseño como gerente» (ADR-008) se refería a liderar un plan de trabajo. El chat «Jefe de proyecto» pasa a llamarse **Gestor del plan de trabajo** y es de la fábrica (Carlos, 17:19; el cambio de nombre en encargos y buzón va en un lote aparte).
+- **Nombre:** COBIT llama «sistema de gobierno de I&T» al conjunto y «componentes» a sus piezas; «universo» queda como nombre del inventario.
+- **Método:** la Guía de diseño de COBIT 2019, con sus cuatro pasos y once factores de diseño (los fijó el Arquitecto por delegación de Carlos, 17:34). Cinco consultores leyeron completos el modelo de objetivos y la guía. Un verificador independiente comprobó los 231 responsables y los flujos de los 28 objetivos del alcance contra el PDF. Un consolidador armó el catálogo. Todo quedó en `Descargas\normas-fabrica\consultoria\` en LENOVO (privado; el repo es público).
+- **Catálogo v1 aprobado (18:41):** 8 objetivos en nivel 3 (BAI02, BAI03, BAI06, BAI07, BAI08, BAI10, APO08, APO07 parcial); APO10 en 3 parcial; el resto del alcance en 2; 11 en nivel 1 sin mejora. Ninguno queda fuera. Se instala en `cobit.json` con LM-94 (preparado).
+- **Decisiones de Carlos pendientes:** vencimientos del 3-nov (plan Premium y bucaramangastays.com), pruebas contra producción (ADR-007), repo público, DA-62 (metas) y ensayo de restauración con «negocio».
+

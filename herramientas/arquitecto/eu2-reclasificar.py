@@ -123,4 +123,4 @@ print('obj|' + '|'.join(x[:5] for x in TI) + '|total')
 for ob in sorted({o['objetivo'] for o in V if o['inventario'] != 'P01'}):
     print(ob + '|' + '|'.join(str(t[(ob, x)] or '') for x in TI) + '|' + str(sum(t[(ob, x)] for x in TI)))
 print('P01 por tipo:', C.Counter(o['tipo'] for o in V if o['inventario'] == 'P01'))
-print('vistas a mano:', sum('a mano' in o['nota'] for o in V), '· compartidas:', sum(o['nota'].startswith('compartida:') for o in V), '· SIN:', [o['id'] for o in V if o['objetivo'] in ('', 'SIN')])
+print('vistas a mano:', sum('vista hecha a mano' in o['nota'] for o in V), '· compartidas:', sum(o['nota'].startswith('compartida:') for o in V), '· SIN:', [o['id'] for o in V if o['objetivo'] in ('', 'SIN')])

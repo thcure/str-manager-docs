@@ -33,3 +33,12 @@ Fábrica por objetivo: APO01 26 · APO03 23 · APO12 4 · BAI02 5 · BAI03 12 ·
 - **Reclasificación v2** con M-1371 (Desarrollo), M-1372 (Diseño) y M-1373 (JP): 323 piezas, 275 vivas (fábrica 172 · compartida 35 · P01 68); se suman ADR-013/014/015 al P01; cuatro **roles de hecho** que ningún encargo nombra (interlocutor funcional del dueño, dueño de la línea objetivo, revisor previo de críticos, dueño de riesgos y metas); APO08 y APO11 ganan piezas; «Tablero de operación» superado; `infraestructura-configuracion.md` mezcla STR y fábrica (partirlo); límites del flujo en dos sitios (dejar uno).
 - **Decisiones de Carlos:** BAI04 → «fuera» con motivo · DSS03 se mantiene con su registro (`seguimiento.json › problemas[]`) · APO06 sí: costo por lote con vueltas y minutos · las carpetas de construcción de Desarrollo pasan al repo (`herramientas/desarrollo/`).
 - **Para el tema de continuidad (e9-1):** pasos del JP que no están en ninguna regla (seis); la skill de requerimientos solo en la cuenta de Carlos; decisiones abiertas de Diseño solo en su chat; carpetas de Desarrollo sin respaldo.
+
+## 6. Elementos de paso (Carlos, 1-nov 10:37–10:55)
+
+- Carlos observó que al gestionar una mejora, un requisito o un plan quedan **elementos sueltos**; algunos funcionan de hecho como almacén o herramienta de un proceso (páginas que guardan datos en su propia base), y otros nacieron al analizar un tema en el chat y cumplieron una **función finita**.
+- Decisión: se resuelve **con estado, no con un campo de duración**. Estado nuevo **«cumplido»**: la pieza terminó su función y su resultado ya está en su fuente; se conserva como registro. «Superado» queda para «otra pieza hace hoy lo que hacía esta».
+- El universo admite **elementos de paso o no definidos**: no se eliminan; si no tienen función clara **no se asignan a un proceso** (grupo «de paso», sin objetivo). La guardia «pieza viva sin objetivo» no los cuenta.
+- Aplicado en la reclasificación v4 (10:56): 13 vistas de paso; 4 vistas a mano con función demostrada (Diagramas, Procesos, Elección de términos, Plan de sitios). Ninguna página se tocó. Contraste: Arquitecto saliente (M-1378) y revisión del repo; la lista de 10 «generar o superar» del 31-oct era un primer corte sin revisar cada vista.
+- Pendiente: 9 vistas a mano más que no estaban en la lista; páginas con base propia (Elección de términos, Plan de sitios, Plan del Universo): exportar su base antes de cualquier cambio.
+

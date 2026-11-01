@@ -114,8 +114,36 @@ for i, nombre, tipo, ob, n in [('json-metas', 'Metas MT-n (proyecto.json › met
                                ('regla-jp-seis-pasos', 'Seis pasos del JP no escritos (hora real; JSON sangría 1 y salto final; pull --rebase y reintento; linea-base.py --lote antes del ok; hasta antes de la ficha; «Esperando»)', 'Regla', 'BAI11', J + ': dueño Jefe de proyecto; va con continuidad (e9-1)'),
                                ('json-pausas-excepciones', 'Excepciones de pausa (proyecto.json › pausas[].excepciones[]) y su regla de ampliación', 'Dato', 'BAI11', J)]:
     out.append({'id': i, 'nombre': nombre, 'estado': 'propuesto', 'inventario': 'fábrica', 'dominio': ob[:3], 'objetivo': ob, 'tipo': tipo, 'nota': n, 'antes': None})
+# v4 (Carlos 1-nov 10:52–10:55): «de momento con estado, no con duración»; «el universo puede tener elementos de paso o que no
+# fueron definidos; no eliminarlos; si no tienen función clara, no estarán asignados a un proceso». Las vistas hechas a mano sin función
+# demostrada quedan «de paso»: sin objetivo ni proceso, con su estado; nunca se superan por limpieza. Evidencia: M-1378 y revisión del repo.
+DE_PASO = {'art-modelo-operacion-v2': ('cumplido', 'con ella aprobó Carlos ADR-007 a ADR-010 (13-oct); se conserva como registro'),
+           'art-arquitectura-viva-modelo': ('cumplido', 'aprobada e instalada con LM-36 (15-oct); copia casi igual en interno/arquitectura/integracion-arquitectura-viva.html'),
+           'art-bloques-oficina': ('parcial', 'MJ-25: único diseño de la pista de planes, no construida'),
+           'art-oficina-str': ('duda', 'MJ-25: quizá la reemplaza la Oficina generada (L-184); lo confirma Carlos'),
+           'art-oficina-3d': ('duda', 'MJ-25: prototipo; quizá la reemplaza la Oficina generada (L-184); lo confirma Carlos'),
+           'art-fabrica-3d': ('duda', 'MJ-25: prototipo con tablero manual al 29-oct 23:38 y «cielo COBIT» sin equivalente; lo confirma Carlos')}
+for i in ['art-arquitectura-viva-del-str', 'art-boceto-flujos', 'art-inventario-en-el-flujo', 'art-mapa-del-str', 'art-mapa-inventario-e-incidentes',
+          'art-proceso-de-pruebas-del-str', 'art-ruta-huesped']:
+    DE_PASO[i] = (None, 'objetivo puesto por defecto (P01 → BAI11) sin evidencia de función')
+CON_FUNCION = {'art-diagramas-fabrica': (None, 'la cita la regla común 16; LM-92 la genera tomándola de base y no la toca hasta igualarla'),
+               'art-procesos-fabrica': ('desfasado', 'lectura obligatoria del encargo del Arquitecto; datos al 25-oct'),
+               'art-eleccion-terminos': (None, 'decisión abierta de Carlos (4 de 17 filas, 30-oct); el dato vive en la base del artefacto: exportarlo antes de tocarla'),
+               'art-plan-de-sitios-lm-79': ('desfasado', 'plan vivo de LM-79; su base dice 5.2c y el repo fase 6: dos fuentes del mismo dato; exportar la base antes de tocarla')}
+for o in out:
+    if o['id'] in DE_PASO:
+        est, n = DE_PASO[o['id']]
+        if est: o['estado'] = est
+        o['objetivo'] = ''; o['dominio'] = ''; o['grupo'] = 'de paso'
+        o['nota'] = 'de paso (sin función definida; no se elimina): ' + n
+    elif o['id'] in CON_FUNCION:
+        est, n = CON_FUNCION[o['id']]
+        if est: o['estado'] = est
+        o['nota'] = 'vista a mano con función demostrada: ' + n
 json.dump(out, open(f'{R}/claude/marco/eu2-reclasificacion.json', 'w'), ensure_ascii=False, indent=1)
-V = [o for o in out if o['estado'] not in ('superado', 'fuera')]
+V = [o for o in out if o['estado'] not in ('superado', 'fuera', 'cumplido')]
+PASO = [o for o in out if o.get('grupo') == 'de paso']
+V = [o for o in V if o.get('grupo') != 'de paso']
 print(len(out), 'piezas;', len(V), 'vivas;', C.Counter(o['inventario'] for o in V))
 TI = ['Procedimiento', 'Regla', 'Plantilla', 'Rol', 'Agente', 'Dato', 'Documento', 'Decisión', 'Vista', 'Herramienta', 'Control', 'Infraestructura', 'Identidad', 'Credencial']
 t = C.Counter((o['objetivo'], o['tipo']) for o in V if o['inventario'] != 'P01')
@@ -123,4 +151,5 @@ print('obj|' + '|'.join(x[:5] for x in TI) + '|total')
 for ob in sorted({o['objetivo'] for o in V if o['inventario'] != 'P01'}):
     print(ob + '|' + '|'.join(str(t[(ob, x)] or '') for x in TI) + '|' + str(sum(t[(ob, x)] for x in TI)))
 print('P01 por tipo:', C.Counter(o['tipo'] for o in V if o['inventario'] == 'P01'))
+print('de paso:', len(PASO), '·', dict(C.Counter(o['estado'] for o in PASO)))
 print('vistas a mano:', sum('vista hecha a mano' in o['nota'] for o in V), '· compartidas:', sum(o['nota'].startswith('compartida:') for o in V), '· SIN:', [o['id'] for o in V if o['objetivo'] in ('', 'SIN')])

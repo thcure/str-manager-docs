@@ -36,6 +36,10 @@
 - **Pendiente:** e3-4 ambientes (estándar APO11 + instancia P01); fase 4 (ficha única con estado de formalización y de operación, «cumplido», «de paso», catálogo; diseño objetivo en borrador); fase 5 (inventarios separados: avisar al Gestor del plan antes de partir `proyecto.json`); fase 6 (revisión de Carlos); e9-1 continuidad (lo cubre el diseño objetivo).
 - **LM-94 preparado, no instalado:** catálogo v1 en `cobit.json` (`interno/respaldos/LM-94/`). Probado en copia: validar 0, paquete sin error. Espera el sí de Carlos. Fase B (después): reescribir las prácticas adoptadas con las fichas (niveles invertidos en APO01, APO03 y APO06; errata APO07.01; métricas pegadas).
 
+## 3b. Plataforma (19:03–19:2x)
+- Informe del consultor de plataforma: `claude/marco/informe-plataforma-claude-code-2026-11.md` (fuentes oficiales al 1-nov). Hallazgo: ya trabajamos casi todo en Claude Code (los chats son sesiones en la nube; el despertador usa `claude -p --cloud`); la decisión es cambiar el pegamento hecho a mano por funciones nativas. Recomienda un camino mixto por etapas y un piloto reversible (Verificador en la nube disparado por PR, tras pasar el repo a privado).
+- Propuesta del Arquitecto, sin respuesta aún: la cadena la garantiza un **motor determinista** (máquina de estados que lanza las sesiones), con guardias, vigilancia que escala y Carlos solo con decisiones y escalamientos; cada paso del proceso declara si lo hace el principal, un subagente o una herramienta.
+
 ## 4. Pendientes de Carlos (no insistir; prioridad EU-2)
 1. Vencen el **3-nov** el plan Premium de Hostinger (no renovar; antes exportar la base `_hospedaje` y desconectar GitHub del sitio viejo) y el dominio bucaramangastays.com (recomendado: soltarlo). El **9-nov** vencen tres tokens.
 2. Pruebas contra producción (`herramientas/pw/comun.js` apunta a `app.`): ejecutar la ADR-007 o aceptar el riesgo por escrito.

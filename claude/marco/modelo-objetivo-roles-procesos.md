@@ -57,7 +57,27 @@ Pedido de Carlos (18:48): «no pienses en los chats que tenemos, todos están co
 Condición previa: el repo de documentos pasa a privado antes de guardar el estado de los roles (decisión pendiente de Carlos).
 
 ## 6. Roles (catálogo v1 § 4)
-Dueño y Gerente de proyecto (Carlos) · Interlocutor e ingeniero de requisitos · Gestor del plan de trabajo · Desarrollador · Constructor · Verificador independiente · Arquitecto del modelo · Gestor de riesgos y medición · Operador de infraestructura · Responsable de seguridad y privacidad · consultores a pedido. Cada uno con objetivo COBIT en `claude/marco/eu2-reclasificacion.json` (piezas `pieza-rol-*`).
+Dueño y Gerente de proyecto (Carlos) · Interlocutor e ingeniero de requisitos · Gestor del plan de trabajo · Desarrollador · Constructor · Verificador independiente · Arquitecto del modelo · Gestor de riesgos y medición · Operador de infraestructura · Auditor del marco · Responsable de seguridad y privacidad · consultores a pedido. Cada uno con objetivo COBIT en `claude/marco/eu2-reclasificacion.json` (piezas `pieza-rol-*`).
+
+## 6b. Acuerdos con Carlos (1-nov-2026, noche)
+**Operador de infraestructura (rol propio, separado del Arquitecto).** Antes lo hacía el Arquitecto de la fábrica, y por eso se saturaba. Alcance: Hostinger (dominios, DNS, correos, certificados, sitios), Supabase (configuración, usuarios, permisos, respaldos, llaves), GitHub (repositorios, permisos, tareas programadas, secretos), LENOVO (tareas programadas, línea de comandos, llaves locales) y todo lo que se haga en el navegador (BAI09, DSS01, DSS05). El Arquitecto escribe la norma; el Operador la cumple y lleva el inventario de activos y vencimientos.
+
+**Norma del navegador (DSS05).** El agente hace solo: leer, revisar, comparar, borradores sin enviar, pestañas propias que cierra al terminar y registro de lo que vio e hizo. Pide confirmación para: enviar formularios, cambiar ajustes, aceptar términos o permisos, descargar y cualquier acción que no se pueda deshacer. Un cambio menor y reversible lo hace, dejando anotado cómo se deshace. Un cambio crítico (base de datos, DNS, permisos, producción) se trata como cambio formal y necesita el sí de Carlos. Solo Carlos: claves, pagos y renovaciones, doble factor, borrado definitivo. Por definir: cuándo se permite usar el perfil de Chrome de Carlos (choca con la regla común 9).
+
+**Relación con el Interlocutor.** El Interlocutor es la única puerta de Carlos: recibe el pedido, lo deja como tarea del Operador, informa el resultado y lleva los «sí» críticos. Única excepción: el Operador habla directo con Carlos en el momento de escribir una clave o hacer el doble factor.
+
+**Auditor del marco (rol nuevo, MEA01/MEA02).** Mirada independiente sobre todo el universo, no solo la fábrica: quien diseña el marco (Arquitecto) no juzga si se cumple. Hace una sesión corta y periódica con una lista de chequeo fija (roles con dueño y sesión viva, procesos que se ejecutan, vencimientos, respaldos probados, buzón sin mensajes colgados, que el motor esté vivo). No arregla nada: registra hallazgos, los asigna al dueño de cada uno y le pasa a Carlos un resumen en verde, amarillo o rojo.
+
+**Quién garantiza el sistema en todos los niveles.**
+| Función | Quién | COBIT |
+|---|---|---|
+| Dirigir | Carlos | EDM |
+| Diseñar y mantener el marco | Arquitecto | APO01, APO03 |
+| Hacer cumplir y mantener viva la plantilla de agentes | Motor y guardias (programa, no IA) | Controles automáticos |
+| Comprobar que se cumple | Auditor | MEA01, MEA02 |
+| Vigilar al vigilante | Latido del motor revisado desde fuera de LENOVO (GitHub) y el Auditor | MEA01 |
+
+Plantilla de agentes (`roles/plantilla.json`, por crear): por rol, dónde corre (aplicación, LENOVO o nube), sesión actual, último latido, cuándo renovar y paquete de arranque. En cada ciclo el motor revisa cada rol. Si le falta sesión o la sesión está vieja o saturada: arma el paquete de arranque desde el repositorio; los roles de LENOVO los lanza él mismo; los de la aplicación, que no puede crear, se los pide a Carlos con el mensaje de arranque listo para pegar (es el único paso manual). El rol es permanente y vive en el repositorio; el agente es desechable.
 
 ## 7. Abierto
 - Punto de entrada de Carlos: **A (recomendada)** un único interlocutor (APO08) que recibe todo y despacha; B directo con cada rol. Sin respuesta aún.

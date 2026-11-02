@@ -41,3 +41,23 @@ Los roles conversacionales (Interlocutor, Requisitos) siguen en la aplicación, 
    - Si no aparece nada, usa el plan.
    - Nunca pegar la clave en el chat.
 2. Confirmar el piloto «motor en sombra», sin IA ni claves: en LENOVO (opción A), un programa que cada 15 minutos calcula qué le toca a cada rol y lo compara una semana con el despertador.
+
+## 6. Validación directa con Claude Code (1-nov 19:4x–19:5x)
+Sesión de Claude Code en la nube sobre este repo («Viabilidad técnica motor determinista», `session_01So4JYbL1mg3rfHk9CHpY4z`, visible en claude.ai/code). Probó en una copia temporal fuera del repo, que luego borró; no tocó el repo ni la cuenta.
+
+| Pregunta | Resultado |
+|---|---|
+| Un programa lanza un rol de `.claude/agents` sin nadie delante | **Probado, sí.** Carga el rol, solo con sus herramientas, aplica CLAUDE.md, ejecuta el hook de inicio, la guardia PreToolUse bloquea un comando prohibido, lo no autorizado se rechaza sin quedar esperando y devuelve JSON |
+| Cuidados | Nunca `--bare` (se salta los hooks y exige clave de API). Siempre `--strict-mcp-config` (sin él carga los conectores de la cuenta). Usar `--allowedTools` en lugar de `bypassPermissions` (sin probar con hooks) |
+| La nube aplica la configuración del repo | **Probado, sí** (settings, hooks, agentes, CLAUDE.md). **Hallazgo:** `str-manager-docs` no tiene `.claude/` ni CLAUDE.md, así que las sesiones en la nube sobre este repo corren **sin guardias**; los hooks viven instalados aparte (str-manager en LENOVO) |
+| Autenticación con el plan | `claude setup-token` una vez en LENOVO y la variable `CLAUDE_CODE_OAUTH_TOKEN` (dura alrededor de un año, sin verificar). Si existe `ANTHROPIC_API_KEY`, la CLI la usa y **se cobra aparte**: hay que borrarla, y el motor no arranca si la encuentra. Comprobar con `echo $env:ANTHROPIC_API_KEY` y `claude auth status` |
+| El motor escribe en el chat del Interlocutor | **No hay vía pública** (el despertador actual es un apaño). Sí puede crear una sesión nueva con una tarea programada de activador API. Recomendación: no despertar al Interlocutor; el motor deja el estado y avisa a Carlos |
+| Límites del plan | El uso de la aplicación y la CLI es compartido: una racha de lotes puede dejar a Carlos sin uso para conversar. Una sesión a la vez, `--max-turns`, modelo barato para el verificador y Opus solo para lo crítico |
+
+**Veredicto de Claude Code: viable, con 4 ajustes**
+1. El motor siempre lanza con `--agent <rol> --strict-mcp-config --allowedTools … --max-turns N --output-format json` y lee el JSON; nunca `--bare`.
+2. Una sola autenticación, `CLAUDE_CODE_OAUTH_TOKEN` del plan; el motor se niega a arrancar si hay `ANTHROPIC_API_KEY`.
+3. Subir `.claude/settings.json`, los hooks, `.claude/agents` y CLAUDE.md a cada repo donde trabaje un rol.
+4. El motor no escribe en el chat del Interlocutor: avisa a Carlos.
+
+**Sin confirmar:** hooks en `bypassPermissions`; duración del token; cifras de sesiones simultáneas y cuota de Ultra; si LENOVO tiene hoy una clave de API; si `model:` del agente se respeta con `--agent`; el comportamiento en Windows (lo probó en Linux).

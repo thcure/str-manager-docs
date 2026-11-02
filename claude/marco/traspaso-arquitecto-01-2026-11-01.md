@@ -42,6 +42,12 @@
 - Carlos (19:16) aprobó el reparto: motor determinista, guardias, vigilancia y él solo con decisiones y escalamientos. Recordó que no es técnico; si el Arquitecto no está convencido, investiga más con un subagente.
 - Segunda ronda: `claude/marco/informe-motor-cadena-2026-11.md`. El motor es un script sin modelo; la recomendación es correrlo en GitHub Actions, que lanza los roles con `claude-code-action`, deja la guardia como paso aparte y funciona con LENOVO apagado. El estado es un registro de eventos con un solo escritor. Los escalamientos van como issue asignado a Carlos (correo y GitHub Mobile). Primer paso reversible: «motor en sombra» (`lo-que-me-toca.py` cada 15 min, sin Claude ni secretos), 7 días comparado con el despertador v12.
 - Lo que Carlos vería (19:19): una sola conversación (el interlocutor), un panel de la cadena y avisos al teléfono.
+- Dónde se crean los roles (19:26 → `claude/marco/informe-integracion-roles-2026-11.md`). Los chats de rol de hoy son sesiones de Claude Code en la nube unidas al proyecto de claude.ai, no Cowork. Propuesta mixta:
+  - el Interlocutor, en la aplicación, dentro del proyecto;
+  - Requisitos, en una sesión de Claude Code en la nube lanzada por el motor;
+  - Desarrollo y el Verificador, en GitHub Actions, sin conversación.
+  
+  Lo lanzado desde GitHub no ve los documentos ni la memoria del proyecto de claude.ai; la aplicación no ejecuta los agentes ni las guardias del repo. Projects de Claude Code (beta) es otro producto. Para no partir el sistema, el repo (privado) es la única fuente: instrucciones, memoria y la skill de requerimientos pasan al repo, y el proyecto de claude.ai queda como ventana. Primer paso: copiar las instrucciones del proyecto a `CLAUDE.md`.
 
 ## 4. Pendientes de Carlos (no insistir; prioridad EU-2)
 1. Vencen el **3-nov** el plan Premium de Hostinger (no renovar; antes exportar la base `_hospedaje` y desconectar GitHub del sitio viejo) y el dominio bucaramangastays.com (recomendado: soltarlo). El **9-nov** vencen tres tokens.

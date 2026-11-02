@@ -39,6 +39,9 @@
 ## 3b. Plataforma (19:03–19:2x)
 - Informe del consultor de plataforma: `claude/marco/informe-plataforma-claude-code-2026-11.md` (fuentes oficiales al 1-nov). Hallazgo: ya trabajamos casi todo en Claude Code (los chats son sesiones en la nube; el despertador usa `claude -p --cloud`); la decisión es cambiar el pegamento hecho a mano por funciones nativas. Recomienda un camino mixto por etapas y un piloto reversible (Verificador en la nube disparado por PR, tras pasar el repo a privado).
 - Propuesta del Arquitecto, sin respuesta aún: la cadena la garantiza un **motor determinista** (máquina de estados que lanza las sesiones), con guardias, vigilancia que escala y Carlos solo con decisiones y escalamientos; cada paso del proceso declara si lo hace el principal, un subagente o una herramienta.
+- Carlos (19:16) aprobó el reparto: motor determinista, guardias, vigilancia y él solo con decisiones y escalamientos. Recordó que no es técnico; si el Arquitecto no está convencido, investiga más con un subagente.
+- Segunda ronda: `claude/marco/informe-motor-cadena-2026-11.md`. El motor es un script sin modelo; la recomendación es correrlo en GitHub Actions, que lanza los roles con `claude-code-action`, deja la guardia como paso aparte y funciona con LENOVO apagado. El estado es un registro de eventos con un solo escritor. Los escalamientos van como issue asignado a Carlos (correo y GitHub Mobile). Primer paso reversible: «motor en sombra» (`lo-que-me-toca.py` cada 15 min, sin Claude ni secretos), 7 días comparado con el despertador v12.
+- Lo que Carlos vería (19:19): una sola conversación (el interlocutor), un panel de la cadena y avisos al teléfono.
 
 ## 4. Pendientes de Carlos (no insistir; prioridad EU-2)
 1. Vencen el **3-nov** el plan Premium de Hostinger (no renovar; antes exportar la base `_hospedaje` y desconectar GitHub del sitio viejo) y el dominio bucaramangastays.com (recomendado: soltarlo). El **9-nov** vencen tres tokens.

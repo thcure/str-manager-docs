@@ -7,7 +7,7 @@ Plan: MJ-27 (`interno/planes/plan-programa-gobierno.json`). Base COBIT: respuest
 | Campo | Contenido |
 |---|---|
 | Unidad de análisis | El sistema de gobierno y gestión de I&T de la gestión de proyectos de software y web con la fábrica. Cada producto (P01) tiene su propio contexto |
-| Programa y proyectos | Sistema de gobierno = programa · gestión automatizada de agentes = primer proyecto de mejora (logro rápido; primer incremento: motor en sombra) · fábrica = segundo proyecto de mejora · P01 = proyecto gobernado y caso real de prueba |
+| Programa y proyectos | Sistema de gobierno = programa «Marco de gobierno y gestión de TI» (`marco-gobierno-ti`, Carlos 3-nov 18:21) · gestión automatizada de agentes = primer proyecto de mejora (logro rápido; primer incremento: motor en sombra) · fábrica = segundo proyecto de mejora · P01 = proyecto gobernado y caso real de prueba |
 | Dolores (evidencia) | Chats que se agotan y relevos a mano · una sola máquina (LENOVO) · pruebas contra producción · repositorio público (INC-201) · trabajo que se detiene esperando a Carlos |
 | Detonantes | Paso de un proyecto a varios (multiproyecto); la fábrica pasa a ser servicio; agentes con llaves propias |
 | Caso de negocio (esquema) | Beneficio: que la fábrica atienda proyectos sin depender de la memoria de un chat ni de la presencia de Carlos. Costo: créditos de la plataforma y horas del Arquitecto |

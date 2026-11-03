@@ -6,8 +6,8 @@ set -u
 R=/home/claude/work/str-manager-docs; S=/home/claude/work; F=/mnt/user-data/uploads/Downloads/str-instr-cola/claves/arquitecto.txt
 MSG="$1"; IDS="${2:-}"
 cd "$R" || exit 1
-TRAIL="Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_011PAjxLN9fTuZ3PSA1XAPxf"
+TRAIL="Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01So4JYcPtDhCMJ26Mk7X43s"
 git add -A
 git -c user.name=Claude -c user.email=noreply@anthropic.com commit -q -m "$MSG" -m "$TRAIL" 2>/dev/null || true
 sleep 1; T=$(tr -d '\r\n ' < "$F" 2>/dev/null); rm -f "$F"

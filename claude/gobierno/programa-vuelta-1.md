@@ -125,4 +125,37 @@ Ocho de nueve están en nivel 1: casi todo existe «en gran medida» pero falta 
 
 **Riesgo residual que aceptas mientras tanto:** se sigue probando en producción con datos «zz-verif-» hasta tener el ambiente de pruebas; el repositorio sigue público hasta decidir la DA-60; una sola máquina hasta la segunda.
 
-Firma (f5-1): ______ Carlos
+Firma (f5-1): Carlos, 3-nov-2026 16:45
+
+## 8. Proyectos de mejora (f6-1) · para aprobar
+
+**Cuadrícula** (fase 4 de la Guía de implementación: primero lo de beneficio alto y facilidad alta; lo de beneficio alto y facilidad baja se parte).
+
+| # | Mejora | Patrón | Beneficio | Facilidad | Decisión |
+|---|---|---|---|---|---|
+| 1 | Motor en sombra: revisa las reglas que hoy no se cumplen (destino de incidentes, cruce del dueño en críticos, veredicto de cada aceptación, control de cada pieza) y solo avisa, sin bloquear | A | Alto | Alta | **Primero** (logro rápido) |
+| 2 | Latido: algo ajeno al motor avisa si el motor dejó de correr | A | Alto | Alta | **Primero** (logro rápido) |
+| 3 | Cierre y retiro: archivar el buzón; problemas con acción, responsable y prioridad; retiro de fichas y piezas sin uso | B | Alto | Alta | Primero |
+| 4 | Acuerdo de servicio proyecto–fábrica de una página, con vía de quejas | D | Medio | Alta | Segundo |
+| 5 | Plantilla de requisitos en uso para todo requisito nuevo | D | Medio | Media | Segundo |
+| 6 | Ambiente de pruebas separado de producción | C | Alto | Baja | **Se parte:** (a) proyecto y rama de pruebas · (b) datos sintéticos · (c) aceptar antes de desplegar |
+| 7 | Cambio de emergencia escrito (o declarado «no aplica») | D | Bajo | Alta | Segundo |
+| 8 | Relevo automático de sesiones | A | Alto | Baja | **Vuelta 2** (necesita el motor estable) |
+
+**Proyecto 1 · Gestión automatizada de agentes** (mejoras 1, 2 y 3)
+- Enfoque: un motor sin IA que vigila las reglas; en esta vuelta solo observa y avisa (en sombra).
+- Entregables: motor en sombra, latido, informe diario de lo que habría bloqueado, buzón archivado, esquema de problemas completo.
+- Objetivos que sube a nivel 2: BAI06, BAI07, BAI10, DSS02, DSS03 y BAI08 (retiro).
+- Cómo se construye: lotes del modelo (LM-n) por la cadena de la fábrica; es crítico (scripts que corren solos) → cruce contigo antes de la cola. Acepta Carlos con la lectura de Riesgos y medición.
+- Medida de éxito: % de reglas críticas vigiladas por el motor; tiempo entre la caída del motor y el aviso del latido.
+
+**Proyecto 2 · Fábrica** (mejoras 4, 5, 6 y 7)
+- Enfoque: cerrar los acuerdos entre roles y separar pruebas de producción.
+- Entregables: acuerdo de servicio con vía de quejas, plantilla de requisitos en uso, ambiente de pruebas en tres incrementos, procedimiento de emergencia.
+- Objetivos que sube a nivel 2: APO08, BAI02, BAI03, BAI07.
+- Cómo se construye: el ambiente de pruebas es de producto (P01) y lo conduce Diseño con Desarrollo; los acuerdos los escribe el Arquitecto. Depende de la pausa de producto y de M-858.
+- Medida de éxito: lotes aceptados antes de desplegar; quejas atendidas por la vía escrita.
+
+**Orden:** proyecto 1 primero, porque no toca lo que ya corre y su motor mide al proyecto 2. Lo no aprobado queda registrado aquí para la vuelta 2.
+
+Aprobación (f6-1): ______ Carlos

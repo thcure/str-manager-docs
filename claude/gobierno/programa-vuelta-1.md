@@ -95,6 +95,8 @@ Nivel calculado con los cortes del ejemplo 1 de la guía (solo ejemplo). Dif. = 
 
 ## 6. Línea base de la fábrica (f4-2)
 
+> **En revisión (Carlos, 3-nov 16:54):** los hallazgos mezclan el sistema con el STR. Se separan en sistema, fábrica y P01; lo de P01 va a sus dueños. Falta medir los objetivos del proyecto 1.
+
 Medida el 3-nov por tres evaluadores independientes, con evidencia del repositorio (sin evidencia = «no»). Detalle por actividad en `cobit-kb/consultoria/linea-base-vuelta-1/` (LENOVO). Falta la revisión de Riesgos y medición y la muestra del Auditor (obligatoria en BAI08 y BAI10, que mantiene el Arquitecto). Límite: no se leyeron los REQ que viven solo en el proyecto de Claude ni el log de LENOVO.
 
 | Objetivo | Actual | Objetivo | Nivel 2: totalmente / en gran medida / parcialmente / no | Lo que impide el nivel 2 |
@@ -125,9 +127,11 @@ Ocho de nueve están en nivel 1: casi todo existe «en gran medida» pero falta 
 
 **Riesgo residual que aceptas mientras tanto:** se sigue probando en producción con datos «zz-verif-» hasta tener el ambiente de pruebas; el repositorio sigue público hasta decidir la DA-60; una sola máquina hasta la segunda.
 
-Firma (f5-1): Carlos, 3-nov-2026 16:45
+Firma (f5-1): Carlos, 3-nov-2026 16:45 — **superada** a las 16:54 por la corrección de alcance; se rehace esta sección.
 
-## 8. Proyectos de mejora (f6-1) · para aprobar
+## 8. Proyectos de mejora (f6-1) · superado, se rehace
+
+> Alcance corregido por Carlos (16:54): **proyecto 1 = Claude** (gestión de agentes para n proyectos de Claude; el motor no conoce ningún proyecto; se acepta solo si funciona con P01 y con un proyecto de prueba vacío) · **proyecto 2 = fábrica** (servicio para cualquier proyecto; el STR es su primer cliente y sus necesidades entran como peticiones; lo propio del STR se queda en P01). El borrador de abajo queda como antecedente.
 
 **Cuadrícula** (fase 4 de la Guía de implementación: primero lo de beneficio alto y facilidad alta; lo de beneficio alto y facilidad baja se parte).
 

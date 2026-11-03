@@ -1,6 +1,6 @@
 # Programa de gobierno COBIT · vuelta 1 · paquete para aprobación
 
-Plan: MJ-27 (`interno/planes/plan-programa-gobierno.json`). Base COBIT: respuestas 6, 8 y 9 del hilo H-2 (consultoría en LENOVO). Estado: **propuesta** del Arquitecto; nada rige hasta el sí de Carlos. Papel mínimo, sin fechas.
+Plan: MJ-27 (`interno/planes/plan-programa-gobierno.json`). Base COBIT: respuestas 6, 8 y 9 del hilo H-2 (consultoría en LENOVO). Estado: **aprobado** por Carlos (3-nov-2026, 16:20, «de acuerdo»): acta firmada; D-2 a D-7, recálculo, lienzo y método aprobados. Pendiente: revisión del lienzo por el Auditor (f3-3). Papel mínimo, sin fechas.
 
 ## 1. Acta de arranque (f1-1) · fase 1 de la Guía de implementación
 
@@ -16,7 +16,7 @@ Plan: MJ-27 (`interno/planes/plan-programa-gobierno.json`). Base COBIT: respuest
 | Partes interesadas | Carlos (dueño), los agentes por rol, los usuarios y titulares de datos de P01 |
 | Riesgo de no actuar | Carlos acepta que lo estructural se trate por vueltas; lo urgente va ya como incidente o cambio |
 
-Firma (f1-3): ______ Carlos
+Firma (f1-3): Carlos, 3-nov-2026 16:20
 
 ## 2. Decisiones propuestas
 

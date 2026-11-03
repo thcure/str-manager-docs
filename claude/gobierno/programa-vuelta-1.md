@@ -92,3 +92,37 @@ Nivel calculado con los cortes del ejemplo 1 de la guía (solo ejemplo). Dif. = 
 - **Evidencia obligatoria** por actividad: archivo, commit, mensaje o registro; sin evidencia es «no».
 - **Quién:** se autoevalúa el rol responsable; revisa Riesgos y medición; el Auditor toma una muestra. Nadie califica lo que construyó.
 - **Salida:** columna «nivel actual» junto al nivel objetivo del lienzo; la primera cifra será baja y eso es el dato.
+
+## 6. Línea base de la fábrica (f4-2)
+
+Medida el 3-nov por tres evaluadores independientes, con evidencia del repositorio (sin evidencia = «no»). Detalle por actividad en `cobit-kb/consultoria/linea-base-vuelta-1/` (LENOVO). Falta la revisión de Riesgos y medición y la muestra del Auditor (obligatoria en BAI08 y BAI10, que mantiene el Arquitecto). Límite: no se leyeron los REQ que viven solo en el proyecto de Claude ni el log de LENOVO.
+
+| Objetivo | Actual | Objetivo | Nivel 2: totalmente / en gran medida / parcialmente / no | Lo que impide el nivel 2 |
+|---|---|---|---|---|
+| BAI02 Requisitos | 1 | 3 | 1 / 4 / 0 / 0 | Plantilla de requisitos sin usar (sin casos de uso ni validación); alternativas solo en conversación |
+| BAI03 Construcción | 1 | 3 | 8 / 13 / 4 / 0 | Pruebas contra producción; proveedores sin respaldo; diseño y usabilidad sin método |
+| BAI06 Cambios | 1 | 3 | 4 / 4 / 0 / 0 | Aprobación del dueño sin campo propio (6 críticos sin cruce citado); sin cambio de emergencia ensayado |
+| BAI07 Aceptación | 1 | 3 | 7 / 11 / 4 / 3 | Se acepta después de desplegar; datos de prueba dentro de producción; sin revisión posterior |
+| BAI08 Conocimiento | **2** | 3 | 4 / 0 / 0 / 0 | (nivel 3) accesos por clasificación (INC-201); paquete de arranque y buzón pasados de tope; nada se retira |
+| BAI10 Configuración | 1 | 3 | 2 / 3 / 0 / 0 | Línea base del producto sin confirmar (M-858); sin guardia fuera de la línea de comandos; 118 piezas sin control |
+| DSS02 Incidentes | 1 | 2 | 1 / 12 / 2 / 0 | La guardia de destino no dispara (INC-214 a 218); producto y fábrica mezclados; solicitudes sin plazo |
+| DSS03 Problemas | 1 | 2 | 0 / 4 / 5 / 0 | 8 problemas, ninguno cerrado ni con acción; sin prioridad ni responsable |
+| APO08 Relaciones | 1 | 3 | 0 / 7 / 0 / 0 | Sin acuerdo de servicio proyecto–fábrica, sin vía de quejas, sin plan de comunicación |
+
+Ocho de nueve están en nivel 1: casi todo existe «en gran medida» pero falta cerrarlo. Es el dato de partida, no un fracaso.
+
+## 7. Brechas, causa raíz y hoja de ruta (f5-1) · para firmar
+
+**Comprobación de sensatez (D-5).** Saltar de 1 a 3 en una vuelta es desproporcionado. Propuesta: la vuelta 1 lleva los nueve a **nivel 2**; el nivel 3 queda para la vuelta 2, sin cambiar el objetivo aprobado.
+
+| Patrón (causa raíz) | Objetivos | Mejora | Va en |
+|---|---|---|---|
+| A · Las reglas existen pero nada las hace cumplir: guardias que no disparan, aprobación sin campo, veredicto sin rastro, piezas sin control | BAI06, BAI07, BAI10, DSS02 | El motor (primero en sombra) vigila esas reglas y avisa | Proyecto 1 · gestión automatizada de agentes |
+| B · Nada se cierra ni se retira: problemas sin acción, fichas y catálogo sin retiro, buzón y arranque pasados de tope, revisión posterior vacía | DSS03, BAI08, BAI07 | Ciclo de cierre y retiro con aviso automático; archivar el buzón | Proyecto 1 |
+| C · No hay ambiente de pruebas: se prueba y acepta en producción | BAI03, BAI07 | Ambiente de pruebas (ADR-007) con datos sintéticos | Proyecto 2 · fábrica |
+| D · Acuerdos entre roles sin escribir: servicio proyecto–fábrica, quejas, plantilla de requisitos, cambio de emergencia | APO08, BAI02, BAI06 | Acuerdo de servicio de una página, vía de quejas, plantilla de requisitos en uso, procedimiento de emergencia | Proyecto 2 |
+| E · Decisiones que esperan a Carlos | BAI10 (M-858), BAI08 (INC-201, DA-60) | Llevarlas a decisión | En paralelo, ya |
+
+**Riesgo residual que aceptas mientras tanto:** se sigue probando en producción con datos «zz-verif-» hasta tener el ambiente de pruebas; el repositorio sigue público hasta decidir la DA-60; una sola máquina hasta la segunda.
+
+Firma (f5-1): ______ Carlos
